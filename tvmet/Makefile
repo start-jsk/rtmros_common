@@ -10,7 +10,7 @@ include $(shell rospack find mk)/download_unpack_build.mk
 
 
 installed: wiped $(SOURCE_DIR)/unpacked
-	cd $(SOURCE_DIR) && ./configure --prefix=$(CURDIR)/tvmet
+	cd $(SOURCE_DIR) && ./configure --prefix=$(CURDIR)
 	cd $(SOURCE_DIR) && make $(ROS_PARALLEL_JOBS) && make install
 	touch installed
 
@@ -18,7 +18,7 @@ clean:
 	if [ -e $(SOURCE_DIR) ] ; then cd $(SOURCE_DIR) && make clean; fi
 
 wipe: clean
-	rm -rf build tvmet
+	rm -rf build include share bin
 
 wiped: Makefile
 	make wipe
