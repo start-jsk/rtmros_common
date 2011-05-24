@@ -1,0 +1,22 @@
+all: installed.tvmet
+
+FILENAME = tvmet-1.7.2.tar.bz2
+TARBALL = build/$(FILENAME)
+TARBALL_URL = http://downloads.sourceforge.net/tvmet/$(FILENAME)
+SOURCE_DIR = build/tvmet-1.7.2
+UNPACK_CMD = tar xjf
+MD5SUM_FILE = $(FILENAME).md5sum
+include $(shell rospack find mk)/download_unpack_build.mk
+
+
+installed.tvmet: $(SOURCE_DIR)/unpacked
+	cd $(SOURCE_DIR) && ./configure --prefix=$(CURDIR)/tvmet
+	cd $(SOURCE_DIR) && make $(ROS_PARALLEL_JOBS) && make install
+	touch installed.tvmet
+
+clean:
+	-cd $(SOURCE_DIR) && make clean
+	rm -fr tvmet
+
+
+

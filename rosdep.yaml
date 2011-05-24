@@ -1,0 +1,114 @@
+sun-java6-jdk:
+  ubuntu: sun-java6-jdk
+sun-java6-fonts:
+  ubuntu: sun-java6-fonts
+sun-java6-plugin:
+  ubuntu: sun-java6-plugin
+jython:
+  ubuntu: jython
+libreadline-java:
+  ubuntu: libreadline-java
+
+# japanese font
+ttf-sazanami-gothic:
+  ubuntu: ttf-sazanami-gothic
+ttf-sazanami-mincho:
+  ubuntu: ttf-sazanami-mincho
+ttf-kochi-gothic:
+  ubuntu: ttf-kochi-gothic
+ttf-kochi-mincho:
+  ubuntu: ttf-kochi-mincho
+
+# omniORB
+libcos4-dev:
+  ubuntu: libcos4-dev
+libomnievents-dev:
+  ubuntu: libomnievents-dev
+libomniorb4-dev:
+  ubuntu: libomniorb4-dev
+libomnithread3-dev:
+  ubuntu: libomnithread3-dev
+omnievents:
+  ubuntu: omnievents
+omniidl4:
+  ubuntu: omniidl4
+omniidl-python:
+  ubuntu:
+    10.04: omniidl4-python
+    10.10: omniidl-python
+omniorb4:
+  ubuntu: omniorb4
+omniorb4-idl:
+  ubuntu: omniorb4-idl
+omniorb4-nameserver:
+  ubuntu: omniorb4-nameserver
+python-omniorb:
+  ubuntu:
+   10.04: python-omniorb2
+   10.10: python-omniorb
+python-tk:
+  ubuntu: python-tk
+
+# math
+liblapack3gf:
+  ubuntu: liblapack3gf
+liblapack-dev:
+  ubuntu: liblapack-dev
+libatlas-base-dev:
+  ubuntu: libatlas-base-dev
+libblas3gf:
+  ubuntu: libblas3gf
+libblas-dev:
+  ubuntu: libblas-dev
+f2c:
+  ubuntu: f2c
+libf2c2:
+  ubuntu: libf2c2
+libf2c2-dev:
+  ubuntu: libf2c2-dev
+libgfortran3:
+  ubuntu: libgfortran3
+libgfortran3-dbg:
+  ubuntu: libgfortran3-dbg
+tvmet:
+  ubuntu: tvmet
+
+# boost
+
+# eclipse3.4.2
+xulrunner-1.9.2:
+  ubuntu: xulrunner-1.9.2
+
+# etc
+zlib1g-dev:
+  ubuntu: zlib1g-dev
+libjpeg62-dev:
+  ubuntu: libjpeg62-dev
+libpng12-dev:
+  ubuntu: libpng12-dev
+uuid-dev:
+  ubuntu: uuid-dev
+
+# openrtm
+#openrtm-aist
+#openrtm-aist-doc
+#openrtm-aist-dev
+#openrtm-aist-example
+openrtm:
+  ubuntu: |
+   if [ ! -f /etc/apt/sources.list.d/openrtm.list ] ; then
+     echo "deb http://www.openrtm.org/pub/Linux/ubuntu maverick main" |  sudo tee /etc/apt/sources.list.d/openrtm.list
+   fi
+   sudo apt-get install openrtm-aist openrtm-aist-doc openrtm-aist-dev openrtm-aist-example
+
+collda-dom:
+  ubuntu: |
+   if [ ! -f /etc/apt/sources.list.d/openrave-release*.list ] ; then
+     sudo add-apt-repository ppa:openrave/release
+     sudo apt-get update
+   fi
+   sudo apt-get install collada-dom
+
+# for hrpsys
+# libncurses5-dev
+# libreadline5-dev

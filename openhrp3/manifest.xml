@@ -1,0 +1,68 @@
+<package>
+  <description brief="openhrp3">
+
+     openhrp3
+
+  </description>
+  <author>Developed by AIST, GRX, ROS Package is maintained by Kei Okada</author>
+  <license>EPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/openhrp3</url>
+
+  <depend package="tvmet" />
+  <rosdep name="collada-dom" />
+
+  <!-- java -->
+  <rosdep name="sun-java6-jdk" />
+  <rosdep name="sun-java6-fonts" />
+  <rosdep name="sun-java6-plugin" />
+  <rosdep name="jython" />
+  <rosdep name="libreadline-java" />
+
+  <rosdep name="ttf-sazanami-gothic" />
+  <rosdep name="ttf-sazanami-mincho" />
+  <rosdep name="ttf-kochi-gothic" />
+  <rosdep name="ttf-kochi-mincho" />
+
+  <!-- omniORB -->
+  <rosdep name="libcos4-dev" />
+  <rosdep name="libomnievents-dev" />
+  <rosdep name="libomniorb4-dev" />
+  <rosdep name="libomnithread3-dev" />
+  <rosdep name="omnievents" />
+  <rosdep name="omniidl4" />
+  <rosdep name="omniidl-python" />
+  <rosdep name="omniorb4" />
+  <rosdep name="omniorb4-idl" />
+  <rosdep name="omniorb4-nameserver" />
+  <rosdep name="python-omniorb" />
+  <rosdep name="python-tk" />
+
+  <!-- math -->
+  <rosdep name="liblapack3gf" />
+  <rosdep name="liblapack-dev" />
+  <rosdep name="libatlas-base-dev" />
+  <rosdep name="libblas3gf" />
+  <rosdep name="libblas-dev" />
+  <rosdep name="f2c" />
+  <rosdep name="libf2c2" />
+  <rosdep name="libf2c2-dev" />
+  <rosdep name="libgfortran3" />
+  <rosdep name="libgfortran3-dbg" />
+
+  <!-- boost -->
+
+  <!-- eclipse3.4.2 -->
+  <rosdep name="xulrunner-1.9.2" />
+
+  <!-- etc -->
+  <rosdep name="zlib1g-dev" />
+  <rosdep name="libjpeg62-dev" />
+  <rosdep name="libpng12-dev" />
+  <rosdep name="uuid-dev" />
+
+  <!-- openrtm -->
+  <rosdep name="openrtm" />
+</package>
+
+

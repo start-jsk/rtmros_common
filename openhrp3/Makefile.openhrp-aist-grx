@@ -1,0 +1,16 @@
+all: installed
+
+INSTALL_DIR=`rospack find openhrp3`
+HG_DIR = build/openhrp-aist-grx
+HG_URL = https://openhrp-aist-grx.googlecode.com/hg/
+include $(shell rospack find mk)/hg_checkout.mk
+
+installed: $(HG_DIR)
+	cd $(HG_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DTVMET_DIR=$(CURDIR)/tvmet -DOPENRTM_DIR=/usr -DCOLLADADOM_DIR=$(CURDIR)/collada-dom .
+	cd $(HG_DIR) && make
+	cd $(HG_DIR) && make install
+	touch installed
+
+clean:
+	-cd $(HG_DIR) && make clean
+	rm -fr include lib installed

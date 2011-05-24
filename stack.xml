@@ -1,0 +1,9 @@
+<stack>
+  <description brief="rtmros_common">Common Packages for RTM/ROS integration</description>
+  <author>Kei Okada, Rosen Diankov</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rtmros_common</url>
+  <depend stack="ros" />
+
+</stack>
