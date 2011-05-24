@@ -1,0 +1,16 @@
+<package>
+  <description brief="tvmet">
+
+     tvmet
+
+  </description>
+  <author>Olaf Petzold, ROS Package maintained by Kei Okada</author>
+  <license>LGPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/tvmet</url>
+  <export>
+    <cpp cflags="-I${prefix}/tvmet/include"/>
+  </export>
+</package>
+
+

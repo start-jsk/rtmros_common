@@ -1,4 +1,4 @@
-all: installed.tvmet
+all: installed
 
 FILENAME = tvmet-1.7.2.tar.bz2
 TARBALL = build/$(FILENAME)
@@ -9,14 +9,19 @@ MD5SUM_FILE = $(FILENAME).md5sum
 include $(shell rospack find mk)/download_unpack_build.mk
 
 
-installed.tvmet: $(SOURCE_DIR)/unpacked
+installed: wiped $(SOURCE_DIR)/unpacked
 	cd $(SOURCE_DIR) && ./configure --prefix=$(CURDIR)/tvmet
 	cd $(SOURCE_DIR) && make $(ROS_PARALLEL_JOBS) && make install
-	touch installed.tvmet
+	touch installed
 
 clean:
-	-cd $(SOURCE_DIR) && make clean
-	rm -fr tvmet
+	if [ -e $(SOURCE_DIR) ] ; then cd $(SOURCE_DIR) && make clean; fi
 
+wipe: clean
+	rm -rf build tvmet
 
+wiped: Makefile
+	make wipe
+	touch wiped
 
+.PHONY : clean download

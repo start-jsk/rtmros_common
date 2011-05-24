@@ -12,11 +12,6 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 rosbuild_init()
 
 # Build OpenHRP3
-execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} make -f Makefile.tvmet
-		RESULT_VARIABLE _make_failed)
-if (_make_failed)
-  message(FATAL_ERROR "Build of tvmet failed")
-endif(_make_failed)
 execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} make -f Makefile.openhrp-aist-grx
 		RESULT_VARIABLE _make_failed)
 if (_make_failed)

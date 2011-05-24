@@ -8,4 +8,3 @@ wipe: clean
 
 extra-clean:
 	make -f Makefile.openhrp-aist-grx clean
-	make -f Makefile.tvmet clean
