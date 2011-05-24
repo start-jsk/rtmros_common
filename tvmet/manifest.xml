@@ -9,7 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/tvmet</url>
   <export>
-    <cpp cflags="-I${prefix}/tvmet/include"/>
+    <cpp cflags="-I${prefix}/include"/>
   </export>
 </package>
 
