@@ -101,7 +101,7 @@ openrtm:
    fi
    sudo apt-get install openrtm-aist openrtm-aist-doc openrtm-aist-dev openrtm-aist-example
 
-collda-dom:
+collada-dom:
   ubuntu: |
    if [ ! -f /etc/apt/sources.list.d/openrave-release*.list ] ; then
      sudo add-apt-repository ppa:openrave/release
