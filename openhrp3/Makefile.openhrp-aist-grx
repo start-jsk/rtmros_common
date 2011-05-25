@@ -9,11 +9,22 @@ installed: $(HG_DIR)
 	cd $(HG_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=/usr -DCOLLADADOM_DIR=$(CURDIR)/collada-dom .
 	cd $(HG_DIR) && make
 	cd $(HG_DIR) && make install
+	#
+	# copy idl
 	mkdir -p $(CURDIR)/idl && cp $(CURDIR)/share/OpenHRP-3.1/idl/OpenHRP/* ./idl/
-	sudo unzip $(HG_DIR)/GrxUIonEclipse-project-0.9.8/GrxUI3.1-RTM1.0.zip -d /usr/lib/eclipse/plugins/
-	sudo unzip build/rtmtools100release_en.zip -d /usr/lib/eclipse/
+	#
+	# unzip grxui jar file
+	sudo unzip -o $(HG_DIR)/GrxUIonEclipse-project-0.9.8/GrxUI3.1-RTM1.0.zip -d /usr/lib/eclipse/plugins/
+
+	#
+	# download and unzip prtm tools
+	rosrun rosbuild download_checkmd5.py http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/rtmtools100release_en.zip build/rtmtools100release_en.zip e1051282f79dd8a2618ad993e92063ce
+	sudo unzip -o build/rtmtools100release_en.zip -d /usr/lib/eclipse/
+	#
 	touch installed
 
 clean:
 	-cd $(HG_DIR) && make clean
+
+wipe: clean
 	rm -fr include bin lib idl installed

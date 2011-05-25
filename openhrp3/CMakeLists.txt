@@ -11,9 +11,6 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
 rosbuild_init()
 
-# download rtmtools
-rosbuild_download_data(http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/rtmtools100release_en.zip build/rtmtools100release_en.zip e1051282f79dd8a2618ad993e92063ce)
-
 # Build OpenHRP3
 execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} make -f Makefile.openhrp-aist-grx
 		RESULT_VARIABLE _make_failed)

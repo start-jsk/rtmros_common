@@ -3,7 +3,7 @@ include $(shell rospack find mk)/cmake.mk
 clean: extra-clean
 
 wipe: clean
-	rm -rf build
+	make -f Makefile.openhrp-aist-grx wipe
 	touch wiped
 
 extra-clean:
