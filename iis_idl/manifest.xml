@@ -1,0 +1,16 @@
+<package>
+  <description brief="iis_idl">
+
+     iis_idl
+
+  </description>
+  <author>Writtein by M.Shimizu, N.Kita, T.Saito, E.Takeuchi, Y.Nakajima, N.Takegawa H.Igarashi, Y.Hayashibara, H.Yamamoto, K.Toda, T.Furuta, M.Mizukawa, ROS package is maintained Kei Okada</author>
+  <license></license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/iis_idl</url>
+
+  <depends package="openhrp3" />
+
+</package>
+
+
