@@ -22,11 +22,14 @@ macro(rtmbuild_genidl)
     _rosbuild_warn("rtmbuild_genidl() was called, but no .idl files ware found")
   else(NOT _idllist)
     file(WRITE ${PROJECT_SOURCE_DIR}/idl_gen/generated "yes")
-    file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl_gen/cpp)
+    file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl_gen/cpp/${_project}/idl)
     file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl_gen/lib)
   endif(NOT _idllist)
 
   set(_output_dir ${PROJECT_SOURCE_DIR}/idl_gen)
+  set(_output_cpp_dir ${PROJECT_SOURCE_DIR}/idl_gen/cpp/${_project}/idl)
+  set(_output_lib_dir ${PROJECT_SOURCE_DIR}/idl_gen/lib)
+
   foreach(_idl ${_idllist})
     message("[rtmbuild_genidl] ${_idl}")
     execute_process(COMMAND rtm-config --idlc OUTPUT_VARIABLE _genidl_exe
@@ -36,13 +39,12 @@ macro(rtmbuild_genidl)
 #      OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(_rtmcxx_exe "g++")
 
-
     set(_input_idl ${PROJECT_SOURCE_DIR}/idl/${_idl})
-    set(_output_idl_hh ${_output_dir}/cpp/${_idl})
-    set(_output_stub_cpp ${_output_dir}/cpp/${_idl})
-    set(_output_skel_cpp ${_output_dir}/cpp/${_idl})
-    set(_output_stub_lib ${_output_dir}/lib/lib${_idl})
-    set(_output_skel_lib ${_output_dir}/lib/lib${_idl})
+    set(_output_idl_hh ${_output_cpp_dir}/${_idl})
+    set(_output_stub_cpp ${_output_cpp_dir}/${_idl})
+    set(_output_skel_cpp ${_output_cpp_dir}/${_idl})
+    set(_output_stub_lib ${_output_lib_dir}/lib${_idl})
+    set(_output_skel_lib ${_output_lib_dir}/lib${_idl})
     string(REPLACE ".idl" ".hh" _output_idl_hh ${_output_idl_hh})
     string(REPLACE ".idl" "Stub.cpp" _output_stub_cpp ${_output_stub_cpp})
     string(REPLACE ".idl" "Stub.so"  _output_stub_lib ${_output_stub_lib})
@@ -51,13 +53,13 @@ macro(rtmbuild_genidl)
 
     # call the  rule to compile idl
     add_custom_command(OUTPUT ${_output_idl_hh}
-      COMMAND ${_genidl_exe} `rtm-config --idlflags` -I`rtm-config --prefix`/include/hrprtm/idl -C${_output_dir}/cpp ${_input_idl}
+      COMMAND ${_genidl_exe} `rtm-config --idlflags` -I`rtm-config --prefix`/include/rtm/idl -I`rospack find openhrp3`/share/OpenHRP-3.1/idl -C${_output_cpp_dir} ${_input_idl}
       DEPENDS ${_input})
     add_custom_command(OUTPUT ${_output_stub_cpp} ${_output_skel_cpp}
-      COMMAND cp ${_input_idl} ${_output_dir}/cpp
+      COMMAND cp ${_input_idl} ${_output_cpp_dir}
       COMMAND rtm-skelwrapper --include-dir="" --skel-suffix=Skel --stub-suffix=Stub  --idl-file=${_idl}
-      COMMAND rm ${_output_dir}/cpp/${_idl}
-      WORKING_DIRECTORY ${_output_dir}/cpp
+      COMMAND rm ${_output_cpp_dir}/${_idl}
+      WORKING_DIRECTORY ${_output_cpp_dir}
       DEPENDS ${_output_idl_hh})
     add_custom_command(OUTPUT ${_output_stub_lib}
       COMMAND ${_rtmcxx_exe} `rtm-config --cflags` -I. -shared -o ${_output_stub_lib} ${_output_stub_cpp} `rtm-config --libs`
