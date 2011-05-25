@@ -1,0 +1,14 @@
+<package>
+  <description brief="rtmbuild">
+
+     rtmbuild
+
+  </description>
+  <author>Build scripts for OpenRTM and OpenHRP, Kei Okada</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rtmbuild</url>
+
+</package>
+
+
