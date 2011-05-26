@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="openhrp3" name="grxui" type="eclipse.sh" />
+</launch>
