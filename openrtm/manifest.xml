@@ -1,0 +1,16 @@
+<package>
+  <description brief="openrtm">
+
+     openrtm
+
+  </description>
+  <author>AIST, ros package is maintained by Kei Okada</author>
+  <license>EPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/openrtm</url>
+
+  <rosdep name="openrtm" />
+
+</package>
+
+

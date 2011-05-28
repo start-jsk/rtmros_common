@@ -1,0 +1,21 @@
+all: installed.java
+
+INSTALL_DIR = `rospack find openrtm`
+FILENAME    = OpenRTM-aist-Java-1.0.0-RELEASE.tar.gz
+TARBALL     = build/$(FILENAME)
+TARBALL_URL = http://www.openrtm.org/pub/OpenRTM-aist/java/1.0.0/$(FILENAME)
+SOURCE_DIR  = build/jp.go.aist.rtm.RTC
+UNPACK_CMD  = tar xzf
+MD5SUM_FILE = $(FILENAME).md5sum
+include $(shell rospack find mk)/download_unpack_build.mk
+
+installed.java: $(SOURCE_DIR)/unpacked
+	# how to install java?
+	cd $(SOURCE_DIR)
+	touch installed.java
+
+clean:
+	-cd $(SOURCE_DIR) && make clean
+
+wipe: clean
+	rm -fr installed.java
