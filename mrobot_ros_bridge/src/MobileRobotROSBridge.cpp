@@ -105,11 +105,11 @@ RTC::ReturnCode_t MobileRobotROSBridge::onExecute(RTC::UniqueId ec_id)
   //std::cerr << "@Execute name : " << getInstanceName() << std::endl;
   if ( m_inIn.isNew() ) {
     m_inIn.read();
-    std::cerr << "x = " << m_in.x << ", y = " << m_in.y << ", theta = " << m_in.theta << std::endl;
+    std::cerr << "[odometry] x = " << m_in.x << ", y = " << m_in.y << ", theta = " << m_in.theta << std::endl;
     //
-    m_out.vx = 0.5;
-    m_out.vy = 0.0;
-    m_out.w  = 0.0;
+    m_out.vx = velocity.linear.x;
+    m_out.vy = velocity.linear.y;
+    m_out.w  = velocity.angular.z;
     m_outOut.write();
     //
     nav_msgs::Odometry odom;
@@ -125,8 +125,9 @@ RTC::ReturnCode_t MobileRobotROSBridge::onExecute(RTC::UniqueId ec_id)
   return RTC::RTC_OK;
 }
 
-void MobileRobotROSBridge::velocityCB(const geometry_msgs::TwistConstPtr& velocity) {
-  std::cerr << "[velocity] x = " << velocity->linear.x << ", y = " << velocity->linear.y << ", z = " << velocity->angular.z << std::endl;
+void MobileRobotROSBridge::velocityCB(const geometry_msgs::TwistConstPtr& msg) {
+  velocity = geometry_msgs::Twist(*msg);
+  std::cerr << "[velocity] x = " << velocity.linear.x << ", y = " << velocity.linear.y << ", z = " << velocity.angular.z << std::endl;
 }
 /*
 RTC::ReturnCode_t MobileRobotROSBridge::onAborting(RTC::UniqueId ec_id)

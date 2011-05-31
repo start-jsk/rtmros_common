@@ -128,6 +128,7 @@ class MobileRobotROSBridge  : public RTC::DataFlowComponentBase
   ros::NodeHandle nh;
   ros::Subscriber velocity_sub;
   ros::Publisher  odometry_pub;
+  geometry_msgs::Twist velocity;
 };
 
 
