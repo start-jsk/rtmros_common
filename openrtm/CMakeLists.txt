@@ -37,6 +37,12 @@ if (_make_failed)
   message(FATAL_ERROR "Build of OpenRTM Tools(rtctree) failed")
 endif(_make_failed)
 #
+execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} make -f Makefile.openrtm-rtsprofile
+                RESULT_VARIABLE _make_failed)
+if (_make_failed)
+  message(FATAL_ERROR "Build of OpenRTM Tools(rtsprofile) failed")
+endif(_make_failed)
+#
 execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} make -f Makefile.openrtm-rtshell
                 RESULT_VARIABLE _make_failed)
 if (_make_failed)
