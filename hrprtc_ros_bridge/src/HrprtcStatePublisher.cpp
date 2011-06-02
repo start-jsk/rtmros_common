@@ -36,9 +36,7 @@ HrprtcStatePublisher::HrprtcStatePublisher(RTC::Manager* manager)
     m_in_rsrhsensorIn("in_rsrhsensor", m_in_rsrhsensor),
     m_in_rslhsensorIn("in_rslhsensor", m_in_rslhsensor),
     m_in_gsensorIn("in_gsensor", m_in_gsensor),
-    m_in_gyrometerIn("in_gyrometer", m_in_gyrometer),
-    m_StateHolderServicePort("StateHolderService")
-
+    m_in_gyrometerIn("in_gyrometer", m_in_gyrometer)
     // </rtc-template>
 {
 }
@@ -70,10 +68,8 @@ RTC::ReturnCode_t HrprtcStatePublisher::onInitialize()
   // Set service provider to Ports
 
   // Set service consumers to Ports
-  m_StateHolderServicePort.registerConsumer("service0", "StateHolderService", m_service0);
 
   // Set CORBA Service Ports
-  addPort(m_StateHolderServicePort);
 
   // </rtc-template>
 

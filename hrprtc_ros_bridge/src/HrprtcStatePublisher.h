@@ -32,7 +32,6 @@
 
 // Service Consumer stub headers
 // <rtc-template block="consumer_stub_h">
-#include "StateHolderServiceStub.h"
 
 // </rtc-template>
 
@@ -127,7 +126,6 @@ class HrprtcStatePublisher  : public RTC::DataFlowComponentBase
 
   // CORBA Port declaration
   // <rtc-template block="corbaport_declare">
-  RTC::CorbaPort m_StateHolderServicePort;
 
   // </rtc-template>
 
@@ -138,7 +136,6 @@ class HrprtcStatePublisher  : public RTC::DataFlowComponentBase
 
   // Consumer declaration
   // <rtc-template block="consumer_declare">
-  RTC::CorbaConsumer<OpenHRP::StateHolderService> m_service0;
 
   // </rtc-template>
 
