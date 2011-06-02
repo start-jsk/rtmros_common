@@ -12,7 +12,6 @@
   <depend package="roscpp"/>
   <depend package="sensor_msgs"/>
   <depend package="openhrp3"/>
-  <depend package="openhrp3_idl"/>
 
 </package>
 
