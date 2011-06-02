@@ -87,14 +87,16 @@ RTC::ReturnCode_t HrprtcStatePublisher::onInitialize()
       comPos = nameServer.length();
     }
   nameServer = nameServer.substr(0, comPos);
-  std::cerr << nameServer.c_str() << std::endl;
+  std::cerr << "nameserver " << nameServer.c_str() << std::endl;
   RTC::CorbaNaming naming(m_pManager->getORB(), nameServer.c_str());
   CosNaming::NamingContext::_duplicate(naming.getRootContext());
+  //std::string modelfile = prop["model"].c_str();
+  std::string modelfile = "/opt/grx/HRP2JSK/model/HRP2JSKmain.wrl";
+  //std::string modelfile = "/opt/grx/HIRONX/model/main.wrl",
   try  {
-    std::cerr << "Loading " << prop["model"].c_str () << std::endl;
+    std::cerr << "Loading " << modelfile << std::endl;
     loadBodyFromModelLoader (body,
-			     "/opt/grx/HRP2JSK/model/HRP2JSKmain.wrl",
-			     //"/opt/grx/HIRONX/model/main.wrl",
+			     modelfile.c_str(),
 			     CosNaming::NamingContext::_duplicate(naming.getRootContext()));
   } catch ( CORBA::SystemException& ex ) {
     std::cerr << "CORBA::SystemException " << ex._name() << std::endl;
@@ -103,7 +105,7 @@ RTC::ReturnCode_t HrprtcStatePublisher::onInitialize()
       std::cerr << "failed to load model[" << prop["model"] << "]" << std::endl;
       return RTC::RTC_ERROR;
   }
-  std::cerr << "Loaded " << body->name() << std::endl;
+  std::cerr << "Loaded " << body->name() << " from " << modelfile <<  std::endl;
   body->calcForwardKinematics();
   return RTC::RTC_OK;
 }
