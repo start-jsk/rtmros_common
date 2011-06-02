@@ -101,12 +101,13 @@ RTC::ReturnCode_t HrprtcStatePublisher::onInitialize()
 			     //"/opt/grx/HIRONX/model/main.wrl",
 			     CosNaming::NamingContext::_duplicate(naming.getRootContext()));
   } catch ( CORBA::SystemException& ex ) {
-    std::cerr << "Loaded " << body->name() << std::endl;
-    // this id OK
+    std::cerr << "CORBA::SystemException " << ex._name() << std::endl;
+    return RTC::RTC_ERROR;
   } catch ( ... ) {
       std::cerr << "failed to load model[" << prop["model"] << "]" << std::endl;
       return RTC::RTC_ERROR;
   }
+  std::cerr << "Loaded " << body->name() << std::endl;
   body->calcForwardKinematics();
   return RTC::RTC_OK;
 }
@@ -164,7 +165,7 @@ RTC::ReturnCode_t HrprtcStatePublisher::onExecute(RTC::UniqueId ec_id)
     std::cerr << body->name() << std::endl;
     if ( m_in_rsangle.data.length() != body->joints().size() ) {
       std::cerr << "rsangle.data.length(" << m_in_rsangle.data.length() << ") is not equal to body->joints().size(" << body->joints().size() << ")" << std::endl;
-      return RTC::RTC_ERROR;
+      return RTC::RTC_OK;
     }
     body->calcForwardKinematics();
 
