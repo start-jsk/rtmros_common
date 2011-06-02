@@ -16,6 +16,7 @@
   <rosdep name="sun-java6-jdk" />
   <rosdep name="sun-java6-fonts" />
   <rosdep name="sun-java6-plugin" />
+  <rosdep name="java3d" />
   <rosdep name="jython" />
   <rosdep name="libreadline-java" />
 
