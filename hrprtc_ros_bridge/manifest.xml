@@ -1,0 +1,19 @@
+<package>
+  <description brief="hrprtc_ros_bridge">
+
+     hrprtc_ros_bridge
+
+  </description>
+  <author>Kei Okada</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hrprtc_ros_bridge</url>
+
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="openhrp3"/>
+  <depend package="openhrp3_idl"/>
+
+</package>
+
+

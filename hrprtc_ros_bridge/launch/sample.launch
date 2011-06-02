@@ -1,0 +1,22 @@
+<launch>
+  <!--
+      roslaunch hrprtc_ros_bridge sample.launch nameserver:=192.168.1.1
+  -->
+  <!-- BEGIN:openrtm setting -->
+  <arg name="nameserver" default="192.168.127.134" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
+  <!-- END:openrtm setting -->
+  <node name = "HrprtcStatePublisher"
+	pkg  = "hrprtc_ros_bridge"
+	type = "HrprtcStatePublisher"
+	args = "$(arg openrtm_args)"
+	output = "screen"/>
+
+  <!-- BEGIN:openrtm connection -->
+  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find hrprtc_ros_bridge)/launch/sample.launch"/>
+  <rtconnect from="StateHolder0.rtc:qOut" to="HrprtcStatePublisher0.rtc:in_rsangle" />
+  <rtactivate component="HrprtcStatePublisher0.rtc" />
+  <!-- END:openrtm connection -->
+</launch>
+
