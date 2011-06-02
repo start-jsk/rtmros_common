@@ -163,7 +163,7 @@ RTC::ReturnCode_t HrprtcStatePublisher::onExecute(RTC::UniqueId ec_id)
     body->calcForwardKinematics();
     std::cerr << body->name() << std::endl;
     if ( m_in_rsangle.data.length() != body->joints().size() ) {
-      std::cerr << "rsangle.data.length(" << m_in_rsangle.data.length() << ") is not equal to body->joints().length(" << body->joints().size() << ")" << std::endl;
+      std::cerr << "rsangle.data.length(" << m_in_rsangle.data.length() << ") is not equal to body->joints().size(" << body->joints().size() << ")" << std::endl;
       return RTC::RTC_ERROR;
     }
     body->calcForwardKinematics();
