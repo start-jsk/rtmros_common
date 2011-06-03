@@ -7,17 +7,17 @@
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
   <!-- END:openrtm setting -->
-  <node name = "MobileRobotRosBridgeComp"
+  <node name = "MobileRobotROSBridgeComp"
 	pkg  = "mrobot_ros_bridge"
-	type = "MobileRobotRosBridgeComp"
+	type = "MobileRobotROSBridgeComp"
 	args = "$(arg openrtm_args)"
 	output = "screen"/>
 
   <!-- BEGIN:openrtm connection -->
-  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find mrobot_ros_bridge)/launch/sample.launch"/>
-  <rtconnect from="Odometry0.rtc:Localization" to="MobileRobotRosBridgeComp0.rtc:in" />
-  <rtconnect from="BeegoController0.rtc:InputTargetVelocity" to="MobileRobotRosBridgeComp0.rtc:out" />
-  <rtactivate component="MobileRobotRosBridgeComp0.rtc" />
+  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find mrobot_ros_bridge)/launch/mrobot_ros_bridge.launch" output="screen"/>
+  <rtconnect from="Odometry0.rtc:ResultLocalization" to="MobileRobotROSBridge0.rtc:in" />
+  <rtconnect from="BeegoController0.rtc:TargetVelocity" to="MobileRobotROSBridge0.rtc:out" />
+  <artactivate component="MobileRobotROSBridge0.rtc" />
   <!-- END:openrtm connection -->
 </launch>
 
