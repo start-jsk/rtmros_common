@@ -78,6 +78,14 @@ tvmet:
 # eclipse3.4.2
 eclipse:
   ubuntu: eclipse
+eclipse-openhrp:
+  ubuntu: |
+   if [ ! -f /usr/lib/eclipse/eclipse ] ; then
+     echo "==="; echo "Downloading Eclipse files, it takes ~10 min"; echo "==="
+     wget -O /tmp/eclipse.tar.gz http://www.openrtp.jp/openhrp3/download/eclipse342_hrpdependencies_linux_en_20100602.tar.gz 1>&2
+     cd /usr/lib && sudo tar -xvzf /tmp/eclipse.tar.gz
+   fi
+
 xulrunner-1.9.2:
   ubuntu: xulrunner-1.9.2
 

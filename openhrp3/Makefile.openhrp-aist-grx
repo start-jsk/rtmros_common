@@ -1,4 +1,4 @@
-all: installed java3d java3declipse grxui rtmtools
+all: installed java3d grxui rtmtools
 
 INSTALL_DIR=`rospack find openhrp3`
 HG_DIR = build/openhrp-aist-grx
@@ -29,8 +29,8 @@ java3declipse: build/java3declipse-20090302.zip
 build/java3declipse-20090302.zip:
 	-wget  -O $@ http://downloads.sourceforge.net/project/java3d-eclipse/java3declipse%20plugin/20090302/java3declipse-20090302.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fjava3d-eclipse%2Ffiles%2F&ts=1307109053&use_mirror=jaist
 	
-grxui: $(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar
-$(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar:
+grxui: /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
+/usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar:
 	### unzip grxui jar file
 	## sudo unzip -o $(HG_DIR)/GrxUIonEclipse-project-0.9.8/GrxUI3.1-RTM1.0.zip -d /usr/lib/eclipse/plugins/
 	#
@@ -41,8 +41,8 @@ $(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar:
 	# copy
 	-sudo cp $(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar /usr/lib/eclipse/plugins/
 
-rtmtools: build/rtmtools100release_en.zip
-build/rtmtools100release_en.zip:
+rtmtools: /usr/lib/eclipse/rtmtools100release_en.zip
+/usr/lib/eclipse/rtmtools100release_en.zip:
 	# download and unzip prtm tools
 	rosrun rosbuild download_checkmd5.py http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/rtmtools100release_en.zip build/rtmtools100release_en.zip e1051282f79dd8a2618ad993e92063ce
 	-sudo unzip -o build/rtmtools100release_en.zip -d /usr/lib/eclipse/
