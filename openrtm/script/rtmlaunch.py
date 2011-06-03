@@ -22,7 +22,7 @@ def rtconnect(nameserver, tags):
             rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, tree=None)
         except Exception, e:
             print >>sys.stderr, '{0}: {1}'.format(os.path.basename(sys.argv[0]), e)
-        return 0
+    return 0
 
 def rtactivate(nameserver, tags):
     def activate_action(object, ec_index):
@@ -37,7 +37,7 @@ def rtactivate(nameserver, tags):
         except Exception, e:
             print >>sys.stderr, '{0}: {1}'.format(os.path.basename(sys.argv[0]), e)
             return 1
-        return 0
+    return 0
 
 def main():
     usage = '''Usage: %prog [launchfile]'''
