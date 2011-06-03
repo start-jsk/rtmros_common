@@ -3,7 +3,7 @@ all: installed java3d grxui rtmtools
 INSTALL_DIR=`rospack find openhrp3`
 HG_DIR = build/openhrp-aist-grx
 HG_URL = https://openhrp-aist-grx.googlecode.com/hg/
-HG_PATCH = openhrp.patch
+HG_PATCH = openhrp.patch controllerbridge.patch
 include $(shell rospack find mk)/hg_checkout.mk
 
 installed: $(HG_DIR) patched
