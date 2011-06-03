@@ -3,7 +3,6 @@ all: installed
 INSTALL_DIR=`rospack find openhrp3`
 HG_DIR = build/openhrp-aist-grx
 HG_URL = https://openhrp-aist-grx.googlecode.com/hg/
-HG_PATCH = 
 include $(shell rospack find mk)/hg_checkout.mk
 
 installed: $(HG_DIR)
@@ -14,11 +13,11 @@ installed: $(HG_DIR)
 	# copy idl
 	# mkdir -p $(CURDIR)/idl && cp $(CURDIR)/share/OpenHRP-3.1/idl/OpenHRP/* ./idl/
 	#
-	if [ ! -f `rospack find openhrp3`/lib/ext/j3dcore.jar ] ; then
-	   cd     /tmp
-	   wget http://download.java.net/media/java3d/builds/release/1.5.2/j3d-1_5_2-linux-amd64.zip
-	   unzip -o j3d-1_5_2-linux-amd64.zip
-	   unzip -o j3d-1_5_2-linux-amd64/j3d-jre.zip -d `rospack find openhrp3`
+	if [ ! -f `rospack find openhrp3`/lib/ext/j3dcore.jar ] ; then \
+	   cd     /tmp ;\
+	   wget http://download.java.net/media/java3d/builds/release/1.5.2/j3d-1_5_2-linux-amd64.zip ;\
+	   unzip -o j3d-1_5_2-linux-amd64.zip ;\
+	   unzip -o j3d-1_5_2-linux-amd64/j3d-jre.zip -d `rospack find openhrp3`; \
 	fi
 	# unzip grxui jar file
 	sudo unzip -o $(HG_DIR)/GrxUIonEclipse-project-0.9.8/GrxUI3.1-RTM1.0.zip -d /usr/lib/eclipse/plugins/
