@@ -8,14 +8,6 @@ jython:
   ubuntu: jython
 libreadline-java:
   ubuntu: libreadline-java
-java3d:
-  ubuntu: |
-    if [ ! -f `rospack find openhrp3`/lib/ext/j3dcore.jar ] ; then
-      cd /tmp
-      wget http://download.java.net/media/java3d/builds/release/1.5.2/j3d-1_5_2-linux-amd64.zip
-      unzip -o j3d-1_5_2-linux-amd64.zip
-      unzip -o j3d-1_5_2-linux-amd64/j3d-jre.zip -d `rospack find openhrp3`
-    fi
 
 # japanese font
 ttf-sazanami-gothic:
