@@ -22,3 +22,33 @@ diff -r 3c7e7ad07c8d server/ModelLoader/BodyInfo_impl.cpp
                  segmentInfo->shapeIndices[j++] = k;
              links_[index].segments[i] = segmentInfo;
          }
+diff -r 3c7e7ad07c8d server/ControllerBridge/main.cpp
+--- server/ControllerBridge/main.cpp	Fri May 20 16:41:05 2011 +0900
++++ server/ControllerBridge/main.cpp	Fri Jun 03 20:49:26 2011 +0900
+@@ -97,16 +97,18 @@
+ 
+     try {
+ 		unsigned int i;
++		int rtc_argc = 1;
++		char** rtc_argv = (char **)malloc(sizeof(char *)*argc);
++		rtc_argv[0] = argv[0];
+ 		for (i=1; i<argc; i++){
+-			if (strcmp(argv[i], "-f")==0){
+-				break;
+-			} 
++			if (strncmp(argv[i], "--", 2)!=0 ) {
++				rtc_argv[rtc_argc] = argv[i];
++				rtc_argc++;
++			}  else {
++				i++;
++			}
+ 		}
+-		if (i == argc){
+-			rtcManager = RTC::Manager::init(1, argv);
+-		}else{
+-			rtcManager = RTC::Manager::init(3, argv+i-1);
+-		}
++		rtcManager = RTC::Manager::init(rtc_argc, rtc_argv);
+ 		rtcManager->activateManager();
+ 	}
+ 	catch(...) {
