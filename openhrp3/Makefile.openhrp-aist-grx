@@ -24,7 +24,8 @@ installed: $(HG_DIR)
 	touch installed
 
 clean:
+	rm -f installed
 	-cd $(HG_DIR) && make clean
 
 wipe: clean
-	rm -fr include bin lib idl installed
+	rm -fr include bin lib idl
