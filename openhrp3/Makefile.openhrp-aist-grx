@@ -1,11 +1,12 @@
-all: installed
+all: installed java3d grxui rtmtools
 
 INSTALL_DIR=`rospack find openhrp3`
 HG_DIR = build/openhrp-aist-grx
 HG_URL = https://openhrp-aist-grx.googlecode.com/hg/
+HG_PATCH = openhrp.patch
 include $(shell rospack find mk)/hg_checkout.mk
 
-installed: $(HG_DIR)
+installed: $(HG_DIR) patched
 	cd $(HG_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=/usr
 	cd $(HG_DIR) && make
 	cd $(HG_DIR) && make install
@@ -13,16 +14,31 @@ installed: $(HG_DIR)
 	# copy idl
 	# mkdir -p $(CURDIR)/idl && cp $(CURDIR)/share/OpenHRP-3.1/idl/OpenHRP/* ./idl/
 	#
+	touch installed
+
+java3d: /lib/ext/j3dcore.jar
+/lib/ext/j3dcore.jar:
 	if [ ! -f `rospack find openhrp3`/lib/ext/j3dcore.jar ] ; then \
 	   cd     /tmp ;\
 	   wget http://download.java.net/media/java3d/builds/release/1.5.2/j3d-1_5_2-linux-amd64.zip ;\
 	   unzip -o j3d-1_5_2-linux-amd64.zip ;\
 	   unzip -o j3d-1_5_2-linux-amd64/j3d-jre.zip -d `rospack find openhrp3`; \
 	fi
-	# unzip grxui jar file
-	sudo unzip -o $(HG_DIR)/GrxUIonEclipse-project-0.9.8/GrxUI3.1-RTM1.0.zip -d /usr/lib/eclipse/plugins/
 
+grxui: $(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar
+$(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar:
+	### unzip grxui jar file
+	## sudo unzip -o $(HG_DIR)/GrxUIonEclipse-project-0.9.8/GrxUI3.1-RTM1.0.zip -d /usr/lib/eclipse/plugins/
 	#
+	# make
+	cp `rospack find openhrp3`/grxui_build.xml $(HG_DIR)/GrxUIonEclipse-project-0.9.8/grxui_build.xml
+	cp `rospack find openhrp3`/javaCompiler.grxui.jar.args $(HG_DIR)/GrxUIonEclipse-project-0.9.8/javaCompiler.grxui.jar.args
+	cd $(HG_DIR)/GrxUIonEclipse-project-0.9.8 && java -jar /usr/lib/eclipse/plugins/org.eclipse.equinox.launcher_1.0.201.R35x_v20090715.jar -application org.eclipse.ant.core.antRunner -buildfile grxui_build.xml -verbose clean build.update.jar
+	# copy
+	sudo cp $(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar /usr/lib/eclipse/plugins/
+
+rtmtools: build/rtmtools100release_en.zip
+build/rtmtools100release_en.zip:
 	# download and unzip prtm tools
 	rosrun rosbuild download_checkmd5.py http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/rtmtools100release_en.zip build/rtmtools100release_en.zip e1051282f79dd8a2618ad993e92063ce
 	sudo unzip -o build/rtmtools100release_en.zip -d /usr/lib/eclipse/
