@@ -76,6 +76,8 @@ tvmet:
 # boost
 
 # eclipse3.4.2
+eclipse:
+  ubuntu: eclipse
 xulrunner-1.9.2:
   ubuntu: xulrunner-1.9.2
 

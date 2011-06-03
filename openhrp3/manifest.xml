@@ -53,6 +53,7 @@
   <!-- boost -->
 
   <!-- eclipse3.4.2 -->
+  <rosdep name="eclipse" />
   <rosdep name="xulrunner-1.9.2" />
 
   <!-- etc -->
