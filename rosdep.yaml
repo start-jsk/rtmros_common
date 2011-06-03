@@ -108,7 +108,7 @@ openrtm:
      echo "deb http://www.openrtm.org/pub/Linux/ubuntu `lsb_release -cs` main" |  sudo tee /etc/apt/sources.list.d/openrtm.list
      sudo apt-get update
    fi
-   sudo apt-get install openrtm-aist openrtm-aist-doc openrtm-aist-dev openrtm-aist-example
+   sudo apt-get -y --force-yes install openrtm-aist openrtm-aist-doc openrtm-aist-dev openrtm-aist-example
 
 collada-dom:
   ubuntu: |
