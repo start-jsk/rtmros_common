@@ -77,7 +77,7 @@ tvmet:
 
 # eclipse3.4.2
 eclipse:
-  ubuntu: eclipse
+  ubuntu: eclipse eclipse-emf eclipse-xsd eclipse-pde
 eclipse-openhrp:
   ubuntu: |
    if [ ! -f /usr/lib/eclipse/eclipse ] ; then
