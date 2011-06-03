@@ -10,6 +10,9 @@
   <url>http://ros.org/wiki/openhrp3</url>
 
   <depend package="tvmet" />
+  <depend package="openrtm" />
+
+  <!-- collada -->
   <rosdep name="collada-dom" />
 
   <!-- java -->
@@ -62,8 +65,6 @@
   <rosdep name="libpng12-dev" />
   <rosdep name="uuid-dev" />
 
-  <!-- openrtm -->
-  <rosdep name="openrtm" />
 </package>
 
 
