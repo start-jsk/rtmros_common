@@ -105,7 +105,8 @@ uuid-dev:
 openrtm:
   ubuntu: |
    if [ ! -f /etc/apt/sources.list.d/openrtm.list ] ; then
-     echo "deb http://www.openrtm.org/pub/Linux/ubuntu maverick main" |  sudo tee /etc/apt/sources.list.d/openrtm.list
+     echo "deb http://www.openrtm.org/pub/Linux/ubuntu `lsb_release -cs` main" |  sudo tee /etc/apt/sources.list.d/openrtm.list
+     sudo apt-get update
    fi
    sudo apt-get install openrtm-aist openrtm-aist-doc openrtm-aist-dev openrtm-aist-example
 
