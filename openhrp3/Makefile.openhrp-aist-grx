@@ -16,8 +16,8 @@ installed: $(HG_DIR) patched
 	#
 	touch installed
 
-java3d: /lib/ext/j3dcore.jar
-/lib/ext/j3dcore.jar:
+java3d: lib/ext/j3dcore.jar
+lib/ext/j3dcore.jar:
 	if [ ! -f `rospack find openhrp3`/lib/ext/j3dcore.jar ] ; then \
 	   cd     /tmp ;\
 	   wget http://download.java.net/media/java3d/builds/release/1.5.2/j3d-1_5_2-linux-amd64.zip ;\
@@ -42,8 +42,7 @@ build/rtmtools100release_en.zip:
 	# download and unzip prtm tools
 	rosrun rosbuild download_checkmd5.py http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/rtmtools100release_en.zip build/rtmtools100release_en.zip e1051282f79dd8a2618ad993e92063ce
 	sudo unzip -o build/rtmtools100release_en.zip -d /usr/lib/eclipse/
-	#
-	touch installed
+
 
 clean:
 	rm -f installed
