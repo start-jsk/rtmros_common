@@ -29,7 +29,7 @@ java3declipse: build/java3declipse-20090302.zip
 build/java3declipse-20090302.zip:
 	-wget  -O $@ http://downloads.sourceforge.net/project/java3d-eclipse/java3declipse%20plugin/20090302/java3declipse-20090302.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fjava3d-eclipse%2Ffiles%2F&ts=1307109053&use_mirror=jaist
 	
-grxui: /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
+grxui: java3d /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
 /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar:
 	### unzip grxui jar file
 	## sudo unzip -o $(HG_DIR)/GrxUIonEclipse-project-0.9.8/GrxUI3.1-RTM1.0.zip -d /usr/lib/eclipse/plugins/
