@@ -77,7 +77,9 @@ tvmet:
 
 # eclipse3.4.2
 eclipse:
-  ubuntu: eclipse eclipse-platform eclipse-rcp eclipse-emf eclipse-xsd eclipse-pde
+  ubuntu:
+   10.04: eclipse eclipse-platform eclipse-rcp eclipse-pde
+   10.10: eclipse eclipse-platform eclipse-rcp eclipse-emf eclipse-xsd eclipse-pde
 eclipse-openhrp:
   ubuntu: |
    if [ ! -f /usr/lib/eclipse/eclipse ] ; then
