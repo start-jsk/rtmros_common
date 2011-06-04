@@ -5,7 +5,6 @@
       - http://www.openrtp.jp/openhrp3/jp/joystick_sample.html#view
   -->
   <arg name="nameserver" default="127.0.0.1" />
-  <arg name="hostname"   default="k-okada-t410" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type: SynchExtTriggerEC" -o "logger.file_name:/tmp/rtc%p.log"' />
   <!-- END:openrtm setting -->
