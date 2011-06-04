@@ -49,7 +49,7 @@ rtmtools: /usr/lib/eclipse/rtmtools100release_en.zip
 
 
 clean:
-	rm -f installed
+	rm -f installed patched
 	-cd $(HG_DIR) && make clean
 
 wipe: clean
