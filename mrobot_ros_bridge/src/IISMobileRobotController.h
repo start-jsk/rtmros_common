@@ -95,8 +95,8 @@ class IISMobileRobotController  : public RTC::DataFlowComponentBase
   InPort<TimedDoubleSeq> m_angleIn;
   TimedDoubleSeq m_velocity;
   InPort<TimedDoubleSeq> m_velocityIn;
-  IIS::TimedPosition m_in;
-  InPort<IIS::TimedPosition> m_inIn;
+  IIS::TimedVelocity m_in;
+  InPort<IIS::TimedVelocity> m_inIn;
 
   // </rtc-template>
 
@@ -104,8 +104,8 @@ class IISMobileRobotController  : public RTC::DataFlowComponentBase
   // <rtc-template block="outport_declare">
   TimedDoubleSeq m_torque;
   OutPort<TimedDoubleSeq> m_torqueOut;
-  IIS::TimedVelocity m_out;
-  OutPort<IIS::TimedVelocity> m_outOut;
+  IIS::TimedPosition m_out;
+  OutPort<IIS::TimedPosition> m_outOut;
 
   // </rtc-template>
 

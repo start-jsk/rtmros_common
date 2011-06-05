@@ -32,8 +32,8 @@ IISMobileRobotController::IISMobileRobotController(RTC::Manager* manager)
     m_angleIn("angle", m_angle),
     m_velocityIn("velocity", m_velocity),
     m_torqueOut("torque", m_torque),
-    m_outOut("out", m_out),
-    m_inIn("in", m_in)
+    m_inIn("in", m_in),
+    m_outOut("out", m_out)
 
     // </rtc-template>
 {
