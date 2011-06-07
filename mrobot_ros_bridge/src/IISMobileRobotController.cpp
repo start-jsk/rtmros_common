@@ -46,6 +46,7 @@ IISMobileRobotController::~IISMobileRobotController()
 
 RTC::ReturnCode_t IISMobileRobotController::onInitialize()
 {
+  std::cerr << "@Initilize name : " << getInstanceName() << std::endl;
   // Registration: InPort/OutPort/Service
   // <rtc-template block="registration">
   // Set InPort buffers
@@ -69,6 +70,13 @@ RTC::ReturnCode_t IISMobileRobotController::onInitialize()
   // Bind variables and configuration variable
 
   // </rtc-template>
+
+  // initialize
+  m_angle.data.length(1);
+  m_angle.data[0] = 0.0;
+  m_velocity.data.length(2);
+  m_velocity.data[0] = m_velocity.data[1] = 0.0;
+  m_torque.data.length(4);
   return RTC::RTC_OK;
 }
 
@@ -103,12 +111,52 @@ RTC::ReturnCode_t IISMobileRobotController::onDeactivated(RTC::UniqueId ec_id)
   return RTC::RTC_OK;
 }
 */
-/*
+
 RTC::ReturnCode_t IISMobileRobotController::onExecute(RTC::UniqueId ec_id)
 {
+  //std::cerr << "@onExecute name : " << getInstanceName() << std::endl;
+  // read data from simulated robot
+  if ( m_angleIn.isNew() &&
+       m_velocityIn.isNew() ) {
+    m_angleIn.read();
+    m_velocityIn.read();
+    double steerAngle = m_angle.data[0];
+    double steerVel = m_velocity.data[0];
+    double tireVel = m_velocity.data[1];
+    fprintf(stderr, "[simulate] steer angle = %.3f, steer vel = %.3f, tire vel = %.3f\n", steerAngle, steerVel, tireVel);
+
+
+    double steerCommandAngle = 0;
+    double tireCommandVel = 0;
+    if ( m_inIn.isNew() ) {
+
+      // read data from client
+      m_inIn.read();
+
+      //
+      steerCommandAngle = m_in.w ;//* 180.0 / 3.14156;
+      tireCommandVel = (m_in.vx + abs(m_in.w));
+      fprintf(stderr, "[command]  x = %.3f y = %.3f, w = %.3f\n", m_in.vx, m_in.vy, m_in.w);
+    }
+    double steerCommandTorque = 4*(steerCommandAngle - steerAngle) - 2.0 * steerVel;
+    double tireCommandTorque = (tireCommandVel * 10 - tireVel);
+
+    // write to simulated robot
+    m_torque.data[0] = steerCommandTorque;
+    m_torque.data[1] = tireCommandTorque;
+    m_torque.data[2] = tireCommandTorque;
+    m_torque.data[3] = tireCommandTorque;
+    m_torqueOut.write();
+
+    m_out.x = tireVel;
+    m_out.y = 0;
+    m_out.theta = steerAngle;
+    m_outOut.write();
+  }
+
   return RTC::RTC_OK;
 }
-*/
+
 /*
 RTC::ReturnCode_t IISMobileRobotController::onAborting(RTC::UniqueId ec_id)
 {

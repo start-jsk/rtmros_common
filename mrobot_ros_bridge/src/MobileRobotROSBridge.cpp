@@ -42,7 +42,7 @@ MobileRobotROSBridge::~MobileRobotROSBridge()
 
 RTC::ReturnCode_t MobileRobotROSBridge::onInitialize()
 {
-  std::cerr << "@Initilize name : " << getInstanceName() << std::endl;
+  std::cerr << "@onInitilize name : " << getInstanceName() << std::endl;
   odometry_pub = nh.advertise<nav_msgs::Odometry>("odom", 1);
   velocity_sub = nh.subscribe<geometry_msgs::Twist>("cmd_vel", 1, &MobileRobotROSBridge::velocityCB, this);
   // Registration: InPort/OutPort/Service
@@ -102,7 +102,7 @@ RTC::ReturnCode_t MobileRobotROSBridge::onDeactivated(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t MobileRobotROSBridge::onExecute(RTC::UniqueId ec_id)
 {
-  //std::cerr << "@Execute name : " << getInstanceName() << std::endl;
+  //std::cerr << "@onExecute name : " << getInstanceName() << std::endl;
   if ( m_inIn.isNew() ) {
     m_inIn.read();
     std::cerr << "[odometry] x = " << m_in.x << ", y = " << m_in.y << ", theta = " << m_in.theta << std::endl;

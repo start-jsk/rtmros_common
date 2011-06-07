@@ -60,7 +60,7 @@ class IISMobileRobotController  : public RTC::DataFlowComponentBase
 
   // The execution action that is invoked periodically
   // former rtc_active_do()
-  // virtual RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
+  virtual RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
 
   // The aborting action when main logic error occurred.
   // former rtc_aborting_entry()
