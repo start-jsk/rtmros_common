@@ -12,6 +12,7 @@
   <depend package="openhrp3"/>
   <depend package="iis_idl"/>
 
+  <depend package="tf"/>
   <depend package="geometry_msgs"/>
   <depend package="nav_msgs"/>
 

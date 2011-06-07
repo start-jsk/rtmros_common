@@ -30,6 +30,7 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Twist.h"
 #include "nav_msgs/Odometry.h"
+#include "tf/transform_broadcaster.h"
 
 using namespace RTC;
 
@@ -128,6 +129,7 @@ class MobileRobotROSBridge  : public RTC::DataFlowComponentBase
   ros::NodeHandle nh;
   ros::Subscriber velocity_sub;
   ros::Publisher  odometry_pub;
+  tf::TransformBroadcaster tf_pub;
   geometry_msgs::Twist velocity;
 };
 
