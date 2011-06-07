@@ -54,3 +54,4 @@ clean:
 
 wipe: clean
 	rm -fr include bin lib idl
+	sudo rm /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
