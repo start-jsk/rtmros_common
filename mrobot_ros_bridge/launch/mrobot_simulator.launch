@@ -1,4 +1,5 @@
 <launch>
+  <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
@@ -27,7 +28,7 @@
 	output = "screen"/>
   <node pkg="pr2_teleop"
 	type="teleop_pr2_keyboard"
-	name="spawn_teleop_keyboard" output="screen"
+	name="teleop_pr2_keyboard" output="screen"
 	launch-prefix="xterm -e"/>
 
 
