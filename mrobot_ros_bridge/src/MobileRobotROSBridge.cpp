@@ -114,19 +114,19 @@ RTC::ReturnCode_t MobileRobotROSBridge::onExecute(RTC::UniqueId ec_id)
     //
     nav_msgs::Odometry odom;
     odom.header.stamp = ros::Time::now();
-    odom.header.frame_id = "";
+    odom.header.frame_id = "base_footprint";
     odom.pose.pose.position.x = m_in.x;
     odom.pose.pose.position.y = m_in.y;
     odom.pose.pose.orientation.w = cos(m_in.theta/2.0);
     odom.pose.pose.orientation.z = sin(m_in.theta/2.0);
     odometry_pub.publish(odom);
 
-	tf::Transform transform;
-	transform.setOrigin( tf::Vector3(m_in.x, m_in.y, 0.0) );
-	transform.setRotation( tf::Quaternion(0, 0,
-										  odom.pose.pose.orientation.z,
-										  odom.pose.pose.orientation.w) );
-	tf_pub.sendTransform(tf::StampedTransform(transform, odom.header.stamp, "/odom", "/base_link"));
+    tf::Transform transform;
+    transform.setOrigin( tf::Vector3(m_in.x, m_in.y, 0.0) );
+    transform.setRotation( tf::Quaternion(0, 0,
+					  odom.pose.pose.orientation.z,
+					  odom.pose.pose.orientation.w) );
+    tf_pub.sendTransform(tf::StampedTransform(transform, odom.header.stamp, "/odom", "/base_link"));
 
     ros::spinOnce();
   }
