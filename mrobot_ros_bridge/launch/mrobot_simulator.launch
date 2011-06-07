@@ -42,4 +42,9 @@
   <rtactivate component="IISMobileRobotController0.rtc" />
   <rtactivate component="MobileRobotROSBridge0.rtc" />
   <!-- END:openrtm connection -->
+
+  <sphinxdoc><![CDATA[
+This script starts mobile robot simulator and keyboard teloep interface
+  ]]></sphinxdoc>
+
 </launch>

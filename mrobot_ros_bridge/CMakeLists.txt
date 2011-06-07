@@ -22,3 +22,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 rtmbuild_add_executable(IISMobileRobotControllerComp src/IISMobileRobotControllerComp.cpp src/IISMobileRobotController.cpp)
 rtmbuild_add_executable(MobileRobotROSBridgeComp src/MobileRobotROSBridge.cpp src/MobileRobotROSBridgeComp.cpp)
 
+## documentation
+rosbuild_find_ros_package("jsk_tools")
+execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_PACKAGE_PATH}/launchdoc-generator.py ${PROJECT_NAME} --output_dir=. --nomakefile RESULT_VARIABLE _make_failed)
+# execute_process(COMMAND rosrun rosdoc rosdoc ${PROJECT_NAME})

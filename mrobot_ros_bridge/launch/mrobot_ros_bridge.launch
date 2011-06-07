@@ -19,5 +19,9 @@
   <rtconnect from="BeegoController0.rtc:TargetVelocity" to="MobileRobotROSBridge0.rtc:out" />
   <artactivate component="MobileRobotROSBridge0.rtc" />
   <!-- END:openrtm connection -->
+
+  <sphinxdoc><![CDATA[
+This script starts rtm-ros bridge compoent, you nedd to launch joystcik related software to control the real robot.
+  ]]></sphinxdoc>
 </launch>
 
