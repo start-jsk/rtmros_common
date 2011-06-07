@@ -128,7 +128,9 @@ RTC::ReturnCode_t MobileRobotROSBridge::onExecute(RTC::UniqueId ec_id)
 					  odom.pose.pose.orientation.w) );
     tf_pub.sendTransform(tf::StampedTransform(transform, odom.header.stamp, "/odom", "/base_link"));
 
-    ros::spinOnce();
+    //calling all callbacks
+    while(!ros::getGlobalCallbackQueue()->isEmpty())
+      ros::spinOnce();
   }
   return RTC::RTC_OK;
 }

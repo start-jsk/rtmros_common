@@ -28,6 +28,7 @@
 
 // ros
 #include "ros/ros.h"
+#include "ros/callback_queue.h"
 #include "geometry_msgs/Twist.h"
 #include "nav_msgs/Odometry.h"
 #include "tf/transform_broadcaster.h"
