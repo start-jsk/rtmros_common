@@ -53,5 +53,5 @@ clean:
 	-cd $(HG_DIR) && make clean
 
 wipe: clean
-	rm -fr include bin lib idl
+	rm -fr include bin lib idl workspace
 	sudo rm /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
