@@ -45,6 +45,10 @@
 
   <sphinxdoc><![CDATA[
 This script starts mobile robot simulator and keyboard teloep interface
+
+.. image:: launch/images/mrobot_simulator_grxui.png
+  :width: 400
+
   ]]></sphinxdoc>
 
 </launch>
