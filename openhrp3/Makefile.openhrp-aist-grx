@@ -41,8 +41,8 @@ grxui: java3d /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
 	# copy
 	-sudo cp $(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar /usr/lib/eclipse/plugins/
 
-rtmtools: /usr/lib/eclipse/rtmtools100release_en.zip
-/usr/lib/eclipse/rtmtools100release_en.zip:
+rtmtools: /usr/lib/eclipse/plugins/jp.go.aist.rtm.systemeditor_1.0.0.v20100521.jar 
+/usr/lib/eclipse/plugins/jp.go.aist.rtm.systemeditor_1.0.0.v20100521.jar:
 	# download and unzip prtm tools
 	rosrun rosbuild download_checkmd5.py http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/rtmtools100release_en.zip build/rtmtools100release_en.zip e1051282f79dd8a2618ad993e92063ce
 	-sudo unzip -o build/rtmtools100release_en.zip -d /usr/lib/eclipse/
@@ -55,3 +55,4 @@ clean:
 wipe: clean
 	rm -fr include bin lib idl workspace
 	sudo rm /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
+	sudo rm /usr/lib/eclipse/plugins/jp.go.aist.rtm.*
