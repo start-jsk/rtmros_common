@@ -1,9 +1,10 @@
 sun-java6-jdk:
-  ubuntu: sun-java6-jdk
-sun-java6-fonts:
-  ubuntu: sun-java6-fonts
-sun-java6-plugin:
-  ubuntu: sun-java6-plugin
+  ubuntu: |
+   if [ ! -f /etc/apt/sources.list.d/canonical.list ] ; then
+     echo "deb http://archive.canonical.com/ `lsb_release -cs` partner" |  sudo tee /etc/apt/sources.list.d/canonical.list
+     sudo apt-get update
+   fi
+   sudo apt-get install sun-java6-jdk sun-java6-fonts sun-java6-plugin
 jython:
   ubuntu: jython
 libreadline-java:
