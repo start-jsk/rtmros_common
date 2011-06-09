@@ -12,6 +12,6 @@ export LD_LIBRARY_PATH=`rospack find openhrp3`/lib/amd64:$LD_LIBRARY_PATH
 export LANG=C
 export GDK_NATIVE_WINDOWS=1
 echo "initialProjectFile=${INITIAL_PROJECT}" >> `rospack find openhrp3`/workspace/.metadata/.plugins/org.eclipse.core.runtime/.settings/com.generalrobotix.ui.grxui.prefs
-eclipse -data `rospack find openhrp3`/workspace -consolelog -clean $@
+/usr/bin/eclipse -data `rospack find openhrp3`/workspace -consolelog -clean $@
 
 
