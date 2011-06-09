@@ -6,7 +6,13 @@ HG_URL = https://openhrp-aist-grx.googlecode.com/hg/
 HG_PATCH = openhrp.patch
 include $(shell rospack find mk)/hg_checkout.mk
 
-installed: $(HG_DIR) patched
+check-java-version:
+	@if [ ! "`java -version 2>&1 | grep Java\(TM\)\ SE`" ]; then \
+	   /bin/echo -e "\e[1;34mSwitch java runtime to to Sun (TM) SE\e[m"; \
+	   sudo update-java-alternatives -s java-6-sun; \
+	fi
+
+installed: $(HG_DIR) patched check-java-version
 	cd $(HG_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=/usr
 	cd $(HG_DIR) && make
 	cd $(HG_DIR) && make install
