@@ -132,6 +132,7 @@ class MobileRobotROSBridge  : public RTC::DataFlowComponentBase
   ros::Publisher  odometry_pub;
   tf::TransformBroadcaster tf_pub;
   geometry_msgs::Twist velocity;
+  ros::Time latest_v;
 };
 
 

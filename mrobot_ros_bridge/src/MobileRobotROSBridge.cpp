@@ -107,9 +107,13 @@ RTC::ReturnCode_t MobileRobotROSBridge::onExecute(RTC::UniqueId ec_id)
     m_inIn.read();
     std::cerr << "[odometry] x = " << m_in.x << ", y = " << m_in.y << ", theta = " << m_in.theta << std::endl;
     //
-    m_out.vx = velocity.linear.x;
-    m_out.vy = velocity.linear.y;
-    m_out.w  = velocity.angular.z;
+    if((ros::Time::now() - latest_v).toSec() < 0.5) {
+      m_out.vx = velocity.linear.x;
+      m_out.vy = velocity.linear.y;
+      m_out.w  = velocity.angular.z;
+    } else {
+      m_out.vx = m_out.vy = m_out.w  = 0;
+    }
     m_outOut.write();
     //
     nav_msgs::Odometry odom;
@@ -136,6 +140,7 @@ RTC::ReturnCode_t MobileRobotROSBridge::onExecute(RTC::UniqueId ec_id)
 }
 
 void MobileRobotROSBridge::velocityCB(const geometry_msgs::TwistConstPtr& msg) {
+  latest_v = ros::Time::now();
   velocity = geometry_msgs::Twist(*msg);
   std::cerr << "[velocity] x = " << velocity.linear.x << ", y = " << velocity.linear.y << ", z = " << velocity.angular.z << std::endl;
 }
