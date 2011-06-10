@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 
+import roslib
+roslib.load_manifest('openrtm')
+
 import sys
 import os
 import time
 import optparse
 
 from xml.dom.minidom import parse
+
 import rtctree
 from rtshell import rtcon
 from rtshell import path
