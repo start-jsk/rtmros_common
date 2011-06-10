@@ -3,7 +3,7 @@ all: installed java3d grxui rtmtools
 INSTALL_DIR=`rospack find openhrp3`
 HG_DIR = build/openhrp-aist-grx
 HG_URL = https://openhrp-aist-grx.googlecode.com/hg/
-HG_PATCH = patch/3dview.patch patch/modelitem.patch  patch/controller.patch patch/bodyinfo.patch
+HG_PATCH = patch/modelitem.patch  patch/controller.patch
 include $(shell rospack find mk)/hg_checkout.mk
 
 check-java-version:
@@ -70,7 +70,7 @@ rtmtools: /usr/lib/eclipse/plugins/jp.go.aist.rtm.systemeditor_1.0.0.v20100521.j
 
 
 clean:
-	rm -f installed patched
+	rm -f installed patched patched2 
 	-cd $(HG_DIR) && make clean
 
 wipe: clean
