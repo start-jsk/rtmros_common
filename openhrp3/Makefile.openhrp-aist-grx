@@ -70,10 +70,10 @@ rtmtools: /usr/lib/eclipse/plugins/jp.go.aist.rtm.systemeditor_1.0.0.v20100521.j
 
 
 clean:
-	rm -f installed patched patched2 
+	-rm -f installed patched patched2 
 	-cd $(HG_DIR) && make clean
 
 wipe: clean
-	rm -fr include bin lib idl workspace
-	sudo rm /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
-	sudo rm /usr/lib/eclipse/plugins/jp.go.aist.rtm.*
+	-rm -fr include share bin lib idl workspace
+	-sudo rm /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
+	-sudo rm /usr/lib/eclipse/plugins/jp.go.aist.rtm.*
