@@ -38,12 +38,18 @@ installed: $(HG_DIR) patched2 check-java-version check-hosts-ipv6
 	touch installed
 
 java3d: lib/ext/j3dcore.jar
+ifeq ($(shell uname -m),x86_64)
+     J3D_FILE=j3d-1_5_2-linux-amd64
+     J3D_MD5S=541d5038c54bbec2f1d311dfc5f68890
+else
+     J3D_FILE=j3d-1_5_2-linux-i586
+     J3D_MD5S=d41d8cd98f00b204e9800998ecf8427e
+endif
 lib/ext/j3dcore.jar:
 	if [ ! -f `rospack find openhrp3`/lib/ext/j3dcore.jar ] ; then \
-	   cd     /tmp ;\
-	   wget http://download.java.net/media/java3d/builds/release/1.5.2/j3d-1_5_2-linux-amd64.zip ;\
-	   unzip -o j3d-1_5_2-linux-amd64.zip ;\
-	   unzip -o j3d-1_5_2-linux-amd64/j3d-jre.zip -d `rospack find openhrp3`; \
+	   rosrun rosbuild download_checkmd5.py http://download.java.net/media/java3d/builds/release/1.5.2/$(J3D_FILE).zip build/$(J3D_FILE).zip ;\
+	   unzip -o build/$(J3D_FILE).zip -d build; \
+	   unzip -o build/$(J3D_FILE)/j3d-jre.zip -d `rospack find openhrp3`; \
 	fi
 
 java3declipse: build/java3declipse-20090302.zip
@@ -56,8 +62,8 @@ grxui: java3d /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
 	## sudo unzip -o $(HG_DIR)/GrxUIonEclipse-project-0.9.8/GrxUI3.1-RTM1.0.zip -d /usr/lib/eclipse/plugins/
 	#
 	# make
-	cp `rospack find openhrp3`/grxui_build.xml $(HG_DIR)/GrxUIonEclipse-project-0.9.8/grxui_build.xml
-	cp `rospack find openhrp3`/javaCompiler.grxui.jar.args $(HG_DIR)/GrxUIonEclipse-project-0.9.8/javaCompiler.grxui.jar.args
+	cp `rospack find openhrp3`/grxui_build_`uname -m`.xml $(HG_DIR)/GrxUIonEclipse-project-0.9.8/grxui_build.xml
+	cp `rospack find openhrp3`/javaCompiler.grxui_`uname -m`.jar.args $(HG_DIR)/GrxUIonEclipse-project-0.9.8/javaCompiler.grxui.jar.args
 	cd $(HG_DIR)/GrxUIonEclipse-project-0.9.8 && java -jar /usr/lib/eclipse/plugins/org.eclipse.equinox.launcher_1.0.201.R35x_v20090715.jar -application org.eclipse.ant.core.antRunner -buildfile grxui_build.xml -verbose clean build.update.jar
 	# copy
 	-sudo cp $(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar /usr/lib/eclipse/plugins/
