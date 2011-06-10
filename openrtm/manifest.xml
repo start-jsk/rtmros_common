@@ -10,6 +10,7 @@
   <url>http://ros.org/wiki/openrtm</url>
 
   <rosdep name="openrtm" />
+  <rosdep name="tix" />
 
 </package>
 

@@ -126,3 +126,7 @@ collada-dom:
 # for hrpsys
 # libncurses5-dev
 # libreadline5-dev
+
+# for openrtm-python-example
+tix:
+  ubuntu: tix
