@@ -12,6 +12,12 @@ check-java-version:
 	   sudo update-java-alternatives -s java-6-sun; \
 	fi
 
+check-hosts-ipv6:
+	@if [ "`lsb_release -cs`" = "lucid" -a "`grep ^::1 /etc/hosts`" ]; then \
+	   /bin/echo -e "\e[1;31mYou must comment out \\"::1  localhost\\" line from /etc/hosts\e[m"; \
+	   exit 1; \
+	fi
+
 # https://code.ros.org/trac/ros/ticket/3525
 patched2: $(HG_PATCH) Makefile
 	cd $(HG_DIR) && hg revert --all
@@ -21,7 +27,7 @@ ifneq ($(strip $(HG_PATCH)),)
 	touch patched2
 endif 
 
-installed: $(HG_DIR) patched2 check-java-version
+installed: $(HG_DIR) patched2 check-java-version check-hosts-ipv6
 	cd $(HG_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=/usr
 	cd $(HG_DIR) && make
 	cd $(HG_DIR) && make install
