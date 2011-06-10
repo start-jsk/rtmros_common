@@ -9,6 +9,6 @@ if __name__ == '__main__':
     if options.file is None:
         print 'please set file path'
     else:
-        sys.path.append(os.path.dirname(options.file))
-        execfile(options.file)
+        os.chdir(os.path.dirname(options.file))
+        execfile(os.path.basename(options.file))
 
