@@ -1,9 +1,8 @@
 <launch>
+  <node name="rtm-naming" pkg="openrtm" type="rtm-naming" output="screen" />
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="127.0.0.1" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
-  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
-  <arg name="openrtm_ext_args" value='$(arg openrtm_args) -o "exec_cxt.periodic.type: SynchExtTriggerEC"' />
   <!-- END:openrtm setting -->
   <node pkg="openrtm" name="$(anon file_launcher)" type="python_launcher.py"
 	args="--file=/usr/share/OpenRTM-aist/examples/python/TkJoyStick/TkJoyStickComp.py" />
