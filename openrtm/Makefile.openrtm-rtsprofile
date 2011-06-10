@@ -10,7 +10,7 @@ MD5SUM_FILE = $(FILENAME).md5sum
 include $(shell rospack find mk)/download_unpack_build.mk
 
 installed.rtsprofile: $(SOURCE_DIR)/unpacked
-	cd $(SOURCE_DIR) && echo "y" | python ./setup.py build && echo "y" | sudo python ./setup.py install
+	cd $(SOURCE_DIR) && echo "y" | python ./setup.py build && echo "y" | python ./setup.py install --prefix=$(INSTALL_DIR)
 	touch installed.rtsprofile
 
 clean:

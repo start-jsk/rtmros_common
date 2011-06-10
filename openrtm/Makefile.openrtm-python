@@ -10,7 +10,7 @@ MD5SUM_FILE = $(FILENAME).md5sum
 include $(shell rospack find mk)/download_unpack_build.mk
 
 installed.python: $(SOURCE_DIR)/unpacked
-	cd $(SOURCE_DIR) && python ./setup.py build && sudo python ./setup.py install
+	cd $(SOURCE_DIR) && python ./setup.py build && python ./setup.py install --prefix=$(INSTALL_DIR)
 	touch installed.python
 
 clean:

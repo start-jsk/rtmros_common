@@ -54,15 +54,18 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-#uncomment if you have defined messages
-#rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
 
-#common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
+###
+###
+include(FindPythonInterp)
+## check python
+find_package(PythonLibs) # using PYTHON_INCLUDE_PATH instead of PYTHON_INCLUDE_DIR
+
+execute_process(
+      COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; from os.path import relpath; print relpath(get_python_lib(1,prefix='${PROJECT_SOURCE_DIR}'))"
+      OUTPUT_VARIABLE OPENRTM_PYTHON_INSTALL_DIR OUTPUT_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE _python_failed2)
+
+execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/src)
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${OPENRTM_PYTHON_INSTALL_DIR} ${PROJECT_SOURCE_DIR}/src/openrtm RESULT_VARIABLE _symlink_failed)
+
