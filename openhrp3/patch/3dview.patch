@@ -1,0 +1,12 @@
+diff -r 3c7e7ad07c8d GrxUIonEclipse-project-0.9.8/src/com/generalrobotix/ui/view/Grx3DView.java
+--- a/GrxUIonEclipse-project-0.9.8/src/com/generalrobotix/ui/view/Grx3DView.java	Fri May 20 16:41:05 2011 +0900
++++ b/GrxUIonEclipse-project-0.9.8/src/com/generalrobotix/ui/view/Grx3DView.java	Fri Jun 03 14:56:48 2011 +0900
+@@ -1202,7 +1202,7 @@
+ 					int startPosition =0;
+ 					int endPosition = currentWorld_.getLogSize();  
+ 					double playRateLogTime_ = currentWorld_.getTime(startPosition);					
+-					for (int position=startPosition; position < endPosition; position++) {
++					for (int position=startPosition; position <= endPosition; position++) {
+ 						if(!btnRec_.isSelected())break;
+ 						double time = currentWorld_.getTime(position);
+ 						if (time >= playRateLogTime_) {
