@@ -18,11 +18,11 @@ rosbuild_init()
 # if (_make_failed)
 #   message(FATAL_ERROR "Build of OpenRTM C++ failed")
 # endif(_make_failed)
-execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} make -f Makefile.openrtm-python
-                RESULT_VARIABLE _make_failed)
-if (_make_failed)
-  message(FATAL_ERROR "Build of OpenRTM Python failed")
-endif(_make_failed)
+# execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} make -f Makefile.openrtm-python
+#                 RESULT_VARIABLE _make_failed)
+# if (_make_failed)
+#   message(FATAL_ERROR "Build of OpenRTM Python failed")
+# endif(_make_failed)
 #
 execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} make -f Makefile.openrtm-java
                 RESULT_VARIABLE _make_failed)
