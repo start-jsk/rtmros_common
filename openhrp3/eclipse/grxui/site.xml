@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/grxui_1.0.0.201106111845.jar" id="grxui" version="1.0.0.201106111845">
+      <category name="GeneralRobotix"/>
+   </feature>
+   <category-def name="GeneralRobotix" label="GRXUI"/>
+</site>

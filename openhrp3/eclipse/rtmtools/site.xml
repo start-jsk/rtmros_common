@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/jp.go.asit.rtm.rtmtools_1.0.0.201106111836.jar" id="jp.go.asit.rtm.rtmtools" version="1.0.0.201106111836">
+      <category name="AIST"/>
+   </feature>
+   <category-def name="AIST" label="OpenRTM">
+      <description>
+         The OMG has developed the Robot Technology Component (RTC) specification
+as a way to increase the efficiency of robot development. Based
+on this specification, AIST has developed the OpenRTM-aist. RT
+System Editor is one of the development tools included in this
+architecture. It is used for manipulating RT Components in a
+real-time graphical interface. It is a plugin for the Eclipse
+IDE, and interacts seamlessly with other Eclipse plugins.
+RTC Builder is a template generator tool for RT Components. It
+generates custom templates based on user-configured parameters.
+RTC Builder operates on top of Eclipse and interacts seamlessly
+and intuitively with other Eclipse plugins. Although RTC Builder
+can be used even if RT System Editor is not installed, if it
+is, RTC Builder&apos;s menus will be integrated with those of RT System
+Editor. This document is written assuming RT System Editor is
+installed.
+      </description>
+   </category-def>
+</site>

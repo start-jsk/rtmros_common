@@ -74,6 +74,20 @@ rtmtools: /usr/lib/eclipse/plugins/jp.go.aist.rtm.systemeditor_1.0.0.v20100521.j
 	rosrun rosbuild download_checkmd5.py http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/rtmtools100release_en.zip build/rtmtools100release_en.zip e1051282f79dd8a2618ad993e92063ce
 	-sudo unzip -o build/rtmtools100release_en.zip -d /usr/lib/eclipse/
 
+## plugin archives
+build/rtmtools100release_en.zip:
+	# download and unzip prtm tools
+	rosrun rosbuild download_checkmd5.py http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/rtmtools100release_en.zip build/rtmtools100release_en.zip e1051282f79dd8a2618ad993e92063ce
+
+build/rtmtools_eclipse.zip: build/rtmtools100release_en.zip eclipse/rtmtools
+	unzip -o build/rtmtools100release_en.zip -d ${CURDIR}/eclipse/rtmtools
+	-rm ${CURDIR}/build/rtmtools_eclipse.zip
+	cd ${CURDIR}/eclipse/rtmtools; zip ${CURDIR}/build/rtmtools_eclipse.zip -r ./
+
+build/grxui_eclipse.zip: build/rtmtools100release_en.zip eclipse/grxui
+	cp $(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar ${CURDIR}/eclipse/grxui/plugins
+	-rm ${CURDIR}/build/grxui_eclipse.zip
+	cd ${CURDIR}/eclipse/grxui; zip ${CURDIR}/build/grxui_eclipse.zip -r ./
 
 clean:
 	-rm -f installed patched patched2 
