@@ -86,12 +86,12 @@ plugin_archives: build/rtmtools_eclipse.zip build/grxui_eclipse.zip
 build/rtmtools_eclipse.zip: build/rtmtools100release_en.zip eclipse/rtmtools
 	unzip -o build/rtmtools100release_en.zip -d ${CURDIR}/eclipse/rtmtools
 	-rm ${CURDIR}/build/rtmtools_eclipse.zip
-	cd ${CURDIR}/eclipse/rtmtools; zip ${CURDIR}/build/rtmtools_eclipse.zip -r ./
+	cd ${CURDIR}/eclipse/rtmtools; zip -urq ${CURDIR}/build/rtmtools_eclipse.zip * -x '*/.svn/*'
 
 build/grxui_eclipse.zip: build/rtmtools100release_en.zip eclipse/grxui
 	cp $(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar ${CURDIR}/eclipse/grxui/plugins
 	-rm ${CURDIR}/build/grxui_eclipse.zip
-	cd ${CURDIR}/eclipse/grxui; zip ${CURDIR}/build/grxui_eclipse.zip -r ./
+	cd ${CURDIR}/eclipse/grxui; zip -urq  ${CURDIR}/build/grxui_eclipse.zip *  -x '*/.svn/*'
 
 clean:
 	-rm -f installed patched patched2 
