@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/RobotHardwareRTC_1.0.0.201106130144.jar" id="RobotHardwareRTC" version="1.0.0.201106130144"/>
+   <category-def name="AIST" label="RobotHardwareRTC"/>
+</site>
