@@ -1,4 +1,4 @@
-all: installed
+all: installed build/robothardware_eclipse.zip
 
 INSTALL_DIR=`rospack find hrpsys`
 SVN_DIR = build/hrpsys-bsae
@@ -14,6 +14,16 @@ installed: $(SVN_DIR)
 	# copy idl
 	mkdir -p $(CURDIR)/idl && cp $(CURDIR)/share/hrpsys/idl/* ./idl/
 	touch installed
+
+
+build/robothardware_eclipse.zip: build/hrpsys-bsae/plugin/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0.jar
+	cp build/hrpsys-bsae/plugin/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0.jar ${CURDIR}/eclipse/robothardware/plugins
+	-rm ${CURDIR}/build/robothardware_eclipse.zip
+	cd ${CURDIR}/eclipse/robothardware; zip -urq ${CURDIR}/build/robothardware_eclipse.zip *  -x '*/.svn/*'
+ 
+build/hrpsys-bsae/plugin/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0.jar:
+	cp rh_build.xml javaCompiler.rh.jar.args $(SVN_DIR)/plugin/
+	cd $(SVN_DIR)/plugin/ && java -jar /usr/lib/eclipse/plugins/org.eclipse.equinox.launcher_1.0.201.R35x_v20090715.jar -application org.eclipse.ant.core.antRunner -buildfile rh_build.xml -verbose clean build.update.jar
 
 clean:
 	-rm -f installed
