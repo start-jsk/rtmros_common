@@ -1,0 +1,16 @@
+<package>
+  <description brief="hrpsys">
+
+    Basic RT components and utilities to control robots using OpenRTM
+
+  </description>
+  <author>AIST, ROS package is maintained by Kei Okada</author>
+  <license>EPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hrpsys</url>
+
+  <depend package="openhrp3"/>
+
+</package>
+
+
