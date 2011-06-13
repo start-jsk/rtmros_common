@@ -1,0 +1,20 @@
+<launch>
+  <node name="rtm-naming" pkg="openrtm" type="rtm-naming" output="screen" />
+  <!-- BEGIN:openrtm setting -->
+  <arg name="nameserver" default="127.0.0.1" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
+  <!-- END:openrtm setting -->
+  <node pkg="openrtm" name="$(anon file_launcher)" type="python_launcher.py"
+	args="--file=/usr/share/OpenRTM-aist/examples/python/SeqI0/SeqIn.py"
+	launch-prefix="xterm -e"/>
+  <node pkg="openrtm" name="$(anon file_launcher)" type="python_launcher.py"
+	args="--file=/usr/share/OpenRTM-aist/examples/python/SeqI0/SeqOut.py"
+	launch-prefix="xterm -e"/>
+  <!-- BEGIN:openrtm connection -->
+  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find openrtm)/launch/Seq_Example.launch" output = "screen"/>
+  <rtconnect from="SequenceOutComponent0.Octet"
+	     to="SequenceInComponent0.Octet" />
+
+  <rtactivate component="SequenceOutComponent0.rtc" />
+  <rtactivate component="SequenceInComponent0.rtc" />
+</launch>
