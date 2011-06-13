@@ -54,7 +54,7 @@ lib/ext/j3dcore.jar:
 
 java3declipse: build/java3declipse-20090302.zip
 build/java3declipse-20090302.zip:
-	rosrun rosbuild download_checkmd5.py  http://downloads.sourceforge.net/project/java3d-eclipse/java3declipse%20plugin/20090302/java3declipse-20090302.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fjava3d-eclipse%2Ffiles%2F&ts=1307109053&use_mirror=jaist $@ 764854845817a5aee403420e1a1a3f86
+	rosrun rosbuild download_checkmd5.py  "http://downloads.sourceforge.net/project/java3d-eclipse/java3declipse%20plugin/20090302/java3declipse-20090302.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fjava3d-eclipse%2Ffiles%2F&ts=1307109053&use_mirror=jaist" $@ 764854845817a5aee403420e1a1a3f86
 
 # grxui	
 grxui: java3d /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
@@ -93,7 +93,7 @@ build/grxui_eclipse.zip: build/rtmtools100release_en.zip eclipse/grxui
 	cp `rospack find openhrp3`/javaCompiler.grxui_`uname -m`.jar.args $(HG_DIR)/GrxUIonEclipse-project-0.9.8/javaCompiler.grxui.jar.args
 	cd $(HG_DIR)/GrxUIonEclipse-project-0.9.8 && java -jar /usr/lib/eclipse/plugins/org.eclipse.equinox.launcher_1.0.201.R35x_v20090715.jar -application org.eclipse.ant.core.antRunner -buildfile grxui_build.xml -verbose clean build.update.jar
 	cp $(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar ${CURDIR}/eclipse/grxui/plugins
-	-rm ${CURDIR}/build/grxui_eclipse.zip
+	-rm -f ${CURDIR}/build/grxui_eclipse.zip
 	cd ${CURDIR}/eclipse/grxui; zip -urq  ${CURDIR}/build/grxui_eclipse.zip *  -x '*/.svn/*'
 
 clean:
