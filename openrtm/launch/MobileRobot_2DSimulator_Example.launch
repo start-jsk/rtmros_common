@@ -9,7 +9,7 @@
   <node pkg="openrtm" name="$(anon file_launcher)" type="python_launcher.py"
 	args="--file=/usr/share/OpenRTM-aist/examples/python/MobileRobotCanvas/TkMobileRobotSimulator.py" />
   <!-- BEGIN:openrtm connection -->
-  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find openrtm)/launch/RTM_2DSimulator_Example.launch" output = "screen"/>
+  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find openrtm)/launch/MobileRobot_2DSimulator_Example.launch" output = "screen"/>
   <rtconnect from="TkJoyStick0.rtc:pos" to="TkMobileRobotSimulator0.rtc:vel" />
   <rtactivate component="TkJoyStick0.rtc" />
   <rtactivate component="TkMobileRobotSimulator0.rtc" />
