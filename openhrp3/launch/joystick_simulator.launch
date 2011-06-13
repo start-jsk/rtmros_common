@@ -4,6 +4,7 @@
       - http://www.openrtp.jp/openhrp3/jp/joystick_sample.html#plugin
       - http://www.openrtp.jp/openhrp3/jp/joystick_sample.html#view
   -->
+  <node name="rtm-naming" pkg="openrtm" type="rtm-naming" output="screen" />
   <arg name="nameserver" default="127.0.0.1" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type: SynchExtTriggerEC" -o "logger.file_name:/tmp/rtc%p.log"' />

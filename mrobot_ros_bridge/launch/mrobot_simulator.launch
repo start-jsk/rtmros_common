@@ -1,4 +1,5 @@
 <launch>
+  <node name="rtm-naming" pkg="openrtm" type="rtm-naming" output="screen" />
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
