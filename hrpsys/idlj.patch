@@ -11,3 +11,20 @@ Index: ec/hrpEC/CMakeLists.txt
      COMMAND ${JAVAC} ${javac_flags} src/${package_path}/*.java
      COMMAND ${JAR} cf ${jarfile} -C ${CMAKE_CURRENT_BINARY_DIR} ${package_path}
      COMMAND cp -f ${jarfile} ${PROJECT_SOURCE_DIR}/plugin
+Index: jython/CMakeLists.txt
+===================================================================
+--- jython/CMakeLists.txt	(revision 9)
++++ jython/CMakeLists.txt	(working copy)
+@@ -5,9 +5,9 @@
+ 
+ add_custom_command(
+   OUTPUT ${jarfile}
+-  COMMAND ${IDLJ} ${idlj_flags} -I. -I${OPENRTM_DIR}/include/rtm/idl ${OPENRTM_DIR}/include/rtm/idl/Manager.idl
+-  COMMAND ${IDLJ} ${idlj_flags} -I. -I${OPENRTM_DIR}/include/rtm/idl ${OPENRTM_DIR}/include/rtm/idl/OpenRTM.idl
+-  COMMAND ${IDLJ} ${idlj_flags} -I. -I${OPENRTM_DIR}/include/rtm/idl ${OPENRTM_DIR}/include/rtm/idl/DataPort.idl
++  COMMAND ${IDLJ} ${idlj_flags} -I. -I${CMAKE_CURRENT_BINARY_DIR}/../idl/ -I${OPENRTM_DIR}/include/rtm/idl ${OPENRTM_DIR}/include/rtm/idl/Manager.idl
++  COMMAND ${IDLJ} ${idlj_flags} -I. -I${CMAKE_CURRENT_BINARY_DIR}/../idl/ -I${OPENRTM_DIR}/include/rtm/idl ${OPENRTM_DIR}/include/rtm/idl/OpenRTM.idl
++  COMMAND ${IDLJ} ${idlj_flags} -I. -I${CMAKE_CURRENT_BINARY_DIR}/../idl/ -I${OPENRTM_DIR}/include/rtm/idl ${OPENRTM_DIR}/include/rtm/idl/DataPort.idl
+   COMMAND ${JAVAC} ${javac_flags} src/*/*.java
+   COMMAND ${JAR} cf ${jarfile} OpenRTM RTC RTM _SDOPackage
+ )

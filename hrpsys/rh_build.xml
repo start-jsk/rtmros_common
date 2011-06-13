@@ -75,7 +75,18 @@
 		<delete dir="${temp.folder}/robothardwareserviceclient.jar.bin"/>
 		<mkdir dir="${temp.folder}/robothardwareserviceclient.jar.bin"/>
 		<path id="robothardwareserviceclient.jar.classpath">
-			<pathelement path="../../../../../../../../.eclipse/org.eclipse.platform_3.5.0_155965261/plugins/com.generalrobotix.ui.grxui_0.9.8.jar"/>
+			<pathelement path="../../../../openhrp3/build/openhrp-aist-grx/GrxUIonEclipse-project-0.9.8/bin"/>
+			<pathelement path="../../../../openhrp3/build/openhrp-aist-grx/GrxUIonEclipse-project-0.9.8/@dot"/>
+			<pathelement path="../../../../openhrp3/build/openhrp-aist-grx/GrxUIonEclipse-project-0.9.8/jython.jar"/>
+			<pathelement path="../../../../openhrp3/build/openhrp-aist-grx/GrxUIonEclipse-project-0.9.8/OpenRTM-aist-1.0.0.jar"/>
+			<pathelement path="../../../../openhrp3/build/openhrp-aist-grx/GrxUIonEclipse-project-0.9.8/openhrpstubskel.jar"/>
+			<pathelement path="../../../../openhrp3/build/openhrp-aist-grx/GrxUIonEclipse-project-0.9.8/commons-cli-1.1.jar"/>
+			<pathelement path="../../../../openhrp3/build/openhrp-aist-grx/GrxUIonEclipse-project-0.9.8/bin/"/>
+			<pathelement path="../../../../openhrp3/build/openhrp-aist-grx/GrxUIonEclipse-project-0.9.8/grxui.jar"/>
+			<pathelement path="../../../../openhrp3/build/openhrp-aist-grx/GrxUIonEclipse-project-0.9.8/jmf-2_1_1e-alljava/JMF-2.1.1e/lib/customizer.jar"/>
+			<pathelement path="../../../../openhrp3/build/openhrp-aist-grx/GrxUIonEclipse-project-0.9.8/jmf-2_1_1e-alljava/JMF-2.1.1e/lib/jmf.jar"/>
+			<pathelement path="../../../../openhrp3/build/openhrp-aist-grx/GrxUIonEclipse-project-0.9.8/jmf-2_1_1e-alljava/JMF-2.1.1e/lib/mediaplayer.jar"/>
+			<pathelement path="../../../../openhrp3/build/openhrp-aist-grx/GrxUIonEclipse-project-0.9.8/jmf-2_1_1e-alljava/JMF-2.1.1e/lib/multiplayer.jar"/>
 			<pathelement path="../../../../../../../../../../usr/lib/eclipse/plugins/org.eclipse.ui_3.5.2.M20100120-0800.jar"/>
 			<pathelement path="../../../../../../../../../../usr/lib/eclipse/plugins/org.eclipse.core.runtime_3.5.0.v20090525.jar"/>
 			<pathelement path="../../../../../../../../../../usr/lib/eclipse/plugins/org.eclipse.osgi_3.5.2.R35x_v20100126.jar"/>
@@ -129,7 +140,7 @@
 			<compilerarg line="${compilerArg}" compiler="${build.compiler}"/>
 			<classpath refid="robothardwareserviceclient.jar.classpath" />
 			<src path="src/"			/>
-			<compilerarg value="@${basedir}/javaCompiler.rh.jar.args" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+			<compilerarg value="@${basedir}/javaCompiler.robothardwareserviceclient.jar.args" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/>
 			<compilerarg line="-log '${temp.folder}/robothardwareserviceclient.jar.bin${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/>
 		</javac>
 		<antcall target="checkCompilationResults"/>
@@ -191,7 +202,7 @@
 		<antcall target="apitools.generation">
 			<param name="target.folder" value="${build.result.folder}"/>
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="${build.result.folder}/robothardwareserviceclient.jar:/home/k-okada/ros/diamondback/rtm-ros-robotics/rtmros_common/hrpsys/build/hrpsys-bsae/plugin/StateHolderService.jar:/home/k-okada/ros/diamondback/rtm-ros-robotics/rtmros_common/hrpsys/build/hrpsys-bsae/plugin/RobotHardwareService.jar"/>
+			<param name="binary.folders" value="${build.result.folder}/robothardwareserviceclient.jar:/home/k-okada/ros/diamondback/rtm-ros-robotics/rtmros_common/hrpsys/build/hrpsys-base/plugin/StateHolderService.jar:/home/k-okada/ros/diamondback/rtm-ros-robotics/rtmros_common/hrpsys/build/hrpsys-base/plugin/RobotHardwareService.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 		</antcall>
 		<eclipse.gatherBundle 
@@ -221,7 +232,7 @@
 		<antcall target="apitools.generation">
 			<param name="target.folder" value="${destination.temp.folder}/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0"/>
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="${destination.temp.folder}/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0/robothardwareserviceclient.jar:/home/k-okada/ros/diamondback/rtm-ros-robotics/rtmros_common/hrpsys/build/hrpsys-bsae/plugin/StateHolderService.jar:/home/k-okada/ros/diamondback/rtm-ros-robotics/rtmros_common/hrpsys/build/hrpsys-bsae/plugin/RobotHardwareService.jar"/>
+			<param name="binary.folders" value="${destination.temp.folder}/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0/robothardwareserviceclient.jar:/home/k-okada/ros/diamondback/rtm-ros-robotics/rtmros_common/hrpsys/build/hrpsys-base/plugin/StateHolderService.jar:/home/k-okada/ros/diamondback/rtm-ros-robotics/rtmros_common/hrpsys/build/hrpsys-base/plugin/RobotHardwareService.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 		</antcall>
 	</target>
@@ -268,7 +279,7 @@
 	</target>
 
 	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
-		<eclipse.convertPath fileSystemPath="/home/k-okada/ros/diamondback/rtm-ros-robotics/rtmros_common/hrpsys/build/hrpsys-bsae/plugin" property="resourcePath"/>
+		<eclipse.convertPath fileSystemPath="/home/k-okada/ros/diamondback/rtm-ros-robotics/rtmros_common/hrpsys/build/hrpsys-base/plugin" property="resourcePath"/>
 		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
 	</target>
 
