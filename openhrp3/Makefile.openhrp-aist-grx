@@ -29,7 +29,7 @@ endif
 
 installed: $(HG_DIR) patched2 check-java-version check-hosts-ipv6
 	cd $(HG_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=/usr
-	cd $(HG_DIR) && make
+	cd $(HG_DIR) && make $(ROS_PARALLEL_JOBS)
 	cd $(HG_DIR) && make install
 	#
 	# copy idl

@@ -11,7 +11,7 @@ clean:
 eclipse-clean:
 	-sudo rm /usr/lib/eclipse/plugins/com.generalrobotix.*
 	-sudo rm /usr/lib/eclipse/plugins/jp.go.aist.rtm.*
-	rm -fr ~/workspace `rospack find openhrp3`/workspace ~/.eclipse
+	-rm -fr ~/workspace `rospack find openhrp3`/workspace ~/.eclipse
 
 
 
