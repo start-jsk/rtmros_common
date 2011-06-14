@@ -2,6 +2,15 @@ Index: sample/HRP-4C/HRP-4C.xml
 ===================================================================
 --- sample/HRP-4C/HRP-4C.xml	(revision 16)
 +++ sample/HRP-4C/HRP-4C.xml	(working copy)
+@@ -4,7 +4,7 @@
+         <item class="com.generalrobotix.ui.item.GrxSimulationItem" name="simulationItem" select="true">
+             <property name="integrate" value="true"/>
+             <property name="viewsimulate" value="false"/>
+-            <property name="totalTime" value="15.0 "/>
++            <property name="totalTime" value="15000.0 "/>
+             <property name="timeStep" value="0.0050 "/>
+             <property name="realTime" value="false"/>
+             <property name="gravity" value="9.8 "/>
 @@ -209,7 +209,7 @@
              <property name="showCoMonFloor" value="false"/>
              <property name="showDistance" value="false"/>
