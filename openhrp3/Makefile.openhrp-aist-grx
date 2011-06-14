@@ -1,9 +1,9 @@
-all: installed java3d grxui rtmtools plugin_archives
+all: installed java3d plugin_archives
 
 INSTALL_DIR=`rospack find openhrp3`
 HG_DIR = build/openhrp-aist-grx
 HG_URL = https://openhrp-aist-grx.googlecode.com/hg/
-HG_PATCH = patch/modelitem.patch  patch/controller.patch
+HG_PATCH = patch/modelitem.patch  patch/controller.patch patch/colladawriter.patch
 include $(shell rospack find mk)/hg_checkout.mk
 
 check-java-version:
@@ -56,32 +56,13 @@ java3declipse: build/java3declipse-20090302.zip
 build/java3declipse-20090302.zip:
 	rosrun rosbuild download_checkmd5.py  "http://downloads.sourceforge.net/project/java3d-eclipse/java3declipse%20plugin/20090302/java3declipse-20090302.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fjava3d-eclipse%2Ffiles%2F&ts=1307109053&use_mirror=jaist" $@ 764854845817a5aee403420e1a1a3f86
 
-# grxui	
-grxui: java3d /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
-/usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar:
-	### unzip grxui jar file
-	## sudo unzip -o $(HG_DIR)/GrxUIonEclipse-project-0.9.8/GrxUI3.1-RTM1.0.zip -d /usr/lib/eclipse/plugins/
-	#
-	# make
-	cp `rospack find openhrp3`/grxui_build_`uname -m`.xml $(HG_DIR)/GrxUIonEclipse-project-0.9.8/grxui_build.xml
-	cp `rospack find openhrp3`/javaCompiler.grxui_`uname -m`.jar.args $(HG_DIR)/GrxUIonEclipse-project-0.9.8/javaCompiler.grxui.jar.args
-	cd $(HG_DIR)/GrxUIonEclipse-project-0.9.8 && java -jar /usr/lib/eclipse/plugins/org.eclipse.equinox.launcher_1.0.201.R35x_v20090715.jar -application org.eclipse.ant.core.antRunner -buildfile grxui_build.xml -verbose clean build.update.jar
-	# copy
-	-sudo cp $(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar /usr/lib/eclipse/plugins/
+## plugin archives
+plugin_archives: build/rtmtools_eclipse.zip build/grxui_eclipse.zip build/java3declipse-20090302.zip
 
 ## rtm tools
 build/rtmtools100release_en.zip:
 	# download and unzip prtm tools
 	rosrun rosbuild download_checkmd5.py http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/rtmtools100release_en.zip build/rtmtools100release_en.zip e1051282f79dd8a2618ad993e92063ce
-
-rtmtools: /usr/lib/eclipse/plugins/jp.go.aist.rtm.systemeditor_1.0.0.v20100521.jar 
-/usr/lib/eclipse/plugins/jp.go.aist.rtm.systemeditor_1.0.0.v20100521.jar: build/rtmtools100release_en.zip
-	# download and unzip rtm tools
-	-sudo unzip -o build/rtmtools100release_en.zip -d /usr/lib/eclipse/
-	-sudo touch $@
-
-## plugin archives
-plugin_archives: build/rtmtools_eclipse.zip build/grxui_eclipse.zip build/java3declipse-20090302.zip
 
 build/rtmtools_eclipse.zip: build/rtmtools100release_en.zip eclipse/rtmtools
 	unzip -o build/rtmtools100release_en.zip -d ${CURDIR}/eclipse/rtmtools
