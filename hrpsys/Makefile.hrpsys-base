@@ -4,7 +4,7 @@ all: installed  /usr/lib/eclipse/plugins/com.generalrobotix.ui.view.GrxRobotHard
 INSTALL_DIR=`rospack find hrpsys`
 SVN_DIR = build/hrpsys-base
 SVN_URL = http://hrpsys-base.googlecode.com/svn/trunk/
-SVN_PATCH = tvmet.patch idlj.patch
+SVN_PATCH = tvmet.patch idlj.patch rpath.patch hrpsysin.path hrp4cxml.patch
 
 include $(shell rospack find mk)/svn_checkout.mk
 
