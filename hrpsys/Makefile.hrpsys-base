@@ -1,5 +1,4 @@
-all: installed  /usr/lib/eclipse/plugins/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0.jar
-#  build/robothardware_eclipse.zip
+all: installed build/robothardware_eclipse.zip
 
 INSTALL_DIR=`rospack find hrpsys`
 SVN_DIR = build/hrpsys-base
@@ -17,9 +16,6 @@ installed: $(SVN_DIR)
 	# copy idl
 	mkdir -p $(CURDIR)/idl && cp $(CURDIR)/share/hrpsys/idl/* ./idl/
 	touch installed
-
-/usr/lib/eclipse/plugins/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0.jar: build/hrpsys-base/plugin/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0.jar
-	-sudo cp build/hrpsys-base/plugin/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0.jar /usr/lib/eclipse/plugins/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0.jar
 
 build/robothardware_eclipse.zip: build/hrpsys-base/plugin/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0.jar
 	cp build/hrpsys-base/plugin/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0.jar ${CURDIR}/eclipse/robothardware/plugins
