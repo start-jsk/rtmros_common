@@ -1,9 +1,13 @@
 <launch>
+  <env name="LANG" value="C" />
   <node name="rtm_naming" pkg="openrtm" type="rtm-naming" output="screen" />
   <node pkg="openhrp3" name="grxui" type="grxui.sh"
 	args="$(find hrpsys)/share/hrpsys/samples/PA10/PA10.xml"/>
-  <node pkg="hrpsys"   name="hrpsys" type="hrpsys.sh" output="screen"
-	launch-prefix="xterm -e" />
+  <node pkg="hrpsys"   name="hrpsys" type="launch_hrpsys.sh" output="screen"
+	launch-prefix="xterm -e" respawn="true">
+    <env name="RTC_CONF_DIR" value="$(find hrpsys)/share/hrpsys/samples/PA10/" />
+    <env name="RTC_CONF_FILE" value="rtc.conf.robot" />
+  </node>
   <node pkg="hrpsys"  name="hrpsyspy" type="hrpsyspy"
 	args="$(find hrpsys)/share/hrpsys/samples/PA10/PA10.py"
 	output="screen"
