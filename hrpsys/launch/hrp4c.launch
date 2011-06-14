@@ -2,23 +2,7 @@
   <env name="LANG" value="C" />
   <node name="rtm_naming" pkg="openrtm" type="rtm-naming" output="screen" />
 
+  <env name="PATH" value="$(find openhrp3)/bin:$(env PATH)" />
   <node pkg="openhrp3" name="grxui" type="grxui.sh"
 	args="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.xml"/>
-  <node pkg="hrpsys"   name="hrpsys" type="launch_hrpsys.sh" output="screen"
-	launch-prefix="xterm -e" >
-    <env name="RTC_CONF_DIR" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/" />
-    <env name="RTC_CONF_FILE" value="rtc.conf" />
-  </node>
-  <node pkg="hrpsys"  name="hrpsyspy" type="hrpsyspy"
-	args="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.py"
-	output="screen"
-	launch-prefix="xterm -e" />
-  <node name = "openhrp_controller_bridge"
-        pkg  = "hrpsys"
-        type = "HRP-4C.sh"
-        output = "screen"
-	launch-prefix="xterm -e" >
-    <env name="PATH" value="$(find openhrp3)/bin:/usr/bin" />
-    <env name="LD_LIBRARY_PATH" value="$(find openhrp3)/lib" />
-  </node>
 </launch>
