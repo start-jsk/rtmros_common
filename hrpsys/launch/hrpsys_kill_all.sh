@@ -1,5 +1,5 @@
 #!/bin/sh
 
-pkill -KILL openhrp-controller-bridge
+pkill -KILL openhrp-
 pkill -KILL rtcd
 exit 0
