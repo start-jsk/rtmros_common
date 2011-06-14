@@ -90,9 +90,7 @@ RTC::ReturnCode_t HrpsysStatePublisher::onInitialize()
   std::cerr << "nameserver " << nameServer.c_str() << std::endl;
   RTC::CorbaNaming naming(m_pManager->getORB(), nameServer.c_str());
   CosNaming::NamingContext::_duplicate(naming.getRootContext());
-  //std::string modelfile = prop["model"].c_str();
-  std::string modelfile = "/opt/grx/HRP2JSK/model/HRP2JSKmain.wrl";
-  //std::string modelfile = "/opt/grx/HIRONX/model/main.wrl",
+  std::string modelfile =  m_pManager->getConfig ()["model"];
   try  {
     std::cerr << "Loading " << modelfile << std::endl;
     loadBodyFromModelLoader (body,
@@ -144,7 +142,8 @@ RTC::ReturnCode_t HrpsysStatePublisher::onDeactivated(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t HrpsysStatePublisher::onExecute(RTC::UniqueId ec_id)
 {
-  std::cerr << "@Execute name : " << getInstanceName() << std::endl;
+  static int skip = 0;
+  //std::cerr << "@Execute name : " << getInstanceName() << std::endl;
   // m_in_rsangleIn
   if ( m_in_rsangleIn.isNew () ) {
     try {
@@ -160,7 +159,6 @@ RTC::ReturnCode_t HrpsysStatePublisher::onExecute(RTC::UniqueId ec_id)
     m_in_rsangleIn.read();
 
     body->calcForwardKinematics();
-    std::cerr << body->name() << std::endl;
     if ( m_in_rsangle.data.length() != body->joints().size() ) {
       std::cerr << "rsangle.data.length(" << m_in_rsangle.data.length() << ") is not equal to body->joints().size(" << body->joints().size() << ")" << std::endl;
       return RTC::RTC_OK;
@@ -169,21 +167,24 @@ RTC::ReturnCode_t HrpsysStatePublisher::onExecute(RTC::UniqueId ec_id)
 
     for ( unsigned int i = 0; i < m_in_rsangle.data.length() ; i++ ){
       body->joint(i)->q = m_in_rsangle.data[i];
-      std::cerr << m_in_rsangle.data[i] << " ";
+      ROS_DEBUG_STREAM(m_in_rsangle.data[i] << " ");
     }
-    std::cerr << std::endl;
+    ROS_DEBUG_STREAM(std::endl);
     std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
     while ( it != body->joints().end() ) {
       hrp::Link* j = ((hrp::Link*)*it);
-      std::cout << j->name << " - " << j->q << std::endl;
+      ROS_DEBUG_STREAM(j->name << " - " << j->q);
       joint_state.name.push_back(j->name);
       joint_state.position.push_back(j->q);
       //joint_state.velocity
       //joint_state.effort
       ++it;
     }
-    joint_state_pub.publish(joint_state);
-    ros::spinOnce();
+    if ( ++skip > 40 ) { // hrpsys runs every 0.005 msec, rviz assumes 50hz(20sec)
+      joint_state_pub.publish(joint_state);
+      ros::spinOnce();
+      skip = 0;
+    }
   }
   return RTC::RTC_OK;
 }
