@@ -1,11 +1,11 @@
 // -*- C++ -*-
 /*!
- * @file  HrprtcStatePublisher.h * @brief HrprtcState component * @date  $Date$ 
+ * @file  HrpsysStatePublisher.h * @brief HrpsysState component * @date  $Date$ 
  *
  * $Id$ 
  */
-#ifndef HRPRTCSTATEPUBLISHER_H
-#define HRPRTCSTATEPUBLISHER_H
+#ifndef HRPSYSSTATEPUBLISHER_H
+#define HRPSYSSTATEPUBLISHER_H
 
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/Manager.h>
@@ -37,11 +37,11 @@
 
 using namespace RTC;
 
-class HrprtcStatePublisher  : public RTC::DataFlowComponentBase
+class HrpsysStatePublisher  : public RTC::DataFlowComponentBase
 {
  public:
-  HrprtcStatePublisher(RTC::Manager* manager);
-  ~HrprtcStatePublisher();
+  HrpsysStatePublisher(RTC::Manager* manager);
+  ~HrpsysStatePublisher();
 
   // The initialize action (on CREATED->ALIVE transition)
   // formaer rtc_init_entry() 
@@ -150,8 +150,8 @@ class HrprtcStatePublisher  : public RTC::DataFlowComponentBase
 
 extern "C"
 {
-  DLL_EXPORT void HrprtcStatePublisherInit(RTC::Manager* manager);
+  DLL_EXPORT void HrpsysStatePublisherInit(RTC::Manager* manager);
 };
 
-#endif // HRPRTCSTATEPUBLISHER_H
+#endif // HRPSYSSTATEPUBLISHER_H
 

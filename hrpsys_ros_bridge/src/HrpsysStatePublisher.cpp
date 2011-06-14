@@ -1,18 +1,18 @@
 // -*- C++ -*-
 /*!
- * @file  HrprtcStatePublisher.cpp * @brief HrprtcState component * $Date$ 
+ * @file  HrpsysStatePublisher.cpp * @brief HrpsysState component * $Date$ 
  *
  * $Id$ 
  */
-#include "HrprtcStatePublisher.h"
+#include "HrpsysStatePublisher.h"
 
 // Module specification
 // <rtc-template block="module_spec">
-static const char* hrprtcstatepublisher_spec[] =
+static const char* hrpsysstatepublisher_spec[] =
   {
-    "implementation_id", "HrprtcStatePublisher",
-    "type_name",         "HrprtcStatePublisher",
-    "description",       "HrprtcState component",
+    "implementation_id", "HrpsysStatePublisher",
+    "type_name",         "HrpsysStatePublisher",
+    "description",       "HrpsysState component",
     "version",           "0.1",
     "vendor",            "JSK",
     "category",          "Generic",
@@ -26,7 +26,7 @@ static const char* hrprtcstatepublisher_spec[] =
   };
 // </rtc-template>
 
-HrprtcStatePublisher::HrprtcStatePublisher(RTC::Manager* manager)
+HrpsysStatePublisher::HrpsysStatePublisher(RTC::Manager* manager)
     // <rtc-template block="initializer">
   : RTC::DataFlowComponentBase(manager),
     m_in_rsangleIn("in_rsangle", m_in_rsangle),
@@ -41,12 +41,12 @@ HrprtcStatePublisher::HrprtcStatePublisher(RTC::Manager* manager)
 {
 }
 
-HrprtcStatePublisher::~HrprtcStatePublisher()
+HrpsysStatePublisher::~HrpsysStatePublisher()
 {
 }
 
 
-RTC::ReturnCode_t HrprtcStatePublisher::onInitialize()
+RTC::ReturnCode_t HrpsysStatePublisher::onInitialize()
 {
   std::cerr << "@Initilize name : " << getInstanceName() << std::endl;
   joint_state_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
@@ -112,37 +112,37 @@ RTC::ReturnCode_t HrprtcStatePublisher::onInitialize()
 
 
 /*
-RTC::ReturnCode_t HrprtcStatePublisher::onFinalize()
+RTC::ReturnCode_t HrpsysStatePublisher::onFinalize()
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HrprtcStatePublisher::onStartup(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HrpsysStatePublisher::onStartup(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HrprtcStatePublisher::onShutdown(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HrpsysStatePublisher::onShutdown(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HrprtcStatePublisher::onActivated(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HrpsysStatePublisher::onActivated(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HrprtcStatePublisher::onDeactivated(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HrpsysStatePublisher::onDeactivated(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 
-RTC::ReturnCode_t HrprtcStatePublisher::onExecute(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HrpsysStatePublisher::onExecute(RTC::UniqueId ec_id)
 {
   std::cerr << "@Execute name : " << getInstanceName() << std::endl;
   // m_in_rsangleIn
@@ -189,31 +189,31 @@ RTC::ReturnCode_t HrprtcStatePublisher::onExecute(RTC::UniqueId ec_id)
 }
 
 /*
-RTC::ReturnCode_t HrprtcStatePublisher::onAborting(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HrpsysStatePublisher::onAborting(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HrprtcStatePublisher::onError(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HrpsysStatePublisher::onError(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HrprtcStatePublisher::onReset(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HrpsysStatePublisher::onReset(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HrprtcStatePublisher::onStateUpdate(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HrpsysStatePublisher::onStateUpdate(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HrprtcStatePublisher::onRateChanged(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HrpsysStatePublisher::onRateChanged(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
@@ -223,12 +223,12 @@ RTC::ReturnCode_t HrprtcStatePublisher::onRateChanged(RTC::UniqueId ec_id)
 extern "C"
 {
  
-  void HrprtcStatePublisherInit(RTC::Manager* manager)
+  void HrpsysStatePublisherInit(RTC::Manager* manager)
   {
-    coil::Properties profile(hrprtcstatepublisher_spec);
+    coil::Properties profile(hrpsysstatepublisher_spec);
     manager->registerFactory(profile,
-                             RTC::Create<HrprtcStatePublisher>,
-                             RTC::Delete<HrprtcStatePublisher>);
+                             RTC::Create<HrpsysStatePublisher>,
+                             RTC::Delete<HrpsysStatePublisher>);
   }
   
 };

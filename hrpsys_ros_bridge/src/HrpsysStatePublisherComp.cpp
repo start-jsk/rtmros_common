@@ -1,6 +1,6 @@
 // -*- C++ -*-
 /*!
- * @file HrprtcStatePublisherComp.cpp
+ * @file HrpsysStatePublisherComp.cpp
  * @brief Standalone component
  * @date $Date$ 
  *
@@ -11,7 +11,7 @@
 #include <rtm/Manager.h>
 #include <iostream>
 #include <string>
-#include "HrprtcStatePublisher.h"
+#include "HrpsysStatePublisher.h"
 
 PortService_var getPort(RTC::RTObject_var rtobj, const char *port_name) {
   // find name comp::get_ports :key #'(lambda (x) (send x :name))
@@ -111,11 +111,11 @@ void ConnectPorts(RTC::PortService_var pout, RTC::PortService_var pin)
 
 void MyModuleInit(RTC::Manager* manager)
 {
-  HrprtcStatePublisherInit(manager);
+  HrpsysStatePublisherInit(manager);
   RTC::RtcBase* comp;
 
   // Create a component
-  comp = manager->createComponent("HrprtcStatePublisher");
+  comp = manager->createComponent("HrpsysStatePublisher");
 
   //
   RTC::ComponentProfile_var prof;
@@ -253,7 +253,7 @@ int main (int argc, char** argv)
 {
   RTC::Manager* manager;
   manager = RTC::Manager::init(argc, argv);
-  ros::init(argc, argv, "hrprtc_state_publisher", ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, "hrpsys_state_publisher", ros::init_options::NoSigintHandler);
 
   // Initialize manager
   manager->init(argc, argv);
