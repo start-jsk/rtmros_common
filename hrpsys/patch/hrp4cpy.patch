@@ -1,0 +1,35 @@
+Index: sample/HRP-4C/HRP4C.py
+===================================================================
+--- sample/HRP-4C/HRP4C.py	(revision 19)
++++ sample/HRP-4C/HRP4C.py	(working copy)
+@@ -8,13 +8,15 @@
+     #
+     connectPorts(seq.port("qRef"), hgc.port("qIn"))
+     #
++    connectPorts(bridge.port("q"), sh.port("qIn"))
+ 
+ def activateComps():
+-    rtm.serializeComponents([bridge, seq])
++    rtm.serializeComponents([bridge, seq, sh])
+     seq.start()
++    sh.start()
+ 
+ def createComps():
+-    global bridge, seq, seq_svc, hgc
++    global bridge, seq, seq_svc, sh, sh_svc, hgc
+ 
+     bridge = findRTC("HRP-4C(Robot)0")
+ 
+@@ -22,7 +24,12 @@
+     seq = ms.create("SequencePlayer", "seq")
+     seq_svc = SequencePlayerServiceHelper.narrow(seq.service("service0"))
+ 
++    ms.load("StateHolder");
++    sh = ms.create("StateHolder", "StateHolder0")
++
++    sh_svc = StateHolderServiceHelper.narrow(sh.service("service0"));
++
+     hgc = findRTC("HGcontroller0")
+ 
+ def init():
+ 

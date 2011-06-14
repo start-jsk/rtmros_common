@@ -3,7 +3,7 @@ all: installed build/robothardware_eclipse.zip
 INSTALL_DIR=`rospack find hrpsys`
 SVN_DIR = build/hrpsys-base
 SVN_URL = http://hrpsys-base.googlecode.com/svn/trunk/
-SVN_PATCH = patch/tvmet.patch patch/idlj.patch patch/rpath.patch patch/hrpsysin.path patch/hrp4cxml.patch
+SVN_PATCH = patch/tvmet.patch patch/idlj.patch patch/rpath.patch patch/hrpsysin.path patch/hrp4cxml.patch patch/hrp4cpy.patch
 
 include $(shell rospack find mk)/svn_checkout.mk
 
