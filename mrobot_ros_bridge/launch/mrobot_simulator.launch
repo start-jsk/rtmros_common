@@ -31,6 +31,15 @@
 	type="teleop_pr2_keyboard"
 	name="teleop_pr2_keyboard" output="screen"
 	launch-prefix="xterm -e"/>
+  <node pkg="wiimote"
+	type="wiimote_node.py"
+	name="wiimote" output="screen"
+	respawn="true"
+	launch-prefix="xterm -e"/>
+  <node name = "beego_teleop"
+	pkg  = "mrobot_ros_bridge"
+	type = "joy_teleop.py"
+	output = "screen"/>
 
 
   <!-- BEGIN:openrtm connection -->
