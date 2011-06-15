@@ -1,4 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
+if [ "`pgrep omniNames -u 0`" ]; then
+    echo -e "\e[1;31mrunning omniNames invoked by root\e[m"
+    echo -e "\e[1;31mtry \`sudo /etc/init.d/omniorb4-nameserver stop\`\e[m"
+    exit 1
+fi
 pkill -KILL omniNames
-rtm-naming
+/usr/bin/rtm-naming
