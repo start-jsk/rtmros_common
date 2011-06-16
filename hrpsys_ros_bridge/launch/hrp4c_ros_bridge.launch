@@ -7,20 +7,20 @@
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
   <!-- END:openrtm setting -->
-  <node name = "HrpsysStatePublisher"
+  <node name = "HrpsysSeqStateROSBridge"
 	pkg  = "hrpsys_ros_bridge"
-	type = "HrpsysStatePublisher"
+	type = "HrpsysSeqStateROSBridge"
 	args = "$(arg openrtm_args) -o model:$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl"
 	output = "screen"/>
 
   <param name="robot_description" textfile="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4C.dae" />
-  <node pkg="robot_state_publisher" type="state_publisher" name="hrp4_state_publisher" >
-  </node>
+  <node pkg="robot_state_publisher" type="state_publisher" name="hrp4_state_publisher" />
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrp4c_ros_bridge.launch"/>
-  <rtconnect from="StateHolder0.rtc:qOut" to="HrpsysStatePublisher0.rtc:in_rsangle" />
-  <rtactivate component="HrpsysStatePublisher0.rtc" />
+  <rtconnect from="StateHolder0.rtc:qOut" to="HrpsysSeqStateROSBridge0.rtc:rsangle" />
+  <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" />
+  <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
   <!-- END:openrtm connection -->
 </launch>
 

@@ -1,29 +1,18 @@
 // -*- C++ -*-
 /*!
- * @file  HrpsysStatePublisher.h * @brief HrpsysState component * @date  $Date$ 
+ * @file  HrpsysSeqStateROSBridgeImpl.h * @brief hrpsys seq state - ros bridge * @date  $Date$ 
  *
  * $Id$ 
  */
-#ifndef HRPSYSSTATEPUBLISHER_H
-#define HRPSYSSTATEPUBLISHER_H
+#ifndef HRPSYSSEQSTATEROSBRIDGEIMPL_H
+#define HRPSYSSEQSTATEROSBRIDGEIMPL_H
 
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
-#include <rtm/CorbaNaming.h>
 #include <rtm/CorbaPort.h>
 #include <rtm/DataInPort.h>
 #include <rtm/DataOutPort.h>
-
-// hrp
-#include <hrpCorba/ModelLoader.hh>
-#include <hrpModel/Link.h>
-#include <hrpModel/ModelLoaderUtil.h>
-
-
-// ros
-#include "ros/ros.h"
-#include "sensor_msgs/JointState.h"
 
 // Service implementation headers
 // <rtc-template block="service_impl_h">
@@ -32,16 +21,17 @@
 
 // Service Consumer stub headers
 // <rtc-template block="consumer_stub_h">
+#include "hrpsys/idl/SequencePlayerServiceStub.h"
 
 // </rtc-template>
 
 using namespace RTC;
 
-class HrpsysStatePublisher  : public RTC::DataFlowComponentBase
+class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
 {
  public:
-  HrpsysStatePublisher(RTC::Manager* manager);
-  ~HrpsysStatePublisher();
+  HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager);
+  ~HrpsysSeqStateROSBridgeImpl();
 
   // The initialize action (on CREATED->ALIVE transition)
   // formaer rtc_init_entry() 
@@ -69,7 +59,7 @@ class HrpsysStatePublisher  : public RTC::DataFlowComponentBase
 
   // The execution action that is invoked periodically
   // former rtc_active_do()
-  virtual RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
+  // virtual RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
 
   // The aborting action when main logic error occurred.
   // former rtc_aborting_entry()
@@ -100,32 +90,37 @@ class HrpsysStatePublisher  : public RTC::DataFlowComponentBase
 
   // DataInPort declaration
   // <rtc-template block="inport_declare">
-  TimedDoubleSeq m_in_rsangle;
-  InPort<TimedDoubleSeq> m_in_rsangleIn;
-  TimedDoubleSeq m_in_mcangle;
-  InPort<TimedDoubleSeq> m_in_mcangleIn;
-  TimedDoubleSeq m_in_rsrfsensor;
-  InPort<TimedDoubleSeq> m_in_rsrfsensorIn;
-  TimedDoubleSeq m_in_rslfsensor;
-  InPort<TimedDoubleSeq> m_in_rslfsensorIn;
-  TimedDoubleSeq m_in_rsrhsensor;
-  InPort<TimedDoubleSeq> m_in_rsrhsensorIn;
-  TimedDoubleSeq m_in_rslhsensor;
-  InPort<TimedDoubleSeq> m_in_rslhsensorIn;
-  TimedDoubleSeq m_in_gsensor;
-  InPort<TimedDoubleSeq> m_in_gsensorIn;
-  TimedDoubleSeq m_in_gyrometer;
-  InPort<TimedDoubleSeq> m_in_gyrometerIn;
+  TimedDoubleSeq m_angle;
+  InPort<TimedDoubleSeq> m_angleIn;
+  TimedDoubleSeq m_rsangle;
+  InPort<TimedDoubleSeq> m_rsangleIn;
+  TimedDoubleSeq m_mcangle;
+  InPort<TimedDoubleSeq> m_mcangleIn;
+  TimedDoubleSeq m_rsrfsensor;
+  InPort<TimedDoubleSeq> m_rsrfsensorIn;
+  TimedDoubleSeq m_rslfsensor;
+  InPort<TimedDoubleSeq> m_rslfsensorIn;
+  TimedDoubleSeq m_rsrhsensor;
+  InPort<TimedDoubleSeq> m_rsrhsensorIn;
+  TimedDoubleSeq m_rslhsensor;
+  InPort<TimedDoubleSeq> m_rslhsensorIn;
+  TimedDoubleSeq m_gsensor;
+  InPort<TimedDoubleSeq> m_gsensorIn;
+  TimedDoubleSeq m_gyrometer;
+  InPort<TimedDoubleSeq> m_gyrometerIn;
 
   // </rtc-template>
 
   // DataOutPort declaration
   // <rtc-template block="outport_declare">
+  TimedDoubleSeq m_torque;
+  OutPort<TimedDoubleSeq> m_torqueOut;
 
   // </rtc-template>
 
   // CORBA Port declaration
   // <rtc-template block="corbaport_declare">
+  RTC::CorbaPort m_SequencePlayerServicePort;
 
   // </rtc-template>
 
@@ -136,22 +131,19 @@ class HrpsysStatePublisher  : public RTC::DataFlowComponentBase
 
   // Consumer declaration
   // <rtc-template block="consumer_declare">
+  RTC::CorbaConsumer<OpenHRP::SequencePlayerService> m_service0;
 
   // </rtc-template>
 
  private:
 
-  hrp::BodyPtr body;
-
-  ros::NodeHandle nh;
-  ros::Publisher joint_state_pub;
 };
 
 
 extern "C"
 {
-  DLL_EXPORT void HrpsysStatePublisherInit(RTC::Manager* manager);
+  DLL_EXPORT void HrpsysSeqStateROSBridgeImplInit(RTC::Manager* manager);
 };
 
-#endif // HRPSYSSTATEPUBLISHER_H
+#endif // HRPSYSSEQSTATEROSBRIDGEIMPL_H
 
