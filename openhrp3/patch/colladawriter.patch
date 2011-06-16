@@ -1,6 +1,6 @@
 diff -r cf3fd4609ad5 server/ModelLoader/ColladaWriter.h
 --- a/server/ModelLoader/ColladaWriter.h	Fri Jun 10 17:55:38 2011 +0900
-+++ b/server/ModelLoader/ColladaWriter.h	Tue Jun 14 19:22:34 2011 +0900
++++ b/server/ModelLoader/ColladaWriter.h	Fri Jun 17 00:52:19 2011 +0900
 @@ -639,7 +639,7 @@
              domJointRef pdomjoint = daeSafeCast<domJoint>(ktec->add(COLLADA_ELEMENT_JOINT));
              string jointsid = str(boost::format("jointsid%d")%ilink);
@@ -10,3 +10,21 @@ diff -r cf3fd4609ad5 server/ModelLoader/ColladaWriter.h
              vector<domAxis_constraintRef> vaxes(dof);
              for(int ia = 0; ia < dof; ++ia) {
                  vaxes[ia] = daeSafeCast<domAxis_constraint>(pdomjoint->add(colladaelement));
+@@ -1022,7 +1022,7 @@
+         LINKOUTPUT out;
+         string linksid = _GetLinkSid(ilink);
+         domLinkRef pdomlink = daeSafeCast<domLink>(pkinparent->add(COLLADA_ELEMENT_LINK));
+-        pdomlink->setName(plink.name);
++        pdomlink->setName(plink.segments[0].name);
+         pdomlink->setSid(linksid.c_str());
+ 
+         domNodeRef pnode = daeSafeCast<domNode>(pnodeparent->add(COLLADA_ELEMENT_NODE));
+@@ -1030,7 +1030,7 @@
+         pnode->setId( nodeid.c_str() );
+         string nodesid = str(boost::format("node%d")%ilink);
+         pnode->setSid(nodesid.c_str());
+-        pnode->setName(plink.name);
++        pnode->setName(plink.segments[0].name);
+ 
+         for(int igeom = 0; igeom < plink.shapeIndices.length(); ++igeom) {
+             string geomid = _GetGeometryId(bodyInfo, ilink,igeom);
