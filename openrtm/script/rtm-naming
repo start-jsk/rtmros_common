@@ -7,4 +7,5 @@ if [ "`pgrep omniNames -u 0`" ]; then
 fi
 pkill -KILL omniNames
 /usr/bin/rtm-naming
+sleep 1 # wait to omniNaming start up
 tail -f ./omninames-`hostname`.log
