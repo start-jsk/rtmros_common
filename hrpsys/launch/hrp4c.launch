@@ -1,6 +1,7 @@
 <launch>
   <env name="LANG" value="C" />
-  <node name="rtm_naming" pkg="openrtm" type="rtm-naming" output="screen" />
+  <node name="rtm_naming" pkg="openrtm" type="rtm-naming" output="screen"
+	required="true" />
 
   <node name="hrpsys_kill_all" pkg="hrpsys" type="hrpsys_kill_all.sh" />
   <node name="hrp4c_model_download" pkg="hrpsys" type="hrp4c_model_download.sh" output="screen"/>
