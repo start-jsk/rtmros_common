@@ -46,6 +46,24 @@ execute_process(COMMAND rosrun hrpsys hrp4c_model_download.sh RESULT_VARIABLE _d
 if (_download_failed)
   message(FATAL_ERROR "Download HRP-4C model from http://unit.aist.go.jp/is/humanoid/hrp-4c/hrp-4c.html")
 endif(_download_failed)
-execute_process(COMMAND rosrun openhrp3 export-collada -i ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl -o ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/HRP4C.dae)
-execute_process(COMMAND rosrun euscollada collada2eus ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/HRP4C.dae ${PROJECT_SOURCE_DIR}/launch/hrp4c.yaml ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/hrp4c.l)
+
+macro(compile_openhrp_model wrlfile workdir daename yamlname lispname)
+  execute_process(COMMAND rosrun openhrp3 export-collada
+    -i ${wrlfile} -o ${workdir}/${daename})
+  execute_process(COMMAND rosrun euscollada collada2eus
+    ${workdir}/${daename}
+    ${PROJECT_SOURCE_DIR}/launch/${yamlname}
+    ${workdir}/${lispname})
+endmacro(compile_openhrp_model)
+
+compile_openhrp_model(
+  ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl
+  ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/
+  HRP4C.dae hrp4c.yaml hrp4c.l)
+rosbuild_find_ros_package(openhrp3)
+compile_openhrp_model(
+  ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl
+  ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/PA10/
+  PA10.dae pa10.yaml pa10.l)
+
 
