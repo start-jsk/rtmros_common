@@ -1,0 +1,61 @@
+##
+## - collada_joint_name : euslisp_joint_name (start with :)
+##
+
+torso:
+  - CHEST_P      : torso-waist-p
+  - CHEST_R      : torso-waist-r
+  - CHEST_Y      : torso-waist-y
+lleg:
+  - L_HIP_Y      : lleg-crotch-y
+  - L_HIP_R      : lleg-crotch-r
+  - L_HIP_P      : lleg-crotch-p
+  - L_KNEE_P     : lleg-knee-p
+  - L_ANKLE_P    : lleg-ankle-p
+  - L_ANKLE_R    : lleg-ankle-r
+rleg:
+  - R_HIP_Y      : rleg-crotch-y
+  - R_HIP_R      : rleg-crotch-r
+  - R_HIP_P      : rleg-crotch-p
+  - R_KNEE_P     : rleg-knee-p
+  - R_ANKLE_P    : rleg-ankle-p
+  - R_ANKLE_R    : rleg-ankle-r
+rarm:
+  - R_SHOULDER_P : rarm-shoulder-p
+  - R_SHOULDER_R : rarm-shoulder-r
+  - R_SHOULDER_Y : rarm-shoulder-y
+  - R_ELBOW_P    : rarm-elbow-p
+  - R_WRIST_Y    : rarm-wrist-y
+  - R_WRIST_R    : rarm-wrist-r
+larm:
+  - L_SHOULDER_P : larm-shoulder-p
+  - L_SHOULDER_R : larm-shoulder-r
+  - L_SHOULDER_Y : larm-shoulder-y
+  - L_ELBOW_P    : larm-elbow-p
+  - L_WRIST_Y    : larm-wrist-y
+  - L_WRIST_R    : larm-wrist-r
+head:
+  - NECK_Y       : head-neck-y
+  - NECK_R       : head-neck-r
+  - NECK_P       : head-neck-p
+
+##
+## end-coords
+##
+larm-end-coords:
+  translate : [0, 0, -0.10]
+rarm-end-coords:
+  translate : [0, 0, -0.10]
+lleg-end-coords:
+  translate : [0.00, 0, 0]
+rleg-end-coords:
+  translate : [0.00, 0, 0]
+head-end-coords:
+  translate : [0.08, 0, 0.13]
+  rotate    : [0, 1, 0, 90]
+
+##
+## reset-pose
+##
+angle-vector:
+  reset-pose : [0.0, 0.0, 0.0, 0.0, 10.0, -30.0, -30.0, 0.0, 0.0, 0.0, -10.0, 30.0, -30.0, 0.0, 0.0, 0.0, 0.0, -20.0, 40.0, -20.0, 0.0, 0.0, 0.0, -20.0, 40.0, -20.0, 0.0, 0.0, 0.0, 0.0]

@@ -47,4 +47,5 @@ if (_download_failed)
   message(FATAL_ERROR "Download HRP-4C model from http://unit.aist.go.jp/is/humanoid/hrp-4c/hrp-4c.html")
 endif(_download_failed)
 execute_process(COMMAND rosrun openhrp3 export-collada -i ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl -o ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/HRP4C.dae)
+execute_process(COMMAND rosrun euscollada collada2eus ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/HRP4C.dae ${PROJECT_SOURCE_DIR}/launch/hrp4c.yaml ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/hrp4c.l)
 
