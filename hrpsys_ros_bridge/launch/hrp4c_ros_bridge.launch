@@ -12,14 +12,23 @@
 	type = "HrpsysSeqStateROSBridge"
 	args = "$(arg openrtm_args) -o model:$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl"
 	output = "screen"/>
+  <node pkg="hrpsys" name="AbsTransformToPosRpy" type="AbsTransformToPosRpy"
+	output="screen" args="$(arg openrtm_args)"/>
+  <!-- -o "exec_cxt.periodic.type:SynchExtTriggerEC" -->
 
   <param name="robot_description" textfile="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4C.dae" />
   <node pkg="robot_state_publisher" type="state_publisher" name="hrp4_state_publisher" />
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrp4c_ros_bridge.launch"/>
+  <rtconnect from="HRP-4C(Robot)0.rtc:pr" to="AbsTransformToPosRpy0.rtc:pr" />
+  <rtconnect from="AbsTransformToPosRpy0.rtc:basePos"  to="StateHolder0.rtc:basePosIn" />
+  <rtconnect from="AbsTransformToPosRpy0.rtc:baseRpy"  to="StateHolder0.rtc:baseRpyIn" />
+  <rtactivate component="AbsTransformToPosRpy0.rtc" />
+
   <rtconnect from="StateHolder0.rtc:qOut" to="HrpsysSeqStateROSBridge0.rtc:rsangle" />
   <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" />
+  <rtconnect from="StateHolder0.rtc:basePoseOut" to="HrpsysSeqStateROSBridge0.rtc:pose" />
   <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
   <!-- END:openrtm connection -->
 </launch>

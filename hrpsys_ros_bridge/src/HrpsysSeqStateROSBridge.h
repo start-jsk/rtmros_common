@@ -22,6 +22,7 @@
 #include "sensor_msgs/JointState.h"
 #include "actionlib/server/simple_action_server.h"
 #include "pr2_controllers_msgs/JointTrajectoryAction.h"
+#include "tf/transform_broadcaster.h"
 
 extern const char* hrpsysseqstaterosbridgeimpl_spec[];
 

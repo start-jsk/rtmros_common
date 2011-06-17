@@ -114,7 +114,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   sensor_msgs::JointState joint_state;
   joint_state.header.stamp = ros::Time::now();
 
-  //std::cerr << "@Execute name : " << getInstanceName() << "/" << ec_id << std::endl;
+  std::cerr << "@Execute name : " << getInstanceName() << "/" << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew() << std::endl;
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
     try {
@@ -125,7 +125,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	std::cerr << e.what() << std::endl;
       }
     //
-    m_rsangleIn.read();
 
     m_mutex.lock();
     body->calcForwardKinematics();
@@ -142,6 +141,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     m_mutex.unlock();
   }
 
+  static tf::TransformBroadcaster br;
+  static tf::Transform transform;
+  if ( m_poseIn.isNew () ) {
+    m_poseIn.read();
+    transform.setOrigin( tf::Vector3(m_pose.data.position.x, m_pose.data.position.y, m_pose.data.position.z) );
+    transform.setRotation( tf::createQuaternionFromRPY(m_pose.data.orientation.r, m_pose.data.orientation.p, m_pose.data.orientation.y) );
+  }
+
   if ( ++skip > 40 ) { // hrpsys runs every 0.005 msec, rviz assumes 50hz(20sec)
     m_mutex.lock();
     std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
@@ -155,6 +162,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       ++it;
     }
     joint_state_pub.publish(joint_state);
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "odom", "BODY"));//body->rootLink()->name));
     ros::spinOnce();
     m_mutex.unlock();
     skip = 0;

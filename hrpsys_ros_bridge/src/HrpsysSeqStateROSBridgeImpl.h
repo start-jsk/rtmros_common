@@ -8,6 +8,7 @@
 #define HRPSYSSEQSTATEROSBRIDGEIMPL_H
 
 #include <rtm/idl/BasicDataTypeSkel.h>
+#include <rtm/idl/ExtendedDataTypesSkel.h>
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
 #include <rtm/CorbaPort.h>
@@ -108,6 +109,8 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   InPort<TimedDoubleSeq> m_gsensorIn;
   TimedDoubleSeq m_gyrometer;
   InPort<TimedDoubleSeq> m_gyrometerIn;
+  TimedPose3D m_pose;
+  InPort<TimedPose3D> m_poseIn;
 
   // </rtc-template>
 
