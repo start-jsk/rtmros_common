@@ -21,7 +21,7 @@
             <property name="WAIST.rotation" value="0.0 1.0 0.0 0.0 "/>
             <property name="WAIST.translation" value="1.0 0.0 0.2 "/>
         </item>
-        <item class="com.generalrobotix.ui.item.GrxModelItem" name="box" select="true" url="$(PROJECT_DIR)/../model/simple_vehicle_with_rangesensor.wrl">
+        <item class="com.generalrobotix.ui.item.GrxModelItem" name="box" select="true" url="$(BEEGO_MODEL_DIR)/beego_jsk.wrl">
             <property name="STEERING.angle" value="0.0 "/>
             <property name="REAR_WHEEL_R.angle" value="0.0 "/>
             <property name="setupDirectory" value=""/>

@@ -5,6 +5,7 @@
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
   <arg name="openrtm_ext_args" value='$(arg openrtm_args) -o "exec_cxt.periodic.type: SynchExtTriggerEC"' />
+  <env name="BEEGO_MODEL_DIR" value="$(find mrobot_ros_bridge)/model" />
   <!-- END:openrtm setting -->
   <node pkg="openhrp3" name="grxui" type="grxui.sh"
 	args="$(find mrobot_ros_bridge)/launch/SimulationProject.xml"/>
@@ -37,11 +38,11 @@
 	type="teleop_pr2_keyboard"
 	name="teleop_pr2_keyboard" output="screen"
 	launch-prefix="xterm -e"/>
-  <node pkg="wiimote"
-	type="wiimote_node.py"
-	name="wiimote" output="screen"
-	respawn="true"
-	launch-prefix="xterm -e"/>
+  <!-- <node pkg="wiimote"
+        type="wiimote_node.py"
+        name="wiimote" output="screen"
+        respawn="true"
+        launch-prefix="xterm -e"/> -->
   <node name = "beego_teleop"
 	pkg  = "mrobot_ros_bridge"
 	type = "joy_teleop.py"
