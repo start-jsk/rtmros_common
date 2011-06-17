@@ -16,7 +16,12 @@
             <property name="WAIST.rotation" value="0.0 1.0 0.0 0.0 "/>
             <property name="WAIST.translation" value="0.0 0.0 -0.1 "/>
         </item>
-        <item class="com.generalrobotix.ui.item.GrxModelItem" name="box" select="true" url="$(PROJECT_DIR)/../model/simple_vehicle.wrl">
+        <item class="com.generalrobotix.ui.item.GrxModelItem" name="box3" select="true" url="$(PROJECT_DIR)/../model/box3.wrl">
+            <property name="isRobot" value="false"/>
+            <property name="WAIST.rotation" value="0.0 1.0 0.0 0.0 "/>
+            <property name="WAIST.translation" value="1.0 0.0 0.2 "/>
+        </item>
+        <item class="com.generalrobotix.ui.item.GrxModelItem" name="box" select="true" url="$(PROJECT_DIR)/../model/simple_vehicle_with_rangesensor.wrl">
             <property name="STEERING.angle" value="0.0 "/>
             <property name="REAR_WHEEL_R.angle" value="0.0 "/>
             <property name="setupDirectory" value=""/>
@@ -37,6 +42,28 @@
             <property name="sprintDamperModel" value="false"/>
             <property name="damperConstant" value="0 0 0 0 0 0"/>
             <property name="objectName2" value="box"/>
+            <property name="objectName1" value="box2"/>
+            <property name="staticFriction" value="0.5"/>
+        </item>
+        <item class="com.generalrobotix.ui.item.GrxCollisionPairItem" name="CP#box2#box" select="true">
+            <property name="springConstant" value="0 0 0 0 0 0"/>
+            <property name="slidingFriction" value="0.5"/>
+            <property name="jointName2" value=""/>
+            <property name="jointName1" value=""/>
+            <property name="sprintDamperModel" value="false"/>
+            <property name="damperConstant" value="0 0 0 0 0 0"/>
+            <property name="objectName2" value="box"/>
+            <property name="objectName1" value="box2"/>
+            <property name="staticFriction" value="0.5"/>
+        </item>
+        <item class="com.generalrobotix.ui.item.GrxCollisionPairItem" name="CP#box2#box3" select="true">
+            <property name="springConstant" value="0 0 0 0 0 0"/>
+            <property name="slidingFriction" value="0.5"/>
+            <property name="jointName2" value=""/>
+            <property name="jointName1" value=""/>
+            <property name="sprintDamperModel" value="false"/>
+            <property name="damperConstant" value="0 0 0 0 0 0"/>
+            <property name="objectName2" value="box3"/>
             <property name="objectName1" value="box2"/>
             <property name="staticFriction" value="0.5"/>
         </item>

@@ -21,6 +21,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rtmbuild_add_executable(IISMobileRobotControllerComp src/IISMobileRobotControllerComp.cpp src/IISMobileRobotController.cpp)
 rtmbuild_add_executable(MobileRobotROSBridgeComp src/MobileRobotROSBridge.cpp src/MobileRobotROSBridgeComp.cpp)
+rtmbuild_add_executable(RangeSensorROSBridgeComp src/RangeSensorROSBridgeComp.cpp src/RangeSensorROSBridge.cpp)
 
 ## documentation
 rosbuild_find_ros_package("jsk_tools")
