@@ -66,5 +66,11 @@ compile_openhrp_model(
   ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl
   ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/PA10/
   PA10.dae pa10.yaml pa10.l)
+compile_openhrp_model(
+  ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/sample1.wrl
+  ${PROJECT_SOURCE_DIR}/scripts/SampleRobot
+  SampleRobot.dae samplerobot.yaml samplerobot.l)
 
+
+add_subdirectory(scripts/SampleRobot)
 
