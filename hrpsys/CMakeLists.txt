@@ -72,5 +72,5 @@ compile_openhrp_model(
   SampleRobot.dae samplerobot.yaml samplerobot.l)
 
 
-add_subdirectory(scripts/SampleRobot)
+execute_process(COMMAND make WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/SampleRobot)
 
