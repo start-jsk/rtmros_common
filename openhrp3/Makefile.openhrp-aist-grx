@@ -3,7 +3,7 @@ all: installed java3d plugin_archives
 INSTALL_DIR=`rospack find openhrp3`
 HG_DIR = build/openhrp-aist-grx
 HG_URL = https://openhrp-aist-grx.googlecode.com/hg/
-HG_PATCH = patch/modelitem.patch  patch/controller.patch patch/colladawriter.patch
+HG_PATCH = patch/modelitem.patch  patch/controller.patch patch/colladawriter.patch patch/linkname.patch
 include $(shell rospack find mk)/hg_checkout.mk
 
 check-java-version:
