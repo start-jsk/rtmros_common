@@ -146,7 +146,7 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
 
     image->data.resize(image->step * image->height);
 
-    for(int i=0; i<image->width*image->height;i++){
+    for(int i=0; i<m_image.data.length();i++){
       image->data[i*3+0] = (m_image.data[i] & 0x00ff0000) >> 16;
       image->data[i*3+1] = (m_image.data[i] & 0x0000ff00) >>  8;
       image->data[i*3+2] = (m_image.data[i] & 0x000000ff) >>  0;
