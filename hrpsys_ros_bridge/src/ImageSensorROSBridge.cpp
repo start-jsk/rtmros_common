@@ -64,6 +64,10 @@ RTC::ReturnCode_t ImageSensorROSBridge::onInitialize()
   pub = it.advertise("image_raw", 1);
   info_pub = node.advertise<sensor_msgs::CameraInfo>("camera_info", 1);
 
+  pair_id = 0;
+
+  ros::param::param<std::string>("~frame_id", frame, "camera");
+
   return RTC::RTC_OK;
 }
 
@@ -101,8 +105,7 @@ RTC::ReturnCode_t ImageSensorROSBridge::onDeactivated(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
 {
-  static unsigned int pair_id = 0;
-  ros::Time capture_time = ros::Time::now();
+  capture_time = ros::Time::now();
 
   if (m_imageIn.isNew()){
     //std::cerr << "@Execute name : " << getInstanceName() << "/" << ec_id << ", image:" << m_imageIn.isNew () << std::endl;
@@ -132,7 +135,6 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
 
     sensor_msgs::ImagePtr image(new sensor_msgs::Image);
     sensor_msgs::CameraInfoPtr info(new sensor_msgs::CameraInfo);
-    std::string frame = "camera";
 
     image->width = 320;
     image->height = 240;
@@ -153,6 +155,11 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
 
     info->width = 320;
     info->height = 240;
+    info->distortion_model = "plumb_bob";
+    boost::array<double, 9> K = {700.0, 0.0, 160.0, 0.0, 700.0, 120.0, 0.0, 0.0, 1.0}; // TODO fieldOfView       0.785398
+    info->K = K;
+    boost::array<double, 12> P = {700, 0, 160, 0, 0, 700, 120, 0, 0, 0, 1, 0};
+    info->P = P;
     info->header.stamp = capture_time;
     info->header.frame_id = frame;
     info_pub.publish(info);

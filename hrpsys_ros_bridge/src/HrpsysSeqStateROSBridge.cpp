@@ -105,6 +105,7 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryAction(const pr2_controllers_msgs
   m_mutex.unlock();
   std::cerr << " : " << goal->trajectory.points[0].time_from_start.toSec() << std::endl;
   m_service0->setJointAngles(angles, goal->trajectory.points[0].time_from_start.toSec());
+  m_service0->waitInterpolation();
   server.setSucceeded(result);
 }
 
@@ -162,6 +163,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       //joint_state.effort
       ++it;
     }
+    joint_state.effort.resize(joint_state.name.size());
     joint_state_pub.publish(joint_state);
     // sensors
     for (int j = 0 ; j < body->numSensorTypes(); j++) {

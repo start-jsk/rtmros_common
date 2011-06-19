@@ -18,7 +18,9 @@
   <node pkg="hrpsys" name="AbsTransformToPosRpy" type="AbsTransformToPosRpy"
 	output="screen" args="$(arg openrtm_args)"/>
   <node pkg="hrpsys_ros_bridge" name="ImageSensorROSBridge" type="ImageSensorROSBridge"
-	output="screen" args="$(arg openrtm_args)"/>
+	output="screen" args="$(arg openrtm_args)" >
+    <param name="frame_id" value="/VISION_SENSOR1" />
+  </node>
   <!-- -o "exec_cxt.periodic.type:SynchExtTriggerEC" -->
 
   <param name="robot_description" textfile="$(find hrpsys)/scripts/SampleRobot/SampleRobot.dae" />
@@ -38,8 +40,6 @@
 
   <rtconnect from="SampleRobot(Robot)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" />
   <rtactivate component="ImageSensorROSBridge0.rtc" />
-  <rtconnect from="SampleRobot(Robot)0.rtc:right-eye" to="ImageSensorROSBridge1.rtc:image" />
-  <rtactivate component="ImageSensorROSBridge1.rtc" />
   <!-- END:openrtm connection -->
 </launch>
 

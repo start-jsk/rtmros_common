@@ -130,6 +130,9 @@ class ImageSensorROSBridge  : public RTC::DataFlowComponentBase
   image_transport::Publisher pub;
   ros::Publisher info_pub;
 
+  unsigned int pair_id;
+  ros::Time capture_time;
+  std::string frame;
 };
 
 
