@@ -14,6 +14,7 @@
 
 // hrp
 #include <hrpCorba/ModelLoader.hh>
+#include <hrpModel/Sensor.h>
 #include <hrpModel/Link.h>
 #include <hrpModel/ModelLoaderUtil.h>
 
