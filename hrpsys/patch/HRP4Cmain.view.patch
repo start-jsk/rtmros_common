@@ -1,0 +1,31 @@
+*** HRP-4C/HRP4Cmain.wrl	2010-03-29 18:15:01.000000000 +0900
+--- HRP-4C/HRP4Cmain.wrl.org	2011-06-20 11:59:59.301221423 +0900
+***************
+*** 105,110 ****
+--- 105,111 ----
+   exposedField SFInt32    sensorId          -1
+   exposedField SFInt32    width             320  
+   exposedField SFInt32    height            240  
++  exposedField SFFloat    frameRate         30
+   
+  ]
+  {
+***************
+*** 984,989 ****
+--- 985,1000 ----
+                                                    lvlimit [-12.81019572]  
+                                                    uvlimit [ 12.81019572]
+                                                  children[
++ ########
++ DEF VISION_SENSOR1 VisionSensor {
++       translation   0.0 0.0 0.0
++       rotation      0.57735 -0.57735 -0.57735 2.09439
++       name          "LeftCamera"
++       type          "COLOR"
++       frontClipDistance 0.05
++       sensorId      0
++ }
++ #######
+                                                     DEF EYE_Y_MOV CylinderSensorZ {
+                                                       minAngle -0.61086524  
+                                                       maxAngle 0.61086524 

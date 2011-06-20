@@ -2,11 +2,12 @@ Index: sample/HRP-4C/HRP-4C.sh
 ===================================================================
 --- sample/HRP-4C/HRP-4C.sh	(リビジョン 19)
 +++ sample/HRP-4C/HRP-4C.sh	(作業コピー)
-@@ -7,6 +7,7 @@
+@@ -7,6 +7,8 @@
      --in-port dqRef:JOINT_VELOCITY \
      --in-port ddqRef:JOINT_ACCELERATION \
      --out-port q:JOINT_VALUE \
 +    --out-port pr:WAIST:ABS_TRANSFORM \
++    --out-port image:0:COLOR_IMAGE:0.1 \
      --connection qRef:HGcontroller0:qOut \
      --connection dqRef:HGcontroller0:dqOut \
      --connection ddqRef:HGcontroller0:ddqOut

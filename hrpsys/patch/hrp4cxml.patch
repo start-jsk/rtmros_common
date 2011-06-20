@@ -5,11 +5,13 @@ Index: sample/HRP-4C/HRP-4C.xml
 @@ -4,7 +4,7 @@
          <item class="com.generalrobotix.ui.item.GrxSimulationItem" name="simulationItem" select="true">
              <property name="integrate" value="true"/>
-             <property name="viewsimulate" value="false"/>
+-            <property name="viewsimulate" value="false"/>
++            <property name="viewsimulate" value="true"/>
 -            <property name="totalTime" value="20.0 "/>
-+            <property name="totalTime" value="300.0 "/>
++            <property name="totalTime" value="1000.0 "/>
              <property name="timeStep" value="0.0050 "/>
-             <property name="realTime" value="false"/>
+-            <property name="realTime" value="false"/>
++            <property name="realTime" value="true"/>
              <property name="gravity" value="9.8 "/>
 @@ -209,7 +209,7 @@
              <property name="showCoMonFloor" value="false"/>

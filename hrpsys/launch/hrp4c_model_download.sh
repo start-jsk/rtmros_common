@@ -20,3 +20,8 @@ if [ ! -f ${HRP4C_MODEL_PATH} ]; then
 	exit -1
     fi
 fi
+if [ -f ${HRP4C_MODEL_PATH} ]; then
+    (cd ${HRP4C_MODEL_DIR}; patch -N HRP-4C/HRP4Cmain.wrl < `rospack find hrpsys`/patch/HRP4Cmain.view.patch)
+    echo 0
+fi
+
