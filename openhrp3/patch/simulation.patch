@@ -1,0 +1,11 @@
+diff -r cf3fd4609ad5 GrxUIonEclipse-project-0.9.8/src/com/generalrobotix/ui/item/GrxSimulationItem.java
+--- a/GrxUIonEclipse-project-0.9.8/src/com/generalrobotix/ui/item/GrxSimulationItem.java	Fri Jun 10 17:55:38 2011 +0900
++++ b/GrxUIonEclipse-project-0.9.8/src/com/generalrobotix/ui/item/GrxSimulationItem.java	Mon Jun 20 11:33:32 2011 +0900
+@@ -324,6 +324,7 @@
+ 									}
+ 								}
+ 							}
++                            Thread.yield();
+ 						}
+ 						isExecuting_ = false;
+ 						simulateTime_ += (System.currentTimeMillis() - startT - suspendT)/1000.0;
