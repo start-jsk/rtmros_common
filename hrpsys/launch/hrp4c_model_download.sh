@@ -11,7 +11,7 @@ if [ ! -f ${HRP4C_MODEL_PATH} ]; then
 	echo "======================================================"
 	echo "======================================================"
 	echo "======================================================"
-	echo "Download HRP4 model and extract to ${HRP4C_MODEL_PATH}"
+	echo "Download HRP4 model from http://unit.aist.go.jp/is/humanoid/hrp-4c/hrp-4c.html and extract to ${HRP4C_MODEL_PATH}"
 	echo "======================================================"
 	echo "======================================================"
 	echo "======================================================"
