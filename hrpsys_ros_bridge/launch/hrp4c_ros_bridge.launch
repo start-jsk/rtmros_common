@@ -14,6 +14,10 @@
 	output = "screen"/>
   <node pkg="hrpsys" name="AbsTransformToPosRpy" type="AbsTransformToPosRpy"
 	output="screen" args="$(arg openrtm_args)"/>
+  <node pkg="hrpsys_ros_bridge" name="ImageSensorROSBridge" type="ImageSensorROSBridge"
+	output="screen" args="$(arg openrtm_args)" >
+    <param name="frame_id" value="/VISION_SENSOR1" />
+  </node>
   <!-- -o "exec_cxt.periodic.type:SynchExtTriggerEC" -->
 
   <param name="robot_description" textfile="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4C.dae" />
@@ -30,6 +34,8 @@
   <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" />
   <rtconnect from="StateHolder0.rtc:basePoseOut" to="HrpsysSeqStateROSBridge0.rtc:pose" />
   <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
+  <rtconnect from="HRP-4C(Robot)0.rtc:image" to="ImageSensorROSBridge0.rtc:image" />
+  <rtactivate component="ImageSensorROSBridge0.rtc" />
   <!-- END:openrtm connection -->
 </launch>
 
