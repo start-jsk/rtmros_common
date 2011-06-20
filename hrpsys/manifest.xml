@@ -11,6 +11,9 @@
 
   <depend package="openhrp3"/>
 
+  <depend package="roseus"/>
+  <depend package="euscollada"/>
+
 </package>
 
 
