@@ -1,10 +1,10 @@
 <launch>
   <!--
       roslaunch mrobot_ros_bridge.launch nameserver:=192.168.1.1
-      if you want to use joy, please press pairning after launching this
+      if you want to use joy, please press pairning after launching this file
   -->
   <!-- BEGIN:openrtm setting -->
-  <arg name="nameserver" default="157.82.4.143" />
+  <arg name="nameserver" default="157.82.4.150" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
   <!-- END:openrtm setting -->
