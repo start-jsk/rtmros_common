@@ -28,9 +28,5 @@ build/hrpsys-base/plugin/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3
 	cd $(SVN_DIR)/plugin/ && java -jar /usr/lib/eclipse/plugins/org.eclipse.equinox.launcher_1.0.201.R35x_v20090715.jar -application org.eclipse.ant.core.antRunner -buildfile build.xml -verbose clean build.update.jar
 
 clean:
-	-rm -f installed
 	-cd $(SVN_DIR) && make clean
-
-wipe: clean
-	-rm -fr include share bin lib idl idl_gen
 
