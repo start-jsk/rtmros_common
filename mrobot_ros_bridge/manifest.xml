@@ -4,7 +4,7 @@
      mrobot_ros_bridge
 
   </description>
-  <author>Kei Okada</author>
+  <author>Kei Okada, Haseru Chen</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/mrobot_ros_bridge</url>
@@ -21,6 +21,14 @@
   <depend package="nav_msgs"/>
 
   <depend package="wiimote"/>
+
+  <!-- for beego navigation -->
+  <depend package="move_base"/>
+  <depend package="jsk_maps"/>
+  <depend package="map_server"/>
+  <depend package="amcl"/>
+  <depend package="openni_camera"/>
+
 
 </package>
 
