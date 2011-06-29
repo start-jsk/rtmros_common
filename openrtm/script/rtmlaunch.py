@@ -24,7 +24,7 @@ def alive_component(path):
 def wait_component(cmd_path):
     count=0
     path = rtctree.path.parse_path(cmd_path)[0]
-    while not alive_component(path) and count < 10:
+    while not alive_component(path) and count < 30:
         print "Wait for ",cmd_path
         count += 1
         time.sleep(1)
