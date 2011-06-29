@@ -10,7 +10,7 @@ MD5SUM_FILE = $(FILENAME).md5sum
 TARBALL_PATCH = rtcryo.patch
 include $(shell rospack find mk)/download_unpack_build.mk
 
-installed.rtshell: $(SOURCE_DIR)/unpacked
+installed.rtshell: wiped.rtshell $(SOURCE_DIR)/unpacked
 	cd $(SOURCE_DIR) && echo "y" | python ./setup.py build && echo "y" | python ./setup.py install --prefix=$(INSTALL_DIR)
 	@bash -c 'echo -e "\e[1;32m;; add following lines to .bashrc to use rtshell\n;;\e[m"'
 	@bash -c 'echo -e "\e[1;32m;; source ${CURDIR}/share/rtshell/shell_support\e[m"'
@@ -21,3 +21,10 @@ clean:
 
 wipe: clean
 	rm -fr installed.rtshell
+	rm -fr lib/lib/python2.6/site-packages/rtshell
+	rm -fr lib/lib/python2.6/site-packages/rtshell-3.0.0-py2.6.egg-info
+
+wiped.rtshell:  Makefile.openrtm-rtshell
+	make -f Makefile.openrtm-rtshell wipe
+	touch wiped.rtshell
+

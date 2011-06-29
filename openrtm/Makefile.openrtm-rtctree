@@ -9,7 +9,7 @@ UNPACK_CMD  = tar xzf
 MD5SUM_FILE = $(FILENAME).md5sum
 include $(shell rospack find mk)/download_unpack_build.mk
 
-installed.rtctree: $(SOURCE_DIR)/unpacked
+installed.rtctree: wiped.rtctree $(SOURCE_DIR)/unpacked
 	cd $(SOURCE_DIR) && echo "y" | python ./setup.py build && echo "y" | python ./setup.py install --prefix=$(INSTALL_DIR)
 	touch installed.rtctree
 
@@ -18,3 +18,9 @@ clean:
 
 wipe: clean
 	rm -fr installed.rtctree
+	rm -fr lib/lib/python2.6/site-packages/rtctree
+	rm -fr lib/lib/python2.6/site-packages/rtctree-3.0.0-py2.6.egg-info
+
+wiped.rtctree:  Makefile.openrtm-rtctree
+	make -f Makefile.openrtm-rtctree wipe
+	touch wiped.rtctree
