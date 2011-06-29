@@ -2,5 +2,5 @@
 
 export PATH=$PATH:`rospack find openrtm`/bin
 export PYTHONPATH=$PYTHONPATH:`rospack find openrtm`/src/openrtm
-rtcryo  | rtstodot  | dot -Tpdf -o /tmp/$$.pdf && evince /tmp/$$.pdf
+rtcryo  | rtstodot  | dot -Tpdf -o /tmp/rtcgraph$$.pdf && evince /tmp/rtcgraph$$.pdf
 
