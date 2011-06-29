@@ -62,10 +62,10 @@ macro(rtmbuild_genidl)
       WORKING_DIRECTORY ${_output_cpp_dir}
       DEPENDS ${_output_idl_hh})
     add_custom_command(OUTPUT ${_output_stub_lib}
-      COMMAND ${_rtmcxx_exe} `rtm-config --cflags` -I. -shared -o ${_output_stub_lib} ${_output_stub_cpp} `rtm-config --libs`
+      COMMAND ${_rtmcxx_exe} `rtm-config --cflags` -I. ${${_prefix}_IDLLIBRARY_INCDIRS} -shared -o ${_output_stub_lib} ${_output_stub_cpp} `rtm-config --libs`
       DEPENDS ${_output_stub_cpp})
     add_custom_command(OUTPUT ${_output_skel_lib}
-      COMMAND ${_rtmcxx_exe} `rtm-config --cflags` -I. -shared -o ${_output_skel_lib} ${_output_skel_cpp} `rtm-config --libs`
+      COMMAND ${_rtmcxx_exe} `rtm-config --cflags` -I. ${${_prefix}_IDLLIBRARY_INCDIRS} -shared -o ${_output_skel_lib} ${_output_skel_cpp} `rtm-config --libs`
       DEPENDS ${_output_skel_cpp})
     list(APPEND _autogen ${_output_stub_lib} ${_output_skel_lib})
   endforeach(_idl)
@@ -136,11 +136,15 @@ macro(rtmbuild_init)
       list(APPEND ${_prefix}_IDLLIBRARY_DIRS ${_idl_skel_file})
       list(APPEND ${_prefix}_IDLLIBRARY_DIRS ${_idl_stub_file})
     endforeach(_idl_file)
+    string(REGEX REPLACE ".*/([^/]*)/idl" "\\1" _tmp_pkg ${_idl_dir})
+    list(APPEND ${_prefix}_IDLLIBRARY_IDLDIRS "-I${_idl_dir}")
+    list(APPEND ${_prefix}_IDLLIBRARY_INCDIRS "-I${_idl_dir}/../idl_gen/cpp/${_tmp_pkg}/idl")
   endforeach(_idl_dir)
 endmacro(rtmbuild_init)
 
 macro(rtmbuild_add_executable exe)
   rosbuild_add_executable(${ARGV})
+  add_dependencies(${exe} RTMBUILD_genidl_cpp)
   target_link_libraries(${exe} ${${_prefix}_IDLLIBRARY_DIRS})
 #  rosbuild_add_executable(${ARGV})
 #  message(${${PROJECT_NAME}_CFLAGS_OTHER})
