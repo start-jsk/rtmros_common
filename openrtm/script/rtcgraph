@@ -1,0 +1,4 @@
+#!/bin/sh
+
+rtcryo  | rtstodot  | dot -Tpdf -o /tmp/$$.pdf && evince /tmp/$$.pdf
+
