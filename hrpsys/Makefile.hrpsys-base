@@ -14,7 +14,7 @@ installed: $(SVN_DIR)
 	-cd $(SVN_DIR) && make install
 	#
 	# copy idl
-	mkdir -p $(CURDIR)/idl && cp $(CURDIR)/share/hrpsys/idl/* ./idl/
+	mkdir -p $(CURDIR)/idl && cp $(CURDIR)/share/hrpsys/idl/* $(SVN_DIR)/idl/SDOPackage.idl ./idl/
 	touch installed
 
 build/robothardware_eclipse.zip: build/hrpsys-base/plugin/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0.jar
