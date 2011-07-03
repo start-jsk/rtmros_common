@@ -96,29 +96,29 @@
         <item class="com.generalrobotix.ui.item.GrxWorldStateItem" name="newworldstate0" select="true">
             <property name="logTimeStep" value="0.02 "/>
         </item>
-        <item class="com.generalrobotix.ui.item.GrxCollisionPairItem" name="CP#DARWINmain_WAIST#floor_WAIST" select="true">
-            <property name="objectName2" value="floor"/>
-            <property name="objectName1" value="DARWINmain"/>
-            <property name="jointName2" value="WAIST"/>
+        <item class="com.generalrobotix.ui.item.GrxCollisionPairItem" name="CP#floor_WAIST#DARWINmain_WAIST" select="true">
+            <property name="objectName1" value="floor"/>
+            <property name="objectName2" value="DARWINmain"/>
             <property name="jointName1" value="WAIST"/>
+            <property name="jointName2" value="WAIST"/>
             <property name="slidingFriction" value="0.5"/>
             <property name="staticFriction" value="0.5"/>
             <property name="cullingThresh" value="0.01"/>
         </item>
-        <item class="com.generalrobotix.ui.item.GrxCollisionPairItem" name="CP#DARWINmain_RLEG_JOINT5#floor_WAIST" select="true">
-            <property name="objectName2" value="floor"/>
-            <property name="objectName1" value="DARWINmain"/>
-            <property name="jointName2" value="WAIST"/>
-            <property name="jointName1" value="RLEG_JOINT5"/>
+        <item class="com.generalrobotix.ui.item.GrxCollisionPairItem" name="CP#floor_WAIST#DARWINmain_RLEG_JOINT5" select="true">
+            <property name="objectName1" value="floor"/>
+            <property name="objectName2" value="DARWINmain"/>
+            <property name="jointName1" value="WAIST"/>
+            <property name="jointName2" value="RLEG_JOINT5"/>
             <property name="slidingFriction" value="0.5"/>
             <property name="staticFriction" value="0.5"/>
             <property name="cullingThresh" value="0.01"/>
         </item>
-        <item class="com.generalrobotix.ui.item.GrxCollisionPairItem" name="CP#DARWINmain_LLEG_JOINT5#floor_WAIST" select="true">
-            <property name="objectName2" value="floor"/>
-            <property name="objectName1" value="DARWINmain"/>
-            <property name="jointName2" value="WAIST"/>
-            <property name="jointName1" value="LLEG_JOINT5"/>
+        <item class="com.generalrobotix.ui.item.GrxCollisionPairItem" name="CP#floor_WAIST#DARWINmain_LLEG_JOINT5" select="true">
+            <property name="objectName1" value="floor"/>
+            <property name="objectName2" value="DARWINmain"/>
+            <property name="jointName1" value="WAIST"/>
+            <property name="jointName2" value="LLEG_JOINT5"/>
             <property name="slidingFriction" value="0.5"/>
             <property name="staticFriction" value="0.5"/>
             <property name="cullingThresh" value="0.01"/>
