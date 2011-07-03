@@ -10,7 +10,7 @@
             <property name="gravity" value="9.8 "/>
             <property name="method" value="RUNGE_KUTTA"/>
         </item>
-        <item class="com.generalrobotix.ui.item.GrxModelItem" name="DARWINmain" select="true" url="$(CURRENT_DIR)/../../../../../../../prog/OpenHRP2/etc.110525/DARWIN/DARWINmain.wrl">
+        <item class="com.generalrobotix.ui.item.GrxModelItem" name="DARWINmain" select="true" url="$(CURRENT_DIR)/../../../../../../../prog/OpenHRP2/etc/DARWIN/DARWINmain.wrl">
             <property name="LARM_JOINT2.mode" value="HighGain"/>
             <property name="WAIST.rotation" value="0.0 1.0 0.0 0.0 "/>
             <property name="RLEG_JOINT4.angle" value="0.0 "/>
