@@ -1,0 +1,10 @@
+<launch>
+  <env name="LANG" value="C" />
+  <node name="rtm_naming" pkg="openrtm" type="rtm-naming" output="screen"
+	required="true" />
+
+  <node name="hrpsys_kill_all" pkg="hrpsys" type="hrpsys_kill_all.sh" />
+  <env name="PATH" value="$(find openhrp3)/bin:$(env PATH)" />
+  <node pkg="openhrp3" name="grxui" type="grxui.sh"
+	args="$(find hrpsys)/scripts/Darwin/Darwin.xml" />
+</launch>

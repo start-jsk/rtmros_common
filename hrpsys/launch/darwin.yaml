@@ -1,0 +1,54 @@
+##
+## - collada_joint_name : euslisp_joint_name (start with :)
+##
+
+lleg:
+  - LLEG_JOINT0     : lleg-crotch-y
+  - LLEG_JOINT1     : lleg-crotch-r
+  - LLEG_JOINT2     : lleg-crotch-p
+  - LLEG_JOINT3     : lleg-knee-p
+  - LLEG_JOINT4     : lleg-ankle-p
+  - LLEG_JOINT5     : lleg-ankle-r
+rleg:
+  - RLEG_JOINT0     : rleg-crotch-y
+  - RLEG_JOINT1     : rleg-crotch-r
+  - RLEG_JOINT2     : rleg-crotch-p
+  - RLEG_JOINT3     : rleg-knee-p
+  - RLEG_JOINT4     : rleg-ankle-p
+  - RLEG_JOINT5     : rleg-ankle-r
+rarm:
+  - RARM_JOINT0     : rarm-shoulder-p
+  - RARM_JOINT1     : rarm-shoulder-r
+  - RARM_JOINT2     : rarm-elbow-p
+larm:
+  - LARM_JOINT0     : larm-shoulder-p
+  - LARM_JOINT1     : larm-shoulder-r
+  - LARM_JOINT2     : larm-elbow-p
+head:
+  - HEAD_JOINT0     : head-neck-y
+  - HEAD_JOINT1     : head-neck-p
+
+##
+## end-coords
+##
+larm-end-coords:
+  translate : [0, 0, -0.10]
+rarm-end-coords:
+  translate : [0, 0, -0.10]
+lleg-end-coords:
+  translate : [0.00, 0, 0]
+rleg-end-coords:
+  translate : [0.00, 0, 0]
+head-end-coords:
+  translate : [0.08, 0, 0.13]
+  rotate    : [0, 1, 0, 90]
+
+##
+## reset-pose
+##
+angle-vector:
+  reset-pose : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  0.0, 0.0, 0.0, 0.0, 0.0,  0.0, 0.0,  0.0, 0.0, 0.0,  0.0, 0.0, 0.0]
+
+
+
+

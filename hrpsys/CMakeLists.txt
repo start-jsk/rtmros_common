@@ -50,11 +50,19 @@ endif(_download_failed)
 
 macro(compile_openhrp_model wrlfile workdir daename yamlname lispname)
   execute_process(COMMAND rosrun openhrp3 export-collada
-    -i ${wrlfile} -o ${workdir}/${daename})
+    -i ${wrlfile} -o ${workdir}/${daename}
+    RESULT_VARIABLE _export_collada_failed)
+  if (_export_collada_failed)
+    message(FATAL_ERROR "convert from ${wrlfile} to ${workdir}/${daename} failed")
+  endif(_export_collada_failed)
   execute_process(COMMAND rosrun euscollada collada2eus
     ${workdir}/${daename}
     ${PROJECT_SOURCE_DIR}/launch/${yamlname}
-    ${workdir}/${lispname})
+    ${workdir}/${lispname}
+    RESULT_VARIABLE _export_collada2eus)
+  if (_export_collada2eus)
+    message(FATAL_ERROR "convert from ${workdir}/${daename} to ${workdir}/${lispname} failed")
+  endif(_export_collada2eus)
 endmacro(compile_openhrp_model)
 
 compile_openhrp_model(
@@ -70,7 +78,12 @@ compile_openhrp_model(
   ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/sample1.wrl
   ${PROJECT_SOURCE_DIR}/scripts/SampleRobot
   SampleRobot.dae samplerobot.yaml samplerobot.l)
+compile_openhrp_model(
+  ${openhrp3_PACKAGE_PATH}/../../../../../prog/OpenHRP2/etc/DARWIN/DARWINmain.wrl
+  ${PROJECT_SOURCE_DIR}/scripts/Darwin
+  Darwin.dae darwin.yaml darwin.l)
 
 
-execute_process(COMMAND make WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/SampleRobot)
+add_subdirectory(${PROJECT_SOURCE_DIR}/scripts/SampleRobot)
+add_subdirectory(${PROJECT_SOURCE_DIR}/scripts/Darwin)
 
