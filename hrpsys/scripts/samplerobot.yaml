@@ -2,17 +2,6 @@
 ## - collada_joint_name : euslisp_joint_name (start with :)
 ##
 
-torso:
-  - WAIST_P      : torso-waist-p
-  - WAIST_R      : torso-waist-r
-  - CHEST        : torso-waist-y
-lleg:
-  - LLEG_HIP_Y      : lleg-crotch-y
-  - LLEG_HIP_R      : lleg-crotch-r
-  - LLEG_HIP_P      : lleg-crotch-p
-  - LLEG_KNEE       : lleg-knee-p
-  - LLEG_ANKLE_P    : lleg-ankle-p
-  - LLEG_ANKLE_R    : lleg-ankle-r
 rleg:
   - RLEG_HIP_Y      : rleg-crotch-y
   - RLEG_HIP_R      : rleg-crotch-r
@@ -28,6 +17,13 @@ rarm:
   - RARM_WRIST_Y    : rarm-wrist-y
   - RARM_WRIST_P    : rarm-wrist-p
   - RARM_WRIST_R    : rarm-wrist-r
+lleg:
+  - LLEG_HIP_Y      : lleg-crotch-y
+  - LLEG_HIP_R      : lleg-crotch-r
+  - LLEG_HIP_P      : lleg-crotch-p
+  - LLEG_KNEE       : lleg-knee-p
+  - LLEG_ANKLE_P    : lleg-ankle-p
+  - LLEG_ANKLE_R    : lleg-ankle-r
 larm:
   - LARM_SHOULDER_P : larm-shoulder-p
   - LARM_SHOULDER_R : larm-shoulder-r
@@ -36,6 +32,10 @@ larm:
   - LARM_WRIST_Y    : larm-wrist-y
   - LARM_WRIST_P    : larm-wrist-p
   - LARM_WRIST_R    : larm-wrist-r
+torso:
+  - WAIST_P      : torso-waist-p
+  - WAIST_R      : torso-waist-r
+  - CHEST        : torso-waist-y
 
 ##
 ## end-coords
@@ -56,7 +56,11 @@ head-end-coords:
 ## reset-pose
 ##
 angle-vector:
-  reset-pose : [0.0, 0.0, 0.0, 18.0,  9.0,  6.5, -36.5, 0.0, 0.0, 0.0, 18.0, -9.0, -6.5, -36.5, 0.0, 0.0, 0.0, -0.0, -0.0, -20.0, 47.0, -27.0, 0.0, -0.0, -0.0, -20.0, 47.0, -27.0, 0.0]
+  reset-pose : [0.0, 0.0, -20.0, 47.0, -27.0, 0.0, # rleg
+                0.0, 0.0, 0.0, -25.0,  9.0, -6.5,  36.5, # rarm
+		0.0, 0.0, -20.0, 47.0, -27.0, 0.0, # lleg
+		0.0, 0.0, 0.0, -25.0, -9.0, -6.5, -36.5, # larm
+		0.0, 0.0, 0.0] # torso
 
 
 
