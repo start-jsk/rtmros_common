@@ -62,10 +62,10 @@ macro(rtmbuild_genidl)
       WORKING_DIRECTORY ${_output_cpp_dir}
       DEPENDS ${_output_idl_hh})
     add_custom_command(OUTPUT ${_output_stub_lib}
-      COMMAND ${_rtmcxx_exe} `rtm-config --cflags` -I. ${${_prefix}_IDLLIBRARY_INCDIRS} -shared -o ${_output_stub_lib} ${_output_stub_cpp} `rtm-config --libs`
+      COMMAND ${_rtmcxx_exe} `rtm-config --cflags` -I. ${${_prefix}_IDLLIBRARY_INCDIRS} -shared -o ${_output_stub_lib} ${_output_stub_cpp} `rtm-config --libs` ${OPENHRP_PRIVATE_LIBRARIES}
       DEPENDS ${_output_stub_cpp})
     add_custom_command(OUTPUT ${_output_skel_lib}
-      COMMAND ${_rtmcxx_exe} `rtm-config --cflags` -I. ${${_prefix}_IDLLIBRARY_INCDIRS} -shared -o ${_output_skel_lib} ${_output_skel_cpp} `rtm-config --libs`
+      COMMAND ${_rtmcxx_exe} `rtm-config --cflags` -I. ${${_prefix}_IDLLIBRARY_INCDIRS} -shared -o ${_output_skel_lib} ${_output_skel_cpp} `rtm-config --libs` ${OPENHRP_PRIVATE_LIBRARIES}
       DEPENDS ${_output_skel_cpp})
     list(APPEND _autogen ${_output_stub_lib} ${_output_skel_lib})
   endforeach(_idl)
