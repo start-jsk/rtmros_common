@@ -1,15 +1,6 @@
 diff -r cf3fd4609ad5 server/ModelLoader/ColladaWriter.h
 --- a/server/ModelLoader/ColladaWriter.h	Fri Jun 10 17:55:38 2011 +0900
 +++ b/server/ModelLoader/ColladaWriter.h	Thu Jun 23 17:32:37 2011 +0900
-@@ -639,7 +639,7 @@
-             domJointRef pdomjoint = daeSafeCast<domJoint>(ktec->add(COLLADA_ELEMENT_JOINT));
-             string jointsid = str(boost::format("jointsid%d")%ilink);
-             pdomjoint->setSid( jointsid.c_str() );
--            pdomjoint->setName(str(boost::format("joint%d")%linkInfo.jointId).c_str());
-+            pdomjoint->setName( linkInfo.name );
-             vector<domAxis_constraintRef> vaxes(dof);
-             for(int ia = 0; ia < dof; ++ia) {
-                 vaxes[ia] = daeSafeCast<domAxis_constraint>(pdomjoint->add(colladaelement));
 @@ -771,7 +771,7 @@
              string rigidsid = str(boost::format("rigid%d")%ilink);
              pmout->vrigidbodysids.push_back(rigidsid);
