@@ -63,6 +63,8 @@
   <rosdep name="libpng12-dev" />
   <rosdep name="uuid-dev" />
 
+  <rosdep name="libxml2" />
+
 </package>
 
 

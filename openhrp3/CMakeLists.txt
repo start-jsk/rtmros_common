@@ -31,3 +31,9 @@ rtmbuild_genidl()
 
 #rtmbuild_add_executable(JoystickController share/OpenHRP-3.1/sample/JoystickControl/Controller/JoystickControllerComp.cpp share/OpenHRP-3.1/sample/JoystickControl/Controller/JoystickController.cpp)
 
+pkg_check_modules(LIBXML2 REQUIRED libxml-2.0)
+rtmbuild_add_executable(openhrp-scheduler src/openhrp-scheduler.cpp)
+include_directories(${LIBXML2_INCLUDE_DIRS})
+target_link_libraries(openhrp-scheduler ${LIBXML2_LIBRARIES})
+
+
