@@ -57,7 +57,7 @@ macro(compile_openhrp_model wrlfile workdir daename yamlname lispname)
   endif(_export_collada_failed)
   execute_process(COMMAND rosrun euscollada collada2eus
     ${workdir}/${daename}
-    ${PROJECT_SOURCE_DIR}/launch/${yamlname}
+    ${PROJECT_SOURCE_DIR}/scripts/${yamlname}
     ${workdir}/${lispname}
     RESULT_VARIABLE _export_collada2eus)
   if (_export_collada2eus)
