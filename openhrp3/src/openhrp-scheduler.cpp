@@ -283,19 +283,21 @@ int main(int argc, char* argv[])
 
 	//================== Model Load ===============================
 	waitForServer<ModelLoader, ModelLoader_var>("ModelLoader", cxt);
-	cerr << "ModelLoader: Loading " << Robot.first << " from " << Robot.second.url << endl;
+	cerr << "ModelLoader: Loading " << Robot.first << " from " << Robot.second.url << " ... ";
 	Robot.second.body = loadBodyInfo(Robot.second.url.c_str(), orb);
 	if(!Robot.second.body){
 		cerr << "ModelLoader: " << Robot.first << " cannot be loaded" << endl;
 		return 1;
 	}
+	cerr << Robot.second.body->name() << endl;
 	for ( map<string, ModelItem>::iterator it = Models.begin(); it != Models.end(); it++ ) {
 		it->second.body = loadBodyInfo(it->second.url.c_str(), orb);
-		cerr << "ModelLoader: Loading " << it->first << " from " << it->second.url << endl;
+		cerr << "ModelLoader: Loading " << it->first << " from " << it->second.url << " ... ";
 		if(!it->second.body){
 			cerr << "ModelLoader: " << it->first << " cannot be loaded" << endl;
 			return 1;
 		}
+		cerr << it->second.body->name() << endl;
 	}
 
 	//==================== OnlineViewer (GrxUI) setup ===============
@@ -308,8 +310,10 @@ int main(int argc, char* argv[])
 	}
 	try {
 		olv->load(Robot.second.body->name(), Robot.second.url.c_str());
+		cerr << "OnlineViewer: Loading " << Robot.second.body->name()  << " from " << Robot.second.url << endl;
 		for ( map<string, ModelItem>::iterator it = Models.begin(); it != Models.end(); it++ ) {
-			olv->load(it->second.body->name(), it->second.url.c_str());
+			olv->load(it->first.c_str(), it->second.url.c_str());
+			cerr << "OnlineViewer: Loading " << it->first << " from " << it->second.url << endl;
 		}
 		olv->clearLog();
 	} catch (CORBA::SystemException& ex) {
@@ -331,8 +335,8 @@ int main(int argc, char* argv[])
 	cout << "Character  : " << Robot.second.body->name() << endl;
 	dynamicsSimulator->registerCharacter(Robot.second.body->name(), Robot.second.body);
 	for ( map<string, ModelItem>::iterator it = Models.begin(); it != Models.end(); it++ ) {
-		cout << "Character  : " << it->second.body->name() << endl;
-		dynamicsSimulator->registerCharacter(it->second.body->name(), it->second.body);
+		cout << "Character  : " << it->first << endl;
+		dynamicsSimulator->registerCharacter(it->first.c_str(), it->second.body);
 	}
 
 	dynamicsSimulator->init(timeStep, DynamicsSimulator::RUNGE_KUTTA, DynamicsSimulator::ENABLE_SENSOR);
@@ -365,24 +369,48 @@ int main(int argc, char* argv[])
 		}
 		dynamicsSimulator->setCharacterLinkData(Robot.second.body->name(), it->first.c_str(), DynamicsSimulator::ABS_TRANSFORM, trans );
 	}
+	for ( map<string, ModelItem>::iterator mit = Models.begin(); mit != Models.end(); mit++ ) {
+		cout << "Character  : " << mit->first << ":" << mit->second.body->name() << endl;
+		for ( map<string, JointItem>::iterator it = mit->second.joint.begin(); it != mit->second.joint.end(); it++ ) {
+			DblSequence data;
+			data.length(1);
+			cerr << it->first << " : " << it->second.angle << ":" << ((it->second.mode==DynamicsSimulator::HIGH_GAIN_MODE)?"HIGH_GAIN_MODE":"TORQUE_MODE") << endl;
+			cerr << "      t:"  << it->second.translation << endl;
+			cerr << "      R:"  << it->second.rotation << endl;
+			// mode
+			data[0] = (it->second.mode==DynamicsSimulator::HIGH_GAIN_MODE)?1.0:0.0;
+			dynamicsSimulator->setCharacterLinkData(Robot.second.body->name(), it->first.c_str(), DynamicsSimulator::POSITION_GIVEN, data);
+			// joint angle
+			data[0] = it->second.angle;
+			dynamicsSimulator->setCharacterLinkData(Robot.second.body->name(), it->first.c_str(), DynamicsSimulator::JOINT_VALUE, data);
+			// translation
+			DblSequence trans;
+			trans.length(12);
+			for(int i=0; i<3; i++) trans[i] = it->second.translation[i];
+			for(int i=0; i<3; i++){
+				for(int j=0; j<3; j++) trans[3+3*i+j] = it->second.rotation(i,j);
+			}
+			dynamicsSimulator->setCharacterLinkData(mit->first.c_str(), it->first.c_str(), DynamicsSimulator::ABS_TRANSFORM, trans );
+		}
+	}
 	dynamicsSimulator->calcWorldForwardKinematics();
 
 
 	//================= CollisionDetector setup ======================
 
-	cout << "** Collision server setup ** " << endl;
+	cerr << "** Collision server setup ** " << endl;
 	DblSequence6 K, C;    // spring-damper parameters are not used now
 	K.length(0);
 	C.length(0);
 #if 0
 	for ( map<string, ModelItem>::iterator it = Models.begin(); it != Models.end(); it++ ) {
-		cout << "Collision : " << it->second.body->name() << " <> " << Robot.second.body->name() << endl;
+		cerr << "Collision : " << it->second.body->name() << " <> " << Robot.second.body->name() << endl;
 		dynamicsSimulator->registerCollisionCheckPair(it->second.body->name(), "", Robot.second.body->name(), "",
 													  0.5, 0.5, K, C, 0.01);
 	}
 #endif
 	for(vector<CollisionPairItem>::iterator it = Collisions.begin(); it != Collisions.end(); it++ ) {
-		cout << "Collision : " << ((Models.find(it->objectName1)!=Models.end())?Models[it->objectName1].body->name():Robot.second.body->name()) << "#" << it->jointName1 << " <> " << ((Models.find(it->objectName2)!=Models.end())?Models[it->objectName2].body->name():Robot.second.body->name()) << "#" << it->jointName2 << endl;
+		cerr << "Collision : " << ((Models.find(it->objectName1)!=Models.end())?Models[it->objectName1].body->name():Robot.second.body->name()) << "#" << it->jointName1 << " <> " << ((Models.find(it->objectName2)!=Models.end())?Models[it->objectName2].body->name():Robot.second.body->name()) << "#" << it->jointName2 << endl;
 		//cout << ((Models.find(it->objectName1)!=Models.end())?Models[it->objectName1].body->name():Robot.second.body->name()) << endl;
 		//cout << ((Models.find(it->objectName2)!=Models.end())?Models[it->objectName2].body->name():Robot.second.body->name()) << endl;
 		dynamicsSimulator->registerCollisionCheckPair(((Models.find(it->objectName1)!=Models.end())?Models[it->objectName1].body->name():Robot.second.body->name()),it->jointName1.c_str(),
@@ -394,8 +422,8 @@ int main(int argc, char* argv[])
 
 	// ==================  Controller setup ==========================
 	waitForServer<Controller, Controller_var>(controllerName, cxt);
-	cout << "** Controller server setup ** " << endl;
-	cout << Robot.second.body->name() << endl;
+	cerr << "** Controller server setup ** " << endl;
+	cerr << Robot.second.body->name() << endl;
 	Controller_var controller;
 	controller = checkCorbaServer <Controller, Controller_var> (controllerName, cxt);
 
@@ -408,7 +436,7 @@ int main(int argc, char* argv[])
 	controller->initialize();
 	controller->setTimeStep(controlTimeStep);
 	controller->start();
-	cout << "** Controller server start ** " << endl;
+	cerr << "** Controller server start ** " << endl;
 
 	// ==================  main loop   ======================
 	WorldState_var state;
