@@ -7,11 +7,14 @@
 #include <hrpCorba/Controller.hh>
 #include <hrpUtil/Tvmet3d.h>
 #include <fstream>
+#include <stdlib.h>
 
 #include <libxml/parser.h>
 #include <libxml/xmlreader.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+
+#include <rospack/rospack.h>
 
 using namespace std;
 using namespace hrp;
@@ -46,6 +49,19 @@ X_ptr checkCorbaServer(std::string n, CosNaming::NamingContext_var &cxt)
 		std::cerr << "Resolve " << n << " InvalidName" << std::endl;
 	}
 	return srv;
+}
+
+template <typename X, typename X_ptr>
+void waitForServer (std::string n, CosNaming::NamingContext_var &cxt) {
+	int waitForModelServer = 10;
+	while ( waitForModelServer-- > 0 ) {
+		if ( checkCorbaServer <X, X_ptr> (n, cxt) != NULL ) {
+			waitForModelServer = 0;
+		} else {
+			std::cerr << "Wait for " << n << "... " << std::endl;;
+		}
+		sleep(2);
+	}
 }
 
 //
@@ -145,7 +161,18 @@ int main(int argc, char* argv[])
 			std::cerr << xmlGetProp(node, (xmlChar *)"name") << "/" << xmlGetProp(node, (xmlChar *)"url") << std::endl;
 			string path = "file://";
 			path += (char *)xmlGetProp(node, (xmlChar *)"url");
-			path.replace(path.find_first_of("$(CURRENT_DIR)"),14, filename.substr(0, filename.find_last_of("/")));
+			if ( path.find("$(CURRENT_DIR)") != string::npos ) {
+				path.replace(path.find("$(CURRENT_DIR)"),14, filename.substr(0, filename.find_last_of("/")));
+			}
+			if ( path.find("$(PROJECT_DIR)") != string::npos ) {
+				rospack::ROSPack rp;
+				try {
+					rospack::Package *p = rp.get_pkg("openhrp3");
+					std::cerr << p->path << std::endl;
+					path.replace(path.find("$(PROJECT_DIR)"),14, p->path+"/share/OpenHRP-3.1/sample/project");
+				} catch (runtime_error &e) {
+				}
+			}
 			ModelItem m;
 			m.url = path;
 			xmlNodePtr cur_node = node->children;
@@ -255,6 +282,7 @@ int main(int argc, char* argv[])
 	}
 
 	//================== Model Load ===============================
+	waitForServer<ModelLoader, ModelLoader_var>("ModelLoader", cxt);
 	cerr << "ModelLoader: Loading " << Robot.first << " from " << Robot.second.url << endl;
 	Robot.second.body = loadBodyInfo(Robot.second.url.c_str(), orb);
 	if(!Robot.second.body){
@@ -272,6 +300,7 @@ int main(int argc, char* argv[])
 
 	//==================== OnlineViewer (GrxUI) setup ===============
 	cout << "** OnlineViewer GrxUI) setup ** " << endl;
+	waitForServer<OnlineViewer, OnlineViewer_var>("OnlineViewer", cxt);
 	OnlineViewer_var olv = getOnlineViewer(argc, argv);
 	if (CORBA::is_nil( olv )) {
 		std::cerr << "OnlineViewer not found" << std::endl;
@@ -338,20 +367,6 @@ int main(int argc, char* argv[])
 	}
 	dynamicsSimulator->calcWorldForwardKinematics();
 
-	// initial position and orientation
-	Vector3  waist_p;
-	Matrix33 waist_R;
-	waist_p = 0, 0, 0.7135;
-	waist_R = tvmet::identity<Matrix33>();
-
-	DblSequence trans;
-	trans.length(12);
-	for(int i=0; i<3; i++) trans[i]   = waist_p(i);
-	for(int i=0; i<3; i++){
-		for(int j=0; j<3; j++) trans[3+3*i+j] = waist_R(i,j);
-	}
-	dynamicsSimulator->setCharacterLinkData("DARWIN", "WAIST", DynamicsSimulator::ABS_TRANSFORM, trans );
-
 
 	//================= CollisionDetector setup ======================
 
@@ -378,6 +393,7 @@ int main(int argc, char* argv[])
 	dynamicsSimulator->initSimulation();
 
 	// ==================  Controller setup ==========================
+	waitForServer<Controller, Controller_var>(controllerName, cxt);
 	cout << "** Controller server setup ** " << endl;
 	cout << Robot.second.body->name() << endl;
 	Controller_var controller;
@@ -392,6 +408,7 @@ int main(int argc, char* argv[])
 	controller->initialize();
 	controller->setTimeStep(controlTimeStep);
 	controller->start();
+	cout << "** Controller server start ** " << endl;
 
 	// ==================  main loop   ======================
 	WorldState_var state;
@@ -428,14 +445,6 @@ int main(int argc, char* argv[])
 		} catch (CORBA::SystemException& ex) {
 			return 1;
 		}
-
-		// ===================== get robot status ===================
-		DblSequence_var waist_pR;  // position and attitude
-		DblSequence_var waist_vw;  // linear and angular velocities
-		dynamicsSimulator->getCharacterLinkData("DARWIN", "WAIST", DynamicsSimulator::ABS_TRANSFORM, waist_pR);
-		dynamicsSimulator->getCharacterLinkData("DARWIN", "WAIST", DynamicsSimulator::ABS_VELOCITY,  waist_vw);
-		std::cout << control << ":" << time << ":" << controlTime << ":" << waist_pR[2] << std::endl;
-
 
 		if(control)
 			controller->output();

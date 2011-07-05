@@ -9,6 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/openhrp3</url>
 
+  <depend package="roscpp" />
   <depend package="tvmet" />
   <depend package="openrtm" />
 
@@ -63,7 +64,9 @@
   <rosdep name="libpng12-dev" />
   <rosdep name="uuid-dev" />
 
+
   <rosdep name="libxml2" />
+
 
 </package>
 
