@@ -33,7 +33,7 @@ installed: $(HG_DIR) patched2 check-java-version check-hosts-ipv6
 	cd $(HG_DIR) && make install
 	#
 	# copy idl
-	#mkdir -p $(CURDIR)/idl && cp $(CURDIR)/share/OpenHRP-3.1/idl/OpenHRP/* ./idl/
+	mkdir -p $(CURDIR)/idl && cp $(CURDIR)/share/OpenHRP-3.1/idl/OpenHRP/* ./idl/
 	#
 	touch installed
 
