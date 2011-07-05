@@ -4,7 +4,12 @@
 	required="true" />
 
   <node name="hrpsys_kill_all" pkg="hrpsys" type="hrpsys_kill_all.sh" />
-  <env name="PATH" value="$(find openhrp3)/bin:$(env PATH)" />
-  <node pkg="openhrp3" name="grxui" type="grxui.sh"
+
+  <node pkg="openhrp3" name="grxui" type="grxui.sh" />
+  <node name="scheduler" pkg="openhrp3" type="openhrp-scheduler" output="screen"
 	args="$(find hrpsys)/scripts/SampleRobot/SampleRobot_inHouse.xml"/>
+
+  <env name="PATH" value="$(find openhrp3)/bin:$(env PATH)" />
+  <node name="controller" pkg="hrpsys" type="SampleRobot.sh" cwd = "node" />
+
 </launch>
