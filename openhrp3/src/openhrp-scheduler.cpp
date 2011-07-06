@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
 	size = xpathObj->nodesetval->nodeNr;
 	for (int i = 0; i < size; i++ ) {
 		xmlNodePtr node = xpathObj->nodesetval->nodeTab[i];
-		std::cout << i << " class:" << xmlGetProp(node, (xmlChar *)"class") << std::endl;
+		std::cerr << i << " class:" << xmlGetProp(node, (xmlChar *)"class") << std::endl;
 		if ( xmlStrEqual( xmlGetProp(node, (xmlChar *)"class"), (xmlChar *)"com.generalrobotix.ui.item.GrxSimulationItem")  ) {
 			xmlNodePtr cur_node = node->children;
 			while ( cur_node ) {
@@ -182,6 +182,7 @@ int main(int argc, char* argv[])
 					if ( xmlStrEqual(xmlGetProp(cur_node, (xmlChar *)"name"),(xmlChar *)"isRobot") ) {
 						if ( xmlStrEqual(xmlGetProp(cur_node, (xmlChar *)"value"),(xmlChar *)"true")) {
 							isRobot = true;
+							controllerName = (char *)xmlGetProp(node, (xmlChar *)"name");
 						}
 					} else if ( xmlStrEqual(xmlGetProp(cur_node, (xmlChar *)"name"),(xmlChar *)"controller") ) {
 						controllerName = (char *)(xmlGetProp(cur_node, (xmlChar *)"value"));
@@ -301,7 +302,7 @@ int main(int argc, char* argv[])
 	}
 
 	//==================== OnlineViewer (GrxUI) setup ===============
-	cout << "** OnlineViewer GrxUI) setup ** " << endl;
+	cerr << "** OnlineViewer GrxUI) setup ** " << endl;
 	waitForServer<OnlineViewer, OnlineViewer_var>("OnlineViewer", cxt);
 	OnlineViewer_var olv = getOnlineViewer(argc, argv);
 	if (CORBA::is_nil( olv )) {
@@ -331,11 +332,11 @@ int main(int argc, char* argv[])
 	}
 	DynamicsSimulator_var dynamicsSimulator = dynamicsSimulatorFactory->create();
 
-	cout << "** Dynamics server setup ** " << endl;
-	cout << "Character  : " << Robot.second.body->name() << endl;
+	cerr << "** Dynamics server setup ** " << endl;
+	cerr << "Character  : " << Robot.second.body->name() << endl;
 	dynamicsSimulator->registerCharacter(Robot.second.body->name(), Robot.second.body);
 	for ( map<string, ModelItem>::iterator it = Models.begin(); it != Models.end(); it++ ) {
-		cout << "Character  : " << it->first << endl;
+		cerr << "Character  : " << it->first << endl;
 		dynamicsSimulator->registerCharacter(it->first.c_str(), it->second.body);
 	}
 
@@ -347,7 +348,7 @@ int main(int argc, char* argv[])
 	g[2] = gravity;
 	dynamicsSimulator->setGVector(g);
 
-	cout << "Setup Character  Link Data : " << Robot.second.body->name() << endl;
+	cerr << "Setup Character  Link Data : " << Robot.second.body->name() << endl;
 	for ( map<string, JointItem>::iterator it = Robot.second.joint.begin(); it != Robot.second.joint.end(); it++ ) {
 		DblSequence data;
 		data.length(1);
@@ -370,7 +371,7 @@ int main(int argc, char* argv[])
 		dynamicsSimulator->setCharacterLinkData(Robot.second.body->name(), it->first.c_str(), DynamicsSimulator::ABS_TRANSFORM, trans );
 	}
 	for ( map<string, ModelItem>::iterator mit = Models.begin(); mit != Models.end(); mit++ ) {
-		cout << "Character  : " << mit->first << ":" << mit->second.body->name() << endl;
+		cerr << "Character  : " << mit->first << ":" << mit->second.body->name() << endl;
 		for ( map<string, JointItem>::iterator it = mit->second.joint.begin(); it != mit->second.joint.end(); it++ ) {
 			DblSequence data;
 			data.length(1);
@@ -411,8 +412,8 @@ int main(int argc, char* argv[])
 #endif
 	for(vector<CollisionPairItem>::iterator it = Collisions.begin(); it != Collisions.end(); it++ ) {
 		cerr << "Collision : " << ((Models.find(it->objectName1)!=Models.end())?Models[it->objectName1].body->name():Robot.second.body->name()) << "#" << it->jointName1 << " <> " << ((Models.find(it->objectName2)!=Models.end())?Models[it->objectName2].body->name():Robot.second.body->name()) << "#" << it->jointName2 << endl;
-		//cout << ((Models.find(it->objectName1)!=Models.end())?Models[it->objectName1].body->name():Robot.second.body->name()) << endl;
-		//cout << ((Models.find(it->objectName2)!=Models.end())?Models[it->objectName2].body->name():Robot.second.body->name()) << endl;
+		//cerr << ((Models.find(it->objectName1)!=Models.end())?Models[it->objectName1].body->name():Robot.second.body->name()) << endl;
+		//cerr << ((Models.find(it->objectName2)!=Models.end())?Models[it->objectName2].body->name():Robot.second.body->name()) << endl;
 		dynamicsSimulator->registerCollisionCheckPair(((Models.find(it->objectName1)!=Models.end())?Models[it->objectName1].body->name():Robot.second.body->name()),it->jointName1.c_str(),
 													  ((Models.find(it->objectName2)!=Models.end())?Models[it->objectName2].body->name():Robot.second.body->name()),it->jointName2.c_str(),
 													  it->staticFriction,it->slidingFriction,K,C,it->cullingThresh);
@@ -422,7 +423,7 @@ int main(int argc, char* argv[])
 
 	// ==================  Controller setup ==========================
 	waitForServer<Controller, Controller_var>(controllerName, cxt);
-	cerr << "** Controller server setup ** " << endl;
+	cerr << "** Controller server(" << controllerName << ") setup ** " << endl;
 	cerr << Robot.second.body->name() << endl;
 	Controller_var controller;
 	controller = checkCorbaServer <Controller, Controller_var> (controllerName, cxt);
