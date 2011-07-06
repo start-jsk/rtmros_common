@@ -14,8 +14,6 @@
 
   <node name="controller" pkg="hrpsys" type="openhrp-controller-bridge.sh" output="screen"
 	args="$(arg ROBOT_NAME) $(arg MODEL_FILE)" />
-  <aenv name="PATH" value="$(find openhrp3)/bin:$(env PATH)" />
-  <anode name="controller" pkg="hrpsys" type="HRP-4C.sh" output="screen" cwd="node" />
 
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
   <node name="hrpsys" pkg="hrpsys" type="hrpsyspy" output="screen"
