@@ -7,7 +7,7 @@ TARBALL_URL = http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/$(FILENAME)
 SOURCE_DIR  = build/rtshell-3.0.0
 UNPACK_CMD  = tar xzf
 MD5SUM_FILE = $(FILENAME).md5sum
-TARBALL_PATCH = rtcryo.patch
+TARBALL_PATCH = rtcryo.patch rtstodot.patch
 include $(shell rospack find mk)/download_unpack_build.mk
 
 installed.rtshell: wiped.rtshell $(SOURCE_DIR)/unpacked
