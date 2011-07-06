@@ -440,6 +440,8 @@ int main(int argc, char* argv[])
 	controller->setTimeStep(controlTimeStep);
 	controller->start();
 	cerr << "** Controller server start ** " << endl;
+	cerr << "   timeStep : " << timeStep << endl;
+	cerr << "   controleTimeStep : " << controlTimeStep << endl;
 
 	// ==================  main loop   ======================
 	WorldState_var state;
