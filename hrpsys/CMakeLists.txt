@@ -76,14 +76,13 @@ compile_openhrp_model(
   PA10.dae pa10.yaml pa10.l)
 compile_openhrp_model(
   ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/sample1.wrl
-  ${PROJECT_SOURCE_DIR}/scripts/SampleRobot
+  ${PROJECT_SOURCE_DIR}/scripts
   SampleRobot.dae samplerobot.yaml samplerobot.l)
 compile_openhrp_model(
   ${openhrp3_PACKAGE_PATH}/../../../../../prog/OpenHRP2/etc/DARWIN/DARWINmain.wrl
-  ${PROJECT_SOURCE_DIR}/scripts/Darwin
+  ${PROJECT_SOURCE_DIR}/scripts
   Darwin.dae darwin.yaml darwin.l)
 
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/scripts/SampleRobot)
-add_subdirectory(${PROJECT_SOURCE_DIR}/scripts/Darwin)
+
 
