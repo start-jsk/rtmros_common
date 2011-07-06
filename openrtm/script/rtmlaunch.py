@@ -32,9 +32,12 @@ def wait_component(cmd_path):
         raise rts_exceptions.NoSuchObjectError(cmd_path)
 
 def rtconnect(nameserver, tags):
+    import re
     for tag in tags:
         source_path = nameserver+"/"+tag.attributes.get("from").value
         dest_path   = nameserver+"/"+tag.attributes.get("to").value
+        source_path = re.sub("\$\(arg ROBOT_NAME\)",robotname,source_path);
+        dest_path = re.sub("\$\(arg ROBOT_NAME\)",robotname,dest_path);
         print >>sys.stderr, "Connect from ",source_path,"to",dest_path
         source_full_path = path.cmd_path_to_full_path(source_path)
         dest_full_path = path.cmd_path_to_full_path(dest_path)
@@ -74,6 +77,7 @@ def rtactivate(nameserver, tags):
     return 0
 
 def main():
+    global robotname;
     usage = '''Usage: %prog [launchfile]'''
     if len(sys.argv) <= 1:
         print >>sys.stderr, usage
@@ -87,6 +91,8 @@ def main():
         return 1
 
     nameserver = os.environ.get("RTCTREE_NAMESERVERS")
+    robotname = os.environ.get("ROBOT_NAME")
+    print robotname
     rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
     rtactivate(nameserver, parser.getElementsByTagName("rtactivate"))
 
