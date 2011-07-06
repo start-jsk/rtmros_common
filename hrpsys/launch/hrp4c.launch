@@ -1,15 +1,8 @@
 <launch>
-  <env name="LANG" value="C" />
-  <node name="rtm_naming" pkg="openrtm" type="rtm-naming" output="screen"
-	required="true" />
-
-  <node name="hrpsys_kill_all" pkg="hrpsys" type="hrpsys_kill_all.sh" />
-  <node name="hrp4c_model_download" pkg="hrpsys" type="hrp4c_model_download.sh" output="screen"/>
-
-  <node name="grxui" pkg="openhrp3" type="grxui.sh" />
-  <node name="scheduler" pkg="openhrp3" type="openhrp-scheduler"
-	args="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.xml"/>
-
-  <env name="PATH" value="$(find openhrp3)/bin:$(env PATH)" />
-  <node name="controller" pkg="hrpsys" type="HRP-4C.sh" cwd = "node" />
+  <node name="hrp4c_model_download" pkg="hrpsys" type="hrp4c_model_download.sh" />
+  <include file="$(find hrpsys)/launch/hrpsys.launch">
+    <arg name="ROBOT_NAME" value="HRP-4C" />
+    <arg name="GRXUI_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.xml" />
+    <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl" />
+  </include>
 </launch>

@@ -1,15 +1,7 @@
 <launch>
-  <env name="LANG" value="C" />
-  <node name="rtm_naming" pkg="openrtm" type="rtm-naming" output="screen"
-	required="true" />
-
-  <node name="hrpsys_kill_all" pkg="hrpsys" type="hrpsys_kill_all.sh" />
-
-  <node pkg="openhrp3" name="grxui" type="grxui.sh" />
-  <node name="scheduler" pkg="openhrp3" type="openhrp-scheduler" output="screen"
-	args="$(find hrpsys)/scripts/SampleRobot/SampleRobot_inHouse.xml"/>
-
-  <env name="PATH" value="$(find openhrp3)/bin:$(env PATH)" />
-  <node name="controller" pkg="hrpsys" type="SampleRobot.sh" cwd = "node" />
-
+  <include file="$(find hrpsys)/launch/hrpsys.launch">
+    <arg name="ROBOT_NAME" value="SampleRobot" />
+    <arg name="GRXUI_FILE" value="$(find hrpsys)/scripts/SampleRobot/SampleRobot_inHouse.xml" />
+    <arg name="MODEL_FILE" value="$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample1.wrl" />
+  </include>
 </launch>
