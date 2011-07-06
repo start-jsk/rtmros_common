@@ -366,6 +366,7 @@ int main(int argc, char* argv[])
 		DblSequence trans;
 		trans.length(12);
 		for(int i=0; i<3; i++) trans[i] = it->second.translation[i];
+		trans[2] += 0.5;
 		for(int i=0; i<3; i++){
 			for(int j=0; j<3; j++) trans[3+3*i+j] = it->second.rotation(i,j);
 		}
@@ -381,10 +382,10 @@ int main(int argc, char* argv[])
 			cerr << "      R:"  << it->second.rotation << endl;
 			// mode
 			data[0] = (it->second.mode==DynamicsSimulator::HIGH_GAIN_MODE)?1.0:0.0;
-			dynamicsSimulator->setCharacterLinkData(Robot.second.body->name(), it->first.c_str(), DynamicsSimulator::POSITION_GIVEN, data);
+			dynamicsSimulator->setCharacterLinkData(mit->second.body->name(), it->first.c_str(), DynamicsSimulator::POSITION_GIVEN, data);
 			// joint angle
 			data[0] = it->second.angle;
-			dynamicsSimulator->setCharacterLinkData(Robot.second.body->name(), it->first.c_str(), DynamicsSimulator::JOINT_VALUE, data);
+			dynamicsSimulator->setCharacterLinkData(mit->second.body->name(), it->first.c_str(), DynamicsSimulator::JOINT_VALUE, data);
 			// translation
 			DblSequence trans;
 			trans.length(12);
