@@ -1,4 +1,5 @@
 import rtm
+import hrp
 
 from rtm import *
 from OpenHRP import *
@@ -18,39 +19,50 @@ def activateComps():
 def createComps():
     global bridge, seq, seq_svc, sh, sh_svc, hgc
 
-    print "createComps -> findRTC : ",name+"(Robot)0"
+    print "[hrpsys.py] createComps -> findRTC : ",name+"(Robot)0"
     bridge = findRTC(name+"(Robot)0")
-    print "createComps -> bridge : ",bridge
+    print "[hrpsys.py] createComps -> bridge : ",bridge
 
     ms.load("SequencePlayer")
     seq = ms.create("SequencePlayer", "seq")
-    print "createComps -> SequencePlayer : ",seq
+
+    print "[hrpsys.py] createComps -> SequencePlayer : ",seq
     seq_svc = SequencePlayerServiceHelper.narrow(seq.service("service0"))
 
     ms.load("StateHolder");
     sh = ms.create("StateHolder", "StateHolder0")
-    print "createComps -> StateHolder : ",sh
+    print "[hrpsys.py] createComps -> StateHolder : ",sh
     sh_svc = StateHolderServiceHelper.narrow(sh.service("service0"));
 
     hgc = findRTC("HGcontroller0")
 
 def init(_name):
+    import time
     global ms
     global name
+
     name = _name
+    ms = None
 
-    ms = rtm.findRTCmanager()
-    print "createRTCmanager : ",ms
+    while ms == None :
+        time.sleep(1);
+        ms = rtm.findRTCmanager()
+        print "[hrpsys.py] wait for RTCmanager : ",ms
 
-    print "creating components"
+    while hrp.findModelLoader() == None: # seq uses modelloader
+        time.sleep(1);
+        print "[hrpsys.py] wait for ModelLoader"
+
+    print "[hrpsys.py] createRTCmanager : ",ms
+    print "[hrpsys.py] creating components"
     createComps()
 
-    print "connecting components"
+    print "[hrpsys.py] connecting components"
     connectComps()
 
-    print "activating components"
+    print "[hrpsys.py] activating components"
     activateComps()
-    print "initialized successfully"
+    print "[hrpsys.py] initialized successfully"
 
 
 if __name__ == '__main__':
