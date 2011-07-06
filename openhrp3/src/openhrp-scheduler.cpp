@@ -54,13 +54,14 @@ X_ptr checkCorbaServer(std::string n, CosNaming::NamingContext_var &cxt)
 template <typename X, typename X_ptr>
 void waitForServer (std::string n, CosNaming::NamingContext_var &cxt) {
 	int waitForModelServer = 10;
-	while ( waitForModelServer-- > 0 ) {
+	while ( --waitForModelServer > 0 ) {
 		if ( checkCorbaServer <X, X_ptr> (n, cxt) != NULL ) {
+			std::cerr << "Found " << n << "!!!" << std::endl;
 			waitForModelServer = 0;
 		} else {
-			std::cerr << "Wait for " << n << "... " << std::endl;;
+			std::cerr << "Wait for " << n << "... " << waitForModelServer << std::endl;;
 		}
-		sleep(2);
+		sleep(3);
 	}
 }
 
@@ -113,7 +114,8 @@ int main(int argc, char* argv[])
 	xmlInitParser();
 	xmlDocPtr doc = xmlParseFile(filename.c_str());
 	if ( doc == NULL ) {
-		std::cerr << "Error : unable to parse file " << argv[1] << std::endl;
+		std::cerr << "[" << argv[0] << "]Error : unable to parse file " << argv[1] << std::endl;
+		exit (1);
 	}
 
 	/* Create xpath evaluation context */
@@ -158,7 +160,7 @@ int main(int argc, char* argv[])
 				cur_node = cur_node->next;
 			}
 		} else if ( xmlStrEqual( xmlGetProp(node, (xmlChar *)"class"), (xmlChar *)"com.generalrobotix.ui.item.GrxModelItem")  ) {
-			std::cerr << xmlGetProp(node, (xmlChar *)"name") << "/" << xmlGetProp(node, (xmlChar *)"url") << std::endl;
+			std::cerr << "GrxModelItem name:" << xmlGetProp(node, (xmlChar *)"name") << ", url:" << xmlGetProp(node, (xmlChar *)"url") << std::endl;
 			string path = "file://";
 			path += (char *)xmlGetProp(node, (xmlChar *)"url");
 			if ( path.find("$(CURRENT_DIR)") != string::npos ) {
@@ -168,7 +170,6 @@ int main(int argc, char* argv[])
 				rospack::ROSPack rp;
 				try {
 					rospack::Package *p = rp.get_pkg("openhrp3");
-					std::cerr << p->path << std::endl;
 					path.replace(path.find("$(PROJECT_DIR)"),14, p->path+"/share/OpenHRP-3.1/sample/project");
 				} catch (runtime_error &e) {
 				}
