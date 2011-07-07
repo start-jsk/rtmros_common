@@ -45,9 +45,9 @@ larm-end-coords:
 rarm-end-coords:
   translate : [0, 0, -0.10]
 lleg-end-coords:
-  translate : [0.00, 0, 0]
+  translate : [0.00, 0, -0.07]
 rleg-end-coords:
-  translate : [0.00, 0, 0]
+  translate : [0.00, 0, -0.07]
 head-end-coords:
   translate : [0.08, 0, 0.13]
   rotate    : [0, 1, 0, 90]

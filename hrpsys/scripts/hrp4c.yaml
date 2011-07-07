@@ -2,17 +2,7 @@
 ## - collada_joint_name : euslisp_joint_name (start with :)
 ##
 
-torso:
-  - CHEST_P      : torso-waist-p
-  - CHEST_R      : torso-waist-r
-  - CHEST_Y      : torso-waist-y
-lleg:
-  - L_HIP_Y      : lleg-crotch-y
-  - L_HIP_R      : lleg-crotch-r
-  - L_HIP_P      : lleg-crotch-p
-  - L_KNEE_P     : lleg-knee-p
-  - L_ANKLE_P    : lleg-ankle-p
-  - L_ANKLE_R    : lleg-ankle-r
+
 rleg:
   - R_HIP_Y      : rleg-crotch-y
   - R_HIP_R      : rleg-crotch-r
@@ -20,6 +10,29 @@ rleg:
   - R_KNEE_P     : rleg-knee-p
   - R_ANKLE_P    : rleg-ankle-p
   - R_ANKLE_R    : rleg-ankle-r
+lleg:
+  - L_HIP_Y      : lleg-crotch-y
+  - L_HIP_R      : lleg-crotch-r
+  - L_HIP_P      : lleg-crotch-p
+  - L_KNEE_P     : lleg-knee-p
+  - L_ANKLE_P    : lleg-ankle-p
+  - L_ANKLE_R    : lleg-ankle-r
+torso:
+  - CHEST_P      : torso-waist-p
+  - CHEST_R      : torso-waist-r
+  - CHEST_Y      : torso-waist-y
+head:
+  - NECK_Y       : head-neck-y
+  - NECK_R       : head-neck-r
+  - NECK_P       : head-neck-p
+  - EYEBROW_P    : head-eyebrow-p
+  - EYELID_P     : head-eyelid-p
+  - EYE_Y        : head-eye-y
+  - EYE_P        : head-eye-p
+  - MOUTH_P      : head-mouth-p
+  - UPPERLIP_P   : head-upperlip-p
+  - LOWERLIP_P   : head-lowerlip-p
+  - CHEEK_P      : head-cheek-p
 rarm:
   - R_SHOULDER_P : rarm-shoulder-p
   - R_SHOULDER_R : rarm-shoulder-r
@@ -27,6 +40,8 @@ rarm:
   - R_ELBOW_P    : rarm-elbow-p
   - R_WRIST_Y    : rarm-wrist-y
   - R_WRIST_R    : rarm-wrist-r
+  - R_HAND_J0    : rarm-hand-j0
+  - R_HAND_J1    : rarm-hand-j1
 larm:
   - L_SHOULDER_P : larm-shoulder-p
   - L_SHOULDER_R : larm-shoulder-r
@@ -34,10 +49,9 @@ larm:
   - L_ELBOW_P    : larm-elbow-p
   - L_WRIST_Y    : larm-wrist-y
   - L_WRIST_R    : larm-wrist-r
-head:
-  - NECK_Y       : head-neck-y
-  - NECK_R       : head-neck-r
-  - NECK_P       : head-neck-p
+  - L_HAND_J0    : larm-hand-j0
+  - L_HAND_J1    : larm-hand-j1
+
 
 ##
 ## end-coords
@@ -58,4 +72,9 @@ head-end-coords:
 ## reset-pose
 ##
 angle-vector:
-  reset-pose : [0.0, 0.0, 0.0, 0.0, 10.0, -30.0, -30.0, 0.0, 0.0, 0.0, -10.0, 30.0, -30.0, 0.0, 0.0, 0.0, 0.0, -20.0, 40.0, -20.0, 0.0, 0.0, 0.0, -20.0, 40.0, -20.0, 0.0, 0.0, 0.0, 0.0]
+  reset-pose : [0.000,  0.000,-13.953, 28.142,-14.189,  0.000,
+                0.000,  0.000,-13.953, 28.142,-14.189,  0.000,
+                0.000,  0.000,  0.000,
+                0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,   0.000,
+                0.000,-12.976, -3.655, -0.680,-29.746,  0.000,  0.000,  0.000,
+                0.000, 12.976,  3.655,  0.680,-29.746,  0.000,  0.000,  0.000]
