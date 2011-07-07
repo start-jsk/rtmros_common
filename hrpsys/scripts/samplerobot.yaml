@@ -3,9 +3,9 @@
 ##
 
 rleg:
-  - RLEG_HIP_Y      : rleg-crotch-y
   - RLEG_HIP_R      : rleg-crotch-r
   - RLEG_HIP_P      : rleg-crotch-p
+  - RLEG_HIP_Y      : rleg-crotch-y
   - RLEG_KNEE       : rleg-knee-p
   - RLEG_ANKLE_P    : rleg-ankle-p
   - RLEG_ANKLE_R    : rleg-ankle-r
@@ -18,9 +18,9 @@ rarm:
   - RARM_WRIST_P    : rarm-wrist-p
   - RARM_WRIST_R    : rarm-wrist-r
 lleg:
-  - LLEG_HIP_Y      : lleg-crotch-y
   - LLEG_HIP_R      : lleg-crotch-r
   - LLEG_HIP_P      : lleg-crotch-p
+  - LLEG_HIP_Y      : lleg-crotch-y
   - LLEG_KNEE       : lleg-knee-p
   - LLEG_ANKLE_P    : lleg-ankle-p
   - LLEG_ANKLE_R    : lleg-ankle-r
@@ -56,9 +56,9 @@ head-end-coords:
 ## reset-pose
 ##
 angle-vector:
-  reset-pose : [0.0, 0.0, -20.0, 47.0, -27.0, 0.0, # rleg
+  reset-pose : [0.0, -20.0, 0.0, 47.0, -27.0, 0.0, # rleg
                 0.0, 0.0, 0.0, -25.0,  9.0, -6.5,  36.5, # rarm
-		0.0, 0.0, -20.0, 47.0, -27.0, 0.0, # lleg
+		0.0, -20.0, 0.0, 47.0, -27.0, 0.0, # lleg
 		0.0, 0.0, 0.0, -25.0, -9.0, -6.5, -36.5, # larm
 		0.0, 0.0, 0.0] # torso
 
