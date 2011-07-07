@@ -82,6 +82,6 @@ clean:
 	-cd $(HG_DIR) && make clean
 
 wipe: clean
-	-rm -fr share
+	-rm -fr share build
 	-sudo rm /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
 	-sudo rm /usr/lib/eclipse/plugins/jp.go.aist.rtm.*
