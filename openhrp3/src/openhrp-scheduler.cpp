@@ -109,6 +109,8 @@ int main(int argc, char* argv[])
 	// controller
 	double controlTimeStep = 0.002;
 	string controllerName;
+	//
+	double logTimeStep = 0.050;
 
 	/* Load XML document */
 	xmlInitParser();
@@ -226,6 +228,16 @@ int main(int argc, char* argv[])
 				Models.insert(pair<string, ModelItem>(n, m));
 			}
 		} else if ( xmlStrEqual( xmlGetProp(node, (xmlChar *)"class"), (xmlChar *)"com.generalrobotix.ui.item.GrxWorldStateItem") ) {
+			CollisionPairItem c;
+			xmlNodePtr cur_node = node->children;
+			while ( cur_node ) {
+				if ( cur_node->type == XML_ELEMENT_NODE ) {
+					if ( xmlStrEqual(xmlGetProp(cur_node, (xmlChar *)"name"),(xmlChar *)"logTimeStep") ) {
+						logTimeStep = atof((char *)(xmlGetProp(cur_node, (xmlChar *)"value")));
+					}
+				}
+				cur_node = cur_node->next;
+			}
 		} else if ( xmlStrEqual ( xmlGetProp(node, (xmlChar *)"class"), (xmlChar *)"com.generalrobotix.ui.item.GrxCollisionPairItem")  ) {
 			CollisionPairItem c;
 			xmlNodePtr cur_node = node->children;
@@ -473,8 +485,10 @@ int main(int argc, char* argv[])
 		// ================== viewer update ====================
 
 		try {
-			dynamicsSimulator -> getWorldState( state );
-			olv->update( state );
+			if ((i % (int)(logTimeStep/controlTimeStep))==0) {
+				dynamicsSimulator -> getWorldState( state );
+				olv->update( state );
+			}
 		} catch (CORBA::SystemException& ex) {
 			return 1;
 		}
