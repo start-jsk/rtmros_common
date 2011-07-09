@@ -37,7 +37,6 @@ def createComps():
     hgc = findRTC("HGcontroller0")
 
 def init(_name):
-    import time
     global ms
     global name
 
@@ -48,10 +47,6 @@ def init(_name):
         time.sleep(1);
         ms = rtm.findRTCmanager()
         print "[hrpsys.py] wait for RTCmanager : ",ms
-
-    while hrp.findModelLoader() == None: # seq uses modelloader
-        time.sleep(1);
-        print "[hrpsys.py] wait for ModelLoader"
 
     print "[hrpsys.py] createRTCmanager : ",ms
     print "[hrpsys.py] creating components"
@@ -66,11 +61,19 @@ def init(_name):
 
 
 if __name__ == '__main__':
-    import sys,os
+    import sys,os,time
     if len(sys.argv) < 2 :
-        sys.exit("Usage : "+sys.argv[0]+" [ROBOTNAME]")
+        sys.exit("Usage : "+sys.argv[0]+" [XMLFILE]")
 
+    while hrp.findModelLoader() == None: # seq uses modelloader
+        time.sleep(3);
+        print "[hrpsys.py] wait for ModelLoader"
+
+    prog=os.popen("rospack find openhrp3").read().rstrip()+"/bin/extract-robotname "+sys.argv[1];
+    modelname=os.popen(prog).read().rstrip()
     os.environ['LD_LIBRARY_PATH']=os.environ['LD_LIBRARY_PATH']+":"+os.popen("rospack find hrpsys").read().rstrip()+"/lib"
-    init(sys.argv[1])
+
+    print "[hrpsys.py] start hrpsys for ",modelname
+    init(modelname)
 
 
