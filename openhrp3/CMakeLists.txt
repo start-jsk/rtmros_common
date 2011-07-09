@@ -36,4 +36,10 @@ rtmbuild_add_executable(openhrp-scheduler src/openhrp-scheduler.cpp)
 include_directories(${LIBXML2_INCLUDE_DIRS})
 target_link_libraries(openhrp-scheduler ${LIBXML2_LIBRARIES})
 
+rtmbuild_add_executable(extract-robotname src/extract-modelfile.cpp)
+rtmbuild_add_executable(extract-modelpath src/extract-modelfile.cpp)
+target_link_libraries(extract-robotname ${LIBXML2_LIBRARIES})
+target_link_libraries(extract-modelpath ${LIBXML2_LIBRARIES})
+rosbuild_add_compile_flags(extract-robotname -DROBOTNAME)
+rosbuild_add_compile_flags(extract-modelpath -DMODELPATH)
 
