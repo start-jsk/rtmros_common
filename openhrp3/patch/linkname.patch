@@ -13,12 +13,16 @@ diff -r cf3fd4609ad5 hrplib/hrpModel/Link.h
 diff -r cf3fd4609ad5 hrplib/hrpModel/ModelLoaderUtil.cpp
 --- a/hrplib/hrpModel/ModelLoaderUtil.cpp	Fri Jun 10 17:55:38 2011 +0900
 +++ b/hrplib/hrpModel/ModelLoaderUtil.cpp	Sun Jun 19 23:00:56 2011 +0900
-@@ -201,6 +201,8 @@
+@@ -201,6 +201,12 @@
          
      CORBA::String_var name0 = linkInfo.name;
      link->name = string( name0 );
 +    link->joint_name = string( name0 );
-+    link->link_name = linkInfo.segments[0].name;
++    if ( linkInfo.segments.length() > 0 ) {
++        link->link_name = linkInfo.segments[0].name;
++    } else {
++        link->link_name = string ( name0 );
++    }
      link->jointId = jointId;
          
      Vector3 relPos(linkInfo.translation[0], linkInfo.translation[1], linkInfo.translation[2]);
