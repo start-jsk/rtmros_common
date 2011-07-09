@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find hrpsys)/launch/hrpsys.launch">
+    <arg name="MODEL_FILE" value="$(find collada_robots)/data/robots/willowgarage-pr2.dae" />
+  </include>
+</launch>

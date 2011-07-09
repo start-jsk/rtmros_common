@@ -1,8 +1,6 @@
 <launch>
   <node name="hrp4c_model_download" pkg="hrpsys" type="hrp4c_model_download.sh" />
   <include file="$(find hrpsys)/launch/hrpsys.launch">
-    <arg name="ROBOT_NAME" value="HRP-4C" />
-    <arg name="GRXUI_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.xml" />
-    <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl" />
+    <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.xml" />
   </include>
 </launch>
