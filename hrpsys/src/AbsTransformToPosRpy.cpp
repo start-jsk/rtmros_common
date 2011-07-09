@@ -104,11 +104,11 @@ RTC::ReturnCode_t AbsTransformToPosRpy::onDeactivated(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t AbsTransformToPosRpy::onExecute(RTC::UniqueId ec_id)
 {
-  //std::cerr << "@onExecute, pr:" << m_prIn.isNew () << std::endl;
+  std::cerr << "@Execute name : " << getInstanceName() << "/" << ec_id << ", pr:" << m_prIn.isNew () << std::endl;
   if ( m_prIn.isNew () ) {
     m_prIn.read();
     //
-    //for ( unsigned int i = 0; i < m_pr.data.length() ; i++ ) std::cerr << m_pr.data[i] << " "; std::cerr << std::endl;
+    for ( unsigned int i = 0; i < m_pr.data.length() ; i++ ) std::cerr << m_pr.data[i] << " "; std::cerr << std::endl;
 
   }else {
     return RTC::RTC_OK;
