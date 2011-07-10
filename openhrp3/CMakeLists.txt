@@ -19,6 +19,29 @@ if (_make_failed)
 endif(_make_failed)
 
 #rosbuild_init()
+set(CollisionDetector.idl_depends
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/ModelLoader.hh
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/World.hh)
+set(Controller.idl_depends
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/OpenHRPCommon.hh
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/DynamicsSimulator.hh
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/ViewSimulator.hh)
+set(DynamicsSimulator.idl_depends
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/CollisionDetector.hh)
+set(ModelLoader.idl_depends
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/OpenHRPCommon.hh)
+set(OnlineViewer.idl_depends
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/OpenHRPCommon.hh)
+set(PathPlanner.idl_depends
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/OpenHRPCommon.hh
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/CollisionDetector.hh
+ ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/DynamicsSimulator.hh)
+set(PathPlanner.idl_depends
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/ModelLoader.hh)
+set(ViewSimulator.idl_depends
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/World.hh)
+set(World.idl_depends
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/ModelLoader.hh)
 rtmbuild_init()
 
 #set the default path for built executables to the "bin" directory
