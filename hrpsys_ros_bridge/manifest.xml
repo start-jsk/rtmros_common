@@ -11,6 +11,7 @@
 
   <depend package="openhrp3"/>
   <depend package="hrpsys"/>
+  <depend package="rviz"/>
 
   <depend package="roscpp"/>
 
