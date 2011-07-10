@@ -54,7 +54,7 @@ macro(rtmbuild_genidl)
     # call the  rule to compile idl
     add_custom_command(OUTPUT ${_output_idl_hh}
       COMMAND ${_genidl_exe} `rtm-config --idlflags` -I`rtm-config --prefix`/include/rtm/idl -I`rospack find openhrp3`/share/OpenHRP-3.1/idl -C${_output_cpp_dir} ${_input_idl}
-      DEPENDS ${_input})
+      DEPENDS ${_input_idl} ${${_idl}_depends})
     add_custom_command(OUTPUT ${_output_stub_cpp} ${_output_skel_cpp}
       COMMAND cp ${_input_idl} ${_output_cpp_dir}
       COMMAND rtm-skelwrapper --include-dir="" --skel-suffix=Skel --stub-suffix=Stub  --idl-file=${_idl}
