@@ -87,7 +87,7 @@ clean:
 
 wipe: clean
 	-rm -fr share build
-	-sudo rm /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
-	-sudo rm /usr/lib/eclipse/plugins/jp.go.aist.rtm.*
+	-sudo rm -f /usr/lib/eclipse/plugins/com.generalrobotix.ui.grxui_0.9.8.jar
+	-sudo rm -f /usr/lib/eclipse/plugins/jp.go.aist.rtm.*
 
 
