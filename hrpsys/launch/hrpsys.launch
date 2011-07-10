@@ -22,10 +22,10 @@
 	args="$(arg MODEL_FILE)" respawn="true" />
 
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
-  <anode name="hrpsys" pkg="hrpsys" type="hrpsyspy" output="screen"
+  <node name="hrpsys" pkg="hrpsys" type="hrpsyspy" output="screen"
 	args='$(find hrpsys)/scripts/hrpsys.py $(arg MODEL_FILE)' respawn="true" />
 
-  <anode name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="screen"
+  <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="screen"
 	args="$(arg openrtm_args)" respawn="true" />
 
   <!-- BEGIN:openrtm connection -->
