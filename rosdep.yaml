@@ -121,7 +121,7 @@ collada-dom:
      sudo add-apt-repository ppa:openrave/release
      sudo apt-get update
    fi
-   sudo apt-get install collada-dom
+   sudo apt-get -y install collada-dom
 
 # for hrpsys
 # libncurses5-dev
