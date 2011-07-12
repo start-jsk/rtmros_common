@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ "`lsb_release -cs`" = "lucid" -a "`grep ^::1 /etc/hosts`" ]; then
+    echo -e "\e[1;31mYou must comment out \\"::1  localhost\\" line from /etc/hosts\e[m"
+    exit 1
+fi
 if [ "`pgrep omniNames -u 0`" ]; then
     echo -e "\e[1;31mrunning omniNames invoked by root\e[m"
     echo -e "\e[1;31mtry \`sudo /etc/init.d/omniorb4-nameserver stop\`\e[m"
