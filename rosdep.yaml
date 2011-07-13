@@ -4,7 +4,7 @@ sun-java6-jdk:
      echo "deb http://archive.canonical.com/ubuntu `lsb_release -cs` partner" |  sudo tee /etc/apt/sources.list.d/canonical.list
      sudo aptitude update
    fi
-   sudo aptitude -y install sun-java6-jdk sun-java6-fonts sun-java6-plugin
+   #sudo aptitude -y install sun-java6-jdk sun-java6-fonts sun-java6-plugin
 jython:
   ubuntu: jython
 libreadline-java:
