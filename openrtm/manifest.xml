@@ -12,6 +12,8 @@
   <rosdep name="openrtm" />
   <rosdep name="tix" />
 
+  <rosdep name="xdot" />
+
   <export>
     <python path="${prefix}/src/openrtm" />
   </export>
