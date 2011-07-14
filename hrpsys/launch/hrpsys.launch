@@ -6,6 +6,8 @@
 				  -o "exec_cxt.periodic.type:SimulationEC" -o "manager.modules.load_path:$(find openhrp3)/lib" -o "manager.modules.preload:SimulationEC.so" ' />
   <!-- END:openrtm setting -->
   <arg name="MODEL_FILE" />
+  <arg name="SCHEDULER_ARGS" default=""/>
+  <arg name="RESPAWN" default="true"/>
   <env name="LANG" value="C" />
 
   <node name="rtm_naming" pkg="openrtm" type="rtm-naming" required="true" />
@@ -13,24 +15,24 @@
   <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
 
   <node name="grxui" pkg="openhrp3" type="grxui.sh" />
-  <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="true" /> <!-- loading dae files crushes model loader -->
+  <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" /> <!-- loading dae files crushes model loader -->
 
   <node name="scheduler" pkg="openhrp3" type="openhrp-scheduler" output="screen"
-	args="$(arg MODEL_FILE)" respawn="true" />  <!-- nosim -->
+	args="$(arg MODEL_FILE) $(arg SCHEDULER_ARGS)" respawn="$(arg RESPAWN)" />  <!-- nosim -->
 
   <node name="controller" pkg="hrpsys" type="openhrp-controller-bridge.sh" output="screen"
-	args="$(arg MODEL_FILE)" respawn="true" />
+	args="$(arg MODEL_FILE)" respawn="$(arg RESPAWN)" />
 
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
   <node name="hrpsys" pkg="hrpsys" type="hrpsyspy" output="screen"
-	args='$(find hrpsys)/scripts/hrpsys.py $(arg MODEL_FILE)' respawn="true" />
+	args='$(find hrpsys)/scripts/hrpsys.py $(arg MODEL_FILE)' respawn="$(arg RESPAWN)" />
 
   <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="screen"
-	args="$(arg openrtm_args)" respawn="true" />
+	args="$(arg openrtm_args)" respawn="$(arg RESPAWN)" />
 
   <!-- BEGIN:openrtm connection -->
   <arg name="ROBOT_NAME" value="dummy" />
-  <node name="rtmlaunch" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hrpsys)/launch/hrpsys.launch" respawn="true" />
+  <node name="rtmlaunch" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hrpsys)/launch/hrpsys.launch" respawn="$(arg RESPAWN)" />
   <rtconnect from="$(arg ROBOT_NAME)(Robot)0.rtc:pr" to="AbsTransformToPosRpy0.rtc:pr" />
   <rtconnect from="AbsTransformToPosRpy0.rtc:basePos"  to="StateHolder0.rtc:basePosIn" />
   <rtconnect from="AbsTransformToPosRpy0.rtc:baseRpy"  to="StateHolder0.rtc:baseRpyIn" />
