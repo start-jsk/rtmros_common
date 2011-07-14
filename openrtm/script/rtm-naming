@@ -5,9 +5,12 @@ if [ "`lsb_release -cs`" = "lucid" -a "`grep ^::1 /etc/hosts`" ]; then
     exit 1
 fi
 if [ "`pgrep omniNames -u 0`" ]; then
-    echo -e "\e[1;31mrunning omniNames invoked by root\e[m"
-    echo -e "\e[1;31mtry \`sudo /etc/init.d/omniorb4-nameserver stop\`\e[m"
-    exit 1
+    gksu /etc/init.d/omniorb4-nameserver stop
+    if [ $? != 0 ]; then
+	echo -e "\e[1;31mrunning omniNames invoked by root\e[m" 1>&2
+	echo -e "\e[1;31mtry \`sudo /etc/init.d/omniorb4-nameserver stop\`\e[m" 1>&2
+	exit 1;
+    fi
 fi
 pkill -KILL omniNames
 /usr/bin/rtm-naming
