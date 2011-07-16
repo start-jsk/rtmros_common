@@ -4,7 +4,7 @@ sun-java6-jdk:
      echo "deb http://archive.canonical.com/ubuntu `lsb_release -cs` partner" |  sudo tee /etc/apt/sources.list.d/canonical.list
      sudo aptitude update
    fi
-   sudo aptitude -y --force-yes install sun-java6-jdk sun-java6-fonts sun-java6-plugin
+   sudo apt-get -y --force-yes install sun-java6-jdk sun-java6-fonts sun-java6-plugin
 jython:
   ubuntu: jython
 libreadline-java:
@@ -113,7 +113,7 @@ openrtm:
      echo "deb http://www.openrtm.org/pub/Linux/ubuntu `lsb_release -cs` main" |  sudo tee /etc/apt/sources.list.d/openrtm.list
      sudo apt-get update
    fi
-   sudo aptitue -y --force-yes install openrtm-aist openrtm-aist-doc openrtm-aist-dev openrtm-aist-example openrtm-aist-python openrtm-aist-python-example
+   sudo apt-get -y --force-yes install openrtm-aist openrtm-aist-doc openrtm-aist-dev openrtm-aist-example openrtm-aist-python openrtm-aist-python-example
 
 collada-dom:
   ubuntu: |
@@ -121,7 +121,7 @@ collada-dom:
      sudo add-apt-repository ppa:openrave/release
      sudo apt-get update
    fi
-   sudo aptitude -y --force-yes install collada-dom
+   sudo apt-get -y --force-yes install collada-dom
 
 # for hrpsys
 # libncurses5-dev
