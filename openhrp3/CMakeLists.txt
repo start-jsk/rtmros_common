@@ -35,8 +35,7 @@ set(OnlineViewer.idl_depends
 set(PathPlanner.idl_depends
   ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/OpenHRPCommon.hh
   ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/CollisionDetector.hh
- ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/DynamicsSimulator.hh)
-set(PathPlanner.idl_depends
+  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/DynamicsSimulator.hh
   ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/ModelLoader.hh)
 set(ViewSimulator.idl_depends
   ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/World.hh)
