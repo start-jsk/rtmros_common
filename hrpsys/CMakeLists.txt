@@ -69,12 +69,12 @@ endmacro(compile_openhrp_model)
 
 compile_openhrp_model(
   ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl
-  ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/
+  ${PROJECT_SOURCE_DIR}/scripts
   HRP4C.dae hrp4c.yaml hrp4c.l)
 rosbuild_find_ros_package(openhrp3)
 compile_openhrp_model(
   ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl
-  ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/PA10/
+  ${PROJECT_SOURCE_DIR}/scripts
   PA10.dae pa10.yaml pa10.l)
 compile_openhrp_model(
   ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/sample1.wrl
