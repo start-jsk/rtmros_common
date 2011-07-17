@@ -153,6 +153,14 @@ public:
 	double slidingFriction;
 	double staticFriction;
 	double cullingThresh;
+
+	CollisionPairItem() {
+		jointName1 = "";
+		jointName2 = "";
+		slidingFriction = 0.5;
+		staticFriction = 0.5;
+		cullingThresh = 0.01;
+	}
 };
 
 class JointItem {
@@ -434,11 +442,6 @@ public:
 			CollisionPairItem c;
 			c.objectName1 = "floor";
 			c.objectName2 = Robot.first;
-			c.jointName1 = "";
-			c.jointName2 = "";
-			c.slidingFriction = 0.5;
-			c.staticFriction = 0.5;
-			c.cullingThresh = 0.01;
 			Collisions.push_back(c);
 		}
 	}
@@ -463,10 +466,10 @@ public:
 		cerr << "[openhrp-scheduler] ModelLoader: Loading " << Robot.first << " from " << Robot.second.url << " ... ";
 		Robot.second.body = loadBodyInfo(Robot.second.url.c_str(), orb);
 		if(!Robot.second.body){
-			cerr << "[openhrp-scheduler] ModelLoader: " << Robot.first << " cannot be loaded" << endl;
+			cerr << endl << "[openhrp-scheduler] ModelLoader: " << Robot.first << " cannot be loaded" << endl;
 			exit(1);
 		}
-		cerr << "[openhrp-scheduler] " << Robot.second.body->name() << endl;
+		cerr << Robot.second.body->name() << endl;
 		controllerName = Robot.second.body->name();
 		for ( map<string, ModelItem>::iterator it = Models.begin(); it != Models.end(); it++ ) {
 			it->second.body = loadBodyInfo(it->second.url.c_str(), orb);
@@ -588,11 +591,11 @@ public:
 		}
 #endif
 		for(vector<CollisionPairItem>::iterator it = Collisions.begin(); it != Collisions.end(); it++ ) {
-			cerr << "[openhrp-scheduler] Collision : " << ((Models.find(it->objectName1)!=Models.end())?Models[it->objectName1].body->name():Robot.second.body->name()) << "#" << it->jointName1 << " <> " << ((Models.find(it->objectName2)!=Models.end())?Models[it->objectName2].body->name():Robot.second.body->name()) << "#" << it->jointName2 << endl;
-			//cerr << ((Models.find(it->objectName1)!=Models.end())?Models[it->objectName1].body->name():Robot.second.body->name()) << endl;
-			//cerr << ((Models.find(it->objectName2)!=Models.end())?Models[it->objectName2].body->name():Robot.second.body->name()) << endl;
-			dynamicsSimulator->registerCollisionCheckPair(((Models.find(it->objectName1)!=Models.end())?Models[it->objectName1].body->name():Robot.second.body->name()),it->jointName1.c_str(),
-														  ((Models.find(it->objectName2)!=Models.end())?Models[it->objectName2].body->name():Robot.second.body->name()),it->jointName2.c_str(),
+			string objectName1 = (Models.find(it->objectName1)!=Models.end())?it->objectName1:Robot.second.body->name();
+			string objectName2 = (Models.find(it->objectName2)!=Models.end())?it->objectName2:Robot.second.body->name();
+			cerr << "[openhrp-scheduler] Collision : " << objectName1 << "#" << it->jointName1 << " <> " << objectName2 << "#" << it->jointName2 << " Friction static : "<< it->staticFriction << " slideing : " << it->slidingFriction << " culling : " << it->cullingThresh << " " << endl;
+			dynamicsSimulator->registerCollisionCheckPair(objectName1.c_str(), it->jointName1.c_str(),
+														  objectName2.c_str(), it->jointName2.c_str(),
 														  it->staticFriction,it->slidingFriction,K,C,it->cullingThresh);
 
 		}
@@ -605,6 +608,7 @@ public:
 
 		if (CORBA::is_nil(controller)) {
 			std::cerr << "[openhrp-scheduler] Controller not found" << std::endl;
+			exit(1);
 		}
 
 		controller->setModelName(Robot.second.body->name());
