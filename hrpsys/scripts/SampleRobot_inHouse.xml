@@ -34,11 +34,11 @@
 		</item>  
 		<item class="com.generalrobotix.ui.item.GrxModelItem" name="Robot" select="true" url="$(PROJECT_DIR)/../model/sample1.wrl">
 			<property name="isRobot" value="true"/>
-			<property name="controller" value="SampleRobot"/>
+			<property name="controller" value="Robot"/>
 			<property name="controlTime" value="0.002"/>
 			<property name="setupDirectory" value="$(CURRENT_DIR)"/>
 			<property name="setupCommand" value="SampleRobot$(BIN_SFX)"/>
-			<property name="WAIST.translation" value="1.9 -0.798 0.7235 "/>
+			<property name="WAIST.translation" value="1.9 -0.398 0.7235 "/> <!--  1.9 -0.798 0.7235   -->
 			<property name="WAIST.rotation" value="0.0 0.0 1.0 1.570796 "/>
 			<property name="WAIST_P.angle" value="0.0 "/>
 			<property name="WAIST_R.angle" value="0.0 "/>
@@ -70,9 +70,9 @@
 			<property name="LARM_WRIST_R.angle" value="0.0 "/>
 			<property name="LARM_WRIST_Y.angle" value="0.0 "/>
 
+			<property name="WAIST.mode" value="Torque"/>
 			<property name="WAIST_P.mode" value="HighGain"/>
 			<property name="WAIST_R.mode" value="HighGain"/>
-			<property name="CHEST.mode" value="HighGain"/>
 			<property name="RLEG_HIP_R.mode" value="HighGain"/>
 			<property name="RLEG_HIP_P.mode" value="HighGain"/>
 			<property name="RLEG_HIP_Y.mode" value="HighGain"/>
@@ -102,14 +102,14 @@
         </item>
 		<item class="com.generalrobotix.ui.item.GrxCollisionPairItem" name="CP#floor#Robot" select="true">
 			<property name="springConstant" value="0 0 0 0 0 0"/>
-			<property name="slidingFriction" value="0.5"/>
+			<property name="slidingFriction" value="100.0"/>
 			<property name="jointName2" value=""/>
 			<property name="jointName1" value=""/>
 			<property name="sprintDamperModel" value="false"/>
 			<property name="damperConstant" value="0 0 0 0 0 0"/>
-			<property name="objectName2" value="Robot"/>
+			<property name="objectName2" value="SampleRobot"/>
 			<property name="objectName1" value="floor"/>
-			<property name="staticFriction" value="0.5"/>
+			<property name="staticFriction" value="100.0"/>
 		</item>
 		<item class="com.generalrobotix.ui.item.GrxCollisionPairItem" name="CP#table#box" select="true">
 			<property name="springConstant" value="0 0 0 0 0 0"/>
@@ -129,7 +129,7 @@
 			<property name="jointName1" value="WAIST"/>
 			<property name="sprintDamperModel" value="false"/>
 			<property name="damperConstant" value="0 0 0 0 0 0"/>
-			<property name="objectName2" value="Robot"/>
+			<property name="objectName2" value="SampleRobot"/>
 			<property name="objectName1" value="box"/>
 			<property name="staticFriction" value="0.5"/>
 		</item>
@@ -140,7 +140,7 @@
 			<property name="jointName1" value="WAIST"/>
 			<property name="sprintDamperModel" value="false"/>
 			<property name="damperConstant" value="0 0 0 0 0 0"/>
-			<property name="objectName2" value="Robot"/>
+			<property name="objectName2" value="SampleRobot"/>
 			<property name="objectName1" value="box"/>
 			<property name="staticFriction" value="0.5"/>
 		</item>
