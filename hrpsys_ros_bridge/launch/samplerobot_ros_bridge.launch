@@ -1,40 +1,18 @@
 <launch>
-  <!--
-      roslaunch hrprtc_ros_bridge sample.launch nameserver:=192.168.1.1
-  -->
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
-  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
-  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"
+				  -o "exec_cxt.periodic.type:SimulationEC" -o "manager.modules.load_path:$(find openhrp3)/lib" -o "manager.modules.preload:SimulationEC.so" ' />
   <!-- END:openrtm setting -->
-  <node name = "HrpsysSeqStateROSBridge"
-	pkg  = "hrpsys_ros_bridge"
-	type = "HrpsysSeqStateROSBridge"
-	args = "$(arg openrtm_args) -o model:$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample1.wrl"
-	output = "screen"/>
-  <node pkg="hrpsys" name="AbsTransformToPosRpy" type="AbsTransformToPosRpy"
-	output="screen" args="$(arg openrtm_args)"/>
-  <node pkg="hrpsys_ros_bridge" name="ImageSensorROSBridge" type="ImageSensorROSBridge"
-	output="screen" args="$(arg openrtm_args)" >
-    <param name="frame_id" value="/VISION_SENSOR1" />
-  </node>
-  <!-- -o "exec_cxt.periodic.type:SynchExtTriggerEC" -->
 
-  <param name="robot_description" textfile="$(find hrpsys)/scripts/SampleRobot.dae" />
-  <node pkg="robot_state_publisher" type="state_publisher" name="samplerobot_state_publisher" />
+  <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
+    <arg name="ROBOT_NAME" value="SampleRobot" />
+    <arg name="MODEL_FILE" value="$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample1.wrl" />
+    <arg name="COLLADA_FILE" value="$(find hrpsys)/scripts/SampleRobot.dae" />
+  </include>
 
   <!-- BEGIN:openrtm connection -->
-  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/samplerobot_ros_bridge.launch"/>
-  <rtconnect from="SampleRobot(Robot)0.rtc:pr" to="AbsTransformToPosRpy0.rtc:pr" />
-  <rtconnect from="AbsTransformToPosRpy0.rtc:basePos"  to="StateHolder0.rtc:basePosIn" />
-  <rtconnect from="AbsTransformToPosRpy0.rtc:baseRpy"  to="StateHolder0.rtc:baseRpyIn" />
-  <rtactivate component="AbsTransformToPosRpy0.rtc" />
-
-  <rtconnect from="StateHolder0.rtc:qOut" to="HrpsysSeqStateROSBridge0.rtc:rsangle" />
-  <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" />
-  <rtconnect from="StateHolder0.rtc:basePoseOut" to="HrpsysSeqStateROSBridge0.rtc:pose" />
-  <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
-
+  <node name="samplerobot_rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/samplerobot_ros_bridge.launch"/>
   <rtconnect from="SampleRobot(Robot)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" />
   <rtactivate component="ImageSensorROSBridge0.rtc" />
   <!-- END:openrtm connection -->
