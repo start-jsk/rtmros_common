@@ -120,6 +120,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_rsangleIn.isNew () ) {
     try {
       m_rsangleIn.read();
+      for ( unsigned int i = 0; i < m_rsangle.data.length() ; i++ ) std::cerr << m_rsangle.data[i] << " "; std::cerr << std::endl;
     }
     catch(const std::runtime_error &e)
       {
@@ -150,7 +151,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     base.setRotation( tf::createQuaternionFromRPY(m_pose.data.orientation.r, m_pose.data.orientation.p, m_pose.data.orientation.y) );
   }
 
-  if ( ++skip > 40 ) { // hrpsys runs every 0.005 msec, rviz assumes 50hz(20sec)
+  if ( ++skip > 4 ) { // hrpsys runs every 0.005 msec, rviz assumes 50hz(20msec)
     m_mutex.lock();
     // joint state
     std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
