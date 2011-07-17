@@ -7,9 +7,6 @@
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
   <!-- END:openrtm setting -->
-  <node name = "hrpsyspy" pkg="hrpsys" type="hrpsyspy"
-	args = "$(find hrpsys)/scripts/SampleRobot/SampleRobot.py"
-	output= "screen"/>
   <node name = "HrpsysSeqStateROSBridge"
 	pkg  = "hrpsys_ros_bridge"
 	type = "HrpsysSeqStateROSBridge"
@@ -23,7 +20,7 @@
   </node>
   <!-- -o "exec_cxt.periodic.type:SynchExtTriggerEC" -->
 
-  <param name="robot_description" textfile="$(find hrpsys)/scripts/SampleRobot/SampleRobot.dae" />
+  <param name="robot_description" textfile="$(find hrpsys)/scripts/SampleRobot.dae" />
   <node pkg="robot_state_publisher" type="state_publisher" name="samplerobot_state_publisher" />
 
   <!-- BEGIN:openrtm connection -->
