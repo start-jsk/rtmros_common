@@ -90,8 +90,8 @@ def main():
         print e
         return 1
 
-    nameserver = os.environ.get("RTCTREE_NAMESERVERS")
-    robotname = os.environ.get("ROBOT_NAME")
+    nameserver = os.getenv("RTCTREE_NAMESERVERS","localhost")
+    robotname = os.getenv("ROBOT_NAME","")
     print robotname
     rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
     rtactivate(nameserver, parser.getElementsByTagName("rtactivate"))
