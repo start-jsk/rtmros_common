@@ -26,11 +26,10 @@ EOF
     --in-port ddqRef:JOINT_ACCELERATION \
     --out-port q:JOINT_VALUE \
     --out-port pr:WAIST:ABS_TRANSFORM \
-    --out-port image:0:COLOR_IMAGE:0.1 \
+    --out-port left-eye:0:COLOR_IMAGE:0.1 \
     --connection qRef:HGcontroller0:qOut \
     --connection dqRef:HGcontroller0:dqOut \
     --connection ddqRef:HGcontroller0:ddqOut \
-    --connection image:image \
     -o "corba.nameservers:localhost:2809" \
     -o "naming.formats:%n.rtc" \
     -o "logger.enable:YES" \
