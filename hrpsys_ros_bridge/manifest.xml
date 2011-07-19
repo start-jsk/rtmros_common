@@ -9,7 +9,6 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/hrprtc_ros_bridge</url>
 
-  <depend package="openhrp3"/>
   <depend package="hrpsys"/>
   <depend package="rviz"/>
 
