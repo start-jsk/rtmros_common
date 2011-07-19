@@ -11,6 +11,14 @@
     <arg name="COLLADA_FILE" value="$(find hrpsys)/scripts/SampleRobot.dae" />
   </include>
 
+  <node name="samplerobot_rviz" pkg="rviz" type="rviz" respawn="true"
+	args="--sync -d $(find hrpsys_ros_bridge)/launch/samplerobot.vcg" />
+
+  <node name="image_proc" pkg="image_proc" type="image_proc" output="screen" />
+  <include file="$(find roseus_tutorials)/launch/image-view.launch" />
+  <include file="$(find roseus_tutorials)/launch/camshiftdemo.launch" />
+
+
   <!-- BEGIN:openrtm connection -->
   <node name="samplerobot_rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/samplerobot_ros_bridge.launch"/>
   <rtconnect from="SampleRobot(Robot)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" />
