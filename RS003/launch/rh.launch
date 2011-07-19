@@ -8,7 +8,7 @@
   <env name="LANG" value="C" />
   <node name="rtm_naming" pkg="openrtm" type="rtm-naming" output="screen" required="true" />
 
-  <node name="hrpsys_kill_all" pkg="hrpsys" type="hrpsys_kill_all.sh" />
+  <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
   <env name="PATH" value="$(find openhrp3)/bin:$(env PATH)" />
   <node pkg="openhrp3" name="grxui" type="grxui.sh"
 	args="$(find RS003)/launch/TEST_RH2_withoutArm_withVision_withRange.xml"/>
