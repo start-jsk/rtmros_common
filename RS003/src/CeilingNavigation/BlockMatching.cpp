@@ -248,6 +248,7 @@ int BlockMatching::SumOfAbsoluteDifference(ImageData &src, ImageData &data, unsi
 	int result, diff;
 
 	result = 0;
+	if ( src.GetWidth() == 0 || src.GetHeight() == 0 || data.GetWidth() == 0 || data.GetHeight() == 0 ) return result;
 	for( cell_y = 0; cell_y < m_LatticeSize; cell_y++) {
 		for( cell_x = 0; cell_x < m_LatticeSize; cell_x++) {
 			diff = src(cell_x + offset_x, cell_y + offset_y) - data(cell_x, cell_y);
