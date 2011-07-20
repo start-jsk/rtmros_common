@@ -118,10 +118,11 @@ openrtm:
 collada-dom:
   ubuntu: |
    if [ ! -f /etc/apt/sources.list.d/openrave-release*.list ] ; then
-     sudo add-apt-repository ppa:openrave/release
-     sudo apt-get update
+     echo "deb http://ppa.launchpad.net/openrave/release/ubuntu `lsb_release -cs` main" |  sudo tee /etc/apt/sources.list.d/openrave-release.list
+     sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 58E6B835EDC85D09
+     sudo apt-get -y update
    fi
-   sudo apt-get -y --force-yes install collada-dom
+   sudo apt-get -y install libcollada15dom-dev
 
 # for hrpsys
 # libncurses5-dev
