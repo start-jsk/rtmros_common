@@ -13,7 +13,7 @@
 	pkg  = "mrobot_ros_bridge"
 	type = "IISMobileRobotControllerComp"
 	args = "$(arg openrtm_ext_args)"
-	output = "screen"/>
+	output = "screen" launch-prefix="xterm -e "/>
   <node name = "openhrp_controller_bridge"
 	pkg  = "openhrp3"
 	type = "openhrp-controller-bridge"
@@ -22,7 +22,7 @@
 		--out-port velocity:JOINT_VELOCITY
 		--out-port range:RANGE_SENSOR1:RANGE_SENSOR
 		--in-port torque:JOINT_TORQUE
-		$(arg openrtm_ext_args)"
+		$(arg openrtm_ext_args)" launch-prefix="xterm -e "
 	output = "screen" respawn="true" />
   <node name = "MobileRobotROSBridgeComp"
 	pkg  = "mrobot_ros_bridge"
