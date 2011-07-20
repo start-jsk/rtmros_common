@@ -12,7 +12,7 @@
   <rosdep name="openrtm" />
   <rosdep name="tix" />
 
-  <package name="xdot" />
+  <depend package="xdot" />
 
   <export>
     <python path="${prefix}/src/openrtm" />
