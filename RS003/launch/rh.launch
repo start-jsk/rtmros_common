@@ -31,7 +31,7 @@
 
   <node name="LocalizeCenter" pkg="RS003" type="LocalizeCenterComp"
 	args="$(arg openrtm_args) -o example.LocalizeCenter0.config_file:$(find RS003)/src/LocalizeCenter/LocalPosition.conf" output="screen" launch-prefix="xterm -e"/>
-  <node name="CeilingNavigation" pkg="RS003" type="CeilingNavigationComp" args="$(arg openrtm_args) -o example.CeilingNavigation0.config_file:$(find RS003)/src/CeilingNavigation/CeilingNavigationParam.conf" cwd="node" output="screen" />
+  <node name="CeilingNavigation" pkg="RS003" type="CeilingNavigationComp" args="$(arg openrtm_args) -o exec_cxt.periodic.rate:1000.0" output="screen" />
   <node name="show_map" pkg="RS003" type="show_map" />
   <node name="SimViewCam" pkg="RS003" type="SimViewCamComp" args="$(arg openrtm_args)" />
   <node name="SimRangeUrg" pkg="RS003" type="SimRangeUrgComp" args="$(arg openrtm_args)" />
