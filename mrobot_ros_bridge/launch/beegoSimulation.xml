@@ -21,17 +21,15 @@
             <property name="WAIST.rotation" value="0.0 1.0 0.0 0.0 "/>
             <property name="WAIST.translation" value="1.0 0.0 0.2 "/>
         </item>
-        <item class="com.generalrobotix.ui.item.GrxModelItem" name="box" select="true" url="$(PROJECT_DIR)/../model/simple_vehicle_with_rangesensor.wrl">
-            <property name="STEERING.angle" value="0.0 "/>
+        <item class="com.generalrobotix.ui.item.GrxModelItem" name="box" select="true" url="$(BEEGO_MODEL_DIR)/beego_jsk.wrl">
             <property name="REAR_WHEEL_R.angle" value="0.0 "/>
+            <property name="REAR_WHEEL_L.angle" value="0.0 "/>
             <property name="setupDirectory" value=""/>
-            <property name="controller" value="IISMobileRobotControllerComp"/>
+            <property name="controller" value="IISBeegoControllerComp"/>
             <property name="setupCommand" value=""/>
-            <property name="FRONT_WHEEL.angle" value="0.0 "/>
             <property name="controlTime" value="0.002"/>
             <property name="isRobot" value="true"/>
             <property name="BODY.rotation" value="0.0 0.0 0.1 1.5708 "/>
-            <property name="REAR_WHEEL_L.angle" value="0.0 "/>
             <property name="BODY.translation" value="0.0 -1.0 0.1 "/>
         </item>
         <item class="com.generalrobotix.ui.item.GrxCollisionPairItem" name="CP#box2#box" select="true">

@@ -27,7 +27,7 @@
   <depend package="jsk_maps"/>
   <depend package="map_server"/>
   <depend package="amcl"/>
-  <depend package="openni_camera"/>
+<!--  <depend package="openni_camera"/> -->
 
 
 </package>
