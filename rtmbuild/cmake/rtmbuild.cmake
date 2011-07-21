@@ -28,6 +28,7 @@ macro(rtmbuild_genidl)
 
   set(_output_dir ${PROJECT_SOURCE_DIR}/idl_gen)
   set(_output_cpp_dir ${PROJECT_SOURCE_DIR}/idl_gen/cpp/${_project}/idl)
+  set(_output_python_dir ${PROJECT_SOURCE_DIR}/src/${_project})
   set(_output_lib_dir ${PROJECT_SOURCE_DIR}/idl_gen/lib)
 
   foreach(_idl ${_idllist})
@@ -41,11 +42,13 @@ macro(rtmbuild_genidl)
 
     set(_input_idl ${PROJECT_SOURCE_DIR}/idl/${_idl})
     set(_output_idl_hh ${_output_cpp_dir}/${_idl})
+    set(_output_idl_py ${PROJECT_SOURCE_DIR}/src/${_project}/${_idl})
     set(_output_stub_cpp ${_output_cpp_dir}/${_idl})
     set(_output_skel_cpp ${_output_cpp_dir}/${_idl})
     set(_output_stub_lib ${_output_lib_dir}/lib${_idl})
     set(_output_skel_lib ${_output_lib_dir}/lib${_idl})
     string(REPLACE ".idl" ".hh" _output_idl_hh ${_output_idl_hh})
+    string(REPLACE ".idl" "_idl.py" _output_idl_py ${_output_idl_py})
     string(REPLACE ".idl" "Stub.cpp" _output_stub_cpp ${_output_stub_cpp})
     string(REPLACE ".idl" "Stub.so"  _output_stub_lib ${_output_stub_lib})
     string(REPLACE ".idl" "Skel.cpp" _output_skel_cpp ${_output_skel_cpp})
@@ -67,7 +70,14 @@ macro(rtmbuild_genidl)
     add_custom_command(OUTPUT ${_output_skel_lib}
       COMMAND ${_rtmcxx_exe} `rtm-config --cflags` -I. ${${_prefix}_IDLLIBRARY_INCDIRS} -shared -o ${_output_skel_lib} ${_output_skel_cpp} `rtm-config --libs` ${OPENHRP_PRIVATE_LIBRARIES}
       DEPENDS ${_output_skel_cpp})
-    list(APPEND _autogen ${_output_stub_lib} ${_output_skel_lib})
+    # python
+    add_custom_command(OUTPUT ${_output_idl_py}
+      COMMAND mkdir -p ${_output_python_dir}
+      COMMAND echo \"import sys\; sys.path.append('${PROJECT_SOURCE_DIR}/src/${_project}')\" > ${_output_python_dir}/__init__.py
+      COMMAND ${_genidl_exe} -bpython -I`rtm-config --prefix`/include/rtm/idl -I`rospack find openhrp3`/share/OpenHRP-3.1/idl -C${_output_python_dir} ${_input_idl}
+      DEPENDS ${_input_idl} ${${_idl}_depends})
+    #
+    list(APPEND _autogen ${_output_stub_lib} ${_output_skel_lib} ${_output_idl_py})
   endforeach(_idl)
   ##
   add_dependencies(rtmbuild_genidl RTMBUILD_genidl_cpp)
