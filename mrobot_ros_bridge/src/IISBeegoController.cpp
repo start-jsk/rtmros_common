@@ -5,7 +5,7 @@
  * $Id$ 
  */
 #include "IISBeegoController.h"
-#include <math.h> // for M_PI
+#include <math.h> // for M_PI, isfinite
 
 // Module specification
 // <rtc-template block="module_spec">
@@ -71,11 +71,11 @@ RTC::ReturnCode_t IISBeegoController::onInitialize()
   // Bind variables and configuration variable
 
   // </rtc-template>
-  m_angle.data.length(1);
-  m_angle.data[0] = 0.0;
+  m_angle.data.length(2);
+  m_angle.data[0] = m_angle.data[0] = 0.0;
   m_velocity.data.length(2);
   m_velocity.data[0] = m_velocity.data[1] = 0.0;
-  m_torque.data.length(2);
+  m_torque.data.length(4);
   return RTC::RTC_OK;
 }
 
@@ -120,9 +120,11 @@ RTC::ReturnCode_t IISBeegoController::onExecute(RTC::UniqueId ec_id)
        m_velocityIn.isNew() ) {
     m_angleIn.read();
     m_velocityIn.read();
-    double l_tireVel = m_velocity.data[0] * (tiresize / 2.0 / M_PI);
-    double r_tireVel = m_velocity.data[1] * (tiresize / 2.0 / M_PI);
+	double l_tireVel = m_velocity.data[0] / 180 * M_PI * tiresize;
+	double r_tireVel = m_velocity.data[1] / 180 * M_PI * tiresize;
     fprintf(stderr, "[simulate] l tire vel = %.3f, r tire vel = %.3f\n", l_tireVel, r_tireVel);
+	if(!isfinite( l_tireVel )) l_tireVel = 0.0;
+	if(!isfinite( r_tireVel )) r_tireVel = 0.0;
 
     static double LeftCommandVel = 0, RightCommandVel = 0;
     if ( m_inIn.isNew() ) {
@@ -131,16 +133,17 @@ RTC::ReturnCode_t IISBeegoController::onExecute(RTC::UniqueId ec_id)
       m_inIn.read();
 
       //
-	  LeftCommandVel  = (2.0*M_PI/tiresize) * (m_in.vx - m_in.w*tread/2);
-	  RightCommandVel = (2.0*M_PI/tiresize) * (m_in.vx + m_in.w*tread/2);
+	  LeftCommandVel  = m_in.vx - m_in.w*tread/2;
+	  RightCommandVel = m_in.vx + m_in.w*tread/2;
       fprintf(stderr, "[command]  x = %.3f y = %.3f, w = %.3f\n", m_in.vx, m_in.vy, m_in.w);
     }
-    double LeftTireTorque = (LeftCommandVel * 10 - l_tireVel);
-    double RightTireTorque = (RightCommandVel * 10 - r_tireVel);
+    double LeftTireTorque = (LeftCommandVel - l_tireVel) * 3;
+    double RightTireTorque = (RightCommandVel - r_tireVel) * 3;
 
     // write to simulated robot
-    m_torque.data[0] = LeftTireTorque;
-    m_torque.data[1] = RightTireTorque;
+    m_torque.data[0] = m_torque.data[1] = 0.0;
+    m_torque.data[2] = LeftTireTorque;
+    m_torque.data[3] = RightTireTorque;
     m_torqueOut.write();
 
     m_out.x = (l_tireVel + r_tireVel) / 2;

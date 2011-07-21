@@ -331,7 +331,7 @@ DEF SimpleVehicle Humanoid {
       children [
         DEF BODY_LINK Segment {
           centerOfMass  0 0 0
-          mass    10.0
+          mass    5.0
           momentsOfInertia [ 0.1 0 0 0 0.1 0 0 0 0.5 ]
 
           children [
@@ -423,9 +423,9 @@ DEF SimpleVehicle Humanoid {
 
         DEF STEERING Joint {
           translation 0 -0.2 0
-          jointType "free"
-#         jointAxis 0 0 1
-#         jointId  3
+          jointType "rotate"
+          jointAxis 0 0 1
+          jointId  0
           children [
             DEF STEERING_LINK Segment {
               centerOfMass  0 0 0
@@ -434,9 +434,9 @@ DEF SimpleVehicle Humanoid {
             }
 
             DEF FRONT_WHEEL Joint {
-              jointType "free"
-#             jointAxis 1 0 0
-#             jointId  2
+              jointType "rotate"
+              jointAxis 1 0 0
+              jointId  1
               children [
                 DEF FRONT_WHEEL_LINK Segment {
                   centerOfMass  0 0 0 
@@ -707,7 +707,7 @@ DEF SimpleVehicle Humanoid {
           translation 0.15 0.2 0
           jointType "rotate"           
           jointAxis 1 0 0
-          jointId 0
+          jointId 2
           children [
             DEF REAR_WHEEL_L_LINK Segment {
               centerOfMass 0 0 0
@@ -969,7 +969,7 @@ DEF SimpleVehicle Humanoid {
           translation -0.15 0.2 0
           jointType "rotate"
           jointAxis 1 0 0
-          jointId 1
+          jointId 3
 
           children [
             DEF REAR_WHEEL_R_LINK Segment {
