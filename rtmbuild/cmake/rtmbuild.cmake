@@ -56,25 +56,25 @@ macro(rtmbuild_genidl)
 
     # call the  rule to compile idl
     add_custom_command(OUTPUT ${_output_idl_hh}
-      COMMAND ${_genidl_exe} `rtm-config --idlflags` -I`rtm-config --prefix`/include/rtm/idl -I`rospack find openhrp3`/share/OpenHRP-3.1/idl -C${_output_cpp_dir} ${_input_idl}
+      COMMAND ${_genidl_exe} `${_openrtm_pkg_dir}/bin/rtm-config --idlflags` -I`${_openrtm_pkg_dir}/bin/rtm-config --prefix`/include/rtm/idl -I${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl -C${_output_cpp_dir} ${_input_idl}
       DEPENDS ${_input_idl} ${${_idl}_depends})
     add_custom_command(OUTPUT ${_output_stub_cpp} ${_output_skel_cpp}
       COMMAND cp ${_input_idl} ${_output_cpp_dir}
-      COMMAND rtm-skelwrapper --include-dir="" --skel-suffix=Skel --stub-suffix=Stub  --idl-file=${_idl}
+      COMMAND ${_openrtm_pkg_dir}/bin/rtm-skelwrapper --include-dir="" --skel-suffix=Skel --stub-suffix=Stub  --idl-file=${_idl}
       COMMAND rm ${_output_cpp_dir}/${_idl}
       WORKING_DIRECTORY ${_output_cpp_dir}
       DEPENDS ${_output_idl_hh})
     add_custom_command(OUTPUT ${_output_stub_lib}
-      COMMAND ${_rtmcxx_exe} `rtm-config --cflags` -I. ${${_prefix}_IDLLIBRARY_INCDIRS} -shared -o ${_output_stub_lib} ${_output_stub_cpp} `rtm-config --libs` ${OPENHRP_PRIVATE_LIBRARIES}
+      COMMAND ${_rtmcxx_exe} `${_openrtm_pkg_dir}/bin/rtm-config --cflags` -I. ${${_prefix}_IDLLIBRARY_INCDIRS} -shared -o ${_output_stub_lib} ${_output_stub_cpp} `${_openrtm_pkg_dir}/bin/rtm-config --libs` ${OPENHRP_PRIVATE_LIBRARIES}
       DEPENDS ${_output_stub_cpp})
     add_custom_command(OUTPUT ${_output_skel_lib}
-      COMMAND ${_rtmcxx_exe} `rtm-config --cflags` -I. ${${_prefix}_IDLLIBRARY_INCDIRS} -shared -o ${_output_skel_lib} ${_output_skel_cpp} `rtm-config --libs` ${OPENHRP_PRIVATE_LIBRARIES}
+      COMMAND ${_rtmcxx_exe} `${_openrtm_pkg_dir}/bin/rtm-config --cflags` -I. ${${_prefix}_IDLLIBRARY_INCDIRS} -shared -o ${_output_skel_lib} ${_output_skel_cpp} `${_openrtm_pkg_dir}/bin/rtm-config --libs` ${OPENHRP_PRIVATE_LIBRARIES}
       DEPENDS ${_output_skel_cpp})
     # python
     add_custom_command(OUTPUT ${_output_idl_py}
       COMMAND mkdir -p ${_output_python_dir}
-      COMMAND echo \"import sys\; sys.path.append('${PROJECT_SOURCE_DIR}/src/${_project}')\" > ${_output_python_dir}/__init__.py
-      COMMAND ${_genidl_exe} -bpython -I`rtm-config --prefix`/include/rtm/idl -I`rospack find openhrp3`/share/OpenHRP-3.1/idl -C${_output_python_dir} ${_input_idl}
+      COMMAND echo \"import sys\; sys.path.append('${PROJECT_SOURCE_DIR}/src/${_project}')\; import ${_project}\" > ${_output_python_dir}/__init__.py
+      COMMAND ${_genidl_exe} -bpython -I`${_openrtm_pkg_dir}/bin/rtm-config --prefix`/include/rtm/idl -I${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl -C${_output_python_dir} ${_input_idl}
       DEPENDS ${_input_idl} ${${_idl}_depends})
     #
     list(APPEND _autogen ${_output_stub_lib} ${_output_skel_lib} ${_output_idl_py})
@@ -118,11 +118,9 @@ macro(rtmbuild_init)
   ## use pkgconfig with openhrp3.1 and openrtm-aist
   # catch the error output to suppress it
   include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
-  execute_process(
-    COMMAND rospack find openhrp3
-    OUTPUT_VARIABLE _openhrp3_pkg_dir
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  SET(ENV{PKG_CONFIG_PATH} ${_openhrp3_pkg_dir}/lib/pkgconfig)
+  execute_process(COMMAND rospack find openrtm OUTPUT_VARIABLE _openrtm_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND rospack find openhrp3 OUTPUT_VARIABLE _openhrp3_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
+  SET(ENV{PKG_CONFIG_PATH} ${_openrtm_pkg_dir}/lib/pkgconfig:${_openhrp3_pkg_dir}/lib/pkgconfig)
   pkg_check_modules(OPENRTM REQUIRED openrtm-aist)
   pkg_check_modules(OPENHRP openhrp3.1)
   list(APPEND ${_prefix}_INCLUDE_DIRS ${OPENRTM_INCLUDE_DIRS})
