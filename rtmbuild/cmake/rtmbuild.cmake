@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
 set(_RTMBUILD_GENERATED_IDL_FILES "")
 macro(rtmbuild_get_idls idlvar)
@@ -33,7 +32,7 @@ macro(rtmbuild_genidl)
 
   foreach(_idl ${_idllist})
     message("[rtmbuild_genidl] ${_idl}")
-    execute_process(COMMAND rtm-config --idlc OUTPUT_VARIABLE _genidl_exe
+    execute_process(COMMAND ${_openrtm_pkg_dir}/bin/rtm-config --idlc OUTPUT_VARIABLE _genidl_exe
       OUTPUT_STRIP_TRAILING_WHITESPACE)
 #    --cxx is grx option???
 #    execute_process(COMMAND rtm-config --cxx OUTPUT_VARIABLE _rtmcxx_ex
@@ -120,7 +119,7 @@ macro(rtmbuild_init)
   include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
   execute_process(COMMAND rospack find openrtm OUTPUT_VARIABLE _openrtm_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
   execute_process(COMMAND rospack find openhrp3 OUTPUT_VARIABLE _openhrp3_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
-  SET(ENV{PKG_CONFIG_PATH} ${_openrtm_pkg_dir}/lib/pkgconfig:${_openhrp3_pkg_dir}/lib/pkgconfig)
+  set(ENV{PKG_CONFIG_PATH} "${_openhrp3_pkg_dir}/lib/pkgconfig:${_openrtm_pkg_dir}/lib/pkgconfig")
   pkg_check_modules(OPENRTM REQUIRED openrtm-aist)
   pkg_check_modules(OPENHRP openhrp3.1)
   list(APPEND ${_prefix}_INCLUDE_DIRS ${OPENRTM_INCLUDE_DIRS})
