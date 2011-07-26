@@ -113,46 +113,72 @@ RTC::ReturnCode_t IISBeegoController::onDeactivated(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t IISBeegoController::onExecute(RTC::UniqueId ec_id)
 {
-  static double tiresize = 0.04; // [m] TODO
-  static double tread = 0.25; // [m] TODO
+    static double tiresize = 0.04; // [m] TODO
+    static double tread = 0.25; // [m] TODO
+    // add for odometry
+    static double prevSec = m_velocity.tm.sec;
+    static double prevNsec = m_velocity.tm.nsec;
+    static double prev_x = 0.0;
+    static double prev_y = 0.0;
+    static double prev_theta = 0.0;
+    //
 
-  if ( m_angleIn.isNew() &&
-       m_velocityIn.isNew() ) {
-    m_angleIn.read();
-    m_velocityIn.read();
-	double l_tireVel = m_velocity.data[0] / 180 * M_PI * tiresize;
-	double r_tireVel = m_velocity.data[1] / 180 * M_PI * tiresize;
-    fprintf(stderr, "[simulate] l tire vel = %.3f, r tire vel = %.3f\n", l_tireVel, r_tireVel);
-	if(!isfinite( l_tireVel )) l_tireVel = 0.0;
-	if(!isfinite( r_tireVel )) r_tireVel = 0.0;
+    if ( m_angleIn.isNew() &&
+         m_velocityIn.isNew() ) {
+        m_angleIn.read();
+        m_velocityIn.read();
+        double l_tireVel = m_velocity.data[0] / 180 * M_PI * tiresize;
+        double r_tireVel = m_velocity.data[1] / 180 * M_PI * tiresize;
 
-    static double LeftCommandVel = 0, RightCommandVel = 0;
-    if ( m_inIn.isNew() ) {
+        // add for odometry
+        double currentSec = m_velocity.tm.sec;
+        double currentNsec = m_velocity.tm.nsec;
+        double delta_t = (double)( (currentSec * 1000 * 1000 + currentNsec)
+                                   - (prevSec * 1000 * 1000 + prevNsec) ) / (1000 * 1000);
+        prevSec = currentSec;
+        prevNsec = currentNsec;
 
-      // read data from client
-      m_inIn.read();
+        double robotVel = (r_tireVel + l_tireVel) / 2.0;
+        double robotAngleVel = (tread * (r_tireVel - l_tireVel) ) / 2.0;
+        double current_theta = prev_theta + robotAngleVel * delta_t;
+        double current_x = prev_x + robotVel * cos(current_theta) * delta_t;
+        double current_y = prev_y + robotVel * sin(current_theta) * delta_t;
+        prev_x = current_x;
+        prev_y = current_y;
+        prev_theta = current_theta;
+        //
 
-      //
-	  LeftCommandVel  = m_in.vx - m_in.w*tread/2;
-	  RightCommandVel = m_in.vx + m_in.w*tread/2;
-      fprintf(stderr, "[command]  x = %.3f y = %.3f, w = %.3f\n", m_in.vx, m_in.vy, m_in.w);
+        fprintf(stderr, "[simulate] l tire vel = %.3f, r tire vel = %.3f\n", l_tireVel, r_tireVel);
+        if(!isfinite( l_tireVel )) l_tireVel = 0.0;
+        if(!isfinite( r_tireVel )) r_tireVel = 0.0;
+
+        static double LeftCommandVel = 0, RightCommandVel = 0;
+        if ( m_inIn.isNew() ) {
+
+            // read data from client
+            m_inIn.read();
+
+            //
+            LeftCommandVel  = m_in.vx - m_in.w*tread/2;
+            RightCommandVel = m_in.vx + m_in.w*tread/2;
+            fprintf(stderr, "[command]  x = %.3f y = %.3f, w = %.3f\n", m_in.vx, m_in.vy, m_in.w);
+        }
+        double LeftTireTorque = (LeftCommandVel - l_tireVel) * 3;
+        double RightTireTorque = (RightCommandVel - r_tireVel) * 3;
+
+        // write to simulated robot
+        m_torque.data[0] = m_torque.data[1] = 0.0;
+        m_torque.data[2] = LeftTireTorque;
+        m_torque.data[3] = RightTireTorque;
+        m_torqueOut.write();
+
+        m_out.x = (l_tireVel + r_tireVel) / 2;
+        m_out.y = 0;
+        m_out.theta = (r_tireVel - l_tireVel) / tread;
+        m_outOut.write();
     }
-    double LeftTireTorque = (LeftCommandVel - l_tireVel) * 3;
-    double RightTireTorque = (RightCommandVel - r_tireVel) * 3;
 
-    // write to simulated robot
-    m_torque.data[0] = m_torque.data[1] = 0.0;
-    m_torque.data[2] = LeftTireTorque;
-    m_torque.data[3] = RightTireTorque;
-    m_torqueOut.write();
-
-    m_out.x = (l_tireVel + r_tireVel) / 2;
-    m_out.y = 0;
-    m_out.theta = (r_tireVel - l_tireVel) / tread;
-    m_outOut.write();
-  }
-
-  return RTC::RTC_OK;
+    return RTC::RTC_OK;
 }
 
 /*
