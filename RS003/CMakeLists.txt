@@ -34,15 +34,7 @@ rtmbuild_genidl()
 #target_link_libraries(example ${PROJECT_NAME})
 
 rtmbuild_add_executable(MotorControlComp src/MotorControl/MotorControl.cpp src/MotorControl/MotorControlComp.cpp src/MotorControl/MotorControlProSVC_impl.cpp)
-# SDOPackage conflicts???
-execute_process(
-  COMMAND mkdir -p ${LIBRARY_OUTPUT_PATH}
-  COMMAND g++ -fPIC -shared -I${OPENRTM_INCLUDE_DIRS} ${${_prefix}_IDLLIBRARY_INCDIRS} -o ${PROJECT_SOURCE_DIR}/lib/MotorControl.so ${PROJECT_SOURCE_DIR}/src/MotorControl/MotorControl.cpp ${PROJECT_SOURCE_DIR}/src/MotorControl/MotorControlProSVC_impl.cpp ${PROJECT_SOURCE_DIR}/../openinvent/idl_gen/lib/libIISSkel.so ${PROJECT_SOURCE_DIR}/../openinvent/idl_gen/lib/libMotorControlProSkel.so
-                RESULT_VARIABLE _make_failed)
-if (_make_failed)
-  message(FATAL_ERROR "Build of MotorControl.so failed")
-endif(_make_failed)
-#rosbuild_add_library(MotorControl src/MotorControl/MotorControl.cpp src/MotorControl/MotorControlProSVC_impl.cpp)
+rtmbuild_add_library(MotorControl src/MotorControl/MotorControl.cpp src/MotorControl/MotorControlProSVC_impl.cpp)
 #
 rtmbuild_add_executable(CeilingNavigationComp src/CeilingNavigation/CeilingNavigation.cpp src/CeilingNavigation/CeilingNavigationComp.cpp src/CeilingNavigation/CeilingMap.cpp src/CeilingNavigation/BlockMatching.cpp src/CeilingNavigation/ImageData.cpp src/Common/sharedmem.c)
 rosbuild_add_compile_flags(CeilingNavigationComp "-I${PROJECT_SOURCE_DIR}/src -D_USE_SHOW_MAP")
