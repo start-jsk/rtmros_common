@@ -24,7 +24,7 @@ endif
 
 installed: $(HG_DIR) patched2
 	make -f Makefile.openhrp-aist-grx check-java-version
-	cd $(HG_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=/usr
+	cd $(HG_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=`rospack find openrtm`
 	cd $(HG_DIR) && make $(ROS_PARALLEL_JOBS)
 	cd $(HG_DIR) && make install
 	#
