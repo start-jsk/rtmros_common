@@ -50,6 +50,9 @@ target_link_libraries(GamePadComp SDL)
 rtmbuild_add_executable(LocalizeCenterComp src/LocalizeCenter/LocalizeCenter.cpp src/LocalizeCenter/LocalizeCenterComp.cpp)
 #
 rtmbuild_add_executable(PathPlanningComp src/PathPlanning/PathPlanning.cpp src/PathPlanning/PathPlanningComp.cpp src/PathPlanning/planner.cpp)
+#compile PathPlanningParam.conf
+configure_file(${PROJECT_SOURCE_DIR}/src/PathPlanning/PathPlanningParam.conf.in ${PROJECT_SOURCE_DIR}/src/PathPlanning/PathPlanningParam.conf)
+add_custom_target(conf ALL DEPENDS ${PROJECT_SOURCE_DIR}/src/PathPlanning/PathPlanningParam.conf)
 #
 rtmbuild_add_executable(PositionInputComp src/PositionInput/PositionInput.cpp src/PositionInput/PositionInputComp.cpp)
 #
