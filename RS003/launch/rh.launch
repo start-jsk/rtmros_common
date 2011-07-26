@@ -25,7 +25,7 @@
 	output="screen" launch-prefix="xterm -e"/>
   <node name="GamePad" pkg="RS003" type="GamePadComp" args="$(arg openrtm_args)" />
   <node name="DispPosition" pkg="RS003" type="DispPositionComp" args="$(arg openrtm_args)" />
-  <node name="PathPlanning" pkg="RS003" type="PathPlanningComp" args="$(arg openrtm_args) -o example.PathPlanning.config_file:/home/k-okada/Desktop/RS003/etc/conf/PathPlanningParam.conf" />
+  <node name="PathPlanning" pkg="RS003" type="PathPlanningComp" args="$(arg openrtm_args) -o example.PathPlanning.config_file:$(find RS003)/src/PathPlanning/PathPlanningParam.conf" />
   <node name="PositionInput" pkg="RS003" type="PositionInputComp" args="$(arg openrtm_args)" />
 
 
@@ -36,7 +36,7 @@
   <node name="SimViewCam" pkg="RS003" type="SimViewCamComp" args="$(arg openrtm_args)" />
   <node name="SimRangeUrg" pkg="RS003" type="SimRangeUrgComp" args="$(arg openrtm_args)" />
   <node name="Navigation" pkg="RS003" type="NavigationComp"
-	args="$(arg openrtm_args) -o example.Navigation0.config_file:$(find RS003)/src/Navigation/Navigation.conf"  launch-prefix="xterm -e"/>
+	args="$(arg openrtm_args) -o example.Navigation0.config_file:$(find RS003)/src/Navigation/NavigationParam.conf"  launch-prefix="xterm -e"/>
   <node name="PathFollower" pkg="RS003" type="PathFollowerComp" args="$(arg openrtm_args)" />
   <node name="SwitchInput" pkg="RS003" type="SwitchInputComp" args="$(arg openrtm_args)" />
   <node name="Tmvel2D2Tmvel" pkg="RS003" type="Tmvel2D2TmvelComp" args="$(arg openrtm_args)" />
