@@ -1,10 +1,11 @@
 #-jsk
 (jsk)
-
+#|
 (unless (boundp '*pickview*)(pickview))
 (defun da ()
 (send *pickview* :draw-objects)
 )
+|#
 ;; beego model
 ;; Author: Tomoko Kurotobi
 (defun set_beego nil
@@ -113,8 +114,90 @@
 
   robot)
 
-(setq *beego* (beego))
+(defun beego-new (&key (tread 275) (wheel-radius 41)
+                       (frame-width 30) (wheel-width 30)
+                       (height 240))
+  (setq co (coords))
+  (send co :scale 50)
+  
+  (setq b1 (make-cube frame-width tread frame-width)
+        b2 (make-cube frame-width tread frame-width)
+        b3 (make-cube tread frame-width frame-width)
+        b4 (make-cube tread frame-width frame-width)
+        base (list b1 b2 b3 b4))
+
+  (send b1 :translate (float-vector (+ (/ tread -2.0) (/ frame-width 2.0)) 0 0))
+  (send b2 :translate (float-vector (- (/ tread 2.0) (/ frame-width 2.0)) 0 0))
+  (send b3 :translate (float-vector 0 (+ (/ tread 2.0) (/ frame-width -2.0)) 0))
+  (send b4 :translate (float-vector 0 (+ (/ tread -2.0) (/ frame-width 2.0)) 0))
+
+  (setq w1 (make-cylinder wheel-radius wheel-width))
+  ;;車輪の穴とか開けたいけど回転軸はシリンダーの中心のままだー
+  ;; (setq hole (make-cylinder 3 12))
+  ;; (send hole :translate #f(8 0 -1) :world)
+  ;; (setq w1 (body- w1 hole))
+  ;; (dotimes (i 5)
+  ;;   (send hole :rotate (* 2pi (/ i 6.0) ) :z :world)
+  ;;   (print i)
+  ;;   (setq w1 (body- w1 hole))
+  ;;   )
+  (send w1 :rotate pi/2 :x)
+  (send w1 :translate (float-vector 50 (/ tread -2.0) 0) :world)
+  (setq w2 (make-cylinder wheel-radius wheel-width))
+  (send w2 :rotate -pi/2 :x)
+  (send w2 :translate (float-vector 50 (/ tread 2.0) 0) :world)
+  (setq wheels (list w1 w2))
+
+  (setq pole (make-cube frame-width frame-width height)
+        p1 (copy-object pole)
+        p2 (copy-object pole)
+        p3 (copy-object pole)
+        p4 (copy-object pole))
+  (setq poles (list p1 p2 p3 p4))
+  (send p1 :translate (float-vector (+ (/ tread -2.0) (/ frame-width 2.0))
+                                    (+ (/ tread -2.0) (/ frame-width 2.0))
+                                    (+ (/ height 2.0) (/ frame-width -2.0))))
+  (send p2 :translate (float-vector (- (/ tread 2.0) (/ frame-width 2.0))
+                                    (+ (/ tread -2.0) (/ frame-width 2.0))
+                                    (+ (/ height 2.0) (/ frame-width -2.0))))
+  (send p3 :translate (float-vector (+ (/ tread -2.0) (/ frame-width 2.0)) 
+                                    (+ (/ tread 2.0) (/ frame-width -2.0))
+                                    (+ (/ height 2.0) (/ frame-width -2.0))))
+  (send p4 :translate (float-vector (- (/ tread 2.0) (/ frame-width 2.0)) 
+                                    (+ (/ tread 2.0) (/ frame-width -2.0))
+                                    (+ (/ height 2.0) (/ frame-width -2.0))))
+
+  (setq plate (make-cube 300 300 30))
+  (send plate :translate (float-vector -15 0 height))
+
+  (setq pc (make-round-corner-cube 240 300 30))
+  (send pc :translate (float-vector 15 0 270))
+  (setq kinect (make-round-corner-cube 60 240 60))
+  (send kinect :translate (float-vector 80 0 180))
+
+  (setq bump (make-cylinder 15 240))
+  (send bump :rotate pi/2 :x)
+  (send bump :translate (float-vector 160 120 0) :world)
+
+  (setq robot-body-lst (flatten (list base bump wheels poles plate pc kinect)))
+  (send-all robot-body-lst :set-color :white)
+  (mapcar #'(lambda(x)(putprop x 0 :weight)) robot-body-lst)
+  (objects (list robot-body-lst co))
+
+  (setq robot (instance robot-link :init (make-cascoords) robot-body-lst
+                        :name "beego"))
+  (setq id 0)
+  (dolist (part robot-body-lst)
+	(send part :name (format nil "link1~a" (incf id)))
+	(send robot :assoc part))
+  
+  robot)
+
+#|
+;;(setq *beego* (beego))
+(setq *beego* (beego-new))
 (with-open-file
  (fd "beego.wrl" :direction :output)
 ; (send *beego* :dump-to-wrl :strm fd))
  (dump-object-to-wrl *beego* fd))
+|#
