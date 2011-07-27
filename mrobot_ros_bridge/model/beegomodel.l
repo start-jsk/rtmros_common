@@ -182,7 +182,7 @@
   (setq robot-body-lst (flatten (list base bump wheels poles plate pc kinect)))
   (send-all robot-body-lst :set-color :white)
   (mapcar #'(lambda(x)(putprop x 0 :weight)) robot-body-lst)
-  (objects (list robot-body-lst co))
+  ;;(objects (list robot-body-lst co))
 
   (setq robot (instance robot-link :init (make-cascoords) robot-body-lst
                         :name "beego"))
