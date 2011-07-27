@@ -127,25 +127,27 @@ RTC::ReturnCode_t IISBeegoController::onExecute(RTC::UniqueId ec_id)
          m_velocityIn.isNew() ) {
         m_angleIn.read();
         m_velocityIn.read();
-	//        double l_tireVel = m_velocity.data[0] / 180 * M_PI * tiresize;
-	//        double r_tireVel = m_velocity.data[1] / 180 * M_PI * tiresize;
-	double l_tireVel = m_velocity.data[2] / 180 * M_PI * tiresize;
-	double r_tireVel = m_velocity.data[3] / 180 * M_PI * tiresize;
+	//       double l_tireVel = m_velocity.data[0] / 180 * M_PI * tiresize;
+	//       double r_tireVel = m_velocity.data[1] / 180 * M_PI * tiresize;
+	// double l_tireVel = m_velocity.data[2] / 180 * M_PI * tiresize;
+	// double r_tireVel = m_velocity.data[3] / 180 * M_PI * tiresize;
+	double l_tireVel = m_velocity.data[2] * tiresize;
+	double r_tireVel = m_velocity.data[3] * tiresize;
 
 	std::cerr << "0 : " << m_velocity.data[0] <<
-	  "1 : " << m_velocity.data[1] <<
-	  "2 : " << m_velocity.data[2] <<
-	  "3 : " << m_velocity.data[3] << std::endl;
+	  " 1 : " << m_velocity.data[1] <<
+	  " 2 : " << m_velocity.data[2] <<
+	  " 3 : " << m_velocity.data[3] << std::endl;
         // add for odometry
         double currentSec = m_velocity.tm.sec;
         double currentNsec = m_velocity.tm.nsec;
-        double delta_t = (double)( (currentSec * 1000 * 1000 + currentNsec)
-                                   - (prevSec * 1000 * 1000 + prevNsec) ) / (1000 * 1000);
+        double delta_t = (double)( (currentSec * 1.0e9 + currentNsec)
+                                   - (prevSec * 1.0e9 + prevNsec) ) / 1.0e9;
         prevSec = currentSec;
         prevNsec = currentNsec;
 
         double robotVel = (r_tireVel + l_tireVel) / 2.0;
-        double robotAngleVel = (tread * (r_tireVel - l_tireVel) ) / 2.0;
+        double robotAngleVel = (r_tireVel - l_tireVel) / (2.0 * tread);
         double current_theta = prev_theta + robotAngleVel * delta_t;
         double current_x = prev_x + robotVel * cos(current_theta) * delta_t;
         double current_y = prev_y + robotVel * sin(current_theta) * delta_t;
@@ -153,6 +155,9 @@ RTC::ReturnCode_t IISBeegoController::onExecute(RTC::UniqueId ec_id)
         prev_y = current_y;
         prev_theta = current_theta;
         //
+	std::cerr << "robotvel : " << robotVel <<
+	  " current_t : " << current_theta <<
+	  " delta_t : " << delta_t << std::endl;
 
 
         fprintf(stderr, "[simulate] l tire vel = %.3f, r tire vel = %.3f\n", l_tireVel, r_tireVel);
@@ -178,6 +183,10 @@ RTC::ReturnCode_t IISBeegoController::onExecute(RTC::UniqueId ec_id)
         m_torque.data[2] = LeftTireTorque;
         m_torque.data[3] = RightTireTorque;
         m_torqueOut.write();
+
+	std::cerr << "torque : " << m_torque.data[0] <<
+	  " torque left : " << m_torque.data[2] <<
+	  " torque right : " << m_torque.data[3] << std::endl;
 
 	m_out.x = current_x;
 	m_out.y = current_y;
