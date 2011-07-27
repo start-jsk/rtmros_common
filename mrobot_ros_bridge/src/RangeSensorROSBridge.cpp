@@ -111,7 +111,7 @@ RTC::ReturnCode_t RangeSensorROSBridge::onExecute(RTC::UniqueId ec_id)
     scan.header.frame_id = "laser_link";
     scan.angle_min = -M_PI/2;
     scan.angle_max =  M_PI/2;
-    scan.angle_increment = 0.1;
+    scan.angle_increment = 0.02;
     scan.time_increment = 0.0; // simulation?
     scan.scan_time = 0.1;
     scan.range_min = 0.0;

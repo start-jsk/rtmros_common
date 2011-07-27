@@ -127,9 +127,15 @@ RTC::ReturnCode_t IISBeegoController::onExecute(RTC::UniqueId ec_id)
          m_velocityIn.isNew() ) {
         m_angleIn.read();
         m_velocityIn.read();
-        double l_tireVel = m_velocity.data[0] / 180 * M_PI * tiresize;
-        double r_tireVel = m_velocity.data[1] / 180 * M_PI * tiresize;
+	//        double l_tireVel = m_velocity.data[0] / 180 * M_PI * tiresize;
+	//        double r_tireVel = m_velocity.data[1] / 180 * M_PI * tiresize;
+	double l_tireVel = m_velocity.data[2] / 180 * M_PI * tiresize;
+	double r_tireVel = m_velocity.data[3] / 180 * M_PI * tiresize;
 
+	std::cerr << "0 : " << m_velocity.data[0] <<
+	  "1 : " << m_velocity.data[1] <<
+	  "2 : " << m_velocity.data[2] <<
+	  "3 : " << m_velocity.data[3] << std::endl;
         // add for odometry
         double currentSec = m_velocity.tm.sec;
         double currentNsec = m_velocity.tm.nsec;
@@ -147,6 +153,7 @@ RTC::ReturnCode_t IISBeegoController::onExecute(RTC::UniqueId ec_id)
         prev_y = current_y;
         prev_theta = current_theta;
         //
+
 
         fprintf(stderr, "[simulate] l tire vel = %.3f, r tire vel = %.3f\n", l_tireVel, r_tireVel);
         if(!isfinite( l_tireVel )) l_tireVel = 0.0;
@@ -172,9 +179,9 @@ RTC::ReturnCode_t IISBeegoController::onExecute(RTC::UniqueId ec_id)
         m_torque.data[3] = RightTireTorque;
         m_torqueOut.write();
 
-        m_out.x = (l_tireVel + r_tireVel) / 2;
-        m_out.y = 0;
-        m_out.theta = (r_tireVel - l_tireVel) / tread;
+	m_out.x = current_x;
+	m_out.y = current_y;
+	m_out.theta = current_theta;
         m_outOut.write();
     }
 

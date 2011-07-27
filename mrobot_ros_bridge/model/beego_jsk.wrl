@@ -16,7 +16,7 @@ PROTO RangeSensor [
   exposedField MFNode     children          [ ]
   exposedField SFInt32    sensorId          -1
   exposedField SFFloat    scanAngle         3.14159 #[rad]
-  exposedField SFFloat    scanStep          0.1     #[rad]
+  exposedField SFFloat    scanStep          0.02    #[rad]
   exposedField SFFloat    scanRate          10      #[Hz]
   exposedField SFFloat    maxDistance        10
 ]
@@ -331,7 +331,7 @@ DEF SimpleVehicle Humanoid {
       children [
         DEF BODY_LINK Segment {
           centerOfMass  0 0 0
-          mass    5.0
+          mass    20	
           momentsOfInertia [ 0.1 0 0 0 0.1 0 0 0 0.5 ]
 
           children [
@@ -429,7 +429,7 @@ DEF SimpleVehicle Humanoid {
           children [
             DEF STEERING_LINK Segment {
               centerOfMass  0 0 0
-              mass    0.5
+              mass    1
               momentsOfInertia [ 0.01 0 0 0 0.01 0 0 0 0.01 ]
             }
 
@@ -440,7 +440,7 @@ DEF SimpleVehicle Humanoid {
               children [
                 DEF FRONT_WHEEL_LINK Segment {
                   centerOfMass  0 0 0 
-                  mass    0.5
+                  mass    1
                   momentsOfInertia [ 0.01 0 0 0 0.01 0 0 0 0.01 ]
 
                   children [
