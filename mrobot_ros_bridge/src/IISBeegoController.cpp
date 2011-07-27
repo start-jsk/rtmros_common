@@ -113,8 +113,10 @@ RTC::ReturnCode_t IISBeegoController::onDeactivated(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t IISBeegoController::onExecute(RTC::UniqueId ec_id)
 {
-    static double tiresize = 0.04; // [m] TODO
-    static double tread = 0.25; // [m] TODO
+  //    static double tiresize = 0.041; // [m] TODO  
+    static double tiresize = 0.1; // [m] TODO
+  //    static double tread = 0.275; // [m] TODO
+    static double tread = 0.4; // [m] TODO
     // add for odometry
     static double prevSec = m_velocity.tm.sec;
     static double prevNsec = m_velocity.tm.nsec;
@@ -134,7 +136,8 @@ RTC::ReturnCode_t IISBeegoController::onExecute(RTC::UniqueId ec_id)
 	double l_tireVel = m_velocity.data[2] * tiresize;
 	double r_tireVel = m_velocity.data[3] * tiresize;
 
-	std::cerr << "0 : " << m_velocity.data[0] <<
+	std::cerr <<
+	  " 0 : " << m_velocity.data[0] <<
 	  " 1 : " << m_velocity.data[1] <<
 	  " 2 : " << m_velocity.data[2] <<
 	  " 3 : " << m_velocity.data[3] << std::endl;
@@ -175,8 +178,12 @@ RTC::ReturnCode_t IISBeegoController::onExecute(RTC::UniqueId ec_id)
             RightCommandVel = m_in.vx + m_in.w*tread/2;
             fprintf(stderr, "[command]  x = %.3f y = %.3f, w = %.3f\n", m_in.vx, m_in.vy, m_in.w);
         }
-        double LeftTireTorque = (LeftCommandVel - l_tireVel) * 3;
-        double RightTireTorque = (RightCommandVel - r_tireVel) * 3;
+        double LeftTireTorque = (LeftCommandVel - l_tireVel) * 100;
+        double RightTireTorque = (RightCommandVel - r_tireVel) * 100;
+	// if (LeftTireTorque < 0.001)
+	//   LeftTireTorque = 0.01;
+	// if (RightTireTorque < 0.001)
+	//   RightTireTorque = 0.01;
 
         // write to simulated robot
         m_torque.data[0] = m_torque.data[1] = 0.0;
