@@ -3,7 +3,7 @@ all: installed java3d plugin_archives
 INSTALL_DIR=`rospack find openhrp3`
 HG_DIR = build/openhrp-aist-grx
 HG_URL = https://openhrp-aist-grx.googlecode.com/hg/
-HG_PATCH = patch/modelitem.patch  patch/controller.patch patch/colladawriter.patch patch/simulation.patch patch/bodyinfocollada.patch patch/linkname.patch patch/shutdown.patch
+HG_PATCH = patch/modelitem.patch  patch/controller.patch patch/colladawriter.patch patch/simulation.patch patch/bodyinfocollada.patch patch/linkname.patch patch/shutdown.patch patch/viewsimulation.patch
 HG_REVISION = 6d3bd6e3ba2d
 include $(shell rospack find mk)/hg_checkout.mk
 

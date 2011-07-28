@@ -4,6 +4,7 @@
 #include <hrpUtil/OnlineViewerUtil.h>
 #include <hrpModel/ModelLoaderUtil.h>
 #include <hrpCorba/DynamicsSimulator.hh>
+#include <hrpCorba/ViewSimulator.hh>
 #include <hrpCorba/Controller.hh>
 #include <hrpCorba/ClockGenerator.hh>
 #include <hrpUtil/Tvmet3d.h>
@@ -207,6 +208,7 @@ public:
 	Controller_var controller;
 	ClockGenerator_impl* clockGeneratorImpl;
 	OnlineViewer_var olv;
+	ViewSimulator_var vs;
 
     OpenHRPScheduler()
 	{
@@ -217,6 +219,7 @@ public:
 		logTimeStep = 0.100;
 		dynamicsSimulator = NULL;
 		olv = NULL;
+		vs = NULL;
 	}
 
     ~OpenHRPScheduler()
@@ -483,8 +486,8 @@ public:
 	}
 
 	void setupViewer(){
-		cerr << "[openhrp-scheduler] ** OnlineViewer GrxUI) setup ** " << endl;
-		olv = waitAndCheckCorbaServer<OnlineViewer, OnlineViewer_var>("OnlineViewer", cxt, 3);
+		cerr << "[openhrp-scheduler] ** OnlineViewer (GrxUI) setup ** " << endl;
+		olv = waitAndCheckCorbaServer<OnlineViewer, OnlineViewer_var>("OnlineViewer", cxt, 5);
 		//getOnlineViewer(argc, argv);
 		if (CORBA::is_nil( olv )) {
 			std::cerr << "OnlineViewer not found" << std::endl;
@@ -500,6 +503,24 @@ public:
 			olv->clearLog();
 		} catch (CORBA::SystemException& ex) {
 			cerr << "Failed to connect GrxUI." << endl;
+			exit(1);
+		}
+
+		cerr << "[openhrp-scheduler] ** ViewSimulator (GrxUI) setup ** " << endl;
+		vs = waitAndCheckCorbaServer<ViewSimulator, ViewSimulator_var>("ViewSimulator", cxt, 5);
+		if (CORBA::is_nil( vs )) {
+			std::cerr << "ViewSimulator not found" << std::endl;
+			return ;
+		}
+		try {
+			vs->registerCharacter(Robot.second.body->name(), Robot.second.body);
+			cerr << "[openhrp-scheduler] ViewSimulator : registerCharacter " << Robot.second.body->name()  << " from " << Robot.second.url << endl;
+			for ( map<string, ModelItem>::iterator it = Models.begin(); it != Models.end(); it++ ) {
+				vs->registerCharacter(it->first.c_str(), it->second.body);
+				cerr << "ViewSimulator: registerCharacter " << it->first << " from " << it->second.url << endl;
+			}
+		} catch (CORBA::SystemException& ex) {
+			cerr << "Failed to connect ViewSimulator." << endl;
 			exit(1);
 		}
 	}
@@ -613,6 +634,7 @@ public:
 
 		controller->setModelName(Robot.second.body->name());
 		controller->setDynamicsSimulator(dynamicsSimulator);
+		if ( vs ) controller->setViewSimulator(vs);
 		controller->initialize();
 		controller->setTimeStep(controlTimeStep);
 		controller->start();
@@ -661,6 +683,7 @@ public:
 		WorldState_var state;
 		dynamicsSimulator -> getWorldState( state );
 		if ( olv ) olv->update( state );
+		if ( vs ) vs->updateScene( state );
 	}
 };
 

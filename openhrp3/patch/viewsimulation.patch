@@ -1,0 +1,138 @@
+diff -r 6d3bd6e3ba2d GrxUIonEclipse-project-0.9.8/src/com/generalrobotix/ui/GrxPluginManager.java
+--- a/GrxUIonEclipse-project-0.9.8/src/com/generalrobotix/ui/item/GrxModelItem.java	(revision 2152)
++++ b/GrxUIonEclipse-project-0.9.8/src/com/generalrobotix/ui/item/GrxModelItem.java	(revision 2153)
+@@ -572,16 +572,7 @@
+     
+     private boolean load0(File f) {
+         long load_stime = System.currentTimeMillis();
+-        manager_.focusedItem(null);
+-        manager_.setSelectedItem(this, false);
+-        bgRoot_.detach();
+-        bgRoot_ = new BranchGroup();
+-        bgRoot_.setCapability(BranchGroup.ALLOW_DETACH);
+-        bgRoot_.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
+-        bgRoot_.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+-        bgRoot_.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+-        file_ = f;
+-        
++        file_ = f; 
+         String url=null;
+ 	 	try {
+			url = f.getCanonicalPath();
+@@ -594,7 +585,40 @@
+                 GrxCorbaUtil.getReference("ModelLoader")); //$NON-NLS-1$
+             setURL(url);
+             bInfo_ = mloader.loadBodyInfo(getURL(true));
+-            //
++            boolean ret = registerCharacter();
++            long load_etime = System.currentTimeMillis();
++            System.out.println("load time = " + (load_etime-load_stime) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
++            return ret;
++        }catch(ModelLoaderException me){
++            MessageDialog.openError(GrxUIPerspectiveFactory.getCurrentShell(),
++                    MessageBundle.get("GrxModelItem.dialog.title.error"), //$NON-NLS-1$
++                    MessageBundle.get("GrxModelItem.dialog.message.loadError") +"\n" + //$NON-NLS-1$ //$NON-NLS-2$
++                    url + "\n\n" + me.description); //$NON-NLS-1$
++		     	   System.out.println("Failed to load vrml model:" + url); //$NON-NLS-1$
++			   			      	 me.printStackTrace();
++									return false;
++									       } catch (Exception ex) {
++									       	       System.out.println("Failed to load vrml model:" + url); //$NON-NLS-1$
++										       				     ex.printStackTrace();
++															 return false;
++															 	}
++    }
++    
++    public boolean registerCharacter(BodyInfo bInfo){
++    	    bInfo_ = bInfo;
++    	    return registerCharacter();
++    }
++    
++    private boolean registerCharacter(){
++        manager_.focusedItem(null);
++        manager_.setSelectedItem(this, false);
++        bgRoot_.detach();
++        bgRoot_ = new BranchGroup();
++        bgRoot_.setCapability(BranchGroup.ALLOW_DETACH);
++        bgRoot_.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
++        bgRoot_.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
++        bgRoot_.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
++
+             LinkInfo[] linkInfoList = bInfo_.links();
+ 
+             // delete existing model data
+@@ -647,7 +671,12 @@
+             }
+ 
+             long stime = System.currentTimeMillis();
+-            _loadVrmlScene(linkInfoList);
++            try {
++				_loadVrmlScene(linkInfoList);
++						} catch (BadLinkStructureException e) {
++						  				   e.printStackTrace();
++													return false;
++														}
+             long etime = System.currentTimeMillis();
+             System.out.println("_loadVrmlScene time = " + (etime-stime) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
+ 
+@@ -667,23 +696,7 @@
+             
+             manager_.setSelectedItem(this, true);
+             cancelModified();
+-
+-        } catch(ModelLoaderException me){
+-            MessageDialog.openError(GrxUIPerspectiveFactory.getCurrentShell(),
+-                                    MessageBundle.get("GrxModelItem.dialog.title.error"), //$NON-NLS-1$
+-                                    MessageBundle.get("GrxModelItem.dialog.message.loadError") +"\n" + //$NON-NLS-1$ //$NON-NLS-2$
+-                                    url + "\n\n" + me.description); //$NON-NLS-1$
+-            System.out.println("Failed to load vrml model:" + url); //$NON-NLS-1$
+-            me.printStackTrace();
+-            return false;
+-        } catch (Exception ex) {
+-            System.out.println("Failed to load vrml model:" + url); //$NON-NLS-1$
+-            ex.printStackTrace();
+-            return false;
+-        }
+-        long load_etime = System.currentTimeMillis();
+-        System.out.println("load time = " + (load_etime-load_stime) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
+-        return true;
++            return true;
+     }
+
+     /**
+diff -r 6d3bd6e3ba2d GrxUIonEclipse-project-0.9.8/src/com/generalrobotix/ui/view/Grx3DView.java
+===================================================================
+--- a/GrxUIonEclipse-project-0.9.8/src/com/generalrobotix/ui/view/Grx3DView.java	(revision 2152)
++++ b/GrxUIonEclipse-project-0.9.8/src/com/generalrobotix/ui/view/Grx3DView.java	(revision 2153)
+@@ -1599,9 +1599,28 @@
+             arg1.value = new Camera[0];
+         }
+ 
+-        public void registerCharacter(String name, BodyInfo bInfo) {}
+-        public void updateScene(WorldState arg0) { }
+-
++        public void registerCharacter(final String name, final BodyInfo bInfo) {
++        	syncExec(new Runnable(){
++            	public void run(){
++            	       GrxBaseItem newItem = manager_.createItem(GrxModelItem.class, name);
++            	       		   if(newItem!=null){
++                        manager_.itemChange(newItem, GrxPluginManager.ADD_ITEM);
++                        manager_.setSelectedItem(newItem, true);
++                        ((GrxModelItem)newItem).registerCharacter(bInfo);
++				}
++            			}
++            });
++        }
++        
++        public void updateScene(WorldState worldState) {
++        	final WorldStateEx statex = new WorldStateEx(worldState);
++        	syncExec(new Runnable(){
++        		     public void run(){
++        		            	 updateModels(statex);
++                    updateViewSimulator(0);
++			}
++            });
++        }
+     }
+     
+     private class OnlineViewer_impl extends OnlineViewerPOA {
