@@ -10,7 +10,7 @@
             <property name="gravity" value="9.8 "/>
         </item>
         <item class="com.generalrobotix.ui.item.GrxWorldStateItem" name="untitled" select="true">
-            <property name="logTimeStep" value="0.002"/>
+            <property name="logTimeStep" value="0.100"/>
         </item>
 		    <item class="com.generalrobotix.ui.item.GrxModelItem" name="house" select="true" url="$(PROJECT_DIR)/../model/house/house.main.wrl">
             <property name="isRobot" value="false"/>
