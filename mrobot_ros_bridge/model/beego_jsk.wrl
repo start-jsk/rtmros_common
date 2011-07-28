@@ -336,6 +336,7 @@ DEF BeegoRobot Humanoid {
         DEF RANGE_SENSOR1 RangeSensor {
           translation   0.15 0 0.15    # change
           rotation     1 0 1 3.1415
+	  scanStep 0.01
           sensorId      0
           children [
            DEF CAMERA_SHAPE Transform {
