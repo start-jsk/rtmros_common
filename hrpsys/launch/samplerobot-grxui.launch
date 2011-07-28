@@ -9,7 +9,7 @@
   <env name="LANG" value="C" />
   <arg name="MODEL_FILE" value="$(find hrpsys)/scripts/SampleRobot_inHouse.xml" />
 
-  <node name="rtm_naming" pkg="openrtm" type="rtm-naming" required="true" />
+  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" required="true" />
 
   <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
 

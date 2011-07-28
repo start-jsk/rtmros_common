@@ -10,7 +10,7 @@
   <arg name="RESPAWN" default="true"/>
   <env name="LANG" value="C" />
 
-  <node name="rtm_naming" pkg="openrtm" type="rtm-naming" required="true" />
+  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" required="true" />
 
   <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
 
