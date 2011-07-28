@@ -64,8 +64,10 @@ RTC::ReturnCode_t ImageSensorROSBridge::onInitialize()
   pub = it.advertise("image_raw", 1);
   info_pub = node.advertise<sensor_msgs::CameraInfo>("camera_info", 1);
 
-  pair_id = 0;
+  // initialize
+  std::cerr << "@Initilize name : " << getInstanceName() << std::endl;
 
+  pair_id = 0;
   ros::param::param<std::string>("~frame_id", frame, "camera");
 
   return RTC::RTC_OK;
