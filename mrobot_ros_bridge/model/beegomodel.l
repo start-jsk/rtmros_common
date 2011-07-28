@@ -1,5 +1,5 @@
-#-jsk
-(jsk)
+;; #-jsk
+;; (jsk)
 #|
 (unless (boundp '*pickview*)(pickview))
 (defun da ()
@@ -46,7 +46,7 @@
   beego
 )
 ;; beego frame
-(defun beego ()
+(defun beego-org ()
   (setq co (coords))
   (send co :scale 50)
 
@@ -113,6 +113,69 @@
 	(send robot :assoc part))
 
   robot)
+
+;; beego frame
+(defun beego ()
+  (setq co (coords))
+  (send co :scale 50)
+
+  (setq base (make-cube 200 300 20))
+  (setq p1 (make-cube 20 20 300))
+  (setq p2 (make-cube 20 20 300))
+  (setq p3 (make-cube 20 20 300))
+  (send p1 :translate #f(0 0 150) :world)
+  (send p1 :translate #f(0 0 -10) :world)
+  (send p2 :translate #f(-100 -150 150) :world)
+  (send p2 :translate #f(10 10 -10) :world)
+  (send p3 :translate #f(-100 150 150) :world)
+  (send p3 :translate #f(10 -10 -10) :world)
+  (setq pole (list p1 p2 p3))
+
+  (setq w1 (make-cylinder 40 10))
+  (send w1 :rotate pi/2 :x)
+  (send w1 :translate #f(100 -150 0) :world)
+  (setq w2 (make-cylinder 40 10))
+  (send w2 :rotate -pi/2 :x)
+  (send w2 :translate #f(100 150 0) :world)
+  (setq w3 (make-cylinder 25 10))
+  (send w3 :rotate -pi/2 :x)
+  (send w3 :translate #f(-170 0 0) :world)
+  (send w3 :translate #f(0 -5 -15) :world)
+
+
+  (setq w3-stand1 (make-cube 20 40 50))
+  (setq w3-stand2 (make-cube 100 40 20))
+  (setq w3-stand3 (make-cube 20 40 60))
+  (send w3-stand1 :translate #f(40 0 -15) :world)
+  (send w3-stand3 :translate #f(-40 0 -20) :world)
+  (setq w3stand (body+ w3-stand1 w3-stand2 w3-stand3))
+  (send w3stand :translate #f(-130 0 40) :world)
+  (setq wheels (list w1 w2 w3 w3stand))
+
+  (setq plate (make-cube 300 300 10))
+  (send plate :translate #f(0 0 290) :world)
+
+  (setq bump (make-cylinder 20 300))
+  (send bump :rotate pi/2 :x)
+  (send bump :translate #f(200 150 0) :world)
+  (setq bump-stand1 (make-cube 100 20 20))
+  (setq bump-stand2 (make-cube 100 20 20))
+  (send bump-stand1 :translate #f(150 -100 0) :world)
+  (send bump-stand2 :translate #f(150 100 0) :world)
+  (setq bump-asm (list bump bump-stand1 bump-stand2))
+
+  (setq pc (make-round-corner-cube 250 300 40))
+  (send pc :translate #f(0 0 310) :world)
+  (setq kinect (make-round-corner-cube 100 300 60))
+  (send kinect :translate #f(100 0 260) :world)
+
+  (setq nakami (make-cube 150 200 100))
+  (send nakami :translate #f(0 0 50) :world)
+
+  (setq beego (list base pole wheels plate bump-asm pc kinect nakami))
+  (objects (list beego co))
+
+  )
 
 (defun beego-new (&key (tread 275) (wheel-radius 41)
                        (frame-width 30) (wheel-width 30)
