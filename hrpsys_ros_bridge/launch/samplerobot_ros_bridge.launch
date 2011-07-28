@@ -1,9 +1,4 @@
 <launch>
-  <!-- BEGIN:openrtm setting -->
-  <arg name="nameserver" default="localhost" />
-  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"
-				  -o "exec_cxt.periodic.type:SimulationEC" -o "manager.modules.load_path:$(find openhrp3)/lib" -o "manager.modules.preload:SimulationEC.so" ' />
-  <!-- END:openrtm setting -->
 
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="ROBOT_NAME" value="SampleRobot" />
@@ -18,11 +13,5 @@
   <include file="$(find roseus_tutorials)/launch/image-view.launch" />
   <include file="$(find roseus_tutorials)/launch/camshiftdemo.launch" />
 
-
-  <!-- BEGIN:openrtm connection -->
-  <node name="samplerobot_rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/samplerobot_ros_bridge.launch"/>
-  <rtconnect from="SampleRobot(Robot)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" />
-  <rtactivate component="ImageSensorROSBridge0.rtc" />
-  <!-- END:openrtm connection -->
 </launch>
 
