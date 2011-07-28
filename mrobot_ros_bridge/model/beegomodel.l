@@ -119,17 +119,17 @@
                        (height 240))
   (setq co (coords))
   (send co :scale 50)
-  
+
   (setq b1 (make-cube frame-width tread frame-width)
         b2 (make-cube frame-width tread frame-width)
         b3 (make-cube tread frame-width frame-width)
-        b4 (make-cube tread frame-width frame-width)
-        base (list b1 b2 b3 b4))
+        b4 (make-cube tread frame-width frame-width))
 
   (send b1 :translate (float-vector (+ (/ tread -2.0) (/ frame-width 2.0)) 0 0))
   (send b2 :translate (float-vector (- (/ tread 2.0) (/ frame-width 2.0)) 0 0))
   (send b3 :translate (float-vector 0 (+ (/ tread 2.0) (/ frame-width -2.0)) 0))
   (send b4 :translate (float-vector 0 (+ (/ tread -2.0) (/ frame-width 2.0)) 0))
+  (setq base (body+ (body+ b1 b3) (body+ b2 b4)))
 
   (setq w1 (make-cylinder wheel-radius wheel-width))
   ;;車輪の穴とか開けたいけど回転軸はシリンダーの中心のままだー
@@ -148,12 +148,11 @@
   (send w2 :translate (float-vector 50 (/ tread 2.0) 0) :world)
   (setq wheels (list w1 w2))
 
-  (setq pole (make-cube frame-width frame-width height)
+  (setq pole (make-cube (1- frame-width) (1- frame-width) height)
         p1 (copy-object pole)
         p2 (copy-object pole)
         p3 (copy-object pole)
         p4 (copy-object pole))
-  (setq poles (list p1 p2 p3 p4))
   (send p1 :translate (float-vector (+ (/ tread -2.0) (/ frame-width 2.0))
                                     (+ (/ tread -2.0) (/ frame-width 2.0))
                                     (+ (/ height 2.0) (/ frame-width -2.0))))
@@ -166,9 +165,11 @@
   (send p4 :translate (float-vector (- (/ tread 2.0) (/ frame-width 2.0)) 
                                     (+ (/ tread 2.0) (/ frame-width -2.0))
                                     (+ (/ height 2.0) (/ frame-width -2.0))))
+  (setq base (body+ (body+ (body+ (body+ base p1) p2) p3) p4))
 
   (setq plate (make-cube 300 300 30))
   (send plate :translate (float-vector -15 0 height))
+  (setq frame (body+ base plate))
 
   (setq pc (make-round-corner-cube 240 300 30))
   (send pc :translate (float-vector 15 0 270))
@@ -179,18 +180,20 @@
   (send bump :rotate pi/2 :x)
   (send bump :translate (float-vector 160 120 0) :world)
 
-  (setq robot-body-lst (flatten (list base bump wheels poles plate pc kinect)))
+  (setq robot-body-lst (flatten (list base wheels pc kinect bump)))
   (send-all robot-body-lst :set-color :white)
   (mapcar #'(lambda(x)(putprop x 0 :weight)) robot-body-lst)
   ;;(objects (list robot-body-lst co))
 
   (setq robot (instance robot-link :init (make-cascoords) robot-body-lst
                         :name "beego"))
+
   (setq id 0)
   (dolist (part robot-body-lst)
-	(send part :name (format nil "link1~a" (incf id)))
+	(when (null (send part :name))
+	  (send part :name (format nil "link~a" (incf id))))
 	(send robot :assoc part))
-  
+
   robot)
 
 #|
