@@ -37,6 +37,7 @@ omniidl-python:
   ubuntu:
     10.04: omniidl4-python
     10.10: omniidl-python
+    11.04: omniidl-python
 omniorb4:
   ubuntu: omniorb4
 omniorb4-idl:
