@@ -10,6 +10,8 @@
   <url>http://ros.org/wiki/openrtm</url>
 
   <rosdep name="tix" />
+  <rosdep name="omniidl4" />
+  <rosdep name="omniidl-python" />
 
   <depend package="xdot" />
 
