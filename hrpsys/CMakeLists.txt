@@ -47,30 +47,26 @@ target_link_libraries(AbsTransformToPosRpy SimulationEC)
 
 execute_process(COMMAND rosrun hrpsys hrp4c_model_download.sh RESULT_VARIABLE _download_failed)
 if (_download_failed)
-  message(FATAL_ERROR "Download HRP-4C model from http://unit.aist.go.jp/is/humanoid/hrp-4c/hrp-4c.html")
+  message(STATUS "Download HRP-4C model from http://unit.aist.go.jp/is/humanoid/hrp-4c/hrp-4c.html")
 endif(_download_failed)
 
+set(wrl_robots)
 macro(compile_openhrp_model wrlfile workdir daename yamlname lispname)
-  execute_process(COMMAND rosrun openhrp3 export-collada
-    -i ${wrlfile} -o ${workdir}/${daename}
-    RESULT_VARIABLE _export_collada_failed)
-  if (_export_collada_failed)
-    message(FATAL_ERROR "convert from ${wrlfile} to ${workdir}/${daename} failed")
-  endif(_export_collada_failed)
-  execute_process(COMMAND rosrun euscollada collada2eus
-    ${workdir}/${daename}
-    ${PROJECT_SOURCE_DIR}/scripts/${yamlname}
-    ${workdir}/${lispname}
-    RESULT_VARIABLE _export_collada2eus)
-  if (_export_collada2eus)
-    message(FATAL_ERROR "convert from ${workdir}/${daename} to ${workdir}/${lispname} failed")
-  endif(_export_collada2eus)
+  add_custom_command(OUTPUT ${workdir}/${lispname}
+    COMMAND rosrun euscollada collada2eus ${workdir}/${daename} ${PROJECT_SOURCE_DIR}/scripts/${yamlname} ${workdir}/${lispname}
+    DEPENDS ${workdir}/${daename})
+  add_custom_command(OUTPUT ${workdir}/${daename}
+    COMMAND rosrun openhrp3 export-collada -i ${wrlfile} -o ${workdir}/${daename}
+    DEPENDS ${wrlfile})
+  list(APPEND all_robots ${workdir}/${lispname})
 endmacro(compile_openhrp_model)
 
-compile_openhrp_model(
-  ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl
-  ${PROJECT_SOURCE_DIR}/scripts
-  HRP4C.dae hrp4c.yaml hrp4c.l)
+if(EXISTS ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl)
+  compile_openhrp_model(
+    ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl
+    ${PROJECT_SOURCE_DIR}/scripts
+    HRP4C.dae hrp4c.yaml hrp4c.l)
+endif(EXISTS ${PROJECT_SOURCE_DIR}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl)
 rosbuild_find_ros_package(openhrp3)
 compile_openhrp_model(
   ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl
@@ -80,11 +76,18 @@ compile_openhrp_model(
   ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/sample1.wrl
   ${PROJECT_SOURCE_DIR}/scripts
   SampleRobot.dae samplerobot.yaml samplerobot.l)
+rosbuild_find_ros_package(collada_robots)
+add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/scripts/kawada-hironx.l
+  COMMAND rosrun euscollada collada2eus ${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae ${PROJECT_SOURCE_DIR}/scripts/kawada-hironx.yaml ${PROJECT_SOURCE_DIR}/scripts/kawada-hironx.l
+  DEPENDS ${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae)
+list(APPEND all_robots ${PROJECT_SOURCE_DIR}/scripts/kawada-hironx.l)
+
 # compile_openhrp_model(
 #   /home/k-okada/prog/OpenHRP2/etc/DARWIN/DARWINmain.wrl
 #   ${PROJECT_SOURCE_DIR}/scripts
 #   Darwin.dae darwin.yaml darwin.l)
 
+add_custom_target(openhrp_robots ALL DEPENDS ${all_robots})
 
 
 
