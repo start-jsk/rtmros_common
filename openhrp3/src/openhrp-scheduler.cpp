@@ -409,7 +409,7 @@ public:
 			m.url = string("file://")+filename;
 			cerr << "[openhrp-scheduler] ModelLoader: Loading " <<filename << " ... ";
 			waitAndCheckCorbaServer<ModelLoader, ModelLoader_var>("ModelLoader", cxt);
-			cerr << "[openhrp-scheduler] ModelLoader: Loading " << m.url << " ... ";
+			cerr << "[openhrp-scheduler] ModelLoader: Loading " << m.url << " ... " << endl;
 			body = loadBodyInfo(m.url.c_str(), orb);
 			if(!body){
 				cerr << "[openhrp-scheduler] ModelLoader: " << m.url << " cannot be loaded" << endl;
@@ -418,6 +418,7 @@ public:
 			LinkInfoSequence_var links = body->links();
 			for (int i = 0; i < links->length(); i++) {
 				LinkInfo link = links[i];
+				cerr << "[openhrp-scheduler] " << i << " " << link.name << "(parnet " << link.parentIndex << ")" << endl;
 				if ( link.parentIndex == -1 ) {
 					m.joint[string(link.name)].mode = DynamicsSimulator::TORQUE_MODE;
 					m.joint[string(link.name)].translation[0] = 0; m.joint[string(link.name)].translation[1] = 0; m.joint[string(link.name)].translation[2] = 1.0;
