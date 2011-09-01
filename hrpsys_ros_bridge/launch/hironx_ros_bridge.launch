@@ -1,0 +1,14 @@
+<launch>
+
+  <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
+    <arg name="ROBOT_NAME" value="main_withHands" />
+    <arg name="MODEL_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae" />
+    <arg name="COLLADA_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae" />
+
+  </include>
+
+  <node name="samplerobot_rviz" pkg="rviz" type="rviz" respawn="true"
+	args="--sync -d $(find hrpsys_ros_bridge)/launch/hiro.vcg" />
+
+</launch>
+
