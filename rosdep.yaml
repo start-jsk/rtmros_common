@@ -118,7 +118,7 @@ openrtm:
    fi
    sudo apt-get -y --force-yes install openrtm-aist openrtm-aist-doc openrtm-aist-dev openrtm-aist-example openrtm-aist-python openrtm-aist-python-example
 
-collada-dom:
+collada15dom:
   ubuntu: |
    if [ ! -f /etc/apt/sources.list.d/openrave-release*.list ] ; then
      echo "deb http://ppa.launchpad.net/openrave/release/ubuntu `lsb_release -cs` main" |  sudo tee /etc/apt/sources.list.d/openrave-release.list

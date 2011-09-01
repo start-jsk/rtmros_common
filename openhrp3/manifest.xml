@@ -14,7 +14,7 @@
   <depend package="openrtm" />
 
   <!-- collada -->
-  <rosdep name="collada-dom" />
+  <rosdep name="collada15dom" />
 
   <!-- java -->
   <rosdep name="sun-java6-jdk" />
