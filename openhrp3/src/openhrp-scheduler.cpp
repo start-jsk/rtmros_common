@@ -416,7 +416,7 @@ public:
 				exit(1);
 			}
 			LinkInfoSequence_var links = body->links();
-			for (int i = 0; i < links->length(); i++) {
+			for (unsigned int i = 0; i < links->length(); i++) {
 				LinkInfo link = links[i];
 				cerr << "[openhrp-scheduler] " << i << " " << link.name << "(parnet " << link.parentIndex << ")" << endl;
 				if ( link.parentIndex == -1 ) {
@@ -491,7 +491,7 @@ public:
 		olv = waitAndCheckCorbaServer<OnlineViewer, OnlineViewer_var>("OnlineViewer", cxt, 5);
 		//getOnlineViewer(argc, argv);
 		if (CORBA::is_nil( olv )) {
-			std::cerr << "OnlineViewer not found" << std::endl;
+			std::cerr << "[openhrp-scheduler] OnlineViewer not found" << std::endl;
 			return ;
 		}
 		try {
@@ -683,7 +683,7 @@ public:
 	void viewerUpdate() {
 		WorldState_var state;
 		dynamicsSimulator -> getWorldState( state );
-		if ( olv ) olv->update( state );
+		if ( !vs && olv ) olv->update( state );
 		if ( vs ) vs->updateScene( state );
 	}
 };
