@@ -1,8 +1,0 @@
-diff -r 6d3bd6e3ba2d script/openhrp-shutdown-servers.in
---- a/script/openhrp-shutdown-servers.in	Mon Jul 04 22:25:23 2011 +0900
-+++ b/script/openhrp-shutdown-servers.in	Sun Jul 10 04:21:02 2011 +0900
-@@ -6,3 +6,4 @@
- killall -9 openhrp-model-loader
- killall -9 openhrp-controller-bridge
- killall -9 openhrp-path-planner
-+exit 0
