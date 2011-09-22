@@ -513,6 +513,7 @@ public:
 			std::cerr << "ViewSimulator not found" << std::endl;
 			return ;
 		}
+		if (olv) return;
 		try {
 			vs->registerCharacter(Robot.second.body->name(), Robot.second.body);
 			cerr << "[openhrp-scheduler] ViewSimulator : registerCharacter " << Robot.second.body->name()  << " from " << Robot.second.url << endl;
