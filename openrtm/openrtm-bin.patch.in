@@ -1,0 +1,21 @@
+--- utils/rtm-skelwrapper/rtm-skelwrapper.org	2010-01-28 13:21:46.000000000 +0900
++++ utils/rtm-skelwrapper/rtm-skelwrapper	2011-09-23 12:24:33.102359078 +0900
+@@ -21,6 +21,7 @@
+ import sys
+ import getopt
+ 
++os.environ['PATH'] = os.environ['PATH'] + ":" + "@OPENRTM_BIN_PATH@"
+ libdir_path = os.popen("rtm-config --libdir", "r").read().split("\n")
+ pyhelper_path = libdir_path[0] + "/py_helper"
+ sys.path.append(pyhelper_path)
+diff -ur OpenRTM-aist-1.0.0/utils/rtc-template/rtc-template OpenRTM-aist-1.0.0.bak//utils/rtc-template/rtc-template
+--- utils/rtc-template/rtc-template.org	    2010-01-28 13:21:46.000000000 +0900
++++ utils/rtc-template/rtc-template 	    2011-09-23 12:25:49.321123920 +0900
+@@ -204,6 +204,7 @@
+   def __init__(self):
+       return
+ 
++os.environ['PATH'] = os.environ['PATH'] + ":" + "@OPENRTM_BIN_PATH@"
+ libdir_path = os.popen("rtm-config --libdir", "r").read().split("\n")
+ if libdir_path[0] != '':
+    pyhelper_path = libdir_path[0] + "/py_helper"

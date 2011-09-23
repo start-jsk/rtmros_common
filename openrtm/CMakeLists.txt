@@ -11,6 +11,11 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
 rosbuild_init()
 
+set(OPENRTM_BIN_PATH "${PROJECT_SOURCE_DIR}/bin")
+configure_file(openrtm-bin.patch.in openrtm-bin.patch)
+add_custom_target(ALL DEPENDS openrtm-bin.patch)
+
+
 # openrtm-c++ is installed via apt-get system
 # Build OpenHRP3
 execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} make -f Makefile.openrtm-c++
