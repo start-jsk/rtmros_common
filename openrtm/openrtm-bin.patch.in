@@ -19,3 +19,14 @@ diff -ur OpenRTM-aist-1.0.0/utils/rtc-template/rtc-template OpenRTM-aist-1.0.0.b
  libdir_path = os.popen("rtm-config --libdir", "r").read().split("\n")
  if libdir_path[0] != '':
     pyhelper_path = libdir_path[0] + "/py_helper"
+--- src/lib/rtm/ModuleManager.cpp.org	2010-01-28 13:21:45.000000000 +0900
++++ src/lib/rtm/ModuleManager.cpp	2011-09-24 19:50:24.267999724 +0900
+@@ -311,6 +311,6 @@
+       std::vector<coil::Properties> prop;
+       for (size_t i(0), len(dlls.size()); i < len; ++i)
+         {
+-          std::string cmd("rtcprof ");
++          std::string cmd("@OPENRTM_BIN_PATH@/rtcprof ");
+           cmd += dlls[i];
+           FILE* fd;
+           if ((fd = popen(cmd.c_str(), "r")) == NULL)
