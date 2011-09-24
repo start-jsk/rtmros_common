@@ -14,13 +14,13 @@ check-java-version:
 	fi
 
 # https://code.ros.org/trac/ros/ticket/3525
-patched2: $(HG_PATCH) Makefile
+patched2: Makefile Makefile.openhrp-aist-grx
 	cd $(HG_DIR) && hg revert --all
 ifneq ($(strip $(HG_PATCH)),)
 	$(foreach PATCH, $(HG_PATCH), patch -d $(HG_DIR) -p1 < $(PATCH) &&) echo patched
+endif 
 	touch rospack_nosubdirs
 	touch patched2
-endif 
 
 installed: $(HG_DIR) patched2
 	make -f Makefile.openhrp-aist-grx check-java-version
