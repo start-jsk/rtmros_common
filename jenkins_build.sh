@@ -10,7 +10,7 @@ rospack profile
 export ROS_PARALLEL_JOBS=-j4
 unset SVN_REVISION ## this conflicts with mk/svn_checkout.mk
 # rosmake
-export ROSMAKE='rosmake --status-rate=0 --rosdep-install --rosdep-yes'
+ROSMAKE='rosmake --status-rate=0 --rosdep-install --rosdep-yes'
 (cd `rospack find euslisp`; svn up; svn up)
 $ROSMAKE euscollada || $ROSMAKE euscollada || $ROSMAKE euscollada || $ROSMAKE  euscollada
 $ROSMAKE openhrp3
