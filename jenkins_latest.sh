@@ -11,8 +11,9 @@ openhrp3_revision=`LANG=C hg -R \`rospack find openhrp3\`/build/openhrp-aist-grx
 sed -i s/#HG_REVISION=@REVISION@/HG_REVISION=$openhrp3_revision/ `rospack find openhrp3`/Makefile.openhrp-aist-grx
 
 # add latest tag
-revision=`python -c "import pysvn; print pysvn.Client().info('$target').commit_revision.number"`
 latest=https://rtm-ros-robotics.googlecode.com/svn/tags/latest
 target=$HOME/jobs/agentsystem/workspace/rtm-ros-robotics-$BUILD_NUMBER/rtmros_common
+revision=`python -c "import pysvn; print pysvn.Client().info('$target').commit_revision.number"`
+
 svn rm --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m "Delete Latest stable Tag (Tagged by Jenkins)" $latest/rtmros_common
 svn cp --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m　"Latest Stable Tag (Tagged by Jenkins). Revision $revision, openhrp3 rev. $openhrp3_revision, hrpsys rev. $hrpsys_revision" $target $latest/rtmros_common
