@@ -2,7 +2,7 @@ LAST_STABLE_NUMBER=`grep number $HOME/jobs/agentsystem/lastSuccessful/build.xml 
 # remove old build
 find $WORKSPACE -maxdepth 1 -name "rtm-ros-robotics-*" -a ! -name "rtm-ros-robotics-$LAST_STABLE_NUMBER" -print -exec rm -fr {} \;
 # rosinstall
-rosinstall --continue-on-error $WORKSPACE/rtm-ros-robotics-$BUILD_NUMBER /opt/ros/diamondback http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall || rosinstall $WORKSPACE/rtm-ros-robotics-$BUILD_NUMBER
+rosinstall --continue-on-error $WORKSPACE/rtm-ros-robotics-$BUILD_NUMBER /opt/ros/electric http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall || rosinstall $WORKSPACE/rtm-ros-robotics-$BUILD_NUMBER
 # source
 . rtm-ros-robotics-$BUILD_NUMBER/setup.sh
 rospack profile
