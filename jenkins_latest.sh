@@ -15,4 +15,4 @@ revision=`python -c "import pysvn; print pysvn.Client().info('$target').commit_r
 latest=https://rtm-ros-robotics.googlecode.com/svn/tags/latest
 target=$HOME/jobs/agentsystem/workspace/rtm-ros-robotics-$BUILD_NUMBER/rtmros_common
 svn rm --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m "Delete Latest stable Tag (Tagged by Jenkins)" $latest/rtmros_common
-svn cp --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m　"Latest Stable Tag (Tagged by Jenkins). Revision $revision" $target $latest/rtmros_common
+svn cp --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m　"Latest Stable Tag (Tagged by Jenkins). Revision $revision, openhrp3 rev. $openhrp3_revision, hrpsys rev. $hrpsys_revision" $target $latest/rtmros_common
