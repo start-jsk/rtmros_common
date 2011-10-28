@@ -155,6 +155,7 @@ public:
 	double slidingFriction;
 	double staticFriction;
 	double cullingThresh;
+	string sprintDamperModel;
 
 	CollisionPairItem() {
 		jointName1 = "";
@@ -162,6 +163,7 @@ public:
 		slidingFriction = 0.5;
 		staticFriction = 0.5;
 		cullingThresh = 0.01;
+		sprintDamperModel = "false";
 	}
 };
 
@@ -381,11 +383,13 @@ public:
 							c.staticFriction = atof((char *)(xmlGetProp(cur_node, (xmlChar *)"value")));
 						} else if ( xmlStrEqual(xmlGetProp(cur_node, (xmlChar *)"name"),(xmlChar *)"cullingThresh") ) {
 							c.cullingThresh = atof((char *)(xmlGetProp(cur_node, (xmlChar *)"value")));
+						} else if ( xmlStrEqual(xmlGetProp(cur_node, (xmlChar *)"name"),(xmlChar *)"sprintDamperModel") ) {
+							c.sprintDamperModel = (char *)(xmlGetProp(cur_node, (xmlChar *)"value"));
 						} else {
 							std::cerr << "[openhrp-scheduler] "
 									  << "Unknown tag : " << cur_node->name << " "
-									  << "name=" << xmlGetProp(cur_node, (xmlChar *)"name")
-									  << "value=" << xmlGetProp(cur_node, (xmlChar *)"value") << std::endl;
+									  << ", name=" << xmlGetProp(cur_node, (xmlChar *)"name")
+									  << ", value=" << xmlGetProp(cur_node, (xmlChar *)"value") << std::endl;
 						}
 					}
 					cur_node = cur_node->next;
@@ -602,7 +606,6 @@ public:
 		dynamicsSimulator->calcWorldForwardKinematics();
 
 
-
 		cerr << "[openhrp-scheduler] ** Collision server setup ** " << endl;
 		DblSequence6 K, C;    // spring-damper parameters are not used now
 		K.length(0);
@@ -617,7 +620,7 @@ public:
 		for(vector<CollisionPairItem>::iterator it = Collisions.begin(); it != Collisions.end(); it++ ) {
 			string objectName1 = (Models.find(it->objectName1)!=Models.end())?it->objectName1:Robot.second.body->name();
 			string objectName2 = (Models.find(it->objectName2)!=Models.end())?it->objectName2:Robot.second.body->name();
-			cerr << "[openhrp-scheduler] Collision : " << objectName1 << "#" << it->jointName1 << " <> " << objectName2 << "#" << it->jointName2 << " Friction static : "<< it->staticFriction << " slideing : " << it->slidingFriction << " culling : " << it->cullingThresh << " " << endl;
+			cerr << "[openhrp-scheduler] Collision : " << objectName1 << "#" << it->jointName1 << " <> " << objectName2 << "#" << it->jointName2 << " Friction static : "<< it->staticFriction << " slideing : " << it->slidingFriction << " culling : " << it->cullingThresh << " " << "sprintDamperModel : " << it->sprintDamperModel << endl;
 			dynamicsSimulator->registerCollisionCheckPair(objectName1.c_str(), it->jointName1.c_str(),
 														  objectName2.c_str(), it->jointName2.c_str(),
 														  it->staticFriction,it->slidingFriction,K,C,it->cullingThresh);
@@ -762,6 +765,9 @@ int main(int argc, char* argv[])
 
 	if ( ! use_dynamics ) cerr << "[openhrp-scheduler] dynamics disabled " << endl;
 	cerr << "[openhrp-scheduler] ready" << endl;
+	cerr << "[openhrp-scheduler]    timeStep         : " << scheduler.getTimeStep() << endl;
+	cerr << "[openhrp-scheduler]    controleTimeStep : " << scheduler.getControlTimeStep() << endl;
+	cerr << "[openhrp-scheduler]    logTimeStep      : " << scheduler.getLogTimeStep() << endl;
 
 	// ==================  main loop   ======================
 	int i=0;
@@ -782,6 +788,7 @@ int main(int argc, char* argv[])
 		i++;
 		time = scheduler.getTimeStep() * i;
 		controlTime = scheduler.getControlTimeStep() * j;
+		//cerr << "time=" << time << ", control=" << controlTime << "(" << control << "/" << ((i % (int)(scheduler.getLogTimeStep()/scheduler.getControlTimeStep()))==0) << ")" << endl;
 
 		if ((i % 50)==0) {
 			cerr << "[openhrp-scheduler]" << setw(6) << i << ", time: " << setw(6) << time << ", controlTime: " << setw(6) << controlTime << ", control : " << ((control==true)?"true":"false") << endl;
