@@ -9,8 +9,7 @@ SVN_PATCH = patch/tvmet.patch patch/idlj.patch patch/rpath.patch patch/hrpsysin.
 include $(shell rospack find mk)/svn_checkout.mk
 
 installed: $(SVN_DIR)
-	cd $(SVN_DIR) && PKG_CONFIG=`rospack find openrtm`/lib/pkgconfig:`rospack find openhrp3`/lib/pkgconfig cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=`rospack find openrtm` -DOpenCV_INCLUDE_DIRS="`rospack cflags-only-I opencv2 | sed s/\ /\;/g`" -DOpenCV_LIBRARIES="`rospack libs-only-l opencv2 | sed s/\ /\;/g`; -L`rospack libs-only-L opencv2` `rospack libs-only-other opencv2`" -DENABLE_INSTALL_RPATH=ON && make
-# -lopencv_contrib -lopencv_legacy -lopencv_objdetect -lopencv_calib3d -lopencv_features2d -lopencv_video -lopencv_highgui -lopencv_ml -lopencv_imgproc -lopencv_flann -lopencv_core"
+	cd $(SVN_DIR) && PKG_CONFIG=`rospack find openrtm`/lib/pkgconfig:`rospack find openhrp3`/lib/pkgconfig cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=`rospack find openrtm` -DOpenCV_INCLUDE_DIRS="`rospack cflags-only-I opencv2 | sed s/\ /\;/g`" -DOpenCV_LIBRARIES="`rospack libs-only-l opencv2 | sed s/\ /\;/g`; `if [ ! \`rospack libs-only-L opencv2\` == \"\" ]; then echo \"-L\`rospack libs-only-L opencv2\`\"; fi;` `rospack libs-only-other opencv2`" -DENABLE_INSTALL_RPATH=ON && make
 	-cd $(SVN_DIR) && make install
 	#
 	# copy idl
