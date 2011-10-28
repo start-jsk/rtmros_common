@@ -109,7 +109,7 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
 {
   capture_time = ros::Time::now();
 
-  std::cerr << "@Execute name : " << getInstanceName() << "/" << ec_id << ", image:" << m_imageIn.isNew () << std::endl;
+  std::cerr << "[" << getInstanceName() << "] @onExecute name : " << getInstanceName() << "/" << ec_id << ", image:" << m_imageIn.isNew () << std::endl;
   if (m_imageIn.isNew()){
 
     m_imageIn.read();

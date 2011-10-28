@@ -41,7 +41,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   HrpsysSeqStateROSBridgeImpl::onInitialize();
 
   // initialize
-  std::cerr << "@Initilize name : " << getInstanceName() << std::endl;
+  std::cerr << "[HrpsysSeqStateROSBridge] @Initilize name : " << getInstanceName() << std::endl;
 
 
   RTC::Properties& prop = getProperties();
@@ -53,23 +53,23 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
       comPos = nameServer.length();
     }
   nameServer = nameServer.substr(0, comPos);
-  std::cerr << "nameserver " << nameServer.c_str() << std::endl;
+  std::cerr << "[HrpsysSeqStateROSBridge] nameserver " << nameServer.c_str() << std::endl;
   RTC::CorbaNaming naming(m_pManager->getORB(), nameServer.c_str());
   CosNaming::NamingContext::_duplicate(naming.getRootContext());
   std::string modelfile =  m_pManager->getConfig ()["model"];
   try  {
-    std::cerr << "Loading " << modelfile << std::endl;
+    std::cerr << "[HrpsysSeqStateROSBridge] Loading " << modelfile << std::endl;
     loadBodyFromModelLoader (body,
 			     modelfile.c_str(),
 			     CosNaming::NamingContext::_duplicate(naming.getRootContext()));
   } catch ( CORBA::SystemException& ex ) {
-    std::cerr << "CORBA::SystemException " << ex._name() << std::endl;
+    std::cerr << "[HrpsysSeqStateROSBridge] CORBA::SystemException " << ex._name() << std::endl;
     return RTC::RTC_ERROR;
   } catch ( ... ) {
-    std::cerr << "failed to load model[" << prop["model"] << "]" << std::endl;
+    std::cerr << "[HrpsysSeqStateROSBridge] failed to load model[" << prop["model"] << "]" << std::endl;
     return RTC::RTC_ERROR;
   }
-  std::cerr << "Loaded " << body->name() << " from " << modelfile <<  std::endl;
+  std::cerr << "[HrpsysSeqStateROSBridge] Loaded " << body->name() << " from " << modelfile <<  std::endl;
   body->calcForwardKinematics();
 
   return RTC::RTC_OK;
@@ -79,6 +79,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
 void HrpsysSeqStateROSBridge::onJointTrajectoryAction(const pr2_controllers_msgs::JointTrajectoryGoalConstPtr& goal) {
   m_mutex.lock();
   pr2_controllers_msgs::JointTrajectoryResult result;
+
+  std::cerr << "[" << getInstanceName() << "] @onJointTrajectoryAction ";
   //std::cerr << goal->trajectory.joint_names.size() << std::endl;
   if ( goal->trajectory.points.size() != 1) ROS_ERROR("trajectory.points must be 1");
   std::vector<std::string> joint_names = goal->trajectory.joint_names;
@@ -111,11 +113,13 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryAction(const pr2_controllers_msgs
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 {
-  static int skip = 0;
+  static int count = 0;
   sensor_msgs::JointState joint_state;
   joint_state.header.stamp = ros::Time::now();
 
-  std::cerr << "@Execute name : " << getInstanceName() << "/" << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew() << std::endl;
+  if ( (count%50) == 0 ) { // hrpsys runs every 0.005 msec, rviz assumes 50hz(20msec)
+    std::cerr << "[" << getInstanceName() << "] @onExecute name : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew() << std::endl;
+  }
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
     try {
@@ -151,7 +155,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     base.setRotation( tf::createQuaternionFromRPY(m_pose.data.orientation.r, m_pose.data.orientation.p, m_pose.data.orientation.y) );
   }
 
-  if ( ++skip > 4 ) { // hrpsys runs every 0.005 msec, rviz assumes 50hz(20msec)
+  if ( (count%4) == 0 ) { // hrpsys runs every 0.005 msec, rviz assumes 50hz(20msec)
     m_mutex.lock();
     // joint state
     std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
@@ -181,8 +185,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     br.sendTransform(tf::StampedTransform(base, ros::Time::now(), "odom", body->rootLink()->link_name));
     ros::spinOnce();
     m_mutex.unlock();
-    skip = 0;
   }
+  count++;
   return RTC::RTC_OK;
 }
 
