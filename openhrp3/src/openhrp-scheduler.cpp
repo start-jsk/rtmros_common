@@ -108,10 +108,11 @@ X_ptr checkCorbaServer(std::string n, CosNaming::NamingContext_var &cxt)
 	try {
 		srv = X::_narrow(cxt->resolve(ncName));
 	} catch(const CosNaming::NamingContext::NotFound &exc) {
-		std::cerr << n << " not found: ";
+		std::cerr << "[openhrp-scheduler] " << n << " not found: ";
 		switch(exc.why) {
 		case CosNaming::NamingContext::missing_node:
 			std::cerr << "Missing Node" << std::endl;
+			break;
 		case CosNaming::NamingContext::not_context:
 			std::cerr << "Not Context" << std::endl;
 			break;
@@ -707,7 +708,7 @@ int main(int argc, char* argv[])
 	int option_index = 0;
 	while((opt = getopt_long(argc, argv, "", lngopt, &option_index)) != -1){
 		if ( opt == 0 ) {
-			cerr << "opt = " << opt << " / " << option_index << endl;
+			cerr << "[openhrp-scheduler] opt = " << opt << " / " << option_index << endl;
 			switch (option_index) {
 			case 0:
 				use_dynamics = false;
@@ -782,7 +783,9 @@ int main(int argc, char* argv[])
 		time = scheduler.getTimeStep() * i;
 		controlTime = scheduler.getControlTimeStep() * j;
 
-		cerr << "[openhrp-scheduler]" << setw(6) << i << ", time: " << setw(6) << time << ", controlTime: " << setw(6) << controlTime << ", control : " << ((control==true)?"true":"false") << endl;
+		if ((i % 50)==0) {
+			cerr << "[openhrp-scheduler]" << setw(6) << i << ", time: " << setw(6) << time << ", controlTime: " << setw(6) << controlTime << ", control : " << ((control==true)?"true":"false") << endl;
+		}
 		if(control) scheduler.controllerControl(time);
 
 		// ================== simulate one step ==============
