@@ -25,7 +25,7 @@
 
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
   <node name="hrpsys" pkg="hrpsys" type="hrpsyspy" output="screen"
-	args='$(find hrpsys)/scripts/hrpsys.py $(arg MODEL_FILE)' respawn="$(arg RESPAWN)" />
+	args='$(find hrpsys)/scripts/hrpsys.py $(arg MODEL_FILE)' />
 
   <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="screen"
 	args="$(arg openrtm_args)" respawn="$(arg RESPAWN)" />
