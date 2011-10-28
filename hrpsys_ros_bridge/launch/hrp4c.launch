@@ -1,6 +1,8 @@
 <launch>
   <node name="hrp4c_model_download" pkg="hrpsys" type="hrp4c_model_download.sh" />
+  <arg name="SCHEDULER_ARGS" default="" />
   <include file="$(find hrpsys)/launch/hrpsys.launch">
     <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.xml" />
+    <arg name="SCHEDULER_ARGS" value="$(arg SCHEDULER_ARGS)" />
   </include>
 </launch>
