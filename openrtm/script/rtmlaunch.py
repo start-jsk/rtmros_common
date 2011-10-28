@@ -16,20 +16,40 @@ from rtshell import path
 from rtshell import state_control_base
 from rtshell import rts_exceptions
 
-
-
 def alive_component(path):
-    return rtctree.tree.RTCTree().has_path(path) and rtctree.tree.RTCTree().is_component(path)
+    tree=rtctree.tree.RTCTree()
+    if tree.has_path(path) and tree.is_component(path):
+        node = tree.get_node(path)
+        return node.plain_state_string
+    else:
+        return False
 
 def wait_component(cmd_path):
     count=0
     path = rtctree.path.parse_path(cmd_path)[0]
-    while not alive_component(path) and count < 30:
+    node = alive_component(path)
+    while not node and count < 30:
+        node = alive_component(path)
         print "Wait for ",cmd_path
         count += 1
         time.sleep(1)
-    if not alive_component(path):
+    if not node:
         raise rts_exceptions.NoSuchObjectError(cmd_path)
+    return node
+
+def check_connect(src_path, dest_path):
+    tree=rtctree.tree.RTCTree()
+    src_path, src_port = rtctree.path.parse_path(src_path)
+    dest_path, dest_port = rtctree.path.parse_path(dest_path)
+    src_node = tree.get_node(src_path)
+    dest_node = tree.get_node(dest_path)
+    port = src_node.get_port_by_name(src_port)
+    for conn in port.connections:
+        for name, p in conn.ports:
+            tmp_dest_path, tmp_dest_port = rtctree.path.parse_path(name)
+            if dest_path[-1] == tmp_dest_path[-1] and dest_port == tmp_dest_port:
+                return True
+    return False
 
 def rtconnect(nameserver, tags):
     import re
@@ -38,16 +58,18 @@ def rtconnect(nameserver, tags):
         dest_path   = nameserver+"/"+tag.attributes.get("to").value
         source_path = re.sub("\$\(arg ROBOT_NAME\)",robotname,source_path);
         dest_path = re.sub("\$\(arg ROBOT_NAME\)",robotname,dest_path);
-        print >>sys.stderr, "Connect from ",source_path,"to",dest_path
         source_full_path = path.cmd_path_to_full_path(source_path)
         dest_full_path = path.cmd_path_to_full_path(dest_path)
         # wait for proess
         try:
             wait_component(source_full_path)
             wait_component(dest_full_path)
+            if check_connect(source_full_path,dest_full_path):
+                continue
         except Exception, e:
             print >>sys.stderr, 'Could not Connect : ', e,' '
             return 1
+        print >>sys.stderr, "Connect from ",source_path,"to",dest_path
         #print source_path, source_full_path, dest_path, dest_full_path;
         try:
             options = optparse.Values({'verbose': False, 'id': '', 'name': None, 'properties': {}})
@@ -62,9 +84,12 @@ def rtactivate(nameserver, tags):
     for tag in tags:
         cmd_path  = nameserver+"/"+tag.attributes.get("component").value
         full_path = path.cmd_path_to_full_path(cmd_path)
-        print "Activate ",full_path
         try:
-            wait_component(full_path)
+            state = wait_component(full_path)
+            if state == 'Active':
+                return 0
+            else:
+                print "[rtmlaunch] Activate <-",state,full_path
         except Exception, e:
             print >>sys.stderr, 'Could not Activate : ', e,' '
             return 1
@@ -77,13 +102,13 @@ def rtactivate(nameserver, tags):
     return 0
 
 def main():
-    global robotname;
+    global robotname
     usage = '''Usage: %prog [launchfile]'''
     if len(sys.argv) <= 1:
         print >>sys.stderr, usage
         return 1
     fullpathname = sys.argv[1]
-    print fullpathname
+    print "[rtmlaunch] starting... ",fullpathname
     try:
         parser = parse(fullpathname)
     except Exception,e:
@@ -92,10 +117,12 @@ def main():
 
     nameserver = os.getenv("RTCTREE_NAMESERVERS","localhost")
     robotname = os.getenv("ROBOT_NAME","")
-    print robotname
-    rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
-    rtactivate(nameserver, parser.getElementsByTagName("rtactivate"))
-
+    print "[rtmlaunch]",robotname
+    while 1:
+        print "[rtmlaunch] check connection/activation"
+        rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
+        rtactivate(nameserver, parser.getElementsByTagName("rtactivate"))
+        time.sleep(10)
 
 if __name__ == '__main__':
     main()
