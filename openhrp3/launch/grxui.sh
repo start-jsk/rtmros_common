@@ -6,4 +6,5 @@ export JYTHON_LIB=/usr/share/jython/Lib/:`rospack find hrpsys`/share/hrpsys/jyth
 
 rosrun openhrp3 eclipse.sh \
 	-application com.generalrobotix.ui.grxui.applications \
-        -perspective com.generalrobotix.ui.grxui.GrxUIPerspectiveFactory
+        -perspective com.generalrobotix.ui.grxui.GrxUIPerspectiveFactory 2>&1
+
