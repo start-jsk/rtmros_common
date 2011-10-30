@@ -36,6 +36,7 @@ omniidl4:
   ubuntu: omniidl4
 omniidl-python:
   ubuntu:
+    9.10: omniidl4-python
     10.04: omniidl4-python
     10.10: omniidl-python
     11.04: omniidl-python
@@ -47,6 +48,7 @@ omniorb4-nameserver:
   ubuntu: omniorb4-nameserver
 python-omniorb:
   ubuntu:
+   9.10: python-omniorb2
    10.04: python-omniorb2
    10.10: python-omniorb
    11.04: python-omniorb
@@ -82,6 +84,7 @@ tvmet:
 # eclipse3.4.2
 eclipse:
   ubuntu:
+   9.10: eclipse eclipse-platform eclipse-rcp eclipse-pde
    10.04: eclipse eclipse-platform eclipse-rcp eclipse-pde
    10.10: eclipse eclipse-platform eclipse-rcp eclipse-emf eclipse-xsd eclipse-pde
    11.04: eclipse eclipse-platform eclipse-rcp eclipse-emf eclipse-xsd eclipse-pde
