@@ -1,4 +1,4 @@
-all: installed java3d plugin_archives
+all: Makefile.openhrp-aist-grx installed java3d plugin_archives
 
 INSTALL_DIR=`rospack find openhrp3`
 HG_DIR = build/openhrp-aist-grx
@@ -13,16 +13,11 @@ check-java-version:
 	   sudo update-java-alternatives -s java-6-sun; \
 	fi
 
-# https://code.ros.org/trac/ros/ticket/3525
-patched2: Makefile Makefile.openhrp-aist-grx
-	cd $(HG_DIR) && hg revert --all
-ifneq ($(strip $(HG_PATCH)),)
-	$(foreach PATCH, $(HG_PATCH), patch -d $(HG_DIR) -p1 < $(PATCH) &&) echo patched
-endif 
-	touch rospack_nosubdirs
-	touch patched2
-
-installed: $(HG_DIR) patched2
+$(HG_DIR)/CMakeFiles: Makefile.openhrp-aist-grx
+	-make -f Makefile.openhrp-aist-grx clean
+	-rm -fr share build
+			 
+installed: $(HG_DIR)/CMakeFiles $(HG_DIR) patched
 	make -f Makefile.openhrp-aist-grx check-java-version
 	cd $(HG_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DCMAKE_BUILD_TYPE=Debug -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=`rospack find openrtm`
 	cd $(HG_DIR) && make $(ROS_PARALLEL_JOBS)
