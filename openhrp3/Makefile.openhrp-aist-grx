@@ -16,6 +16,7 @@ check-java-version:
 $(HG_DIR)/CMakeFiles: Makefile.openhrp-aist-grx
 	-make -f Makefile.openhrp-aist-grx clean
 	-rm -fr share build
+	mkdir -p build
 			 
 installed: $(HG_DIR)/CMakeFiles $(HG_DIR) patched
 	make -f Makefile.openhrp-aist-grx check-java-version
