@@ -207,6 +207,7 @@ public:
 	CosNaming::NamingContext_var cxt;
 
 	// server
+	ModelLoader_var modelLoader;
 	DynamicsSimulator_var dynamicsSimulator;
 	Controller_var controller;
 	ClockGenerator_impl* clockGeneratorImpl;
@@ -471,15 +472,16 @@ public:
 	}
 
 	void loadModel() {
-		waitAndCheckCorbaServer<ModelLoader, ModelLoader_var>("ModelLoader", cxt);
+		modelLoader = waitAndCheckCorbaServer<ModelLoader, ModelLoader_var>("ModelLoader", cxt);
 		cerr << "[openhrp-scheduler] ModelLoader: Loading " << Robot.first << " from " << Robot.second.url << " ... ";
 		Robot.second.body = loadBodyInfo(Robot.second.url.c_str(), orb);
 		if(!Robot.second.body){
 			cerr << endl << "[openhrp-scheduler] ModelLoader: " << Robot.first << " cannot be loaded" << endl;
 			exit(1);
 		}
-		cerr << Robot.second.body->name() << endl;
+		cerr << "[openhrp-sceduler] " << Robot.second.body->name() << endl;
 		controllerName = Robot.second.body->name();
+		// load models
 		for ( map<string, ModelItem>::iterator it = Models.begin(); it != Models.end(); it++ ) {
 			it->second.body = loadBodyInfo(it->second.url.c_str(), orb);
 			cerr << "[openhrp-scheduler] ModelLoader: Loading " << it->first << " from " << it->second.url << " ... ";
@@ -533,6 +535,15 @@ public:
 	}
 
 	void setupSimulator() {
+		//
+		ModelLoader::ModelLoadOption option;
+		option.readImage = false;
+		option.AABBdata.length(Robot.second.joint.size()+1);
+		for(int i = 0 ; i < option.AABBdata.length(); i++){option.AABBdata[i] = 1;}
+		option.AABBtype = ModelLoader::AABB_NUM;
+		// load AABB robot
+		Robot.second.body = modelLoader->getBodyInfoEx(Robot.second.url.c_str(), option);
+
 		DynamicsSimulatorFactory_var dynamicsSimulatorFactory;
 		dynamicsSimulatorFactory =
 			waitAndCheckCorbaServer <DynamicsSimulatorFactory, DynamicsSimulatorFactory_var> ("DynamicsSimulatorFactory", cxt);
