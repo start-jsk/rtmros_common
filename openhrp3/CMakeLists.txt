@@ -41,7 +41,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-set(OPENHRP_PRIVATE_LIBRARIES `rospack find openhrp3`/build/openhrp-aist-grx/lib/libhrpCorbaStubSkel-3.1.a)
+set(OPENHRP_PRIVATE_LIBRARIES `rospack find openhrp3`/openhrp-aist-grx-svn/lib/libhrpCorbaStubSkel-3.1.a)
 rtmbuild_genidl()
 
 rtmbuild_add_executable(JoystickController share/OpenHRP-3.1/sample/JoystickControl/Controller/JoystickControllerComp.cpp share/OpenHRP-3.1/sample/JoystickControl/Controller/JoystickController.cpp)
