@@ -117,9 +117,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   sensor_msgs::JointState joint_state;
   joint_state.header.stamp = ros::Time::now();
 
-  if ( (count%50) == 0 ) { // hrpsys runs every 0.005 msec, rviz assumes 50hz(20msec)
-    std::cerr << "[" << getInstanceName() << "] @onExecute name : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew() << std::endl;
-  }
+  std::cerr <<"[" << getInstanceName() << "] @onExecute [" << joint_state.header.stamp << "] name : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew() << std::endl;
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
     try {
@@ -155,37 +153,37 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     base.setRotation( tf::createQuaternionFromRPY(m_pose.data.orientation.r, m_pose.data.orientation.p, m_pose.data.orientation.y) );
   }
 
-  if ( (count%4) == 0 ) { // hrpsys runs every 0.005 msec, rviz assumes 50hz(20msec)
-    m_mutex.lock();
-    // joint state
-    std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
-    while ( it != body->joints().end() ) {
-      hrp::Link* j = ((hrp::Link*)*it);
-      ROS_DEBUG_STREAM(j->name << " - " << j->q);
-      joint_state.name.push_back(j->name);
-      joint_state.position.push_back(j->q);
-      //joint_state.velocity
-      //joint_state.effort
-      ++it;
-    }
-    joint_state.effort.resize(joint_state.name.size());
-    joint_state_pub.publish(joint_state);
-    // sensors
-    for (int j = 0 ; j < body->numSensorTypes(); j++) {
-      for (int i = 0 ; i < body->numSensors(j); i++) {
-	static tf::Transform transform;
-	hrp::Sensor* sensor = body->sensor(j, i);
-	transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
-	hrp::Vector3 rpy = hrp::rpyFromRot(sensor->localR);
-	transform.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
-	br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), sensor->link->link_name, sensor->name));
+  // publish
+  m_mutex.lock();
+  // joint state
+  std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
+  while ( it != body->joints().end() ) {
+    hrp::Link* j = ((hrp::Link*)*it);
+    ROS_DEBUG_STREAM(j->name << " - " << j->q);
+    joint_state.name.push_back(j->name);
+    joint_state.position.push_back(j->q);
+    //joint_state.velocity
+    //joint_state.effort
+    ++it;
+  }
+  joint_state.effort.resize(joint_state.name.size());
+  joint_state_pub.publish(joint_state);
+  // sensors
+  for (int j = 0 ; j < body->numSensorTypes(); j++) {
+    for (int i = 0 ; i < body->numSensors(j); i++) {
+      static tf::Transform transform;
+      hrp::Sensor* sensor = body->sensor(j, i);
+      transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
+      hrp::Vector3 rpy = hrp::rpyFromRot(sensor->localR);
+      transform.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
+      br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), sensor->link->link_name, sensor->name));
       }
     }
-    // odom
-    br.sendTransform(tf::StampedTransform(base, ros::Time::now(), "odom", body->rootLink()->link_name));
-    ros::spinOnce();
-    m_mutex.unlock();
-  }
+  // odom
+  br.sendTransform(tf::StampedTransform(base, ros::Time::now(), "odom", body->rootLink()->link_name));
+  ros::spinOnce();
+  m_mutex.unlock();
+
   count++;
   return RTC::RTC_OK;
 }
