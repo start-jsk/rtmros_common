@@ -11,13 +11,6 @@ include(${rtmbuild_PACKAGE_PATH}/cmake/rtmbuild.cmake)
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 #set(ROS_BUILD_TYPE RelWithDebInfo)
 
-# Build OpenHRP3
-execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} make -f Makefile.openhrp-aist-grx
-		RESULT_VARIABLE _make_failed)
-if (_make_failed)
-  message(FATAL_ERROR "Build of OpenHRP3 failed")
-endif(_make_failed)
-
 #rosbuild_init()
 set(CollisionDetector.idl_depends
   ${PROJECT_SOURCE_DIR}/idl_gen/cpp/openhrp3/idl/ModelLoader.hh
@@ -51,7 +44,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 set(OPENHRP_PRIVATE_LIBRARIES `rospack find openhrp3`/build/openhrp-aist-grx/lib/libhrpCorbaStubSkel-3.1.a)
 rtmbuild_genidl()
 
-#rtmbuild_add_executable(JoystickController share/OpenHRP-3.1/sample/JoystickControl/Controller/JoystickControllerComp.cpp share/OpenHRP-3.1/sample/JoystickControl/Controller/JoystickController.cpp)
+rtmbuild_add_executable(JoystickController share/OpenHRP-3.1/sample/JoystickControl/Controller/JoystickControllerComp.cpp share/OpenHRP-3.1/sample/JoystickControl/Controller/JoystickController.cpp)
 
 pkg_check_modules(LIBXML2 REQUIRED libxml-2.0)
 rtmbuild_add_executable(openhrp-scheduler src/openhrp-scheduler.cpp)
