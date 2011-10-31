@@ -2,7 +2,7 @@ Ball: installed java3d plugin_archives all
 include $(shell rospack find mk)/cmake.mk
 
 INSTALL_DIR=`rospack find openhrp3`
-HG_DIR = build/openhrp-aist-grx
+HG_DIR = openhrp-aist-grx-svn
 HG_URL = https://openhrp-aist-grx.googlecode.com/hg/
 HG_PATCH =
 #HG_REVISION=@REVISION@
@@ -14,8 +14,7 @@ check-java-version:
 	   sudo update-java-alternatives -s java-6-sun; \
 	fi
 
-installed: $(HG_DIR) patched
-	make -f Makefile.openhrp-aist-grx check-java-version
+installed: $(HG_DIR) patched check-java-version
 	-rm $(HG_DIR)/CMakeCache.txt
 	cd $(HG_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DCMAKE_BUILD_TYPE=Debug -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=`rospack find openrtm`
 	cd $(HG_DIR) && make $(ROS_PARALLEL_JOBS)
@@ -70,11 +69,13 @@ build/grxui_eclipse.zip: build/rtmtools100release_en.zip eclipse/grxui
 	cd ${CURDIR}/eclipse/grxui; zip -urq  ${CURDIR}/build/grxui_eclipse.zip *  -x '*/.svn/*'
 
 wipe: clean
-	make -f Makefile.openhrp-aist-grx wipe
+        -rm -fr share build
 	touch wiped
 
 clean:
-	make -f Makefile.openhrp-aist-grx clean
+        -rm -fr installed patched include bin lib idl idl_gen workspace
+        -cd $(HG_DIR) && make clean
+	-rm -fr
 
 eclipse-clean:
 	-sudo rm /usr/lib/eclipse/plugins/com.generalrobotix.*
