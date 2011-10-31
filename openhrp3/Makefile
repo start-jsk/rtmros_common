@@ -69,12 +69,12 @@ build/grxui_eclipse.zip: build/rtmtools100release_en.zip eclipse/grxui
 	cd ${CURDIR}/eclipse/grxui; zip -urq  ${CURDIR}/build/grxui_eclipse.zip *  -x '*/.svn/*'
 
 wipe: clean
-        -rm -fr share build
+	-rm -fr share build
 	touch wiped
 
 clean:
-        -rm -fr installed patched include bin lib idl idl_gen workspace
-        -cd $(HG_DIR) && make clean
+	-rm -fr installed patched include bin lib idl idl_gen workspace
+	-cd $(HG_DIR) && make clean
 	-rm -fr
 
 eclipse-clean:
