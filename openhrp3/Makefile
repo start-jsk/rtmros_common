@@ -11,10 +11,11 @@ include $(shell rospack find mk)/hg_checkout.mk
 check-java-version:
 	@if [ ! "`java -version 2>&1 | grep Java\(TM\)\ SE`" ]; then \
 	   /bin/echo -e "\e[1;34mSwitch java runtime to to Sun (TM) SE\e[m"; \
-	   sudo update-java-alternatives -s java-6-sun; \
+	   sudo update-java-alternatives -s java-6-sun; \ exit -1;
 	fi
 
-installed: $(HG_DIR) patched check-java-version
+installed: $(HG_DIR)
+	make check-java-version
 	-rm $(HG_DIR)/CMakeCache.txt
 	cd $(HG_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DCMAKE_BUILD_TYPE=Debug -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=`rospack find openrtm`
 	cd $(HG_DIR) && make $(ROS_PARALLEL_JOBS)
@@ -24,6 +25,8 @@ installed: $(HG_DIR) patched check-java-version
 	mkdir -p $(CURDIR)/idl && cp -p $(CURDIR)/share/OpenHRP-3.1/idl/OpenHRP/* ./idl/
 	# add link
 	ln -sf $(CURDIR)/lib/SimulationEC.so $(CURDIR)/lib/libSimulationEC.so
+	# clean
+	cd $(HG_DIR) ;make clean
 	#
 	touch installed
 
@@ -69,7 +72,7 @@ build/grxui_eclipse.zip: build/rtmtools100release_en.zip eclipse/grxui
 	cd ${CURDIR}/eclipse/grxui; zip -urq  ${CURDIR}/build/grxui_eclipse.zip *  -x '*/.svn/*'
 
 wipe: clean
-	-rm -fr share build
+	-rm -fr share build $(HG_DIR) 
 	touch wiped
 
 clean:
