@@ -11,7 +11,7 @@ include $(shell rospack find mk)/hg_checkout.mk
 check-java-version:
 	@if [ ! "`java -version 2>&1 | grep Java\(TM\)\ SE`" ]; then \
 	   /bin/echo -e "\e[1;34mSwitch java runtime to to Sun (TM) SE\e[m"; \
-	   sudo update-java-alternatives -s java-6-sun; \ exit -1;
+	   sudo update-java-alternatives -s java-6-sun; exit -1; \
 	fi
 
 installed: $(HG_DIR)
