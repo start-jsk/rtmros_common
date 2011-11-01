@@ -41,7 +41,10 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-set(OPENHRP_PRIVATE_LIBRARIES `rospack find openhrp3`/openhrp-aist-grx-svn/lib/libhrpCorbaStubSkel-3.1.a)
+# 
+set(OPENHRP3_PRIVATE_LIBRARIES ${PROJECT_SOURCE_DIR}/lib/libhrpCorbaStubSkel-3.1.a)
+set(OPENHRP3_LIBRARY_DIRS ${PROJECT_SOURCE_DIR})
+set(OPENHRP3_LIBRARIES hrpModel-3.1 libUtil-3.1)
 rtmbuild_genidl()
 
 rtmbuild_add_executable(JoystickController share/OpenHRP-3.1/sample/JoystickControl/Controller/JoystickControllerComp.cpp share/OpenHRP-3.1/sample/JoystickControl/Controller/JoystickController.cpp)
@@ -51,6 +54,7 @@ rtmbuild_add_executable(openhrp-scheduler src/openhrp-scheduler.cpp)
 include_directories(${LIBXML2_INCLUDE_DIRS})
 target_link_libraries(openhrp-scheduler ${LIBXML2_LIBRARIES})
 
+include_directories(${PROJECT_SOURCE_DIR}/include/OpenHRP-3.1)
 rtmbuild_add_executable(extract-robotname src/extract-modelfile.cpp)
 rtmbuild_add_executable(extract-modelpath src/extract-modelfile.cpp)
 target_link_libraries(extract-robotname ${LIBXML2_LIBRARIES})
