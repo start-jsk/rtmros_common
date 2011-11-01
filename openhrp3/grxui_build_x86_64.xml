@@ -75,9 +75,9 @@
 		<delete dir="${temp.folder}/grxui.jar.bin"/>
 		<mkdir dir="${temp.folder}/grxui.jar.bin"/>
 		<path id="grxui.jar.classpath">
-			<pathelement path="../../../lib/ext/j3dutils.jar"/>
-			<pathelement path="../../../lib/ext/vecmath.jar"/>
-			<pathelement path="../../../lib/ext/j3dcore.jar"/>
+			<pathelement path="../../lib/ext/j3dutils.jar"/>
+			<pathelement path="../../lib/ext/vecmath.jar"/>
+			<pathelement path="../../lib/ext/j3dcore.jar"/>
 			<pathelement path="/usr/lib/eclipse/plugins/org.eclipse.ui_3.5.2.M20100120-0800.jar"/>
 			<pathelement path="/usr/lib/eclipse/plugins/org.eclipse.core.runtime_3.5.0.v20090525.jar"/>
 			<pathelement path="/usr/lib/eclipse/plugins/org.eclipse.osgi_3.5.2.R35x_v20100126.jar"/>
