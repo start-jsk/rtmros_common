@@ -27,7 +27,7 @@ static const char* hrpsysseqstaterosbridge_spec[] =
 // </rtc-template>
 
 HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
-  server(nh, "fullbody_controller/joint_trajectory_action", boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryAction, this, _1)),
+  server(nh, "fullbody_controller/joint_trajectory_action", boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryAction, this, _1), true),
   HrpsysSeqStateROSBridgeImpl(manager)
 {
 }
@@ -117,7 +117,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   joint_state.header.stamp = ros::Time::now();
 
   std::cerr <<"[" << getInstanceName() << "] @onExecute [" << joint_state.header.stamp << "] name : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew() << std::endl;
-  return RTC::RTC_OK;
 
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
