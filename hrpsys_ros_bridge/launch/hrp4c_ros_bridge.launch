@@ -5,7 +5,7 @@
     <arg name="COLLADA_FILE" value="$(find hrpsys)/scripts/HRP4C.dae" />
   </include>
 
-  <anode name="hrp4c_rviz" pkg="rviz" type="rviz" respawn="true"
+  <node name="hrp4c_rviz" pkg="rviz" type="rviz" respawn="true"
 	args="--sync -d $(find hrpsys_ros_bridge)/launch/hrp4c.vcg" />
 </launch>
 
