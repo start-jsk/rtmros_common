@@ -11,8 +11,6 @@
 #include <string>
 #include "HrpsysSeqStateROSBridge.h"
 
-#include "ros/ros.h"
-
 void MyModuleInit(RTC::Manager* manager)
 {
   HrpsysSeqStateROSBridgeInit(manager);

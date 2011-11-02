@@ -113,11 +113,12 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryAction(const pr2_controllers_msgs
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 {
-  static int count = 0;
   sensor_msgs::JointState joint_state;
   joint_state.header.stamp = ros::Time::now();
 
   std::cerr <<"[" << getInstanceName() << "] @onExecute [" << joint_state.header.stamp << "] name : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew() << std::endl;
+  return RTC::RTC_OK;
+
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
     try {
@@ -134,6 +135,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     body->calcForwardKinematics();
     if ( m_rsangle.data.length() != body->joints().size() ) {
       std::cerr << "rsangle.data.length(" << m_rsangle.data.length() << ") is not equal to body->joints().size(" << body->joints().size() << ")" << std::endl;
+      m_mutex.unlock();
       return RTC::RTC_OK;
     }
     for ( unsigned int i = 0; i < m_rsangle.data.length() ; i++ ){
@@ -142,49 +144,45 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
     ROS_DEBUG_STREAM(std::endl);
     body->calcForwardKinematics();
+
+    // joint state publish
+    std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
+    while ( it != body->joints().end() ) {
+      hrp::Link* j = ((hrp::Link*)*it);
+      ROS_DEBUG_STREAM(j->name << " - " << j->q);
+      joint_state.name.push_back(j->name);
+      joint_state.position.push_back(j->q);
+      //joint_state.velocity
+      //joint_state.effort
+      ++it;
+    }
+    joint_state.effort.resize(joint_state.name.size());
+    joint_state_pub.publish(joint_state);
+    // sensors publish
+    tf::Transform transform;
+    for (int j = 0 ; j < body->numSensorTypes(); j++) {
+      for (int i = 0 ; i < body->numSensors(j); i++) {
+	hrp::Sensor* sensor = body->sensor(j, i);
+	transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
+	hrp::Vector3 rpy = hrp::rpyFromRot(sensor->localR);
+	transform.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
+	br.sendTransform(tf::StampedTransform(transform, joint_state.header.stamp, sensor->link->link_name, sensor->name));
+      }
+    }
+
     m_mutex.unlock();
   }
 
-  static tf::TransformBroadcaster br;
-  static tf::Transform base;
   if ( m_poseIn.isNew () ) {
     m_poseIn.read();
+    tf::Transform base;
     base.setOrigin( tf::Vector3(m_pose.data.position.x, m_pose.data.position.y, m_pose.data.position.z) );
     base.setRotation( tf::createQuaternionFromRPY(m_pose.data.orientation.r, m_pose.data.orientation.p, m_pose.data.orientation.y) );
+
+    // odom publish
+    br.sendTransform(tf::StampedTransform(base, joint_state.header.stamp, "odom", body->rootLink()->link_name));
   }
 
-  // publish
-  m_mutex.lock();
-  // joint state
-  std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
-  while ( it != body->joints().end() ) {
-    hrp::Link* j = ((hrp::Link*)*it);
-    ROS_DEBUG_STREAM(j->name << " - " << j->q);
-    joint_state.name.push_back(j->name);
-    joint_state.position.push_back(j->q);
-    //joint_state.velocity
-    //joint_state.effort
-    ++it;
-  }
-  joint_state.effort.resize(joint_state.name.size());
-  joint_state_pub.publish(joint_state);
-  // sensors
-  for (int j = 0 ; j < body->numSensorTypes(); j++) {
-    for (int i = 0 ; i < body->numSensors(j); i++) {
-      static tf::Transform transform;
-      hrp::Sensor* sensor = body->sensor(j, i);
-      transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
-      hrp::Vector3 rpy = hrp::rpyFromRot(sensor->localR);
-      transform.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
-      br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), sensor->link->link_name, sensor->name));
-      }
-    }
-  // odom
-  br.sendTransform(tf::StampedTransform(base, ros::Time::now(), "odom", body->rootLink()->link_name));
-  ros::spinOnce();
-  m_mutex.unlock();
-
-  count++;
   return RTC::RTC_OK;
 }
 

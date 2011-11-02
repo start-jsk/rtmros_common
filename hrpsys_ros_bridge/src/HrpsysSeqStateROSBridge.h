@@ -45,6 +45,8 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   ros::Publisher joint_state_pub;
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> server;
 
+  tf::TransformBroadcaster br;
+
   coil::Mutex m_mutex;
 };
 
