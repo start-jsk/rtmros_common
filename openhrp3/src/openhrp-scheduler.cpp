@@ -801,7 +801,7 @@ int main(int argc, char* argv[])
 		controlTime = scheduler.getControlTimeStep() * j;
 		//cerr << "time=" << time << ", control=" << controlTime << "(" << control << "/" << ((i % (int)(scheduler.getLogTimeStep()/scheduler.getControlTimeStep()))==0) << ")" << endl;
 
-		cerr << "[openhrp-scheduler]" << setw(6) << i << ", time: " << setw(6) << time << ", controlTime: " << setw(6) << controlTime << ", control : " << ((control==true)?"true":"false") << endl;
+		cerr << "[openhrp-scheduler]" << setw(6) << i << ", time: " << setw(6) << time << ", control : " << ((control==true)?"true":"false") << ", viewer: " << (((i % (int)(scheduler.getLogTimeStep()/scheduler.getControlTimeStep()))==0)?"true":"false") << endl;
 
 		if(control) scheduler.controllerControl(time);
 
