@@ -11,8 +11,6 @@ function check-sample-project {
 }
 
 SHARE_DIR=`rospack find openhrp3`/share
-check-sample-project $SHARE_DIR/OpenHRP-3.1/sample/project/Sample.xml
-exit
 check-sample-project $SHARE_DIR/OpenHRP-3.1/sample/project/FallingBoxes.xml
 check-sample-project $SHARE_DIR/OpenHRP-3.1/sample/project/ODESample_Crash.xml
 check-sample-project $SHARE_DIR/OpenHRP-3.1/sample/project/PA10Sample.xml
