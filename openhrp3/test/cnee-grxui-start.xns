@@ -1,0 +1,178 @@
+####################################
+#         System information       #
+####################################
+# Date:                   2011:11:03 
+# Time:                   23:28:55 
+# Xnee program:           cnee 
+# Xnee version:           3.10 
+# Xnee home:              http://www.gnu.org/software/xnee/ 
+# Xnee info mailing list: info-xnee@gnu.org 
+# Xnee bug mailing list:  bug-xnee@gnu.org 
+# X version:              11 
+# X revision:             0 
+# X vendor:               The X.Org Foundation 
+# X vendor release:       10900000 
+# Record version major:   1
+# Record version minor:   13
+# OS name:                Linux 
+# OS Release:             2.6.35-28-generic 
+# OS Version:             #50-Ubuntu SMP Fri Mar 18 18:42:20 UTC 2011 
+# Machine:                x86_64 
+# Nodename:               k-okada-t410s 
+# Display name:           :0.0
+# Dimension:              1440x900
+
+
+
+##############################################
+#      Xnee application arguments            #
+##############################################
+#  cnee --record --keyboard -o cnee-grxui-start.xns --seconds-to-record 5 --time 3 
+
+
+##############################################
+#      Displays                              #
+##############################################
+# display :0.0
+# distribute
+
+
+##############################################
+#      Files                                 #
+##############################################
+# out-file cnee-grxui-start.xns
+# err-file stderr
+
+
+##############################################
+#      Key Grabs                             #
+##############################################
+# stop-key         0
+# pause-key        0
+# resume-key       0
+# insert-key       0
+# exec-key         0
+# exec-program-key         xnee-exec-no-program
+
+
+##############################################
+#      Recording limits etc                  #
+##############################################
+
+events-to-record        -1
+data-to-record          -1
+seconds-to-record       5
+# first-last
+
+# Record  all (including current) clients or only future ones
+all-clients
+# future-clients
+
+# Store the starting mouse position 
+# store-mouse-position
+
+
+##############################################
+#      Resolution                            #
+##############################################
+
+# Resolution
+#recorded-resolution  1440x900
+#replay-resolution  1x1
+#resolution-adjustment  0
+
+
+##############################################
+#      Speed                                 #
+##############################################
+
+# Speed
+#speed-percent  100
+
+
+##############################################
+#      Replaying limits etc                  #
+##############################################
+
+max-threshold 20 
+min-threshold 20 
+tot-threshold 40 
+
+
+##############################################
+#      Feedback                              #
+##############################################
+#feedback-none
+#feedback-stderr
+feedback-xosd
+ 
+
+
+##############################################
+#      Various                               #
+##############################################
+
+# Plugin file 
+
+# Modes (currently not used)
+# synchronised-replay
+
+# Replay offset
+#replay-offset 0x0
+
+# Human printout of X11 data (instead of Xnee format)
+# human-printout  
+
+# Delay before starting record/replay
+# time 3
+
+# No recording of ReparentNotify
+# no-reparent-recording 
+
+# Various
+#########################################
+#          Record settings              #
+#########################################
+#   data_flags          7
+#   rState              0x1fed010
+#   xids[0]             3
+#   xids[1]             0
+# Number of Ranges      2
+# RecordRange[0]
+request-range            0-0
+reply-range                   0-0 
+extension-request-major-range  0-0 
+extension-request-minor-range  0-0 
+extension-reply-major-range   0-0
+extension-reply-minor-range   0-0 
+delivered-event-range         21-21 
+device-event-range            2-3 
+error-range                   0-0 
+# RecordRange[1]
+request-range            0-0
+reply-range                   0-0 
+extension-request-major-range  0-0 
+extension-request-minor-range  0-0 
+extension-reply-major-range   0-0
+extension-reply-minor-range   0-0 
+delivered-event-range         0-0 
+device-event-range            78-80 
+error-range                   0-0 
+7,2,0,0,0,64,0,5272316,14,AT Translated Set 2 keyboard
+0,2,0,0,0,64,0,5272316
+6,2,0,0,0,64,0,5272316,3,Virtual core keyboard
+7,2,0,0,0,42,0,5272918,14,AT Translated Set 2 keyboard
+0,2,0,0,0,42,0,5272918
+6,2,0,0,0,42,0,5272918,3,Virtual core keyboard
+7,3,0,0,0,42,0,5273157,14,AT Translated Set 2 keyboard
+0,3,0,0,0,42,0,5273157
+6,3,0,0,0,42,0,5273157,3,Virtual core keyboard
+7,3,0,0,0,64,0,5273177,14,AT Translated Set 2 keyboard
+0,3,0,0,0,64,0,5273177
+6,3,0,0,0,64,0,5273177,3,Virtual core keyboard
+7,2,0,0,0,39,0,5273634,14,AT Translated Set 2 keyboard
+0,2,0,0,0,39,0,5273634
+6,2,0,0,0,39,0,5273634,3,Virtual core keyboard
+7,3,0,0,0,39,0,5273857,14,AT Translated Set 2 keyboard
+0,3,0,0,0,39,0,5273857
+6,3,0,0,0,39,0,5273857,3,Virtual core keyboard

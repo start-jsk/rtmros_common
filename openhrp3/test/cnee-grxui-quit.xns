@@ -1,0 +1,255 @@
+####################################
+#         System information       #
+####################################
+# Date:                   2011:11:04 
+# Time:                   00:53:36 
+# Xnee program:           cnee 
+# Xnee version:           3.10 
+# Xnee home:              http://www.gnu.org/software/xnee/ 
+# Xnee info mailing list: info-xnee@gnu.org 
+# Xnee bug mailing list:  bug-xnee@gnu.org 
+# X version:              11 
+# X revision:             0 
+# X vendor:               The X.Org Foundation 
+# X vendor release:       10900000 
+# Record version major:   1
+# Record version minor:   13
+# OS name:                Linux 
+# OS Release:             2.6.35-28-generic 
+# OS Version:             #50-Ubuntu SMP Fri Mar 18 18:42:20 UTC 2011 
+# Machine:                x86_64 
+# Nodename:               k-okada-t410s 
+# Display name:           :0.0
+# Dimension:              1440x900
+
+
+
+##############################################
+#      Xnee application arguments            #
+##############################################
+#  cnee --record --keyboard -o cnee-grxui-quit.xns --seconds-to-record 10 --time 5 
+
+
+##############################################
+#      Displays                              #
+##############################################
+# display :0.0
+# distribute
+
+
+##############################################
+#      Files                                 #
+##############################################
+# out-file cnee-grxui-quit.xns
+# err-file stderr
+
+
+##############################################
+#      Key Grabs                             #
+##############################################
+# stop-key         0
+# pause-key        0
+# resume-key       0
+# insert-key       0
+# exec-key         0
+# exec-program-key         xnee-exec-no-program
+
+
+##############################################
+#      Recording limits etc                  #
+##############################################
+
+events-to-record        -1
+data-to-record          -1
+seconds-to-record       10
+# first-last
+
+# Record  all (including current) clients or only future ones
+all-clients
+# future-clients
+
+# Store the starting mouse position 
+# store-mouse-position
+
+
+##############################################
+#      Resolution                            #
+##############################################
+
+# Resolution
+#recorded-resolution  1440x900
+#replay-resolution  1x1
+#resolution-adjustment  0
+
+
+##############################################
+#      Speed                                 #
+##############################################
+
+# Speed
+#speed-percent  100
+
+
+##############################################
+#      Replaying limits etc                  #
+##############################################
+
+max-threshold 20 
+min-threshold 20 
+tot-threshold 40 
+
+
+##############################################
+#      Feedback                              #
+##############################################
+#feedback-none
+#feedback-stderr
+feedback-xosd
+ 
+
+
+##############################################
+#      Various                               #
+##############################################
+
+# Plugin file 
+
+# Modes (currently not used)
+# synchronised-replay
+
+# Replay offset
+#replay-offset 0x0
+
+# Human printout of X11 data (instead of Xnee format)
+# human-printout  
+
+# Delay before starting record/replay
+# time 5
+
+# No recording of ReparentNotify
+# no-reparent-recording 
+
+# Various
+#########################################
+#          Record settings              #
+#########################################
+#   data_flags          7
+#   rState              0x2007010
+#   xids[0]             3
+#   xids[1]             0
+# Number of Ranges      2
+# RecordRange[0]
+request-range            0-0
+reply-range                   0-0 
+extension-request-major-range  0-0 
+extension-request-minor-range  0-0 
+extension-reply-major-range   0-0
+extension-reply-minor-range   0-0 
+delivered-event-range         21-21 
+device-event-range            2-3 
+error-range                   0-0 
+# RecordRange[1]
+request-range            0-0
+reply-range                   0-0 
+extension-request-major-range  0-0 
+extension-request-minor-range  0-0 
+extension-reply-major-range   0-0
+extension-reply-minor-range   0-0 
+delivered-event-range         0-0 
+device-event-range            78-80 
+error-range                   0-0 
+7,2,0,0,0,36,0,10352950,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,10352950
+6,2,0,0,0,36,0,10352950,3,Virtual core keyboard
+7,3,0,0,0,36,0,10353157,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,10353157
+6,3,0,0,0,36,0,10353157,3,Virtual core keyboard
+0,21,0,0,0,0,0,10353163
+NEW-WINDOW:32632,-1376964509:39849366,39849366,180,204,294,0:1689014624x32767+1689014648+32767:0,0:
+0,21,0,0,0,0,0,10353163
+0,21,0,0,0,0,0,10353163
+0,21,0,0,0,0,0,10353163
+0,21,0,0,0,0,0,10353163
+0,21,0,0,0,0,0,10353236
+NEW-WINDOW:205,321:39849996,39849996,29479811,0,0,0:1x29+611+145:0,0:Simulation Finished 
+0,21,0,0,0,0,0,10353236
+0,21,0,0,0,0,0,10353236
+0,21,0,0,0,0,0,10353236
+7,2,0,0,0,36,0,10353948,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,10353948
+6,2,0,0,0,36,0,10353948,3,Virtual core keyboard
+0,21,0,0,0,0,0,10354206
+NEW-WINDOW:204,292:39849996,39849996,180,204,292,0:204x292+611+145:0,0:Simulation Finished 
+0,21,0,0,0,0,0,10354206
+0,21,0,0,0,0,0,10354206
+0,21,0,0,0,0,0,10354206
+0,21,0,0,0,0,0,10354206
+7,3,0,0,0,36,0,10354315,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,10354315
+6,3,0,0,0,36,0,10354315,3,Virtual core keyboard
+7,2,0,0,0,36,0,10355065,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,10355066
+6,2,0,0,0,36,0,10355066,3,Virtual core keyboard
+7,3,0,0,0,36,0,10355561,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,10355561
+6,3,0,0,0,36,0,10355561,3,Virtual core keyboard
+7,2,0,0,0,36,0,10356215,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,10356215
+6,2,0,0,0,36,0,10356215,3,Virtual core keyboard
+7,3,0,0,0,36,0,10356550,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,10356550
+6,3,0,0,0,36,0,10356550,3,Virtual core keyboard
+7,2,0,0,0,64,0,10356911,14,AT Translated Set 2 keyboard
+0,2,0,0,0,64,0,10356911
+6,2,0,0,0,64,0,10356911,3,Virtual core keyboard
+7,2,0,0,0,41,0,10357049,14,AT Translated Set 2 keyboard
+0,2,0,0,0,41,0,10357049
+6,2,0,0,0,41,0,10357049,3,Virtual core keyboard
+7,3,0,0,0,64,0,10357190,14,AT Translated Set 2 keyboard
+0,3,0,0,0,64,0,10357190
+6,3,0,0,0,64,0,10357190,3,Virtual core keyboard
+7,3,0,0,0,41,0,10357231,14,AT Translated Set 2 keyboard
+0,3,0,0,0,41,0,10357232
+6,3,0,0,0,41,0,10357232,3,Virtual core keyboard
+7,2,0,0,0,53,0,10357429,14,AT Translated Set 2 keyboard
+0,2,0,0,0,53,0,10357429
+6,2,0,0,0,53,0,10357429,3,Virtual core keyboard
+0,21,0,0,0,0,0,10357594
+NEW-WINDOW:0,0:81788935,81788935,180,0,0,0:0x0+598+320:0,0:JavaEmbeddedFrame
+0,21,0,0,0,0,0,10357594
+0,21,0,0,0,0,0,10357594
+0,21,0,0,0,0,0,10357594
+0,21,0,0,0,0,0,10357594
+7,3,0,0,0,53,0,10357716,14,AT Translated Set 2 keyboard
+0,3,0,0,0,53,0,10357716
+6,3,0,0,0,53,0,10357716,3,Virtual core keyboard
+7,2,0,0,0,36,0,10358494,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,10358494
+6,2,0,0,0,36,0,10358494,3,Virtual core keyboard
+7,3,0,0,0,36,0,10358926,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,10358926
+6,3,0,0,0,36,0,10358926,3,Virtual core keyboard
+7,2,0,0,0,36,0,10359612,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,10359612
+6,2,0,0,0,36,0,10359612,3,Virtual core keyboard
+7,2,0,0,0,36,0,10360112,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,10360112
+6,2,0,0,0,36,0,10360112,3,Virtual core keyboard
+7,2,0,0,0,36,0,10360145,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,10360145
+6,2,0,0,0,36,0,10360145,3,Virtual core keyboard
+7,2,0,0,0,36,0,10360178,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,10360178
+6,2,0,0,0,36,0,10360178,3,Virtual core keyboard
+7,2,0,0,0,36,0,10360211,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,10360211
+6,2,0,0,0,36,0,10360211,3,Virtual core keyboard
+7,3,0,0,0,36,0,10360235,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,10360235
+6,3,0,0,0,36,0,10360235,3,Virtual core keyboard
+7,2,0,0,0,36,0,10360778,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,10360778
+6,2,0,0,0,36,0,10360778,3,Virtual core keyboard
+7,2,0,0,0,36,0,10361278,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,10361278
+6,2,0,0,0,36,0,10361278,3,Virtual core keyboard
