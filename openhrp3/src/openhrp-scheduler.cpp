@@ -472,9 +472,18 @@ public:
 	}
 
 	void loadModel() {
+		ModelLoader::ModelLoadOption option;
+		option.readImage = false;
+		option.AABBtype = ModelLoader::AABB_NUM;
+
 		modelLoader = waitAndCheckCorbaServer<ModelLoader, ModelLoader_var>("ModelLoader", cxt);
 		cerr << "[openhrp-scheduler] ModelLoader: Loading " << Robot.first << " from " << Robot.second.url << " ... ";
-		Robot.second.body = loadBodyInfo(Robot.second.url.c_str(), orb);
+		//modelLoader->clearData();
+
+		option.AABBdata.length(Robot.second.joint.size()+1);
+		for(unsigned int i = 0 ; i < option.AABBdata.length(); i++){option.AABBdata[i] = 1;}
+		modelLoader->loadBodyInfoEx(Robot.second.url.c_str(), option);
+		Robot.second.body = modelLoader->getBodyInfoEx(Robot.second.url.c_str(), option);
 		if(!Robot.second.body){
 			cerr << endl << "[openhrp-scheduler] ModelLoader: " << Robot.first << " cannot be loaded" << endl;
 			exit(1);
@@ -483,7 +492,10 @@ public:
 		controllerName = Robot.second.body->name();
 		// load models
 		for ( map<string, ModelItem>::iterator it = Models.begin(); it != Models.end(); it++ ) {
-			it->second.body = loadBodyInfo(it->second.url.c_str(), orb);
+			option.AABBdata.length(1);
+			for(unsigned int i = 0 ; i < option.AABBdata.length(); i++){option.AABBdata[i] = 1;}
+			modelLoader->loadBodyInfoEx(it->second.url.c_str(), option);
+			it->second.body = modelLoader->getBodyInfoEx(it->second.url.c_str(), option);
 			cerr << "[openhrp-scheduler] ModelLoader: Loading " << it->first << " from " << it->second.url << " ... ";
 			if(!it->second.body){
 				cerr << "[openhrp-scheduler] ModelLoader: " << it->first << " cannot be loaded" << endl;
@@ -536,14 +548,6 @@ public:
 
 	void setupSimulator() {
 		//
-		ModelLoader::ModelLoadOption option;
-		option.readImage = false;
-		option.AABBdata.length(Robot.second.joint.size()+1);
-		for(int i = 0 ; i < option.AABBdata.length(); i++){option.AABBdata[i] = 1;}
-		option.AABBtype = ModelLoader::AABB_NUM;
-		// load AABB robot
-		Robot.second.body = modelLoader->getBodyInfoEx(Robot.second.url.c_str(), option);
-
 		DynamicsSimulatorFactory_var dynamicsSimulatorFactory;
 		dynamicsSimulatorFactory =
 			waitAndCheckCorbaServer <DynamicsSimulatorFactory, DynamicsSimulatorFactory_var> ("DynamicsSimulatorFactory", cxt);
