@@ -24,7 +24,7 @@ target_revision=`python -c "import pysvn; print pysvn.Client().info('$target').c
 echo ";; latest revision : $latest_revision"
 echo ";; target revision : $target_revision"
 
-(cd $latest; svn merge -r $latest_revision:$target_revision $target)
+(cd $latest; svn merge -r 0:$target_revision $target)
 export ROS_PACKAGE_PATH=$latest:$ROS_PACKAGE_PATH
 sed -i s/^SVN_REVISION=-r.*$/SVN_REVISION=-r$hrpsys_revision/ `rospack find hrpsys`/Makefile.hrpsys-base
 sed -i s/^HG_REVISION=.*$/HG_REVISION=$openhrp3_revision/ `rospack find openhrp3`/Makefile
