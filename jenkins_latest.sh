@@ -1,19 +1,38 @@
-BUILD_NUMBER=`grep number $HOME/jobs/agentsystem/lastSuccessful/build.xml | sed 's/[^0-9]//g'`
-. $HOME/jobs/agentsystem/workspace/rtm-ros-robotics-$BUILD_NUMBER/setup.sh
-
+UPSTREAM=$HOME/jobs/agentsystem
+BUILD_NUMBER=`grep number $UPSTREAM/lastSuccessful/build.xml | sed 's/[^0-9]//g'`
+. $UPSTREAM/workspace/rtm-ros-robotics-$BUILD_NUMBER/setup.sh
 
 # hrpsys
 hrpsys_revision=`python -c "import pysvn; print pysvn.Client().info('\`rospack find hrpsys\`/build/hrpsys-base').revision.number"`
-sed -i s/#SVN_REVISION=-r@REVISION@/SVN_REVISION=-r$hrpsys_revision/ `rospack find hrpsys`/Makefile.hrpsys-base
 
 # openhrp3
-openhrp3_revision=`LANG=C hg -R \`rospack find openhrp3\`/build/openhrp-aist-grx tip | head -1 | cut -d\: -f3`
-sed -i s/#HG_REVISION=@REVISION@/HG_REVISION=$openhrp3_revision/ `rospack find openhrp3`/Makefile.openhrp-aist-grx
+openhrp3_revision=`LANG=C hg -R \`rospack find openhrp3\`/openhrp-aist-grx-svn tip | head -1 | cut -d\: -f3`
 
-# add latest tag
-latest=https://rtm-ros-robotics.googlecode.com/svn/tags/latest
+#
+echo ";;   hrpsys revision : $hrpsys_revision"
+echo ";; openrhp3 revision : $openhrp3_revision"
+
+# download and merge
+latest_uri=https://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common
+latest=$WORKSPACE/rtmros_common
 target=$HOME/jobs/agentsystem/workspace/rtm-ros-robotics-$BUILD_NUMBER/rtmros_common
-revision=`python -c "import pysvn; print pysvn.Client().info('$target').commit_revision.number"`
 
-svn rm --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m "Delete Latest stable Tag (Tagged by Jenkins)" $latest/rtmros_common
-svn cp --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m　"Latest Stable Tag (Tagged by Jenkins). Revision $revision, openhrp3 rev. $openhrp3_revision, hrpsys rev. $hrpsys_revision" $target $latest/rtmros_common
+#rm -fr rtmros_common ; svn co $latest_uri rtmros_common;
+
+latest_revision=`python -c "import pysvn; print pysvn.Client().info('$latest').commit_revision.number"`
+target_revision=`python -c "import pysvn; print pysvn.Client().info('$target').commit_revision.number"`
+echo ";; latest revision : $latest_revision" 
+echo ";; target revision : $target_revision" 
+
+#(cd $latest; svn merge -r $latest_revision:$target_revision $target) 
+export ROS_PACKAGE_PATH=$latest:$ROS_PACKAGE_PATH
+sed -i s/^SVN_REVISION=-r.*$/SVN_REVISION=-r$hrpsys_revision/ `rospack find hrpsys`/Makefile.hrpsys-base
+sed -i s/^HG_REVISION=.*$/HG_REVISION=$openhrp3_revision/ `rospack find openhrp3`/Makefile
+
+cat <<EOF >  latest.commit.msg 
+Add latest tag for $target_revision by Jenkins
+Update from previous latest version($latest_revision) are....
+
+`svn log -r $latest_revision:$target_revision $target`
+EOF
+svn commit --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -F latest.commit.msg $latest 
