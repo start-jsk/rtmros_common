@@ -35,4 +35,9 @@ Update from previous latest version($latest_revision) are....
 
 `svn log -r $latest_revision:$target_revision $target`
 EOF
+
 svn commit --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -F latest.commit.msg $latest
+
+svn diff $latest_uri https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common
+
+
