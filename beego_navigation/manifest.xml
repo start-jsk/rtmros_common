@@ -1,0 +1,18 @@
+<package>
+  <description brief="beego_simulation">
+
+     beego_simulation
+
+  </description>
+  <author>chen</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/beego_simulation</url>
+  <depend package="move_base"/>
+  <depend package="map_server"/>
+  <depend package="amcl"/>
+  <depend package="openni_camera"/>
+  <depend package="pointcloud_to_laserscan"/>
+</package>
+
+

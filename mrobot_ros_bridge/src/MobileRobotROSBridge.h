@@ -133,6 +133,7 @@ class MobileRobotROSBridge  : public RTC::DataFlowComponentBase
   tf::TransformBroadcaster tf_pub;
   geometry_msgs::Twist velocity;
   ros::Time latest_v;
+  double x_coe_,y_coe_,z_coe_;
 };
 
 

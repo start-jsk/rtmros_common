@@ -32,7 +32,11 @@ MobileRobotROSBridge::MobileRobotROSBridge(RTC::Manager* manager)
     m_inIn("in", m_in),
     m_outOut("out", m_out)
     // </rtc-template>
+
 {
+    ros::param::param<double>("x_coe",x_coe_,1.0);
+    ros::param::param<double>("y_coe",y_coe_,1.0);
+    ros::param::param<double>("z_coe",z_coe_,1.0);
 }
 
 MobileRobotROSBridge::~MobileRobotROSBridge()
@@ -108,9 +112,9 @@ RTC::ReturnCode_t MobileRobotROSBridge::onExecute(RTC::UniqueId ec_id)
     std::cerr << "[odometry] x = " << m_in.x << ", y = " << m_in.y << ", theta = " << m_in.theta << std::endl;
     //
     if((ros::Time::now() - latest_v).toSec() < 0.5) {
-      m_out.vx = velocity.linear.x;
-      m_out.vy = velocity.linear.y;
-      m_out.w  = velocity.angular.z;
+      m_out.vx = velocity.linear.x * x_coe_;
+      m_out.vy = velocity.linear.y * y_coe_;
+      m_out.w  = velocity.angular.z * z_coe_;
     } else {
       m_out.vx = m_out.vy = m_out.w  = 0;
     }
