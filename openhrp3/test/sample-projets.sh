@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# install cnee http://blog.livedoor.jp/vine_user/archives/51738792.html, use xnee-3.10.tar.gz
 TEST_DIR=`rospack find openhrp3`/test
 function check-sample-project {
     local filename=$1
