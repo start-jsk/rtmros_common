@@ -181,6 +181,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     // odom publish
     br.sendTransform(tf::StampedTransform(base, joint_state.header.stamp, "odom", body->rootLink()->link_name));
   }
+  ros::spinOnce();
 
   return RTC::RTC_OK;
 }
