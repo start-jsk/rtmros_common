@@ -1,9 +1,9 @@
 (ros::roseus "pickbox")
-(load "package://pr2eus/pr2-interface.l")
+(load "package://roseus/euslisp/robot-interface.l")
 (load "package://hrpsys/scripts/kawada-hironx.l")
 
 (defclass kawadahironx-interface
-  :super ros-interface
+  :super robot-interface
   :slots ())
 (defmethod kawadahironx-interface
   (:init (&rest args)

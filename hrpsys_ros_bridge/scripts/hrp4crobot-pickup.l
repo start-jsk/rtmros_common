@@ -1,9 +1,9 @@
 (ros::roseus "pickbox")
-(load "package://pr2eus/pr2-interface.l")
+(load "package://roseus/euslisp/robot-interface.l")
 (load "package://hrpsys/scripts/hrp4c.l")
 
 (defclass hrp4c-interface
-  :super ros-interface
+  :super robot-interface
   :slots ())
 (defmethod hrp4c-interface
   (:init (&rest args)
