@@ -14,6 +14,7 @@ unset SVN_REVISION ## this conflicts with mk/svn_checkout.mk
 ROSMAKE='rosmake --status-rate=0 --rosdep-install --rosdep-yes'
 (cd `rospack find euslisp`; svn up; svn up)
 $ROSMAKE euscollada || $ROSMAKE euscollada || $ROSMAKE euscollada || $ROSMAKE  euscollada
+$ROSMAKE rtmros_common
 $ROSMAKE openhrp3
 $ROSMAKE hrpsys_ros_bridge
 $ROSMAKE RS003
