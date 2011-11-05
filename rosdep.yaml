@@ -134,6 +134,11 @@ collada15dom:
    fi
    sudo apt-get -y install libcollada15dom-dev
 
+# for openhrp3
+libxml2:
+  ubuntu: libxml2-dev
+  debian: libxml2-dev
+
 # for hrpsys
 # libncurses5-dev
 # libreadline5-dev
