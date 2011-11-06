@@ -2,7 +2,7 @@
 #         System information       #
 ####################################
 # Date:                   2011:11:06 
-# Time:                   18:57:07 
+# Time:                   18:56:46 
 # Xnee program:           cnee 
 # Xnee version:           3.10 
 # Xnee home:              http://www.gnu.org/software/xnee/ 
@@ -27,7 +27,7 @@
 ##############################################
 #      Xnee application arguments            #
 ##############################################
-#  cnee --record --keyboard -o cnee-grxui-quit.xns --seconds-to-record 5 --time 5 
+#  cnee --record --keyboard -o cnee-grxui-return.xns --seconds-to-record 5 --time 5 
 
 
 ##############################################
@@ -40,7 +40,7 @@
 ##############################################
 #      Files                                 #
 ##############################################
-# out-file cnee-grxui-quit.xns
+# out-file cnee-grxui-return.xns
 # err-file stderr
 
 
@@ -134,7 +134,7 @@ feedback-xosd
 #          Record settings              #
 #########################################
 #   data_flags          7
-#   rState              0x1daf010
+#   rState              0x11c0010
 #   xids[0]             3
 #   xids[1]             0
 # Number of Ranges      2
@@ -158,28 +158,60 @@ extension-reply-minor-range   0-0
 delivered-event-range         0-0 
 device-event-range            78-80 
 error-range                   0-0 
-7,2,0,0,0,64,0,120748599,14,AT Translated Set 2 keyboard
-0,2,0,0,0,64,0,120748599
-6,2,0,0,0,64,0,120748599,3,Virtual core keyboard
-7,2,0,0,0,41,0,120748920,14,AT Translated Set 2 keyboard
-0,2,0,0,0,41,0,120748921
-6,2,0,0,0,41,0,120748921,3,Virtual core keyboard
-7,3,0,0,0,41,0,120749112,14,AT Translated Set 2 keyboard
-0,3,0,0,0,41,0,120749112
-6,3,0,0,0,41,0,120749112,3,Virtual core keyboard
-7,3,0,0,0,64,0,120749131,14,AT Translated Set 2 keyboard
-0,3,0,0,0,64,0,120749131
-6,3,0,0,0,64,0,120749131,3,Virtual core keyboard
-7,2,0,0,0,53,0,120750492,14,AT Translated Set 2 keyboard
-0,2,0,0,0,53,0,120750492
-6,2,0,0,0,53,0,120750492,3,Virtual core keyboard
-0,21,0,0,0,0,0,120750676
-NEW-WINDOW:32634,2059255907:102760455,102760455,180,0,0,0:-467899856x32767+-467899832+32767:0,0:
-0,21,0,0,0,0,0,120750676
-0,21,0,0,0,0,0,120750676
-0,21,0,0,0,0,0,120750676
-0,21,0,0,0,0,0,120750676
-0,21,0,0,0,0,0,120750676
-7,3,0,0,0,53,0,120750987,14,AT Translated Set 2 keyboard
-0,3,0,0,0,53,0,120750987
-6,3,0,0,0,53,0,120750987,3,Virtual core keyboard
+7,3,0,0,0,36,0,120726355,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,120726355
+6,3,0,0,0,36,0,120726355,3,Virtual core keyboard
+7,2,0,0,0,36,0,120726642,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,120726642
+6,2,0,0,0,36,0,120726642,3,Virtual core keyboard
+7,3,0,0,0,36,0,120726801,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,120726801
+6,3,0,0,0,36,0,120726801,3,Virtual core keyboard
+7,2,0,0,0,36,0,120727096,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,120727096
+6,2,0,0,0,36,0,120727096,3,Virtual core keyboard
+7,3,0,0,0,36,0,120727247,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,120727247
+6,3,0,0,0,36,0,120727247,3,Virtual core keyboard
+7,2,0,0,0,36,0,120727542,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,120727542
+6,2,0,0,0,36,0,120727542,3,Virtual core keyboard
+7,3,0,0,0,36,0,120727685,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,120727685
+6,3,0,0,0,36,0,120727685,3,Virtual core keyboard
+7,2,0,0,0,36,0,120727996,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,120727996
+6,2,0,0,0,36,0,120727996,3,Virtual core keyboard
+7,3,0,0,0,36,0,120728155,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,120728155
+6,3,0,0,0,36,0,120728155,3,Virtual core keyboard
+7,2,0,0,0,36,0,120728473,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,120728474
+6,2,0,0,0,36,0,120728474,3,Virtual core keyboard
+7,3,0,0,0,36,0,120728633,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,120728633
+6,3,0,0,0,36,0,120728633,3,Virtual core keyboard
+7,2,0,0,0,36,0,120728943,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,120728943
+6,2,0,0,0,36,0,120728943,3,Virtual core keyboard
+7,3,0,0,0,36,0,120729134,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,120729134
+6,3,0,0,0,36,0,120729134,3,Virtual core keyboard
+7,2,0,0,0,36,0,120729413,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,120729413
+6,2,0,0,0,36,0,120729413,3,Virtual core keyboard
+7,3,0,0,0,36,0,120729580,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,120729580
+6,3,0,0,0,36,0,120729580,3,Virtual core keyboard
+7,2,0,0,0,36,0,120729819,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,120729819
+6,2,0,0,0,36,0,120729819,3,Virtual core keyboard
+7,3,0,0,0,36,0,120729994,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,120729994
+6,3,0,0,0,36,0,120729994,3,Virtual core keyboard
+7,2,0,0,0,36,0,120730257,14,AT Translated Set 2 keyboard
+0,2,0,0,0,36,0,120730257
+6,2,0,0,0,36,0,120730257,3,Virtual core keyboard
+7,3,0,0,0,36,0,120730440,14,AT Translated Set 2 keyboard
+0,3,0,0,0,36,0,120730440
+6,3,0,0,0,36,0,120730440,3,Virtual core keyboard
