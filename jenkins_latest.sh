@@ -38,6 +38,9 @@ EOF
 
 svn commit --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -F latest.commit.msg $latest
 
-svn diff $latest_uri https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common
+if [ `svn diff --diff-cmd /usr/bin/diff -x "--normal " $latest_uri https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common | grep "^>" | grep -v "@REVISION" | wc -l` != 0 ] ; then
+    svn diff $latest_uri https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common
+    exit 1
+fi
 
 
