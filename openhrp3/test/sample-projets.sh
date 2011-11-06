@@ -21,7 +21,10 @@ function check-sample-project {
     # start simulator
     cnee --replay --time 5 -f $TEST_DIR/cnee-grxui-start.xns
     # capture image
-    sleep 5; import -window Eclipse\ SDK\  $TEST_DIR/project-`basename $filename .xml`.png
+    sleep 5;
+    cnee --replay --time 0 -f $TEST_DIR/cnee-grxui-return.xns
+    cnee --replay --time 0 -f $TEST_DIR/cnee-grxui-return.xns
+    import -window Eclipse\ SDK\  $TEST_DIR/project-`basename $filename .xml`.png
     # done
     cnee --replay --time 1 -f $TEST_DIR/cnee-grxui-return.xns
     cnee --replay --time 1 -f $TEST_DIR/cnee-grxui-return.xns
