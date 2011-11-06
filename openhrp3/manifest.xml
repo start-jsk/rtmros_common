@@ -12,6 +12,7 @@
   <depend package="roscpp" />
   <depend package="tvmet" />
   <depend package="openrtm" />
+  <depend package="common_rosdeps" />
 
   <!-- collada -->
   <rosdep name="collada15dom" />
