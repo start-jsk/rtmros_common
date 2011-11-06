@@ -17,4 +17,5 @@ $ROSMAKE euscollada || $ROSMAKE euscollada || $ROSMAKE euscollada || $ROSMAKE  e
 $ROSMAKE rtmros_common
 $ROSMAKE openhrp3
 $ROSMAKE hrpsys_ros_bridge
+$ROSMAKE mrobot_ros_bridge
 $ROSMAKE RS003
