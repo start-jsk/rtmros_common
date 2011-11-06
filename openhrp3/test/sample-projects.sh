@@ -1,5 +1,7 @@
 #!/bin/bash
 
+touch $HOME/.ros/test_results/openhrp3/TEST-sample-project.xml
+
 # install cnee http://blog.livedoor.jp/vine_user/archives/51738792.html, use xnee-3.10.tar.gz
 TEST_DIR=`rospack find openhrp3`/test
 function check-sample-project {
@@ -11,7 +13,7 @@ function check-sample-project {
     # start openhrp3
     rosrun openhrp3 grxui.sh $filename > /dev/null &
     while :; do
-	./check-online-viewer.py $robotname
+	rosrun openhrp3 check-online-viewer.py $robotname
 	if [ $? == 0 ] ; then
 	    break;
 	fi;

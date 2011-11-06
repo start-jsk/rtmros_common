@@ -62,3 +62,4 @@ target_link_libraries(extract-modelpath ${LIBXML2_LIBRARIES})
 rosbuild_add_compile_flags(extract-robotname -DROBOTNAME)
 rosbuild_add_compile_flags(extract-modelpath -DMODELPATH)
 
+rosbuild_add_rostest(test/sample-project.test)
