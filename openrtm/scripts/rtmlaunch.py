@@ -60,6 +60,13 @@ def rtconnect(nameserver, tags):
         dest_path = re.sub("\$\(arg ROBOT_NAME\)",robotname,dest_path);
         source_full_path = path.cmd_path_to_full_path(source_path)
         dest_full_path = path.cmd_path_to_full_path(dest_path)
+        if tag.attributes.get("subscription_type") != None:
+            sub_type = tag.attributes.get("subscription_type").value
+            if not sub_type in ['flush','new','periodic']:
+                print >>sys.stderr, sub_type+' is not a subscription type'
+                continue
+        else:
+            sub_type = 'flush' # this is default value
         # wait for proess
         try:
             wait_component(source_full_path)
@@ -72,7 +79,7 @@ def rtconnect(nameserver, tags):
         print >>sys.stderr, "Connect from ",source_path,"to",dest_path
         #print source_path, source_full_path, dest_path, dest_full_path;
         try:
-            options = optparse.Values({'verbose': False, 'id': '', 'name': None, 'properties': {}})
+            options = optparse.Values({'verbose': False, 'id': '', 'name': None, 'properties': {'dataport.subscription_type': sub_type}})
             rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, tree=None)
         except Exception, e:
             print >>sys.stderr, '{0}: {1}'.format(os.path.basename(sys.argv[0]), e)
