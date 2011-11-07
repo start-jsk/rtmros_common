@@ -67,6 +67,8 @@ def rtconnect(nameserver, tags):
                 continue
         else:
             sub_type = 'flush' # this is default value
+        if sub_type == 'new':
+            push_policy = 'all'
         # wait for proess
         try:
             wait_component(source_full_path)
@@ -79,7 +81,10 @@ def rtconnect(nameserver, tags):
         print >>sys.stderr, "Connect from ",source_path,"to",dest_path
         #print source_path, source_full_path, dest_path, dest_full_path;
         try:
-            options = optparse.Values({'verbose': False, 'id': '', 'name': None, 'properties': {'dataport.subscription_type': sub_type}})
+            props = {'dataport.subscription_type': sub_type}
+            if sub_type == 'new':
+                props['dataport.publisher.push_policy'] = 'all'
+            options = optparse.Values({'verbose': False, 'id': '', 'name': None, 'properties': props})
             rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, tree=None)
         except Exception, e:
             print >>sys.stderr, '{0}: {1}'.format(os.path.basename(sys.argv[0]), e)
