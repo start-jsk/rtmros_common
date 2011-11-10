@@ -146,3 +146,14 @@ libxml2:
 # for openrtm-python-example
 tix:
   ubuntu: tix
+
+# choreonoid
+doxygen:
+  ubuntu: doxygen
+openscenegraph:
+  ubuntu: libopenscenegraph-dev openscenegraph-doc
+libsimage-dev:
+  ubuntu: libsimage-dev
+libqt4-opengl:
+  ubuntu: libqt4-opengl-dev
+
