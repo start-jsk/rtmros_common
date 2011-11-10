@@ -15,6 +15,7 @@
   <depend package="euscollada"/>
   <depend package="collada_robots"/>
 
+  <rosdep name="doxygen" />
 </package>
 
 
