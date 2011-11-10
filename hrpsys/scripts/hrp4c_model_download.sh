@@ -22,6 +22,7 @@ if [ ! -f ${HRP4C_MODEL_PATH} ]; then
 fi
 if [ -f ${HRP4C_MODEL_PATH} ]; then
     (cd ${HRP4C_MODEL_DIR}; patch -N HRP-4C/HRP4Cmain.wrl < `rospack find hrpsys`/patch/HRP4Cmain.view.patch)
+    (cd ${HRP4C_MODEL_DIR}/HRP-4C/cover; sed -i 's/^\(.*ccw.*\)$/#\1/' L_*.wrl  CHEST_*.wrl WAIST.wrl NECK_*.wrl)
     echo 0
 fi
 
