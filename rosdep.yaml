@@ -110,6 +110,15 @@ libpng12-dev:
 uuid-dev:
   ubuntu: uuid-dev
 
+# openhrp3 test
+xnee:
+  ubuntu: |
+    if [ ! -f /usr/local/bin/cnee ]; then
+     sudo aptitude install build-essential libxtst-dev libpanel-applet2-dev autoconf automake libtool libgnomeui-dev checkinstall
+      wget http://ftp.gnu.org/gnu/xnee/xnee-3.10.tar.gz -O /tmp/xnee-3.10-$$.tar.gz
+      mkdir /tmp/xnee-3.10-$$; tar -C /tmp/xnee-3.10-$$ -xzvf /tmp/xnee-3.10-$$.tar.gz; cd /tmp/xnee-3.10-$$/xnee-3.10; ./configure --disable-doc; make; sudo checkinstall -y
+    fi
+
 # openrtm
 #openrtm-aist
 #openrtm-aist-doc

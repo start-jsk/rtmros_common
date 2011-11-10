@@ -67,6 +67,7 @@
 
 
   <rosdep name="libxml2" />
+  <rosdep name="xnee" />
 
 
 </package>
