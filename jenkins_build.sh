@@ -8,7 +8,7 @@ rosinstall --continue-on-error $WORKSPACE/rtm-ros-robotics-$BUILD_NUMBER /opt/ro
 . rtm-ros-robotics-$BUILD_NUMBER/setup.sh
 rospack profile
 # set environment
-export ROS_PARALLEL_JOBS=-j4
+export ROS_PARALLEL_JOBS=-j1 # make -j4 at RS003 fails..
 unset SVN_REVISION ## this conflicts with mk/svn_checkout.mk
 # rosmake
 ROSMAKE='rosmake --status-rate=0 --rosdep-install --rosdep-yes'
