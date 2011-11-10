@@ -78,7 +78,6 @@ wipe: clean
 clean:
 	-rm -fr installed patched include bin lib idl idl_gen workspace
 	-cd $(HG_DIR) && make clean
-	-rm -fr
 
 eclipse-clean:
 	-sudo rm /usr/lib/eclipse/plugins/com.generalrobotix.*
