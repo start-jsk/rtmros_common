@@ -13,6 +13,7 @@
   <rosdep name="omniidl4" />
   <rosdep name="omniidl-python" />
 
+  <depend package="rtmbuild" />
   <depend package="xdot" />
 
   <export>
