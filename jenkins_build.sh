@@ -8,6 +8,9 @@ echo "removing old bulid ... $LAST_STABLE_NUMBER"
 find $WORKSPACE -maxdepth 1 -name "rtm-ros-robotics-*" -a ! -name "rtm-ros-robotics-$LAST_STABLE_NUMBER" -print -exec rm -fr {} \;
 # rosinstall
 rosinstall --continue-on-error $WORKSPACE/rtm-ros-robotics-$BUILD_NUMBER /opt/ros/electric http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall || rosinstall $WORKSPACE/rtm-ros-robotics-$BUILD_NUMBER
+# copy jenkins source
+rm -fr rtm-ros-robotics-$BUILD_NUMBER/rtmros_common/
+mv rtm-ros-robotics/rtmros_common rtm-ros-robotics-$BUILD_NUMBER/rtmros_common
 # source
 . rtm-ros-robotics-$BUILD_NUMBER/setup.sh
 rospack profile
