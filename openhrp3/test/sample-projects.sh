@@ -8,16 +8,17 @@ function check-sample-project {
     local filename=$1
     local robotname=$2
     if [ "$robotname" == "" ] ; then robotname="floor"; fi
-    echo $robotname
     rm -f $TEST_DIR/project-`basename $filename .xml`.png
     # start openhrp3
+    rosrun openhrp3 openhrp-shutdown-servers
+    rosrun openrtm rtm-naming-restart &
     rosrun openhrp3 grxui.sh $filename > /dev/null &
     while :; do
 	rosrun openhrp3 check-online-viewer.py $robotname
 	if [ $? == 0 ] ; then
 	    break;
 	fi;
-	echo ";; Wait for GRXUIof $filename";
+	echo ";; Wait for GRXUI of $filename";
 	sleep 1;
     done
     # start simulator
@@ -32,6 +33,8 @@ function check-sample-project {
     cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-return.xns
     cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-quit.xns
     cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-return.xns
+    # make sure to kill eclipse
+    ps $! && kill -KILL $!
 }
 
 SHARE_DIR=`rospack find openhrp3`/share
