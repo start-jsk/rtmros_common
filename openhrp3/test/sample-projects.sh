@@ -37,27 +37,28 @@ EOF
     # start openhrp3
     rosrun openhrp3 openhrp-shutdown-servers
     rosrun openrtm rtm-naming-restart &
+    echo "start $filename" 1>&2
     rosrun openhrp3 grxui.sh $filename > /dev/null &
     while :; do
 	rosrun openhrp3 check-online-viewer.py $robotname
 	if [ $? == 0 ] ; then
 	    break;
 	fi;
-	echo ";; Wait for GRXUI of $filename";
+	echo ";; Wait for GRXUI of $filename" 1>&2;
 	sleep 1;
     done
     # start simulator
-    cnee --replay --time 5 -fcr -f $TEST_DIR/cnee-grxui-start.xns
+    cnee --replay --time 5 -fcr -f $TEST_DIR/cnee-grxui-start.xns  1>&2
     # capture image
     sleep 5;
-    cnee --replay --time 0 -fcr -f $TEST_DIR/cnee-grxui-return.xns
-    cnee --replay --time 0 -fcr -f $TEST_DIR/cnee-grxui-return.xns
-    import -window Eclipse\ SDK\  $TEST_DIR/project-`basename $filename .xml`.png
+    cnee --replay --time 0 -fcr -f $TEST_DIR/cnee-grxui-return.xns  1>&2
+    cnee --replay --time 0 -fcr -f $TEST_DIR/cnee-grxui-return.xns  1>&2
+    import -window Eclipse\ SDK\  $TEST_DIR/project-`basename $filename .xml`.png  1>&2
     # done
-    cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-return.xns
-    cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-return.xns
-    cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-quit.xns
-    cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-return.xns
+    cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-return.xns  1>&2
+    cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-return.xns  1>&2
+    cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-quit.xns    1>&2
+    cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-return.xns  1>&2
     # make sure to kill eclipse
     ps $! && kill -KILL $!
 }
