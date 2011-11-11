@@ -4,9 +4,34 @@ touch $HOME/.ros/test_results/openhrp3/TEST-sample-project.xml
 
 # install cnee http://blog.livedoor.jp/vine_user/archives/51738792.html, use xnee-3.10.tar.gz
 TEST_DIR=`rospack find openhrp3`/test
+
+cat <<EOF > $TEST_DIR/sample-projects.rst
+OpenHPR3 examples
+=================
+EOF
+
 function check-sample-project {
     local filename=$1
     local robotname=$2
+    cat <<EOF >> $TEST_DIR/sample-projects.rst
+
+`basename $filename .xml`
+-------------------------
+
+.. code-block:: bash
+
+  roscd openhrp3/OpenHRP-3.1/sample/project/
+  rosrun openhrp3 grxui.sh `basename $filename`
+
+.. image :: project-`basename $filename .xml`.png
+    :width: 500pt
+
+Download \``basename $filename`\`_ file
+
+.. _\``basename $filename`\`: ../../share/OpenHRP-3.1/sample/project/`basename $filename`
+
+-------------------
+EOF
     if [ "$robotname" == "" ] ; then robotname="floor"; fi
     rm -f $TEST_DIR/project-`basename $filename .xml`.png
     # start openhrp3
@@ -53,5 +78,8 @@ check-sample-project $SHARE_DIR/OpenHRP-3.1/sample/project/SampleRobot_inHouse.x
 check-sample-project $SHARE_DIR/OpenHRP-3.1/sample/project/SampleSV.xml "longfloor"
 check-sample-project $SHARE_DIR/OpenHRP-3.1/sample/project/SampleSV_RangeSensor.xml "longfloor"
 check-sample-project $SHARE_DIR/OpenHRP-3.1/sample/project/SpringJoint.xml
+
+
+sphinx-build  -b html -d `rospack find openhrp3`/build/doctrees $TEST_DIR `rospack find openhrp3`build/html
 
 
