@@ -33,9 +33,6 @@ rtmbuild_genidl()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-set(MotorControl.idl_depends
-  ${PROJECT_SOURCE_DIR}/idl_gen/cpp/RS003/idl/intellirobot.hh)
-
 rtmbuild_add_executable(MotorControlComp src/MotorControl/MotorControl.cpp src/MotorControl/MotorControlComp.cpp src/MotorControl/MotorControlProSVC_impl.cpp)
 rtmbuild_add_library(MotorControl src/MotorControl/MotorControl.cpp src/MotorControl/MotorControlProSVC_impl.cpp)
 #
