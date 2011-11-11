@@ -1,3 +1,7 @@
+#!/bin/bash
+
+trap 'exit 1' ERR
+
 LAST_STABLE_NUMBER=`grep number $HOME/jobs/agentsystem/lastSuccessful/build.xml | sed 's/[^0-9]//g'`
 # remove old build
 echo "removing old bulid ... $LAST_STABLE_NUMBER"

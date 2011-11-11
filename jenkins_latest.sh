@@ -1,3 +1,7 @@
+#!/bin/bash
+
+trap 'exit 1' ERR
+
 UPSTREAM=$HOME/jobs/agentsystem
 BUILD_NUMBER=`grep number $UPSTREAM/lastSuccessful/build.xml | sed 's/[^0-9]//g'`
 . $UPSTREAM/workspace/rtm-ros-robotics-$BUILD_NUMBER/setup.sh
