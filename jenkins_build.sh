@@ -15,7 +15,7 @@ mv rtm-ros-robotics/rtmros_common rtm-ros-robotics-$BUILD_NUMBER/rtmros_common
 . rtm-ros-robotics-$BUILD_NUMBER/setup.sh
 rospack profile
 # set environment
-export ROS_PARALLEL_JOBS=-j1 # make -j4 at RS003 fails..
+export ROS_PARALLEL_JOBS=-j4
 unset SVN_REVISION ## this conflicts with mk/svn_checkout.mk
 # rosmake
 ROSMAKE='rosmake --status-rate=0 --rosdep-install --rosdep-yes'
