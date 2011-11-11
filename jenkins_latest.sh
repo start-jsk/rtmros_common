@@ -18,10 +18,10 @@ echo ";; openrhp3 revision : $openhrp3_revision"
 
 # download and merge
 latest_uri=https://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common
-latest=$WORKSPACE/rtmros_common
+latest=$WORKSPACE/rtmros_common-latest
 target=$HOME/jobs/agentsystem/workspace/rtm-ros-robotics-$BUILD_NUMBER/rtmros_common
 
-rm -fr rtmros_common ; svn co $latest_uri rtmros_common;
+rm -fr rtmros_common-latest ; svn co $latest_uri rtmros_common-latest;
 
 latest_revision=`python -c "import pysvn; print pysvn.Client().info('$latest').commit_revision.number"`
 target_revision=`python -c "import pysvn; print pysvn.Client().info('$target').commit_revision.number"`
