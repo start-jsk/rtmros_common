@@ -79,8 +79,8 @@ macro(rtmbuild_genidl)
     list(APPEND _autogen ${_output_stub_lib} ${_output_skel_lib} ${_output_idl_py})
   endforeach(_idl)
   ##
-  add_dependencies(rtmbuild_genidl RTMBUILD_genidl_cpp)
-  add_custom_target(RTMBUILD_genidl_cpp DEPENDS ${_autogen})
+  add_dependencies(rtmbuild_genidl RTMBUILD_genidl)
+  add_custom_target(RTMBUILD_genidl ALL DEPENDS ${_autogen})
 
   #
   if(_autogen)
@@ -153,7 +153,7 @@ endmacro(rtmbuild_init)
 
 macro(rtmbuild_add_executable exe)
   rosbuild_add_executable(${ARGV})
-  add_dependencies(${exe} RTMBUILD_genidl_cpp)
+  add_dependencies(${exe} RTMBUILD_genidl)
   target_link_libraries(${exe} ${${_prefix}_IDLLIBRARY_DIRS})
 #  rosbuild_add_executable(${ARGV})
 #  message(${${PROJECT_NAME}_CFLAGS_OTHER})
@@ -164,6 +164,7 @@ endmacro(rtmbuild_add_executable)
 
 macro(rtmbuild_add_library lib)
   rosbuild_add_library(${ARGV})
+  add_dependencies(${lib} RTMBUILD_genidl)
   target_link_libraries(${lib} ${${_prefix}_IDLLIBRARY_DIRS})
 #  rosbuild_add_library(${ARGV})
 #  message(${${PROJECT_NAME}_CFLAGS_OTHER})
