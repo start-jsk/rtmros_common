@@ -82,7 +82,7 @@ wipe: clean
 	touch wiped
 
 clean:
-	-rm -fr installed patched include bin lib idl idl_gen workspace
+	-rm -fr installed patched include bin lib idl idl_gen workspace build/CMakeCache.txt
 	-cd $(HG_DIR) && make clean
 
 eclipse-clean:
