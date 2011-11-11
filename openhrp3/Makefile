@@ -8,6 +8,12 @@ HG_PATCH =patch/PD_HGtest.xml.patch patch/Sample.xml.patch patch/SampleHG.xml.pa
 #HG_REVISION=@REVISION@
 include $(shell rospack find mk)/hg_checkout.mk
 
+# https://code.ros.org/trac/ros/ticket/3748
+$(HG_DIR):
+	mkdir -p `dirname $(HG_DIR)`; hg clone $(HG_URL) $(HG_DIR)
+	cd $(HG_DIR) && hg update $(HG_BRANCH) && hg update $(HG_REVISION)
+	touch rospack_nosubdirs
+
 check-java-version:
 	@if [ ! "`java -version 2>&1 | grep Java\(TM\)\ SE`" ]; then \
 	   /bin/echo -e "\e[1;34mSwitch java runtime to to Sun (TM) SE\e[m"; \
