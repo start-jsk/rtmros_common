@@ -4,8 +4,8 @@ trap 'exit 1' ERR
 
 LAST_STABLE_NUMBER=`grep number $HOME/jobs/agentsystem/lastSuccessful/build.xml | sed 's/[^0-9]//g'`
 # remove old build
-echo "removing old bulid ... $LAST_STABLE_NUMBER"
-find $WORKSPACE -maxdepth 1 -name "rtm-ros-robotics-*" -a ! -name "rtm-ros-robotics-$LAST_STABLE_NUMBER" -a -ctime +3 -print -exec rm -fr {} \;
+echo "last stable number ... $LAST_STABLE_NUMBER"
+find $WORKSPACE -maxdepth 1 -name "rtm-ros-robotics-*" -a ! -name "rtm-ros-robotics-$LAST_STABLE_NUMBER" -a -ctime +3 -exec echo "remove " {} \; -exec rm -fr {} \;
 # rosinstall
 rosinstall --continue-on-error $WORKSPACE/rtm-ros-robotics-$BUILD_NUMBER /opt/ros/electric http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall || rosinstall $WORKSPACE/rtm-ros-robotics-$BUILD_NUMBER
 # copy jenkins source
