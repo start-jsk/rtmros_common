@@ -1,7 +1,25 @@
 #!/bin/bash -x
 
-TEST_DIR=`rospack find openhrp3`/test
+## parse gtest options
+if [ $# -gt 0 ] ; then
+    GETOPT=`getopt -l gtest_output: -- dummy "$@"` ; [ $? != 0 ] && exit 1
+    eval set -- "$GETOPT"
+    while true
+    do
+	case $1 in
+	    --gtest_output)  TEST_OUTPUT=`echo $2|sed s/^xml\://`     ; shift 2
+		;;
+	    --)  shift; break;
+		;;
+	esac
+    done
+    if [ "$TEST_OUTPUT" != "" ] ; then
+	touch $TEST_OUTPUT # for dummy gtest output
+    fi
+fi
 
+## grxui functions
+TEST_DIR=`rospack find openhrp3`/test
 function wait-grxui {
     while :; do
 	rosrun openhrp3 check-online-viewer.py

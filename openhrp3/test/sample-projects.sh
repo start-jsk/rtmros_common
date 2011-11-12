@@ -1,8 +1,10 @@
 #!/bin/bash -x
 
+PROJECT_FILE=$1
+TEST_DIR=`rospack find openhrp3`/test
+
 . `rospack find openhrp3`/test/test-grxui-lib.sh
 
-TEST_DIR=`rospack find openhrp3`/test
 
 function check-sample-project {
     local filename=$1
@@ -23,20 +25,6 @@ function check-sample-project {
     ps $! && kill -KILL $!
 }
 
-PROJECT_FILE=$1
-GETOPT=`getopt -q -l gtest_output: -- "$@"` ; [ $? != 0 ] && exit 1
-eval set -- "$GETOPT"
-while true
-do
-  case $1 in
-  --gtest_output)  TEST_OUTPUT=`echo $2|sed s/^xml\://`     ; shift 2
-	  ;;
-  --)  shift; break
-	  ;;
-  esac
-done
-
-touch $TEST_OUTPUT # for dummy gtest output
 check-sample-project $PROJECT_FILE
 
 
