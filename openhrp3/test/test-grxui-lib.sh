@@ -36,12 +36,29 @@ function wait-grxui {
 # install cnee http://blog.livedoor.jp/vine_user/archives/51738792.html, use xnee-3.10.tar.gz
 function start-capture-grxui {
     local filename=$1
-    WINID=`xdotool search --name \Eclipse\ SDK`;
-    xdotool windowraise $WINID; xdotool windowmove  $WINID 320 0; xdotool windowfocus $WINID;
+    # wait for winid
+    WINID=""
+    while [ "$WINID" == "" ]; do
+	WINID=`xdotool search --name \Eclipse\ SDK`;
+	sleep 1
+    done
+    # fail to start up?
+    for winname in "Restoring Problems"
+    do
+	winid=`xdotool search --name "$winname"`
+	if [ "$winid" != "" ]; then
+	    xdotool windowfocus $winid; xdotool key alt+F4
+	fi
+    done
+    # move right for image viewer
+    xdotool windowraise $WINID; xdotool windowmove  $WINID 330 0; xdotool windowfocus $WINID;
+    echo "target  window id    ->"$WINID
+    echo "current window focus ->"`xdotool getwindowfocus`
     # start simulator
     xdotool key alt+g; xdotool key Down; xdotool key Down; xdotool key Down; xdotool key Down; xdotool key Down; xdotool key Return
-    # capture image
+    # wait 5 sec
     sleep 5;
+    # kill another windows
     for winname in "Time is up" "Extend Time" "Simulation Finished"
     do
 	winid=`xdotool search --name "$winname"`
@@ -49,6 +66,7 @@ function start-capture-grxui {
 	    xdotool windowfocus $winid; xdotool key alt+F4
 	fi
     done
+    # capture image
     xdotool windowfocus $(xdotool search --name  Eclipse\ SDK\ )
     import -window Eclipse\ SDK\  $filename  1>&2
     # done
