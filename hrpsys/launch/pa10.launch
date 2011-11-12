@@ -2,7 +2,7 @@
   <env name="LANG" value="C" />
   <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/PA10/PA10.xml" />
 
-  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" required="true" />
+  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
   <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
   <node name="grxui" pkg="openhrp3" type="grxui.sh" args="$(arg MODEL_FILE)" />
 </launch>
