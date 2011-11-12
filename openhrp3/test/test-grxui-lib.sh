@@ -9,6 +9,8 @@ if [ $# -gt 0 ] ; then
 	case $1 in
 	    --gtest_output)  TEST_OUTPUT=`echo $2|sed s/^xml\://`     ; shift 2
 		;;
+	    --start)  FILENAME=$2     ; shift 2
+		;;
 	    --)  shift; break;
 		;;
 	esac
@@ -48,3 +50,7 @@ function start-capture-grxui {
     cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-return.xns  1>&2
 }
 
+if [ "$FILENAME" != "" ]; then
+    wait-grxui
+    start-capture-grxui $FILENAME
+fi
