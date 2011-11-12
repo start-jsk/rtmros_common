@@ -6,7 +6,7 @@
   <!-- END:openrtm setting -->
 
   <env name="LANG" value="C" />
-  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" output="screen" required="true" />
+  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" output="screen" />
 
   <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
   <env name="PATH" value="$(find openhrp3)/bin:$(env PATH)" />
