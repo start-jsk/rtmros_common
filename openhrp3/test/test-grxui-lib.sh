@@ -2,7 +2,7 @@
 
 ## parse gtest options
 if [ $# -gt 0 ] ; then
-    GETOPT=`getopt -l gtest_output: -- dummy "$@"` ; [ $? != 0 ] && exit 1
+    GETOPT=`getopt -l gtest_output:,start: -- dummy "$@"` ; [ $? != 0 ] && exit 1
     eval set -- "$GETOPT"
     while true
     do
