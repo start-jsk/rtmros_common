@@ -90,4 +90,7 @@ list(APPEND all_robots ${PROJECT_SOURCE_DIR}/scripts/kawada-hironx.l)
 add_custom_target(openhrp_robots ALL DEPENDS ${all_robots})
 
 
+rosbuild_add_rostest(test/hrp4c.test)
+rosbuild_add_rostest(test/pa10.test)
+rosbuild_add_rostest(test/samplerobot.test)
 

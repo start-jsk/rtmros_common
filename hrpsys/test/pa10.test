@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find hrpsys)/launch/pa10.launch" />
+  <test test-name="pa10" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+   type="test-grxui-lib.sh" args="--start $(find hrpsys)/test/pa10-grxui.png"/>
+</launch>
