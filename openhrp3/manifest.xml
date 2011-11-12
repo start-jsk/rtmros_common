@@ -67,7 +67,7 @@
 
 
   <rosdep name="libxml2" />
-  <rosdep name="xnee" />
+  <rosdep name="xdotool" />
 
 
 </package>
