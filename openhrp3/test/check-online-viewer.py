@@ -33,17 +33,13 @@ def findObject(name, kind):
 initCORBA(sys.argv)
 try:
     obj = findObject("OnlineViewer", "")
-    if len(sys.argv) > 1 :
-        robotname = sys.argv[1]
-    else:
-        robotname = False
-    if robotname:
+    for robotname in ["floor", "longfloor", "box"]:
         print ";; getPosture of ",robotname
         ret = obj.getPosture(robotname);
         print ";;               -> ",ret
-        if not ret[0]:
-            raise
-except:
-    exit(-1)
+        if ret[0]:
+            raise NameError
+except NameError, ex:
+    exit(0)
 
-exit(0)
+exit(-1)
