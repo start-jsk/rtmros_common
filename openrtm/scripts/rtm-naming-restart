@@ -15,4 +15,5 @@ fi
 pkill -KILL omniNames
 `rospack find openrtm`/bin/rtm-naming
 sleep 1 # wait to omniNaming start up
-tail -f ./omninames-`hostname`.log
+tail ./omninames-`hostname`.log
+
