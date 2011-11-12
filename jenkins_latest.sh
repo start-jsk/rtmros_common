@@ -10,7 +10,7 @@ BUILD_NUMBER=`grep number $UPSTREAM/lastSuccessful/build.xml | sed 's/[^0-9]//g'
 hrpsys_revision=`python -c "import pysvn; print pysvn.Client().info('\`rospack find hrpsys\`/build/hrpsys-base').revision.number"`
 
 # openhrp3
-openhrp3_revision=`LANG=C hg -R \`rospack find openhrp3\`/openhrp-aist-grx-svn tip | head -1 | cut -d\: -f3`
+openhrp3_revision=`LANG=C hg -R \`rospack find openhrp3\`/build/openhrp-aist-grx-svn tip | head -1 | cut -d\: -f3`
 
 #
 echo ";;   hrpsys revision : $hrpsys_revision"
