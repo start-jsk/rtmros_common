@@ -1,4 +1,21 @@
-#!/bin/bash
+#!/bin/bash -x
+
+if [ $# -gt 0 ] ; then
+    GETOPT=`getopt -q -l gtest_output: -- "$@"` ; [ $? != 0 ] && exit 1
+    eval set -- "$GETOPT"
+    while true
+    do
+	case $1 in
+	    --gtest_output)  TEST_OUTPUT=`echo $2|sed s/^xml\://`     ; shift 2
+		;;
+	    --)  shift; break
+		;;
+	esac
+    done
+    if [ "$TEST_OUTPUT" != "" ] ; then
+	touch $TEST_OUTPUT # for dummy gtest output
+    fi
+fi
 
 TEST_DIR=`rospack find openhrp3`/test
 
