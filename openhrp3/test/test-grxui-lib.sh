@@ -55,6 +55,7 @@ function start-capture-grxui {
     echo "target  window id    ->"$WINID
     echo "current window focus ->"`xdotool getwindowfocus`
     # start simulator
+    xdotool windowfocus $WINID;
     xdotool key alt+g; xdotool key Down; xdotool key Down; xdotool key Down; xdotool key Down; xdotool key Down; xdotool key Return
     # wait 5 sec
     sleep 5;
@@ -71,6 +72,7 @@ function start-capture-grxui {
     import -window Eclipse\ SDK\  $filename  1>&2
     # done
     xdotool windowfocus $(xdotool search --name  Eclipse\ SDK\ ) && xdotool key alt+F4
+    sleep 2
 }
 
 if [ "$FILENAME" != "" ]; then
