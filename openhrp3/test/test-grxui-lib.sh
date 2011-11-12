@@ -36,18 +36,23 @@ function wait-grxui {
 # install cnee http://blog.livedoor.jp/vine_user/archives/51738792.html, use xnee-3.10.tar.gz
 function start-capture-grxui {
     local filename=$1
+    WINID=`xdotool search --name \Eclipse\ SDK`;
+    xdotool windowraise $WINID; xdotool windowmove  $WINID 320 0; xdotool windowfocus $WINID;
     # start simulator
-    cnee --replay --time 5 -fcr -f $TEST_DIR/cnee-grxui-start.xns  1>&2
+    xdotool key alt+g; xdotool key Down; xdotool key Down; xdotool key Down; xdotool key Down; xdotool key Down; xdotool key Return
     # capture image
     sleep 5;
-    cnee --replay --time 0 -fcr -f $TEST_DIR/cnee-grxui-return.xns  1>&2
-    cnee --replay --time 0 -fcr -f $TEST_DIR/cnee-grxui-return.xns  1>&2
+    for winname in "Time is up" "Extend Time" "Simulation Finished"
+    do
+	winid=`xdotool search --name "$winname"`
+	if [ "$winid" != "" ]; then
+	    xdotool windowfocus $winid; xdotool key alt+F4
+	fi
+    done
+    xdotool windowfocus $(xdotool search --name  Eclipse\ SDK\ )
     import -window Eclipse\ SDK\  $filename  1>&2
     # done
-    cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-return.xns  1>&2
-    cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-return.xns  1>&2
-    cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-quit.xns    1>&2
-    cnee --replay --time 1 -fcr -f $TEST_DIR/cnee-grxui-return.xns  1>&2
+    xdotool windowfocus $(xdotool search --name  Eclipse\ SDK\ ) && xdotool key alt+F4
 }
 
 if [ "$FILENAME" != "" ]; then
