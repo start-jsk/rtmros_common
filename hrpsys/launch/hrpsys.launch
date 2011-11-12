@@ -15,7 +15,7 @@
   <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
 
   <node name="grxui" pkg="openhrp3" type="grxui.sh" />
-  <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" launch-prefix="xterm -e"/> <!-- loading dae files crushes model loader -->
+  <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" /> <!-- loading dae files crushes model loader -->
 
   <node name="scheduler" pkg="openhrp3" type="openhrp-scheduler" output="screen"
 	args="$(arg MODEL_FILE) $(arg SCHEDULER_ARGS)" respawn="$(arg RESPAWN)" />  <!-- nosim -->
