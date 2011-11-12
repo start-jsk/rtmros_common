@@ -59,4 +59,4 @@ EOF
 
 done
 
-sphinx-build  -b html -d `rospack find openhrp3`/build/doctrees $TEST_DIR `rospack find openhrp3`/build/html
+sphinx-build  -b singlehtml -d `rospack find openhrp3`/build/doctrees $TEST_DIR `rospack find openhrp3`/build/html
