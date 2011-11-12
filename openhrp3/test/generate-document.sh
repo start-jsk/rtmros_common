@@ -20,7 +20,7 @@ fi
 
 TEST_DIR=`rospack find openhrp3`/test
 
-cat <<EOF > $TEST_DIR/sample-projects.rst
+cat <<EOF > $TEST_DIR/index.rst
 OpenHPR3 examples
 =================
 EOF
@@ -28,7 +28,7 @@ EOF
 for filename in `rospack find openhrp3`/share/OpenHRP-3.1/sample/project/*.xml
 do
     if [ -f $TEST_DIR/project-`basename $filename .xml`.png ]; then
-	cat <<EOF >> $TEST_DIR/sample-projects.rst
+	cat <<EOF >> $TEST_DIR/index.rst
 `basename $filename .xml`
 -------------------------
 
@@ -41,13 +41,13 @@ do
     :width: 500pt
 EOF
 	else
-	cat <<EOF >> $TEST_DIR/sample-projects.rst
+	cat <<EOF >> $TEST_DIR/index.rst
 `basename $filename .xml` (not tested)
 --------------------------------------
 
 EOF
 	fi
-	cat <<EOF >> $TEST_DIR/sample-projects.rst
+	cat <<EOF >> $TEST_DIR/index.rst
 
 Download \``basename $filename`\`_ file
 
