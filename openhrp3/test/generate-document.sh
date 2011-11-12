@@ -1,14 +1,14 @@
 #!/bin/bash -x
 
 if [ $# -gt 0 ] ; then
-    GETOPT=`getopt -q -l gtest_output: -- "$@"` ; [ $? != 0 ] && exit 1
+    GETOPT=`getopt -l gtest_output: -- dummy "$@"` ; [ $? != 0 ] && exit 1
     eval set -- "$GETOPT"
     while true
     do
 	case $1 in
 	    --gtest_output)  TEST_OUTPUT=`echo $2|sed s/^xml\://`     ; shift 2
 		;;
-	    --)  shift; break
+	    --)  shift; break;
 		;;
 	esac
     done
@@ -16,6 +16,7 @@ if [ $# -gt 0 ] ; then
 	touch $TEST_OUTPUT # for dummy gtest output
     fi
 fi
+
 
 TEST_DIR=`rospack find openhrp3`/test
 
@@ -26,7 +27,7 @@ EOF
 
 for filename in `rospack find openhrp3`/share/OpenHRP-3.1/sample/project/*.xml
 do
-    if [ -f project-`basename $filename .xml`.png ]; then
+    if [ -f $TEST_DIR/project-`basename $filename .xml`.png ]; then
 	cat <<EOF >> $TEST_DIR/sample-projects.rst
 `basename $filename .xml`
 -------------------------
