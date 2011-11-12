@@ -33,7 +33,7 @@ def findObject(name, kind):
 initCORBA(sys.argv)
 try:
     obj = findObject("OnlineViewer", "")
-    for robotname in ["floor", "longfloor", "box"]:
+    for robotname in ["floor", "longfloor", "box", "pa10"]:
         print ";; getPosture of ",robotname
         ret = obj.getPosture(robotname);
         print ";;               -> ",ret
