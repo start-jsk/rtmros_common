@@ -42,8 +42,8 @@ do
 EOF
 	else
 	cat <<EOF >> $TEST_DIR/sample-projects.rst
-`basename $filename .xml` is not tested
-=======================================
+`basename $filename .xml` (not tested)
+--------------------------------------
 
 EOF
 	fi
