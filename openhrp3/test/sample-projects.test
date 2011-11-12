@@ -27,4 +27,8 @@
    test-name="Sample_RangeSensor" args="$(find openhrp3)/share/OpenHRP-3.1/sample/project/Sample_RangeSensor.xml" />
   <test type="sample-projects.sh" pkg="openhrp3" time-limit="120" launch-prefix="xterm -e" 
    test-name="SprintJoint" args="$(find openhrp3)/share/OpenHRP-3.1/sample/project/SpringJoint.xml" />
+
+
+  <test type="generate-document.sh" pkg="openhrp3" time-limit="120" launch-prefix="xterm -e" 
+   test-name="generate_document" />
 </launch>
