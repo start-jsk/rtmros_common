@@ -119,7 +119,11 @@ xnee:
       mkdir /tmp/xnee-3.10-$$; tar -C /tmp/xnee-3.10-$$ -xzvf /tmp/xnee-3.10-$$.tar.gz; cd /tmp/xnee-3.10-$$/xnee-3.10; ./configure --disable-doc; make; sudo checkinstall -y
     fi
 xdotool:
-  ubuntu: xdotool
+  ubuntu: |
+    if [ ! -f /usr/local/bin/xdotool ]; then
+      wget http://semicomplete.googlecode.com/files/xdotool-2.20110530.1.tar.gz -O /tmp/xdotool-2.2-$$.tar.gz
+      mkdir /tmp/xdotool-2.2-$$; tar -C /tmp/xdotool-2.2-$$ -xvzf /tmp/xdotool-2.2-$$.tar.gz; cd /tmp/xdotool-2.2-$$/xdotool-2.20110530.1; ./configure; make; sudo checkinstall -y
+    fi
 
 # openrtm
 #openrtm-aist
