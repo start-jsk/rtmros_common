@@ -33,66 +33,57 @@ function wait-grxui {
     done
 }
 
-# 10.04 does not support search name contains white space
-function xdotool-search-name {
-    local name=$1
-    tmpname=`echo $name | awk '{print $1}'`
-    for winid in `xdotool search --name $tmpname`; do
-	if xwininfo -id $winid | grep Window\ id | grep "$name" ; then export TMP_WINID=$winid; return 0; fi;
-    done
-    export TMP_WINID=
-}
-
 # install cnee http://blog.livedoor.jp/vine_user/archives/51738792.html, use xnee-3.10.tar.gz
 function start-capture-grxui {
     local filename=$1
     # wait for winid
     WINID=""
     while [ "$WINID" == "" ]; do
-	xdotool-search-name "Eclipse SDK" # set TMP_WINID
-	WINID=$TMP_WINID
 	sleep 1
+	WINID=`xdotool search "Eclipse SDK"`
     done
     # fail to start up?
     for winname in "Restoring Problems"
     do
-	xdotool-search-name "$winname" # set TMP_WINID
-	tmpwinid=$TMP_WINID
+	tmpwinid=`xdotool search "$winname"`
 	if [ "$tmpwinid" != "" ]; then
-	    xdotool windowfocus $tmpwinid; xdotool key alt+F4
+	    xdotool windowfocus --sync $tmpwinid; xdotool key alt+F4
 	fi
     done
     # move right for image viewer
-    xdotool windowraise $WINID; xdotool windowmove  $WINID 330 0; xdotool windowfocus $WINID; xdotool windowactivate $WINID;
+    xdotool set_desktop 2
+    xdotool search "Eclipse SDK " set_desktop_for_window 2
+    xdotool search "Eclipse SDK " windowmove --sync 3 3
+    xdotool windowactivate $WINID --sync
     echo "target  window id    ->"$WINID
     echo "current window focus ->"`xdotool getwindowfocus`
     # start simulator
-    xdotool windowfocus $WINID;
-    xdotool mousemove 400 400;
-    xdotool key alt+g; sleep 1;
-    xdotool key Down;  sleep 1;
-    xdotool key Down;  sleep 1;
-    xdotool key Down;  sleep 1;
-    xdotool key Down;  sleep 1;
-    xdotool key Down;  sleep 1;
-    xdotool key Return;  sleep 1;
+    xdotool windowfocus --sync $WINID
+    xdotool mousemove 400 400
+    xdotool key alt+g
+    xdotool key Down
+    xdotool key Down
+    xdotool key Down
+    xdotool key Down
+    xdotool key Down
+    xdotool key Return
     # wait 5 sec
     sleep 5;
     # kill another windows
     for winname in "Time is up" "Extend Time" "Simulation Finished"
     do
-	xdotool-search-name "$winname" # set TMP_WINID
-	tmpwinid=$TMP_WINID
+	tmpwinid=`xdotool search "$winname"`
 	if [ "$tmpwinid" != "" ]; then
-	    xdotool windowfocus $tmpwinid; xdotool key alt+F4
+	    xdotool windowfocus --sync $tmpwinid; xdotool key alt+F4
 	fi
     done
     # capture image
-    xdotool windowfocus $WINID
+    xdotool windowfocus --sync $WINID
     import -window Eclipse\ SDK\  $filename  1>&2
     # done
-    xdotool windowfocus $WINID && xdotool key alt+F4
-    sleep 2
+    xdotool windowfocus --sync $WINID
+    xdotool key alt+F4
+    sleep 1
     # fail when unable to capture image
     if [ ! -f $filename ] ; then exit 1; fi
 }
