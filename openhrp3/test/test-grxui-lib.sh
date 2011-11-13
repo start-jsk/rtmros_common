@@ -63,12 +63,20 @@ function start-capture-grxui {
 	fi
     done
     # move right for image viewer
-    xdotool windowraise $WINID; xdotool windowmove  $WINID 330 0; xdotool windowfocus $WINID; xdotool windowactivate $WINID; xdotool click 1
+    xdotool windowraise $WINID; xdotool windowmove  $WINID 330 0; xdotool windowfocus $WINID; xdotool windowactivate $WINID;
     echo "target  window id    ->"$WINID
     echo "current window focus ->"`xdotool getwindowfocus`
     # start simulator
     xdotool windowfocus $WINID;
-    xdotool key alt+g; xdotool key Down; xdotool key Down; xdotool key Down; xdotool key Down; xdotool key Down; xdotool key Return
+    xdotool windowfocus $WINID
+    xdotool mousemove 400 100
+    xdotool key alt+g; sleep 1;
+    xdotool key Down;  sleep 1;
+    xdotool key Down;  sleep 1;
+    xdotool key Down;  sleep 1;
+    xdotool key Down;  sleep 1;
+    xdotool key Down;  sleep 1;
+    xdotool key Return;  sleep 1;
     # wait 5 sec
     sleep 5;
     # kill another windows
