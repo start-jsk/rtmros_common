@@ -94,6 +94,8 @@ function start-capture-grxui {
     # done
     xdotool windowfocus $WINID && xdotool key alt+F4
     sleep 2
+    # fail when unable to capture image
+    if [ ! -f $filename ] ; then exit 1; fi
 }
 
 if [ "$FILENAME" != "" ]; then
