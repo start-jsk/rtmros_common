@@ -40,7 +40,7 @@ function start-capture-grxui {
     WINID=""
     while [ "$WINID" == "" ]; do
 	sleep 1
-	WINID=`xdotool search "Eclipse SDK"`
+	WINID=`xdotool search --name "Eclipse SDK"`
     done
     # fail to start up?
     for winname in "Restoring Problems"
@@ -52,40 +52,44 @@ function start-capture-grxui {
     done
     # move right for image viewer
     xdotool set_desktop 2
-    xdotool search "Eclipse SDK " set_desktop_for_window 2
-    xdotool search "Eclipse SDK " windowmove --sync 3 3
-    xdotool windowactivate $WINID --sync
+    xdotool search --name "Eclipse SDK " set_desktop_for_window 2
+    xdotool search --name "Eclipse SDK " windowmove --sync 0 0
+    xdotool search --name "Eclipse SDK " windowactivate --sync
     echo "target  window id    ->"$WINID
     echo "current window focus ->"`xdotool getwindowfocus`
     # start simulator
-    xdotool windowfocus --sync $WINID
-    xdotool mousemove 400 400
-    xdotool key alt+g
-    xdotool key Down
-    xdotool key Down
-    xdotool key Down
-    xdotool key Down
-    xdotool key Down
-    xdotool key Return
-    # wait 5 sec
-    sleep 5;
-    # kill another windows
-    for winname in "Time is up" "Extend Time" "Simulation Finished"
-    do
-	tmpwinid=`xdotool search "$winname"`
-	if [ "$tmpwinid" != "" ]; then
-	    xdotool windowfocus --sync $tmpwinid; xdotool key alt+F4
-	fi
+    xdotool search --name "Eclipse SDK" windowactivate --sync \
+	key --clearmodifiers alt+g \
+	key --clearmodifiers Down \
+	key --clearmodifiers Down \
+	key --clearmodifiers Down \
+	key --clearmodifiers Down \
+	key --clearmodifiers Down \
+	key --clearmodifiers Return
+    # wait for Time is up
+    WINID=""
+    i=0
+    while [ "$WINID" == "" ]; do
+	import -screen -window Eclipse\ SDK\  "${filename%%.*}-$i.${filename#*.}"  1>&2
+	sleep 1
+	WINID=`xdotool search --name "Time is up"`
+	i=`expr $i + 1`
     done
-    # capture image
-    xdotool windowfocus --sync $WINID
-    import -window Eclipse\ SDK\  $filename  1>&2
+    xdotool search --name "Time is up" windowunmap --sync
+    # capure
+    import -screen -window Eclipse\ SDK\  $filename  1>&2
+    # finish
+    xdotool search --name "Time is up" windowmap --sync
+    xdotool search --name "Time is up" windowactivate --sync key --clearmodifiers Return
+    WINID=""; while [ "$WINID" == "" ]; do sleep 1; WINID=`xdotool search --name "Simulation Finished"`; done
+    xdotool search --name "Simulation Finished" windowactivate --sync key --clearmodifiers Return
     # done
-    xdotool windowfocus --sync $WINID
-    xdotool key alt+F4
-    sleep 1
+    xdotool search --name "Eclipse SDK" windowactivate --sync \
+	key --clearmodifiers alt+f \
+	key --clearmodifiers x \
     # fail when unable to capture image
     if [ ! -f $filename ] ; then exit 1; fi
+    echo "done"
 }
 
 if [ "$FILENAME" != "" ]; then
