@@ -33,25 +33,37 @@ function wait-grxui {
     done
 }
 
+# 10.04 does not support search name contains white space
+function xdotool-search-name {
+    local name=$1
+    tmpname=`echo $name | awk '{print $1}'`
+    for winid in `xdotool search --name $tmpname`; do
+	if xwininfo -id $winid | grep Window\ id | grep "$name" ; then export TMP_WINID=$winid; return 0; fi;
+    done
+    export TMP_WINID=
+}
+
 # install cnee http://blog.livedoor.jp/vine_user/archives/51738792.html, use xnee-3.10.tar.gz
 function start-capture-grxui {
     local filename=$1
     # wait for winid
     WINID=""
     while [ "$WINID" == "" ]; do
-	WINID=`xdotool search --name \Eclipse\ SDK`;
+	xdotool-search-name "Eclipse SDK" # set TMP_WINID
+	WINID=$TMP_WINID
 	sleep 1
     done
     # fail to start up?
     for winname in "Restoring Problems"
     do
-	winid=`xdotool search --name "$winname"`
-	if [ "$winid" != "" ]; then
-	    xdotool windowfocus $winid; xdotool key alt+F4
+	xdotool-search-name "$winname" # set TMP_WINID
+	tmpwinid=$TMP_WINID
+	if [ "$tmpwinid" != "" ]; then
+	    xdotool windowfocus $tmpwinid; xdotool key alt+F4
 	fi
     done
     # move right for image viewer
-    xdotool windowraise $WINID; xdotool windowmove  $WINID 330 0; xdotool windowfocus $WINID;
+    xdotool windowraise $WINID; xdotool windowmove  $WINID 330 0; xdotool windowfocus $WINID; xdotool windowactivate $WINID; xdotool click 1
     echo "target  window id    ->"$WINID
     echo "current window focus ->"`xdotool getwindowfocus`
     # start simulator
@@ -62,16 +74,17 @@ function start-capture-grxui {
     # kill another windows
     for winname in "Time is up" "Extend Time" "Simulation Finished"
     do
-	winid=`xdotool search --name "$winname"`
-	if [ "$winid" != "" ]; then
-	    xdotool windowfocus $winid; xdotool key alt+F4
+	xdotool-search-name "$winname" # set TMP_WINID
+	tmpwinid=$TMP_WINID
+	if [ "$tmpwinid" != "" ]; then
+	    xdotool windowfocus $tmpwinid; xdotool key alt+F4
 	fi
     done
     # capture image
-    xdotool windowfocus $(xdotool search --name  Eclipse\ SDK\ )
+    xdotool windowfocus $WINID
     import -window Eclipse\ SDK\  $filename  1>&2
     # done
-    xdotool windowfocus $(xdotool search --name  Eclipse\ SDK\ ) && xdotool key alt+F4
+    xdotool windowfocus $WINID && xdotool key alt+F4
     sleep 2
 }
 
