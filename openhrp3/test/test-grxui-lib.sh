@@ -75,6 +75,7 @@ function start-capture-grxui {
     xdotool key Down;  sleep 1;
     xdotool key Down;  sleep 1;
     xdotool key Down;  sleep 1;
+    xdotool key Down;  sleep 1;
     xdotool key Return;  sleep 1;
     # wait 5 sec
     sleep 5;
