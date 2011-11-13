@@ -1,19 +1,39 @@
-
+import os
 import time
-import rtm;
-from rtm import *;
-from OpenHRP import *;
+import rtm
+from rtm import *
+from OpenHRP import *
 
-conn = [['StateHolder0', 'qOut',
+if os.environ.has_key('RTCTREE_NAMESERVERS'):
+    nshost = os.environ.get('RTCTREE_NAMESERVERS')
+else:
+    nshost = localhost
+
+def myinitCORBA():
+    global rootnc, nshost, orb
+    props = System.getProperties()
+
+    args = string.split('-ORBInitRef NameService=corbaloc:iiop:'+nshost+':2809/NameService')
+    orb = ORB.init(args, props)
+
+    nameserver = orb.resolve_initial_references("NameService")
+    rootnc = NamingContextHelper.narrow(nameserver)
+    return None
+
+myinitCORBA()
+
+conn = [['RobotHardware0', 'q',
          'HrpsysSeqStateROSBridge0', 'rsangle'],
-        ['HrpsysSeqStateROSBridge0', 'SequencePlayerService',
-         'seq', 'SequencePlayerService'],
-        ['StateHolder0', 'basePoseOut',
-         'HrpsysSeqStateROSBridge0', 'pose']]
+        ['VideoStream0', 'MultiCameraImages',
+         'ImageSensorROSBridge0', 'MultiCameraImages']]
+#        ['HrpsysSeqStateROSBridge0', 'SequencePlayerService',
+#         'seq', 'SequencePlayerService'],
+#        ['StateHolder0', 'basePoseOut',
+#         'HrpsysSeqStateROSBridge0', 'pose']]
 
-time.sleep(20)
+time.sleep(10)
 
-for node1, port1, node2, port2 in conn :
-    connectPorts(findRTC(node1).port(port1),
-                 findRTC(node2).port(port2), subscription='new')
-
+for node1, port1, node2, port2 in conn:
+    print [node1,port1,node2,port2]
+    connectPorts(findRTC(node1,rootnc).port(port1),
+                 findRTC(node2,rootnc).port(port2), subscription='new')
