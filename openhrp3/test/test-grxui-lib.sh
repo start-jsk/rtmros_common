@@ -68,9 +68,8 @@ function start-capture-grxui {
     echo "current window focus ->"`xdotool getwindowfocus`
     # start simulator
     xdotool windowfocus $WINID;
-    xdotool mousemove 400 100;
+    xdotool mousemove 400 400;
     xdotool key alt+g; sleep 1;
-    xdotool key Down;  sleep 1;
     xdotool key Down;  sleep 1;
     xdotool key Down;  sleep 1;
     xdotool key Down;  sleep 1;
