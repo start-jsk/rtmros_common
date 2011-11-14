@@ -12,7 +12,7 @@ class TestGrxUIProject(unittest.TestCase):
     proc=None
     project_filename=""
     capture_filename=""
-    max_time=600
+    max_time=300
 
     def setUp(self):
         parser = OptionParser(description='grxui project testing')
