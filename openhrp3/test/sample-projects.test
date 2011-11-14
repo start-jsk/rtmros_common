@@ -1,34 +1,34 @@
 <launch>
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="FallingBoxes" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/FallingBoxes.xml" cwd="node" />
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
-   test-name="ODESample_Crash" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/ODESample_Crash.xml" cwd="node" />
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
+   test-name="ODESample_Crash" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/ODESample_Crash.xml --max-time=100" cwd="node" />
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="PA10Sample" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/PA10Sample.xml" cwd="node" />
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="PD_HGtest" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/PD_HGtest.xml" cwd="node" />
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="Sample" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/Sample.xml" cwd="node" />
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="SampleHG" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/SampleHG.xml" cwd="node" />
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="SampleLF" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/SampleLF.xml" cwd="node" />
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="SamplePD" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/SamplePD.xml" cwd="node" />
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="SamplePD_HG" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/SamplePD_HG.xml" cwd="node" />
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="SampleRH2" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/SampleRH2.xml" cwd="node" />
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="SampleRobot_inHouse" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/SampleRobot_inHouse.xml" cwd="node" />
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="SampleSV" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/SampleSV.xml" cwd="node" />
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="SampleSV_RangeSensor" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/SampleSV_RangeSensor.xml" cwd="node" />
-  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
+  <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="SprintJoint" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/SpringJoint.xml" cwd="node" />
 
 
-  <test type="generate-document.sh" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" 
+  <test type="generate-document.sh" pkg="openhrp3" time-limit="300" 
    test-name="generate_document" cwd="node" />
 </launch>
