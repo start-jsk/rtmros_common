@@ -11,13 +11,36 @@ from optparse import OptionParser
 class TestGrxUIProject(unittest.TestCase):
     proc=None
     project_filename=""
+    capture_filename=""
+    max_time=600
 
     def setUp(self):
         parser = OptionParser(description='grxui project testing')
         parser.add_option('--project',action="store",type='string',dest='project_filename',default=None,
-                          help='project iflename')
+                          help='project xml filename')
+        parser.add_option('--capture',action="store",type='string',dest='capture_filename',default=None,
+                          help='do not launch grxui, just wait finish and capture files')
+        parser.add_option('--max-time',action="store",type='int',dest='max_time',default=600,
+                          help='wait sec until exit from grxui')
+        parser.add_option('--gtest_output'); # dummy
         (options, args) = parser.parse_args()
         self.project_filename = options.project_filename
+        self.max_time = options.max_time
+        if options.capture_filename:
+            self.capture_filename = options.capture_filename
+        else:
+            self.capture_filename = os.path.splitext(os.path.basename(self.project_filename))[0]+".png"
+
+    def xdotool(self,name,action):
+        ret = 1
+        while 1 :
+            ret = subprocess.call("xdotool search --name \"%s\" %s"%(name,action), shell=True)
+            if ret != 1 : break
+            time.sleep(1)
+        return ret
+
+    def check_window(self,name):
+        return subprocess.call("xdotool search --name \""+name+"\"", shell=True) != 1
 
     def wait_for_window(self,name):
         while subprocess.call("xdotool search --name \""+name+"\"", shell=True) == 1:
@@ -26,72 +49,81 @@ class TestGrxUIProject(unittest.TestCase):
         print "wait for \""+name+"\" ... done"
     def unmap_window(self,name):
         print "unmap \""+name+"\""
-        subprocess.call("xdotool search --name \""+name+"\" windowunmap --sync", shell=True)
+        if self.check_window(name):
+            self.xdotool(name, "windowunmap --sync")
     def map_window(self,name):
         print "map \""+name+"\""
-        subprocess.call("xdotool search --name \""+name+"\" windowmap --sync", shell=True)
+        if self.check_window(name):
+            self.xdotool(name, "windowmap --sync")
+    def move_window(self,name,x,y):
+        print "move %s %d %d"%(name,x,y)
+        if self.check_window(name):
+            self.xdotool(name, "windowmove --sync %d %d"%(x,y))
 
     def return_window(self,name):
         print "send return to \""+name+"\""
-        subprocess.call("xdotool search --name \""+name+"\" windowactivate --sync key --clearmodifiers Return", shell=True)
+        if self.check_window(name):
+            self.xdotool(name, "windowactivate --sync key --clearmodifiers Return")
 
     def start_simulation(self):
         print "start simulation"
-        subprocess.call("xdotool set_desktop 2", shell=True)
-        subprocess.call("xdotool search --name \"Eclipse SDK \" set_desktop_for_window 2", shell=True)
-        subprocess.call("xdotool search --name \"Eclipse SDK \" windowmove --sync 0 0", shell=True)
-        subprocess.call("xdotool search --name \"Eclipse SDK \" windowactivate --sync", shell=True)
-        # start simulator
-        subprocess.call("\
-        xdotool search --name \"Eclipse SDK\" windowactivate --sync \
+        #subprocess.call("xdotool set_desktop 2", shell=True)
+        #subprocess.call("xdotool search --name \"Eclipse SDK \" set_desktop_for_window 2", shell=True)
+        self.xdotool("Eclipse SDK ", "windowmove --sync 0 0")
+        self.xdotool("Eclipse SDK ", "windowactivate --sync")
+        self.xdotool("Eclipse SDK ", "\
+        windowactivate --sync \
 	key --clearmodifiers alt+g \
 	key --clearmodifiers Down \
 	key --clearmodifiers Down \
 	key --clearmodifiers Down \
 	key --clearmodifiers Down \
 	key --clearmodifiers Down \
-	key --clearmodifiers Return", shell=True)
+	key --clearmodifiers Return")
 
     def wait_times_is_up(self):
-        #self.wait_for_window("Time is up")
         i = 0
-        while subprocess.call("xdotool search --name \"Time is up\"", shell=True) == 1:
-            print "wait for \"Time is up\" ..."
-            print self.project_filename
-            print os.path.basename(self.project_filename)
-            print os.path.splitext(os.path.basename(self.project_filename))
-            filename="%s-%d.png"%(os.path.splitext(os.path.basename(self.project_filename))[0], i)
-            subprocess.call("import -screen -window Eclipse\ SDK\  "+filename, shell=True)
+        while (not self.check_window("Time is up")) and (i < self.max_time):
+            for camera_window in ["VISION_SENSOR1"]:
+                if self.check_window(camera_window):
+                    self.move_window(camera_window,679,509)
+            print "wait for \"Time is up\" (%d/%d) ..."%(i, self.max_time)
+            filename="%s/%s-%d.png"%(os.path.dirname(self.capture_filename), os.path.splitext(os.path.basename(self.capture_filename))[0], i)
+            print filename
+            subprocess.call("import -frame -screen -window Eclipse\ SDK\  "+filename, shell=True)
             time.sleep(1)
             i+=1
         print "wait for \"Time is up\" ... done"
-
         self.unmap_window("Time is up")
 
     def capture_eclipse(self):
-        filename=os.path.splitext(os.path.basename(self.project_filename))[0]+".png"
-        subprocess.call("import -screen -window Eclipse\ SDK\  "+filename, shell=True)
+        subprocess.call("import -screen -window Eclipse\ SDK\  "+self.capture_filename, shell=True)
 
     def exit_eclipse(self):
         self.map_window("Time is up")
-        self.return_window("Time is up")
-        self.wait_for_window("Simulation Finished")
-        self.return_window("Simulation Finished")
+        if self.check_window("Time is up"):
+            self.return_window("Time is up")
+            self.wait_for_window("Simulation Finished")
+            self.return_window("Simulation Finished")
         subprocess.call("xdotool search --name \"Eclipse SDK\" windowactivate --sync key --clearmodifiers alt+f key --clearmodifiers x", shell=True)
         if self.proc:
             self.proc.wait()
 
-    def test_0_launch_grxui(self):
-        subprocess.call("rosrun openhrp3 openhrp-shutdown-servers", shell=True)
-        subprocess.call("rosrun openrtm rtm-naming-restart", shell=True)
-        self.proc=subprocess.Popen(['rosrun', 'openhrp3', 'grxui.sh', self.project_filename])
-    def test_1_wait_for_grxui(self):
+    def test_grxui_simulation(self):
         import check_online_viewer
+        if self.project_filename: # if no project_filename is given, we assume grxui is already launched
+            subprocess.call("rosrun openhrp3 openhrp-shutdown-servers", shell=True)
+            subprocess.call("rosrun openrtm rtm-naming-restart", shell=True)
+            self.proc=subprocess.Popen(['rosrun', 'openhrp3', 'grxui.sh', self.project_filename])
+        # wait online viewer
         check_online_viewer.waitOnlineViewer()
-    def test_2_capture(self):
+        # start simualation
         self.start_simulation()
+        # wait for a time
         self.wait_times_is_up()
+        # capture result
         self.capture_eclipse()
+        # exit
         self.exit_eclipse()
 
     def __del__(self):
@@ -102,5 +134,5 @@ class TestGrxUIProject(unittest.TestCase):
 
 if __name__ == '__main__':
     import rosunit
-    rosunit.unitrun(PKG, "test_sample_projects", TestGrxUIProject)
+    rosunit.unitrun(PKG, "test_grxui_projects", TestGrxUIProject)
 
