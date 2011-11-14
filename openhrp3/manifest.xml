@@ -9,6 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/openhrp3</url>
 
+  <depend package="rosunit" />
   <depend package="roscpp" />
   <depend package="tvmet" />
   <depend package="openrtm" />
