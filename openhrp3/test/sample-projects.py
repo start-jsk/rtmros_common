@@ -67,6 +67,7 @@ class TestGrxUIProject(unittest.TestCase):
 
     def start_simulation(self):
         print "start simulation"
+        self.xdotool("Eclipse SDK ", "mousemove --sync 0 0")
         #subprocess.call("xdotool set_desktop 2", shell=True)
         #subprocess.call("xdotool search --name \"Eclipse SDK \" set_desktop_for_window 2", shell=True)
         self.xdotool("Eclipse SDK ", "windowmove --sync 0 0")
@@ -74,12 +75,7 @@ class TestGrxUIProject(unittest.TestCase):
         self.xdotool("Eclipse SDK ", "\
         windowactivate --sync \
 	key --clearmodifiers alt+g \
-	key --clearmodifiers Down \
-	key --clearmodifiers Down \
-	key --clearmodifiers Down \
-	key --clearmodifiers Down \
-	key --clearmodifiers Down \
-	key --clearmodifiers Return")
+	key --clearmodifiers s")
 
     def wait_times_is_up(self):
         i = 0
