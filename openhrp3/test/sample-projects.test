@@ -4,7 +4,7 @@
   <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="FallingBoxes" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/FallingBoxes.xml" cwd="node" />
   <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
-   test-name="ODESample_Crash" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/ODESample_Crash.xml --max-time=100" cwd="node" />
+   test-name="ODESample_Crash" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/ODESample_Crash.xml --max-time=10" cwd="node" />
   <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
    test-name="PA10Sample" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/PA10Sample.xml" cwd="node" />
   <test type="sample-projects.py" pkg="openhrp3" time-limit="300" retry="3"
