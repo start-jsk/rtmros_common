@@ -88,7 +88,9 @@ class TestGrxUIProject(unittest.TestCase):
                 if self.check_window(camera_window):
                     self.move_window(camera_window,679,509)
             print "wait for \"Time is up\" (%d/%d) ..."%(i, self.max_time)
-            filename="%s/%s-%d.png"%(os.path.dirname(self.capture_filename), os.path.splitext(os.path.basename(self.capture_filename))[0], i)
+            filename="%s-%d.png"%(os.path.splitext(os.path.basename(self.capture_filename))[0], i)
+            if os.path.dirname(self.capture_filename):
+                filename=os.path.dirname(self.capture_filename)+"/"+filename
             print filename
             subprocess.call("import -frame -screen -window Eclipse\ SDK\  "+filename, shell=True)
             time.sleep(1)
