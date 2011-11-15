@@ -12,7 +12,7 @@ class TestGrxUIProject(unittest.TestCase):
     proc=None
     project_filename=""
     capture_filename=""
-    max_time=300
+    max_time=100
 
     def setUp(self):
         parser = OptionParser(description='grxui project testing')
@@ -23,6 +23,7 @@ class TestGrxUIProject(unittest.TestCase):
         parser.add_option('--max-time',action="store",type='int',dest='max_time',default=600,
                           help='wait sec until exit from grxui')
         parser.add_option('--gtest_output'); # dummy
+        parser.add_option('--text'); # dummy
         (options, args) = parser.parse_args()
         self.project_filename = options.project_filename
         self.max_time = options.max_time
@@ -39,8 +40,9 @@ class TestGrxUIProject(unittest.TestCase):
             time.sleep(1)
         return ret
 
-    def check_window(self,name):
-        return subprocess.call("xdotool search --name \""+name+"\"", shell=True) != 1
+    def check_window(self,name,visible=""):
+        if visible : visible = "--onlyvisible"
+        return subprocess.call("xdotool search "+visible+" --name \""+name+"\"", shell=True) != 1
 
     def wait_for_window(self,name):
         while subprocess.call("xdotool search --name \""+name+"\"", shell=True) == 1:
@@ -48,21 +50,21 @@ class TestGrxUIProject(unittest.TestCase):
             time.sleep(1)
         print "wait for \""+name+"\" ... done"
     def unmap_window(self,name):
-        print "unmap \""+name+"\""
         if self.check_window(name):
+            print "unmap \""+name+"\""
             self.xdotool(name, "windowunmap --sync")
     def map_window(self,name):
-        print "map \""+name+"\""
         if self.check_window(name):
+            print "map \""+name+"\""
             self.xdotool(name, "windowmap --sync")
     def move_window(self,name,x,y):
-        print "move %s %d %d"%(name,x,y)
         if self.check_window(name):
+            print "move %s %d %d"%(name,x,y)
             self.xdotool(name, "windowmove --sync %d %d"%(x,y))
 
     def return_window(self,name):
-        print "send return to \""+name+"\""
         if self.check_window(name):
+            print "send return to \""+name+"\""
             self.xdotool(name, "windowactivate --sync key --clearmodifiers Return")
 
     def start_simulation(self):
@@ -81,7 +83,7 @@ class TestGrxUIProject(unittest.TestCase):
         i = 0
         while (not self.check_window("Time is up")) and (i < self.max_time):
             for camera_window in ["VISION_SENSOR1"]:
-                if self.check_window(camera_window):
+                if self.check_window(camera_window, visible=True):
                     self.move_window(camera_window,679,509)
             print "wait for \"Time is up\" (%d/%d) ..."%(i, self.max_time)
             filename="%s-%d.png"%(os.path.splitext(os.path.basename(self.capture_filename))[0], i)
@@ -104,8 +106,12 @@ class TestGrxUIProject(unittest.TestCase):
             self.wait_for_window("Simulation Finished")
             self.return_window("Simulation Finished")
         subprocess.call("xdotool search --name \"Eclipse SDK\" windowactivate --sync key --clearmodifiers alt+f key --clearmodifiers x", shell=True)
-        if self.proc:
-            self.proc.wait()
+        subprocess.call("xdotool key --clearmodifiers return")
+        # wait 10 seconds?
+        i = 0
+        while self.proc and self.proc.poll() == None and i < 10:
+            timer.sleep(1)
+            i += 1
 
     def test_grxui_simulation(self):
         import check_online_viewer
