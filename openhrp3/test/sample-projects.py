@@ -111,7 +111,7 @@ class TestGrxUIProject(unittest.TestCase):
         # wait 10 seconds?
         i = 0
         while self.proc and self.proc.poll() == None and i < 10:
-            timer.sleep(1)
+            time.sleep(1)
             i += 1
 
     def test_grxui_simulation(self):
