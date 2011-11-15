@@ -42,6 +42,7 @@ class TestGrxUIProject(unittest.TestCase):
 
     def check_window(self,name,visible=""):
         if visible : visible = "--onlyvisible"
+        print "check window", name
         return subprocess.call("xdotool search "+visible+" --name \""+name+"\"", shell=True) != 1
 
     def wait_for_window(self,name):
@@ -82,14 +83,14 @@ class TestGrxUIProject(unittest.TestCase):
     def wait_times_is_up(self):
         i = 0
         while (not self.check_window("Time is up")) and (i < self.max_time):
+            print "wait for \"Time is up\" (%d/%d) ..."%(i, self.max_time)
             for camera_window in ["VISION_SENSOR1"]:
                 if self.check_window(camera_window, visible=True):
                     self.move_window(camera_window,679,509)
-            print "wait for \"Time is up\" (%d/%d) ..."%(i, self.max_time)
             filename="%s-%03d.png"%(os.path.splitext(os.path.basename(self.capture_filename))[0], i)
             if os.path.dirname(self.capture_filename):
                 filename=os.path.dirname(self.capture_filename)+"/"+filename
-            print filename
+            print "write to ",filename
             subprocess.call("import -frame -screen -window Eclipse\ SDK\  "+filename, shell=True)
             time.sleep(1)
             i+=1
