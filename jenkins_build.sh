@@ -2,7 +2,7 @@
 
 trap 'exit 1' ERR
 
-LAST_STABLE_NUMBER=`grep $\ \ \<number $HOME/jobs/agentsystem/lastSuccessful/build.xml | sed 's/[^0-9]//g'`
+LAST_STABLE_NUMBER=`grep '^\ \ \<number' $HOME/jobs/agentsystem/lastSuccessful/build.xml | sed 's/[^0-9]//g'`
 # remove old build
 echo "last stable number ... $LAST_STABLE_NUMBER"
 find $WORKSPACE -maxdepth 1 -name "rtm-ros-robotics-*" -a ! -name "rtm-ros-robotics-$LAST_STABLE_NUMBER" -a -ctime +3 -exec echo "remove " {} \; -exec rm -fr {} \;
