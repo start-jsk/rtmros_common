@@ -69,7 +69,7 @@ class TestGrxUIProject(unittest.TestCase):
 
     def start_simulation(self):
         print "start simulation"
-        self.xdotool("Eclipse SDK ", "mousemove --sync 0 0")
+        self.xdotool("Eclipse SDK ", "mousemove --sync 400 50")
         #subprocess.call("xdotool set_desktop 2", shell=True)
         #subprocess.call("xdotool search --name \"Eclipse SDK \" set_desktop_for_window 2", shell=True)
         self.xdotool("Eclipse SDK ", "windowmove --sync 0 0")
