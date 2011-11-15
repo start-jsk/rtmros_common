@@ -20,7 +20,7 @@ class TestGrxUIProject(unittest.TestCase):
                           help='project xml filename')
         parser.add_option('--capture',action="store",type='string',dest='capture_filename',default=None,
                           help='do not launch grxui, just wait finish and capture files')
-        parser.add_option('--max-time',action="store",type='int',dest='max_time',default=600,
+        parser.add_option('--max-time',action="store",type='int',dest='max_time',default=self.max_time,
                           help='wait sec until exit from grxui')
         parser.add_option('--gtest_output'); # dummy
         parser.add_option('--text'); # dummy
