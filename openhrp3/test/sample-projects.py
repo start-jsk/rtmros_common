@@ -99,7 +99,7 @@ class TestGrxUIProject(unittest.TestCase):
         self.unmap_window("Time is up")
 
     def capture_eclipse(self):
-        subprocess.call("import -screen -window Eclipse\ SDK\  "+self.capture_filename, shell=True)
+        subprocess.call("import -frame -screen -window Eclipse\ SDK\  "+self.capture_filename, shell=True)
 
     def exit_eclipse(self):
         self.map_window("Time is up")
