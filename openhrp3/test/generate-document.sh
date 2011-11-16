@@ -1,12 +1,14 @@
 #!/bin/bash -x
 
 if [ $# -gt 0 ] ; then
-    GETOPT=`getopt -l gtest_output: -- dummy "$@"` ; [ $? != 0 ] && exit 1
+    GETOPT=`getopt -l gtest_output:,text -- dummy "$@"` ; [ $? != 0 ] && exit 1
     eval set -- "$GETOPT"
     while true
     do
 	case $1 in
 	    --gtest_output)  TEST_OUTPUT=`echo $2|sed s/^xml\://`     ; shift 2
+		;;
+	    --text)  shift 1
 		;;
 	    --)  shift; break;
 		;;
