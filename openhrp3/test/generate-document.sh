@@ -21,11 +21,9 @@ fi
 
 
 TEST_DIR=`rospack find openhrp3`/test
-
-cat <<EOF > $TEST_DIR/index.rst
-OpenHPR3 examples
-=================
-EOF
+rev=`LANG=C svn info \`rospack find openhrp3\` | grep ^Revision`
+echo "OpenHPR3 examples ($rev)" > $TEST_DIR/index.rst
+echo "==========================" >> $TEST_DIR/index.rst
 
 for filename in `rospack find openhrp3`/share/OpenHRP-3.1/sample/project/*.xml
 do
