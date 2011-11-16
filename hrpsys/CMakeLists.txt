@@ -91,6 +91,7 @@ add_custom_target(openhrp_robots ALL DEPENDS ${all_robots})
 
 
 rosbuild_add_rostest(test/hrp4c.test)
-rosbuild_add_rostest(test/pa10.test)
-rosbuild_add_rostest(test/samplerobot.test)
+#rosbuild_add_rostest(test/pa10.test)
+#rosbuild_add_rostest(test/samplerobot.test)
+rosbuild_add_rostest(test/generate-document.test)
 

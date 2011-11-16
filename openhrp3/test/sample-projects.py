@@ -108,7 +108,7 @@ class TestGrxUIProject(unittest.TestCase):
             self.wait_for_window("Simulation Finished")
             self.return_window("Simulation Finished")
         subprocess.call("xdotool search --name \"Eclipse SDK\" windowactivate --sync key --clearmodifiers alt+f key --clearmodifiers x", shell=True)
-        subprocess.call("xdotool key --clearmodifiers return", shell=True)
+        subprocess.call("xdotool key --clearmodifiers Return", shell=True)
         # wait 10 seconds?
         i = 0
         while self.proc and self.proc.poll() == None and i < 10:
