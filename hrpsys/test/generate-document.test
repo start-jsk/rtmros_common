@@ -1,5 +1,5 @@
 <launch>
-  <test type="generate-document.sh" pkg="hrpsys" time-limit="300" launch-prefix="xterm -e"
+  <test type="generate-document.sh" pkg="hrpsys" time-limit="300" 
 	test-name="generate_document" />
 </launch>
 
