@@ -66,28 +66,6 @@ void MyModuleInit(RTC::Manager* manager)
 
 int main (int argc, char** argv)
 {
-  { // wait for ClockGenerator
-    CORBA::ORB_var orb;
-    orb = CORBA::ORB_init(argc, argv);
-    CosNaming::NamingContext_var cxt;
-    CORBA::Object_var	nS = orb->resolve_initial_references("NameService");
-    cxt = CosNaming::NamingContext::_narrow(nS);
-    CosNaming::Name ncName;
-    ncName.length(1);
-    ncName[0].id = CORBA::string_dup("ClockGenerator");
-    ncName[0].kind = CORBA::string_dup("");
-    CORBA::Object_var obj = NULL;
-    do {
-      try {
-	obj = cxt->resolve(ncName);
-      } catch(...) {
-	std::cerr << "[" << argv[0] << "] wait ClockGenerator" << std::endl;
-	sleep(3);
-      }
-    } while ( obj == NULL );
-    std::cerr << "[" << argv[0] << "] found ClockGenerator" << std::endl;
-  }
-
   RTC::Manager* manager;
   manager = RTC::Manager::init(argc, argv);
 
