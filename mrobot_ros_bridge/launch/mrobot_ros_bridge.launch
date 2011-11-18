@@ -25,10 +25,10 @@
   <node pkg="mrobot_ros_bridge" name="joy_teleop" type="joy_teleop.py" output="screen"/>
 
   <!-- BEGIN:openrtm connection -->
-  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find mrobot_ros_bridge)/launch/mrobot_ros_bridge.launch" output="screen"/>
-  <rtconnect from="Odometry0.rtc:ResultLocalization" to="MobileRobotROSBridge0.rtc:in" />
-  <rtconnect from="BeegoController0.rtc:TargetVelocity" to="MobileRobotROSBridge0.rtc:out" />
-  <rtactivate component="MobileRobotROSBridge0.rtc" />
+  <!-- <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find mrobot_ros_bridge)/launch/mrobot_ros_bridge.launch" output="screen"/> -->
+  <!-- <rtconnect from="Odometry0.rtc:ResultLocalization" to="MobileRobotROSBridge0.rtc:in" /> -->
+  <!-- <rtconnect from="BeegoController0.rtc:TargetVelocity" to="MobileRobotROSBridge0.rtc:out" /> -->
+  <!-- <rtactivate component="MobileRobotROSBridge0.rtc" /> -->
   <!-- END:openrtm connection -->
 
   <sphinxdoc><![CDATA[
