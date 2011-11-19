@@ -22,10 +22,12 @@ class TestGrxUIProject(unittest.TestCase):
                           help='do not launch grxui, just wait finish and capture files')
         parser.add_option('--max-time',action="store",type='int',dest='max_time',default=self.max_time,
                           help='wait sec until exit from grxui')
+        parser.add_option('--kill-nameserver',action="store",type='string',dest='kill_nameserver',default=None);
         parser.add_option('--gtest_output'); # dummy
         parser.add_option('--text'); # dummy
         (options, args) = parser.parse_args()
         self.project_filename = options.project_filename
+        self.kill_nameserver = options.kill_nameserver
         self.max_time = options.max_time
         if options.capture_filename:
             self.capture_filename = options.capture_filename
@@ -111,6 +113,8 @@ class TestGrxUIProject(unittest.TestCase):
         subprocess.call("xdotool key --clearmodifiers Return", shell=True)
         # wait 10 seconds?
         i = 0
+        if self.kill_nameserver :
+            subprocess.call("pkill omniNames", shell=True)
         while self.proc and self.proc.poll() == None and i < 10:
             time.sleep(1)
             i += 1
