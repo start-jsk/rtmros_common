@@ -27,7 +27,7 @@ echo "==========================" >> $TEST_DIR/index.rst
 
 for filename in `rospack find openhrp3`/share/OpenHRP-3.1/sample/project/*.xml
 do
-    if [ -f $TEST_DIR/project-`basename $filename .xml`.png ]; then
+    if [ -f $TEST_DIR/`basename $filename .xml`.png ]; then
 	cat <<EOF >> $TEST_DIR/index.rst
 `basename $filename .xml`
 -------------------------
