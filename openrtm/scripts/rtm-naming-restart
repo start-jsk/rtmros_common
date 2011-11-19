@@ -17,3 +17,6 @@ pkill -KILL omniNames
 sleep 1 # wait to omniNaming start up
 tail ./omninames-`hostname`.log
 
+exit 0
+
+
