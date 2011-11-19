@@ -28,7 +28,7 @@
   <test type="sample-projects.py" pkg="openhrp3" time-limit="600" retry="3"
    test-name="SampleSV_RangeSensor" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/SampleSV_RangeSensor.xml" cwd="node" />
   <test type="sample-projects.py" pkg="openhrp3" time-limit="600" retry="3"
-   test-name="SprintJoint" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/SpringJoint.xml" cwd="node" />
+   test-name="SprintJoint" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/SpringJoint.xml --kill-nameserver" cwd="node" />
 
 
   <test type="generate-document.sh" pkg="openhrp3"
