@@ -84,7 +84,10 @@ class TestGrxUIProject(unittest.TestCase):
 
     def wait_times_is_up(self):
         i = 0
-        subprocess.call("rm *.png",shell=True)
+        filename="%s*.png"%(os.path.splitext(os.path.basename(self.capture_filename))[0])
+        if os.path.dirname(self.capture_filename):
+            filename=os.path.dirname(self.capture_filename)+"/"+filename
+        subprocess.call(filename,shell=True)
         while (not self.check_window("Time is up")) and (i < self.max_time):
             print "wait for \"Time is up\" (%d/%d) ..."%(i, self.max_time)
             for camera_window in ["VISION_SENSOR1"]:

@@ -37,7 +37,7 @@ do
   roscd openhrp3/share/OpenHRP-3.1/sample/project/
   rosrun openhrp3 grxui.sh `basename $filename`
 
-.. image :: project-`basename $filename .xml`.png
+.. image :: `basename $filename .xml`.png
     :width: 500pt
 EOF
 	else
