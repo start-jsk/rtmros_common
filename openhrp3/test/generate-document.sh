@@ -28,6 +28,7 @@ echo "==========================" >> $TEST_DIR/index.rst
 for filename in `rospack find openhrp3`/share/OpenHRP-3.1/sample/project/*.xml
 do
     if [ -f $TEST_DIR/`basename $filename .xml`.png ]; then
+	convert -delay 10 -loop 0 $TEST_DIR/`basename $filename .xml`-*.png $TEST_DIR/`basename $filename .xml`.gif
 	cat <<EOF >> $TEST_DIR/index.rst
 `basename $filename .xml`
 -------------------------
@@ -37,7 +38,7 @@ do
   roscd openhrp3/share/OpenHRP-3.1/sample/project/
   rosrun openhrp3 grxui.sh `basename $filename`
 
-.. image :: `basename $filename .xml`.png
+.. image :: `basename $filename .xml`.gif
     :width: 500pt
 EOF
 	else

@@ -30,6 +30,7 @@ EOF
 for filename in `rospack find hrpsys`/launch/*.launch
 do
     if [ -f $TEST_DIR/`basename $filename .launch`-grxui.png ]; then
+	convert -delay 10 -loop 0 $TEST_DIR/`basename $filename .launch`-grxui-*.png $TEST_DIR/`basename $filename .launchl`-grxui.gif
 	cat <<EOF >> $TEST_DIR/index.rst
 `basename $filename .launch`
 -------------------------
@@ -38,7 +39,7 @@ do
 
   rosrun hrpsys `basename $filename`
 
-.. image :: `basename $filename .launch`-grxui.png
+.. image :: `basename $filename .launch`-grxui.gif
     :width: 500pt
 EOF
 	else
