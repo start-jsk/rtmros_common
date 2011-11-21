@@ -21,11 +21,9 @@ fi
 
 
 TEST_DIR=`rospack find hrpsys`/test
-
-cat <<EOF > $TEST_DIR/index.rst
-hrpsys examples
-=================
-EOF
+rev=`LANG=C svn info \`rospack find hrpsys\` | grep ^Revision`
+echo "hrpsys examples ($rev)" > $TEST_DIR/index.rst
+echo "==========================" >> $TEST_DIR/index.rst
 
 for filename in `rospack find hrpsys`/launch/*.launch
 do
