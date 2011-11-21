@@ -31,6 +31,6 @@
    test-name="SprintJoint" args="--project $(find openhrp3)/share/OpenHRP-3.1/sample/project/SpringJoint.xml --kill-nameserver" cwd="node" />
 
 
-  <test type="generate-document.sh" pkg="openhrp3"  time-limit="600"
+  <test type="generate-document.sh" pkg="openhrp3"  time-limit="1800"
    test-name="generate_document" cwd="node" />
 </launch>
