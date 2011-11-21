@@ -1,5 +1,0 @@
-<launch>
-  <include file="$(find hrpsys)/launch/samplerobot.launch" />
-  <test test-name="samplerobot" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
-   type="test-grxui-lib.sh" args="--start $(find hrpsys)/test/samplerobot-grxui.png"/>
-</launch>

@@ -1,5 +1,7 @@
 <launch>
   <include file="$(find hrpsys)/launch/pa10.launch" />
-  <test test-name="pa10" pkg="openhrp3" time-limit="300" launch-prefix="xterm -e" retry="3"
-   type="test-grxui-lib.sh" args="--start $(find hrpsys)/test/pa10-grxui.png"/>
+  <node name="pa10_python_client" pkg="hrpsys" type="hrpsyspy"
+	args="$(find hrpsys)/share/hrpsys/samples/PA10/PA10.py" respawn="true" />
+  <test test-name="pa10" pkg="openhrp3" time-limit="200"
+   type="test-grxui-lib.sh" args="--capture $(find hrpsys)/test/pa10-grxui.png --max-time 30 --kill-nameserver"/>
 </launch>
