@@ -20,15 +20,21 @@ class TestGrxUIProject(unittest.TestCase):
                           help='project xml filename')
         parser.add_option('--capture',action="store",type='string',dest='capture_filename',default=None,
                           help='do not launch grxui, just wait finish and capture files')
+        parser.add_option('--capture-window',action="store",type='string',dest='capture_window',default="Eclipse\ SDK\ ",
+                          help='do not launch grxui, just wait finish and capture files')
         parser.add_option('--max-time',action="store",type='int',dest='max_time',default=self.max_time,
                           help='wait sec until exit from grxui')
         parser.add_option('--kill-nameserver',action="store",type='string',dest='kill_nameserver',default=None);
+        parser.add_option('--start-simulation',action="store_true",dest='simulation_start');
+        parser.add_option('--no-start-simulation',action="store_false",dest='simulation_start');
         parser.add_option('--gtest_output'); # dummy
         parser.add_option('--text'); # dummy
         (options, args) = parser.parse_args()
         self.project_filename = options.project_filename
         self.kill_nameserver = options.kill_nameserver
+        self.simulation_start = options.simulation_start
         self.max_time = options.max_time
+        self.capture_window = options.capture_window
         if options.capture_filename:
             self.capture_filename = options.capture_filename
         else:
@@ -87,24 +93,28 @@ class TestGrxUIProject(unittest.TestCase):
         filename="%s*.png"%(os.path.splitext(os.path.basename(self.capture_filename))[0])
         if os.path.dirname(self.capture_filename):
             filename=os.path.dirname(self.capture_filename)+"/"+filename
-        subprocess.call(filename,shell=True)
+        subprocess.call("rm "+filename,shell=True)
+        self.xdotool(self.capture_window, "windowactivate --sync")
         while (not self.check_window("Time is up")) and (i < self.max_time):
             print "wait for \"Time is up\" (%d/%d) ..."%(i, self.max_time)
             for camera_window in ["VISION_SENSOR1"]:
                 if self.check_window(camera_window, visible=True):
-                    self.move_window(camera_window,679,509)
+                    if self.simulation_start :
+                        self.move_window(camera_window,679,509)
+                    else:
+                        self.unmap_window(camera_window)
             filename="%s-%03d.png"%(os.path.splitext(os.path.basename(self.capture_filename))[0], i)
             if os.path.dirname(self.capture_filename):
                 filename=os.path.dirname(self.capture_filename)+"/"+filename
             print "write to ",filename
-            subprocess.call("import -frame -screen -window Eclipse\ SDK\  "+filename, shell=True)
-            time.sleep(1)
-            i+=1
+            subprocess.call("import -frame -screen -window "+self.capture_window+" "+filename, shell=True)
+            time.sleep(0.5)
+            i+=0.5
         print "wait for \"Time is up\" ... done"
         self.unmap_window("Time is up")
 
     def capture_eclipse(self):
-        subprocess.call("import -frame -screen -window Eclipse\ SDK\  "+self.capture_filename, shell=True)
+        subprocess.call("import -frame -screen -window "+self.capture_window+" "+self.capture_filename, shell=True)
 
     def exit_eclipse(self):
         self.map_window("Time is up")
@@ -131,7 +141,8 @@ class TestGrxUIProject(unittest.TestCase):
         # wait online viewer
         check_online_viewer.waitOnlineViewer()
         # start simualation
-        self.start_simulation()
+        if self.simulation_start :
+            self.start_simulation()
         # wait for a time
         self.wait_times_is_up()
         # capture result
