@@ -35,7 +35,7 @@ do
 
 .. code-block:: bash
 
-  rosrun hrpsys `basename $filename`
+  roslaunch hrpsys `basename $filename`
 
 .. image :: `basename $filename .launch`-grxui.gif
     :width: 500pt
