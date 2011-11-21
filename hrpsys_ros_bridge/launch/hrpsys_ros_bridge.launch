@@ -8,8 +8,7 @@
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
-  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"
-				  -o "exec_cxt.periodic.type:SimulationEC" -o "manager.modules.load_path:$(find openhrp3)/lib" -o "manager.modules.preload:SimulationEC.so" ' />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
   <!-- END:openrtm setting -->
   <node name = "HrpsysSeqStateROSBridge"
 	pkg  = "hrpsys_ros_bridge"
@@ -27,7 +26,7 @@
 
   <!-- BEGIN:openrtm connection -->
   <env name="ROBOT_NAME" value="$(arg ROBOT_NAME)" />
-  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch"/>
+  <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch"/>
   <rtconnect from="StateHolder0.rtc:qOut" to="HrpsysSeqStateROSBridge0.rtc:rsangle" />
   <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" />
   <rtconnect from="StateHolder0.rtc:basePoseOut" to="HrpsysSeqStateROSBridge0.rtc:pose" />
