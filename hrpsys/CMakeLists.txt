@@ -80,6 +80,12 @@ add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/scripts/kawada-hironx.l
   COMMAND rosrun euscollada collada2eus ${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae ${PROJECT_SOURCE_DIR}/scripts/kawada-hironx.yaml ${PROJECT_SOURCE_DIR}/scripts/kawada-hironx.l
   DEPENDS ${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae)
 list(APPEND all_robots ${PROJECT_SOURCE_DIR}/scripts/kawada-hironx.l)
+if(EXISTS ${PROJECT_SOURCE_DIR}/scripts/DARWIN.wrl)
+compile_openhrp_model(
+  ${PROJECT_SOURCE_DIR}/scripts/DARWIN.wrl
+  ${PROJECT_SOURCE_DIR}/scripts
+  DARWIN.dae darwin.yaml darwin.l)
+endif(EXISTS ${PROJECT_SOURCE_DIR}/scripts/DARWIN.wrl)
 
 # compile_openhrp_model(
 #   /home/k-okada/prog/OpenHRP2/etc/DARWIN/DARWINmain.wrl
