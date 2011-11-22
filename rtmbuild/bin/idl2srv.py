@@ -89,7 +89,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if isinstance(typ, idlast.Struct):
             return idlutil.ccolonName(typ.scopedName())
         if isinstance(typ, idlast.Enum):
-            return 'int' # enum is int ??
+            return 'int64_t' # enum is int64 ??
         if isinstance(typ, idlast.Typedef):
             return idlutil.ccolonName(typ.declarators()[0].scopedName())
         if isinstance(typ, idlast.Declarator):
@@ -128,7 +128,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if isinstance(typ, idlast.Const):
             return TypeNameMap[typ.constKind()]
         if isinstance(typ, idlast.Enum):
-            return 'int64' # enum is int64
+            return TypeNameMap[idltype.tk_longlong] # enum is int64
         if isinstance(typ, idlast.Typedef):
             arraysize = typ.declarators()[0].sizes()
             if 0 < len(arraysize):
