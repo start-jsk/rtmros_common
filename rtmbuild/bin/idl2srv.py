@@ -15,6 +15,7 @@ TypeNameMap = {} # for ROS msg/srv
 TypeNameMap[idltype.tk_boolean] = 'bool'
 TypeNameMap[idltype.tk_char] = 'int8'
 TypeNameMap[idltype.tk_octet] = 'uint8'
+TypeNameMap[idltype.tk_wchar] = 'int16'
 TypeNameMap[idltype.tk_short] = 'int16'
 TypeNameMap[idltype.tk_ushort] = 'uint16'
 TypeNameMap[idltype.tk_long] = 'int32'
@@ -24,6 +25,10 @@ TypeNameMap[idltype.tk_ulonglong] = 'uint64'
 TypeNameMap[idltype.tk_float] = 'float32'
 TypeNameMap[idltype.tk_double] = 'float64'
 TypeNameMap[idltype.tk_string] = 'string'
+TypeNameMap[idltype.tk_wstring] = 'string'
+TypeNameMap[idltype.tk_any] = 'string' # ??
+TypeNameMap[idltype.tk_TypeCode] = 'uint64' # ??
+TypeNameMap[idltype.tk_enum] = 'uint64'
 
 # convert functions for IDL/ROS
 convert_functions = """\n
@@ -78,34 +83,40 @@ class ServiceVisitor (idlvisitor.AstVisitor):
 ##
 ##
 ##
-    def getCppTypeText(self, typ, out=False):
+    def getCppTypeText(self, typ, out=False, full=False):
         if isinstance(typ, idltype.Sequence):
-            return ('%s*' if out else '%s') % self.getCppTypeText(typ.seqType(), False)
+            return ('%s*' if out else '%s') % self.getCppTypeText(typ.seqType(), False, full)
         if isinstance(typ, idltype.String):
             return 'char*' # ??
         if isinstance(typ, idltype.Declared):
             postfix = '*' if out and isinstance(typ.unalias(), idltype.Sequence) else ''
-            return self.getCppTypeText(typ.decl(), False) + postfix
+            return self.getCppTypeText(typ.decl(), False, full) + postfix
         if isinstance(typ, idlast.Struct):
-            return idlutil.ccolonName(typ.scopedName())
+            if full:
+                return idlutil.ccolonName(typ.scopedName())
+            else:
+                return typ.identifier()
         if isinstance(typ, idlast.Enum):
             return 'int64_t' # enum is int64 ??
         if isinstance(typ, idlast.Typedef):
-            return idlutil.ccolonName(typ.declarators()[0].scopedName())
+            if full:
+                return idlutil.ccolonName(typ.declarators()[0].scopedName())
+            else:
+                return typ.declarators()[0].identifier()
         if isinstance(typ, idlast.Declarator):
-            return self.getCppTypeText(typ.alias(), out)
+            return self.getCppTypeText(typ.alias(), out, full)
         return 'undefined'
 
 
     def getROSTypeText(self, typ):
         if isinstance(typ, idltype.Base):
             return TypeNameMap[typ.kind()]
-        if isinstance(typ, idltype.String):
+        if isinstance(typ, idltype.String) or isinstance(typ, idltype.WString):
             return 'string' # ??
         if isinstance(typ, idltype.Sequence):
             etype = typ.seqType() # n-dimensional array -> 1-dimensional
             size = typ.bound()
-            while not (isinstance(etype, idltype.Base) or isinstance(etype, idltype.String) or isinstance(etype, idlast.Struct) or isinstance(etype, idlast.Enum)):
+            while not (isinstance(etype, idltype.Base) or isinstance(etype, idltype.String) or isinstance(etype, idltype.WString) or isinstance(etype, idlast.Struct) or isinstance(etype, idlast.Enum) or isinstance (etype, idlast.Forward)):
                 if isinstance(etype, idltype.Declared):
                     etype = etype.decl()
                 elif isinstance(etype, idltype.Sequence):
@@ -117,18 +128,24 @@ class ServiceVisitor (idlvisitor.AstVisitor):
                     etype = etype.aliasType()
                 elif isinstance(etype, idlast.Declarator):
                     etype = etype.alias()
+                elif isinstance(etype, idlast.Forward):
+                    etype = etype.fullDecl()
                 else:
                     return 'undefined'
             return self.getROSTypeText(etype) + ('[]' if size==0 else '[%d]' % size)
         if isinstance(typ, idltype.Declared):
             return self.getROSTypeText(typ.decl())
 
+        if isinstance(typ, idlast.Interface):
+            return typ.identifier()
         if isinstance(typ, idlast.Struct):
             return typ.identifier()
         if isinstance(typ, idlast.Const):
             return TypeNameMap[typ.constKind()]
         if isinstance(typ, idlast.Enum):
             return TypeNameMap[idltype.tk_longlong] # enum is int64
+        if isinstance(typ, idlast.Union):
+            return TypeNameMap[idltype.tk_double] # union is not in ROS
         if isinstance(typ, idlast.Typedef):
             arraysize = typ.declarators()[0].sizes()
             if 0 < len(arraysize):
@@ -136,7 +153,12 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             return self.getROSTypeText(typ.aliasType())
         if isinstance(typ, idlast.Declarator):
             return self.getROSTypeText(typ.alias())
+        if isinstance(typ, idlast.Forward):
+            return self.getROSTypeText(typ.fullDecl())
 
+        global hoge
+        hoge = typ
+        print typ.__class__
         return 'undefined'
 
     # output .msg file defined in .idl
@@ -144,9 +166,9 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if not (isinstance(typ, idlast.Enum) or isinstance(typ, idlast.Struct) or isinstance(typ, idlast.Interface)):
             return
 
-        idlfile = typ.file()
-        idldir = os.path.split(idlfile)[0]
-        basedir = os.path.split(idldir)[0]
+#        idlfile = typ.file()
+#        idldir = os.path.split(idlfile)[0]
+#        basedir = os.path.split(idldir)[0]
         msgfile = basedir + "/msg/" + typ.identifier() + ".msg"
         if not os.path.exists(basedir):
             return
@@ -173,9 +195,9 @@ class ServiceVisitor (idlvisitor.AstVisitor):
 
     # output .srv file defined in .idl
     def outputSrv(self, op):
-        idlfile = op.file()
-        idldir = os.path.split(idlfile)[0]
-        basedir = os.path.split(idldir)[0]
+#        idlfile = op.file()
+#        idldir = os.path.split(idlfile)[0]
+#        basedir = os.path.split(idldir)[0]
 
         srvfile = basedir + "/srv/" + op.identifier() + ".srv"
         if not os.path.exists(basedir):
@@ -193,7 +215,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         for arg in [arg for arg in args if arg.is_in()]:
             fd.write("%s %s\n" % (self.getROSTypeText(arg.paramType()), arg.identifier()))
         fd.write("---\n")
-        if op.returnType().kind() != idltype.tk_void:
+        if not op.oneway() and op.returnType().kind() != idltype.tk_void:
             fd.write("%s operation_return\n" % self.getROSTypeText(op.returnType()))
         for arg in [arg for arg in args if arg.is_out()]:
             fd.write("%s %s\n" % (self.getROSTypeText(arg.paramType()), arg.identifier()))
@@ -206,13 +228,13 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             if not isinstance(typ, idlast.Struct):
                 continue
 
-            code += 'template<> void convert(%s& in, %s::%s& out){\n' % (self.getCppTypeText(typ), pkgname, self.getCppTypeText(typ))
+            code += 'template<> void convert(%s& in, %s::%s& out){\n' % (self.getCppTypeText(typ, full=True), pkgname, self.getCppTypeText(typ))
             for mem in typ.members():
                 var = mem.declarators()[0].identifier()
                 code += '  convert(out.%s, in.%s);\n' % (var, var)
             code += '}\n'
 
-            code += 'template<> void convert(%s::%s& in, %s& out){\n' % (pkgname, self.getCppTypeText(typ), self.getCppTypeText(typ))
+            code += 'template<> void convert(%s::%s& in, %s& out){\n' % (pkgname, self.getCppTypeText(typ), self.getCppTypeText(typ, full=True))
             for mem in typ.members():
                 var = mem.declarators()[0].identifier()
                 code += '  convert(out.%s, in.%s);\n' % (var, var)
@@ -236,7 +258,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
                 else:
                     params += [('res.' if is_out else 'req.') + par.identifier()]
             if isinstance(ptype.unalias(), idltype.Sequence) or isinstance(ptype.unalias(), idltype.String) or isinstance(ptype.unalias(), idltype.Declared):
-                code += '  %s %s;\n' % (self.getCppTypeText(ptype,is_out), var)
+                code += '  %s %s;\n' % (self.getCppTypeText(ptype, out=is_out, full=True), var)
                 if is_out:
                     res_code += '  convert(%s, res.%s);\n' % (var, var)
                 else:
@@ -247,10 +269,13 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         else:
             params = reduce(lambda a,b:a+', '+b, params)
 
-        code += ('  ROS_INFO("call %s");\n' % op.identifier()) + '\n' + req_code + ("""
+        code += ('  ROS_INFO("call %s");\n' % op.identifier()) + '\n' + req_code
+        if not op.oneway() and op.returnType().kind() != idltype.tk_void:
+            code += ("""
   // call service
   res.operation_return = m_service0->%s(%s);
-""" % (op.identifier(), params)) + '\n' + res_code
+\n""" % (op.identifier(), params))
+        code += res_code
 
         return """bool %s::%s(%s::%s::Request &req, %s::%s::Response &res){\n%s\n  return true;\n};\n\n""" % (ifname, op.identifier(), pkgname, op.identifier(), pkgname, op.identifier(), code)
 
@@ -258,6 +283,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
     def genBridgeComponent(self, interface):
         idlfile = interface.file()
         module_name = '%sROSBridge' % interface.identifier()
+        #service_name = idlutil.ccolonName(interface.scopedName())
         service_name = interface.identifier()
         idl_name = os.path.split(idlfile)[1]
         tmpdir = '/tmp/idl2srv'
@@ -275,7 +301,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if os.path.exists(Comp_cpp) and os.path.exists(mod_cpp) and os.path.exists(mod_h) and not options.overwrite:
             return # do not overwrite
 
-        command = "rosrun openrtm rtc-template -bcxx --module-name=%s --consumer=%s:service0:%s --consumer-idl=%s --idl-include=%s" % (module_name, service_name, service_name, idlfile, idldir)
+        command = "rosrun openrtm rtc-template -bcxx --module-name=%s --consumer=%s:service0:'%s' --consumer-idl=%s --idl-include=%s" % (module_name, service_name, service_name, idlfile, idldir)
         os.system("mkdir -p %s" % tmpdir)
         os.system("mkdir -p %s" % wd)
         os.system("cd %s; yes 2> /dev/null | %s > /dev/null" % (tmpdir, command))
@@ -298,10 +324,10 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         #  make ROS bridge functions in .cpp
         compsrc = open(tmpdir + '/' + module_name + '.cpp').read()
         compsrc += """
-RTC::ReturnCode_t VehicleServiceROSBridge::onExecute(RTC::UniqueId ec_id) {
+RTC::ReturnCode_t %s::onExecute(RTC::UniqueId ec_id) {
   ros::spinOnce();
   return RTC::RTC_OK;
-}\n\n"""
+}\n\n""" % module_name
 
         compsrc += convert_functions + self.convertFunctionCode()
 
@@ -317,6 +343,8 @@ RTC::ReturnCode_t VehicleServiceROSBridge::onExecute(RTC::UniqueId ec_id) {
         #  add ros headers, service server functions, uncomment onExecute
         compsrc = open(tmpdir + '/' + module_name + '.h').read()
         compsrc = re.sub(basedir+"/idl/(.+).h", r'\1.h', compsrc)
+
+        compsrc = compsrc.replace('<%s>'%service_name, '<%s>'%idlutil.ccolonName(interface.scopedName()))
 
         incs = ['', '// ROS', '#include <ros/ros.h>']
         incs += ['#include <%s/%s.h>' % (pkgname, op.identifier()) for op in operations]
@@ -355,7 +383,7 @@ class InterfaceNameVisitor (idlvisitor.AstVisitor):
 
 
 if __name__ == '__main__':
-    global options, pkgname
+    global options, basedir, pkgname
 
     parser = OptionParser()
     parser.add_option("-i", "--idl", dest="idlfile",
