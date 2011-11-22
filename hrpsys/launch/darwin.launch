@@ -1,0 +1,7 @@
+<launch>
+  <arg name="SCHEDULER_ARGS" default="" />
+  <include file="$(find hrpsys)/launch/hrpsys.launch">
+    <arg name="MODEL_FILE" value="$(find hrpsys)/scripts/DARWIN.wrl" />
+    <arg name="SCHEDULER_ARGS" value="$(arg SCHEDULER_ARGS)" />
+  </include>
+</launch>
