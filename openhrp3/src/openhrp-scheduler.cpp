@@ -427,8 +427,10 @@ public:
 				cerr << "[openhrp-scheduler] " << i << " " << link.name << "(parnet " << link.parentIndex << ")" << endl;
 				if ( link.parentIndex == -1 ) {
 					m.joint[string(link.name)].mode = DynamicsSimulator::TORQUE_MODE;
-					m.joint[string(link.name)].translation[0] = 0; m.joint[string(link.name)].translation[1] = 0; m.joint[string(link.name)].translation[2] = 1.0;
-					hrp::calcRodrigues(m.joint[string(link.name)].rotation, Vector3(0, 0, 1), 0);
+					m.joint[string(link.name)].translation[0] = links[i].translation[0];
+					m.joint[string(link.name)].translation[1] = links[i].translation[1];
+					m.joint[string(link.name)].translation[2] = links[i].translation[2];
+					hrp::calcRodrigues(m.joint[string(link.name)].rotation, Vector3(links[i].rotation[0], links[i].rotation[1], links[i].rotation[2]), links[i].rotation[3]);
 				} else {
 					m.joint[string(link.name)].mode = DynamicsSimulator::HIGH_GAIN_MODE;
 				}
