@@ -151,6 +151,8 @@ class TestGrxUIProject(unittest.TestCase):
         self.exit_eclipse()
 
     def __del__(self):
+        if self.kill_nameserver :
+            subprocess.call("pkill omniNames", shell=True)
         if self.proc and self.proc.poll() == None:
             self.proc.terminate()
             self.proc.kill()
