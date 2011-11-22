@@ -2,6 +2,6 @@
   <include file="$(find hrpsys_ros_bridge)/launch/hrp4c.launch" />
   <include file="$(find hrpsys_ros_bridge)/launch/hrp4c_ros_bridge.launch" />
   <node name="hrp4c_client" pkg="hrpsys" type="hrp4c_walk.sh" respawn="true" />
-  <test test-name="hrp4c" pkg="openhrp3" time-limit="200" 
-   type="sample-projects.py" args='--capture $(find hrpsys_ros_bridge)/test/hrp4c.png --capture-window "RViz" --max-time 60 --no-start-simulation --kill-nameserver'/>
+  <test test-name="hrp4c" pkg="openhrp3" time-limit="600" 
+   type="sample-projects.py" args='--capture $(find hrpsys_ros_bridge)/test/hrp4c.png --capture-window "RViz" --max-time 30 --no-start-simulation --kill-nameserver'/>
 </launch>
