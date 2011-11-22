@@ -25,7 +25,7 @@ class TestGrxUIProject(unittest.TestCase):
         parser.add_option('--max-time',action="store",type='int',dest='max_time',default=self.max_time,
                           help='wait sec until exit from grxui')
         parser.add_option('--kill-nameserver',action="store",type='string',dest='kill_nameserver',default=None);
-        parser.add_option('--start-simulation',action="store_true",dest='simulation_start');
+        parser.add_option('--start-simulation',action="store_true",dest='simulation_start', default=True);
         parser.add_option('--no-start-simulation',action="store_false",dest='simulation_start');
         parser.add_option('--gtest_output'); # dummy
         parser.add_option('--text'); # dummy
