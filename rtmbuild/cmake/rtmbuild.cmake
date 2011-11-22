@@ -174,3 +174,58 @@ macro(rtmbuild_add_library lib)
 endmacro(rtmbuild_add_library)
 
 
+# generate msg/srv files from idl, must be called before rosbuild_init
+macro(rtmbuild_genbridge)
+  message("[rtmbuild_genbridge] Generating bridge compornents from idl in package ${_project}")
+  rtmbuild_get_idls(_idllist)
+  if(NOT _idllist)
+    _rosbuild_warn("rtmbuild_genbridge() was called, but no .idl files ware found")
+  else(NOT _idllist)
+    file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/msg)
+    file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/srv)
+  endif(NOT _idllist)
+
+  execute_process(COMMAND rosrun openrtm rtm-config --prefix OUTPUT_VARIABLE _rtm_prefix OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND rospack find openhrp3 OUTPUT_VARIABLE _openhrp3_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set(_include_dirs "${_rtm_prefix}/include/rtm/idl ${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl")
+
+  set(_autogen "")
+  include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
+  foreach(_idl ${_idllist})
+    message("[rtmbuild_genbridge] Generate srvs from ${_idl}")
+    execute_process(COMMAND rosrun rtmbuild idl2srv.py --filenames -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_include_dirs}" OUTPUT_VARIABLE _autogen_files
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    string(REPLACE "\n" ";" _autogen_files  ${_autogen_files})
+    #add_custom_target(OUTPUT ${_autogen_files}
+    #  COMMAND rosrun rtmbuild idl2srv.py -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_include_dirs}"
+    #  DEPENDS ${PROJECT_SOURCE_DIR}/idl/${_idl})
+    message("rosrun rtmbuild idl2srv.py -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs=\"${_include_dirs}\"")
+    execute_process(COMMAND rosrun rtmbuild idl2srv.py -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_include_dirs}")
+    list(APPEND _autogen ${_autogen_files})
+  endforeach(_idl)
+
+  if(_autogen)
+    # Also set up to clean the generated msg/srv/cpp/h files
+    get_directory_property(_old_clean_files ADDITIONAL_MAKE_CLEAN_FILES)
+    list(APPEND _old_clean_files ${_autogen})
+    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${_old_clean_files}")
+  endif(_autogen)
+
+endmacro(rtmbuild_genbridge)
+
+# rtm/ros bridge executables
+macro(rtmros_bridge_executables)
+  rosbuild_genmsg() # where to call ?
+  rosbuild_gensrv() #
+  rtmbuild_get_idls(_idllist)
+  foreach(_idl ${_idllist})
+    execute_process(COMMAND rosrun rtmbuild idl2srv.py --interfaces -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_include_dirs}" OUTPUT_VARIABLE _interface
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    string(REPLACE "\n" ";" _interface ${_interface})
+    foreach(_comp ${_interface})
+      message("[rtmbuild_bridge_executables] ${_idl} -> ${_comp}ROSBridgeComp")
+      rtmbuild_add_executable("${_comp}ROSBridgeComp" "src/${_comp}ROSBridge.cpp" "src/${_comp}ROSBridgeComp.cpp")
+    endforeach(_comp)
+  endforeach(_idl)
+endmacro(rtmros_bridge_executables)
+
