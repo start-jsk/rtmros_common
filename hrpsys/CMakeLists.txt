@@ -80,17 +80,22 @@ add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/scripts/kawada-hironx.l
   COMMAND rosrun euscollada collada2eus ${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae ${PROJECT_SOURCE_DIR}/scripts/kawada-hironx.yaml ${PROJECT_SOURCE_DIR}/scripts/kawada-hironx.l
   DEPENDS ${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae)
 list(APPEND all_robots ${PROJECT_SOURCE_DIR}/scripts/kawada-hironx.l)
-if(EXISTS ${PROJECT_SOURCE_DIR}/scripts/DARWIN.wrl)
-compile_openhrp_model(
-  ${PROJECT_SOURCE_DIR}/scripts/DARWIN.wrl
-  ${PROJECT_SOURCE_DIR}/scripts
-  DARWIN.dae darwin.yaml darwin.l)
-endif(EXISTS ${PROJECT_SOURCE_DIR}/scripts/DARWIN.wrl)
 
-# compile_openhrp_model(
-#   /home/k-okada/prog/OpenHRP2/etc/DARWIN/DARWINmain.wrl
-#   ${PROJECT_SOURCE_DIR}/scripts
-#   Darwin.dae darwin.yaml darwin.l)
+# generate darwin model
+rosbuild_find_ros_package("webots")
+if(EXISTS "${webots_PACKAGE_PATH}/build/webots/projects/robots/darwin-op/protos/DARwInOP.proto")
+  message("webots package found. convert darwin model.")
+  add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/scripts/DARWIN.wrl
+    COMMAND rosrun roseus roseus ${PROJECT_SOURCE_DIR}/scripts/webotsvrml2openhrp3vrml.l
+    "\\(progn \\(convert-webots-vrml-\\>openhrp3-vrml-for-darwin \\\"${PROJECT_SOURCE_DIR}/scripts/DARWIN.wrl\\\"\\) \\(exit\\)\\)"
+    DEPENDS ${webots_PACKAGE_PATH}/build/webots/projects/robots/darwin-op/protos/DARwInOP.proto)
+  compile_openhrp_model(
+    ${PROJECT_SOURCE_DIR}/scripts/DARWIN.wrl
+    ${PROJECT_SOURCE_DIR}/scripts
+    DARWIN.dae darwin.yaml darwin.l)
+else(EXISTS "${webots_PACKAGE_PATH}/build/webots/projects/robots/darwin-op/protos/DARwInOP.proto")
+  message("webots package not found. not convert darwin model.")
+endif(EXISTS "${webots_PACKAGE_PATH}/build/webots/projects/robots/darwin-op/protos/DARwInOP.proto")
 
 add_custom_target(openhrp_robots ALL DEPENDS ${all_robots})
 
