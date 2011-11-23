@@ -16,15 +16,13 @@
 ;;      }
 ;;    ->
 ;;   2. fixed vrml file
-;;      [
-;;        DEF AAA BB (
-;;          cc [1.0? 2.0]
-;;        )
-;;      ]
+;;      DEF AAA BB (
+;;        cc [1.0? 2.0]
+;;      )
 ;;   ->
 ;;   3. read s expression
-;;      '(aref DEF AA BB (CC (aref 1.0? 2.0)))
-(defun read-fixed-vrml-file (vrml-fname)
+;;      '(DEF AA BB (CC (aref 1.0? 2.0)))
+(defun read-vrml-file-with-vrml-fix (vrml-fname)
   (let ((fixed-vrml-fname (format nil "/tmp/~A.readvrmltmp" (pathname-name vrml-fname))) (ret) (str))
     (unix:system (format nil "cp ~A ~A" vrml-fname fixed-vrml-fname))
     (sed-vrml-file-using-s-expression fixed-vrml-fname)
@@ -295,8 +293,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Preprocess for VRML convert
-;;   1. Neglect lines with #
-;;   2. All tempolary files are named as *.bak and tmp.wrl
 ;;;;;;;;;;;;;;;;;;;;;;;;
 (defun get-vrml-convert-script-dir ()
   (let* ((strm (piped-fork "rospack find hrpsys"))
@@ -306,8 +302,8 @@
 
 (defun preprocess-for-vrml-convert (robot-vrml-fname)
   ;; define OpenHRP3 PROTOs
-  (define-vrml-node-spec-from-read-vrml-data (read-fixed-vrml-file (format nil "~A/openhrp3_protos.wrl" (get-vrml-convert-script-dir))))
-  (define-vrml-node-spec-from-read-vrml-data (read-fixed-vrml-file robot-vrml-fname))
+  (define-vrml-node-spec-from-read-vrml-data (read-vrml-file-with-vrml-fix (format nil "~A/openhrp3_protos.wrl" (get-vrml-convert-script-dir))))
+  (define-vrml-node-spec-from-read-vrml-data (read-vrml-file-with-vrml-fix robot-vrml-fname))
   (def-all-print-name)
   t)
 
@@ -357,10 +353,10 @@
       (setq ret (format nil " ~A" ret)))
     ret))
 
-(defun print-vrml-nodes (fstrm lis &optional (indent-size 0))
+(defun print-vrml-nodes (fstrm lis &optional (indent-size 0) (use-indent t))
   (cond
    ((and (consp (car lis)) (eq (caar lis) 'aref))
-    (format fstrm "~A[~%" (gen-indent-string-from-size indent-size))
+    (format fstrm "~A[~%" (if use-indent (gen-indent-string-from-size indent-size) ""))
     (mapcar #'(lambda (x)
 		(print-vrml-nodes fstrm x indent-size))
 	    (cdr lis))
@@ -370,7 +366,8 @@
 		(print-vrml-nodes fstrm x indent-size))
 	    lis))
    ((eq (car lis) 'def)
-    (format fstrm "DEF ~A ~A {~%"
+    (format fstrm "~ADEF ~A ~A {~%"
+	    (if use-indent (gen-indent-string-from-size indent-size) "")
 	    (if (send (caddr lis) :get :print-field-varname-upcase)
 		(string-upcase (cadr lis))
 	      (cadr lis))
@@ -378,7 +375,9 @@
     (print-vrml-fields fstrm (cdddr lis) (caddr lis) (+ indent-size 2))
     (format fstrm "~A}~%" (gen-indent-string-from-size indent-size)))
    (t
-    (format fstrm "~A {~%" (send (car lis) :get :print-object-string))
+    (format fstrm "~A~A {~%"
+	    (if use-indent (gen-indent-string-from-size indent-size) "")
+	    (send (car lis) :get :print-object-string))
     (print-vrml-fields fstrm (cdr lis) (car lis) (+ indent-size 2))
     (format fstrm "~A}~%" (gen-indent-string-from-size indent-size))
     ))
@@ -403,9 +402,9 @@
 	  (format fstrm "[~%")
 	  (dolist (l (cdar (cdr ll)))
 	    (format fstrm "~A " (if upcasep (string-upcase (check-string-or-not l)) (check-string-or-not l))))
-	  (format fstrm "~A]~%" (gen-indent-string-from-size indent-size)))
+	  (format fstrm "]~%"))
 	 ((consp (car (cdr ll)))
-	  (print-vrml-nodes fstrm (car (cdr ll)) (+ indent-size 2)))
+	  (print-vrml-nodes fstrm (car (cdr ll)) (+ indent-size 2) nil))
 	 (t
 	  (dolist (l (cdr ll))
 	    (format fstrm "~A " (if upcasep (string-upcase (check-string-or-not l)) (check-string-or-not l)))
@@ -477,7 +476,7 @@
        (insert-segment
 	(append-openhrp3-waist-joint
 	 (split-nodes
-	  (cadddr (read-fixed-vrml-file (format nil "/tmp/~A" webots-vrml-fname)))
+	  (cadddr (read-vrml-file-with-vrml-fix (format nil "/tmp/~A" webots-vrml-fname)))
 	  nil) ;; debug print nil
 	 (list 0 0 0.33951) (list 0.57735 0.57735 0.57735 2.09439) ;; WAIST translation and rotation
 	 )
