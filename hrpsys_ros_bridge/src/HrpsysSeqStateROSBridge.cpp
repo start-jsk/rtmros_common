@@ -30,6 +30,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   server(nh, "fullbody_controller/joint_trajectory_action", boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryAction, this, _1), true),
   HrpsysSeqStateROSBridgeImpl(manager)
 {
+  sendmsg_srv = nh.advertiseService(std::string("sendmsg"), &HrpsysSeqStateROSBridge::sendMsg, this);
 }
 HrpsysSeqStateROSBridge::~HrpsysSeqStateROSBridge() {};
 
@@ -109,6 +110,22 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryAction(const pr2_controllers_msgs
   m_service0->setJointAngles(angles, goal->trajectory.points[0].time_from_start.toSec());
   m_service0->waitInterpolation();
   server.setSucceeded(result);
+}
+
+bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
+				       dynamic_reconfigure::Reconfigure::Response &res)
+{
+  if ( req.config.strs.size() == 2 ) {
+    std::cerr <<"[" << getInstanceName() << "] @sendMsg [" << req.config.strs[0].value << "]" << std::endl;
+    if (req.config.strs[0].value == "setInterpolationMode") {
+      std::cerr <<"[" << getInstanceName() << "] @sendMsg [" << req.config.strs[1].value  << "]" << std::endl;
+      if ( req.config.strs[1].value == "linear" ) m_service0->setInterpolationMode(OpenHRP::SequencePlayerService::LINEAR);
+      else m_service0->setInterpolationMode(OpenHRP::SequencePlayerService::HOFFARBIB);
+    }
+  } else {
+    std::cerr <<"[" << getInstanceName() << "] @sendMsg [Invalid argument string length]" << std::endl;
+  }
+  return true;
 }
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)

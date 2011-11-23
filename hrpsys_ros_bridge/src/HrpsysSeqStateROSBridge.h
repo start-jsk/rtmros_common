@@ -24,6 +24,7 @@
 #include "actionlib/server/simple_action_server.h"
 #include "pr2_controllers_msgs/JointTrajectoryAction.h"
 #include "tf/transform_broadcaster.h"
+#include "dynamic_reconfigure/Reconfigure.h"
 
 extern const char* hrpsysseqstaterosbridgeimpl_spec[];
 
@@ -37,6 +38,8 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
 
   void onJointTrajectoryAction(const pr2_controllers_msgs::JointTrajectoryGoalConstPtr& goal);
+  bool sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
+		dynamic_reconfigure::Reconfigure::Response &res);
 
  private:
   hrp::BodyPtr body;
@@ -44,6 +47,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   ros::NodeHandle nh;
   ros::Publisher joint_state_pub;
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> server;
+  ros::ServiceServer sendmsg_srv;
 
   tf::TransformBroadcaster br;
 
