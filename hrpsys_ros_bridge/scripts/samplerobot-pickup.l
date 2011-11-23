@@ -1,6 +1,6 @@
 (ros::roseus "pickbox")
 (load "package://roseus/euslisp/robot-interface.l")
-(load "package://hrpsys/scripts/samplerobot.l")
+(require :samplerobot "package://hrpsys/scripts/samplerobot.l")
 
 (defclass samplerobot-interface
   :super robot-interface

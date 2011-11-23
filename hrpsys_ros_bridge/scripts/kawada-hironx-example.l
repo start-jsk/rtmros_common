@@ -1,6 +1,6 @@
 (ros::roseus "pickbox")
 (load "package://roseus/euslisp/robot-interface.l")
-(load "package://hrpsys/scripts/kawada-hironx.l")
+(require :kawadahironx "package://hrpsys/scripts/kawada-hironx.l")
 
 (defclass kawadahironx-interface
   :super robot-interface
