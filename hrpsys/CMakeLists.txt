@@ -100,7 +100,7 @@ endif(EXISTS "${webots_PACKAGE_PATH}/build/webots/projects/robots/darwin-op/prot
 add_custom_target(openhrp_robots ALL DEPENDS ${all_robots})
 
 
+rosbuild_add_rostest(test/generate-document.test)
 rosbuild_add_rostest(test/hrp4c.test)
 rosbuild_add_rostest(test/pa10.test)
-rosbuild_add_rostest(test/generate-document.test)
 
