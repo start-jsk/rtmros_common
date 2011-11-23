@@ -1,5 +1,5 @@
-(ros::roseus "pickbox")
-(load "package://roseus/euslisp/robot-interface.l")
+(ros::roseus "hrp4c_pickbox")
+(load "package://hrpsys_ros_bridge/scripts/rtm-ros-robot-interface.l")
 (require :hrp4c "package://hrpsys/scripts/hrp4c.l")
 
 (defclass hrp4c-interface

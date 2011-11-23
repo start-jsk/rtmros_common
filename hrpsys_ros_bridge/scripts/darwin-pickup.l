@@ -1,5 +1,5 @@
-(ros::roseus "darwin-pickup")
-(load "package://roseus/euslisp/robot-interface.l")
+(ros::roseus "darwin_pickup")
+(load "package://hrpsys_ros_bridge/scripts/rtm-ros-robot-interface.l")
 (require :darwin "package://hrpsys/scripts/darwin.l")
 
 (defclass darwin-interface
