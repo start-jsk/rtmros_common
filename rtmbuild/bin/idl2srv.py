@@ -83,6 +83,17 @@ class ServiceVisitor (idlvisitor.AstVisitor):
 ##
 ##
 ##
+    def isCorbaPointer(self, typ, out):
+        if isinstance(typ, idltype.Sequence):
+            return out
+        if isinstance(typ, idltype.Declared):
+            if isinstance(typ.unalias(), idltype.Sequence):
+                return out
+            return self.isCorbaPointer(typ.decl(), out)
+        if isinstance(typ, idlast.Struct):
+            return out
+        return False
+
     def getCppTypeText(self, typ, out=False, full=False):
         if isinstance(typ, idltype.Sequence):
             return ('%s*' if out else '%s') % self.getCppTypeText(typ.seqType(), False, full)
@@ -92,10 +103,8 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             postfix = '*' if out and isinstance(typ.unalias(), idltype.Sequence) else ''
             return self.getCppTypeText(typ.decl(), False, full) + postfix
         if isinstance(typ, idlast.Struct):
-            if full:
-                return idlutil.ccolonName(typ.scopedName())
-            else:
-                return typ.identifier()
+            name = (idlutil.ccolonName(typ.scopedName()) if full else typ.identifier())
+            return name
         if isinstance(typ, idlast.Enum):
             return 'int64_t' # enum is int64 ??
         if isinstance(typ, idlast.Typedef):
@@ -156,9 +165,6 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if isinstance(typ, idlast.Forward):
             return self.getROSTypeText(typ.fullDecl())
 
-        global hoge
-        hoge = typ
-        print typ.__class__
         return 'undefined'
 
     # output .msg file defined in .idl
@@ -166,9 +172,6 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if not (isinstance(typ, idlast.Enum) or isinstance(typ, idlast.Struct) or isinstance(typ, idlast.Interface)):
             return
 
-#        idlfile = typ.file()
-#        idldir = os.path.split(idlfile)[0]
-#        basedir = os.path.split(idldir)[0]
         msgfile = basedir + "/msg/" + typ.identifier() + ".msg"
         if not os.path.exists(basedir):
             return
@@ -183,7 +186,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         fd = open(msgfile, 'w')
         if isinstance(typ, idlast.Enum):
             for val in typ.enumerators():
-                fd.write("int64 %s=%d\n" % (val.identifier(), val.value()))
+                fd.write("%s %s=%d\n" % (self.getROSTypeText(typ), val.identifier(), val.value()))
         elif isinstance(typ, idlast.Struct):
             for mem in typ.members():
                 fd.write(self.getROSTypeText(mem.memberType()) + " " + mem.declarators()[0].identifier() + "\n")
@@ -195,9 +198,6 @@ class ServiceVisitor (idlvisitor.AstVisitor):
 
     # output .srv file defined in .idl
     def outputSrv(self, op):
-#        idlfile = op.file()
-#        idldir = os.path.split(idlfile)[0]
-#        basedir = os.path.split(idldir)[0]
 
         srvfile = basedir + "/srv/" + op.identifier() + ".srv"
         if not os.path.exists(basedir):
@@ -221,23 +221,27 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             fd.write("%s %s\n" % (self.getROSTypeText(arg.paramType()), arg.identifier()))
         fd.close()
 
-    def convertFunctionCode(self):
+    def convertFunctionCode(self, interface):
+        visitor = DependencyVisitor()
+        interface.accept(visitor)
+        #print visitor.allmsg
         code = ''
-        for tn in idltype.declaredTypeMap:
-            typ = idltype.declaredTypeMap[tn].decl() # ??
+#        for tn in idltype.declaredTypeMap:
+#            typ = idltype.declaredTypeMap[tn].decl() # ??
+        for typ in visitor.allmsg:
             if not isinstance(typ, idlast.Struct):
                 continue
 
             code += 'template<> void convert(%s& in, %s::%s& out){\n' % (self.getCppTypeText(typ, full=True), pkgname, self.getCppTypeText(typ))
             for mem in typ.members():
                 var = mem.declarators()[0].identifier()
-                code += '  convert(out.%s, in.%s);\n' % (var, var)
+                code += '  convert(in.%s, out.%s);\n' % (var, var)
             code += '}\n'
 
             code += 'template<> void convert(%s::%s& in, %s& out){\n' % (pkgname, self.getCppTypeText(typ), self.getCppTypeText(typ, full=True))
             for mem in typ.members():
                 var = mem.declarators()[0].identifier()
-                code += '  convert(out.%s, in.%s);\n' % (var, var)
+                code += '  convert(in.%s, out.%s);\n' % (var, var)
             code += '}\n'
 
         return code
@@ -260,7 +264,8 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             if isinstance(ptype.unalias(), idltype.Sequence) or isinstance(ptype.unalias(), idltype.String) or isinstance(ptype.unalias(), idltype.Declared):
                 code += '  %s %s;\n' % (self.getCppTypeText(ptype, out=is_out, full=True), var)
                 if is_out:
-                    res_code += '  convert(%s, res.%s);\n' % (var, var)
+                    #ptr = ('*' if self.isCorbaPointer(ptype, is_out) else '')
+                    res_code += '  convert(%s%s, res.%s);\n' % ('', var, var)
                 else:
                     req_code += '  convert(req.%s, %s);\n' % (var, var)
                 params += [var]
@@ -270,11 +275,10 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             params = reduce(lambda a,b:a+', '+b, params)
 
         code += ('  ROS_INFO("call %s");\n' % op.identifier()) + '\n' + req_code
-        if not op.oneway() and op.returnType().kind() != idltype.tk_void:
-            code += ("""
-  // call service
-  res.operation_return = m_service0->%s(%s);
-\n""" % (op.identifier(), params))
+        if not (op.oneway() or op.returnType().kind() == idltype.tk_void):
+            code += '\n  res.operation_return = '
+        code += '  m_service0->%s(%s);\n' % (op.identifier(), params)
+
         code += res_code
 
         return """bool %s::%s(%s::%s::Request &req, %s::%s::Response &res){\n%s\n  return true;\n};\n\n""" % (ifname, op.identifier(), pkgname, op.identifier(), pkgname, op.identifier(), code)
@@ -329,7 +333,7 @@ RTC::ReturnCode_t %s::onExecute(RTC::UniqueId ec_id) {
   return RTC::RTC_OK;
 }\n\n""" % module_name
 
-        compsrc += convert_functions + self.convertFunctionCode()
+        compsrc += convert_functions + self.convertFunctionCode(interface)
 
         for i in range(len(operations)):
             name = operations[i].identifier()
@@ -367,6 +371,40 @@ RTC::ReturnCode_t %s::onExecute(RTC::UniqueId ec_id) {
         # finialize
         os.system("rm -rf %s" % tmpdir)
         return
+
+# all types depended by a interface
+class DependencyVisitor (idlvisitor.AstVisitor):
+    def checkBasicType(self, node):
+        classes = [idltype.Base, idltype.String, idltype.WString]
+        classes += [idlast.Const, idlast.Enum, idlast.Union]
+        if not any([isinstance(node, cls) for cls in classes]):
+            node.accept(self)
+
+    def visitInterface(self, node):
+        self.allmsg = []
+        if node.mainFile():
+            for n in node.callables():
+                n.accept(self)
+    def visitOperation(self, node):
+        types = [p.paramType() for p in node.parameters()]
+        types += [node.returnType()]
+        for n in types:
+            self.checkBasicType(n)
+
+    def visitStruct(self, node):
+        if not node in self.allmsg:
+            self.allmsg += [node]
+
+    def visitSequenceType(self, node):
+        self.checkBasicType(node.seqType())
+    def visitDeclaredType(self, node):
+        self.checkBasicType(node.decl())
+    def visitTypedef(self, node):
+        self.checkBasicType(node.aliasType())
+    def visitDeclarator(self, node):
+        self.checkBasicType(node.alias())
+    def visitForward(self, node):
+        self.checkBasicType(node.fullDecl())
 
 
 # visitor only prints interface names
