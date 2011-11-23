@@ -480,7 +480,8 @@
 	))
       "DARWIN"))
     (post-process-for-vrml-convert openhrp3-vrml-fname)
-    (unix:system "rm -f mp_*.jpg mp_*.txt DARwIn-OP_Dynamics.zip")
+    ;;(unix:system "rm -f mp_*.jpg mp_*.txt DARwIn-OP_Dynamics.zip")
+    (unix:system "rm -f mp_*.jpg mp_*.txt")
     (in-package "USER")
     t))
 (export '(convert-webots-vrml->openhrp3-vrml-for-darwin))
@@ -618,13 +619,19 @@
      (replace-Accelerometer->AccelerationSensor
       (replace-servo->joint rb-lis))))))
 
+(defun find-vrml-node-from-node-list (lis node-name)
+  (remove-if-not #'(lambda (x)
+		     (cond
+		      ((eq (elt x 0) 'def) (eq (elt x 2) node-name))
+		      (t (eq (elt x 0) node-name))))
+		 lis))
+
 (defun replace-servo->joint (rb-lis)
   (let ((node-fields (mapcar 'car (cdr (assoc 'field (send 'joint :get :vrml-node-spec)))))
 	(jointid -1))
     (labels ((find-servo
 	      (l)
-	      (let ((sv-l
-		     (remove-if-not #'(lambda (x) (and (> (length x) 2) (eq (elt x 2) 'servo))) l)))
+	      (let ((sv-l (find-vrml-node-from-node-list l 'servo)))
 		(when sv-l
 		  (dolist (sv sv-l)
 		    ;; here is only for DARwInOP.proto !! -->
@@ -651,59 +658,64 @@
       (find-servo rb-lis)
       rb-lis)))
 
-(defun replace-Accelerometer->AccelerationSensor (rb-lis)
-  (let ((node-fields (mapcar 'car (cdr (assoc 'field (send 'accelerationsensor :get :vrml-node-spec))))))
+(defun replace-webots-node->openhrp3-node
+  (rb-lis webots-node-name openhrp-node-name
+	  destructive-func)
+  (let ((node-fields (mapcar 'car (cdr (assoc 'field (send openhrp-node-name :get :vrml-node-spec))))))
     (labels ((find-servo
 	      (l)
-	      (let* ((sv
-		      (find-if #'(lambda (x) (and (> (length x) 2) (eq (elt x 2) 'joint))) l))
-		     (sv2 (find-if #'(lambda (x) (eq (elt x 0) 'accelerometer)) (cadr (assoc 'children sv)))))
-		(when sv2
-		  (delete-if #'(lambda (x) (not (memq (car x) node-fields)))
-			     (cdr sv2))
-		  (setf (elt sv2 0) 'def)
-		  (push (list 'sensorid 0) (cdr sv2))
-		  (push 'accelerationsensor (cdr sv2))
-		  (push 'gsensor (cdr sv2))
-		  (find-servo (cadr (assoc 'children sv2)))
-		  ))))
+	      (let* ((sv-l (find-vrml-node-from-node-list l 'joint)))
+		(dolist (sv sv-l)
+		  (let ((sv2-l (find-vrml-node-from-node-list (cadr (assoc 'children sv)) webots-node-name)))
+		    (dolist (sv2 sv2-l)
+		      (when sv2
+			(delete-if #'(lambda (x) (not (memq (car x) node-fields)))
+				   (cdr sv2))
+			(funcall destructive-func sv2)
+			(find-servo (cadr (assoc 'children sv2)))
+			)))))))
       (find-servo rb-lis)
     rb-lis)))
 
+(defun replace-Accelerometer->AccelerationSensor (rb-lis)
+  (replace-webots-node->openhrp3-node
+   rb-lis
+   'accelerometer
+   'accelerationsensor
+   #'(lambda (sv2)
+       (setf (elt sv2 0) 'def)
+       (push (list 'sensorid 0) (cdr sv2))
+       (push 'accelerationsensor (cdr sv2))
+       (push 'gsensor (cdr sv2)))
+   ))
+
 (defun replace-Gyro2->Gyro (rb-lis)
-  (let ((node-fields (mapcar 'car (cdr (assoc 'field (send 'gyro :get :vrml-node-spec))))))
-    (labels ((find-servo
-	      (l)
-	      (let* ((sv
-		      (find-if #'(lambda (x) (and (> (length x) 2) (eq (elt x 2) 'joint))) l))
-		     (sv2 (find-if #'(lambda (x) (eq (elt x 0) 'gyro2)) (cadr (assoc 'children sv)))))
-		(when sv2
-		  (delete-if #'(lambda (x) (not (memq (car x) node-fields)))
-			     (cdr sv2))
-		  (setf (elt sv2 0) 'def)
-		  (push (list 'sensorid 0) (cdr sv2))
-		  (push 'gyro (cdr sv2))
-		  (push 'gyrometer (cdr sv2))
-		  (find-servo (cadr (assoc 'children sv2)))
-		  ))))
-      (find-servo rb-lis)
-    rb-lis)))
+  (replace-webots-node->openhrp3-node
+   rb-lis
+   'gyro2
+   'gyro
+   #'(lambda (sv2)
+       (setf (elt sv2 0) 'def)
+       (push (list 'sensorid 0) (cdr sv2))
+       (push 'gyro (cdr sv2))
+       (push 'gyrometer (cdr sv2)))
+   ))
 
 (defun replace-Led->VisionSensor (rb-lis)
   (let ((node-fields (mapcar 'car (cdr (assoc 'field (send 'visionsensor :get :vrml-node-spec))))))
     (labels ((find-servo
 	      (l)
-	      (let* ((sv
-		      (find-if #'(lambda (x) (and (> (length x) 2) (eq (elt x 2) 'joint))) l))
-		     (sv2 (remove-if-not #'(lambda (x) (and (> (length x) 2) (eq (elt x 2) 'Led))) (cadr (assoc 'children sv)))))
-		(when sv
-		  (when sv2
-		    (dolist (sv3 sv2)
-		      (delete-if #'(lambda (x) (not (memq (car x) node-fields)))
-				 (cdddr sv3))
-		      (setf (elt sv3 2) 'visionsensor)))
-		  (find-servo (cadr (assoc 'children sv))))
-		)))
+	      (let* ((sv-l (find-vrml-node-from-node-list l 'joint)))
+		(dolist (sv sv-l)
+		  (let ((sv2 (remove-if-not #'(lambda (x) (and (> (length x) 2) (eq (elt x 2) 'Led))) (cadr (assoc 'children sv)))))
+		    (when sv
+		      (when sv2
+			(dolist (sv3 sv2)
+			  (delete-if #'(lambda (x) (not (memq (car x) node-fields)))
+				     (cdddr sv3))
+			  (setf (elt sv3 2) 'visionsensor)))
+		      (find-servo (cadr (assoc 'children sv))))
+		    )))))
       (find-servo rb-lis)
     rb-lis)))
 
@@ -711,20 +723,20 @@
   (let ((node-fields (mapcar 'car (cdr (assoc 'field (send 'visionsensor :get :vrml-node-spec))))))
     (labels ((find-servo
 	      (l)
-	      (let* ((sv
-		      (find-if #'(lambda (x) (and (> (length x) 2) (eq (elt x 2) 'joint))) l))
-		     (sv2 (remove-if-not #'(lambda (x) (eq (elt x 0) 'Camera)) (cadr (assoc 'children sv)))))
-		(when sv
-		  (when sv2
-		    (dolist (sv3 sv2)
-		      (delete-if #'(lambda (x) (not (memq (car x) node-fields)))
-				 (cdr sv3))
-		      (setf (elt sv3 0) 'def)
-		      (push (list 'sensorid 0) (cdr sv3))
-		      (push 'visionsensor (cdr sv3))
-		      (push 'camera (cdr sv3))))
-		  (find-servo (cadr (assoc 'children sv))))
-		)))
+	      (let* ((sv-l (find-vrml-node-from-node-list l 'joint)))
+		(dolist (sv sv-l)
+		  (let ((sv2 (remove-if-not #'(lambda (x) (eq (elt x 0) 'Camera)) (cadr (assoc 'children sv)))))
+		    (when sv
+		      (when sv2
+			(dolist (sv3 sv2)
+			  (delete-if #'(lambda (x) (not (memq (car x) node-fields)))
+				     (cdr sv3))
+			  (setf (elt sv3 0) 'def)
+			  (push (list 'sensorid 0) (cdr sv3))
+			  (push 'visionsensor (cdr sv3))
+			  (push 'camera (cdr sv3))))
+		      (find-servo (cadr (assoc 'children sv))))
+		    )))))
       (find-servo rb-lis)
     rb-lis)))
 
