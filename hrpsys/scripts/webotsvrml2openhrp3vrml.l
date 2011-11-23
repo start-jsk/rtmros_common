@@ -480,8 +480,8 @@
 	))
       "DARWIN"))
     (post-process-for-vrml-convert openhrp3-vrml-fname)
-    ;;(unix:system "rm -f mp_*.jpg mp_*.txt DARwIn-OP_Dynamics.zip")
-    (unix:system "rm -f mp_*.jpg mp_*.txt")
+    (unix:system "rm -f mp_*.jpg mp_*.txt DARwIn-OP_Dynamics.zip")
+    ;;(unix:system "rm -f mp_*.jpg mp_*.txt")
     (in-package "USER")
     t))
 (export '(convert-webots-vrml->openhrp3-vrml-for-darwin))
@@ -557,7 +557,7 @@
 (defun darwin-inertia-lists (&optional (force-update nil))
   (if force-update (unix:system "rm -f DARwIn-OP_Dynamics.zip"))
   (unix:system "if [ ! -e DARwIn-OP_Dynamics.zip ]; then wget http://sourceforge.net/projects/darwinop/files/Hardware/Mechanics/Physical%20Information/DARwIn-OP_Dynamics.zip;fi")
-  (unix:system "if [ ! -e mp_*.* ] ;then unzip DARwIn-OP_Dynamics.zip;fi")
+  (unix:system "if [ ! -e mp_ankle_l.jpg ] ;then unzip DARwIn-OP_Dynamics.zip;fi")
   (let ((ff (remove-if-not #'(lambda (x) (and (substringp "mp" x) (substringp "txt" x)))
 			   (directory ".")))
 	(file-names<->webots-segment-name-map
@@ -660,7 +660,7 @@
 
 (defun replace-webots-node->openhrp3-node
   (rb-lis webots-node-name openhrp-node-name
-	  &optional (new-node-name))
+	  &optional (new-node-name) (add-sensor-id t))
   (let ((node-fields (mapcar 'car (cdr (assoc 'field (send openhrp-node-name :get :vrml-node-spec)))))
 	(sensorid 0))
     (labels ((find-servo
@@ -669,14 +669,21 @@
 		(dolist (sv sv-l)
 		  (let ((sv2-l (find-vrml-node-from-node-list (cadr (assoc 'children sv)) webots-node-name)))
 		    (dolist (sv2 sv2-l)
-		      (delete-if #'(lambda (x) (not (memq (car x) node-fields)))
-				 (cdr sv2))
-		      (push (list 'sensorid sensorid) (cdr sv2))
-		      (incf sensorid)
-		      (setf (elt sv2 0) 'def)
-		      (push openhrp-node-name (cdr sv2))
-		      (push (read-from-string (format nil "~A~A" (if new-node-name new-node-name openhrp-node-name) sensorid)) (cdr sv2))
-		      )
+		      ;; update node's fields
+		      (let ((tmp-node (if (eq (elt sv2 0) 'def) (cddr sv2) sv2))) ;; tmp-node -> '(node-name (field1 value1) (field2 value2) ..)
+			(delete-if #'(lambda (x) (not (memq (car x) node-fields)))
+				   (cdr tmp-node))
+			(when add-sensor-id
+			  (push (list 'sensorid sensorid) (cdr tmp-node))
+			  (incf sensorid)))
+		      ;; update node's names
+		      (if (eq (elt sv2 0) 'def)
+			  (setf (elt sv2 2) openhrp-node-name)
+			(progn
+			  (setf (elt sv2 0) 'def)
+			  (push openhrp-node-name (cdr sv2))
+			  (push (read-from-string (format nil "~A~A" (if new-node-name new-node-name openhrp-node-name) sensorid)) (cdr sv2))
+			  )))
 		    (find-servo (cadr (assoc 'children sv)))
 		    )))))
       (find-servo rb-lis)
@@ -699,20 +706,13 @@
    ))
 
 (defun replace-Led->VisionSensor (rb-lis)
-  (let ((node-fields (mapcar 'car (cdr (assoc 'field (send 'visionsensor :get :vrml-node-spec))))))
-    (labels ((find-servo
-	      (l)
-	      (let* ((sv-l (find-vrml-node-from-node-list l 'joint)))
-		(dolist (sv sv-l)
-		  (let ((sv2-l (find-vrml-node-from-node-list (cadr (assoc 'children sv)) 'Led)))
-		    (dolist (sv2 sv2-l)
-		      (delete-if #'(lambda (x) (not (memq (car x) node-fields)))
-				 (cdddr sv2))
-		      (setf (elt sv2 2) 'visionsensor))
-		    (find-servo (cadr (assoc 'children sv)))
-		    )))))
-      (find-servo rb-lis)
-    rb-lis)))
+  (replace-webots-node->openhrp3-node
+   rb-lis
+   'Led
+   'visionsensor
+   nil
+   nil
+   ))
 
 (defun replace-Camera->VisionSensor (rb-lis)
   (replace-webots-node->openhrp3-node
