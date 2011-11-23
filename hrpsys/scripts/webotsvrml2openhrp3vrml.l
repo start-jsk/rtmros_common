@@ -36,20 +36,25 @@
 
 ;; Define vrml node spec from read vrml data
 ;;   'data' must be '(proto aa (field-definition-for-aa) (implementation-for-aa) proto bb (field-definition-for-bb) (implementation-for-bb) ...)
-(defun define-vrml-node-spec-from-read-vrml-data (data)
-  (unless data (return-from define-vrml-node-spec-from-read-vrml-data nil))
-  (when (eq (car data) 'proto)
+(defun define-vrml-node-spec-from-read-vrml-data (data &optional (debug nil))
+  (cond
+   ((null data))
+   ((eq (car data) 'proto)
     (let ((proto-name (cadr data))
 	  (field-defs (cdr (caddr data)))
 	  (impl-defs (cadr (cddr data))))
-      ;; (print (list 'proto proto-name))
-      ;; (print (list 'field field-defs))
-      ;; (print (list 'impl impl-defs))
+      (when debug
+	(print "in define-vrml-node-spec-from-read-vrml-data")
+	(print (list 'proto proto-name))
+	(print (list 'field field-defs))
+	(print (list 'impl impl-defs)))
       (eval `(define-vrml-node-spec ,proto-name
 	       nil
 	       ,@(store-vrml-fields field-defs)))
-      (define-vrml-node-spec-from-read-vrml-data (cddddr data))
-      )))
+      (define-vrml-node-spec-from-read-vrml-data (cddddr data) debug)
+      ))
+   (t (define-vrml-node-spec-from-read-vrml-data (cdr data) debug))
+   ))
 
 (defun store-vrml-fields (field-defs)
   (let ((sret) (ret))
