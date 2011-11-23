@@ -660,20 +660,25 @@
 
 (defun replace-webots-node->openhrp3-node
   (rb-lis webots-node-name openhrp-node-name
-	  destructive-func)
-  (let ((node-fields (mapcar 'car (cdr (assoc 'field (send openhrp-node-name :get :vrml-node-spec))))))
+	  &optional (new-node-name))
+  (let ((node-fields (mapcar 'car (cdr (assoc 'field (send openhrp-node-name :get :vrml-node-spec)))))
+	(sensorid 0))
     (labels ((find-servo
 	      (l)
 	      (let* ((sv-l (find-vrml-node-from-node-list l 'joint)))
 		(dolist (sv sv-l)
 		  (let ((sv2-l (find-vrml-node-from-node-list (cadr (assoc 'children sv)) webots-node-name)))
 		    (dolist (sv2 sv2-l)
-		      (when sv2
-			(delete-if #'(lambda (x) (not (memq (car x) node-fields)))
-				   (cdr sv2))
-			(funcall destructive-func sv2)
-			(find-servo (cadr (assoc 'children sv2)))
-			)))))))
+		      (delete-if #'(lambda (x) (not (memq (car x) node-fields)))
+				 (cdr sv2))
+		      (push (list 'sensorid sensorid) (cdr sv2))
+		      (incf sensorid)
+		      (setf (elt sv2 0) 'def)
+		      (push openhrp-node-name (cdr sv2))
+		      (push (read-from-string (format nil "~A~A" (if new-node-name new-node-name openhrp-node-name) sensorid)) (cdr sv2))
+		      )
+		    (find-servo (cadr (assoc 'children sv)))
+		    )))))
       (find-servo rb-lis)
     rb-lis)))
 
@@ -682,11 +687,7 @@
    rb-lis
    'accelerometer
    'accelerationsensor
-   #'(lambda (sv2)
-       (setf (elt sv2 0) 'def)
-       (push (list 'sensorid 0) (cdr sv2))
-       (push 'accelerationsensor (cdr sv2))
-       (push 'gsensor (cdr sv2)))
+   'gsensor
    ))
 
 (defun replace-Gyro2->Gyro (rb-lis)
@@ -694,11 +695,7 @@
    rb-lis
    'gyro2
    'gyro
-   #'(lambda (sv2)
-       (setf (elt sv2 0) 'def)
-       (push (list 'sensorid 0) (cdr sv2))
-       (push 'gyro (cdr sv2))
-       (push 'gyrometer (cdr sv2)))
+   'gyrometer
    ))
 
 (defun replace-Led->VisionSensor (rb-lis)
@@ -707,38 +704,23 @@
 	      (l)
 	      (let* ((sv-l (find-vrml-node-from-node-list l 'joint)))
 		(dolist (sv sv-l)
-		  (let ((sv2 (remove-if-not #'(lambda (x) (and (> (length x) 2) (eq (elt x 2) 'Led))) (cadr (assoc 'children sv)))))
-		    (when sv
-		      (when sv2
-			(dolist (sv3 sv2)
-			  (delete-if #'(lambda (x) (not (memq (car x) node-fields)))
-				     (cdddr sv3))
-			  (setf (elt sv3 2) 'visionsensor)))
-		      (find-servo (cadr (assoc 'children sv))))
+		  (let ((sv2-l (find-vrml-node-from-node-list (cadr (assoc 'children sv)) 'Led)))
+		    (dolist (sv2 sv2-l)
+		      (delete-if #'(lambda (x) (not (memq (car x) node-fields)))
+				 (cdddr sv2))
+		      (setf (elt sv2 2) 'visionsensor))
+		    (find-servo (cadr (assoc 'children sv)))
 		    )))))
       (find-servo rb-lis)
     rb-lis)))
 
 (defun replace-Camera->VisionSensor (rb-lis)
-  (let ((node-fields (mapcar 'car (cdr (assoc 'field (send 'visionsensor :get :vrml-node-spec))))))
-    (labels ((find-servo
-	      (l)
-	      (let* ((sv-l (find-vrml-node-from-node-list l 'joint)))
-		(dolist (sv sv-l)
-		  (let ((sv2 (remove-if-not #'(lambda (x) (eq (elt x 0) 'Camera)) (cadr (assoc 'children sv)))))
-		    (when sv
-		      (when sv2
-			(dolist (sv3 sv2)
-			  (delete-if #'(lambda (x) (not (memq (car x) node-fields)))
-				     (cdr sv3))
-			  (setf (elt sv3 0) 'def)
-			  (push (list 'sensorid 0) (cdr sv3))
-			  (push 'visionsensor (cdr sv3))
-			  (push 'camera (cdr sv3))))
-		      (find-servo (cadr (assoc 'children sv))))
-		    )))))
-      (find-servo rb-lis)
-    rb-lis)))
+  (replace-webots-node->openhrp3-node
+   rb-lis
+   'camera
+   'visionsensor
+   'camera
+   ))
 
 (defun gather-all-objecet (rb-lis sym)
   (let ((ret))
