@@ -165,8 +165,8 @@ class TestGrxUIProject(unittest.TestCase):
         # wait scripts
         for p in self.proc:
             if p and p.poll() == None:
-            p.terminate()
-            p.kill()
+                p.terminate()
+                p.kill()
 
 
 if __name__ == '__main__':
