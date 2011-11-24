@@ -26,11 +26,24 @@
   (let ((fixed-vrml-fname (format nil "/tmp/~A.readvrmltmp" (pathname-name vrml-fname))) (ret) (str))
     (unix:system (format nil "cp ~A ~A" vrml-fname fixed-vrml-fname))
     (sed-vrml-file-using-s-expression fixed-vrml-fname)
-    (with-open-file
-     (f fixed-vrml-fname :direction :input)
-     (while (setq str (read f nil nil)) (push str ret)))
-    (unix:system (format nil "rm -f ~A" fixed-vrml-fname))
-    (reverse ret)))
+    (with-replace-read-macros
+     (with-open-file
+      (f fixed-vrml-fname :direction :input)
+      (while (setq str (read f nil nil)) (push str ret)))
+     (unix:system (format nil "rm -f ~A" fixed-vrml-fname))
+     (reverse ret))))
+
+(defmacro with-replace-read-macros
+  (&rest forms)
+  (let ((tmp-readtable (gensym)))
+    `(let ((,tmp-readtable (copy-readtable)))
+       ;; cannot use ( and ) ??
+       ;;(set-macro-character #\{ #'(lambda (strm char) '|(|) nil ,tmp-readtable)
+       ;;(set-macro-character #\} #'(lambda (strm char) '|)|) nil ,tmp-readtable)
+       (set-macro-character #\, #'(lambda (strm char) '|?|) nil ,tmp-readtable)
+       (let ((*readtable* ,tmp-readtable))
+	 ,@forms
+	 ))))
 
 ;; Define vrml node spec from read vrml data
 ;;   'data' must be '(proto aa (field-definition-for-aa) (implementation-for-aa) proto bb (field-definition-for-bb) (implementation-for-bb) ...)
@@ -334,7 +347,6 @@
 (defun sed-vrml-file-using-s-expression (fname)
   (unix:system (format nil "sed -i -e s/\{/\\(/g ~A" fname))
   (unix:system (format nil "sed -i -e s/\}/\\)/g ~A" fname))
-  (unix:system (format nil "sed -i -e s/\,/\?/g ~A" fname))
   ;; remove lines with #
   (unix:system (format nil "grep -v \"\#\" ~A > /tmp/tmp.wrl && cp /tmp/tmp.wrl ~A && rm -f /tmp/tmp.wrl" fname fname))
   )
@@ -343,7 +355,6 @@
 (defun sed-s-expression-file-using-vrml (fname)
   (unix:system (format nil "sed -i -e s/\\(/\{/g ~A" fname))
   (unix:system (format nil "sed -i -e s/\\)/\}/g ~A" fname))
-  (unix:system (format nil "sed -i -e s/\?/\,/g ~A" fname))
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -399,6 +410,7 @@
 	    (cond
 	     ((stringp l) (format nil "\"~A\"" l))
 	     ((eq l 'use) "USE")
+	     ((eq l '|?|) ",")
 	     (t l))))
     (dolist (ll lis)
       (format fstrm "~A~A " (gen-indent-string-from-size indent-size)
@@ -622,9 +634,9 @@
      (list 'name robot-name)
      (list 'humanoidbody (append (list (list 'aref)) rb-lis))
      (list 'joints
-	   (apply #'append (list 'aref) (mapcar #'(lambda (x) (list 'USE (read-from-string (format nil "~A\?" x)))) (gather-all-objecet rb-lis 'joint))))
+	   (apply #'append (list 'aref) (mapcar #'(lambda (x) (list 'USE x '|?|)) (gather-all-objecet rb-lis 'joint))))
      (list 'segments
-	   (apply #'append (list 'aref) (mapcar #'(lambda (x) (list 'USE (read-from-string (format nil "~A\?" x)))) (gather-all-objecet rb-lis 'segment))))
+	   (apply #'append (list 'aref) (mapcar #'(lambda (x) (list 'USE x '|?|)) (gather-all-objecet rb-lis 'segment))))
      )
     )
    )
