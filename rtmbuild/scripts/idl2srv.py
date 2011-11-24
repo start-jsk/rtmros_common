@@ -11,24 +11,24 @@ import os, os.path, sys, string, re
 #  how to manipulate namespace -> under score concat
 #  unit conversion, mm<->m -> OK??
 
-TypeNameMap = {} # for ROS msg/srv
-TypeNameMap[idltype.tk_boolean] = 'bool'
-TypeNameMap[idltype.tk_char] = 'int8'
-TypeNameMap[idltype.tk_octet] = 'uint8'
-TypeNameMap[idltype.tk_wchar] = 'int16'
-TypeNameMap[idltype.tk_short] = 'int16'
-TypeNameMap[idltype.tk_ushort] = 'uint16'
-TypeNameMap[idltype.tk_long] = 'int32'
-TypeNameMap[idltype.tk_ulong] = 'uint32'
-TypeNameMap[idltype.tk_longlong] = 'int64'
-TypeNameMap[idltype.tk_ulonglong] = 'uint64'
-TypeNameMap[idltype.tk_float] = 'float32'
-TypeNameMap[idltype.tk_double] = 'float64'
-TypeNameMap[idltype.tk_string] = 'string'
-TypeNameMap[idltype.tk_wstring] = 'string'
-TypeNameMap[idltype.tk_any] = 'string' # ??
-TypeNameMap[idltype.tk_TypeCode] = 'uint64' # ??
-TypeNameMap[idltype.tk_enum] = 'uint64'
+TypeNameMap = { # for ROS msg/srv
+    idltype.tk_boolean: 'bool',
+    idltype.tk_char: 'int8',
+    idltype.tk_octet: 'uint8',
+    idltype.tk_wchar: 'int16',
+    idltype.tk_short: 'int16',
+    idltype.tk_ushort: 'uint16',
+    idltype.tk_long: 'int32',
+    idltype.tk_ulong: 'uint32',
+    idltype.tk_longlong: 'int64',
+    idltype.tk_ulonglong: 'uint64',
+    idltype.tk_float: 'float32',
+    idltype.tk_double: 'float64',
+    idltype.tk_string: 'string',
+    idltype.tk_wstring: 'string',
+    idltype.tk_any: 'string', # ??
+    idltype.tk_TypeCode: 'uint64', # ??
+    idltype.tk_enum: 'uint64' }
 
 # convert functions for IDL/ROS
 convert_functions = """\n
@@ -51,7 +51,13 @@ template<class S,class T>
 void convert(std::vector<T>& v, S& s){
   int size = v.size();
   s = S(size, size, S::allocbuf(size), 1);
-  for(int i=0; i<=size; i++) convert(v[i],s[i]);}
+  for(int i=0; i<size; i++) convert(v[i],s[i]);}
+template<class S,class T,std::size_t n>
+void convert(S& s, boost::array<T,n>& v){
+  for(std::size_t i=0; i<n; i++) convert(s[i],v[i]);}
+template<class S,class T,std::size_t n>
+void convert(boost::array<T,n>& v, S& s){
+  for(std::size_t i=0; i<n; i++) convert(v[i],s[i]);}
 """
 
 # visitor for generate msg/srv/cpp/h for bridge compornents
