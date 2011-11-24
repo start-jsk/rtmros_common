@@ -8,19 +8,21 @@
 
   <sphinxdoc><![CDATA[
 
-.. code-block:: bash
-
-  roslaunch hrpsys samplerobot.launch
-  rosrun hrpsys hrpsyspy `rospack find hrpsys`/scripts/hrpsys.py `rospack find hrpsys`/scripts/SampleRobot_inHouse.xml
-  rosrun hrpsys SampleRobot_walk.sh
-
 This launch file shows an example of create project file for the robot
 
-1. `roslaunch hrpsys samplerobot.launch` starts SampleRobot_inHouse.xml project file, this project file invokes `openhrp-controller-bridge.sh` that reads project file and create ControllerBridge RTC named SampleRobot(Robot)
+`roslaunch hrpsys samplerobot.launch` starts SampleRobot_inHouse.xml project file, this project file invokes `openhrp-controller-bridge.sh` that reads project file and create openhrp3 simulator and rtc ontroller bridge RTC named `SampleRobot(Robot)`
 
-2. `rosrun hrpsys hrpsyspy hrpsys.py <project xml file>` starts SequencePlayer(seq) and StateHolder(sh) , and serialize theses components includes the bridge component
+.. code-block:: bash
 
-3. `rosrun hrpsys SampleRobot_walk.sh` read walking pattern data and send to `seq` component
+  rosrun hrpsys hrpsyspy `rospack find hrpsys`/scripts/hrpsys.py `rospack find hrpsys`/scripts/SampleRobot_inHouse.xml
+
+Then type `rosrun hrpsys hrpsyspy hrpsys.py <project xml file>` to start SequencePlayer(seq) and StateHolder(sh) , and serialize theses components includes the bridge component
+
+.. code-block:: bash
+
+  rosrun hrpsys SampleRobot_walk.sh
+
+Finally, `rosrun hrpsys SampleRobot_walk.sh` read walking pattern data and send to `seq` component.
 
 .. image:: build/images/SampleRobot.gif
   :width: 600
