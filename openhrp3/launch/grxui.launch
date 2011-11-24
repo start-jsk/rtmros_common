@@ -1,3 +1,0 @@
-<launch>
-  <node pkg="openhrp3" name="grxui" type="grxui.sh" />
-</launch>
