@@ -21,6 +21,7 @@ latest_uri=https://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common
 latest=$WORKSPACE/rtmros_common-latest
 target=$HOME/jobs/agentsystem/workspace/rtm-ros-robotics-$BUILD_NUMBER/rtmros_common
 
+## rtmros_common
 rm -fr rtmros_common-latest ; svn co $latest_uri rtmros_common-latest;
 
 latest_revision=`python -c "import pysvn; print pysvn.Client().info('$latest').commit_revision.number"`
@@ -46,4 +47,38 @@ if [ `svn diff --diff-cmd /usr/bin/diff -x "--normal " $latest_uri https://rtm-r
     svn diff $latest_uri https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common
 fi
 
+##
+## update agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall
+##
+latest_revision=`python -c "import pysvn; print pysvn.Client().info('$latest').commit_revision.number"`
+
+target_ros_install_dir=$HOME/jobs/agentsystem/workspace/rtm-ros-robotics-$BUILD_NUMBER
+latest_ros_install_dir=$WORKSPACE/agentsystem_ros_tutorials
+#
+# get latest .rosinstall
+rm -fr ${latest_ros_install_dir}
+svn co -N https://rtm-ros-robotics.googlecode.com/svn/tags/latest/agentsystem_ros_tutorials/
+#
+# copy backup
+cp ${target_ros_install_dir}/.rosinstall  ${target_ros_install_dir}/.rosinstall.bak
+# extract other https://code.ros.org/trac/ros/ticket/3735
+sed -n '/^\(- other:\)/p' ${target_ros_install_dir}/.rosinstall > ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.other
+sed -i 's/^\(- other:\)/#\1/g' ${target_ros_install_dir}/.rosinstall
+# generate versioned rosinstall
+/usr/local/bin/rosinstall ${target_ros_install_dir} --generate-versioned-rosinstall=${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
+# remove home directory
+sed -i "s#$target_ros_install_dir##g" ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
+# set rtm-ros-robotics from trunk to latest
+sed -i 's#https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common#https://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common#g' ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
+sed -e "/rtm-ros-robotics/{
+N
+s#\(https://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common',\n    version: -r\)[0-9]*#\1${latest_reversion}#
+}
+" ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
+# conmbine other and vcs .rosinstall
+cat ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.other ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs > ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall
+# restore
+mv ${target_ros_install_dir}/.rosinstall.bak  ${target_ros_install_dir}/.rosinstall
+# commit
+svn commit --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m "update versioned rosinstall file for latest tag" ${latest_ros_install_dir}
 
