@@ -5,4 +5,27 @@
   <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
   <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
   <node name="grxui" pkg="openhrp3" type="grxui.sh" args="$(arg MODEL_FILE)" />
+
+  <sphinxdoc><![CDATA[
+.. code-block: bash
+  roslaunch hrpsys samplerobot.launch
+  rosrun hrpsys hrpsyspy `rospack find hrpsys`/scripts/hrpsys.py `rospack find hrpsys`/scripts/SampleRobot_inHouse.xml
+  rosrun hrpsys SampleRobot_walk.sh
+
+This launch file shows an example of create project file for the robot
+1) `roslaunch hrpsys samplerobot.launch` starts SampleRobot_inHouse.xml project file,
+this project file invokes `openhrp-controller-bridge.sh` that reads project file and create ControllerBridge RTC named SampleRobot(Robot)
+2) `rosrun hrpsys hrpsyspy hrpsys.py <project xml file>` starts SequencePlayer(seq) and StateHolder(sh) , and serialize theses components includes the bridge component
+3) `rosrun hrpsys SampleRobot_walk.sh` read walking pattern data and send to `seq` component
+
+.. image:: build/images/SampleRobot.gif
+  :width: 600
+
+  ]]></sphinxdoc>
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
+   test-name="SampleRobot"
+   args="--start-simulation --max-time=60
+	 --target-directory=$(find hrpsys)/build/images
+	 --script='rosrun hrpsys hrpsyspy $(find hrpsys)/scripts/hrpsys.py $(find hrpsys)/scripts/SampleRobot_inHouse.xml; rosrun hrpsys SampleRobot_walk.sh'"
+   />
 </launch>

@@ -11,7 +11,7 @@
   roslaunch hrpsys pa10.launch
   rosrun hrpsys hrpsyspy `rospack find hrpsys`/share/hrpsys/samples/PA10/PA10.py
 
-This scripts starts PA10.xml hrpsys-base sample project file, the robot picks up the yellow box from the ground by selecting StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
+This scripts starts PA10.xml hrpsys-base sample project file, the robot picks up the green box from the ground by selecting StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
 
 .. image:: build/images/PA10.gif
   :width: 600

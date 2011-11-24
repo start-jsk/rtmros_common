@@ -11,7 +11,7 @@
   roslaunch hrpsys hrp4c.launch
   rosrun hrpsys hrpsyspy `rospack find hrpsys`/share/hrpsys/samples/HRP-4C/HRP4C.py
 
-This scripts starts HRP-4C.xml hrpsys-base sample project file, the robot picks up the yellow box from the ground by selecting StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
+This scripts starts HRP-4C.xml hrpsys-base sample project file, the robot walks after selecting StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
 
 .. image:: build/images/HRP4C.gif
   :width: 600
