@@ -677,9 +677,13 @@
 			    (list 'jointType "rotate"))
 			  (cdddr sv))
 		    (push (append (list 'jointaxis)
-				  (if (and (assoc 'rotation sv) (/= jointid -1))
-				      (mapcar #'abs (subseq (assoc 'rotation sv) 1 4))
-				    (list 1 0 0))) (cdddr sv))
+				  (cond
+				   ((and (assoc 'rotation sv) (/= jointid -1))
+				    (mapcar #'abs (subseq (assoc 'rotation sv) 1 4)))
+				   ;; here is only for DARwInOP.proto !! -->
+				   ((memq (elt sv 1) '(dpelvyl dpelvyr)) (list 0 1 0))
+				   ;; <-- here is only for DARwInOP.proto !!
+				   (t (list 1 0 0)))) (cdddr sv))
 		    (push (list 'jointid jointid) (cdddr sv))
 		    (incf jointid)
 		    (setf (elt sv 2) 'joint)
