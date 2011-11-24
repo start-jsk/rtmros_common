@@ -524,6 +524,7 @@
 ;;      -> Enclose Webot's Shape nodes with Segment in (insert-segment) function
 ;;   3. Servo (Webots) -> Joint (OpenHRP3)
 ;;      -> Rename Servo -> Joint and define jointType, jointAxis, and jointId in (convert-servo->joint) function
+;;         Joint axis definition ;; webots -> (almost) all joints asymmetorical ;; OpenHRP3 and euslisp -> pitch is ssymnetrical
 ;;   4. Difference in PROTO
 ;;      -> Convert Accelerometer -> Accelerationsenso
 ;;         Convert Gyro2 -> Gyro
@@ -658,18 +659,13 @@
 
 (defun replace-servo->joint (rb-lis)
   (let ((node-fields (mapcar 'car (cdr (assoc 'field (send 'joint :get :vrml-node-spec)))))
+	(default-roation-value (caddr (cadr (assoc 'field (get 'servo :vrml-node-spec)))))
 	(jointid -1))
     (labels ((find-servo
 	      (l)
 	      (let ((sv-l (find-vrml-node-from-node-list l 'servo)))
 		(when sv-l
 		  (dolist (sv sv-l)
-		    ;; here is only for DARwInOP.proto !! -->
-		    ;; origin of elbow joints in Webots model are incorrect??
-		    (if (memq (elt sv 1) '(darmlowerl darmlowerr))
-			(delete-if #'(lambda (x) (eq (car x) 'rotation))
-				   (cdddr sv)))
-		    ;; <-- here is only for DARwInOP.proto !!
 		    (delete-if #'(lambda (x) (not (memq (car x) node-fields)))
 			       (cdddr sv))
 		    (push (if (= jointid -1)
@@ -679,11 +675,11 @@
 		    (push (append (list 'jointaxis)
 				  (cond
 				   ((and (assoc 'rotation sv) (/= jointid -1))
-				    (mapcar #'abs (subseq (assoc 'rotation sv) 1 4)))
-				   ;; here is only for DARwInOP.proto !! -->
-				   ((memq (elt sv 1) '(dpelvyl dpelvyr)) (list 0 1 0))
-				   ;; <-- here is only for DARwInOP.proto !!
-				   (t (list 1 0 0)))) (cdddr sv))
+				    (mapcar #'abs (subseq (assoc 'rotation sv) 1 4)) ;; OpenHRP3, eus
+				    ;;(subseq (assoc 'rotation sv) 1 4) ;; default
+				    )
+				   (t (subseq default-roation-value 0 3))))
+			  (cdddr sv))
 		    (push (list 'jointid jointid) (cdddr sv))
 		    (incf jointid)
 		    (setf (elt sv 2) 'joint)
