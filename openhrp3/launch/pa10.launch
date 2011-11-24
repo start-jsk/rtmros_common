@@ -13,7 +13,7 @@
 This scripts starts PA10Sample.xml OpenHRP3 sample project file, the robot picks up the yellow box from the ground by selecting StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
 
 .. image:: build/images/PA10Sample.gif
-  :width: 800
+  :width: 600
 
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
