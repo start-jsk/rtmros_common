@@ -7,9 +7,6 @@
   <node name="grxui" pkg="openhrp3" type="grxui.sh" args="$(arg MODEL_FILE)" />
 
   <sphinxdoc><![CDATA[
-.. code-block: bash
-  roslaunch openhrp3 falling-box.launch
-
 This scripts starts FallingBoxes.xml project file, select StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
 
 .. image:: build/images/FallingBoxes.gif
