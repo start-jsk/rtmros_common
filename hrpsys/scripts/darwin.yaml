@@ -2,21 +2,9 @@
 ## - collada_joint_name : euslisp_joint_name (start with :)
 ##
 
-rarm:
-  - DSHOULDERR : rarm-shoulder-p
-  - DARMUPPERR : rarm-shoulder-r
-  - DARMLOWERR : rarm-elbow-p
-larm:
-  - DSHOULDERL : larm-shoulder-p
-  - DARMUPPERL : larm-shoulder-r
-  - DARMLOWERL : larm-elbow-p
-rleg:
-  - DPELVYR    : rleg-crotch-y
-  - DPELVR     : rleg-crotch-r
-  - DLEGUPPERR : rleg-crotch-p
-  - DLEGLOWERR : rleg-knee-p
-  - DANKLER    : rleg-ankle-p
-  - DFOOTR     : rleg-ankle-r
+head:
+  - DNECK      : head-neck-y
+  - DHEAD      : head-neck-p
 lleg:
   - DPELVYL    : lleg-crotch-y
   - DPELVL     : lleg-crotch-r
@@ -24,20 +12,32 @@ lleg:
   - DLEGLOWERL : lleg-knee-p
   - DANKLEL    : lleg-ankle-p
   - DFOOTL     : lleg-ankle-r
-head:
-  - DNECK      : head-neck-y
-  - DHEAD      : head-neck-p
+rleg:
+  - DPELVYR    : rleg-crotch-y
+  - DPELVR     : rleg-crotch-r
+  - DLEGUPPERR : rleg-crotch-p
+  - DLEGLOWERR : rleg-knee-p
+  - DANKLER    : rleg-ankle-p
+  - DFOOTR     : rleg-ankle-r
+larm:
+  - DSHOULDERL : larm-shoulder-p
+  - DARMUPPERL : larm-shoulder-r
+  - DARMLOWERL : larm-elbow-p
+rarm:
+  - DSHOULDERR : rarm-shoulder-p
+  - DARMUPPERR : rarm-shoulder-r
+  - DARMLOWERR : rarm-elbow-p
 
 ##
 ## reset-pose
 ##
 
 angle-vector:
-  reset-pose : [30.0, -20.0, -60.0,
+  reset-pose : [0.0,   20.0,
+                0.0,    0.0, -10.0,  20.0, -10.0, 0.0,
+                0.0,    0.0, -10.0,  20.0, -10.0, 0.0,
                 30.0,  20.0, -60.0,
-                0.0,    0.0, -10.0,  20.0, -10.0, 0.0,
-                0.0,    0.0, -10.0,  20.0, -10.0, 0.0,
-  	        0.0,   20.0]
+                30.0, -20.0, -60.0]
 
 ##
 ## end-coords
