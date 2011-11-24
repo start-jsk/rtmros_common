@@ -18,5 +18,9 @@ This scripts starts PA10.xml hrpsys-base sample project file, the robot picks up
 
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
-   test-name="PA10" args="--start-simulation --max-time=60" cwd="node" />
+   test-name="PA10"
+   args="--start-simulation --max-time=60
+	 --target-directory=$(find hrpsys)/build/images
+	 --script='rosrun hrpsys hrpsyspy $(find hrpsys)/share/hrpsys/samples/PA10/PA10.py'"
+   />
 </launch>
