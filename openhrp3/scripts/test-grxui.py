@@ -21,7 +21,7 @@ class TestGrxUIProject(unittest.TestCase):
                           help='wait sec until exit from grxui')
         parser.add_option('--target-directory',action="store",type='string',dest='target_directory',default='../build/images/',
                           help='directory to write results')
-        parser.add_option('--script',action="store",type='string',dest='script',default=None,
+        parser.add_option('--script',action="store",type='string',dest='scripts',default=None,
                           help='sample script to execute during test')
         parser.add_option('--no-start-simulation',action="store_false",dest='simulation_start', default=False);
         parser.add_option('--start-simulation',action="store_true",dest='simulation_start');
@@ -35,7 +35,7 @@ class TestGrxUIProject(unittest.TestCase):
         self.simulation_start = options.simulation_start
         self.target_directory = options.target_directory
         self.max_time = options.max_time
-        self.script = options.script
+        self.scripts = options.scripts
         self.capture_window = options.capture_window
 
     def xdotool(self,name,action):
@@ -86,19 +86,27 @@ class TestGrxUIProject(unittest.TestCase):
 	key --clearmodifiers alt+g \
 	key --clearmodifiers s")
 
+    def execute_scripts(self):
+        scripts = shlex.shlex(self.scripts)
+        whitespace = scripts.whitespace
+        scripts.whitespace = ';'
+        scripts.whitespace_split = True
+        self.proc = []
+        for script in scripts:
+            args = shlex.split(script)
+            self.proc.append(subprocess.Popen(args))
+        print "proc->",self.proc
+
     def wait_times_is_up(self):
         i = 0
         if not os.path.isdir(self.target_directory) :
             os.mkdir(self.target_directory)
         subprocess.call('rm -f %s/%s*.png'%(self.target_directory,self.name),shell=True)
         self.xdotool(self.capture_window, "windowactivate --sync")
-        if self.script:
-            args = shlex.split(self.script)
-            print "execute script",self.script
-            self.proc = subprocess.Popen(args)
+        if self.scripts: self.execute_scripts()
         while (not self.check_window("Time is up")) and (i < self.max_time) :
             print "wait for \"Time is up\" (%d/%d) ..."%(i, self.max_time)
-            for camera_window in ["VISION_SENSOR1"]:
+            for camera_window in ["VISION_SENSOR1","VISION_SENSOR2"]:
                 if self.check_window(camera_window, visible=True):
                     if self.simulation_start :
                         self.move_window(camera_window,679,509)
@@ -107,10 +115,11 @@ class TestGrxUIProject(unittest.TestCase):
             filename="%s-%03d.png"%(self.name, i)
             print "write to ",filename
             subprocess.call('import -frame -screen -window %s %s/%s'%(self.capture_window, self.target_directory, filename), shell=True)
-            if self.proc and self.proc.poll() != None:
-                print repr(self.proc.communicate()[0])
-                print "execute script",self.script
-                self.proc = subprocess.Popen(args)
+            if self.proc and all(map(lambda x: x.poll()!=None, self.proc)) :
+                for p in self.proc:
+                    print "proc message",repr(p.communicate()[0])
+                print "execute script",self.scripts
+                self.execute_scripts()
             i+=1
         print "wait for \"Time is up\" ... done"
         self.unmap_window("Time is up")
