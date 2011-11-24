@@ -140,10 +140,11 @@ class TestGrxUIProject(unittest.TestCase):
         i = 0
         subprocess.call("pkill omniNames", shell=True)
         # wait scripts
-        if self.proc: self.proc.terminate()
-        while self.proc and self.proc.poll() == None and i < 10:
-            time.sleep(1)
-            i += 1
+        for p in self.proc:
+            if p: p.terminate()
+            while p and p.poll() == None and i < 10:
+                time.sleep(1)
+                i += 1
 
     def test_grxui_simulation(self):
         import check_online_viewer
@@ -162,9 +163,10 @@ class TestGrxUIProject(unittest.TestCase):
     def __del__(self):
         subprocess.call("pkill omniNames", shell=True)
         # wait scripts
-        if self.proc and self.proc.poll() == None:
-            self.proc.terminate()
-            self.proc.kill()
+        for p in self.proc:
+            if p and p.poll() == None:
+            p.terminate()
+            p.kill()
 
 
 if __name__ == '__main__':
