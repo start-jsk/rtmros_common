@@ -1,0 +1,21 @@
+<launch>
+  <env name="LANG" value="C" />
+  <arg name="MODEL_FILE" value="$(find openhrp3)/share/OpenHRP-3.1/sample/project/FallingBoxes.xml" />
+
+  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
+  <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
+  <node name="grxui" pkg="openhrp3" type="grxui.sh" args="$(arg MODEL_FILE)" />
+
+  <sphinxdoc><![CDATA[
+.. code-block: bash
+  roslaunch openhrp3 falling-box.launch
+
+This scripts starts FallingBoxes.xml project file, select StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
+
+.. image:: build/images/FallingBoxes.gif
+  :width: 800
+
+  ]]></sphinxdoc>
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="180"
+   test-name="FallingBoxes" args="--max-time=30" cwd="node" />
+</launch>
