@@ -4,7 +4,7 @@ trap 'exit 1' ERR
 
 UPSTREAM=$HOME/jobs/agentsystem
 BUILD_NUMBER=`grep '^  <number' $UPSTREAM/lastSuccessful/build.xml | sed 's/[^0-9]//g'`
-. $UPSTREAM/workspace/rtm-ros-robotics-$BUILD_NUMBER/rtm-ros-robotics/setup.sh
+. $UPSTREAM/workspace/rtm-ros-robotics-$BUILD_NUMBER/setup.sh
 
 # hrpsys
 hrpsys_revision=`python -c "import pysvn; print pysvn.Client().info('\`rospack find hrpsys\`/build/hrpsys-base').revision.number"`
