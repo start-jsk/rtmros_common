@@ -9,12 +9,12 @@ find $WORKSPACE -maxdepth 1 -name "rtm-ros-robotics-*" -a ! -name "rtm-ros-robot
 # rosinstall
 rosinstall --continue-on-error $WORKSPACE/rtm-ros-robotics-$BUILD_NUMBER /opt/ros/electric http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall || rosinstall $WORKSPACE/rtm-ros-robotics-$BUILD_NUMBER
 # copy jenkins source
-rm -fr rtm-ros-robotics-$BUILD_NUMBER/rtmros_common/
-cp -r rtm-ros-robotics/rtmros_common rtm-ros-robotics-$BUILD_NUMBER/rtmros_common
+rm -fr rtm-ros-robotics-$BUILD_NUMBER/rtm-ros-robotics/rtmros_common/
+cp -r rtm-ros-robotics/rtm-ros-robotics/rtmros_common rtm-ros-robotics-$BUILD_NUMBER/rtm-ros-robotics/rtmros_common
 # set ROS_HOME under workspace so that we can check from web interface
-echo "export ROS_HOME=$WORKSPACE/.ros" >> rtm-ros-robotics-$BUILD_NUMBER/setup.sh
+echo "export ROS_HOME=$WORKSPACE/.ros" >> rtm-ros-robotics-$BUILD_NUMBER/rtm-ros-robotics/setup.sh
 # source
-. rtm-ros-robotics-$BUILD_NUMBER/setup.sh
+. rtm-ros-robotics-$BUILD_NUMBER/rtm-ros-robotics/setup.sh
 rospack profile
 # set environment
 export ROS_PARALLEL_JOBS=-j4

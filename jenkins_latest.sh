@@ -4,7 +4,7 @@ trap 'exit 1' ERR
 
 UPSTREAM=$HOME/jobs/agentsystem
 BUILD_NUMBER=`grep '^  <number' $UPSTREAM/lastSuccessful/build.xml | sed 's/[^0-9]//g'`
-. $UPSTREAM/workspace/rtm-ros-robotics-$BUILD_NUMBER/setup.sh
+. $UPSTREAM/workspace/rtm-ros-robotics-$BUILD_NUMBER/rtm-ros-robotics/setup.sh
 
 # hrpsys
 hrpsys_revision=`python -c "import pysvn; print pysvn.Client().info('\`rospack find hrpsys\`/build/hrpsys-base').revision.number"`
@@ -19,7 +19,7 @@ echo ";; openrhp3 revision : $openhrp3_revision"
 # download and merge
 latest_uri=https://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common
 latest=$WORKSPACE/rtmros_common-latest
-target=$HOME/jobs/agentsystem/workspace/rtm-ros-robotics-$BUILD_NUMBER/rtmros_common
+target=$HOME/jobs/agentsystem/workspace/rtm-ros-robotics-$BUILD_NUMBER/rtm-ros-robotics/rtmros_common
 
 ## rtmros_common
 rm -fr rtmros_common-latest ; svn co $latest_uri rtmros_common-latest;
@@ -74,7 +74,7 @@ sed -e "/rtm-ros-robotics/{
 N
 s#\(https://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common',\n    version: -r\)[0-9]*#\1${latest_revision}#
 }
-" ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs.tmp
+" ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs > ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs.tmp
 mv ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs.tmp ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
 # conmbine other and vcs .rosinstall
 cat ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.other ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs > ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall
