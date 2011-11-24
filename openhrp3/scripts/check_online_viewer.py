@@ -13,9 +13,13 @@ from openhrp3 import OnlineViewer_idl
 rootnc = None
 def initCORBA(argv):
     global rootnc
-    orb = CORBA.ORB_init(argv)
-    nameserver = orb.string_to_object("corbaloc::localhost/NameService")
-    rootnc = nameserver._narrow(CosNaming.NamingContext)
+    while rootnc == none:
+        try:
+            orb = CORBA.ORB_init(argv)
+            nameserver = orb.string_to_object("corbaloc::localhost/NameService")
+            rootnc = nameserver._narrow(CosNaming.NamingContext)
+        except:
+            time.sleep(1)
     return None
 
 def findObject(name, kind):
