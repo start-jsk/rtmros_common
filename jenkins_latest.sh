@@ -65,16 +65,17 @@ cp ${target_ros_install_dir}/.rosinstall  ${target_ros_install_dir}/.rosinstall.
 sed -n '/^\(- other:\)/p' ${target_ros_install_dir}/.rosinstall > ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.other
 sed -i 's/^\(- other:\)/#\1/g' ${target_ros_install_dir}/.rosinstall
 # generate versioned rosinstall
-/usr/local/bin/rosinstall ${target_ros_install_dir} --generate-versioned-rosinstall=${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
+/usr/local/bin/rosinstall ${target_ros_install_dir} --generate-versioned-rosinstall=${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs || true
 # remove home directory
-sed -i "s#$target_ros_install_dir##g" ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
+sed -i "s#${target_ros_install_dir}/##g" ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
 # set rtm-ros-robotics from trunk to latest
 sed -i 's#https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common#https://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common#g' ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
 sed -e "/rtm-ros-robotics/{
 N
 s#\(https://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common',\n    version: -r\)[0-9]*#\1${latest_reversion}#
 }
-" ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
+" ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs.tmp
+mv ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs.tmp ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
 # conmbine other and vcs .rosinstall
 cat ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.other ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs > ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall
 # restore
