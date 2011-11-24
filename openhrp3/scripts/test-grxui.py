@@ -10,7 +10,7 @@ from optparse import OptionParser
 ##
 
 class TestGrxUIProject(unittest.TestCase):
-    script_procs = None;
+    script_procs = [];
     init_proc = None
     name = ""
 
@@ -95,11 +95,11 @@ class TestGrxUIProject(unittest.TestCase):
         whitespace = scripts.whitespace
         scripts.whitespace = ';'
         scripts.whitespace_split = True
-        self.script_proc = []
+        self.script_procs = []
         for script in scripts:
             args = shlex.split(script)
-            self.script_proc.append(subprocess.Popen(args))
-        print "proc->",self.script_proc
+            self.script_procs.append(subprocess.Popen(args))
+        print "proc->",self.script_procs
 
     def wait_times_is_up(self):
         i = 0
@@ -119,8 +119,8 @@ class TestGrxUIProject(unittest.TestCase):
             filename="%s-%03d.png"%(self.name, i)
             print "write to ",filename
             subprocess.call('import -frame -screen -window %s %s/%s'%(self.capture_window, self.target_directory, filename), shell=True)
-            if self.script_proc and all(map(lambda x: x.poll()!=None, self.script_proc)) :
-                for p in self.script_proc:
+            if self.script_procs and all(map(lambda x: x.poll()!=None, self.script_procs)) :
+                for p in self.script_procs:
                     print "proc message",repr(p.communicate()[0])
                 print "execute script",self.scripts
                 self.execute_scripts()
@@ -145,7 +145,7 @@ class TestGrxUIProject(unittest.TestCase):
         subprocess.call("pkill omniNames", shell=True)
         # wait scripts
         if self.init_proc: self.init_proc.terminate()
-        for p in self.script_proc:
+        for p in self.script_procs:
             if p: p.terminate()
             while p and p.poll() == None and i < 10:
                 time.sleep(1)
@@ -174,7 +174,7 @@ class TestGrxUIProject(unittest.TestCase):
         if self.init_proc and self.init_proc.poll() == None:
             self.init_proc.terminate()
             self.init_proc.kill()
-        for p in self.script_proc:
+        for p in self.script_procs:
             if p and p.poll() == None:
                 p.terminate()
                 p.kill()
