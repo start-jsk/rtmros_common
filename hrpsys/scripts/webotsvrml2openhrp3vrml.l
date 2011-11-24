@@ -150,7 +150,7 @@
 
 (define-vrml-node-spec Servo
   nil
-  (field SFRotation rotation 0)
+  (field SFRotation rotation (0 1 0 0))
   (field SFVec3f translation 0)
   (field SFString name "")
   (field SFFloat maxForce 0.0)
