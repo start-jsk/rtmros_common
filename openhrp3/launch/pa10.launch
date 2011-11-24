@@ -16,6 +16,6 @@ This scripts starts PA10Sample.xml project file, the robot picks up the yellow b
   :width: 800
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
    test-name="PA10Sample" args="--max-time=60" cwd="node" />
 </launch>

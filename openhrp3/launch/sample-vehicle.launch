@@ -16,6 +16,6 @@ This scripts starts SampleSV_RangeSensor.xml project file, the robot picks up th
   :width: 800
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
    test-name="SampleSV_RangeSensor" args="--max-time=60" cwd="node" />
 </launch>

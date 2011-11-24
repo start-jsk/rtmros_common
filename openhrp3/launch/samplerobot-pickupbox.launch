@@ -16,6 +16,6 @@ This scripts starts SampleLF.xml project file, the robot picks up the yellow box
   :width: 800
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
    test-name="SampleLF" args="--max-time=60" cwd="node" />
 </launch>
