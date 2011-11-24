@@ -651,6 +651,10 @@
     (DARMLOWERR (-90 0))
     ))
 
+(defun darwin-joint-rotation-lists ()
+  '((DARMLOWERR (1 0 0 0)) (DARMLOWERL (1 0 0 0)))
+  )
+
 (defun append-openhrp3-humanoid (rb-lis robot-name)
   (list
    (append
@@ -681,7 +685,8 @@
 		      (t (eq (elt x 0) node-name))))
 		 lis))
 
-(defun replace-servo->joint (rb-lis &optional (min-max-lists (darwin-min-max-lists)))
+(defun replace-servo->joint
+  (rb-lis &optional (min-max-lists (darwin-min-max-lists)) (origin-list (darwin-joint-rotation-lists)))
   (let ((node-fields (mapcar 'car (cdr (assoc 'field (send 'joint :get :vrml-node-spec)))))
 	(default-roation-value (caddr (cadr (assoc 'field (get 'servo :vrml-node-spec)))))
 	(jointid -1))
@@ -704,6 +709,10 @@
 			(push (append (list 'ulimit)
 				      (list (list 'aref (deg2rad (cadr (cadr mml))))))
 			      (cdddr sv))))
+		    (let ((jol (assoc (elt sv 1) origin-list)))
+		      (when jol
+			(dotimes (i 4)
+			  (setf (elt (assoc 'rotation sv) (1+ i)) (elt (cadr jol) i)))))
 		    (push (append (list 'jointaxis)
 				  (cond
 				   ((and (assoc 'rotation sv) (/= jointid -1))
