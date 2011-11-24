@@ -72,7 +72,7 @@ sed -i "s#${target_ros_install_dir}/##g" ${latest_ros_install_dir}/rtm-ros-robot
 sed -i 's#https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common#https://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common#g' ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
 sed -e "/rtm-ros-robotics/{
 N
-s#\(https://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common',\n    version: -r\)[0-9]*#\1${latest_reversion}#
+s#\(https://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common',\n    version: -r\)[0-9]*#\1${latest_revision}#
 }
 " ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs.tmp
 mv ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs.tmp ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
@@ -81,5 +81,5 @@ cat ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.other ${latest_ros_ins
 # restore
 mv ${target_ros_install_dir}/.rosinstall.bak  ${target_ros_install_dir}/.rosinstall
 # commit
-svn commit --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m "update versioned rosinstall file for latest tag" ${latest_ros_install_dir}
+svn commit --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m "update versioned rosinstall file for latest tag r${latest_revision}" ${latest_ros_install_dir}
 
