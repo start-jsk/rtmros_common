@@ -38,6 +38,6 @@ rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/Im
 rosbuild_find_ros_package("jsk_tools")
 execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_PACKAGE_PATH}/bin/launchdoc-generator.py ${PROJECT_NAME} --output_dir=. --nomakefile RESULT_VARIABLE _make_failed)
 
-rosbuild_add_rostest(launch/test-hrp4c-example.launch)
-rosbuild_add_rostest(launch/test-hrp4c-pickup.launch)
+rosbuild_add_rostest(launch/hrp4c-example.launch)
+rosbuild_add_rostest(launch/hrp4c-pickup.launch)
 
