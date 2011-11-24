@@ -53,8 +53,8 @@ lleg-end-coords:
 rleg-end-coords:
   translate : [0, -0.033751, 0]
   rotate    : [-0.57735, -0.57735, -0.57735, 120]
-#head-end-coords:
-#  translate : [0.08, 0, 0.13]
-#  rotate    : [0, 1, 0, 90]
+head-end-coords:
+  translate : [0, 0.0329074, 0.0359816]
+  rotate    : [0, 0, 1, 180]
 
 
