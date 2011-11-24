@@ -18,5 +18,5 @@ This scripts starts PA10.xml hrpsys-base sample project file, the robot picks up
 
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
-   test-name="PA10" args="--max-time=60" cwd="node" />
+   test-name="PA10" args="--start-simulation --max-time=60" cwd="node" />
 </launch>

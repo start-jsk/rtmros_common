@@ -19,8 +19,10 @@ class TestGrxUIProject(unittest.TestCase):
                           help='do not launch grxui, just wait finish and capture files')
         parser.add_option('--max-time',action="store",type='int',dest='max_time',default=100,
                           help='wait sec until exit from grxui')
-        parser.add_option('--start-simulation',action="store_true",dest='simulation_start', default=True);
-        parser.add_option('--no-start-simulation',action="store_false",dest='simulation_start');
+        parser.add_option('--target-directory',action="store",type='string',dest='target_directory',default='../build/images/',
+                          help='directory to write results')
+        parser.add_option('--no-start-simulation',action="store_false",dest='simulation_start', default=False);
+        parser.add_option('--start-simulation',action="store_true",dest='simulation_start');
         parser.add_option('--gtest_output'); # dummy
         parser.add_option('--text'); # dummy
         for arg in sys.argv:
@@ -29,6 +31,7 @@ class TestGrxUIProject(unittest.TestCase):
                 self.name=match.group(1)
         (options, args) = parser.parse_args()
         self.simulation_start = options.simulation_start
+        self.target_directory = options.target_directory
         self.max_time = options.max_time
         self.capture_window = options.capture_window
 
@@ -82,9 +85,9 @@ class TestGrxUIProject(unittest.TestCase):
 
     def wait_times_is_up(self):
         i = 0
-        if not os.path.isdir("../build/images/") :
-            os.mkdir("../build/images/")
-        subprocess.call('rm -f ../build/images/%s*.png'%(self.name),shell=True)
+        if not os.path.isdir(self.target_directory) :
+            os.mkdir(self.target_directory)
+        subprocess.call('rm -f %s/%s*.png'%(self.target_directory,self.name),shell=True)
         self.xdotool(self.capture_window, "windowactivate --sync")
         while (not self.check_window("Time is up")) and (i < self.max_time) :
             print "wait for \"Time is up\" (%d/%d) ..."%(i, self.max_time)
@@ -96,14 +99,14 @@ class TestGrxUIProject(unittest.TestCase):
                         self.unmap_window(camera_window)
             filename="%s-%03d.png"%(self.name, i)
             print "write to ",filename
-            subprocess.call('import -frame -screen -window %s ../build/images/%s'%(self.capture_window, filename), shell=True)
+            subprocess.call('import -frame -screen -window %s %s/%s'%(self.capture_window, self.target_directory, filename), shell=True)
             i+=1
         print "wait for \"Time is up\" ... done"
         self.unmap_window("Time is up")
 
     def capture_eclipse(self):
-        subprocess.call('import -frame -screen -window %s ../build/images/%s.png'%(self.capture_window,self.name), shell=True)
-        subprocess.call('convert -delay 10 -loop 0 ../build/images/%s-*.png ../build/images/%s.gif'%(self.name, self.name), shell=True)
+        subprocess.call('import -frame -screen -window %s %s/%s.png'%(self.capture_window, self.target_directory, self.name), shell=True)
+        subprocess.call('convert -delay 10 -loop 0 %s/%s-*.png %s/%s.gif'%(self.target_directory, self.name, self.target_directory, self.name), shell=True)
 
     def exit_eclipse(self):
         self.map_window("Time is up")

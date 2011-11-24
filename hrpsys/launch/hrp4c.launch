@@ -18,5 +18,5 @@ This scripts starts HRP-4C.xml hrpsys-base sample project file, the robot picks 
 
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
-   test-name="HRP4C" args="--max-time=60" cwd="node" />
+   test-name="HRP4C" args="--start-simulation --max-time=60 --target-directory=$(find hrpsys)/build/images" />
 </launch>

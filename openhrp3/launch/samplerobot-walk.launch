@@ -17,5 +17,5 @@ This scripts starts SamplePD.xml OpenHRP3 sample project file, the robot picks u
 
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
-   test-name="SamplePD" args="--max-time=60" cwd="node" />
+   test-name="SamplePD" args="--start-simulation --max-time=60" cwd="node" />
 </launch>

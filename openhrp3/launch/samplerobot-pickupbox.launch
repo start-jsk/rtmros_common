@@ -16,6 +16,6 @@ This scripts starts SampleLF.xml OpenHRP3 sample project file, the robot picks u
   :width: 600
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
-   test-name="SampleLF" args="--max-time=60" cwd="node" />
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="500" retry="2"
+   test-name="SampleLF" args="--start-simulation --max-time=100" cwd="node" />
 </launch>

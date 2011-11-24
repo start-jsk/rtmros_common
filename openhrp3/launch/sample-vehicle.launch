@@ -17,5 +17,5 @@ This scripts starts SampleSV_RangeSensor.xml OpenHRP3 sample project file, the r
 
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
-   test-name="SampleSV_RangeSensor" args="--max-time=60" cwd="node" />
+   test-name="SampleSV_RangeSensor" args="--start-simulation --max-time=60" cwd="node" />
 </launch>
