@@ -1,0 +1,31 @@
+<launch>
+  <include file="$(find hrpsys_ros_bridge)/launch/hrp4c.launch">
+  <include file="$(find hrpsys_ros_bridge)/launch/hrp4c_ros_bridge.launch">
+
+  <sphinxdoc><![CDATA[
+.. code-block: bash
+  roslaunch hrpsys_ros_bridge hrp4c.launch
+  roslaunch hrpsys_ros_bridge hrp4c_ros_bridge.launch
+  rosrun roseus roseus `rospack find hrpsys_ros_bridge`/scripts/hrp4c-example.l
+
+This launch file shows an example of ros bridge for open hrp4 robot.
+
+1. `roslaunch hrpsys_ros_bridge hrp4c.launch` : launch simulated robot environment, if you use real robot, you don't need this line
+
+2. `roslaunch hrpsys_ros_bridge hrp4c_ros_bridge.launch` : launch rtm ros bridge
+
+3. `rosrun roseus roseus hrp4c-example.l` : sample euslisp script to control therobot.
+
+.. image:: build/images/HRP4C_Example.gif
+  :width: 600
+
+  ]]></sphinxdoc>
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="600" retry="2"
+   test-name="HRP4C_Example"
+   args="--max-time=120 --capture-window RViz
+	 --target-directory=$(find hrpsys_ros_bridge)/build/images
+	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/hrp4c-example.l'"
+   />
+</launch>
+
+
