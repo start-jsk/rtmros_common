@@ -33,7 +33,7 @@ TypeNameMap = { # for ROS msg/srv
 # convert functions for IDL/ROS
 convert_functions = """\n
 template<class T1, class T2> inline
-void convert(T1& in, T2& out){ out = (T2)in; }
+void convert(T1& in, T2& out){ out = static_cast<T2>(in); }
 template<>
 void convert(char*& in, std::string& out){ out = std::string(in); }
 template<>
@@ -102,7 +102,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             name = (idlutil.ccolonName(typ.scopedName()) if full else typ.identifier())
             return name + ('*' if out and cxx.types.variableDecl(typ) else '')
         if isinstance(typ, idlast.Enum):
-            return 'int64_t' # enum is int64 ??
+            return idlutil.ccolonName(typ.scopedName())
         if isinstance(typ, idlast.Typedef):
             if full:
                 return idlutil.ccolonName(typ.declarators()[0].scopedName())
@@ -148,7 +148,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if isinstance(typ, idlast.Const):
             return TypeNameMap[typ.constKind()]
         if isinstance(typ, idlast.Enum):
-            return TypeNameMap[idltype.tk_longlong] # enum is int64
+            return TypeNameMap[idltype.tk_longlong] # enum is int64 ??
         if isinstance(typ, idlast.Union):
             return TypeNameMap[idltype.tk_double] # union is not in ROS
         if isinstance(typ, idlast.Typedef):
