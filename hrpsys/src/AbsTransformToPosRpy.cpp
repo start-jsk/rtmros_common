@@ -111,7 +111,6 @@ RTC::ReturnCode_t AbsTransformToPosRpy::onExecute(RTC::UniqueId ec_id)
     //
     for ( unsigned int i = 0; i < m_pr.data.length() ; i++ ) std::cout << std::setw(4) << m_pr.data[i] << " "; std::cout << std::endl;
   }else {
-    std::cout << std::endl;
     return RTC::RTC_OK;
   }
   m_basePos.data.x = m_pr.data[0];
