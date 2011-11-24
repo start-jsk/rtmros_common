@@ -1,5 +1,0 @@
-<launch>
-  <test type="generate-document.sh" pkg="hrpsys" time-limit="300" 
-	test-name="generate_document" />
-</launch>
-

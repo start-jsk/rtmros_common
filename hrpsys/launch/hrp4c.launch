@@ -5,4 +5,18 @@
   <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
   <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
   <node name="grxui" pkg="openhrp3" type="grxui.sh" args="$(arg MODEL_FILE)" />
+
+  <sphinxdoc><![CDATA[
+.. code-block: bash
+  roslaunch hrpsys hrp4c.launch
+  rosrun hrpsys hrpsyspy `rospack find hrpsys`/share/hrpsys/samples/HRP-4C/HRP4C.py
+
+This scripts starts HRP-4C.xml hrpsys-base sample project file, the robot picks up the yellow box from the ground by selecting StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
+
+.. image:: build/images/HRP4C.gif
+  :width: 600
+
+  ]]></sphinxdoc>
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
+   test-name="HRP4C" args="--max-time=60" cwd="node" />
 </launch>

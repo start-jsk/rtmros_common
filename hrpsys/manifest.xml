@@ -9,6 +9,10 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/hrpsys</url>
 
+  <export>
+    <rosdoc config="rosdoc.yaml" />
+  </export>
+
   <depend package="openhrp3"/>
 
   <depend package="roseus"/>

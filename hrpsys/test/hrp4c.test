@@ -1,7 +1,0 @@
-<launch>
-  <include file="$(find hrpsys)/launch/hrp4c.launch" />
-  <node name="hrp4c_python_client" pkg="hrpsys" type="hrpsyspy"
-	args="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4C.py" respawn="true" />
-  <test test-name="hrp4c" pkg="openhrp3" time-limit="200" 
-   type="sample-projects.py" args="--capture $(find hrpsys)/test/hrp4c-grxui.png --max-time 30 --kill-nameserver"/>
-</launch>
