@@ -10,7 +10,7 @@
 .. code-block: bash
   roslaunch openhrp3 samplerobot-walk.launch
 
-This scripts starts SamplePD.xml project file, the robot picks up the yellow box from the ground by selecting StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
+This scripts starts SamplePD.xml OpenHRP3 sample project file, the robot picks up the yellow box from the ground by selecting StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
 
 .. image:: build/images/SamplePD.gif
   :width: 800

@@ -10,7 +10,7 @@
 .. code-block: bash
   roslaunch openhrp3 pa10.launch
 
-This scripts starts PA10Sample.xml project file, the robot picks up the yellow box from the ground by selecting StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
+This scripts starts PA10Sample.xml OpenHRP3 sample project file, the robot picks up the yellow box from the ground by selecting StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
 
 .. image:: build/images/PA10Sample.gif
   :width: 800

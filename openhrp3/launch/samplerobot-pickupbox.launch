@@ -10,7 +10,7 @@
 .. code-block: bash
   roslaunch openhrp3 samplerobot-pickupbox.launch
 
-This scripts starts SampleLF.xml project file, the robot picks up the yellow box from the ground by selecting StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
+This scripts starts SampleLF.xml OpenHRP3 sample project file, the robot picks up the yellow box from the ground by selecting StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
 
 .. image:: build/images/SampleLF.gif
   :width: 800
