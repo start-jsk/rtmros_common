@@ -7,7 +7,9 @@
   <node name="grxui" pkg="openhrp3" type="grxui.sh" args="$(arg MODEL_FILE)" />
 
   <sphinxdoc><![CDATA[
-.. code-block: bash
+
+.. code-block:: bash
+
   roslaunch hrpsys pa10.launch
   rosrun hrpsys hrpsyspy `rospack find hrpsys`/share/hrpsys/samples/PA10/PA10.py
 

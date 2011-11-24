@@ -3,7 +3,9 @@
   <include file="$(find hrpsys_ros_bridge)/launch/hrp4c_ros_bridge.launch">
 
   <sphinxdoc><![CDATA[
-.. code-block: bash
+
+.. code-block:: bash
+
   roslaunch hrpsys_ros_bridge hrp4c.launch
   roslaunch hrpsys_ros_bridge hrp4c_ros_bridge.launch
   rosrun roseus roseus `rospack find hrpsys_ros_bridge`/scripts/hrp4c-example.l
