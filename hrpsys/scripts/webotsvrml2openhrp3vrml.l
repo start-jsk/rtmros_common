@@ -627,6 +627,30 @@
       )
     file-names<->webots-segment-name-map))
 
+(defun darwin-min-max-lists () ;; (list min-angle max-angle) [deg]
+  '((DWAIST ())
+    (DNECK (-45 45))
+    (DHEAD (-45 45))
+    (DPELVYL (-45 45))
+    (DPELVYR (-45 45))
+    (DPELVL (-45 45))
+    (DPELVR (-45 45))
+    (DLEGUPPERL (-90 90))
+    (DLEGUPPERR (-90 90))
+    (DLEGLOWERL (0 90))
+    (DLEGLOWERR (0 90))
+    (DANKLEL (-90 90))
+    (DANKLER (-90 90))
+    (DFOOTL (-45 45))
+    (DFOOTR (-45 45))
+    (DSHOULDERL (-90 90))
+    (DSHOULDERR (-90 90))
+    (DARMUPPERL (0 180))
+    (DARMUPPERR (-180 0))
+    (DARMLOWERL (-90 0))
+    (DARMLOWERR (-90 0))
+    ))
+
 (defun append-openhrp3-humanoid (rb-lis robot-name)
   (list
    (append
@@ -657,7 +681,7 @@
 		      (t (eq (elt x 0) node-name))))
 		 lis))
 
-(defun replace-servo->joint (rb-lis)
+(defun replace-servo->joint (rb-lis &optional (min-max-lists (darwin-min-max-lists)))
   (let ((node-fields (mapcar 'car (cdr (assoc 'field (send 'joint :get :vrml-node-spec)))))
 	(default-roation-value (caddr (cadr (assoc 'field (get 'servo :vrml-node-spec)))))
 	(jointid -1))
@@ -672,6 +696,14 @@
 			      (list 'jointType "free")
 			    (list 'jointType "rotate"))
 			  (cdddr sv))
+		    (let ((mml (assoc (elt sv 1) min-max-lists)))
+		      (when mml
+			(push (append (list 'llimit)
+				      (list (list 'aref (deg2rad (car (cadr mml))))))
+			      (cdddr sv))
+			(push (append (list 'ulimit)
+				      (list (list 'aref (deg2rad (cadr (cadr mml))))))
+			      (cdddr sv))))
 		    (push (append (list 'jointaxis)
 				  (cond
 				   ((and (assoc 'rotation sv) (/= jointid -1))
