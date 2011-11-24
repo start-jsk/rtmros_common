@@ -1,13 +1,20 @@
 <package>
   <description brief="openhrp3">
 
-     openhrp3
+     "OpenHRP3" : Robot software platform
+
+http://www.openrtp.jp/openhrp3/en/index.html
+http://code.google.com/p/openhrp-aist-grx/
 
   </description>
   <author>Developed by AIST, GRX, ROS Package is maintained by Kei Okada</author>
   <license>EPL</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/openhrp3</url>
+
+  <export>
+    <rosdoc config="rosdoc.yaml" />
+  </export>
 
   <depend package="rosunit" />
   <depend package="roscpp" />

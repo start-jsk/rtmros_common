@@ -5,40 +5,32 @@ import roslib; roslib.load_manifest(PKG)
 
 import os,sys,subprocess,time
 import unittest
+import re
 from optparse import OptionParser
 ##
 
 class TestGrxUIProject(unittest.TestCase):
-    proc=None
-    project_filename=""
-    capture_filename=""
-    max_time=100
+    proc = None;
+    name = ""
 
     def setUp(self):
         parser = OptionParser(description='grxui project testing')
-        parser.add_option('--project',action="store",type='string',dest='project_filename',default=None,
-                          help='project xml filename')
-        parser.add_option('--capture',action="store",type='string',dest='capture_filename',default=None,
-                          help='do not launch grxui, just wait finish and capture files')
         parser.add_option('--capture-window',action="store",type='string',dest='capture_window',default="Eclipse\ SDK\ ",
                           help='do not launch grxui, just wait finish and capture files')
-        parser.add_option('--max-time',action="store",type='int',dest='max_time',default=self.max_time,
+        parser.add_option('--max-time',action="store",type='int',dest='max_time',default=100,
                           help='wait sec until exit from grxui')
-        parser.add_option('--kill-nameserver',action="store",type='string',dest='kill_nameserver',default=None);
         parser.add_option('--start-simulation',action="store_true",dest='simulation_start', default=True);
         parser.add_option('--no-start-simulation',action="store_false",dest='simulation_start');
         parser.add_option('--gtest_output'); # dummy
         parser.add_option('--text'); # dummy
+        for arg in sys.argv:
+            match=re.match('__name:=(.*)',arg)
+            if match :
+                self.name=match.group(1)
         (options, args) = parser.parse_args()
-        self.project_filename = options.project_filename
-        self.kill_nameserver = options.kill_nameserver
         self.simulation_start = options.simulation_start
         self.max_time = options.max_time
         self.capture_window = options.capture_window
-        if options.capture_filename:
-            self.capture_filename = options.capture_filename
-        else:
-            self.capture_filename = os.path.splitext(os.path.basename(self.project_filename))[0]+".png"
 
     def xdotool(self,name,action):
         ret = 1
@@ -90,12 +82,11 @@ class TestGrxUIProject(unittest.TestCase):
 
     def wait_times_is_up(self):
         i = 0
-        filename="%s*.png"%(os.path.splitext(os.path.basename(self.capture_filename))[0])
-        if os.path.dirname(self.capture_filename):
-            filename=os.path.dirname(self.capture_filename)+"/"+filename
-        subprocess.call("rm "+filename,shell=True)
+        if not os.path.isdir("../build/images/") :
+            os.mkdir("../build/images/")
+        subprocess.call('rm -f ../build/images/%s*.png'%(self.name),shell=True)
         self.xdotool(self.capture_window, "windowactivate --sync")
-        while (not self.check_window("Time is up")) and (i < self.max_time):
+        while (not self.check_window("Time is up")) and (i < self.max_time) :
             print "wait for \"Time is up\" (%d/%d) ..."%(i, self.max_time)
             for camera_window in ["VISION_SENSOR1"]:
                 if self.check_window(camera_window, visible=True):
@@ -103,18 +94,16 @@ class TestGrxUIProject(unittest.TestCase):
                         self.move_window(camera_window,679,509)
                     else:
                         self.unmap_window(camera_window)
-            filename="%s-%03d.png"%(os.path.splitext(os.path.basename(self.capture_filename))[0], i)
-            if os.path.dirname(self.capture_filename):
-                filename=os.path.dirname(self.capture_filename)+"/"+filename
+            filename="%s-%03d.png"%(self.name, i)
             print "write to ",filename
-            subprocess.call("import -frame -screen -window "+self.capture_window+" "+filename, shell=True)
-            time.sleep(0.5)
-            i+=0.5
+            subprocess.call('import -frame -screen -window %s ../build/images/%s'%(self.capture_window, filename), shell=True)
+            i+=1
         print "wait for \"Time is up\" ... done"
         self.unmap_window("Time is up")
 
     def capture_eclipse(self):
-        subprocess.call("import -frame -screen -window "+self.capture_window+" "+self.capture_filename, shell=True)
+        subprocess.call('import -frame -screen -window %s ../build/images/%s.png'%(self.capture_window,self.name), shell=True)
+        subprocess.call('convert -delay 10 -loop 0 ../build/images/%s-*.png ../build/images/%s.gif'%(self.name, self.name), shell=True)
 
     def exit_eclipse(self):
         self.map_window("Time is up")
@@ -126,18 +115,14 @@ class TestGrxUIProject(unittest.TestCase):
         subprocess.call("xdotool key --clearmodifiers Return", shell=True)
         # wait 10 seconds?
         i = 0
-        if self.kill_nameserver :
-            subprocess.call("pkill omniNames", shell=True)
+        subprocess.call("pkill omniNames", shell=True)
         while self.proc and self.proc.poll() == None and i < 10:
+            print "wait for eclipse stops"
             time.sleep(1)
             i += 1
 
     def test_grxui_simulation(self):
         import check_online_viewer
-        if self.project_filename: # if no project_filename is given, we assume grxui is already launched
-            subprocess.call("rosrun openhrp3 openhrp-shutdown-servers", shell=True)
-            subprocess.call("rosrun openrtm rtm-naming-restart", shell=True)
-            self.proc=subprocess.Popen(['rosrun', 'openhrp3', 'grxui.sh', self.project_filename])
         # wait online viewer
         check_online_viewer.waitOnlineViewer()
         # start simualation
@@ -151,8 +136,7 @@ class TestGrxUIProject(unittest.TestCase):
         self.exit_eclipse()
 
     def __del__(self):
-        if self.kill_nameserver :
-            subprocess.call("pkill omniNames", shell=True)
+        subprocess.call("pkill omniNames", shell=True)
         if self.proc and self.proc.poll() == None:
             self.proc.terminate()
             self.proc.kill()
