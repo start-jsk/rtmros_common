@@ -13,7 +13,7 @@ from openhrp3 import OnlineViewer_idl
 rootnc = None
 def initCORBA(argv):
     global rootnc
-    while rootnc == none:
+    while rootnc == None:
         try:
             orb = CORBA.ORB_init(argv)
             nameserver = orb.string_to_object("corbaloc::localhost/NameService")
