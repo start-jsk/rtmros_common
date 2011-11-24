@@ -1,6 +1,6 @@
 <launch>
-  <include file="$(find hrpsys_ros_bridge)/launch/hrp4c.launch">
-  <include file="$(find hrpsys_ros_bridge)/launch/hrp4c_ros_bridge.launch">
+  <include file="$(find hrpsys_ros_bridge)/launch/hrp4c.launch" />
+  <include file="$(find hrpsys_ros_bridge)/launch/hrp4c_ros_bridge.launch" />
 
   <sphinxdoc><![CDATA[
 
