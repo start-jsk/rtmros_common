@@ -19,7 +19,7 @@ This scripts starts HRP-4C.xml hrpsys-base sample project file, the robot walks 
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
    test-name="HRP4C"
-   args="--start-simulation --max-time=60
+   args="--start-simulation --max-time=50
 	 --target-directory=$(find hrpsys)/build/images
 	 --script='rosrun hrpsys hrpsyspy $(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4C.py'"
    />
