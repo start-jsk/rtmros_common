@@ -3,9 +3,8 @@
 PKG='openhrp3'
 import roslib; roslib.load_manifest(PKG)
 import rospy,tf
-import os,sys,shlex,subprocess,time
+import os,sys,shlex,subprocess,time,signal,re
 import unittest
-import re
 from optparse import OptionParser
 ##
 
@@ -111,15 +110,17 @@ class TestGrxUIProject(unittest.TestCase):
             self.init_proc.kill()
         self.init_proc = None
         for p in self.script_procs:
-            i = 0
             print "[%s] __del__, process %s"%(self.id(), p)
-            while p and (p.poll() == None) and (i < 100):
-                print "[%s] __del__, process %s poll %s"%(self.id(), p, p.poll())
-                print "[%s] __del__, send SIGINT, terminate, kill to %s"%(self.id(), p)
-                p.send_signal(2) ## send SIGINT
-                p.terminate()
-                p.kill()
-                i += 1
+            ## get process that has p.pid as ppid
+            p.pid
+            for sig in [signal.SIGINT, signal.SIGKILL, signal.SIGTERM]:
+                i = 0
+                while p and (p.poll() == None) and (i < 5):
+                    print "[%s] __del__, send %d to process %s, poll %s, pid %d (%d)"%(self.id(), sig, p, p.poll(), p.pid, i)
+                    p.send_signal(sig)
+                    subprocess.call('for child in $(ps -o pid,ppid -ax | awk "{ if ( \$2 == %d ){ print \$1}}"); do  echo $child; kill %d $child; done'%(p.pid, sig), shell=True)
+                    i += 1
+                    time.sleep(1)
         self.script_procs = []
 
     def wait_times_is_up(self):
