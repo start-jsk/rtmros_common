@@ -26,8 +26,8 @@ This launch file shows an example of ros bridge for open hrp4 robot.
    test-name="HRP4C_Example"
    args="--max-time=120 --capture-window RViz
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
-	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/hrp4c-example.l'"
-   />
+	 --check-tf='/BODY /R_HAND_J1_LINK'
+	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/hrp4c-example.l __log:=dummy'" /> <!-- add dummy __log/= argument to invoke roseus with non-interactive mode -->
 </launch>
 
 
