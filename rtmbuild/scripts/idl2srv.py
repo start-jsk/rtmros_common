@@ -34,14 +34,16 @@ TypeNameMap = { # for ROS msg/srv
 convert_functions = """\n
 template<class T1, class T2> inline
 void convert(T1& in, T2& out){ out = static_cast<T2>(in); }
-template<>
-void convert(char*& in, std::string& out){ out = std::string(in); }
-template<>
-void convert(std::string& in, char*& out){ out = (char*)in.c_str(); }
-template<>
-void convert(CORBA::String_member& in, std::string& out){ out = std::string(in); }
-template<>
-void convert(std::string& in, CORBA::String_member& out){ out = (char*)in.c_str(); }
+template<typename T>
+void convert(T& in, std::string& out){ out = std::string(in); }
+template<typename T>
+void convert(std::string& in, T& out){ out = static_cast<T>(in.c_str()); }
+//template<>
+//void convert(CORBA::String_member& in, std::string& out){ out = std::string(in); }
+//template<>
+//void convert(std::string& in, CORBA::String_member& out){ out = (const char*)in.c_str(); }
+void convert(_CORBA_String_element in, std::string& out){ out = std::string(in); }
+void convert(std::string& in, _CORBA_String_element out){ out = (const char*)in.c_str(); }
 template<class S,class T>
 void convert(S& s, std::vector<T>& v){
   int size = s.length();
@@ -90,10 +92,8 @@ class ServiceVisitor (idlvisitor.AstVisitor):
 ##
 ##
     def getCppTypeText(self, typ, out=False, full=False):
-#        if isinstance(typ, idltype.Sequence):
-#            return ('%s*' if out else '%s') % self.getCppTypeText(typ.seqType(), False, full)
         if isinstance(typ, idltype.String):
-            return 'char*' # ??
+            return ('char*' if out else 'const char*') # ??
         if isinstance(typ, idltype.Declared):
             postfix = ('*' if out and cxx.types.variableDecl(typ.decl()) else '')
             return self.getCppTypeText(typ.decl(), False, full) + postfix
@@ -102,7 +102,10 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             name = (idlutil.ccolonName(typ.scopedName()) if full else typ.identifier())
             return name + ('*' if out and cxx.types.variableDecl(typ) else '')
         if isinstance(typ, idlast.Enum):
-            return idlutil.ccolonName(typ.scopedName())
+            if full:
+                return idlutil.ccolonName(typ.scopedName())
+            else:
+                return typ.identifier()
         if isinstance(typ, idlast.Typedef):
             if full:
                 return idlutil.ccolonName(typ.declarators()[0].scopedName())
@@ -353,6 +356,12 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         #  make ROS service in onInitialize
         #  make ROS bridge functions in .cpp
         compsrc = open(tmpdir + '/' + module_name + '.cpp').read()
+
+        port_name_src = """  std::string port_name;
+  nh.param<std::string>("service_port", port_name, "service0");"""
+        compsrc = addline(port_name_src, compsrc, 'Set service consumers to Ports')
+        compsrc = compsrc.replace('registerConsumer("service0"','registerConsumer(port_name.c_str()')
+
         compsrc += """
 RTC::ReturnCode_t %s::onExecute(RTC::UniqueId ec_id) {
   ros::spinOnce();
