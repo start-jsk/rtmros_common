@@ -7,41 +7,40 @@ import _omniidl
 import os, os.path, sys, string, re
 
 # TODO
-#  multi dimensional array -> *MultiArray.msg # ??
-#  how to manipulate namespace -> under score concat
-#  unit conversion, mm<->m -> OK??
+# not generate unused msgs
+# how to manipulate namespace -> under score concat
 
 TypeNameMap = { # for ROS msg/srv
-    idltype.tk_boolean: 'bool',
-    idltype.tk_char: 'int8',
-    idltype.tk_octet: 'uint8',
-    idltype.tk_wchar: 'int16',
-    idltype.tk_short: 'int16',
-    idltype.tk_ushort: 'uint16',
-    idltype.tk_long: 'int32',
-    idltype.tk_ulong: 'uint32',
-    idltype.tk_longlong: 'int64',
-    idltype.tk_ulonglong: 'uint64',
-    idltype.tk_float: 'float32',
-    idltype.tk_double: 'float64',
-    idltype.tk_string: 'string',
-    idltype.tk_wstring: 'string',
-    idltype.tk_any: 'string', # ??
-    idltype.tk_TypeCode: 'uint64', # ??
-    idltype.tk_enum: 'uint64' }
+    idltype.tk_boolean:   ('bool',    'uchar'),
+    idltype.tk_char:      ('int8',    'char'),
+    idltype.tk_octet:     ('uint8',   'uchar'),
+    idltype.tk_wchar:     ('int16',   'short'),
+    idltype.tk_short:     ('int16',   'short'),
+    idltype.tk_ushort:    ('uint16',  'ushort'),
+    idltype.tk_long:      ('int32',   'int'),
+    idltype.tk_ulong:     ('uint32',  'uint'),
+    idltype.tk_longlong:  ('int64',   'long long'),
+    idltype.tk_ulonglong: ('uint64',  'unsigned long long'),
+    idltype.tk_float:     ('float32', 'float'),
+    idltype.tk_double:    ('float64', 'double'),
+p    idltype.tk_string:    ('string',  'undef'),
+    idltype.tk_wstring:   ('string',  'undef'),
+    idltype.tk_any:       ('string',  'undef'), # ??
+    idltype.tk_TypeCode:  ('uint64',  'undef'), # ??
+    idltype.tk_enum:      ('uint64',  'unsigned long long') }
 
 MultiArrayTypeNameMap = { # for ROS msg/srv
-    idltype.tk_char:     ('std_msgs/Int8MultiArray',   'char'),
-    idltype.tk_octet:    ('std_msgs/Uint8MultiArray',  'uchar'),
-    idltype.tk_wchar:    ('std_msgs/Int16MultiArray',  'short'),
-    idltype.tk_short:    ('std_msgs/Int16MultiArray',  'short'),
-    idltype.tk_ushort:   ('std_msgs/Uint16MultiArray', 'ushort'),
-    idltype.tk_long:     ('std_msgs/Int32MultiArray',  'int'),
-    idltype.tk_ulong:    ('std_msgs/Uint32MultiArray', 'uint'),
-    idltype.tk_longlong: ('std_msgs/Int64MultiArray',  'long long'),
-    idltype.tk_ulonglong:('std_msgs/Uint64MultiArray', 'long long'),
-    idltype.tk_float:    ('std_msgs/Float32MultiArray','float'),
-    idltype.tk_double:   ('std_msgs/Float64MultiArray','double')}
+    idltype.tk_char:     'std_msgs/Int8MultiArray',
+    idltype.tk_octet:    'std_msgs/Uint8MultiArray',
+    idltype.tk_wchar:    'std_msgs/Int16MultiArray',
+    idltype.tk_short:    'std_msgs/Int16MultiArray',
+    idltype.tk_ushort:   'std_msgs/Uint16MultiArray',
+    idltype.tk_long:     'std_msgs/Int32MultiArray',
+    idltype.tk_ulong:    'std_msgs/Uint32MultiArray',
+    idltype.tk_longlong: 'std_msgs/Int64MultiArray',
+    idltype.tk_ulonglong:'std_msgs/Uint64MultiArray',
+    idltype.tk_float:    'std_msgs/Float32MultiArray',
+    idltype.tk_double:   'std_msgs/Float64MultiArray'}
 
 # convert functions for IDL/ROS
 # _CORBA_String_element type is env depend ??
@@ -141,6 +140,8 @@ class ServiceVisitor (idlvisitor.AstVisitor):
 ##
 ##
     def getCppTypeText(self, typ, out=False, full=False):
+        if isinstance(typ, idltype.Base):
+            return TypeNameMap[typ.kind()][1]
         if isinstance(typ, idltype.String):
             return ('char*' if out else 'const char*') # ??
         if isinstance(typ, idltype.Declared):
@@ -167,7 +168,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
 
     def getROSTypeText(self, typ):
         if isinstance(typ, idltype.Base):
-            return TypeNameMap[typ.kind()]
+            return TypeNameMap[typ.kind()][0]
         if isinstance(typ, idltype.String) or isinstance(typ, idltype.WString):
             return 'string' # ??
         if isinstance(typ, idltype.Sequence):
@@ -193,7 +194,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
                 else:
                     return 'undefined'
             if( 1 < dim ):
-                return MultiArrayTypeNameMap[etype.kind()][0]
+                return MultiArrayTypeNameMap[etype.kind()]
             return self.getROSTypeText(etype) + ('[]' if size==0 else '[%d]' % size)
         if isinstance(typ, idltype.Declared):
             return self.getROSTypeText(typ.decl())
@@ -203,11 +204,11 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if isinstance(typ, idlast.Struct):
             return typ.identifier()
         if isinstance(typ, idlast.Const):
-            return TypeNameMap[typ.constKind()]
+            return TypeNameMap[typ.constKind()][0]
         if isinstance(typ, idlast.Enum):
-            return TypeNameMap[idltype.tk_longlong] # enum is int64 ??
+            return TypeNameMap[idltype.tk_longlong][0] # enum is int64 ??
         if isinstance(typ, idlast.Union):
-            return TypeNameMap[idltype.tk_double] # union is not in ROS
+            return TypeNameMap[idltype.tk_double][0] # union is not in ROS
         if isinstance(typ, idlast.Typedef):
             arraysize = typ.declarators()[0].sizes()
             if 0 < len(arraysize):
@@ -280,8 +281,8 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         code = ''
 
         for typ in visitor.multiarray:
-            msg = MultiArrayTypeNameMap[typ.kind()][0].replace('/','::')
-            cpp = MultiArrayTypeNameMap[typ.kind()][1]
+            msg = MultiArrayTypeNameMap[typ.kind()].replace('/','::')
+            cpp = TypeNameMap[typ.kind()][1]
             code += multiarray_conversion % (msg,cpp,msg,msg,msg,cpp)
 
         for typ in visitor.allmsg:
@@ -310,19 +311,14 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             ptype = par.paramType()
             var = par.identifier()
             # temporary variables
-            if isinstance(ptype.unalias(), idltype.Base):
-                if (ptype.kind() == idltype.tk_boolean) and is_out:
-                    code += '  bool %s;\n' % var
-                    res_code += '  res.%s = %s;\n' % (var, var)
-                    params += [par.identifier()]
-                else:
-                    params += [('res.' if is_out else 'req.') + par.identifier()]
-            if isinstance(ptype.unalias(), idltype.String) or \
+            if isinstance(ptype.unalias(), idltype.Base) or \
+               isinstance(ptype.unalias(), idltype.String) or \
                isinstance(ptype.unalias(), idltype.Sequence) or \
                isinstance(ptype.unalias(), idltype.Declared):
                 code += '  %s %s;\n' % (self.getCppTypeText(ptype, out=is_out, full=True), var)
                 params += [var]
-            if isinstance(ptype.unalias(), idltype.String):
+            if isinstance(ptype.unalias(), idltype.Base) or \
+               isinstance(ptype.unalias(), idltype.String):
                 if is_out:
                     res_code += '  convert(%s, res.%s);\n' % (var, var)
                 else:
@@ -340,11 +336,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
                 else:
                     req_code += '  convert(req.%s, %s);\n' % (var, var)
 
-        if len(params) == 0:
-            params = ''
-        else:
-            params = reduce(lambda a,b:a+', '+b, params)
-
+        params = ', '.join(params)
         code += ('  ROS_INFO("call %s");\n' % op.identifier()) + '\n' + req_code
 
         if op.oneway() or op.returnType().kind() == idltype.tk_void:
