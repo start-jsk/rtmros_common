@@ -501,8 +501,8 @@
 	       nil) ;; debug print nil
 	      (list 0 0 0.33951) (list 0.57735 0.57735 0.57735 2.09439) ;; WAIST translation and rotation
 	      )
-	     (darwin-inertia-lists) ;; inertia-maps for insert-segment
-	     ))
+	     (darwin-inertia-lists)) ;; inertia-maps for insert-segment
+	    (darwin-min-max-lists) (darwin-joint-rotation-lists))
 	   "DARWIN")))
     (print-all-vrml-nodes-fields
      openhrp3-vrml-fname openhrp-vrml-data
@@ -553,7 +553,7 @@
       )))))
 ;; (append-openhrp3-waist-joint (split-nodes c3 nil))
 
-(defun insert-segment (rb-lis &optional (inertia-maps (darwin-inertia-lists)))
+(defun insert-segment (rb-lis &optional (inertia-maps))
   (let ((ret (copy-object rb-lis)))
     (labels ((find-servo
 	      (l)
@@ -585,76 +585,6 @@
       (find-servo ret)
       ret)))
 
-(defun darwin-inertia-lists (&optional (force-update nil))
-  (if force-update (unix:system "rm -f DARwIn-OP_Dynamics.zip"))
-  (unix:system "if [ ! -e DARwIn-OP_Dynamics.zip ]; then wget http://sourceforge.net/projects/darwinop/files/Hardware/Mechanics/Physical%20Information/DARwIn-OP_Dynamics.zip;fi")
-  (unix:system "if [ ! -e mp_ankle_l.jpg ] ;then unzip DARwIn-OP_Dynamics.zip;fi")
-  (let ((ff (remove-if-not #'(lambda (x) (and (substringp "mp" x) (substringp "txt" x)))
-			   (directory ".")))
-	(file-names<->webots-segment-name-map
-	 '((mp_body.txt (DBODY_LINK) ())
-	   (mp_neck.txt (DNECK_LINK) ())
-	   (mp_head.txt (DHEAD_LINK) ())
-	   (mp_pelv_y_l.txt (DPELVYL_LINK DPELVYR_LINK) ())
-	   (mp_pelv_l.txt (DPELVL_LINK DPELVR_LINK) ())
-	   (mp_thigh_l.txt (DLEGUPPERL_LINK DLEGUPPERR_LINK) ())
-	   (mp_tibia_l.txt (DLEGLOWERL_LINK DLEGLOWERR_LINK) ())
-	   (mp_ankle_l.txt (DANKLEL_LINK DANKLER_LINK) ())
-	   (mp_foot_l.txt (DFOOTL_LINK DFOOTR_LINK) ())
-	   (mp_shoulder_l.txt (DSHOULDERL_LINK DSHOULDERR_LINK) ())
-	   (mp_arm_upper_l.txt (DARMUPPERL_LINK DARMUPPERR_LINK) ())
-	   (mp_arm_lower_l.txt (DARMLOWERL_LINK DARMLOWERR_LINK) ())
-	   )))
-    (dolist (f ff)
-      (with-open-file
-       (fstrm f :direction :input)
-       (let ((str))
-	 (while (and (setq str (read-line fstrm nil nil))
-		     (not (substringp "INERTIA TENSOR" str))))
-	 (let ((mat
-		(make-matrix
-		 3 3
-		 (mapcar #'(lambda (trim-str)
-			     (let ((str
-				    (make-string-input-stream
-				     (string-left-trim trim-str (read-line fstrm nil nil)))))
-			       (float-vector (read str nil nil) (read str nil nil) (read str nil nil))
-			       ))
-			 (list "Ixx Ixy Ixz " "Iyx Iyy Iyz " "Izx Izy Izz ")))))
-	   (setf (elt (assoc (read-from-string f) file-names<->webots-segment-name-map) 2)
-		 (list (scale-matrix 1e-9 mat))) ;; [g mm^2] -> [kg m^2]
-	   )))
-      )
-    file-names<->webots-segment-name-map))
-
-(defun darwin-min-max-lists () ;; (list min-angle max-angle) [deg]
-  '((DWAIST ())
-    (DNECK (-45 45))
-    (DHEAD (-45 45))
-    (DPELVYL (-45 45))
-    (DPELVYR (-45 45))
-    (DPELVL (-45 45))
-    (DPELVR (-45 45))
-    (DLEGUPPERL (-90 90))
-    (DLEGUPPERR (-90 90))
-    (DLEGLOWERL (0 90))
-    (DLEGLOWERR (0 90))
-    (DANKLEL (-90 90))
-    (DANKLER (-90 90))
-    (DFOOTL (-45 45))
-    (DFOOTR (-45 45))
-    (DSHOULDERL (-90 90))
-    (DSHOULDERR (-90 90))
-    (DARMUPPERL (0 180))
-    (DARMUPPERR (-180 0))
-    (DARMLOWERL (-90 0))
-    (DARMLOWERR (-90 0))
-    ))
-
-(defun darwin-joint-rotation-lists ()
-  '((DARMLOWERR (1 0 0 0)) (DARMLOWERL (1 0 0 0)))
-  )
-
 (defun append-openhrp3-humanoid (rb-lis robot-name)
   (list
    (append
@@ -671,12 +601,13 @@
    )
   )
 
-(defun replace-all-objects-for-Webots->OpenHRP3 (rb-lis)
+(defun replace-all-objects-for-Webots->OpenHRP3
+  (rb-lis &optional (min-max-lists) (origin-list))
   (replace-Camera->VisionSensor
    (replace-Led->VisionSensor
     (replace-gyro2->gyro
      (replace-Accelerometer->AccelerationSensor
-      (replace-servo->joint rb-lis))))))
+      (replace-servo->joint rb-lis min-max-lists origin-list))))))
 
 (defun find-vrml-node-from-node-list (lis node-name)
   (remove-if-not #'(lambda (x)
@@ -686,7 +617,7 @@
 		 lis))
 
 (defun replace-servo->joint
-  (rb-lis &optional (min-max-lists (darwin-min-max-lists)) (origin-list (darwin-joint-rotation-lists)))
+  (rb-lis &optional (min-max-lists) (origin-list))
   (let ((node-fields (mapcar 'car (cdr (assoc 'field (send 'joint :get :vrml-node-spec)))))
 	(default-roation-value (caddr (cadr (assoc 'field (get 'servo :vrml-node-spec)))))
 	(jointid -1))
@@ -805,6 +736,83 @@
 		)))
       (_gather (flatten rb-lis))
       (reverse ret))))
+
+;; darwin model fix
+
+;; set inertia parameters from sourceforge information
+(defun darwin-inertia-lists (&optional (force-update nil))
+  (if force-update (unix:system "rm -f DARwIn-OP_Dynamics.zip"))
+  (unix:system "if [ ! -e DARwIn-OP_Dynamics.zip ]; then wget http://sourceforge.net/projects/darwinop/files/Hardware/Mechanics/Physical%20Information/DARwIn-OP_Dynamics.zip;fi")
+  (unix:system "if [ ! -e mp_ankle_l.jpg ] ;then unzip DARwIn-OP_Dynamics.zip;fi")
+  (let ((ff (remove-if-not #'(lambda (x) (and (substringp "mp" x) (substringp "txt" x)))
+			   (directory ".")))
+	(file-names<->webots-segment-name-map
+	 '((mp_body.txt (DBODY_LINK) ())
+	   (mp_neck.txt (DNECK_LINK) ())
+	   (mp_head.txt (DHEAD_LINK) ())
+	   (mp_pelv_y_l.txt (DPELVYL_LINK DPELVYR_LINK) ())
+	   (mp_pelv_l.txt (DPELVL_LINK DPELVR_LINK) ())
+	   (mp_thigh_l.txt (DLEGUPPERL_LINK DLEGUPPERR_LINK) ())
+	   (mp_tibia_l.txt (DLEGLOWERL_LINK DLEGLOWERR_LINK) ())
+	   (mp_ankle_l.txt (DANKLEL_LINK DANKLER_LINK) ())
+	   (mp_foot_l.txt (DFOOTL_LINK DFOOTR_LINK) ())
+	   (mp_shoulder_l.txt (DSHOULDERL_LINK DSHOULDERR_LINK) ())
+	   (mp_arm_upper_l.txt (DARMUPPERL_LINK DARMUPPERR_LINK) ())
+	   (mp_arm_lower_l.txt (DARMLOWERL_LINK DARMLOWERR_LINK) ())
+	   )))
+    (dolist (f ff)
+      (with-open-file
+       (fstrm f :direction :input)
+       (let ((str))
+	 (while (and (setq str (read-line fstrm nil nil))
+		     (not (substringp "INERTIA TENSOR" str))))
+	 (let ((mat
+		(make-matrix
+		 3 3
+		 (mapcar #'(lambda (trim-str)
+			     (let ((str
+				    (make-string-input-stream
+				     (string-left-trim trim-str (read-line fstrm nil nil)))))
+			       (float-vector (read str nil nil) (read str nil nil) (read str nil nil))
+			       ))
+			 (list "Ixx Ixy Ixz " "Iyx Iyy Iyz " "Izx Izy Izz ")))))
+	   (setf (elt (assoc (read-from-string f) file-names<->webots-segment-name-map) 2)
+		 (list (scale-matrix 1e-9 mat))) ;; [g mm^2] -> [kg m^2]
+	   )))
+      )
+    file-names<->webots-segment-name-map))
+
+;; joint min max for darwin
+;;   (list jointname (list min-angle max-angle)) ;; <- [deg]
+(defun darwin-min-max-lists ()
+  '((DWAIST ())
+    (DNECK (-45 45))
+    (DHEAD (-45 45))
+    (DPELVYL (-45 45))
+    (DPELVYR (-45 45))
+    (DPELVL (-45 45))
+    (DPELVR (-45 45))
+    (DLEGUPPERL (-90 90))
+    (DLEGUPPERR (-90 90))
+    (DLEGLOWERL (0 90))
+    (DLEGLOWERR (0 90))
+    (DANKLEL (-90 90))
+    (DANKLER (-90 90))
+    (DFOOTL (-45 45))
+    (DFOOTR (-45 45))
+    (DSHOULDERL (-90 90))
+    (DSHOULDERR (-90 90))
+    (DARMUPPERL (0 180))
+    (DARMUPPERR (-180 0))
+    (DARMLOWERL (-90 0))
+    (DARMLOWERR (-90 0))
+    ))
+
+;; joint origin offset
+(defun darwin-joint-rotation-lists ()
+  '((DARMLOWERR (1 0 0 0)) (DARMLOWERL (1 0 0 0)))
+  )
+
 ;; (pprint (append-openhrp3-humanoid (replace-servo->joint (insert-segment (append-openhrp3-waist-joint (split-nodes c3 nil))))))
 ;; (append (list '(aref)) (append-openhrp3-humanoid (replace-servo->joint (insert-segment (append-openhrp3-waist-joint (split-nodes c3 nil))))))
 ;; (print-all-vrml-nodes-fields "hoge.wrl" (append (list '(aref)) (append-openhrp3-humanoid (replace-servo->joint (insert-segment (append-openhrp3-waist-joint (split-nodes c3 nil)))))))
