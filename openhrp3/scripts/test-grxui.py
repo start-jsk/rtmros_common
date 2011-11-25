@@ -130,7 +130,6 @@ class TestGrxUIProject(unittest.TestCase):
 
     def capture_eclipse(self):
         subprocess.call('import -frame -screen -window %s %s/%s.png'%(self.capture_window, self.target_directory, self.name), shell=True)
-        subprocess.call('convert -delay 10 -loop 0 %s/%s-*.png %s/%s.gif'%(self.target_directory, self.name, self.target_directory, self.name), shell=True)
 
     def exit_eclipse(self):
         self.map_window("Time is up")
@@ -150,6 +149,8 @@ class TestGrxUIProject(unittest.TestCase):
             while p and p.poll() == None and i < 10:
                 time.sleep(1)
                 i += 1
+        # create animation gif
+        subprocess.call('convert -delay 10 -loop 0 %s/%s-*.png %s/%s.gif'%(self.target_directory, self.name, self.target_directory, self.name), shell=True)
 
     def test_grxui_simulation(self):
         if self.init_script :
