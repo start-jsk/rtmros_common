@@ -109,6 +109,7 @@ class TestGrxUIProject(unittest.TestCase):
             self.init_proc.send_signal(2) ## send SIGINT
             self.init_proc.terminate()
             self.init_proc.kill()
+        self.init_proc = None
         for p in self.script_procs:
             i = 0
             print "[%s] __del__, process %s"%(self.id(), p)
@@ -119,6 +120,7 @@ class TestGrxUIProject(unittest.TestCase):
                 p.terminate()
                 p.kill()
                 i += 1
+        self.script_procs = []
 
     def wait_times_is_up(self):
         i = 0
