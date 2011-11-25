@@ -138,7 +138,9 @@ class TestGrxUIProject(unittest.TestCase):
                         self.unmap_window(camera_window)
             filename="%s-%03d.png"%(self.name, i)
             print "[%s] write to %s"%(self.id(), filename)
-            subprocess.call('import -frame -screen -window %s %s/%s'%(self.capture_window, self.target_directory, filename), shell=True)
+            ret = subprocess.call('import -frame -screen -window %s %s/%s'%(self.capture_window, self.target_directory, filename), shell=True)
+            print "[%s] import returns %s"%(self.id(), ret)
+            self.assertEqual(ret, 0) #
             if self.script_procs and all(map(lambda x: x.poll()!=None, self.script_procs)) :
                 for p in self.script_procs:
                     print "[%s] %s"%(self.id(),repr(p.communicate()[0]))
@@ -162,6 +164,7 @@ class TestGrxUIProject(unittest.TestCase):
         # wait scripts
         self.terminate_scripts()
         # create animation gif
+        print "[%s] convert png to gif"%(self.id())
         subprocess.call('convert -delay 10 -loop 0 %s/%s-*.png %s/%s.gif'%(self.target_directory, self.name, self.target_directory, self.name), shell=True)
         self.success = True
 
