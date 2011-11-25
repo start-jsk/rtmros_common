@@ -11,23 +11,23 @@ import os, os.path, sys, string, re
 # how to manipulate namespace -> under score concat
 
 TypeNameMap = { # for ROS msg/srv
-    idltype.tk_boolean:   ('bool',    'uchar'),
-    idltype.tk_char:      ('int8',    'char'),
-    idltype.tk_octet:     ('uint8',   'uchar'),
-    idltype.tk_wchar:     ('int16',   'short'),
-    idltype.tk_short:     ('int16',   'short'),
-    idltype.tk_ushort:    ('uint16',  'ushort'),
-    idltype.tk_long:      ('int32',   'int'),
-    idltype.tk_ulong:     ('uint32',  'uint'),
-    idltype.tk_longlong:  ('int64',   'long long'),
-    idltype.tk_ulonglong: ('uint64',  'unsigned long long'),
-    idltype.tk_float:     ('float32', 'float'),
-    idltype.tk_double:    ('float64', 'double'),
-p    idltype.tk_string:    ('string',  'undef'),
-    idltype.tk_wstring:   ('string',  'undef'),
-    idltype.tk_any:       ('string',  'undef'), # ??
-    idltype.tk_TypeCode:  ('uint64',  'undef'), # ??
-    idltype.tk_enum:      ('uint64',  'unsigned long long') }
+    idltype.tk_boolean:   'bool',
+    idltype.tk_char:      'int8',
+    idltype.tk_octet:     'uint8',
+    idltype.tk_wchar:     'int16',
+    idltype.tk_short:     'int16',
+    idltype.tk_ushort:    'uint16',
+    idltype.tk_long:      'int32',
+    idltype.tk_ulong:     'uint32',
+    idltype.tk_longlong:  'int64',
+    idltype.tk_ulonglong: 'uint64',
+    idltype.tk_float:     'float32',
+    idltype.tk_double:    'float64',
+    idltype.tk_string:    'string',
+    idltype.tk_wstring:   'string',
+    idltype.tk_any:       'string', # ??
+    idltype.tk_TypeCode:  'uint64', # ??
+    idltype.tk_enum:      'uint64'}
 
 MultiArrayTypeNameMap = { # for ROS msg/srv
     idltype.tk_char:     'std_msgs/Int8MultiArray',
@@ -141,7 +141,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
 ##
     def getCppTypeText(self, typ, out=False, full=False):
         if isinstance(typ, idltype.Base):
-            return TypeNameMap[typ.kind()][1]
+            return cxx.types.basic_map[typ.kind()]
         if isinstance(typ, idltype.String):
             return ('char*' if out else 'const char*') # ??
         if isinstance(typ, idltype.Declared):
@@ -168,7 +168,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
 
     def getROSTypeText(self, typ):
         if isinstance(typ, idltype.Base):
-            return TypeNameMap[typ.kind()][0]
+            return TypeNameMap[typ.kind()]
         if isinstance(typ, idltype.String) or isinstance(typ, idltype.WString):
             return 'string' # ??
         if isinstance(typ, idltype.Sequence):
@@ -204,11 +204,11 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if isinstance(typ, idlast.Struct):
             return typ.identifier()
         if isinstance(typ, idlast.Const):
-            return TypeNameMap[typ.constKind()][0]
+            return TypeNameMap[typ.constKind()]
         if isinstance(typ, idlast.Enum):
-            return TypeNameMap[idltype.tk_longlong][0] # enum is int64 ??
+            return TypeNameMap[idltype.tk_longlong] # enum is int64 ??
         if isinstance(typ, idlast.Union):
-            return TypeNameMap[idltype.tk_double][0] # union is not in ROS
+            return TypeNameMap[idltype.tk_double] # union is not in ROS
         if isinstance(typ, idlast.Typedef):
             arraysize = typ.declarators()[0].sizes()
             if 0 < len(arraysize):
@@ -282,7 +282,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
 
         for typ in visitor.multiarray:
             msg = MultiArrayTypeNameMap[typ.kind()].replace('/','::')
-            cpp = TypeNameMap[typ.kind()][1]
+            cpp = cxx.types.basic_map[typ.kind()]
             code += multiarray_conversion % (msg,cpp,msg,msg,msg,cpp)
 
         for typ in visitor.allmsg:
