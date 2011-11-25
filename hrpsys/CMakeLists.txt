@@ -105,4 +105,5 @@ execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_
 
 rosbuild_add_rostest(launch/hrp4c.launch)
 rosbuild_add_rostest(launch/pa10.launch)
+rosbuild_add_rostest(launch/samplerobot.launch)
 
