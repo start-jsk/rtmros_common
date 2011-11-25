@@ -120,6 +120,7 @@ class AbsTransformToPosRpy  : public RTC::DataFlowComponentBase
   // </rtc-template>
 
  private:
+  coil::TimeMeasure tm;
 
 };
 
