@@ -19,6 +19,10 @@ http://code.google.com/p/openhrp-aist-grx/
 
   <depend package="rosunit" />
   <depend package="roscpp" />
+  <depend package="rospy" />
+  <depend package="tf" />
+
+  <!-- openhrp3 -->
   <depend package="tvmet" />
   <depend package="openrtm" />
   <depend package="common_rosdeps" />

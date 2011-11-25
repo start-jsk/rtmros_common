@@ -37,7 +37,7 @@ def waitOnlineViewer():
     ret = False
     while not ret :
         time.sleep(1)
-        print "wait for online viewer..."
+        print "[check_online_viewer] wait for online viewer..."
         try:
             ret = filter(lambda x: findObject("OnlineViewer", "").getPosture(x)[0], ["floor", "longfloor", "box", "pa10"])
         except:
