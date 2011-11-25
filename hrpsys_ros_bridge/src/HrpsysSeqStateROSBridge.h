@@ -52,6 +52,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   tf::TransformBroadcaster br;
 
   coil::Mutex m_mutex;
+  coil::TimeMeasure tm;
 };
 
 

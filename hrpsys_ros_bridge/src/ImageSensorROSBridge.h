@@ -133,6 +133,8 @@ class ImageSensorROSBridge  : public RTC::DataFlowComponentBase
   unsigned int pair_id;
   ros::Time capture_time;
   std::string frame;
+
+  coil::TimeMeasure tm;
 };
 
 

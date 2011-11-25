@@ -73,6 +73,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   std::cerr << "[HrpsysSeqStateROSBridge] Loaded " << body->name() << " from " << modelfile <<  std::endl;
   body->calcForwardKinematics();
 
+  tm.tick();
   return RTC::RTC_OK;
 }
 
@@ -133,10 +134,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   sensor_msgs::JointState joint_state;
   joint_state.header.stamp = ros::Time::now();
 
-  std::cerr <<"[" << getInstanceName() << "] @onExecute [" << joint_state.header.stamp << "] name : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew() << std::endl;
-
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
+    std::cerr <<"[" << getInstanceName() << "] @onExecute [" << joint_state.header.stamp << "] name : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew() << std::endl;
+
     try {
       m_rsangleIn.read();
       for ( unsigned int i = 0; i < m_rsangle.data.length() ; i++ ) std::cerr << m_rsangle.data[i] << " "; std::cerr << std::endl;
@@ -187,6 +188,15 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
 
     m_mutex.unlock();
+
+    ros::spinOnce();
+  } else { //m_in_rsangleIn
+    double interval = 5;
+    tm.tack();
+    if ( tm.interval() > interval ) {
+      std::cout << "[" << getInstanceName() << "] @onExecutece " << ec_id << " is not executed last " << interval << "[sec]" << std::endl;
+      tm.tick();
+    }
   }
 
   if ( m_poseIn.isNew () ) {
@@ -198,7 +208,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     // odom publish
     br.sendTransform(tf::StampedTransform(base, joint_state.header.stamp, "odom", body->rootLink()->link_name));
   }
-  ros::spinOnce();
 
   return RTC::RTC_OK;
 }

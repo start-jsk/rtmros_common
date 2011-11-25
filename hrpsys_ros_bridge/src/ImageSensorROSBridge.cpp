@@ -70,6 +70,7 @@ RTC::ReturnCode_t ImageSensorROSBridge::onInitialize()
   pair_id = 0;
   ros::param::param<std::string>("~frame_id", frame, "camera");
 
+  tm.tick();
   return RTC::RTC_OK;
 }
 
@@ -109,8 +110,10 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
 {
   capture_time = ros::Time::now();
 
-  std::cerr << "[" << getInstanceName() << "] @onExecute name : " << getInstanceName() << "/" << ec_id << ", image:" << m_imageIn.isNew () << std::endl;
+  // m_image
   if (m_imageIn.isNew()){
+
+    std::cerr << "[" << getInstanceName() << "] @onExecute name : " << getInstanceName() << "/" << ec_id << ", image:" << m_imageIn.isNew () << std::endl;
 
     m_imageIn.read();
 #if 0
@@ -167,6 +170,13 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
     info_pub.publish(info);
 
     ++pair_id;
+  } else {  // m_image
+    double interval = 5;
+    tm.tack();
+    if ( tm.interval() > interval ) {
+      std::cout << "[" << getInstanceName() << "] @onExecutece " << ec_id << " is not executed last " << interval << "[sec]" << std::endl;
+      tm.tick();
+    }
   }
   return RTC::RTC_OK;
 }
