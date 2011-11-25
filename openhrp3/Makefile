@@ -4,7 +4,7 @@ include $(shell rospack find mk)/cmake.mk
 INSTALL_DIR=`rospack find openhrp3`
 HG_DIR = build/openhrp-aist-grx-svn
 HG_URL = https://openhrp-aist-grx.googlecode.com/hg/
-HG_PATCH =patch/PD_HGtest.xml.patch patch/Sample.xml.patch patch/SampleHG.xml.patch patch/SampleLF.xml.patch patch/SamplePD.xml.patch patch/SamplePD_HG.xml.patch patch/SampleSV.xml.patch
+HG_PATCH =patch/PD_HGtest.xml.patch patch/Sample.xml.patch patch/SampleHG.xml.patch patch/SampleLF.xml.patch patch/SamplePD.xml.patch patch/SamplePD_HG.xml.patch patch/SampleSV.xml.patch patch/PA10Sample.xml.patch patch/SampleRobot_inHouse.xml.patch
 #HG_REVISION=@REVISION@
 include $(shell rospack find mk)/hg_checkout.mk
 

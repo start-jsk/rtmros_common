@@ -1,0 +1,20 @@
+diff -r d2238a6a6df1 sample/project/PA10Sample.xml
+--- a/sample/project/PA10Sample.xml	Fri Oct 28 13:53:05 2011 +0900
++++ b/sample/project/PA10Sample.xml	Fri Nov 25 15:39:44 2011 +0900
+@@ -73,5 +73,16 @@
+             <property name="springDamperModel" value="false"/>
+             <property name="staticFriction" value="0.5"/>
+         </item>
++        <view class="com.generalrobotix.ui.view.Grx3DView" name="3DView">
++            <property name="view.mode" value="Room"/>
++            <property name="showCoM" value="false"/>
++            <property name="showCoMonFloor" value="false"/>
++            <property name="showDistance" value="false"/>
++            <property name="showIntersection" value="false"/>
++            <property name="eyeHomePosition" value="0.74103 0.02685 0.67094 1.90955 0.67147 -0.02963 -0.74044 -2.65816 -0 0.9992 -0.03999 0.25703 0 0 0 1 "/>
++            <property name="showCollision" value="true"/>
++            <property name="showActualState" value="true"/>
++            <property name="showScale" value="true"/>
++        </view>
+     </mode>
+ </grxui>
