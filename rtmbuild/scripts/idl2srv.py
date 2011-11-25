@@ -110,6 +110,11 @@ template<>
 void convert(%s& v, %s& s){ convert(v.data[v.layout.data_offset++], s); }
 """ # % (std_msgs::Float64MultiArray, double, std_msgs::Float64MultiArray) + (std_msgs::Float64MultiArray, std_msgs::Float64MultiArray, double)
 
+# symbol type constant
+NOT_FULL = 0
+ROS_FULL = 1
+CPP_FULL = 2
+
 # visitor for generate msg/srv/cpp/h for bridge compornents
 class ServiceVisitor (idlvisitor.AstVisitor):
 
@@ -139,7 +144,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
 ##
 ##
 ##
-    def getCppTypeText(self, typ, out=False, full=False):
+    def getCppTypeText(self, typ, out=False, full=NOT_FULL):
         if isinstance(typ, idltype.Base):
             return cxx.types.basic_map[typ.kind()]
         if isinstance(typ, idltype.String):
@@ -149,20 +154,32 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             return self.getCppTypeText(typ.decl(), False, full) + postfix
 
         if isinstance(typ, idlast.Struct):
-            name = (idlutil.ccolonName(typ.scopedName()) if full else typ.identifier())
+            if full == CPP_FULL:
+                name = idlutil.ccolonName(typ.scopedName())
+            elif full == ROS_FULL:
+                return '_'.join(typ.scopedName()) # return
+            else:
+                name = typ.identifier()
             return name + ('*' if out and cxx.types.variableDecl(typ) else '')
-        if isinstance(typ, idlast.Enum):
-            if full:
+        if isinstance(typ, idlast.Enum) or \
+           isinstance(typ, idlast.Interface) or \
+           isinstance(typ, idlast.Operation):
+            if full == CPP_FULL:
                 return idlutil.ccolonName(typ.scopedName())
+            elif full == ROS_FULL:
+                return '_'.join(typ.scopedName())
             else:
                 return typ.identifier()
         if isinstance(typ, idlast.Typedef):
-            if full:
+            if full == CPP_FULL:
                 return idlutil.ccolonName(typ.declarators()[0].scopedName())
+            elif full == ROS_FULL:
+                return '_'.join(typ.declarators()[0].scopedName())
             else:
                 return typ.declarators()[0].identifier()
         if isinstance(typ, idlast.Declarator):
             return self.getCppTypeText(typ.alias(), out, full)
+
         return 'undefined'
 
 
@@ -200,9 +217,9 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             return self.getROSTypeText(typ.decl())
 
         if isinstance(typ, idlast.Interface):
-            return typ.identifier()
+            return '_'.join(typ.scopedName())
         if isinstance(typ, idlast.Struct):
-            return typ.identifier()
+            return '_'.join(typ.scopedName())
         if isinstance(typ, idlast.Const):
             return TypeNameMap[typ.constKind()]
         if isinstance(typ, idlast.Enum):
@@ -226,7 +243,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if not (isinstance(typ, idlast.Enum) or isinstance(typ, idlast.Struct) or isinstance(typ, idlast.Interface)):
             return
 
-        msgfile = basedir + "/msg/" + typ.identifier() + ".msg"
+        msgfile = basedir + "/msg/" + self.getCppTypeText(typ,full=ROS_FULL) + ".msg"
         if not os.path.exists(basedir):
             return
         if options.filenames:
@@ -253,7 +270,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
     # output .srv file defined in .idl
     def outputSrv(self, op):
 
-        srvfile = basedir + "/srv/" + op.identifier() + ".srv"
+        srvfile = basedir + "/srv/" + self.getCppTypeText(op,full=ROS_FULL) + ".srv"
         if not os.path.exists(basedir):
             return
         if options.filenames:
@@ -289,13 +306,13 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             if not isinstance(typ, idlast.Struct):
                 continue
 
-            code += 'template<> void convert(%s& in, %s::%s& out){\n' % (self.getCppTypeText(typ, full=True), pkgname, self.getCppTypeText(typ))
+            code += 'template<> void convert(%s& in, %s::%s& out){\n' % (self.getCppTypeText(typ, full=CPP_FULL), pkgname, self.getCppTypeText(typ,full=ROS_FULL))
             for mem in typ.members():
                 var = mem.declarators()[0].identifier()
                 code += '  convert(in.%s, out.%s);\n' % (var, var)
             code += '}\n'
 
-            code += 'template<> void convert(%s::%s& in, %s& out){\n' % (pkgname, self.getCppTypeText(typ), self.getCppTypeText(typ, full=True))
+            code += 'template<> void convert(%s::%s& in, %s& out){\n' % (pkgname, self.getCppTypeText(typ,full=ROS_FULL), self.getCppTypeText(typ, full=CPP_FULL))
             for mem in typ.members():
                 var = mem.declarators()[0].identifier()
                 code += '  convert(in.%s, out.%s);\n' % (var, var)
@@ -315,7 +332,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
                isinstance(ptype.unalias(), idltype.String) or \
                isinstance(ptype.unalias(), idltype.Sequence) or \
                isinstance(ptype.unalias(), idltype.Declared):
-                code += '  %s %s;\n' % (self.getCppTypeText(ptype, out=is_out, full=True), var)
+                code += '  %s %s;\n' % (self.getCppTypeText(ptype, out=is_out, full=CPP_FULL), var)
                 params += [var]
             if isinstance(ptype.unalias(), idltype.Base) or \
                isinstance(ptype.unalias(), idltype.String):
@@ -352,14 +369,14 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             elif isinstance(rtype.unalias(), idltype.Declared):
                 ptr = ('*' if cxx.types.variableDecl(rtype.decl()) else '')
             else: ptr = ''
-            code += '  %s operation_return;\n' % self.getCppTypeText(rtype, out=True, full=True)
+            code += '  %s operation_return;\n' % self.getCppTypeText(rtype, out=True, full=CPP_FULL)
             code += '  operation_return = m_service0->%s(%s);\n' % (op.identifier(), params)
             code += '  convert(%soperation_return, res.operation_return);\n' % ptr
 
 
         code += res_code
 
-        return """bool %s::%s(%s::%s::Request &req, %s::%s::Response &res){\n%s\n  return true;\n};\n\n""" % (ifname, op.identifier(), pkgname, op.identifier(), pkgname, op.identifier(), code)
+        return """bool %s::%s(%s::%s::Request &req, %s::%s::Response &res){\n%s\n  return true;\n};\n\n""" % (ifname, op.identifier(), pkgname, self.getCppTypeText(op,full=ROS_FULL), pkgname, self.getCppTypeText(op,full=ROS_FULL), code)
 
     # generate cpp source to bridge RTM/ROS
     def genBridgeComponent(self, interface):
@@ -435,13 +452,13 @@ RTC::ReturnCode_t %s::onExecute(RTC::UniqueId ec_id) {
         compsrc = compsrc.replace('<%s>'%service_name, '<%s>'%idlutil.ccolonName(interface.scopedName()))
 
         incs = ['', '// ROS', '#include <ros/ros.h>']
-        incs += ['#include <%s/%s.h>' % (pkgname, op.identifier()) for op in operations]
+        incs += ['#include <%s/%s.h>' % (pkgname, self.getCppTypeText(op,full=ROS_FULL)) for op in operations]
         incs = '\n'.join(incs)
         compsrc = addline(incs, compsrc, '#define')
 
         compsrc = '\n'.join([ (a.replace('//','') if ('RTC::ReturnCode_t onExecute' in a) else a) for a in compsrc.split('\n')])
 
-        srvfunc = ['  bool %s(%s::%s::Request &req, %s::%s::Response &res);' % (op.identifier(), pkgname, op.identifier(), pkgname, op.identifier()) for op in operations]
+        srvfunc = ['  bool %s(%s::%s::Request &req, %s::%s::Response &res);' % (op.identifier(), pkgname, self.getCppTypeText(op,full=ROS_FULL), pkgname, self.getCppTypeText(op,full=ROS_FULL)) for op in operations]
         srvfunc = '\n'.join(srvfunc)
         compsrc = addline(srvfunc, compsrc, 'public:')
 
