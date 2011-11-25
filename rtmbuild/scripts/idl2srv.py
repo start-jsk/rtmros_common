@@ -30,18 +30,34 @@ TypeNameMap = { # for ROS msg/srv
     idltype.tk_TypeCode: 'uint64', # ??
     idltype.tk_enum: 'uint64' }
 
+MultiArrayTypeNameMap = { # for ROS msg/srv
+    idltype.tk_char:     ('std_msgs/Int8MultiArray',   'char'),
+    idltype.tk_octet:    ('std_msgs/Uint8MultiArray',  'uchar'),
+    idltype.tk_wchar:    ('std_msgs/Int16MultiArray',  'short'),
+    idltype.tk_short:    ('std_msgs/Int16MultiArray',  'short'),
+    idltype.tk_ushort:   ('std_msgs/Uint16MultiArray', 'ushort'),
+    idltype.tk_long:     ('std_msgs/Int32MultiArray',  'int'),
+    idltype.tk_ulong:    ('std_msgs/Uint32MultiArray', 'uint'),
+    idltype.tk_longlong: ('std_msgs/Int64MultiArray',  'long long'),
+    idltype.tk_ulonglong:('std_msgs/Uint64MultiArray', 'long long'),
+    idltype.tk_float:    ('std_msgs/Float32MultiArray','float'),
+    idltype.tk_double:   ('std_msgs/Float64MultiArray','double')}
+
 # convert functions for IDL/ROS
+# _CORBA_String_element type is env depend ??
 convert_functions = """\n
+template<typename T,typename S>
+void genseq(S& s, int size, _CORBA_Unbounded_Sequence<T>* p){
+  s = S(size,size,S::allocbuf(size), 1);}
+template<typename T,typename S,int n>
+void genseq(S& s, int size, _CORBA_Bounded_Sequence<T,n>* p){
+  s = S(size,S::allocbuf(size), 1);}
 template<class T1, class T2> inline
 void convert(T1& in, T2& out){ out = static_cast<T2>(in); }
 template<typename T>
 void convert(T& in, std::string& out){ out = std::string(in); }
 template<typename T>
 void convert(std::string& in, T& out){ out = static_cast<T>(in.c_str()); }
-//template<>
-//void convert(CORBA::String_member& in, std::string& out){ out = std::string(in); }
-//template<>
-//void convert(std::string& in, CORBA::String_member& out){ out = (const char*)in.c_str(); }
 void convert(_CORBA_String_element in, std::string& out){ out = std::string(in); }
 void convert(std::string& in, _CORBA_String_element out){ out = (const char*)in.c_str(); }
 template<class S,class T>
@@ -61,6 +77,39 @@ template<class S,class T,std::size_t n>
 void convert(boost::array<T,n>& v, S& s){
   for(std::size_t i=0; i<n; i++) convert(v[i],s[i]);}
 """
+
+multiarray_conversion = """
+template<class S> // convert multi-dimensional array
+void convert(S& s, %s& v){
+  if(v.layout.dim.size()==0 || v.layout.dim[v.layout.dim.size()-1].size==0) {
+    int level = v.layout.dim.size();
+    v.layout.dim.push_back(std_msgs::MultiArrayDimension());
+    v.layout.dim[level].stride = 1;
+    for(uint i=0; i<s.length(); i++){
+      convert(s[i], v);
+      if(i==0) v.layout.dim[level].size = s.length(); // initialized flag
+    }
+    for(uint i=level; i<v.layout.dim.size(); i++)
+      v.layout.dim[level].stride *= v.layout.dim[level].size;
+  } else {
+    for(uint i=0; i<s.length(); i++){ convert(s[i], v); }
+  }
+}
+template<>
+void convert(%s& s, %s& v){ v.data.push_back(s); }
+template<class S>
+void convert(%s& v, S& s){
+  int level, size;
+  for(level=0; (size=v.layout.dim[level].size)==0; level++);
+  genseq(s, size, &s);
+  v.layout.dim[level].size = 0;
+  for(uint i=0; i<s.length(); i++)
+    convert(v, s[i]);
+  v.layout.dim[level].size = size;
+}
+template<>
+void convert(%s& v, %s& s){ convert(v.data[v.layout.data_offset++], s); }
+""" # % (std_msgs::Float64MultiArray, double, std_msgs::Float64MultiArray) + (std_msgs::Float64MultiArray, std_msgs::Float64MultiArray, double)
 
 # visitor for generate msg/srv/cpp/h for bridge compornents
 class ServiceVisitor (idlvisitor.AstVisitor):
@@ -124,22 +173,27 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if isinstance(typ, idltype.Sequence):
             etype = typ.seqType() # n-dimensional array -> 1-dimensional
             size = typ.bound()
-            while not (isinstance(etype, idltype.Base) or isinstance(etype, idltype.String) or isinstance(etype, idltype.WString) or isinstance(etype, idlast.Struct) or isinstance(etype, idlast.Enum) or isinstance (etype, idlast.Forward)):
+            dim = 1
+            while not (isinstance(etype, idltype.Base) or isinstance(etype, idltype.String) or isinstance(etype, idltype.WString) or isinstance(etype, idlast.Struct) or isinstance(etype, idlast.Enum) or isinstance(etype, idlast.Forward)):
                 if isinstance(etype, idltype.Declared):
                     etype = etype.decl()
                 elif isinstance(etype, idltype.Sequence):
+                    dim += 1
                     size *= etype.bound()
                     etype = etype.seqType()
                 elif isinstance(etype, idlast.Typedef):
                     arrsize = [size] + etype.declarators()[0].sizes()
+                    if(len(arrsize) != 1): dim += 1
                     size = reduce(lambda a,b: a*b, arrsize)
                     etype = etype.aliasType()
                 elif isinstance(etype, idlast.Declarator):
                     etype = etype.alias()
-                elif isinstance(etype, idlast.Forward):
-                    etype = etype.fullDecl()
+#                elif isinstance(etype, idlast.Forward):
+#                    etype = etype.fullDecl()
                 else:
                     return 'undefined'
+            if( 1 < dim ):
+                return MultiArrayTypeNameMap[etype.kind()][0]
             return self.getROSTypeText(etype) + ('[]' if size==0 else '[%d]' % size)
         if isinstance(typ, idltype.Declared):
             return self.getROSTypeText(typ.decl())
@@ -223,10 +277,13 @@ class ServiceVisitor (idlvisitor.AstVisitor):
     def convertFunctionCode(self, interface):
         visitor = DependencyVisitor()
         interface.accept(visitor)
-        #print visitor.allmsg
         code = ''
-#        for tn in idltype.declaredTypeMap:
-#            typ = idltype.declaredTypeMap[tn].decl() # ??
+
+        for typ in visitor.multiarray:
+            msg = MultiArrayTypeNameMap[typ.kind()][0].replace('/','::')
+            cpp = MultiArrayTypeNameMap[typ.kind()][1]
+            code += multiarray_conversion % (msg,cpp,msg,msg,msg,cpp)
+
         for typ in visitor.allmsg:
             if not isinstance(typ, idlast.Struct):
                 continue
@@ -417,6 +474,7 @@ class DependencyVisitor (idlvisitor.AstVisitor):
 
     def visitInterface(self, node):
         self.allmsg = []
+        self.multiarray = []
         if node.mainFile():
             for n in node.callables():
                 n.accept(self)
@@ -433,6 +491,23 @@ class DependencyVisitor (idlvisitor.AstVisitor):
             self.allmsg += [node]
 
     def visitSequenceType(self, node):
+        etype = node.seqType()
+        dim = 1
+        while not (isinstance(etype, idltype.Base) or isinstance(etype, idltype.String) or isinstance(etype, idltype.WString) or isinstance(etype, idlast.Struct) or isinstance(etype, idlast.Enum)):
+            if isinstance(etype, idltype.Sequence):
+                dim += 1
+                etype = etype.seqType()
+            elif isinstance(etype, idltype.Declared):
+                etype = etype.decl()
+            elif isinstance(etype, idlast.Typedef):
+                if len(etype.declarators()[0].sizes()) != 0 : dim += 1
+                etype = etype.aliasType()
+            elif isinstance(etype, idlast.Declarator):
+                etype = etype.alias()
+            elif isinstance(etype, idlast.Forward):
+                etype = etype.fullDecl()
+        if 1 < dim and isinstance(etype, idltype.Base) and (not etype in self.multiarray) :
+            self.multiarray += [etype]
         self.checkBasicType(node.seqType())
     def visitDeclaredType(self, node):
         self.checkBasicType(node.decl())
