@@ -6,15 +6,15 @@
 
 .. code-block:: bash
 
-  roslaunch hrpsys_ros_bridge hrp4c.launch
-  roslaunch hrpsys_ros_bridge hrp4c_ros_bridge.launch
   rosrun roseus roseus `rospack find hrpsys_ros_bridge`/scripts/hrp4c-example.l
 
-This launch file shows an example of ros bridge for open hrp4 robot.
+This launch file shows an example of ros bridge for open hrp4 robot, `hrp4c-example.launch` file launches folloiwng two program
 
 1. `roslaunch hrpsys_ros_bridge hrp4c.launch` : launch simulated robot environment, if you use real robot, you don't need this line
 
 2. `roslaunch hrpsys_ros_bridge hrp4c_ros_bridge.launch` : launch rtm ros bridge
+
+After that, we need to invoke the client program. Following program is the example of euslisp language
 
 3. `rosrun roseus roseus hrp4c-example.l` : sample euslisp script to control therobot.
 
