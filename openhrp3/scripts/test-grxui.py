@@ -141,6 +141,7 @@ class TestGrxUIProject(unittest.TestCase):
                         self.unmap_window(camera_window)
             filename="%s-%03d.png"%(self.name, i)
             print "[%s] write to %s"%(self.id(), filename)
+            self.xdotool(self.capture_window, "windowactivate --sync")
             ret = subprocess.call('import -frame -screen -window %s %s/%s'%(self.capture_window, self.target_directory, filename), shell=True)
             print "[%s] import returns %s"%(self.id(), ret)
             self.assertEqual(ret, 0) #
