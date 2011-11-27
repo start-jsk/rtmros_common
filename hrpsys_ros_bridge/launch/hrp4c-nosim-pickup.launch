@@ -4,7 +4,7 @@
 
   <sphinxdoc><![CDATA[
 
-  This script is "no-sim" version of `hrp4-pickup.launch`, launch `hrp4c-nosim.launch` instead of `hrp4c.launch` to run OpenHRP3 simulator without forward dynamics calculation.
+This script is "no-sim" version of `hrp4-pickup.launch`, launch `hrp4c-nosim.launch` instead of `hrp4c.launch` to run OpenHRP3 simulator without forward dynamics calculation.
 
 .. image:: build/images/HRP4C_NoSimPickUp.gif
   :width: 600
