@@ -1,0 +1,21 @@
+<launch>
+  <include file="$(find hrpsys_ros_bridge)/launch/hrp4c-nosim.launch" >
+  <include file="$(find hrpsys_ros_bridge)/launch/hrp4c_ros_bridge.launch" />
+
+  <sphinxdoc><![CDATA[
+
+  This script is "no-sim" version of `hrp4-pickup.launch`, launch `hrp4c-nosim.launch` instead of `hrp4c.launch` to run OpenHRP3 simulator without forward dynamics calculation.
+
+.. image:: build/images/HRP4C_NoSimPickUp.gif
+  :width: 600
+
+  ]]></sphinxdoc>
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="600" retry="2"
+   test-name="HRP4C_NoSimPickUp"
+   args="--max-time=40 --capture-window RViz
+	 --target-directory=$(find hrpsys_ros_bridge)/build/images
+	 --check-tf='/BODY /R_HAND_J1_LINK'
+	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/hrp4c-pickup.l __log:=dummy'" /> <!-- add dummy __log/= argument to invoke roseus with non-interactive mode -->
+</launch>
+
+
