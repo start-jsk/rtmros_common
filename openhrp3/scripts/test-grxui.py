@@ -143,7 +143,8 @@ class TestGrxUIProject(unittest.TestCase):
             filename="%s-%03d.png"%(self.name, i)
             print "[%s] write to %s"%(self.id(), filename)
             self.xdotool(self.capture_window, "windowactivate --sync", visible=True)
-            ret = subprocess.call('import -frame -screen -window %s %s/%s'%(self.capture_window, self.target_directory, filename), shell=True)
+            #ret = subprocess.call('import -frame -screen -window %s %s/%s'%(self.capture_window, self.target_directory, filename), shell=True)
+            ret = subprocess.call('import -frame -screen -window root %s/%s'%(self.capture_window, self.target_directory, filename), shell=True)
             print "[%s] import returns %s"%(self.id(), ret)
             self.assertEqual(ret, 0) #
             if self.script_procs and all(map(lambda x: x.poll()!=None, self.script_procs)) :
