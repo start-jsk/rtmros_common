@@ -1,5 +1,5 @@
 (load "package://hrpsys_ros_bridge/scripts/rtm-ros-robot-interface.l")
-(require :hrp4c "package://hrpsys/scripts/hrp4c.l")
+(require :hrp4c "package://hrpsys_ros_bridge/models/hrp4c.l")
 
 (defclass hrp4c-interface
   :super robot-interface
