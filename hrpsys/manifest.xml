@@ -18,6 +18,7 @@
   <depend package="roseus"/>
   <depend package="euscollada"/>
   <depend package="collada_robots"/>
+  <depend package="webots"/>
 
   <rosdep name="doxygen" />
 </package>
