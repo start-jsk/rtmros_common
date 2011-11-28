@@ -96,10 +96,10 @@ int main (int argc, char* argv[]) {
 #ifdef MODELPATH
 	{
 		cout << modelpath << endl;
+		return 0;
 	}
 #endif
 
-#ifdef ROBOTNAME
 	{ // wait for ClockGenerator
 		CORBA::ORB_var orb;
 		orb = CORBA::ORB_init(argc, argv);
@@ -120,8 +120,14 @@ int main (int argc, char* argv[]) {
 		} while ( obj == NULL );
 
 		BodyInfo_var body = loadBodyInfo(modelpath.c_str(), orb);
+#ifdef ROBOTNAME
 		cout << body->name() << endl;
-	}
 #endif
+#ifdef ROOTLINK
+		LinkInfoSequence_var links = body->links();
+		cout << string(links[0].name) << endl;
+#endif
+	}
+
 	return 0;
 }

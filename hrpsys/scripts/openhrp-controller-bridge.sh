@@ -10,6 +10,8 @@ ROBOTNAME=`$OPENHRP3_PATH/bin/extract-robotname $1`
 if [ $? != 0 ]; then exit 1; fi
 MODELFILE=`$OPENHRP3_PATH/bin/extract-modelpath $1`
 if [ $? != 0 ]; then exit 1; fi
+ROOTLINK=`$OPENHRP3_PATH/bin/extract-rootlink $1`
+if [ $? != 0 ]; then exit 1; fi
 
 echo "Stating $ROBOTNAME from $MODELFILE with /tmp/$ROBOTNAME$$.conf"
 
@@ -18,14 +20,14 @@ model: file://$MODELFILE
 dt: 0.005
 EOF
 
-`rospack find openhrp3`/bin/openhrp-controller-bridge --server-name $ROBOTNAME \
+gdb -ex run --args `rospack find openhrp3`/bin/openhrp-controller-bridge --server-name $ROBOTNAME \
     --periodic-rate $ROBOTNAME\(Robot\)0:1.0 \
     --periodic-rate HGcontroller0:1.0 \
     --in-port qRef:JOINT_VALUE \
     --in-port dqRef:JOINT_VELOCITY \
     --in-port ddqRef:JOINT_ACCELERATION \
     --out-port q:JOINT_VALUE \
-    --out-port pr:WAIST:ABS_TRANSFORM \
+    --out-port pr:$ROOTLINK:ABS_TRANSFORM \
     --out-port left-eye:0:COLOR_IMAGE:0.1 \
     --connection qRef:HGcontroller0:qOut \
     --connection dqRef:HGcontroller0:dqOut \

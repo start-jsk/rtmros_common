@@ -444,9 +444,13 @@ public:
 			rospack::ROSPack rp;
 			rospack::Package *p = rp.get_pkg("openhrp3");
 			m.url = string("file://")+p->path+"/share/OpenHRP-3.1/sample/model/floor.wrl";
-			m.joint["WAIST"].mode = DynamicsSimulator::HIGH_GAIN_MODE;
-			m.joint["WAIST"].translation[0] = 0; m.joint["WAIST"].translation[1] = 0; m.joint["WAIST"].translation[2] = -0.1;
-			hrp::calcRodrigues(m.joint["WAIST"].rotation, Vector3(0, 0, 1), 0);
+			LinkInfoSequence_var links = body->links();
+			string rootLinkName = string(links[0].name);
+			m.joint[rootLinkName].mode = DynamicsSimulator::HIGH_GAIN_MODE;
+			m.joint[rootLinkName].translation[0] = 0;
+			m.joint[rootLinkName].translation[1] = 0;
+			m.joint[rootLinkName].translation[2] = -0.1;
+			hrp::calcRodrigues(m.joint[rootLinkName].rotation, Vector3(0, 0, 1), 0);
 			string n = string("floor");
 			Models.insert(pair<string,ModelItem>(n, m));
 		}
