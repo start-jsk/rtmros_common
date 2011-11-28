@@ -141,8 +141,9 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
     sensor_msgs::ImagePtr image(new sensor_msgs::Image);
     sensor_msgs::CameraInfoPtr info(new sensor_msgs::CameraInfo);
 
-    image->width = 320;
-    image->height = 240;
+    // assume that m_image.data is color and 3:4 image
+    image->width  = 4*sqrt(m_image.data.length()/12);
+    image->height = 3*sqrt(m_image.data.length()/12);
     image->step = 3 * image->width;
     image->encoding = sensor_msgs::image_encodings::RGB8;
     image->header.stamp = capture_time;
@@ -158,8 +159,8 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
     }
     pub.publish(image);
 
-    info->width = 320;
-    info->height = 240;
+    info->width  = image->width;
+    info->height = image->height;
     info->distortion_model = "plumb_bob";
     boost::array<double, 9> K = {700.0, 0.0, 160.0, 0.0, 700.0, 120.0, 0.0, 0.0, 1.0}; // TODO fieldOfView       0.785398
     info->K = K;
