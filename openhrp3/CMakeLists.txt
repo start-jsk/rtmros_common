@@ -66,6 +66,10 @@ rosbuild_find_ros_package("jsk_tools")
 execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_PACKAGE_PATH}/bin/launchdoc-generator.py ${PROJECT_NAME} --output_dir=. --nomakefile RESULT_VARIABLE _make_failed)
 
 
+rosbuild_check_for_display(disp)
+if(disp AND NOT EXISTS ${PROJECT_SOURCE_DIR}/workspace)
+  execute_process(COMMAND ${PROJECT_SOURCE_DIR}/scripts/_setup_grxui.sh)
+endif(disp AND NOT EXISTS ${PROJECT_SOURCE_DIR}/workspace)
 rosbuild_add_rostest(launch/sample.launch)
 rosbuild_add_rostest(launch/falling-box.launch)
 rosbuild_add_rostest(launch/pa10.launch)
