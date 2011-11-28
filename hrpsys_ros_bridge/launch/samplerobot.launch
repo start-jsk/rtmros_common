@@ -16,7 +16,7 @@ This launch file shows an example of ros bridge for sample robot and client prog
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="600" retry="2"
    test-name="SampleRobot_PickUp"
-   args="--max-time=100 --capture-window RViz
+   args="--max-time=40 --capture-window RViz
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --check-tf='/WAIST_LINK0 /VISION_SENSOR1'
 	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/samplerobot-pickup.l __log:=dummy'" /> <!-- add dummy __log/= argument to invoke roseus with non-interactive mode -->
