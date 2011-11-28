@@ -113,6 +113,7 @@ rosbuild_add_rostest(launch/hrp4c_nosim.launch)
 rosbuild_add_rostest(launch/darwin.launch)
 rosbuild_add_rostest(launch/samplerobot.launch)
 rosbuild_add_rostest(launch/hironx.launch)
+rosbuild_add_rostest(launch/smartpal5.launch)
 
 ##
 ## documents
