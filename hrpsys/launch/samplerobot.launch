@@ -32,6 +32,6 @@ Finally, `rosrun hrpsys SampleRobot_walk.sh` read walking pattern data and send 
    test-name="SampleRobot"
    args="--start-simulation --max-time=40
 	 --target-directory=$(find hrpsys)/build/images
-	 --script='rosrun hrpsys hrpsyspy $(find hrpsys)/scripts/hrpsys.py $(find hrpsys)/scripts/SampleRobot_inHouse.xml; rosrun hrpsys SampleRobot_walk.sh'"
+	 --script='sleep 5; rosrun hrpsys hrpsyspy $(find hrpsys)/scripts/hrpsys.py $(find hrpsys)/scripts/SampleRobot_inHouse.xml; rosrun hrpsys SampleRobot_walk.sh'"
    />
 </launch>
