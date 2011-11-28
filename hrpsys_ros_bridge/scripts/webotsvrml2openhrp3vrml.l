@@ -301,7 +301,7 @@
 ;; Preprocess for VRML convert
 ;;;;;;;;;;;;;;;;;;;;;;;;
 (defun get-vrml-convert-script-dir ()
-  (format nil "~A/scripts" (get-rospack-find-str "hrpsys")))
+  (format nil "~A/scripts" (get-rospack-find-str "hrpsys_ros_bridge")))
 
 (defun get-rospack-find-str (package-name-str)
   (let* ((strm (piped-fork (format nil "rospack find ~A" package-name-str)))
