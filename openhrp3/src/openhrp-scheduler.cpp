@@ -219,7 +219,7 @@ public:
 		gravity = 0.9;
 		totalTime = 10.0;
 		timeStep = 0.05;
-		controlTimeStep = 0.005;
+		controlTimeStep = 0.05;
 		logTimeStep = 0.100;
 		dynamicsSimulator = NULL;
 		olv = NULL;
@@ -713,15 +713,16 @@ public:
 int main(int argc, char* argv[])
 {
 	// simulation
-	bool use_dynamics = true;
+	bool use_dynamics = true, verbose = false;
 	double gravity   = 9.8;
 	double totalTime = -1;
-	double timeStep  = 0.005;
+	double timeStep  = 0.05;
 
 	struct option lngopt[] = {
 		{"nosim",     0, NULL, 0},
 		{"totaltime", 1, NULL, 0},
 		{"timestep",  1, NULL, 0},
+		{"verbose",     0, NULL, 0},
 		{0, 0, 0, 0}
 	};
 	int opt;
@@ -738,6 +739,9 @@ int main(int argc, char* argv[])
 				break;
 			case 2:
 				timeStep = atof(optarg);
+				break;
+			case 3:
+				verbose = true;
 				break;
 			default:
 				cerr << "[openhrp-sceduler] unknwon option " << lngopt[option_index].name << endl;
@@ -787,8 +791,9 @@ int main(int argc, char* argv[])
 	cerr << "[openhrp-scheduler]    logTimeStep      : " << scheduler.getLogTimeStep() << endl;
 
 	// ==================  main loop   ======================
-	int i=0;
+	int i = 0;
 	int j = 0;
+	int count = 0;
 	double time=0.0;
 	double controlTime=0.0;
 
@@ -807,7 +812,13 @@ int main(int argc, char* argv[])
 		controlTime = scheduler.getControlTimeStep() * j;
 		//cerr << "time=" << time << ", control=" << controlTime << "(" << control << "/" << ((i % (int)(scheduler.getLogTimeStep()/scheduler.getControlTimeStep()))==0) << ")" << endl;
 
-		cerr << "[openhrp-scheduler]" << setw(6) << i << ", time: " << setw(6) << time << ", control : " << ((control==true)?"true":"false") << ", viewer: " << (((i % (int)(scheduler.getLogTimeStep()/scheduler.getControlTimeStep()))==0)?"true":"false") << endl;
+		count ++;
+		if ( verbose ) {
+			cerr << "[openhrp-scheduler]" << setw(6) << i << ", time: " << setw(6) << time << ", control : " << ((control==true)?"true":"false") << ", viewer: " << (((i % (int)(scheduler.getLogTimeStep()/scheduler.getTimeStep()))==0)?"true":"false") << endl;
+		} else if ( count > 1 / scheduler.getTimeStep() ) {
+			cerr << "[openhrp-scheduler] time: " << setw(6) << time << ", hz : " << count << endl;
+			count = 0;
+		}
 
 		if(control) scheduler.controllerControl(time);
 
@@ -815,7 +826,7 @@ int main(int argc, char* argv[])
 		scheduler.stepSimulation(use_dynamics);
 		// ================== viewer update ====================
 
-		if ((i % (int)(scheduler.getLogTimeStep()/scheduler.getControlTimeStep()))==0) {
+		if ((i % (int)(scheduler.getLogTimeStep()/scheduler.getTimeStep()))==0) {
 			scheduler.viewerUpdate();
 		}
 
