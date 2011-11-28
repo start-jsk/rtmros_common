@@ -1,0 +1,35 @@
+<launch>
+  <include file="$(find hrpsys_ros_bridge)/launch/hironx_startup.launch" >
+    <arg name="SCHEDULER_ARGS" value="--nosim" />
+  </include>
+  <include file="$(find hrpsys_ros_bridge)/launch/hironx_ros_bridge.launch" />
+
+  <sphinxdoc><![CDATA[
+
+.. code-block:: bash
+
+  rosrun roseus roseus `rospack find hrpsys_ros_bridge`/scripts/kawada-hironx-example.l
+
+This launch file shows an example of ros bridge for open kawada hironx robot, `hironx.launch` file launches folloiwng two program
+
+1. `roslaunch hrpsys_ros_bridge hironx_startup.launch` : launch simulated robot environment, if you use real robot, you don't need this line
+
+2. `roslaunch hrpsys_ros_bridge hironx_ros_bridge.launch` : launch rtm ros bridge
+
+After that, we need to invoke the client program. Following program is the example of euslisp language
+
+3. `rosrun roseus roseus kawada-hironx-example.l` : sample euslisp script to control the robot.
+
+.. image:: build/images/HIRONX_Example.gif
+  :width: 600
+
+  ]]></sphinxdoc>
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="600" retry="2"
+   test-name="HIRONX_Example"
+   args="--max-time=40 --capture-window RViz
+	 --target-directory=$(find hrpsys_ros_bridge)/build/images
+	 --check-tf='/WAIST /HEAD_JOINT1_Link'
+	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/kawada-hironx-example.l __log:=dummy'" /> <!-- add dummy __log/= argument to invoke roseus with non-interactive mode -->
+</launch>
+
+
