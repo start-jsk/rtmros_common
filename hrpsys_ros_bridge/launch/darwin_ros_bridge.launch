@@ -6,7 +6,7 @@
   </include>
 
   <node name="darwin_rviz" pkg="rviz" type="rviz" respawn="true"
-	args="--sync -d $(find hrpsys_ros_bridge)/launch/hrp4c.vcg" />
+	args="--sync -d $(find hrpsys_ros_bridge)/launch/darwin.vcg" />
 </launch>
 
 
