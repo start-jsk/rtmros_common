@@ -133,7 +133,6 @@ class TestGrxUIProject(unittest.TestCase):
         if self.scripts: self.execute_scripts()
         while (not self.check_window("Time is up")) and (i < self.max_time) :
             print "[%s] wait for \"Time is up\" (%d/%d) ..."%(self.id(), i, self.max_time)
-            print self.check_tf
             for camera_window in ["VISION_SENSOR1","VISION_SENSOR2"]:
                 if self.check_window(camera_window, visible=True):
                     if self.simulation_start :
