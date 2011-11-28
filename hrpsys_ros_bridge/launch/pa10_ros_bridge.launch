@@ -1,26 +1,12 @@
 <launch>
-  <!--
-      roslaunch hrprtc_ros_bridge sample.launch nameserver:=192.168.1.1
-  -->
-  <!-- BEGIN:openrtm setting -->
-  <arg name="nameserver" default="localhost" />
-  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
-  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
-  <!-- END:openrtm setting -->
-  <node name = "HrpsysSeqStateROSBridge"
-	pkg  = "hrpsys_ros_bridge"
-	type = "HrpsysSeqStateROSBridge"
-	args = "$(arg openrtm_args) -o model:$(find openhrp3)/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl"
-	output = "screen"/>
+  <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
+    <arg name="ROBOT_NAME" value="HRP1" />
+    <arg name="MODEL_FILE" value="$(find openhrp3)/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl" />
+    <arg name="COLLADA_FILE" value="$(find hrpsys)/scripts/PA10.dae" />
+  </include>
 
-  <param name="robot_description" textfile="$(find hrpsys)/share/hrpsys/samples/PA10/PA10.dae" />
-  <node pkg="robot_state_publisher" type="state_publisher" name="pa10_state_publisher" />
-
-  <!-- BEGIN:openrtm connection -->
-  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/pa10_ros_bridge.launch"/>
-  <rtconnect from="StateHolder0.rtc:qOut" to="HrpsysSeqStateROSBridge0.rtc:rsangle" />
-  <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" />
-  <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
-  <!-- END:openrtm connection -->
+  <node name="darwin_rviz" pkg="rviz" type="rviz" respawn="true"
+	args="--sync -d $(find hrpsys_ros_bridge)/launch/pa10.vcg" />
 </launch>
+
 

@@ -1,0 +1,7 @@
+<launch>
+  <arg name="SCHEDULER_ARGS" default="--nosim" />
+  <include file="$(find hrpsys)/launch/hrpsys.launch">
+    <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/PA10/PA10.xml" />
+    <arg name="SCHEDULER_ARGS" value="$(arg SCHEDULER_ARGS)" />
+  </include>
+</launch>

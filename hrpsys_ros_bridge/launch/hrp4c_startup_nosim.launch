@@ -1,6 +1,6 @@
 <launch>
   <arg name="SCHEDULER_ARGS" default="" />
-  <include file="$(find hrpsys_ros_bridge)/launch/hrp4c.launch">
+  <include file="$(find hrpsys_ros_bridge)/launch/hrp4c_startup.launch">
     <arg name="SCHEDULER_ARGS" value="--nosim" />
   </include>
 </launch>

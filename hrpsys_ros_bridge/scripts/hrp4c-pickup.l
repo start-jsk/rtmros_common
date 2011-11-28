@@ -1,5 +1,4 @@
-;(ros::roseus "hrp4c_pickup")
-;(load "package://hrpsys_ros_bridge/scripts/rtm-ros-robot-interface.l")
+(load "package://hrpsys_ros_bridge/scripts/rtm-ros-robot-interface.l")
 (require :hrp4c "package://hrpsys/scripts/hrp4c.l")
 
 (defclass hrp4c-interface
@@ -45,6 +44,7 @@
   (send *ri* :wait-interpolation)
   )
 
+(ros::roseus "hrp4c_pickup")
 (hrp4c-init)
 (hrp4c-lookdown)
 (hrp4c-pickup)
