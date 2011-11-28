@@ -58,18 +58,26 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   RTC::CorbaNaming naming(m_pManager->getORB(), nameServer.c_str());
   CosNaming::NamingContext::_duplicate(naming.getRootContext());
   std::string modelfile =  m_pManager->getConfig ()["model"];
-  try  {
-    std::cerr << "[HrpsysSeqStateROSBridge] Loading " << modelfile << std::endl;
-    loadBodyFromModelLoader (body,
-			     modelfile.c_str(),
-			     CosNaming::NamingContext::_duplicate(naming.getRootContext()));
-  } catch ( CORBA::SystemException& ex ) {
-    std::cerr << "[HrpsysSeqStateROSBridge] CORBA::SystemException " << ex._name() << std::endl;
-    return RTC::RTC_ERROR;
-  } catch ( ... ) {
-    std::cerr << "[HrpsysSeqStateROSBridge] failed to load model[" << prop["model"] << "]" << std::endl;
+  std::cerr << "[HrpsysSeqStateROSBridge] Errror on loading " << body <<  std::endl;
+  bool ret = false;
+  while ( ! ret ) {
+    try  {
+      ret = loadBodyFromModelLoader (body,
+				     modelfile.c_str(),
+				     CosNaming::NamingContext::_duplicate(naming.getRootContext()));
+    } catch ( CORBA::SystemException& ex ) {
+      std::cerr << "[HrpsysSeqStateROSBridge] CORBA::SystemException " << ex._name() << std::endl;
+      sleep(1);
+    } catch ( ... ) {
+      std::cerr << "[HrpsysSeqStateROSBridge] failed to load model[" << prop["model"] << "]" << std::endl;
+      sleep(1);
+    }
+  }
+  if ( body == NULL ) {
+    std::cerr << "[HrpsysSeqStateROSBridge] Errror on loading " << modelfile <<  std::endl;
     return RTC::RTC_ERROR;
   }
+
   std::cerr << "[HrpsysSeqStateROSBridge] Loaded " << body->name() << " from " << modelfile <<  std::endl;
   body->calcForwardKinematics();
 
