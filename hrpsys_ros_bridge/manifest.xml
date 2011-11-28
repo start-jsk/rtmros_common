@@ -53,6 +53,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <!-- examples -->
   <depend package="rviz"/>
   <depend package="jsk_perception" />
+  <depend package="image_view2" />
 </package>
 
 
