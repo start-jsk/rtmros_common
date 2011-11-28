@@ -1,0 +1,7 @@
+<launch>
+  <arg name="SCHEDULER_ARGS" default="--nosim" />
+  <include file="$(find hrpsys)/launch/hrpsys.launch">
+    <arg name="MODEL_FILE" value="$(find hrpsys_ros_bridge)/models/YaskawaSmartPal5.wrl" />
+    <arg name="SCHEDULER_ARGS" value="$(arg SCHEDULER_ARGS)" />
+  </include>
+</launch>
