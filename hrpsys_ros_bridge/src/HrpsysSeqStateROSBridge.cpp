@@ -42,7 +42,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   HrpsysSeqStateROSBridgeImpl::onInitialize();
 
   // initialize
-  std::cerr << "[HrpsysSeqStateROSBridge] @Initilize name : " << getInstanceName() << std::endl;
+  ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @Initilize name : " << getInstanceName());
 
 
   RTC::Properties& prop = getProperties();
@@ -54,11 +54,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
       comPos = nameServer.length();
     }
   nameServer = nameServer.substr(0, comPos);
-  std::cerr << "[HrpsysSeqStateROSBridge] nameserver " << nameServer.c_str() << std::endl;
+  ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] nameserver " << nameServer.c_str());
   RTC::CorbaNaming naming(m_pManager->getORB(), nameServer.c_str());
   CosNaming::NamingContext::_duplicate(naming.getRootContext());
   std::string modelfile =  m_pManager->getConfig ()["model"];
-  std::cerr << "[HrpsysSeqStateROSBridge] Errror on loading " << body <<  std::endl;
+  ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] Errror on loading " << body);
   bool ret = false;
   while ( ! ret ) {
     try  {
@@ -66,19 +66,19 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
 				     modelfile.c_str(),
 				     CosNaming::NamingContext::_duplicate(naming.getRootContext()));
     } catch ( CORBA::SystemException& ex ) {
-      std::cerr << "[HrpsysSeqStateROSBridge] CORBA::SystemException " << ex._name() << std::endl;
+      ROS_ERROR_STREAM("[HrpsysSeqStateROSBridge] CORBA::SystemException " << ex._name());
       sleep(1);
     } catch ( ... ) {
-      std::cerr << "[HrpsysSeqStateROSBridge] failed to load model[" << prop["model"] << "]" << std::endl;
+      ROS_ERROR_STREAM("[HrpsysSeqStateROSBridge] failed to load model[" << prop["model"] << "]");
       sleep(1);
     }
   }
   if ( body == NULL ) {
-    std::cerr << "[HrpsysSeqStateROSBridge] Errror on loading " << modelfile <<  std::endl;
+    ROS_FATAL_STREAM("[HrpsysSeqStateROSBridge] Errror on loading " << modelfile);
     return RTC::RTC_ERROR;
   }
 
-  std::cerr << "[HrpsysSeqStateROSBridge] Loaded " << body->name() << " from " << modelfile <<  std::endl;
+  ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] Loaded " << body->name() << " from " << modelfile);
   body->calcForwardKinematics();
 
   tm.tick();
@@ -90,7 +90,7 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryAction(const pr2_controllers_msgs
   m_mutex.lock();
   pr2_controllers_msgs::JointTrajectoryResult result;
 
-  std::cerr << "[" << getInstanceName() << "] @onJointTrajectoryAction ";
+  ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction ");
   //std::cerr << goal->trajectory.joint_names.size() << std::endl;
   if ( goal->trajectory.points.size() != 1) ROS_ERROR("trajectory.points must be 1");
   std::vector<std::string> joint_names = goal->trajectory.joint_names;
@@ -110,12 +110,12 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryAction(const pr2_controllers_msgs
   std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
   while ( it != body->joints().end() ) {
     hrp::Link* j = ((hrp::Link*)*it);
-    std::cerr << j->q << " ";
+    //std::cerr << j->q << " ";
     angles[i] = j->q;
     ++it;++i;
   }
   m_mutex.unlock();
-  std::cerr << " : " << goal->trajectory.points[0].time_from_start.toSec() << std::endl;
+  ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction : " << goal->trajectory.points[0].time_from_start.toSec());
   m_service0->setJointAngles(angles, goal->trajectory.points[0].time_from_start.toSec());
   m_service0->waitInterpolation();
   server.setSucceeded(result);
@@ -125,14 +125,14 @@ bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request
 				       dynamic_reconfigure::Reconfigure::Response &res)
 {
   if ( req.config.strs.size() == 2 ) {
-    std::cerr <<"[" << getInstanceName() << "] @sendMsg [" << req.config.strs[0].value << "]" << std::endl;
+    ROS_INFO_STREAM("[" << getInstanceName() << "] @sendMsg [" << req.config.strs[0].value << "]");
     if (req.config.strs[0].value == "setInterpolationMode") {
-      std::cerr <<"[" << getInstanceName() << "] @sendMsg [" << req.config.strs[1].value  << "]" << std::endl;
+      ROS_INFO_STREAM("[" << getInstanceName() << "] @sendMsg [" << req.config.strs[1].value  << "]");
       if ( req.config.strs[1].value == "linear" ) m_service0->setInterpolationMode(OpenHRP::SequencePlayerService::LINEAR);
       else m_service0->setInterpolationMode(OpenHRP::SequencePlayerService::HOFFARBIB);
     }
   } else {
-    std::cerr <<"[" << getInstanceName() << "] @sendMsg [Invalid argument string length]" << std::endl;
+    ROS_ERROR_STREAM("[" << getInstanceName() << "] @sendMsg [Invalid argument string length]");
   }
   return true;
 }
@@ -144,22 +144,21 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
-    std::cerr <<"[" << getInstanceName() << "] @onExecute [" << joint_state.header.stamp << "] name : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew() << std::endl;
-
+    ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew());
     try {
       m_rsangleIn.read();
-      for ( unsigned int i = 0; i < m_rsangle.data.length() ; i++ ) std::cerr << m_rsangle.data[i] << " "; std::cerr << std::endl;
+      //for ( unsigned int i = 0; i < m_rsangle.data.length() ; i++ ) std::cerr << m_rsangle.data[i] << " "; std::cerr << std::endl;
     }
     catch(const std::runtime_error &e)
       {
-	std::cerr << e.what() << std::endl;
+	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
     //
 
     m_mutex.lock();
     body->calcForwardKinematics();
     if ( m_rsangle.data.length() != body->joints().size() ) {
-      std::cerr << "rsangle.data.length(" << m_rsangle.data.length() << ") is not equal to body->joints().size(" << body->joints().size() << ")" << std::endl;
+      ROS_ERROR_STREAM("rsangle.data.length(" << m_rsangle.data.length() << ") is not equal to body->joints().size(" << body->joints().size() << ")");
       m_mutex.unlock();
       return RTC::RTC_OK;
     }
@@ -198,11 +197,21 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     m_mutex.unlock();
 
     ros::spinOnce();
+
+    //
+    static int count = 0;
+    tm.tack();
+    if ( tm.interval() > 1 ) {
+      ROS_INFO_STREAM("[" << getInstanceName() << "] @onExecutece " << ec_id << " is working at " << count << "[Hz]");
+      tm.tick();
+      count = 0;
+    }
+    count ++;
   } else { //m_in_rsangleIn
     double interval = 5;
     tm.tack();
     if ( tm.interval() > interval ) {
-      std::cout << "[" << getInstanceName() << "] @onExecutece " << ec_id << " is not executed last " << interval << "[sec]" << std::endl;
+      ROS_WARN_STREAM("[" << getInstanceName() << "] @onExecutece " << ec_id << " is not executed last " << interval << "[sec]");
       tm.tick();
     }
   }

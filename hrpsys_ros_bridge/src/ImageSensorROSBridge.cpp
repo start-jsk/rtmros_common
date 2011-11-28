@@ -65,7 +65,7 @@ RTC::ReturnCode_t ImageSensorROSBridge::onInitialize()
   info_pub = node.advertise<sensor_msgs::CameraInfo>("camera_info", 1);
 
   // initialize
-  std::cerr << "@Initilize name : " << getInstanceName() << std::endl;
+  ROS_INFO_STREAM("[ImageSensorROSBridge] @Initilize name : " << getInstanceName());
 
   pair_id = 0;
   ros::param::param<std::string>("~frame_id", frame, "camera");
@@ -113,7 +113,7 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
   // m_image
   if (m_imageIn.isNew()){
 
-    std::cerr << "[" << getInstanceName() << "] @onExecute name : " << getInstanceName() << "/" << ec_id << ", image:" << m_imageIn.isNew () << std::endl;
+    ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", image:" << m_imageIn.isNew ());
 
     m_imageIn.read();
 #if 0
@@ -170,11 +170,19 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
     info_pub.publish(info);
 
     ++pair_id;
+
+    static int count = 0;
+    tm.tack();
+    if ( tm.interval() > 1 ) {
+      ROS_INFO_STREAM("[" << getInstanceName() << "] @onExecutece " << ec_id << " is working at " << count << "[Hz]");
+      tm.tick();
+    }
+    count ++;
   } else {  // m_image
     double interval = 5;
     tm.tack();
     if ( tm.interval() > interval ) {
-      std::cout << "[" << getInstanceName() << "] @onExecutece " << ec_id << " is not executed last " << interval << "[sec]" << std::endl;
+      ROS_WARN_STREAM("[" << getInstanceName() << "] @onExecutece " << ec_id << " is not executed last " << interval << "[sec]");
       tm.tick();
     }
   }
