@@ -2,7 +2,7 @@
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="ROBOT_NAME" value="HRP4" />
     <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl" />
-    <arg name="COLLADA_FILE" value="$(find hrpsys)/scripts/HRP4C.dae" />
+    <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge)/models/HRP4C.dae" />
   </include>
 
   <node name="hrp4c_rviz" pkg="rviz" type="rviz" respawn="true"

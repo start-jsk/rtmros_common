@@ -30,22 +30,29 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   </export>
 
   <depend package="hrpsys"/>
-  <depend package="rviz"/>
 
+  <!-- seq state ros bridge -->
   <depend package="roscpp"/>
-
   <depend package="sensor_msgs"/>
   <depend package="robot_state_publisher"/>
-
   <depend package="actionlib"/>
   <depend package="pr2_controllers_msgs"/>
-
   <depend package="tf" />
 
+  <!-- image ros bridge -->
   <depend package="camera_info_manager" />
   <depend package="image_transport" />
   <depend package="dynamic_reconfigure" />
 
+  <!-- models -->
+  <depend package="roseus"/>
+  <depend package="euscollada"/>
+  <depend package="collada_robots"/>
+  <depend package="webots"/>
+
+  <!-- examples -->
+  <depend package="rviz"/>
+  <depend package="jsk_perception" />
 </package>
 
 
