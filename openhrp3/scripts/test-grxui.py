@@ -151,7 +151,7 @@ class TestGrxUIProject(unittest.TestCase):
             print "[%s] write %s to %s"%(self.id(), self.capture_window, filename)
             self.xdotool(self.capture_window, "windowactivate --sync", visible=True)
             #ret = subprocess.call('import -frame -screen -window %s %s/%s'%(self.capture_window, self.target_directory, filename), shell=True)
-            ret = subprocess.call('import -frame -screen -window root %s/%s'%(self.target_directory, filename), shell=True)
+            ret = subprocess.call('import -frame -resize 50%% -screen -window root %s/%s'%(self.target_directory, filename), shell=True)
             print "[%s] import returns %s"%(self.id(), ret)
             self.assertEqual(ret, 0) #
             if self.script_procs and all(map(lambda x: x.poll()!=None, self.script_procs)) :
@@ -172,7 +172,7 @@ class TestGrxUIProject(unittest.TestCase):
             self.wait_for_window("Simulation Finished")
             self.return_window("Simulation Finished")
         subprocess.call("xdotool search --name \"Eclipse SDK\" windowactivate --sync key --clearmodifiers alt+f key --clearmodifiers x", shell=True)
-        self.subprocess.call("xdotool key --clearmodifiers Return", shell=True)
+        subprocess.call("xdotool key --clearmodifiers Return", shell=True)
         subprocess.call("pkill omniNames", shell=True)
         # wait scripts
         self.terminate_scripts()
