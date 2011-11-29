@@ -79,8 +79,11 @@ class TestGrxUIProject(unittest.TestCase):
 
     def return_window(self,name):
         if self.check_window(name):
+            print "[%s] activate for return %s"%(self.id(),name)
+            self.xdotool(name, "windowactivate --sync")
+        if self.check_window(name):
             print "[%s] send return %s"%(self.id(),name)
-            self.xdotool(name, "windowactivate --sync key --clearmodifiers Return")
+            self.xdotool(name, "key --clearmodifiers Return",visible=True)
 
     def start_simulation(self):
         print "[%s] start simulation"%(self.id())
