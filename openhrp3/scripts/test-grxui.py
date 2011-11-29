@@ -146,7 +146,8 @@ class TestGrxUIProject(unittest.TestCase):
                     else:
                         self.unmap_window(camera_window)
             if self.check_window("Setup Controller", visible=True):
-                self.xdotool("Setup Controller", "key --clearmodifiers Tab key --clearmodifiers Return",visible=True)
+                self.xdotool("Setup Controller", "key Tab",visible=True)
+                self.xdotool("Setup Controller", "key Return",visible=True)
             filename="%s-%03d.png"%(self.name, i)
             print "[%s] write %s to %s"%(self.id(), self.capture_window, filename)
             self.xdotool(self.capture_window, "windowactivate --sync", visible=True)
