@@ -26,7 +26,7 @@ After that, we need to invoke the client program. Following program is the examp
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="600" retry="2"
    test-name="HIRONX_Example"
-   args="--max-time=10 --capture-window RViz
+   args="--max-time=40 --capture-window RViz
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --check-tf='/WAIST /HEAD_JOINT1_Link'
 	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/kawada-hironx-example.l __log:=dummy'" /> <!-- add dummy __log/= argument to invoke roseus with non-interactive mode -->

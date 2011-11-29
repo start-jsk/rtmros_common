@@ -12,7 +12,7 @@ This script is "no-sim" version of `hrp4.launch`, launch `hrp4c_startup_nosim.la
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="600" retry="2"
    test-name="HRP4C_NoSimPickUp"
-   args="--max-time=10 --capture-window RViz
+   args="--max-time=20 --capture-window RViz
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --check-tf='/BODY /R_HAND_J1_LINK'
 	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/hrp4c-pickup.l __log:=dummy'" /> <!-- add dummy __log/= argument to invoke roseus with non-interactive mode -->
