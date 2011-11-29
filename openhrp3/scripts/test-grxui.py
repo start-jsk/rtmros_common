@@ -81,6 +81,7 @@ class TestGrxUIProject(unittest.TestCase):
         if self.check_window(name):
             print "[%s] activate for return %s"%(self.id(),name)
             self.xdotool(name, "windowactivate --sync")
+        time.sleep(1)
         if self.check_window(name):
             print "[%s] send return %s"%(self.id(),name)
             self.xdotool(name, "key --clearmodifiers Return",visible=True)
