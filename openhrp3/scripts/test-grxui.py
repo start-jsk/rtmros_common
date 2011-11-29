@@ -145,6 +145,8 @@ class TestGrxUIProject(unittest.TestCase):
                         self.move_window(camera_window,679,509)
                     else:
                         self.unmap_window(camera_window)
+            if self.check_window("Setup Controller", visible=True):
+                self.xdotool("Setup Controller", "key --clearmodifiers Tab key --clearmodifiers Return",visible=True)
             filename="%s-%03d.png"%(self.name, i)
             print "[%s] write %s to %s"%(self.id(), self.capture_window, filename)
             self.xdotool(self.capture_window, "windowactivate --sync", visible=True)
@@ -170,7 +172,7 @@ class TestGrxUIProject(unittest.TestCase):
             self.wait_for_window("Simulation Finished")
             self.return_window("Simulation Finished")
         subprocess.call("xdotool search --name \"Eclipse SDK\" windowactivate --sync key --clearmodifiers alt+f key --clearmodifiers x", shell=True)
-        subprocess.call("xdotool key --clearmodifiers Return", shell=True)
+        self.subprocess.call("xdotool key --clearmodifiers Return", shell=True)
         subprocess.call("pkill omniNames", shell=True)
         # wait scripts
         self.terminate_scripts()
