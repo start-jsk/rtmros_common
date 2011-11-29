@@ -12,5 +12,13 @@ sleep 10
 xdotool mousemove --clearmodifiers 863 132
 xdotool mousedown --clearmodifiers 1
 xdotool mouseup --clearmodifiers 1
-sleep 1
-xdotool key --clearmodifiers alt+f key --clearmodifiers x  key --clearmodifiers Return
+sleep 3
+xdotool key --clearmodifiers alt+f
+xdotool key --clearmodifiers x
+xdotool key --clearmodifiers Return
+rosrun openhrp3 openhrp-shutdown-servers
+for child in $(ps -o pid,command -axwww | awk "{if ( /eclipse.equinox.launcher/ && ! /grep/){ print \$1}}"); do
+
+    echo "kill $child"
+    kill -KILL $child
+done
