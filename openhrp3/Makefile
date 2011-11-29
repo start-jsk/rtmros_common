@@ -23,7 +23,7 @@ check-java-version:
 installed: $(HG_DIR) patched
 	make check-java-version
 	-rm $(HG_DIR)/CMakeCache.txt
-	cd $(HG_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DCMAKE_BUILD_TYPE=Debug -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=`rospack find openrtm`
+	cd $(HG_DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DCMAKE_BUILD_TYPE=Debug -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=`rospack find openrtm` -DODE_DIR=`rospack find opende`/opende
 	cd $(HG_DIR) && make $(ROS_PARALLEL_JOBS)
 	cd $(HG_DIR) && make install
 	#
