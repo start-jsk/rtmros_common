@@ -40,7 +40,8 @@ MultiArrayTypeNameMap = { # for ROS msg/srv
     idltype.tk_longlong: 'std_msgs/Int64MultiArray',
     idltype.tk_ulonglong:'std_msgs/Uint64MultiArray',
     idltype.tk_float:    'std_msgs/Float32MultiArray',
-    idltype.tk_double:   'std_msgs/Float64MultiArray'}
+    idltype.tk_double:   'std_msgs/Float64MultiArray',
+    idltype.tk_string:   'rtmbuild/StringMultiArray'}
 
 # convert functions for IDL/ROS
 # _CORBA_String_element type is env depend ??
@@ -192,7 +193,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             etype = typ.seqType() # n-dimensional array -> 1-dimensional
             size = typ.bound()
             dim = 1
-            while not (isinstance(etype, idltype.Base) or isinstance(etype, idltype.String) or isinstance(etype, idltype.WString) or isinstance(etype, idlast.Struct) or isinstance(etype, idlast.Enum) or isinstance(etype, idlast.Forward)):
+            while not (isinstance(etype, idltype.Base) or isinstance(etype, idltype.String) or isinstance(etype, idltype.WString) or isinstance(etype, idlast.Struct) or isinstance(etype, idlast.Interface) or isinstance(etype, idlast.Enum) or isinstance(etype, idlast.Forward)):
                 if isinstance(etype, idltype.Declared):
                     etype = etype.decl()
                 elif isinstance(etype, idltype.Sequence):
@@ -405,7 +406,8 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         os.system("mkdir -p %s" % wd)
         os.system("cd %s; yes 2> /dev/null | %s > /dev/null" % (tmpdir, command))
 
-        operations = interface.callables()
+        # TODO: ignore attribute read/write operators
+        operations = [o for o in interface.callables() if isinstance(o, idlast.Operation)]
 
         def addline(src, dest, ref):
             idx = dest.find(ref)
@@ -475,18 +477,23 @@ RTC::ReturnCode_t %s::onExecute(RTC::UniqueId ec_id) {
 
 # all types depended by a interface
 class DependencyVisitor (idlvisitor.AstVisitor):
-    def checkBasicType(self, node):
-        classes = [idltype.Base, idltype.String, idltype.WString]
-        classes += [idlast.Const, idlast.Enum, idlast.Union]
-        if not any([isinstance(node, cls) for cls in classes]):
-            node.accept(self)
-
-    def visitInterface(self, node):
+    def __init__(self):
         self.allmsg = []
         self.multiarray = []
+        self.checked = []
+
+    def visitInterface(self, node):
         if node.mainFile():
             for n in node.callables():
                 n.accept(self)
+
+    def checkBasicType(self, node):
+        classes = [idltype.Base, idltype.String, idltype.WString]
+        classes += [idlast.Const, idlast.Enum, idlast.Union]
+        if not (any([isinstance(node, cls) for cls in classes]) or node in self.checked):
+            self.checked += [node]
+            node.accept(self)
+
     def visitOperation(self, node):
         types = [p.paramType() for p in node.parameters()]
         types += [node.returnType()]
@@ -502,7 +509,7 @@ class DependencyVisitor (idlvisitor.AstVisitor):
     def visitSequenceType(self, node):
         etype = node.seqType()
         dim = 1
-        while not (isinstance(etype, idltype.Base) or isinstance(etype, idltype.String) or isinstance(etype, idltype.WString) or isinstance(etype, idlast.Struct) or isinstance(etype, idlast.Enum)):
+        while not (isinstance(etype, idltype.Base) or isinstance(etype, idltype.String) or isinstance(etype, idltype.WString) or isinstance(etype, idlast.Struct) or isinstance(etype, idlast.Interface) or isinstance(etype, idlast.Enum) or isinstance(etype, idlast.Forward)):
             if isinstance(etype, idltype.Sequence):
                 dim += 1
                 etype = etype.seqType()
@@ -513,11 +520,11 @@ class DependencyVisitor (idlvisitor.AstVisitor):
                 etype = etype.aliasType()
             elif isinstance(etype, idlast.Declarator):
                 etype = etype.alias()
-            elif isinstance(etype, idlast.Forward):
-                etype = etype.fullDecl()
+#            elif isinstance(etype, idlast.Forward):
+#                etype = etype.fullDecl()
         if 1 < dim and isinstance(etype, idltype.Base) and (not etype in self.multiarray) :
             self.multiarray += [etype]
-        self.checkBasicType(node.seqType())
+        self.checkBasicType(etype)
     def visitDeclaredType(self, node):
         self.checkBasicType(node.decl())
     def visitTypedef(self, node):
