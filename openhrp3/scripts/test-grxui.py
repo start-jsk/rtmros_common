@@ -143,8 +143,6 @@ class TestGrxUIProject(unittest.TestCase):
                 if self.check_window(camera_window, visible=True):
                     if self.simulation_start :
                         self.move_window(camera_window,679,509)
-                    else:
-                        self.unmap_window(camera_window)
             if self.check_window("Setup Controller", visible=True):
                 self.xdotool("Setup Controller", "key Tab",visible=True)
                 self.xdotool("Setup Controller", "key Return",visible=True)
