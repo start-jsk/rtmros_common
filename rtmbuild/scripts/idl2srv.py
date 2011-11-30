@@ -119,6 +119,9 @@ CPP_FULL = 2
 # visitor for generate msg/srv/cpp/h for bridge compornents
 class ServiceVisitor (idlvisitor.AstVisitor):
 
+    def __init__(self):
+        self.generated_msgs = [] # type objects
+
     def visitAST(self, node):
         for n in node.declarations():
             n.accept(self)
@@ -132,16 +135,13 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if node.mainFile():
             self.genBridgeComponent(node)
 
-    def visitEnum(self, node):
-        self.outputMsg(node)
-    def visitStruct(self, node):
-        self.outputMsg(node)
-
     def visitOperation(self, node):
         if node.mainFile():
             self.outputSrv(node)
-        for n in node.parameters():
-            n.accept(self)
+            for n in node.parameters():
+                self.outputMsg(n.paramType())
+                n.accept(self)
+            self.outputMsg(node.returnType())
 ##
 ##
 ##
@@ -241,7 +241,26 @@ class ServiceVisitor (idlvisitor.AstVisitor):
 
     # output .msg file defined in .idl
     def outputMsg(self, typ):
-        if not (isinstance(typ, idlast.Enum) or isinstance(typ, idlast.Struct) or isinstance(typ, idlast.Interface)):
+        if typ in self.generated_msgs:
+            return
+        elif isinstance(typ, idlast.Struct):
+            for mem in typ.members():
+                self.outputMsg(mem.memberType())
+            self.generated_msgs += [typ]
+        elif isinstance(typ, idlast.Enum) or \
+           isinstance(typ, idlast.Interface):
+            self.generated_msgs += [typ]
+        elif isinstance(typ, idltype.Sequence):
+            return self.outputMsg(typ.seqType())
+        elif isinstance(typ, idltype.Declared):
+            return self.outputMsg(typ.decl())
+        elif isinstance(typ, idlast.Typedef):
+            return self.outputMsg(typ.aliasType())
+        elif isinstance(typ, idlast.Declarator):
+            return self.outputMsg(typ.alias())
+        elif isinstance(typ, idlast.Forward):
+            return self.outputMsg(typ.fullDecl())
+        else:
             return
 
         msgfile = basedir + "/msg/" + self.getCppTypeText(typ,full=ROS_FULL) + ".msg"
