@@ -180,6 +180,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       //joint_state.effort
       ++it;
     }
+    joint_state.velocity.resize(joint_state.name.size());
     joint_state.effort.resize(joint_state.name.size());
     joint_state_pub.publish(joint_state);
     // sensors publish
