@@ -14,7 +14,7 @@
 
   <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
 
-  <node name="grxui" pkg="openhrp3" type="grxui.sh" />
+  <node name="grxui" pkg="openhrp3" type="grxui.sh" args="$(find openhrp3)/scripts/grxui_3dview.xml" />
   <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" /> <!-- loading dae files crushes model loader -->
 
   <node name="scheduler" pkg="openhrp3" type="openhrp-scheduler" output="$(arg OUTPUT)"
