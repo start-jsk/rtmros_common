@@ -463,18 +463,39 @@ public:
 	}
 
 	void initCORBA(int argc, char* argv[]) {
-		// initialize CORBA
-		orb = CORBA::ORB_init(argc, argv);
+		cxt = NULL;
+		while (cxt == NULL) {
+			try {
+				// initialize CORBA
+				orb = CORBA::ORB_init(argc, argv);
+			} catch (const CORBA::Exception& excep) {
+				std::cerr << "[ERROR] CORBA::ORB_init failed" << std::endl;
+				sleep(1);
+				continue;
+			}
 
-		// ROOT POA
-		CORBA::Object_var poaObj = orb -> resolve_initial_references("RootPOA");
-		rootPOA = PortableServer::POA::_narrow(poaObj);
+			try {
+				// ROOT POA
+				CORBA::Object_var poaObj = orb -> resolve_initial_references("RootPOA");
+				rootPOA = PortableServer::POA::_narrow(poaObj);
+			} catch (const CORBA::Exception& excep) {
+				std::cerr << "[ERROR] Resolve Initial Reference for RootPOA failed" << std::endl;
+				sleep(1);
+				continue;
+			}
 
-		// get reference to POA manager
-		manager = rootPOA -> the_POAManager();
+			try {
+				// get reference to POA manager
+				manager = rootPOA -> the_POAManager();
 
-		CORBA::Object_var	nS = orb->resolve_initial_references("NameService");
-		cxt = CosNaming::NamingContext::_narrow(nS);
+				CORBA::Object_var	nS = orb->resolve_initial_references("NameService");
+				cxt = CosNaming::NamingContext::_narrow(nS);
+			} catch (const CORBA::Exception& excep) {
+				std::cerr << "[ERROR] Resolve Initial Reference for NameServer failed" << std::endl;
+				sleep(1);
+				continue;
+			}
+		}
 	}
 
 	void loadModel() {
