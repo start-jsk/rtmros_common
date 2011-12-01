@@ -12,6 +12,7 @@
 (setq *ri* (instance darwin-interface :init))
 (setq *darwin* (instance darwin-robot :init))
 (send *darwin* :reset-pose)
+(make-irtviewer :width 320 :height 320)
 (objects (list *darwin*))
 (send *ri* :angle-vector (send *darwin* :angle-vector) 3000)
 (send *ri* :wait-interpolation)
