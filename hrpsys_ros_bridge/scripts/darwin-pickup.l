@@ -14,19 +14,19 @@
 (send *darwin* :reset-pose)
 (make-irtviewer :width 320 :height 320)
 (objects (list *darwin*))
-(send *ri* :angle-vector (send *darwin* :angle-vector) 3000)
+(send *ri* :angle-vector (send *darwin* :angle-vector) 1000)
 (send *ri* :wait-interpolation)
 ;;
 (send *darwin* :rarm :shoulder-p :joint-angle 40)
 (send *darwin* :rarm :elbow-p :joint-angle -130)
 (objects (list *darwin*))
-(send *ri* :angle-vector (send *darwin* :angle-vector) 3000)
+(send *ri* :angle-vector (send *darwin* :angle-vector) 1000)
 (send *ri* :wait-interpolation)
 ;;
 (send *darwin* :rarm :shoulder-p :joint-angle -65)
 (send *darwin* :rarm :shoulder-r :joint-angle -60)
 (send *darwin* :rarm :elbow-p :joint-angle -40)
 (objects (list *darwin*))
-(send *ri* :angle-vector (send *darwin* :angle-vector) 3000)
+(send *ri* :angle-vector (send *darwin* :angle-vector) 1000)
 (send *ri* :wait-interpolation)
 
