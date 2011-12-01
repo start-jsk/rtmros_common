@@ -41,8 +41,30 @@
   (send *ri* :wait-interpolation)
   )
 
+(defun hrp4c-fullbody-pickup ()
+  (let* ((limbs '(:rarm :rleg :lleg))
+         (move-target (mapcar #'(lambda (l) (send *hrp4c* l :end-coords)) limbs))
+         (link-list (mapcar #'(lambda (mt)
+                                (send *hrp4c* :link-list (send mt :parent)))
+                            move-target))
+         (fix-leg-coords (list (send *hrp4c* :rleg :end-coords :copy-worldcoords)
+                               (send *hrp4c* :lleg :end-coords :copy-worldcoords))))
+    (send *hrp4c* :reset-pose)
+    ;; fullbody-inverse-kinematics requires parameters for rarm, rleg, and lleg
+    (send *hrp4c* :fullbody-inverse-kinematics
+          (append (list (make-coords :pos #f(250 -200 170))) fix-leg-coords)
+          :link-list link-list :move-target move-target
+          :rotation-axis (list nil t t) :thre '(5 1 1)
+          :look-at-target t
+          :cog-gain 2.5 :stop 200 :centroid-thre 20
+          :debug-view t))
+  (send *ri* :angle-vector (send *hrp4c* :angle-vector) 3000)
+  (send *ri* :wait-interpolation)
+  )
+
 (ros::roseus "hrp4c_pickup")
 (hrp4c-init)
 (hrp4c-lookdown)
-(hrp4c-pickup)
+;;(hrp4c-pickup)
+(hrp4c-fullbody-pickup)
 (hrp4c-init)
