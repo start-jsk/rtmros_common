@@ -1,0 +1,78 @@
+Index: idl/SequencePlayerService.idl
+===================================================================
+--- idl/SequencePlayerService.idl	(リビジョン 42)
++++ idl/SequencePlayerService.idl	(作業コピー)
+@@ -95,7 +95,7 @@
+     void playPattern(in dSequenceSequence pos, 
+ 		     in dSequenceSequence rpy,
+ 		     in dSequenceSequence zmp, 
+-		     in double tm);
++		     in dSequence tm);
+ 
+     /**
+      * @brief clear pattern data in playback queue. This function returns after the queue becomes empty.
+Index: rtc/SequencePlayer/SequencePlayer.cpp
+===================================================================
+--- rtc/SequencePlayer/SequencePlayer.cpp	(リビジョン 42)
++++ rtc/SequencePlayer/SequencePlayer.cpp	(作業コピー)
+@@ -341,17 +341,18 @@
+     }
+ }
+ 
+-void SequencePlayer::playPattern(const dSequenceSequence& pos, const dSequenceSequence& rpy, const dSequenceSequence& zmp, ::CORBA::Double tm)
++void SequencePlayer::playPattern(const dSequenceSequence& pos, const dSequenceSequence& rpy, const dSequenceSequence& zmp, const dSequence& tm)
+ {
+     if (!setInitialState()) return;
+ 
+-    const double *q=NULL, *z=NULL, *a=NULL, *p=NULL, *e=NULL;
++    const double *q=NULL, *z=NULL, *a=NULL, *p=NULL, *e=NULL; double t=0;
+     for (unsigned int i=0; i<pos.length(); i++){
+         q = pos[i].get_buffer();
+         if (i < zmp.length()) z = zmp[i].get_buffer();
+         if (i < rpy.length()) e = rpy[i].get_buffer();
++        if (i < tm.length()) t = tm[i];
+         if (i==0){
+-            m_seq->go(q, z, a, p, e, tm, false);
++            m_seq->go(q, z, a, p, e, t, false);
+         }else{
+             m_seq->push(q, z, a, p, e, false);
+         }
+Index: rtc/SequencePlayer/SequencePlayerService_impl.cpp
+===================================================================
+--- rtc/SequencePlayer/SequencePlayerService_impl.cpp	(リビジョン 42)
++++ rtc/SequencePlayer/SequencePlayerService_impl.cpp	(作業コピー)
+@@ -97,7 +97,7 @@
+   m_player = i_player;
+ } 
+ 
+-void SequencePlayerService_impl::playPattern(const dSequenceSequence& pos, const dSequenceSequence& rpy, const dSequenceSequence& zmp, ::CORBA::Double tm)
++void SequencePlayerService_impl::playPattern(const dSequenceSequence& pos, const dSequenceSequence& rpy, const dSequenceSequence& zmp, const dSequence& tm)
+ {
+     m_player->playPattern(pos, rpy, zmp, tm);
+ }
+Index: rtc/SequencePlayer/SequencePlayer.h
+===================================================================
+--- rtc/SequencePlayer/SequencePlayer.h	(リビジョン 42)
++++ rtc/SequencePlayer/SequencePlayer.h	(作業コピー)
+@@ -112,7 +112,7 @@
+   bool setBaseRpy(const double *rpy, double tm);
+   bool setZmp(const double *zmp, double tm);
+   void loadPattern(const char *basename, double time); 
+-  void playPattern(const OpenHRP::dSequenceSequence& pos, const OpenHRP::dSequenceSequence& rpy, const OpenHRP::dSequenceSequence& zmp, ::CORBA::Double tm);
++  void playPattern(const OpenHRP::dSequenceSequence& pos, const OpenHRP::dSequenceSequence& rpy, const OpenHRP::dSequenceSequence& zmp, const OpenHRP::dSequence& tm);
+   bool setInterpolationMode(OpenHRP::SequencePlayerService::interpolationMode i_mode_);
+ 
+  protected:
+Index: rtc/SequencePlayer/SequencePlayerService_impl.h
+===================================================================
+--- rtc/SequencePlayer/SequencePlayerService_impl.h	(リビジョン 42)
++++ rtc/SequencePlayer/SequencePlayerService_impl.h	(作業コピー)
+@@ -25,7 +25,7 @@
+   CORBA::Boolean setZmp(const dSequence& zmp, CORBA::Double tm);
+   CORBA::Boolean isEmpty();
+   void loadPattern(const char* basename, CORBA::Double tm);
+-  void playPattern(const dSequenceSequence& pos, const dSequenceSequence& rpy, const dSequenceSequence& zmp, ::CORBA::Double tm);
++  void playPattern(const dSequenceSequence& pos, const dSequenceSequence& rpy, const dSequenceSequence& zmp, const dSequence& tm);
+   void clear();
+   void clearNoWait();
+   CORBA::Boolean setInterpolationMode(OpenHRP::SequencePlayerService::interpolationMode i_mode_);
