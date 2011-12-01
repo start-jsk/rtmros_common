@@ -1,29 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <grxui>
     <mode name="Simulation">
-        <item class="com.generalrobotix.ui.item.GrxSimulationItem" name="simulationItem" select="true">
-            <property name="integrate" value="true"/>
-            <property name="viewsimulate" value="false"/>
-            <property name="totalTime" value="20.0 "/>
-            <property name="timeStep" value="0.0010 "/>
-            <property name="realTime" value="false"/>
-            <property name="gravity" value="9.8 "/>
-            <property name="method" value="RUNGE_KUTTA"/>
-        </item>
         <view class="com.generalrobotix.ui.view.Grx3DView" name="3DView">
             <property name="view.mode" value="Room"/>
             <property name="showCoM" value="false"/>
             <property name="showCoMonFloor" value="false"/>
             <property name="showDistance" value="false"/>
             <property name="showIntersection" value="false"/>
-            <property name="eyeHomePosition" value="-0.70711 0 0.70711 2.87328 0.70711 0 0.70711 2.88035 0 1 0 0.88 0 0 0 1 "/>
+            <property name="eyeHomePosition" value="-0.70711 -0 0.70711 2 0.70711 -0 0.70711 2 0 1 0 0.8 0 0 0 1 "/>
             <property name="showCollision" value="true"/>
             <property name="showActualState" value="true"/>
             <property name="showScale" value="true"/>
         </view>
     <perspective editorAreaTrimState="2" editorAreaVisible="0" fixed="0" version="0.016">
-<descriptor descriptor="com.generalrobotix.ui.grxui.GrxUIPerspectiveFactory" id="com.generalrobotix.ui.grxui.GrxUIPerspectiveFactory.project" label="3dview"/>
-<window height="844" width="599" x="0" y="32"/>
+<descriptor descriptor="com.generalrobotix.ui.grxui.GrxUIPerspectiveFactory" id="com.generalrobotix.ui.grxui.GrxUIPerspectiveFactory.project" label="hoge"/>
+<window height="724" width="384" x="0" y="24"/>
 <alwaysOnActionSet id="org.eclipse.ui.cheatsheets.actionSet"/>
 <alwaysOnActionSet id="org.eclipse.search.searchActionSet"/>
 <alwaysOnActionSet id="org.eclipse.ui.edit.text.actionSet.annotationNavigation"/>
@@ -35,6 +26,10 @@
 <alwaysOnActionSet id="com.generalrobotix.ui.actionSet"/>
 <hide_toolbar_item_id id="org.eclipse.ui.edit.text.toggleShowSelectedElementOnly"/>
 <view id="com.generalrobotix.ui.view.Grx3DViewPart"/>
+<view id="com.generalrobotix.ui.view.GrxOpenHRPViewPart"/>
+<view id="com.generalrobotix.ui.view.GrxControllerViewPart"/>
+<view id="com.generalrobotix.ui.view.GrxCollisionPairViewPart"/>
+<view id="com.generalrobotix.ui.view.GrxTextEditorViewPart"/>
 <fastViewBars/>
 <layout>
 <mainWindow>
@@ -44,20 +39,20 @@
 <presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory"/>
 </folder>
 </info>
-<info folder="true" part="stickyFolderRight" ratio="0.7495049" ratioLeft="757" ratioRight="253" relationship="2" relative="TopViews">
+<info folder="true" part="stickyFolderRight" ratio="0.749499" ratioLeft="748" ratioRight="250" relationship="2" relative="TopViews">
 <folder appearance="2" expanded="2">
 <page content="org.eclipse.help.ui.HelpView" label="LabelNotFound"/>
 <page content="org.eclipse.ui.internal.introview" label="LabelNotFound"/>
 <page content="org.eclipse.ui.cheatsheets.views.CheatSheetView" label="LabelNotFound"/>
 </folder>
 </info>
-<info folder="true" part="TopLeftViews" ratio="0.109467454" ratioLeft="74" ratioRight="602" relationship="4" relative="TopViews">
+<info folder="true" part="TopLeftViews" ratio="0.10962963" ratioLeft="74" ratioRight="601" relationship="4" relative="TopViews">
 <folder appearance="2" expanded="2">
 <page content="com.generalrobotix.ui.view.GrxItemViewPart" label="LabelNotFound"/>
 <presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory"/>
 </folder>
 </info>
-<info folder="true" part="RightMIDDLEViews" ratio="0.6" ratioLeft="606" ratioRight="404" relationship="2" relative="TopLeftViews">
+<info folder="true" part="RightMIDDLEViews" ratio="0.5991984" ratioLeft="598" ratioRight="400" relationship="2" relative="TopLeftViews">
 <folder appearance="2" expanded="2">
 <page content="com.generalrobotix.ui.view.GrxGraphViewPart" label="LabelNotFound"/>
 <page content="com.generalrobotix.ui.view.GrxPropertyViewPart" label="LabelNotFound"/>
@@ -65,20 +60,24 @@
 <presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory"/>
 </folder>
 </info>
-<info folder="true" part="MiddleViews" ratio="0.3986711" ratioLeft="240" ratioRight="362" relationship="4" relative="TopLeftViews">
+<info folder="true" part="MiddleViews" ratio="0.39933443" ratioLeft="240" ratioRight="361" relationship="4" relative="TopLeftViews">
 <folder activePageID="com.generalrobotix.ui.view.Grx3DViewPart" appearance="2" expanded="2">
 <page content="com.generalrobotix.ui.view.Grx3DViewPart" label="3DView"/>
-<page content="com.generalrobotix.ui.view.GrxOpenHRPViewPart" label="LabelNotFound"/>
-<page content="com.generalrobotix.ui.view.GrxControllerViewPart" label="LabelNotFound"/>
-<page content="com.generalrobotix.ui.view.GrxCollisionPairViewPart" label="LabelNotFound"/>
-<page content="com.generalrobotix.ui.view.GrxTextEditorViewPart" label="LabelNotFound"/>
+<page content="com.generalrobotix.ui.view.GrxOpenHRPViewPart" label="Simulation"/>
+<page content="com.generalrobotix.ui.view.GrxControllerViewPart" label="Controller"/>
+<page content="com.generalrobotix.ui.view.GrxCollisionPairViewPart" label="Collision Pair"/>
+<page content="com.generalrobotix.ui.view.GrxTextEditorViewPart" label="Text Editor"/>
 <presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
 <part id="0"/>
+<part id="1"/>
+<part id="2"/>
+<part id="3"/>
+<part id="4"/>
 </presentation>
 </folder>
 </info>
-<info part="org.eclipse.ui.editorss" ratio="0.5990099" ratioLeft="363" ratioRight="243" relationship="2" relative="TopLeftViews"/>
-<info folder="true" part="TopRightViews" ratio="0.34986225" ratioLeft="127" ratioRight="236" relationship="2" relative="TopLeftViews">
+<info part="org.eclipse.ui.editorss" ratio="0.5986622" ratioLeft="358" ratioRight="240" relationship="2" relative="TopLeftViews"/>
+<info folder="true" part="TopRightViews" ratio="0.349162" ratioLeft="125" ratioRight="233" relationship="2" relative="TopLeftViews">
 <folder appearance="2" expanded="2">
 <page content="com.generalrobotix.ui.view.GrxORBMonitorViewPart" label="LabelNotFound"/>
 <page content="com.generalrobotix.ui.view.GrxProcessManagerViewPart" label="LabelNotFound"/>
