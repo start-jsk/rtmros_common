@@ -16,7 +16,8 @@ test-grxui openhrp3
 test-grxui hrpsys
 
 # resize eclipse window size
-sed -i 's/height="768" width="1024"/height="723" width="506"/' `rospack find openhrp3`/workspace/.metadata/.plugins/org.eclipse.ui.workbench/workbench.xml
+sed -i 's/height=".*" width=".*"/height="723" width="506"/' `rospack find openhrp3`/workspace/.metadata/.plugins/org.eclipse.ui.workbench/workbench.xml
+head `rospack find openhrp3`/workspace/.metadata/.plugins/org.eclipse.ui.workbench/workbench.xml
 # do test
 test-grxui hrpsys_ros_bridge
 
