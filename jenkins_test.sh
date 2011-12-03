@@ -2,18 +2,25 @@
 
 trap 'rosrun rosunit clean_junit_xml.py; exit 1' ERR
 
-TEST_PACKAGES='openhrp3 hrpsys hrpsys_ros_bridge'
+function test-grxui {
+    local package=$1
+    rosmake --status-rate=0 --test-only $package
+    (cd `rospack find $dir`; rosrun rosdoc rosdoc $package)
 
-## do test
-rosclean check
-for dir in $TEST_PACKAGES; do
-  rosmake --status-rate=0 --test-only $dir
-  (cd `rospack find $dir`; rosrun rosdoc rosdoc $dir)
-done
+#    rm -fr $WORKSPACE/$package-example
+#    cp -r `rospack find $dir`/doc/$package/html $WORKSPACE/$dir-example
+}
+
+# do test
+test-grxui openhrp3
+test-grxui hrpsys
+
+# resize eclipse window size
+sed -i 's/height="768" width="1024"/height="723" width="506"/' `rospack find openhrp3`/workspace/.metadata/.plugins/org.eclipse.ui.workbench/workbench.xml
+# do test
+test-grxui hrpsys hrpsys_ros_bridge
+
+# done
 rosrun rosunit clean_junit_xml.py
 
-# copy results
-for dir in $TEST_PACKAGES; do
-  rm -fr $WORKSPACE/$dir-example
-  cp -r `rospack find $dir`/doc/$dir/html $WORKSPACE/$dir-example
-done
+
