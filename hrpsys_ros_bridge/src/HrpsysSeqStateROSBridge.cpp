@@ -94,7 +94,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
 
 void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
   pr2_controllers_msgs::JointTrajectoryGoalConstPtr goal = server.acceptNewGoal();
-  ROS_ERROR_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction ---");
   m_mutex.lock();
 
   ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction ");
@@ -134,7 +133,6 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
 	duration[i] = goal->trajectory.points[i].time_from_start.toSec() - 0.2;
       }
     }
-    ROS_ERROR_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction ---" <<  duration[i]);
   }
   if ( duration.length() == 1 ) {
     m_service0->setJointAngles(angles[0], duration[0]);
