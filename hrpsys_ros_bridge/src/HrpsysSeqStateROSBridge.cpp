@@ -27,9 +27,11 @@ static const char* hrpsysseqstaterosbridge_spec[] =
 // </rtc-template>
 
 HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
-  server(nh, "fullbody_controller/joint_trajectory_action", boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryAction, this, _1), true),
+  server(nh, "fullbody_controller/joint_trajectory_action", false),
   HrpsysSeqStateROSBridgeImpl(manager)
 {
+  server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
+  server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
   sendmsg_srv = nh.advertiseService(std::string("sendmsg"), &HrpsysSeqStateROSBridge::sendMsg, this);
 }
 HrpsysSeqStateROSBridge::~HrpsysSeqStateROSBridge() {};
@@ -82,43 +84,70 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   body->calcForwardKinematics();
 
   tm.tick();
+
+  server.start();
+  interpolationp = false;
+
   return RTC::RTC_OK;
 }
 
 
-void HrpsysSeqStateROSBridge::onJointTrajectoryAction(const pr2_controllers_msgs::JointTrajectoryGoalConstPtr& goal) {
+void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
+  pr2_controllers_msgs::JointTrajectoryGoalConstPtr goal = server.acceptNewGoal();
+  ROS_ERROR_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction ---");
   m_mutex.lock();
-  pr2_controllers_msgs::JointTrajectoryResult result;
 
   ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction ");
   //std::cerr << goal->trajectory.joint_names.size() << std::endl;
-  if ( goal->trajectory.points.size() != 1) ROS_ERROR("trajectory.points must be 1");
+
+  OpenHRP::dSequenceSequence angles;
+  OpenHRP::dSequence duration;
+
+  angles.length(goal->trajectory.points.size()) ;
+  duration.length(goal->trajectory.points.size()) ;
+
   std::vector<std::string> joint_names = goal->trajectory.joint_names;
   for (unsigned int i=0; i < goal->trajectory.points.size(); i++) {
+    angles[i].length(body->joints().size());
+
     trajectory_msgs::JointTrajectoryPoint point = goal->trajectory.points[i];
     for (unsigned int j=0; j < goal->trajectory.joint_names.size(); j++ ) {
       body->link(joint_names[j])->q = point.positions[j];
-      //std::cerr << joint_names[j] << "," << point.positions[j] << "->" << body->link(joint_names[j])->q << std::endl;
     }
-  }
-  body->calcForwardKinematics();
+    body->calcForwardKinematics();
 
-  //std::cerr <<  body->joints().size() << std::endl;
-  OpenHRP::dSequence angles;
-  angles.length(body->joints().size());
-  int i = 0;
-  std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
-  while ( it != body->joints().end() ) {
-    hrp::Link* j = ((hrp::Link*)*it);
-    //std::cerr << j->q << " ";
-    angles[i] = j->q;
-    ++it;++i;
+    int j = 0;
+    std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
+    while ( it != body->joints().end() ) {
+      hrp::Link* l = ((hrp::Link*)*it);
+      angles[i][j] = l->q;
+      ++it;++j;
+    }
+    m_mutex.unlock();
+    ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction : " << goal->trajectory.points[i].time_from_start.toSec());
+    if ( i > 0 ) {
+      duration[i] =  goal->trajectory.points[i].time_from_start.toSec() - goal->trajectory.points[i-1].time_from_start.toSec();
+    } else { // if i == 0
+      if ( goal->trajectory.points.size()== 1 ) {
+	duration[i] = goal->trajectory.points[i].time_from_start.toSec();
+      } else { // 0.2 is magic number writtein in roseus/euslisp/robot-interface.l
+	duration[i] = goal->trajectory.points[i].time_from_start.toSec() - 0.2;
+      }
+    }
+    ROS_ERROR_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction ---" <<  duration[i]);
   }
-  m_mutex.unlock();
-  ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction : " << goal->trajectory.points[0].time_from_start.toSec());
-  m_service0->setJointAngles(angles, goal->trajectory.points[0].time_from_start.toSec());
-  m_service0->waitInterpolation();
-  server.setSucceeded(result);
+  if ( duration.length() == 1 ) {
+    m_service0->setJointAngles(angles[0], duration[0]);
+  } else {
+    OpenHRP::dSequenceSequence rpy, zmp;
+    m_service0->playPattern(angles, NULL, NULL, duration);
+  }
+
+  interpolationp = true;
+}
+
+void HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt() {
+  server.setPreempted();
 }
 
 bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
@@ -196,6 +225,13 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
 
     m_mutex.unlock();
+
+    if ( server.isActive() &&
+	 interpolationp == true &&  m_service0->isEmpty() == true ) {
+      pr2_controllers_msgs::JointTrajectoryResult result;
+      server.setSucceeded(result);
+      interpolationp = false;
+    }
 
     ros::spinOnce();
 

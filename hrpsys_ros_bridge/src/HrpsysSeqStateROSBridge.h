@@ -37,7 +37,8 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   RTC::ReturnCode_t onInitialize();
   RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
 
-  void onJointTrajectoryAction(const pr2_controllers_msgs::JointTrajectoryGoalConstPtr& goal);
+  void onJointTrajectoryActionGoal();
+  void onJointTrajectoryActionPreempt();
   bool sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
 		dynamic_reconfigure::Reconfigure::Response &res);
 
@@ -48,6 +49,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   ros::Publisher joint_state_pub;
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> server;
   ros::ServiceServer sendmsg_srv;
+  bool interpolationp;
 
   tf::TransformBroadcaster br;
 
