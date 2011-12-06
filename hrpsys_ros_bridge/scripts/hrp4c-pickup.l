@@ -19,6 +19,33 @@
   (send *ri* :wait-interpolation)
   )
 
+(defun hrp4c-walk ()
+  (let ((eof (gensym)) avs av tms tm (tmp 0) s l)
+    (with-open-file
+     (f (ros::resolve-ros-path "package://hrpsys/share/hrpsys/samples/HRP-4C/data/walk2m.pos") :direction :input)
+     (while (not (eq (setq l (read-line f nil eof)) eof))
+       (setq s (make-string-input-stream l))
+       (setq tm (* 1000 (read s)))
+       (setq av nil)
+       (while (not (eq (setq n (read s nil eof)) eof))
+	 (push (rad2deg n) av)
+	 )
+       (setq av (reverse av))
+       (setq av (concatenate float-vector (subseq av 0 6) (subseq av 7 12) (subseq av 13)))
+       (push av avs)
+       (push (- tm tmp) tms)
+       (setq tmp tm)
+       )
+     (setq avs (reverse avs))
+     (setq tms (reverse tms))
+     )
+    (send *ri* :set-interpolation-mode :linear)
+    (send *ri* :angle-vector-sequence avs tms)
+    (send *ri* :wait-interpolation)
+    (send *ri* :set-interpolation-mode :hoffarbib)
+    ))
+
+
 (defun hrp4c-lookdown ()
   ;; reset manip pose
   (send *hrp4c* :torso :waist-y :joint-angle -30)
@@ -64,7 +91,9 @@
 
 (ros::roseus "hrp4c_pickup")
 (hrp4c-init)
+(hrp4c-walk)
 (hrp4c-lookdown)
-;;(hrp4c-pickup)
+;(hrp4c-pickup)
 (hrp4c-fullbody-pickup)
 (hrp4c-init)
+
