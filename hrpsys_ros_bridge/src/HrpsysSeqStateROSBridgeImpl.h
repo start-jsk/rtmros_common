@@ -36,7 +36,7 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
 
   // The initialize action (on CREATED->ALIVE transition)
   // formaer rtc_init_entry() 
- virtual RTC::ReturnCode_t onInitialize();
+  virtual RTC::ReturnCode_t onInitialize();
 
   // The finalize action (on ALIVE->END transition)
   // formaer rtc_exiting_entry()

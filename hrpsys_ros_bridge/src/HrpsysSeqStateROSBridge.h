@@ -35,6 +35,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   ~HrpsysSeqStateROSBridge();
 
   RTC::ReturnCode_t onInitialize();
+  RTC::ReturnCode_t onFinalize();
   RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
 
   void onJointTrajectoryActionGoal();

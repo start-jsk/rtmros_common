@@ -34,7 +34,13 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
   sendmsg_srv = nh.advertiseService(std::string("sendmsg"), &HrpsysSeqStateROSBridge::sendMsg, this);
 }
+
 HrpsysSeqStateROSBridge::~HrpsysSeqStateROSBridge() {};
+
+RTC::ReturnCode_t HrpsysSeqStateROSBridge::onFinalize() {
+  ROS_ERROR_STREAM("[HrpsysSeqStateROSBridge] @Initilize name : " << getInstanceName());
+  server.setPreempted();
+}
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   // ros
