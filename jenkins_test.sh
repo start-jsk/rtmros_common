@@ -7,8 +7,10 @@ function test-grxui {
     rosmake --status-rate=0 --test-only $package
     (cd `rospack find $dir`; rosrun rosdoc rosdoc $package)
 
-#    rm -fr $WORKSPACE/$package-example
-#    cp -r `rospack find $dir`/doc/$package/html $WORKSPACE/$dir-example
+    if [ -n "$WORKSPACE" ]; then # only for jenkins to copy to results
+	rm -fr $WORKSPACE/$package-example
+	cp -r `rospack find $dir`/doc/$package/html $WORKSPACE/$dir-example
+    fi
 }
 
 # do test
