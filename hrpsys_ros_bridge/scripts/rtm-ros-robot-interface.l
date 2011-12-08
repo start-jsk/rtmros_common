@@ -13,4 +13,13 @@
 		    strs))
       req)))
   (:set-interpolation-mode (mode) (send self :sendmsg (list "setInterpolationMode" mode)))
+  ;; just for seq debug
+  (:wait-interpolation-for-seq-debug () (send self :sendmsg (list "waitInterpolation" "")))
+  (:angle-vector-for-seq-debug
+   (v tm)
+   (send self :sendmsg
+	 (list "setJointAngles"
+	       (let ((str""))
+		 (dotimes (i (length v)) (setq str (format nil "~A ~A" str (deg2rad (elt v i)))))
+		 (format nil "~A ~A" str (* 1e-3 tm))))))
   )

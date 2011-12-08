@@ -163,6 +163,16 @@ bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request
       ROS_INFO_STREAM("[" << getInstanceName() << "] @sendMsg [" << req.config.strs[1].value  << "]");
       if ( req.config.strs[1].value == "linear" ) m_service0->setInterpolationMode(OpenHRP::SequencePlayerService::LINEAR);
       else m_service0->setInterpolationMode(OpenHRP::SequencePlayerService::HOFFARBIB);
+    } else if (req.config.strs[0].value == "setJointAngles") {
+      std::istringstream iss(req.config.strs[1].value);
+      OpenHRP::dSequence js;
+      js.length(body->joints().size());
+      double duration;
+      for (size_t ii = 0; ii < body->joints().size(); ii++) iss >> js[ii];
+      iss >> duration;
+      m_service0->setJointAngles(js, duration);
+    } else if (req.config.strs[0].value == "waitInterpolation") {
+      m_service0->waitInterpolation();
     }
   } else {
     ROS_ERROR_STREAM("[" << getInstanceName() << "] @sendMsg [Invalid argument string length]");
