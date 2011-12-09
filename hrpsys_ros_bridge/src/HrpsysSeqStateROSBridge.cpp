@@ -161,7 +161,7 @@ bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request
     ROS_INFO_STREAM("[" << getInstanceName() << "] @sendMsg [" << req.config.strs[0].value << "]");
     if (req.config.strs[0].value == "setInterpolationMode") {
       ROS_INFO_STREAM("[" << getInstanceName() << "] @sendMsg [" << req.config.strs[1].value  << "]");
-      if ( req.config.strs[1].value == "linear" ) m_service0->setInterpolationMode(OpenHRP::SequencePlayerService::LINEAR);
+      if ( req.config.strs[1].value == ":linear" ) m_service0->setInterpolationMode(OpenHRP::SequencePlayerService::LINEAR);
       else m_service0->setInterpolationMode(OpenHRP::SequencePlayerService::HOFFARBIB);
     } else if (req.config.strs[0].value == "setJointAngles") {
       std::istringstream iss(req.config.strs[1].value);
