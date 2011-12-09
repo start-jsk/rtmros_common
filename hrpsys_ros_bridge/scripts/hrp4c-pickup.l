@@ -30,8 +30,13 @@
        (while (not (eq (setq n (read s nil eof)) eof))
 	 (push (rad2deg n) av)
 	 )
-       (setq av (reverse av))
-       (setq av (concatenate float-vector (subseq av 0 6) (subseq av 7 12) (subseq av 13)))
+       ;; :angle-vector-sequence version
+       ;;(setq av (reverse av))
+       ;;(setq av (concatenate float-vector (subseq av 0 6) (subseq av 7 12) (subseq av 13)))
+
+       ;; :angle-vector-for-seq-debug version
+       (setq av (concatenate float-vector (reverse av)))
+
        (push av avs)
        (push (- tm tmp) tms)
        (setq tmp tm)
@@ -40,7 +45,25 @@
      (setq tms (reverse tms))
      )
     (send *ri* :set-interpolation-mode :linear)
-    (send *ri* :angle-vector-sequence avs tms)
+    ;; :angle-vector-for-seq-debug version
+    ;;(send *ri* :angle-vector-sequence avs tms)
+
+    ;; :angle-vector-for-seq-debug version
+    (let ((avs2) (tms2) (sendcount 5)) ;; sendcount <- down sampling
+      (push (car avs) avs2)
+      (push (car tms) tms2)
+      (dotimes (i (length avs))
+	(when (and (= (mod i sendcount) 0) (> i 0))
+	  (push (elt avs i) avs2)
+	  (push (* sendcount (elt tms i)) tms2)))
+      (setq avs (reverse avs2))
+      (setq tms (reverse tms2))
+      (mapcar
+       #'(lambda (av tm)
+      	   (send *ri* :angle-vector-for-seq-debug av tm)
+      	   (send *ri* :wait-interpolation-for-seq-debug))
+       avs tms))
+
     (send *ri* :wait-interpolation)
     (send *ri* :set-interpolation-mode :hoffarbib)
     ))
