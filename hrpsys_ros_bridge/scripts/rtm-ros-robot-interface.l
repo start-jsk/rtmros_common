@@ -12,7 +12,7 @@
 			(instance dynamic_reconfigure::StrParameter :init :name service-name :value str))
 		    strs))
       req)))
-  (:set-interpolation-mode (mode) (send self :sendmsg (list "setInterpolationMode" mode)))
+  (:set-interpolation-mode (mode) (send self :sendmsg (list "setInterpolationMode" (format nil "~A" mode))))
   ;; just for seq debug
   (:wait-interpolation-for-seq-debug () (send self :sendmsg (list "waitInterpolation" "")))
   (:angle-vector-for-seq-debug
