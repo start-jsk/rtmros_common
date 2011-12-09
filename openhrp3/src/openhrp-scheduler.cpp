@@ -216,11 +216,11 @@ public:
 
     OpenHRPScheduler()
 	{
-		gravity = 0.9;
+		gravity = 9.8;
 		totalTime = 10.0;
-		timeStep = 0.05;
-		controlTimeStep = 0.05;
-		logTimeStep = 0.100;
+		timeStep = 0.005;
+		controlTimeStep = 0.005;
+		logTimeStep = 0.050;
 		dynamicsSimulator = NULL;
 		olv = NULL;
 		vs = NULL;
@@ -741,7 +741,7 @@ int main(int argc, char* argv[])
 	bool use_dynamics = true, verbose = false;
 	double gravity   = 9.8;
 	double totalTime = -1;
-	double timeStep  = 0.05;
+	double timeStep  = 0.005;
 
 	struct option lngopt[] = {
 		{"nosim",     0, NULL, 0},
