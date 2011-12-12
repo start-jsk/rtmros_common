@@ -608,11 +608,13 @@
 
 (defun replace-all-objects-for-Webots->OpenHRP3
   (rb-lis &optional (min-max-lists) (origin-list))
-  (replace-Camera->VisionSensor
-   (replace-Led->VisionSensor
-    (replace-gyro2->gyro
-     (replace-Accelerometer->AccelerationSensor
-      (replace-servo->joint rb-lis min-max-lists origin-list))))))
+  (replace-Emitter->nil
+   (replace-Receiver->nil
+    (replace-Camera->VisionSensor
+     (replace-Led->VisionSensor
+      (replace-gyro2->gyro
+       (replace-Accelerometer->AccelerationSensor
+        (replace-servo->joint rb-lis min-max-lists origin-list))))))))
 
 (defun find-vrml-node-from-node-list (lis node-name)
   (remove-if-not #'(lambda (x)
@@ -674,6 +676,10 @@
 	      (l)
 	      (let* ((sv-l (find-vrml-node-from-node-list l 'joint)))
 		(dolist (sv sv-l)
+                  (when (not openhrp-node-name)
+                    (delete-if
+                     #'(lambda (x) (find-vrml-node-from-node-list (list x) webots-node-name))
+                     (cadr (assoc 'children sv))))
 		  (let ((sv2-l (find-vrml-node-from-node-list (cadr (assoc 'children sv)) webots-node-name)))
 		    (dolist (sv2 sv2-l)
 		      ;; update node's fields
@@ -727,6 +733,20 @@
    'camera
    'visionsensor
    'camera
+   ))
+
+(defun replace-Receiver->nil (rb-lis)
+  (replace-webots-node->openhrp3-node
+   rb-lis
+   'Receiver
+   nil
+   ))
+
+(defun replace-Emitter->nil (rb-lis)
+  (replace-webots-node->openhrp3-node
+   rb-lis
+   'Emitter
+   nil
    ))
 
 (defun gather-all-objecet (rb-lis sym)
