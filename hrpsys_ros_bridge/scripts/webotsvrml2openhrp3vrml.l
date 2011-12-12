@@ -471,6 +471,7 @@
   (send 'humanoid :put :print-field-upcase (list 'joints 'segments))
   (send 'segment :put :print-field-varname-upcase t)
   (send 'joint :put :print-field-varname-upcase t)
+  (send 'cylinder :put :print-field-upcase (list 'bottom 'side 'top))
   )
 
 ;; convert "string" -> "String"
