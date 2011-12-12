@@ -2,6 +2,7 @@
 
 trap 'exit 1' ERR
 
+export LANG=C
 LAST_STABLE_NUMBER=`grep '^  <number' $HOME/jobs/agentsystem/lastSuccessful/build.xml | sed 's/[^0-9]//g'`
 # remove old build
 echo "last stable number ... $LAST_STABLE_NUMBER"
