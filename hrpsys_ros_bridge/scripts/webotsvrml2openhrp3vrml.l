@@ -319,9 +319,9 @@
   t)
 
 (defun preprocess-for-vrml-convert-for-darwin ()
-  (preprocess-for-vrml-convert (format nil "~A/build/webots/projects/robots/darwin-op/protos/DARwInOP.proto" (get-rospack-find-str "webots_simulator")))
+  (preprocess-for-vrml-convert (format nil "~A/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto" (get-rospack-find-str "webots_simulator")))
   ;; rename webots Gyro -> Gyro2 because the name 'Gyro' is duplicate name
-  (unix:system "cp $(rospack find webots_simulator)/build/webots/projects/robots/darwin-op/protos/DARwInOP.proto /tmp/DARwInOP.proto")
+  (unix:system "cp $(rospack find webots_simulator)/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto /tmp/DARwInOP.proto")
   (unix:system "sed -i -e s/Gyro/Gyro2/g /tmp/DARwInOP.proto")
   t)
 
