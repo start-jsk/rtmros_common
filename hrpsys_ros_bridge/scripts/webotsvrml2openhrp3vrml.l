@@ -342,8 +342,9 @@
 
 (defun preprocess-for-vrml-convert-for-darwin ()
   (preprocess-for-vrml-convert (format nil "~A/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto" (get-rospack-find-str "webots_simulator")))
+  ;; remove subdivision field from Cylinder Node in webots vrml because subdivision field does not exist in default VRML specification. Why?
+  (unix:system "grep -v \"subdivision\" $(rospack find webots_simulator)/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto > /tmp/DARwInOP.proto")
   ;; rename webots Gyro -> Gyro2 because the name 'Gyro' is duplicate name
-  (unix:system "cp $(rospack find webots_simulator)/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto /tmp/DARwInOP.proto")
   (unix:system "sed -i -e s/Gyro/Gyro2/g /tmp/DARwInOP.proto")
   t)
 
