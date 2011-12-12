@@ -1,5 +1,5 @@
 <launch>
-  <arg name="SCHEDULER_ARGS" default="" />
+  <arg name="SCHEDULER_ARGS" default="--nosim" />
   <include file="$(find hrpsys)/launch/hrpsys.launch">
     <arg name="MODEL_FILE" value="$(find collada_robots)/data/robots/willowgarage-pr2.dae" />
     <arg name="SCHEDULER_ARGS" value="$(arg SCHEDULER_ARGS)" />
