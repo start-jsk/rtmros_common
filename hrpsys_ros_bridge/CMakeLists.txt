@@ -71,11 +71,11 @@ add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/models/kawada-hironx.l
 list(APPEND all_robots ${PROJECT_SOURCE_DIR}/models/kawada-hironx.l)
 
 # generate webots model
-rosbuild_find_ros_package(webots)
+rosbuild_find_ros_package(webots_simulator)
 add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/models/DARWIN.wrl
   COMMAND rosrun roseus roseus ${PROJECT_SOURCE_DIR}/scripts/webotsvrml2openhrp3vrml.l
   "\\(progn \\(convert-webots-vrml-\\>openhrp3-vrml-for-darwin \\\"${PROJECT_SOURCE_DIR}/models/DARWIN.wrl\\\"\\) \\(exit\\)\\)"
-  DEPENDS ${webots_PACKAGE_PATH}/build/webots/projects/robots/darwin-op/protos/DARwInOP.proto)
+  DEPENDS ${webots_simulator_PACKAGE_PATH}/build/webots/projects/robots/darwin-op/protos/DARwInOP.proto)
 compile_openhrp_model(
   ${PROJECT_SOURCE_DIR}/models/DARWIN.wrl
   ${PROJECT_SOURCE_DIR}/models
