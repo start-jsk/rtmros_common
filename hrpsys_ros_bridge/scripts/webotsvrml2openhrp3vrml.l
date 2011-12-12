@@ -186,6 +186,28 @@
   (exposedfield SFVec2f windowPosition ())
   )
 
+(define-vrml-node-spec Receiver
+  nil
+  (field SFString type "radio")
+  (field SFFloat aperture -1)
+  (field SFInt32 channel 0)
+  (field SFInt32 baudRate -1)
+  (field SFInt32 byteSize 8)
+  (field SFInt32 bufferSize 4096)
+  )
+
+(define-vrml-node-spec Emitter
+  nil
+  (field SFString type "radio")
+  (field SFFloat range -1)
+  (field SFFloat maxRange -1)
+  (field SFFloat aperture -1)
+  (field SFInt32 channel 0)
+  (field SFInt32 baudRate -1)
+  (field SFInt32 byteSize 8)
+  (field SFInt32 bufferSize 4096)
+  )
+
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;; VRML Parser
 ;;   Read VRML file and convert s-expression.
