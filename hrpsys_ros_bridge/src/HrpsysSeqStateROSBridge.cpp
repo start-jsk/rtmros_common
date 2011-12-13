@@ -284,6 +284,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_rslfsensorIn.isNew () ) {
     try {
       m_rslfsensorIn.read();
+      ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute lfsensor size = " << m_rslfsensor.data.length() );
       if ( m_rslfsensor.data.length() >= 6 ) {
 	geometry_msgs::WrenchStamped lfsensor;
 	lfsensor.header.stamp = joint_state.header.stamp;
@@ -305,6 +306,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_rsrfsensorIn.isNew () ) {
     try {
       m_rsrfsensorIn.read();
+      ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute rfsensor size = " << m_rsrfsensor.data.length() );
       if ( m_rsrfsensor.data.length() >= 6 ) {
 	geometry_msgs::WrenchStamped rfsensor;
 	rfsensor.header.stamp = joint_state.header.stamp;
