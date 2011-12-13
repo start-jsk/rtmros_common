@@ -19,9 +19,11 @@ def activateComps():
 def createComps():
     global bridge, seq, seq_svc, sh, sh_svc, hgc
 
+    bridge = None
     print "[hrpsys.py] createComps -> findRTC : ",name+"(Robot)0"
-    bridge = findRTC(name+"(Robot)0")
-    print "[hrpsys.py] createComps -> bridge : ",bridge
+    while bridge == None :
+        bridge = findRTC(name+"(Robot)0")
+        print "[hrpsys.py] createComps -> bridge : ",bridge
 
     ms.load("SequencePlayer")
     seq = ms.create("SequencePlayer", "seq")
@@ -69,9 +71,12 @@ if __name__ == '__main__':
         time.sleep(3);
         print "[hrpsys.py] wait for ModelLoader"
 
-    prog=os.popen("rospack find openhrp3").read().rstrip()+"/bin/extract-robotname "+sys.argv[1];
-    modelname=os.popen(prog).read().rstrip()
-    os.environ['LD_LIBRARY_PATH']=os.environ['LD_LIBRARY_PATH']+":"+os.popen("rospack find hrpsys").read().rstrip()+"/lib"
+    modelname=""
+    while modelname=="" :
+        prog=os.popen("rospack find openhrp3").read().strip()+"/bin/extract-robotname "+sys.argv[1];
+        modelname=os.popen(prog).read().strip()
+
+    os.environ['LD_LIBRARY_PATH']=os.environ['LD_LIBRARY_PATH']+":"+os.popen("rospack find hrpsys").read().strip()+"/lib"
 
     print "[hrpsys.py] start hrpsys for ",modelname
     init(modelname)
