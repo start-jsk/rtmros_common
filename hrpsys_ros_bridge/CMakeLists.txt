@@ -114,6 +114,7 @@ rosbuild_add_rostest(launch/darwin.launch)
 rosbuild_add_rostest(launch/samplerobot.launch)
 rosbuild_add_rostest(launch/hironx.launch)
 rosbuild_add_rostest(launch/smartpal5.launch)
+rosbuild_add_rostest(launch/pr2.launch)
 
 ##
 ## documents
