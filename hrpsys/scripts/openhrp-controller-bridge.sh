@@ -29,6 +29,8 @@ gdb -ex run --args `rospack find openhrp3`/bin/openhrp-controller-bridge --serve
     --out-port q:JOINT_VALUE \
     --out-port pr:$ROOTLINK:ABS_TRANSFORM \
     --out-port left-eye:0:COLOR_IMAGE:0.1 \
+    --out-port lfsensor:FORCE_SENSOR \
+    --out-port rfsensor:FORCE_SENSOR \
     --connection qRef:HGcontroller0:qOut \
     --connection dqRef:HGcontroller0:dqOut \
     --connection ddqRef:HGcontroller0:ddqOut \
