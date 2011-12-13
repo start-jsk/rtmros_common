@@ -30,7 +30,6 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   //server(nh, "fullbody_controller/joint_trajectory_action", false),
   HrpsysSeqStateROSBridgeImpl(manager)
 {
-#if 0
   // ros
   server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
   server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
@@ -38,7 +37,6 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   joint_state_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
 
   server.start();
-#endif
 }
 
 HrpsysSeqStateROSBridge::~HrpsysSeqStateROSBridge() {};
