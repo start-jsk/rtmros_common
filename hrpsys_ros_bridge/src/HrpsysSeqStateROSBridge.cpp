@@ -186,8 +186,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   sensor_msgs::JointState joint_state;
   joint_state.header.stamp = ros::Time::now();
 
-  ROS_INFO_STREAM("[" << getInstanceName() << "]");
-
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
     ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew());
