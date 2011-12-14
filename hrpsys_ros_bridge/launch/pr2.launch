@@ -12,9 +12,9 @@ This launch file shows an example of ros bridge for pr2 robot
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="600" retry="2"
    test-name="PR2_Example"
-   args="--max-time=40 --capture-window RViz
+   args="--max-time=10 --capture-window RViz
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
-	 --check-tf='/DBODY_LINK /DHEAD_LINK'
+	 --check-tf='/base_footprint /head_plate_frame'
 	 " /> <!-- add dummy __log:= argument to invoke roseus with non-interactive mode -->
 </launch>
 
