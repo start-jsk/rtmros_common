@@ -97,7 +97,7 @@ def rtactivate(nameserver, tags):
     for tag in tags:
         cmd_path  = nameserver+"/"+tag.attributes.get("component").value
         full_path = path.cmd_path_to_full_path(cmd_path)
-        print "connect %s"%(fullpath)
+        print "connect %s"%(full_path)
         try:
             state = wait_component(full_path)
             if state == 'Active':
