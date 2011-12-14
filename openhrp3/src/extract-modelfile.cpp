@@ -102,17 +102,17 @@ int main (int argc, char* argv[]) {
 
 	{ // wait for ClockGenerator
 		CORBA::ORB_var orb;
-		orb = CORBA::ORB_init(argc, argv);
-		CosNaming::NamingContext_var cxt;
-		CORBA::Object_var	nS = orb->resolve_initial_references("NameService");
-		cxt = CosNaming::NamingContext::_narrow(nS);
-		CosNaming::Name ncName;
-		ncName.length(1);
-		ncName[0].id = CORBA::string_dup("ModelLoader");
-		ncName[0].kind = CORBA::string_dup("");
 		CORBA::Object_var obj = NULL;
 		do {
 			try {
+				orb = CORBA::ORB_init(argc, argv);
+				CosNaming::NamingContext_var cxt;
+				CORBA::Object_var	nS = orb->resolve_initial_references("NameService");
+				cxt = CosNaming::NamingContext::_narrow(nS);
+				CosNaming::Name ncName;
+				ncName.length(1);
+				ncName[0].id = CORBA::string_dup("ModelLoader");
+				ncName[0].kind = CORBA::string_dup("");
 				obj = cxt->resolve(ncName);
 			} catch(...) {
 			}
