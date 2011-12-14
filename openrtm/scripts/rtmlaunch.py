@@ -58,6 +58,7 @@ def rtconnect(nameserver, tags):
         dest_path   = nameserver+"/"+tag.attributes.get("to").value
         source_path = re.sub("\$\(arg ROBOT_NAME\)",robotname,source_path);
         dest_path = re.sub("\$\(arg ROBOT_NAME\)",robotname,dest_path);
+        print "connect from %s to %s"%(source_path,dest_path)
         source_full_path = path.cmd_path_to_full_path(source_path)
         dest_full_path = path.cmd_path_to_full_path(dest_path)
         if tag.attributes.get("subscription_type") != None:
@@ -96,6 +97,7 @@ def rtactivate(nameserver, tags):
     for tag in tags:
         cmd_path  = nameserver+"/"+tag.attributes.get("component").value
         full_path = path.cmd_path_to_full_path(cmd_path)
+        print "connect %s"%(fullpath)
         try:
             state = wait_component(full_path)
             if state == 'Active':
