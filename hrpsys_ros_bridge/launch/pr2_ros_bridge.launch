@@ -8,7 +8,6 @@
   <node name = "HrpsysSeqStateROSBridge_respawn"
 	pkg  = "hrpsys_ros_bridge"
 	type = "HrpsysSeqStateROSBridge"
-	launch-prefix = "xterm -e gdb -ex run --args"
 	args = '-o "corba.nameservers:localhost:2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" -o "model:$(find collada_robots)/data/robots/willowgarage-pr2.dae"'
 	output = "screen" />
 
