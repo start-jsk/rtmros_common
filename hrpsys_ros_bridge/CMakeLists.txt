@@ -84,7 +84,7 @@ compile_openhrp_model(
 # yaskawa model
 rosbuild_download_data(http://openhrp-aist-grx.googlecode.com/files/YaskawaSmartPal5.zip build/YaskawaSmartPal5.zip 3db916d5dc5ef4259c7dfc1ac85dd380)
 add_custom_command(
-  OUTPUT ${PROJECT_SOURCE_DIR}/models/YaskawaSmartPal5.wrl ${PROJECT_SOURCE_DIR}/models/SmartPal5/
+  OUTPUT ${PROJECT_SOURCE_DIR}/models/YaskawaSmartPal5.wrl
   COMMAND unzip -o ${PROJECT_SOURCE_DIR}/build/YaskawaSmartPal5.zip
   COMMAND mv    -f ${PROJECT_SOURCE_DIR}/build/YaskawaSmartPal5/* ${PROJECT_SOURCE_DIR}/models/
   COMMAND touch ${PROJECT_SOURCE_DIR}/models/YaskawaSmartPal5.wrl
