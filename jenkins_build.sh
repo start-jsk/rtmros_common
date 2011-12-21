@@ -21,7 +21,7 @@ if [ "$JENKINS_HOME" != "" ]; then #if jenkins
     cp -r $WORKSPACE/rtmros_common $ROS_INSTALLDIR/rtm-ros-robotics/rtmros_common
     # set ROS_HOME under workspace so that we can check from web interface
     echo "export ROS_HOME=$WORKSPACE/.ros" >> $ROS_INSTALLDIR/setup.sh
-endif
+fi
 
 # source
 . $ROS_INSTALLDIR/setup.sh
