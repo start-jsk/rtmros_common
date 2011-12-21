@@ -6,11 +6,13 @@ export LANG=C
 
 DISTRIBUTION=${@-"electric"}
 
-# setup workspaceand buildspace
+# setup workspace and buildspace
 if [ "$WORKSPACE" == "" ]; then # if not jenkins
     export WORKSPACE=$HOME
 fi
-export ROS_INSTALLDIR=$WORKSPACE/ros/$DISTRIBUTION
+if [ "$ROS_INSTALLDIR" == "" ]; then # if not jenkins
+    export ROS_INSTALLDIR=$WORKSPACE/ros/$DISTRIBUTION
+fi
 
 # rosinstall
 /usr/local/bin/rosinstall --rosdep-yes --continue-on-error  --delete-changed-uris $ROS_INSTALLDIR /opt/ros/$DISTRIBUTION  http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall || rosinstall $ROS_INSTALLDIR
@@ -18,7 +20,7 @@ export ROS_INSTALLDIR=$WORKSPACE/ros/$DISTRIBUTION
 # copy jenkins source
 if [ "$JENKINS_HOME" != "" ]; then #if jenkins
     rm -fr $ROS_INSTALLDIR/rtm-ros-robotics/rtmros_common/
-    cp -r $WORKSPACE/rtmros_common $ROS_INSTALLDIR/rtm-ros-robotics/rtmros_common
+    cp -r $WORKSPACE/rtm-ros-robotics/rtmros_common $ROS_INSTALLDIR/rtm-ros-robotics/rtmros_common
     # set ROS_HOME under workspace so that we can check from web interface
     echo "export ROS_HOME=$WORKSPACE/.ros" >> $ROS_INSTALLDIR/setup.sh
 fi
