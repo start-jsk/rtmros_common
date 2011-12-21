@@ -3,19 +3,28 @@
 trap 'exit 1' ERR
 
 export LANG=C
-LAST_STABLE_NUMBER=`grep '^  <number' $HOME/jobs/agentsystem/lastSuccessful/build.xml | sed 's/[^0-9]//g'`
-# remove old build
-echo "last stable number ... $LAST_STABLE_NUMBER"
-find $WORKSPACE -maxdepth 1 -name "rtm-ros-robotics-*" -a ! -name "rtm-ros-robotics-$LAST_STABLE_NUMBER" -a -ctime +3 -exec echo "remove " {} \; -exec rm -fr {} \;
+
+DISTRIBUTION=${@-"electric"}
+
+# setup workspaceand buildspace
+if [ "$WORKSPACE" == "" ]; then # if not jenkins
+    export WORKSPACE=$HOME
+fi
+export ROS_INSTALLDIR=$WORKSPACE/ros/$DISTRIBUTION
+
 # rosinstall
-rosinstall --continue-on-error $WORKSPACE/rtm-ros-robotics-$BUILD_NUMBER /opt/ros/electric http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall || rosinstall $WORKSPACE/rtm-ros-robotics-$BUILD_NUMBER
+/usr/local/bin/rosinstall --rosdep-yes --continue-on-error  --delete-changed-uris $ROS_INSTALLDIR /opt/ros/$DISTRIBUTION  http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall || rosinstall $ROS_INSTALLDIR
+
 # copy jenkins source
-rm -fr rtm-ros-robotics-$BUILD_NUMBER/rtm-ros-robotics/rtmros_common/
-cp -r rtm-ros-robotics/rtmros_common rtm-ros-robotics-$BUILD_NUMBER/rtm-ros-robotics/rtmros_common
-# set ROS_HOME under workspace so that we can check from web interface
-echo "export ROS_HOME=$WORKSPACE/.ros" >> rtm-ros-robotics-$BUILD_NUMBER/setup.sh
+if [ "$JENKINS_HOME" != "" ]; then #if jenkins
+    rm -fr $ROS_INSTALLDIR/rtm-ros-robotics/rtmros_common/
+    cp -r $WORKSPACE/rtmros_common $ROS_INSTALLDIR/rtm-ros-robotics/rtmros_common
+    # set ROS_HOME under workspace so that we can check from web interface
+    echo "export ROS_HOME=$WORKSPACE/.ros" >> $ROS_INSTALLDIR/setup.sh
+endif
+
 # source
-. rtm-ros-robotics-$BUILD_NUMBER/setup.sh
+. $ROS_INSTALLDIR/setup.sh
 rospack profile
 # set environment
 export ROS_PARALLEL_JOBS=-j4
