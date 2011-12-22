@@ -1,4 +1,4 @@
-(load "package://roseus/euslisp/robot-interface.l")
+(load "package://pr2eus/robot-interface.l")
 
 (ros::load-ros-manifest "dynamic_reconfigure")
 (defmethod robot-interface
