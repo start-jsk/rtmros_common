@@ -52,6 +52,8 @@ omniorb4-idl:
   ubuntu: omniorb4-idl
 omniorb4-nameserver:
   ubuntu: omniorb4-nameserver
+libomniorb4-dev:
+  ubuntu: libomniorb4-dev
 python-omniorb:
   ubuntu:
    9.10: python-omniorb2
