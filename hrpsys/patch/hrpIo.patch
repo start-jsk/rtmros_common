@@ -1,0 +1,10 @@
+Index: hrplib/hrpIo/CMakeLists.txt
+===================================================================
+--- hrplib/hrpIo/CMakeLists.txt	(リビジョン 58)
++++ hrplib/hrpIo/CMakeLists.txt	(作業コピー)
+@@ -1,4 +1,5 @@
+ add_library(hrpIo SHARED iob.cpp)
++target_link_libraries(hrpIo rt)
+ 
+ set(target hrpIo)
+ 
