@@ -1,11 +1,13 @@
 sun-java6-jdk:
   ubuntu: |
    #!/bin/bash
-   if [ ! -f /etc/apt/sources.list.d/canonical.list ] ; then
-     echo "deb http://archive.canonical.com/ubuntu `lsb_release -cs` partner" |  sudo tee /etc/apt/sources.list.d/canonical.list
+   if [ ! -f /etc/apt/sources.list.d/ferramroberto-java-`lsb_release -cs`.list ] ; then
+     sudo add-apt-repository -y ppa:ferramroberto/java
      sudo aptitude update
    fi
-   sudo apt-get -y --force-yes install sun-java6-jdk sun-java6-fonts sun-java6-plugin
+   echo "sun-java6-jdk shared/accepted-sun-dlj-v1-1 select true" | sudo debconf-set-selections
+   echo "sun-java6-jre shared/accepted-sun-dlj-v1-1 select true" | sudo debconf-set-selections
+   DEBIAN_FRONTEND=noninteractive sudo apt-get -y --force-yes install sun-java6-jdk sun-java6-fonts sun-java6-plugin
 jython:
   ubuntu: jython
 libreadline-java:
@@ -47,11 +49,26 @@ omniidl-python:
     11.04: omniidl-python
     oneiric: omniidl-python
 omniorb4:
-  ubuntu: omniorb4
+  ubuntu:
+    9.10: omniorb4
+    10.04: omniorb4
+    10.10: omniorb4
+    11.04: omniorb4
+    oneiric: omniorb
 omniorb4-idl:
-  ubuntu: omniorb4-idl
+  ubuntu:
+    9.10: omniorb4-idl
+    10.04: omniorb4-idl
+    10.10: omniorb4-idl
+    11.04: omniorb4-idl
+    oneiric: omniorb-idl
 omniorb4-nameserver:
-  ubuntu: omniorb4-nameserver
+  ubuntu:
+    9.10: omniorb4-nameserver
+    10.04: omniorb4-nameserver
+    10.10: omniorb4-nameserver
+    11.04: omniorb4-nameserver
+    oneiric: omniorb-nameserver
 libomniorb4-dev:
   ubuntu: libomniorb4-dev
 python-omniorb:
@@ -108,7 +125,14 @@ eclipse-openhrp:
    fi
 
 xulrunner-1.9.2:
-  ubuntu: xulrunner-1.9.2
+  ubuntu:
+    9.10: xulrunner-1.9.2
+    10.04: xulrunner-1.9.2
+    10.10: xulrunner-1.9.2
+    11.04: xulrunner-1.9.2
+    oneiric: |
+      #!/bin/bash
+      echo "oneric does not need xulrunner"
 
 # etc
 zlib1g-dev:
@@ -133,7 +157,7 @@ xdotool:
     if [ ! -f /usr/local/bin/xdotool ]; then
       sudo aptitude install checkinstall libxtst-dev
       wget http://semicomplete.googlecode.com/files/xdotool-2.20110530.1.tar.gz -O /tmp/xdotool-2.2-$$.tar.gz
-      mkdir /tmp/xdotool-2.2-$$; tar -C /tmp/xdotool-2.2-$$ -xvzf /tmp/xdotool-2.2-$$.tar.gz; cd /tmp/xdotool-2.2-$$/xdotool-2.20110530.1; ./configure; make; sudo checkinstall -y
+      mkdir /tmp/xdotool-2.2-$$; tar -C /tmp/xdotool-2.2-$$ -xvzf /tmp/xdotool-2.2-$$.tar.gz; cd /tmp/xdotool-2.2-$$/xdotool-2.20110530.1; ./configure; make; sudo mkdir -p /usr/local/man/man1; sudo checkinstall -y
     fi
 
 # openrtm
