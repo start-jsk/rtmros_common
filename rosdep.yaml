@@ -36,47 +36,47 @@ omnievents:
   ubuntu: omnievents
 omniidl4:
   ubuntu:
-    9.10: omniidl4
-    10.04: omniidl4
-    10.10: omniidl4
-    11.04: omniidl4
+    kermic: omniidl4
+    lucid: omniidl4
+    maverick: omniidl4
+    natty: omniidl4
     oneiric: omniidl
 omniidl-python:
   ubuntu:
-    9.10: omniidl4-python
-    10.04: omniidl4-python
-    10.10: omniidl-python
-    11.04: omniidl-python
+    kermic: omniidl4-python
+    lucid: omniidl4-python
+    maverick: omniidl-python
+    natty: omniidl-python
     oneiric: omniidl-python
 omniorb4:
   ubuntu:
-    9.10: omniorb4
-    10.04: omniorb4
-    10.10: omniorb4
-    11.04: omniorb4
+    kermic: omniorb4
+    lucid: omniorb4
+    maverick: omniorb4
+    natty: omniorb4
     oneiric: omniorb
 omniorb4-idl:
   ubuntu:
-    9.10: omniorb4-idl
-    10.04: omniorb4-idl
-    10.10: omniorb4-idl
-    11.04: omniorb4-idl
+    kermic: omniorb4-idl
+    lucid: omniorb4-idl
+    maverick: omniorb4-idl
+    natty: omniorb4-idl
     oneiric: omniorb-idl
 omniorb4-nameserver:
   ubuntu:
-    9.10: omniorb4-nameserver
-    10.04: omniorb4-nameserver
-    10.10: omniorb4-nameserver
-    11.04: omniorb4-nameserver
+    kermic: omniorb4-nameserver
+    lucid: omniorb4-nameserver
+    maverick: omniorb4-nameserver
+    natty: omniorb4-nameserver
     oneiric: omniorb-nameserver
 libomniorb4-dev:
   ubuntu: libomniorb4-dev
 python-omniorb:
   ubuntu:
-   9.10: python-omniorb2
-   10.04: python-omniorb2
-   10.10: python-omniorb
-   11.04: python-omniorb
+   kermic: python-omniorb2
+   lucid: python-omniorb2
+   maverick: python-omniorb
+   natty: python-omniorb
    oneiric: python-omniorb
 python-tk:
   ubuntu: python-tk
@@ -110,10 +110,10 @@ tvmet:
 # eclipse3.4.2
 eclipse:
   ubuntu:
-   9.10: eclipse eclipse-platform eclipse-rcp eclipse-pde
-   10.04: eclipse eclipse-platform eclipse-rcp eclipse-pde
-   10.10: eclipse eclipse-platform eclipse-rcp eclipse-emf eclipse-xsd eclipse-pde
-   11.04: eclipse eclipse-platform eclipse-rcp eclipse-emf eclipse-xsd eclipse-pde
+   kermic: eclipse eclipse-platform eclipse-rcp eclipse-pde
+   lucid: eclipse eclipse-platform eclipse-rcp eclipse-pde
+   maverick: eclipse eclipse-platform eclipse-rcp eclipse-emf eclipse-xsd eclipse-pde
+   natty: eclipse eclipse-platform eclipse-rcp eclipse-emf eclipse-xsd eclipse-pde
    oneiric: eclipse eclipse-platform eclipse-rcp eclipse-emf eclipse-xsd eclipse-pde
 eclipse-openhrp:
   ubuntu: |
@@ -126,10 +126,10 @@ eclipse-openhrp:
 
 xulrunner-1.9.2:
   ubuntu:
-    9.10: xulrunner-1.9.2
-    10.04: xulrunner-1.9.2
-    10.10: xulrunner-1.9.2
-    11.04: xulrunner-1.9.2
+    kermic: xulrunner-1.9.2
+    lucid: xulrunner-1.9.2
+    maverick: xulrunner-1.9.2
+    natty: xulrunner-1.9.2
     oneiric: |
       #!/bin/bash
       echo "oneric does not need xulrunner"
