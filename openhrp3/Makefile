@@ -72,7 +72,7 @@ build/rtmtools_eclipse.zip: build/rtmtools100release_en.zip eclipse/rtmtools
 build/grxui_eclipse.zip: build/rtmtools100release_en.zip eclipse/grxui
 	cp `rospack find openhrp3`/grxui_build_`uname -m`.xml $(HG_DIR)/GrxUIonEclipse-project-0.9.8/grxui_build.xml
 	cp `rospack find openhrp3`/javaCompiler.grxui_`uname -m`.jar.args $(HG_DIR)/GrxUIonEclipse-project-0.9.8/javaCompiler.grxui.jar.args
-	cd $(HG_DIR)/GrxUIonEclipse-project-0.9.8 && java -Dorg.osgi.framework.os.version=`uname -r` -jar /usr/lib/eclipse/plugins/org.eclipse.equinox.launcher_1.0.201.R35x_v20090715.jar -application org.eclipse.ant.core.antRunner -buildfile grxui_build.xml -verbose clean build.update.jar
+	cd $(HG_DIR)/GrxUIonEclipse-project-0.9.8 && java -Dorg.osgi.framework.os.version=`uname -r` -jar /usr/lib/eclipse/plugins/org.eclipse.equinox.launcher_*.jar -application org.eclipse.ant.core.antRunner -buildfile grxui_build.xml -verbose clean build.update.jar 2>&1 | tee build.log; if [ "`grep ERROR build.log`" ] ; then exit 1; fi
 	cp $(HG_DIR)/GrxUIonEclipse-project-0.9.8/com.generalrobotix.ui.grxui_0.9.8.jar ${CURDIR}/eclipse/grxui/plugins
 	-rm -f ${CURDIR}/build/grxui_eclipse.zip
 	cd ${CURDIR}/eclipse/grxui; zip -urq  ${CURDIR}/build/grxui_eclipse.zip *  -x '*/.svn/*'
