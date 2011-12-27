@@ -5,7 +5,7 @@ wipe: clean
 	rm -fr build share
 	touch wiped
 
-clean:
+clean: Makefile.hrpsys-base
 	make -f Makefile.hrpsys-base clean
 	-rm -fr installed patched include bin lib idl idl_gen
 
