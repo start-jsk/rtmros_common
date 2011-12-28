@@ -82,13 +82,13 @@ compile_openhrp_model(
   DARWIN.dae darwin.yaml darwin.l)
 
 # yaskawa model
-rosbuild_download_data(http://openhrp-aist-grx.googlecode.com/files/YaskawaSmartPal5.zip ${PROJECT_SOURCE_DIR}/build/YaskawaSmartPal5.zip 3db916d5dc5ef4259c7dfc1ac85dd380)
+rosbuild_download_data(http://openhrp-aist-grx.googlecode.com/files/YaskawaSmartPal5.zip build/YaskawaSmartPal5.zip 3db916d5dc5ef4259c7dfc1ac85dd380)
 add_custom_command(
   OUTPUT ${PROJECT_SOURCE_DIR}/models/YaskawaSmartPal5.wrl
   COMMAND unzip -o ${PROJECT_SOURCE_DIR}/build/YaskawaSmartPal5.zip
   COMMAND mv    -f ${PROJECT_SOURCE_DIR}/build/YaskawaSmartPal5/* ${PROJECT_SOURCE_DIR}/models/
   COMMAND touch ${PROJECT_SOURCE_DIR}/models/YaskawaSmartPal5.wrl
-  DEPENDS ${PROJECT_SOURCE_DIR}/build/YaskawaSmartPal5.zip)
+  DEPENDS build/YaskawaSmartPal5.zip)
 compile_openhrp_model(
   ${PROJECT_SOURCE_DIR}/models/YaskawaSmartPal5.wrl
   ${PROJECT_SOURCE_DIR}/models
