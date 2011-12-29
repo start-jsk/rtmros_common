@@ -13,6 +13,6 @@ This scripts starts SampleLF.xml OpenHRP3 sample project file, the robot picks u
   :width: 600
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="1000" retry="2"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="1000"
    test-name="SampleRobot_inHouse" args="--start-simulation --max-time=200" cwd="node" />
 </launch>

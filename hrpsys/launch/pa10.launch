@@ -18,7 +18,7 @@ This scripts starts PA10.xml hrpsys-base sample project file, First, select Star
   :width: 600
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
    test-name="PA10"
    args="--start-simulation --max-time=40
 	 --target-directory=$(find hrpsys)/build/images

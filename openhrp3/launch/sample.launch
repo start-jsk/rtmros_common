@@ -13,6 +13,6 @@ This scripts starts Sample.xml project file, select StartSimulation sub-menu fro
   :width: 600
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="30" retry="2"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="30"
    test-name="Sample" args="--start-simulation --max-time=10" cwd="node" />
 </launch>

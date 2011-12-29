@@ -10,7 +10,7 @@ This script is "no-sim" version of `hrp4.launch`, launch `hrp4c_startup_nosim.la
   :width: 600
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="600" retry="2"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
    test-name="HRP4C_NoSimPickUp"
    args="--max-time=20 --capture-window RViz
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images

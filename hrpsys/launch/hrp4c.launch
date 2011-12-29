@@ -19,7 +19,7 @@ select StartSimulation sub-menu from GrxUI menu, or clock Simulation Start butto
   :width: 600
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
    test-name="HRP4C"
    args="--start-simulation --max-time=40
 	 --target-directory=$(find hrpsys)/build/images

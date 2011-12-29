@@ -13,6 +13,6 @@ This scripts starts SampleSV_RangeSensor.xml OpenHRP3 sample project file, the r
   :width: 600
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="300" retry="2"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
    test-name="SampleSV_RangeSensor" args="--start-simulation --max-time=60" cwd="node" />
 </launch>

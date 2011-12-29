@@ -28,7 +28,7 @@ Finally, `rosrun hrpsys SampleRobot_walk.sh` read walking pattern data and send 
   :width: 600
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="600" retry="2"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
    test-name="SampleRobot"
    args="--start-simulation --max-time=100
 	 --target-directory=$(find hrpsys)/build/images
