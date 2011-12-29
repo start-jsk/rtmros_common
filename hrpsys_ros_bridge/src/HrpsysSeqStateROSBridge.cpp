@@ -203,12 +203,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
     m_mutex.lock();
     body->calcForwardKinematics();
-    if ( m_rsangle.data.length() != body->joints().size() ) {
+    if ( m_rsangle.data.length() < body->joints().size() ) {
       ROS_ERROR_STREAM("rsangle.data.length(" << m_rsangle.data.length() << ") is not equal to body->joints().size(" << body->joints().size() << ")");
       m_mutex.unlock();
       return RTC::RTC_OK;
+    } else if ( m_rsangle.data.length() != body->joints().size() ) {
+      ROS_INFO_STREAM("rsangle.data.length(" << m_rsangle.data.length() << ") is not equal to body->joints().size(" << body->joints().size() << ")");
     }
-    for ( unsigned int i = 0; i < m_rsangle.data.length() ; i++ ){
+    for ( unsigned int i = 0; i < body->joints().size() ; i++ ){
       body->joint(i)->q = m_rsangle.data[i];
       ROS_DEBUG_STREAM(m_rsangle.data[i] << " ");
     }
