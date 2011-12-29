@@ -16,7 +16,7 @@ class TestGrxUIProject(unittest.TestCase):
 
     def setUp(self):
         parser = OptionParser(description='grxui project testing')
-        parser.add_option('--capture-window',action="store",type='string',dest='capture_window',default="Eclipse\ SDK\ ",
+        parser.add_option('--capture-window',action="store",type='string',dest='capture_window',default="Eclipse ",
                           help='do not launch grxui, just wait finish and capture files')
         parser.add_option('--max-time',action="store",type='int',dest='max_time',default=100,
                           help='wait sec until exit from grxui')
@@ -90,17 +90,18 @@ class TestGrxUIProject(unittest.TestCase):
 
     def start_simulation(self):
         print "[%s] start simulation"%(self.id())
-        self.xdotool("Eclipse SDK ", "mousemove --sync 400 50")
+        self.xdotool("Eclipse ", "mousemove --sync 400 50")
         #subprocess.call("xdotool set_desktop 2", shell=True)
-        #subprocess.call("xdotool search --name \"Eclipse SDK \" set_desktop_for_window 2", shell=True)
-        self.xdotool("Eclipse SDK ", "windowmove --sync 0 0")
-        self.xdotool("Eclipse SDK ", "windowactivate --sync")
-        self.xdotool("Eclipse SDK ", "\
+        #subprocess.call("xdotool search --name \"Eclipse \" set_desktop_for_window 2", shell=True)
+        self.xdotool("Eclipse ", "windowmove --sync 0 0")
+        self.xdotool("Eclipse ", "windowactivate --sync")
+        self.xdotool("Eclipse ", "\
         windowactivate --sync \
 	key --clearmodifiers alt+g \
 	key --clearmodifiers s")
 
     def execute_scripts(self):
+        print "[%s] start scripts %s"%(self.id(),self.scripts)
         scripts = shlex.shlex(self.scripts)
         whitespace = scripts.whitespace
         scripts.whitespace = ';'
@@ -131,6 +132,7 @@ class TestGrxUIProject(unittest.TestCase):
         self.script_procs = []
 
     def wait_times_is_up(self):
+        print "[%s] wait time is up"%(self.id())
         i = 0
         if not os.path.isdir(self.target_directory) :
             os.mkdir(self.target_directory)
@@ -170,7 +172,7 @@ class TestGrxUIProject(unittest.TestCase):
             self.return_window("Time is up")
             self.wait_for_window("Simulation Finished")
             self.return_window("Simulation Finished")
-        subprocess.call("xdotool search --name \"Eclipse SDK\" windowactivate --sync key --clearmodifiers alt+f key --clearmodifiers x", shell=True)
+        subprocess.call("xdotool search --name \"Eclipse \" windowactivate --sync key --clearmodifiers alt+f key --clearmodifiers x", shell=True)
         subprocess.call("xdotool key --clearmodifiers Return", shell=True)
         subprocess.call("pkill omniNames", shell=True)
         # wait scripts
@@ -192,6 +194,7 @@ class TestGrxUIProject(unittest.TestCase):
             self.start_simulation()
         # wait for tf
         if self.check_tf :
+            print "[%s] check tf %s"%(self.id(),self.check_tf)
             self.check_tf = shlex.split(self.check_tf)
             self.tf = tf.TransformListener()
             ret = None
