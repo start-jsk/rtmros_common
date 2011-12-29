@@ -12,7 +12,8 @@ include $(shell rospack find mk)/download_unpack_build.mk
 
 build/openrtm-bin.patch: openrtm-bin.patch.in
 installed.c++: $(SOURCE_DIR)/unpacked
-	cd $(SOURCE_DIR) && ./configure --prefix=$(CURDIR) && make && make install
+	# need enable-debug as described in http://www.openrtm.org/pipermail/openrtm-users/2011-December/003511.html
+	cd $(SOURCE_DIR) && ./configure --enable-debug --prefix=$(CURDIR) && make && make install
 	touch installed.c++
 
 clean:
