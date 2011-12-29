@@ -182,7 +182,7 @@ collada15dom:
      sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 58E6B835EDC85D09
      sudo apt-get -y update
    fi
-   sudo apt-get -y install libcollada15dom-dev
+   sudo apt-get -y --force-yes install libcollada15dom-dev
 
 # for openhrp3
 libxml2:
