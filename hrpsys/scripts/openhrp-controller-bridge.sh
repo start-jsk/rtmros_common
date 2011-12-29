@@ -20,7 +20,7 @@ model: file://$MODELFILE
 dt: 0.005
 EOF
 
-gdb -ex run --args `rospack find openhrp3`/bin/openhrp-controller-bridge --server-name $ROBOTNAME \
+`rospack find openhrp3`/bin/openhrp-controller-bridge --server-name $ROBOTNAME \
     --periodic-rate $ROBOTNAME\(Robot\)0:1.0 \
     --periodic-rate HGcontroller0:1.0 \
     --in-port qRef:JOINT_VALUE \
