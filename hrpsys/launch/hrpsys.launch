@@ -2,13 +2,14 @@
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
-  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
   <!-- END:openrtm setting -->
   <arg name="MODEL_FILE" />
   <arg name="SCHEDULER_ARGS" default=""/>
   <arg name="RESPAWN" default="true"/>
   <arg name="OUTPUT" default="log"/>
   <env name="LANG" value="C" />
+  <env name="ORBgiopMaxMsgSize" value="2147483648" />
 
   <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
 

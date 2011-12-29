@@ -11,6 +11,8 @@
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
   <!-- END:openrtm setting -->
   <arg name="OUTPUT" default="screen"/>
+  <env name="LANG" value="C" />
+  <env name="ORBgiopMaxMsgSize" value="2147483648" />
 
   <node name = "HrpsysSeqStateROSBridge"
 	pkg  = "hrpsys_ros_bridge"
