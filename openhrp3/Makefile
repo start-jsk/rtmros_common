@@ -31,8 +31,6 @@ installed: $(HG_DIR) patched
 	mkdir -p $(CURDIR)/idl && cp -p $(CURDIR)/share/OpenHRP-3.1/idl/OpenHRP/* ./idl/
 	# add link
 	ln -sf $(CURDIR)/lib/SimulationEC.so $(CURDIR)/lib/libSimulationEC.so
-	# clean
-	cd $(HG_DIR) ;make clean
 	#
 	touch installed
 
