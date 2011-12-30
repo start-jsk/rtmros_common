@@ -2,10 +2,10 @@ Ball: installed all
 include $(shell rospack find mk)/cmake.mk
 
 INSTALL_DIR = $(CURDIR)
-FILENAME    = choreonoid-1.0.0.zip
+FILENAME    = choreonoid-1.1.0.zip
 TARBALL     = build/$(FILENAME)
 TARBALL_URL = http://choreonoid.org/_downloads/$(FILENAME)
-SOURCE_DIR  = build/choreonoid-1.0.0
+SOURCE_DIR  = build/choreonoid-1.1.0
 TARBALL_PATCH =
 UNPACK_CMD  = unzip
 MD5SUM_FILE = $(FILENAME).md5sum
