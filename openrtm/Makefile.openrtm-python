@@ -13,7 +13,7 @@ PYTHONDIR   = `python -c 'import sys; print "python%s"%sys.version[:3]'`
 installed.python: $(SOURCE_DIR)/unpacked
 	cd $(SOURCE_DIR) && python ./setup.py build && python ./setup.py install --prefix=$(INSTALL_DIR)
 	(cp $(INSTALL_DIR)/lib/$(PYTHONDIR)/site-packages/OpenRTM_aist ./src/openrtm ; true)
-	(cp $(INSTALL_DIR)/lib/$(PYTHONDIR)/dist-packages/OpenRTM-aist.pth ./src/openrtm/OpenRTM_aist/ ; true)
+	(cp $(INSTALL_DIR)/lib/$(PYTHONDIR)/dist-packages/OpenRTM-aist.pth ./src/openrtm/ ; true)
 	touch installed.python
 
 clean:
