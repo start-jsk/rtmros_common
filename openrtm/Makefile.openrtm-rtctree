@@ -7,6 +7,7 @@ TARBALL_URL = http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/$(FILENAME)
 SOURCE_DIR  = build/rtctree-3.0.0
 UNPACK_CMD  = tar xzf
 MD5SUM_FILE = $(FILENAME).md5sum
+PYTHONDIR   = `python -c 'import sys; print "python%s"%sys.version[:3]'`
 include $(shell rospack find mk)/download_unpack_build.mk
 
 installed.rtctree: wiped.rtctree $(SOURCE_DIR)/unpacked
@@ -18,8 +19,8 @@ clean:
 
 wipe: clean
 	rm -fr installed.rtctree
-	rm -fr lib/lib/python2.6/site-packages/rtctree
-	rm -fr lib/lib/python2.6/site-packages/rtctree-3.0.0-py2.6.egg-info
+	rm -fr lib/lib/$(PYTHONDIR)/site-packages/rtctree
+	rm -fr lib/lib/$(PYTHONDIR)/site-packages/rtctree-3.0.0-py2.6.egg-info
 
 wiped.rtctree:  Makefile.openrtm-rtctree
 	make -f Makefile.openrtm-rtctree wipe
