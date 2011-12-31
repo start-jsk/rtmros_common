@@ -14,6 +14,10 @@ if [ "$ROS_INSTALLDIR" == "" ]; then # if not jenkins
     export ROS_INSTALLDIR=$WORKSPACE/ros/$DISTRIBUTION
 fi
 
+# setup ros packages
+wget https://jsk-ros-pkg.svn.sourceforge.net/svnroot/jsk-ros-pkg/trunk/jsk.rosbuild -O /tmp/jsk.rosbuild
+bash /tmp/jsk.rosbuild --show-install | sh
+
 # rosinstall
 /usr/local/bin/rosinstall --rosdep-yes --continue-on-error  --delete-changed-uris $ROS_INSTALLDIR /opt/ros/$DISTRIBUTION  http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall || rosinstall $ROS_INSTALLDIR
 
