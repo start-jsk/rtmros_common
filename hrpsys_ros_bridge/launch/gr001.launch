@@ -16,7 +16,7 @@ This launch file shows an example of ros bridge for darwin robot and sample clie
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
    test-name="GR001_PickUp"
-   args="--max-time=120 --capture-window RViz
+   args="--max-time=10 --capture-window RViz
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --check-tf='/WAIST_LINK /NECK_Y_LINK'
 	 " />
