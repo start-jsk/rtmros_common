@@ -94,6 +94,13 @@ compile_openhrp_model(
   ${PROJECT_SOURCE_DIR}/models
   SmartPal5.dae smartpal5.yaml smartpal5.l)
 
+# choreonoid model
+rosbuild_find_ros_package(choreonoid)
+compile_openhrp_model(
+  ${choreonoid_PACKAGE_PATH}/share/choreonoid-1.1/models/GR001/GR001.wrl
+  ${PROJECT_SOURCE_DIR}/models
+  GR001.dae gr001.yaml gr001.l)
+
 add_custom_target(openhrp_robots ALL DEPENDS ${all_robots})
 
 

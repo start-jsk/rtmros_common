@@ -1,0 +1,25 @@
+<launch>
+  <include file="$(find hrpsys_ros_bridge)/launch/gr001_startup.launch" />
+  <include file="$(find hrpsys_ros_bridge)/launch/gr001_ros_bridge.launch" />
+
+  <sphinxdoc><![CDATA[
+
+.. code-block:: bash
+
+  rosrun roseus roseus `rospack find hrpsys_ros_bridge`/scripts/darwin-pickup.l
+
+This launch file shows an example of ros bridge for darwin robot and sample client program `darwin-pickup.l`
+
+.. image:: build/images/GR001_PickUp.gif
+  :width: 600
+
+  ]]></sphinxdoc>
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
+   test-name="GR001_PickUp"
+   args="--max-time=120 --capture-window RViz
+	 --target-directory=$(find hrpsys_ros_bridge)/build/images
+	 --check-tf='/WAIST_LINK /NECK_Y_LINK'
+	 " />
+</launch>
+
+
