@@ -19,8 +19,9 @@ clean:
 
 wipe: clean
 	rm -fr installed.rtctree
-	rm -fr lib/lib/$(PYTHONDIR)/site-packages/rtctree
-	rm -fr lib/lib/$(PYTHONDIR)/site-packages/rtctree-3.0.0-py2.6.egg-info
+	rm -fr $(SOURCE_DIR)
+	rm -fr lib/$(PYTHONDIR)/site-packages/rtctree
+	rm -fr lib/$(PYTHONDIR)/site-packages/rtctree-3.0.0-py2.6.egg-info
 
 wiped.rtctree:  Makefile.openrtm-rtctree
 	make -f Makefile.openrtm-rtctree wipe

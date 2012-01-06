@@ -22,8 +22,9 @@ clean:
 
 wipe: clean
 	rm -fr installed.rtshell
-	rm -fr lib/lib/$(PYTHONDIR)/site-packages/rtshell
-	rm -fr lib/lib/$(PYTHONDIR)/site-packages/rtshell-3.0.0-py2.6.egg-info
+	rm -fr $(SOURCE_DIR)
+	rm -fr lib/$(PYTHONDIR)/site-packages/rtshell
+	rm -fr lib/$(PYTHONDIR)/site-packages/rtshell-3.0.0-py2.6.egg-info
 
 wiped.rtshell:  Makefile.openrtm-rtshell
 	make -f Makefile.openrtm-rtshell wipe

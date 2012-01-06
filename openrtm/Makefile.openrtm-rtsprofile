@@ -19,8 +19,9 @@ clean:
 
 wipe: clean
 	rm -fr installed.rtsprofile
-	rm -fr lib/lib/$(PYTHONDIR)/site-packages/rtsprofile
-	rm -fr lib/lib/$(PYTHONDIR)/site-packages/rtsprofile-1.0.0-py2.6.egg-info
+	rm -fr $(SOURCE_DIR)
+	rm -fr lib/$(PYTHONDIR)/site-packages/rtsprofile
+	rm -fr lib/$(PYTHONDIR)/site-packages/rtsprofile-1.0.0-py2.6.egg-info
 
 wiped.rtsprofile:  Makefile.openrtm-rtsprofile
 	make -f Makefile.openrtm-rtsprofile wipe
