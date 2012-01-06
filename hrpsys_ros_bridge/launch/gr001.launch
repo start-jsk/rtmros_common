@@ -16,10 +16,10 @@ This launch file shows an example of ros bridge for darwin robot and sample clie
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
    test-name="GR001_PickUp"
-   args="--max-time=10 --capture-window RViz
+   args="--max-time=30 --capture-window RViz
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --check-tf='/WAIST_LINK /NECK_Y_LINK'
-	 " />
+	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/gr001-motion.l __log\:=dummy'" /> <!-- add dummy __log:= argument to invoke roseus with non-interactive mode -->
 </launch>
 
 
