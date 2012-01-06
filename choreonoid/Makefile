@@ -6,7 +6,7 @@ FILENAME    = choreonoid-1.1.0.zip
 TARBALL     = build/$(FILENAME)
 TARBALL_URL = http://choreonoid.org/_downloads/$(FILENAME)
 SOURCE_DIR  = build/choreonoid-1.1.0
-TARBALL_PATCH =
+TARBALL_PATCH = add_dummy_option.patch
 UNPACK_CMD  = unzip
 MD5SUM_FILE = $(FILENAME).md5sum
 include $(shell rospack find mk)/download_unpack_build.mk
