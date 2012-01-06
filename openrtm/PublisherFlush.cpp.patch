@@ -1,0 +1,11 @@
+--- src/lib/rtm/PublisherFlush.cpp.org	2012-01-06 17:40:49.774790425 +0900
++++ src/lib/rtm/PublisherFlush.cpp	2012-01-06 17:41:36.270791161 +0900
+@@ -35,7 +35,7 @@
+    */
+   PublisherFlush::PublisherFlush()
+     : rtclog("PublisherFlush"),
+-      m_consumer(0), m_listeners(0), m_active(false)
++      m_consumer(0), m_listeners(0), m_active(false), m_retcode(PORT_OK)
+   {
+   }
+ 
