@@ -10,7 +10,7 @@ This launch file shows an example of ros bridge for pr2 robot
   :width: 600
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="180"
    test-name="PR2_Example"
    args="--max-time=10 --capture-window RViz
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
