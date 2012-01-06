@@ -1,24 +1,19 @@
 all: installed.rtshell
 
 INSTALL_DIR = `rospack find openrtm`
-FILENAME    = rtshell-3.0.0.tar.gz
-TARBALL     = build/$(FILENAME)
-TARBALL_URL = http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/$(FILENAME)
-SOURCE_DIR  = build/rtshell-3.0.0
-UNPACK_CMD  = tar xzf
-MD5SUM_FILE = $(FILENAME).md5sum
-TARBALL_PATCH = rtcryo.patch rtstodot.patch fmt.patch
+GIT_DIR=build/rtshell-3.0.0
+GIT_URL=https://github.com/gbiggs/rtshell.git
 PYTHONDIR   = `python -c 'import sys; print "python%s"%sys.version[:3]'`
-include $(shell rospack find mk)/download_unpack_build.mk
+include $(shell rospack find mk)/git_checkout.mk
 
-installed.rtshell: wiped.rtshell $(SOURCE_DIR)/unpacked
-	cd $(SOURCE_DIR) && echo "y" | python ./setup.py build && echo "y" | python ./setup.py install --prefix=$(INSTALL_DIR)
+installed.rtshell: wiped.rtshell $(GIT_DIR)
+	cd $(GIT_DIR) && echo "y" | python ./setup.py build && echo "y" | python ./setup.py install --prefix=$(INSTALL_DIR)
 	@bash -c 'echo -e "\e[1;32m;; add following lines to .bashrc to use rtshell\n;;\e[m"'
 	@bash -c 'echo -e "\e[1;32m;; source ${CURDIR}/share/rtshell/shell_support\e[m"'
 	touch installed.rtshell
 
 clean:
-	-cd $(SOURCE_DIR) && make clean
+	-cd $(GIT_DIR) && make clean
 
 wipe: clean
 	rm -fr installed.rtshell
