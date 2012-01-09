@@ -192,6 +192,8 @@ libxml2:
 # for hrpsys
 # libncurses5-dev
 # libreadline5-dev
+libirrlicht-dev:
+  ubuntu: libirrlicht-dev
 
 # for openrtm-python-example
 tix:

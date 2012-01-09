@@ -15,6 +15,7 @@
   <depend package="openhrp3"/>
 
   <rosdep name="doxygen" />
+  <rosdep name="libirrlicht-dev" />
 </package>
 
 
