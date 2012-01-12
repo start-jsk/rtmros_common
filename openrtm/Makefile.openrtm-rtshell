@@ -14,7 +14,7 @@ include $(shell rospack find mk)/download_unpack_build.mk
 installed.rtshell: wiped.rtshell $(SOURCE_DIR)/unpacked
 	cd $(SOURCE_DIR) && echo "y" | python ./setup.py build && echo "y" | python ./setup.py install --prefix=$(INSTALL_DIR)
 	@bash -c 'echo -e "\e[1;32m;; add following lines to .bashrc to use rtshell\n;;\e[m"'
-	@bash -c 'echo -e "\e[1;32m;; source ${CURDIR}/share/rtshell/shell_support\e[m"'
+	@bash -c 'echo -e "\e[1;32m;; source ${CURDIR}/scripts/rtshell-setup.sh\e[m"'
 	touch installed.rtshell
 
 clean:
