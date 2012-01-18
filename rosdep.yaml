@@ -157,7 +157,7 @@ xdotool:
     if [ ! -f /usr/local/bin/xdotool ]; then
       sudo aptitude install checkinstall libxtst-dev
       wget http://semicomplete.googlecode.com/files/xdotool-2.20110530.1.tar.gz -O /tmp/xdotool-2.2-$$.tar.gz
-      mkdir /tmp/xdotool-2.2-$$; tar -C /tmp/xdotool-2.2-$$ -xvzf /tmp/xdotool-2.2-$$.tar.gz; cd /tmp/xdotool-2.2-$$/xdotool-2.20110530.1; ./configure; make; sudo mkdir -p /usr/local/man/man1; mkdir -p /usr/local/lib; mkdir -p /usr/local/include; sudo checkinstall -y
+      mkdir /tmp/xdotool-2.2-$$; tar -C /tmp/xdotool-2.2-$$ -xvzf /tmp/xdotool-2.2-$$.tar.gz; cd /tmp/xdotool-2.2-$$/xdotool-2.20110530.1; ./configure; make; sudo mkdir -p /usr/local/man/man1; sudo mkdir -p /usr/local/lib; sudo mkdir -p /usr/local/include; sudo checkinstall -y
     fi
 
 # openrtm
