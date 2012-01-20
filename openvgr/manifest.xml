@@ -12,16 +12,8 @@ Please see their official web sites to see the details of their licenses.
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/openvgr</url>
 
-  <!-- <rosdep name="doxygen" /> -->
-  <!-- <rosdep name="graphviz" /> -->
-  <!-- <rosdep name="zlib1g-dev" /> -->
-  <!-- <rosdep name="libjpeg62-dev" /> -->
-  <!-- <rosdep name="libpng12-dev" /> -->
-  <!-- <rosdep name="openscenegraph" /> -->
-  <!-- <rosdep name="libsimage-dev" /> -->
-  <!-- <rosdep name="yaml" /> -->
-  <!-- <rosdep name="qt4" /> -->
-  <!-- <rosdep name="libqt4-opengl" /> -->
+  <depend package="openrtm" />
+  <depend package="camera1394" />
 
 </package>
 
