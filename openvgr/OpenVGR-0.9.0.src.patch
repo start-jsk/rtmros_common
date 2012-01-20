@@ -1,0 +1,20 @@
+diff -crN src/lib/libopenvgr/Makefile src.editted/lib/libopenvgr/Makefile
+*** src/lib/libopenvgr/Makefile	2011-11-22 12:02:07.000000000 +0900
+--- src.editted/lib/libopenvgr/Makefile	2012-01-19 22:11:28.594461026 +0900
+***************
+*** 10,16 ****
+  .cpp.o:
+  	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(DEFS) -o $@ $<
+  
+! OPENCVINC = -I/usr/include/opencv
+  RTMINC = -I`rtm-config --prefix`/include/rtm/idl
+  INCLUDES = $(OPENCVINC) $(RTMINC)
+  
+--- 10,16 ----
+  .cpp.o:
+  	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(DEFS) -o $@ $<
+  
+! OPENCVINC = `pkg-config --cflags opencv`
+  RTMINC = -I`rtm-config --prefix`/include/rtm/idl
+  INCLUDES = $(OPENCVINC) $(RTMINC)
+  

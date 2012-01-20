@@ -1,0 +1,4 @@
+<launch>
+  <node name="choreonoid" pkg="choreonoid" type="choreonoid"
+	args="--start-playback $(find choreonoid)/share/choreonoid-1.1/projects/GR001Sample.cnoid  -- " />
+</launch>
