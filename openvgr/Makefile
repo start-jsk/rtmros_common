@@ -28,7 +28,7 @@ opencv20:
 		tar -xjf OpenCV-2.0.0.tar.bz2 ;\
 		cd OpenCV-2.0.0 ;\
 		patch -p1 < $(CURDIR)/cxcore.hpp.patch ;\
-		cmake -DCMAKE_INSTALL_PREFIX:PATH=$(OPENCV20_DIR)/installed ;\
+		cmake -DCMAKE_INSTALL_PREFIX:PATH=$(OPENCV20_DIR)/installed -DWITH_FFMPEG=OFF -DWITH_1394=OFF -DWITH_GSTREAMER=OFF -DWITH_V4L=OFF ;\
 		make -j4 ;\
 		make install ;\
 	fi
