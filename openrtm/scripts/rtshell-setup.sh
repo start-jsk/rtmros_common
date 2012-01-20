@@ -6,4 +6,4 @@ export PYTHONPATH=`rospack find openrtm`/lib/`python -c 'import sys; print "pyth
 . `rospack find openrtm`/share/rtshell/shell_support
 
 export RTCTREE_NAMESERVERS=localhost
-echo ";; set RTCTREE_NAMESERVERS=$RTCTREE_NAMESERVERS"
+#echo ";; set RTCTREE_NAMESERVERS=$RTCTREE_NAMESERVERS"
