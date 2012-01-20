@@ -14,7 +14,7 @@ include $(shell rospack find mk)/download_unpack_build.mk
 OPENCV20_DIR = $(shell rospack find openvgr)/build/OpenCV-2.0.0
 
 installed: $(SOURCE_DIR)/unpacked opencv20
-	cd $(SOURCE_DIR) && PKG_CONFIG_PATH=$(OPENCV20_DIR)/installed/lib/pkgconfig/:$PKG_CONFIG_PATH make && cd build && make && cp -R ../example/dataset/image ./ && cp -R ../example/dataset/calib ./ && cp -R ../example/model ./ && cp -R ../example/dataset/param ./
+	cd $(SOURCE_DIR) && PATH=`rospack find openrtm`/bin:$$PATH PKG_CONFIG_PATH=$(OPENCV20_DIR)/installed/lib/pkgconfig/:$PKG_CONFIG_PATH make && cd build && make && cp -R ../example/dataset/image ./ && cp -R ../example/dataset/calib ./ && cp -R ../example/model ./ && cp -R ../example/dataset/param ./
 	sed -i 's@^source /usr/local/share/rtshell/@#source /usr/local/share/rtshell/shell_support@' $(SOURCE_DIR)/example/script/*.sh $(SOURCE_DIR)/example/script/*/*.sh
 	sed -i 's@#!/bin/bash@#!/bin/bash\nexport LD_LIBRARY_PATH=`rospack find openrtm`/lib:$(OPENCV20_DIR)/installed/lib:$$LD_LIBRARY_PATH\nexport PATH=$$PATH:`rospack find openrtm`/bin\nexport PYTHONPATH=$$PYTHONPATH:`rospack find openrtm`/src/openrtm\nsource `rospack find openrtm`/scripts/rtshell-setup.sh@' $(SOURCE_DIR)/example/script/*.sh $(SOURCE_DIR)/example/script/substill/*.sh
 
