@@ -81,7 +81,7 @@
 
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.ui_3.7.0.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.swt_3.7.0.dist.jar"/>
-        <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.swt.gtk.linux.x86_64_3.7.0.dist.jar"/>
+        <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.swt.gtk.linux.x86_3.7.0.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.jface_3.7.0.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.core.commands_3.6.0.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.ui.workbench_3.7.0.dist.jar"/>
