@@ -18,13 +18,3 @@ diff -crN src/lib/libopenvgr/Makefile src.editted/lib/libopenvgr/Makefile
   RTMINC = -I`rtm-config --prefix`/include/rtm/idl
   INCLUDES = $(OPENCVINC) $(RTMINC)
   
---- include/opencv/cxcore.hpp.org	2012-01-20 09:08:50.324472629 +0900
-+++ /include/opencv/cxcore.hpp	2012-01-20 09:09:29.928659226 +0900
-@@ -44,6 +44,7 @@
- #define _CXCORE_HPP_
- 
- #include "cxmisc.h"
-+#include <stddef.h>
- 
- #ifdef __cplusplus
- 
