@@ -2,7 +2,7 @@
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="192.168.128.14" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
-  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" -o "exec_cxt.periodic.rate:10"' />
   <!-- END:openrtm setting -->
   <arg name="MODEL_FILE" value="/opt/grx/HIRONX/model/main.wrl" />
   <arg name="COLLADA_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae"/>
@@ -24,7 +24,7 @@
   <node pkg="robot_state_publisher" type="state_publisher" name="hrpsys_state_publisher" />
 
   <node name="hironx_rviz" pkg="rviz" type="rviz" respawn="$(arg RESPAWN)"
-        args="--sync"/>
+        args="--sync -d $(find hironx_ros_bridge)/launch/hironx.vcg"/>
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hironx_ros_bridge)/launch/hironx.launch" respawn="$(arg RESPAWN)" />
