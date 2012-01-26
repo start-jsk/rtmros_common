@@ -14,8 +14,6 @@
   <node name="HiroStateHolder" pkg="hironx_ros_bridge" type="HiroStateHolder" output="$(arg OUTPUT)"
 	args="$(arg openrtm_args)" respawn="$(arg RESPAWN)" />
 
-  <!-- <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" /  -->
-
   <node name = "HrpsysSeqStateROSBridge"
         pkg  = "hrpsys_ros_bridge"
         type = "HrpsysSeqStateROSBridge"
