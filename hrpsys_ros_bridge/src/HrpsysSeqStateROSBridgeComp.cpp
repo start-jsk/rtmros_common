@@ -65,27 +65,8 @@ void MyModuleInit(RTC::Manager* manager)
 
 int main (int argc, char** argv)
 {
-  { // wait for ClockGenerator
-    CORBA::ORB_var orb;
-    CORBA::Object_var obj = NULL;
-    do {
-      try {
-	orb = CORBA::ORB_init(argc, argv);
-	CosNaming::NamingContext_var cxt;
-	CORBA::Object_var	nS = orb->resolve_initial_references("NameService");
-	cxt = CosNaming::NamingContext::_narrow(nS);
-	CosNaming::Name ncName;
-	ncName.length(1);
-	ncName[0].id = CORBA::string_dup("ModelLoader");
-	ncName[0].kind = CORBA::string_dup("");
-	obj = cxt->resolve(ncName);
-      } catch(...) {
-      }
-      sleep(3);
-      fprintf(stderr, ";; [HrpsysSeqStateROSBridgeComp.cpp] wait for model loader...\n");
-    } while ( obj == NULL );
-  }
   RTC::Manager* manager;
+
   manager = RTC::Manager::init(argc, argv);
   ros::init(argc, argv, "HrpsysSeqStateBridge", ros::init_options::NoSigintHandler);
 
