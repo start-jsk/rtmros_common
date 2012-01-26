@@ -125,14 +125,20 @@ RTC::ReturnCode_t HiroStateHolder::onExecute(RTC::UniqueId ec_id)
       k+= m_jointData.qCommand[i].length();
     }
     m_angle.data.length(k);
+    m_rsangle.data.length(k);
+    m_mcangle.data.length(k);
     k = 0;
     for (int i = 0; i < m_jointData.id.length(); i++ ) {
       for (int j = 0; j < m_jointData.qCommand[i].length(); j++ ) {
-	m_angle.data[k] = m_jointData.qCommand[i][j];
+	m_angle.data[k]   = m_jointData.qState[i][j];
+	m_mcangle.data[k] = m_jointData.qCommand[i][j];
+	m_rsangle.data[k] = m_jointData.qState[i][j];
       }
     }
 
     m_angleOut.write();
+    m_mcangleOut.write();
+    m_rsangleOut.write();
   }
   return RTC::RTC_OK;
 }
