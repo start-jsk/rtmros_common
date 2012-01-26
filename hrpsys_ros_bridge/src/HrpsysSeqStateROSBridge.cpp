@@ -147,7 +147,7 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
     m_service0->setJointAngles(angles[0], duration[0]);
   } else {
     OpenHRP::dSequenceSequence rpy, zmp;
-    m_service0->playPattern(angles, NULL, NULL, duration);
+    m_service0->playPattern(angles, rpy, zmp, duration);
   }
 
   interpolationp = true;
