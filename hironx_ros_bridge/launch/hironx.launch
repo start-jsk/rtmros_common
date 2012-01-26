@@ -28,7 +28,7 @@
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hironx_ros_bridge)/launch/hironx.launch" respawn="$(arg RESPAWN)" />
-  <rtconnect from="RobotHardware0.rtc:jointDatOut" to="HiroStateHolder0.rtc:jointData" />
+  <rtconnect from="RobotHardware0.rtc:jointDatOut" to="HiroStateHolder0.rtc:jointData" subscription_type="new"/>
   <rtconnect from="HiroStateHolder0.rtc:angle" to="HrpsysSeqStateROSBridge0.rtc:angle" />
   <rtconnect from="HiroStateHolder0.rtc:rsangle" to="HrpsysSeqStateROSBridge0.rtc:rsangle" />
   <rtconnect from="HiroStateHolder0.rtc:mcangle" to="HrpsysSeqStateROSBridge0.rtc:mcangle" />
