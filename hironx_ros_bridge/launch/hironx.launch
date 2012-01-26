@@ -2,7 +2,7 @@
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="192.168.128.14" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
-  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" -o "exec_cxt.periodic.rate:10"' />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
   <!-- END:openrtm setting -->
   <arg name="MODEL_FILE" value="/opt/grx/HIRONX/model/main.wrl" />
   <arg name="COLLADA_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae"/>
@@ -28,7 +28,7 @@
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hironx_ros_bridge)/launch/hironx.launch" respawn="$(arg RESPAWN)" />
-  <rtconnect from="RobotHardware0.rtc:jointDatOut" to="HiroStateHolder0.rtc:jointData" subscription_type="new"/>
+  <rtconnect from="RobotHardware0.rtc:jointDatOut" to="HiroStateHolder0.rtc:jointData" subscription_type="periodic" push_rate="50"/>
   <rtconnect from="HiroStateHolder0.rtc:angle" to="HrpsysSeqStateROSBridge0.rtc:angle" />
   <rtconnect from="HiroStateHolder0.rtc:rsangle" to="HrpsysSeqStateROSBridge0.rtc:rsangle" />
   <rtconnect from="HiroStateHolder0.rtc:mcangle" to="HrpsysSeqStateROSBridge0.rtc:mcangle" />
