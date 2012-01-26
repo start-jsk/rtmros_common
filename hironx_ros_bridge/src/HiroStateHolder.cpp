@@ -5,6 +5,8 @@
  * $Id$ 
  */
 #include "HiroStateHolder.h"
+#include <hrpUtil/Tvmet3d.h>
+
 
 // Module specification
 // <rtc-template block="module_spec">
@@ -39,8 +41,10 @@ HiroStateHolder::HiroStateHolder(RTC::Manager* manager)
     m_gsensorOut("gsensor", m_gsensor),
     m_gyrometerOut("gyrometer", m_gyrometer),
     m_poseOut("pose", m_pose),
-    m_jointDataIn("jointData", m_jointData)
 
+    m_jointDataIn("jointData", m_jointData),
+    m_basePosIn("basePos", m_basePos),
+    m_baseRpyIn("baseRpy", m_baseRpy)
     // </rtc-template>
 {
 }
@@ -56,6 +60,8 @@ RTC::ReturnCode_t HiroStateHolder::onInitialize()
   // <rtc-template block="registration">
   // Set InPort buffers
   addInPort("jointData", m_jointDataIn);
+  addInPort("basePos", m_basePosIn);
+  addInPort("baseRpy", m_baseRpyIn);
 
   // Set OutPort buffer
   addOutPort("angle", m_angleOut);
@@ -141,6 +147,20 @@ RTC::ReturnCode_t HiroStateHolder::onExecute(RTC::UniqueId ec_id)
     m_mcangleOut.write();
     m_rsangleOut.write();
   }
+
+  if ( m_basePosIn.isNew() && m_baseRpyIn.isNew() ) {
+    m_basePosIn.read(); m_baseRpyIn.read();
+    m_pose.data.position.x = m_basePos.data[0];
+    m_pose.data.position.y = m_basePos.data[1];
+    m_pose.data.position.z = m_basePos.data[2];
+    hrp::Matrix33 R;
+    hrp::getMatrix33FromRowMajorArray(R, m_baseRpy.data, 3);
+    hrp::Vector3 rpy = hrp::rpyFromRot(R);
+    m_pose.data.orientation.r = rpy[0];
+    m_pose.data.orientation.p = rpy[1];
+    m_pose.data.orientation.y = rpy[2];
+    m_poseOut.write();
+    }
   return RTC::RTC_OK;
 }
 

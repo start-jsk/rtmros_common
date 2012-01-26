@@ -94,6 +94,10 @@ class HiroStateHolder  : public RTC::DataFlowComponentBase
   // <rtc-template block="inport_declare">
   TimedJointData m_jointData;
   InPort<TimedJointData> m_jointDataIn;
+  TimedDoubleSeq m_basePos;
+  InPort<TimedDoubleSeq> m_basePosIn;
+  TimedDoubleSeq m_baseRpy;
+  InPort<TimedDoubleSeq> m_baseRpyIn;
 
   // </rtc-template>
 
