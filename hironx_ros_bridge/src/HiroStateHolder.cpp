@@ -1,17 +1,17 @@
 // -*- C++ -*-
 /*!
- * @file  HiroStateConverter.cpp * @brief hiro - ros bridge * $Date$ 
+ * @file  HiroStateHolder.cpp * @brief hiro - ros bridge * $Date$ 
  *
  * $Id$ 
  */
-#include "HiroStateConverter.h"
+#include "HiroStateHolder.h"
 
 // Module specification
 // <rtc-template block="module_spec">
 static const char* hirostateconverter_spec[] =
   {
-    "implementation_id", "HiroStateConverter",
-    "type_name",         "HiroStateConverter",
+    "implementation_id", "HiroStateHolder",
+    "type_name",         "HiroStateHolder",
     "description",       "hiro - ros bridge",
     "version",           "1.0",
     "vendor",            "Kei Okada",
@@ -26,7 +26,7 @@ static const char* hirostateconverter_spec[] =
   };
 // </rtc-template>
 
-HiroStateConverter::HiroStateConverter(RTC::Manager* manager)
+HiroStateHolder::HiroStateHolder(RTC::Manager* manager)
     // <rtc-template block="initializer">
   : RTC::DataFlowComponentBase(manager),
     m_angleOut("angle", m_angle),
@@ -45,12 +45,12 @@ HiroStateConverter::HiroStateConverter(RTC::Manager* manager)
 {
 }
 
-HiroStateConverter::~HiroStateConverter()
+HiroStateHolder::~HiroStateHolder()
 {
 }
 
 
-RTC::ReturnCode_t HiroStateConverter::onInitialize()
+RTC::ReturnCode_t HiroStateHolder::onInitialize()
 {
   // Registration: InPort/OutPort/Service
   // <rtc-template block="registration">
@@ -86,37 +86,37 @@ RTC::ReturnCode_t HiroStateConverter::onInitialize()
 
 
 /*
-RTC::ReturnCode_t HiroStateConverter::onFinalize()
+RTC::ReturnCode_t HiroStateHolder::onFinalize()
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HiroStateConverter::onStartup(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HiroStateHolder::onStartup(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HiroStateConverter::onShutdown(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HiroStateHolder::onShutdown(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HiroStateConverter::onActivated(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HiroStateHolder::onActivated(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HiroStateConverter::onDeactivated(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HiroStateHolder::onDeactivated(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 
-RTC::ReturnCode_t HiroStateConverter::onExecute(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HiroStateHolder::onExecute(RTC::UniqueId ec_id)
 {
   if ( m_jointDataIn.isNew() ) {
     m_jointDataIn.read();
@@ -138,31 +138,31 @@ RTC::ReturnCode_t HiroStateConverter::onExecute(RTC::UniqueId ec_id)
 }
 
 /*
-RTC::ReturnCode_t HiroStateConverter::onAborting(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HiroStateHolder::onAborting(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HiroStateConverter::onError(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HiroStateHolder::onError(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HiroStateConverter::onReset(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HiroStateHolder::onReset(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HiroStateConverter::onStateUpdate(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HiroStateHolder::onStateUpdate(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
 */
 /*
-RTC::ReturnCode_t HiroStateConverter::onRateChanged(RTC::UniqueId ec_id)
+RTC::ReturnCode_t HiroStateHolder::onRateChanged(RTC::UniqueId ec_id)
 {
   return RTC::RTC_OK;
 }
@@ -172,12 +172,12 @@ RTC::ReturnCode_t HiroStateConverter::onRateChanged(RTC::UniqueId ec_id)
 extern "C"
 {
  
-  void HiroStateConverterInit(RTC::Manager* manager)
+  void HiroStateHolderInit(RTC::Manager* manager)
   {
     coil::Properties profile(hirostateconverter_spec);
     manager->registerFactory(profile,
-                             RTC::Create<HiroStateConverter>,
-                             RTC::Delete<HiroStateConverter>);
+                             RTC::Create<HiroStateHolder>,
+                             RTC::Delete<HiroStateHolder>);
   }
   
 };

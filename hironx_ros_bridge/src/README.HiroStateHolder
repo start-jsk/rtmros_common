@@ -1,5 +1,5 @@
 #======================================================================
-#  RTComponent: HiroStateConverter specificatioin
+#  RTComponent: HiroStateHolder specificatioin
 #
 #  OpenRTM-aist-1.0.0
 #
@@ -9,7 +9,7 @@
 #
 #  \
 #    /home/k-okada/ros/electric/rtm-ros-robotics/rtmros_common/openrtm/bin/rtc-template \
-#    -bcxx --module-name=HiroStateConverter \
+#    -bcxx --module-name=HiroStateHolder \
 #    --module-type=DataFlowComponent --module-desc=hiro - ros bridge \
 #    --module-version=1.0 --module-vendor=Kei Okada \
 #    --module-category=example --module-max-inst=10 \

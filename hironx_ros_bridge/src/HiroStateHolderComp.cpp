@@ -1,6 +1,6 @@
 // -*- C++ -*-
 /*!
- * @file HiroStateConverterComp.cpp
+ * @file HiroStateHolderComp.cpp
  * @brief Standalone component
  * @date $Date$ 
  *
@@ -9,16 +9,16 @@
 #include <rtm/Manager.h>
 #include <iostream>
 #include <string>
-#include "HiroStateConverter.h"
+#include "HiroStateHolder.h"
 
 
 void MyModuleInit(RTC::Manager* manager)
 {
-  HiroStateConverterInit(manager);
+  HiroStateHolderInit(manager);
   RTC::RtcBase* comp;
 
   // Create a component
-  comp = manager->createComponent("HiroStateConverter");
+  comp = manager->createComponent("StateHolder");
 
 
   // Example

@@ -1,6 +1,6 @@
 // -*- C++ -*-
 /*!
- * @file  HiroStateConverter.h * @brief hiro - ros bridge * @date  $Date$ 
+ * @file  HiroStateholder.h * @brief hiro - ros bridge * @date  $Date$ 
  *
  * $Id$ 
  */
@@ -29,11 +29,11 @@
 
 using namespace RTC;
 
-class HiroStateConverter  : public RTC::DataFlowComponentBase
+class HiroStateHolder  : public RTC::DataFlowComponentBase
 {
  public:
-  HiroStateConverter(RTC::Manager* manager);
-  ~HiroStateConverter();
+  HiroStateHolder(RTC::Manager* manager);
+  ~HiroStateHolder();
 
   // The initialize action (on CREATED->ALIVE transition)
   // formaer rtc_init_entry() 
@@ -144,7 +144,7 @@ class HiroStateConverter  : public RTC::DataFlowComponentBase
 
 extern "C"
 {
-  DLL_EXPORT void HiroStateConverterInit(RTC::Manager* manager);
+  DLL_EXPORT void HiroStateHolderInit(RTC::Manager* manager);
 };
 
 #endif // HIROSTATECONVERTER_H
