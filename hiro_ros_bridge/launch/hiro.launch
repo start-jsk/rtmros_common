@@ -1,0 +1,21 @@
+<launch>
+  <!-- BEGIN:openrtm setting -->
+  <arg name="nameserver" default="192.168.128.14" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+  <!-- END:openrtm setting -->
+  <arg name="RESPAWN" default="true"/>
+  <arg name="OUTPUT" default="log"/>
+  <env name="LANG" value="C" />
+  <env name="ORBgiopMaxMsgSize" value="2147483648" />
+
+  <node name="HiroStateConverter" pkg="hiro_ros_bridge" type="HiroStateConverter" output="$(arg OUTPUT)"
+	args="$(arg openrtm_args)" respawn="$(arg RESPAWN)" />
+
+  <!-- BEGIN:openrtm connection -->
+  <arg name="ROBOT_NAME" value="dummy" />
+  <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hiro_ros_bridge)/launch/hiro.launch" respawn="$(arg RESPAWN)" />
+  <rtconnect from="HiroStateConverter0.rtc:jointData" to="HiroStateConverter0.rtc:angle" />
+  <rtactivate component="HiroStateConverter0.rtc" />
+  <!-- END:openrtm connection -->
+</launch>
