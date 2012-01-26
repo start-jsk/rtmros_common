@@ -11,6 +11,11 @@
 
 (setq *ri* (instance kawadahironx-interface :init))
 (setq *hiro* (instance hironx-robot :init))
+
+(defmethod hironx-robot
+  (:off-pose ()
+   (send self :angle-vector (float-vector 0.0 -140.0 -158.0 0.0 0.0 0.0 0.0 -140.0 -158.0 0.0 0.0 0.0 0.0 0.0 0.0))))
+
 (dotimes (i 10)
   (send *hiro* :reset-pose)
   ;;(objects (list *hiro*))
