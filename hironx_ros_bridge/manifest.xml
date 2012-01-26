@@ -10,6 +10,7 @@
   <url>http://ros.org/wiki/hiro_ros_bridge</url>
 
   <depend package="hrpsys"/>
+  <depend package="hrpsys_ros_bridge"/>
 
 </package>
 
