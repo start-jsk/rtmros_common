@@ -133,6 +133,7 @@ RTC::ReturnCode_t HiroStateHolder::onExecute(RTC::UniqueId ec_id)
 	m_angle.data[k]   = m_jointData.qState[i][j];
 	m_mcangle.data[k] = m_jointData.qCommand[i][j];
 	m_rsangle.data[k] = m_jointData.qState[i][j];
+	k++;
       }
     }
 
