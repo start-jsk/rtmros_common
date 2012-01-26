@@ -28,7 +28,12 @@
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hironx_ros_bridge)/launch/hironx.launch" respawn="$(arg RESPAWN)" />
-  <rtconnect from="RobotHardware0.rtc:jointDatOut" to="StateHolder0.rtc:jointData" />
-  <rtactivate component="HiroStateConverter0.rtc" />
+  <rtconnect from="RobotHardware0.rtc:jointDatOut" to="HiroStateHolder0.rtc:jointData" />
+  <rtconnect from="HiroStateHolder0.rtc:angle" to="HrpsysSeqStateROSBridge0.rtc:angle" />
+  <rtconnect from="HiroStateHolder0.rtc:rsangle" to="HrpsysSeqStateROSBridge0.rtc:rsangle" />
+  <rtconnect from="HiroStateHolder0.rtc:mcangle" to="HrpsysSeqStateROSBridge0.rtc:mcangle" />
+  <rtconnect from="seq.rtc:SequencePlayerService" to="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" />
+  <rtactivate component="HiroStateHolder0.rtc" />
+  <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
   <!-- END:openrtm connection -->
 </launch>
