@@ -4,7 +4,8 @@
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
   <!-- END:openrtm setting -->
-  <arg name="MODEL_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae" />
+  <arg name="MODEL_FILE" value="/opt/grx/HIRONX/model/main.wrl" />
+  <arg name="COLLADA_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae"/>
   <arg name="RESPAWN" default="true"/>
   <arg name="OUTPUT" default="log"/>
   <env name="LANG" value="C" />
@@ -13,8 +14,22 @@
   <node name="HiroStateHolder" pkg="hironx_ros_bridge" type="HiroStateHolder" output="$(arg OUTPUT)"
 	args="$(arg openrtm_args)" respawn="$(arg RESPAWN)" />
 
+  <!-- <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" /  -->
+
+  <node name = "HrpsysSeqStateROSBridge"
+        pkg  = "hrpsys_ros_bridge"
+        type = "HrpsysSeqStateROSBridge"
+        args = "$(arg openrtm_args) -o model:$(arg MODEL_FILE)"
+        output = "screen" />
+
+  <param name="robot_description" textfile="$(arg COLLADA_FILE)" />
+  <node pkg="robot_state_publisher" type="state_publisher" name="hrpsys_state_publisher" />
+
+  <node name="hironx_rviz" pkg="rviz" type="rviz" respawn="$(arg RESPAWN)"
+        args="--sync"/>
+
   <!-- BEGIN:openrtm connection -->
-  <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hironx_ros_bridge)/launch/hiro.launch" respawn="$(arg RESPAWN)" />
+  <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hironx_ros_bridge)/launch/hironx.launch" respawn="$(arg RESPAWN)" />
   <rtconnect from="RobotHardware0.rtc:jointDatOut" to="StateHolder0.rtc:jointData" />
   <rtactivate component="HiroStateConverter0.rtc" />
   <!-- END:openrtm connection -->
