@@ -27,8 +27,8 @@ def init():
 
 def loadPattern(tm=10.0):
     seq_svc.playPattern([0,    0,    0,
-                         -0.6,  0, -100,  15.2,  9.4,  3.2,
-                          0.6,  0, -100, -15.2,  9.4, -3.2], tm)
+                         -0.0,  0, -1.75,  0.26,  0.16,  0.5,
+                          0.0,  0, -1.75, -0.26,  0.16, -0.5], tm)
     seq_svc.waitInterpolation()
 
 init()
