@@ -1,5 +1,7 @@
+hostname='hiro014' # you need to add this host/ip information to /etc/hosts
+
 from java.lang import System
-System.setProperty('NS_OPT', '-ORBInitRef NameService=corbaloc:iiop:192.168.128.14:2809/NameService')
+System.setProperty('NS_OPT', '-ORBInitRef NameService=corbaloc:iiop:'+hostname+':2809/NameService')
 
 import rtm
 from rtm import *
@@ -17,19 +19,19 @@ def createComps():
     print dir(seq_svc)
 
 def init():
-    global ms
+    global ms, hostname
 
-    ms = rtm.findRTCmanager()
+    ms = rtm.findRTCmanager(hostname=hostname)
 
     print "creating components"
     createComps()
     print "initialized successfully"
 
-def loadPattern(tm=10.0):
-    seq_svc.playPattern([0,    0,    0,
+def playPattern(tm=10.0):
+    seq_svc.playPattern([[0,    0,    0,
                          -0.0,  0, -1.75,  0.26,  0.16,  0.5,
-                          0.0,  0, -1.75, -0.26,  0.16, -0.5], tm)
+                          0.0,  0, -1.75, -0.26,  0.16, -0.5]], [], [], [tm])
     seq_svc.waitInterpolation()
 
 init()
-loadPattern()
+playPattern()
