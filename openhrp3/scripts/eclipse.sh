@@ -14,6 +14,7 @@ export GDK_NATIVE_WINDOWS=1
 export ORBgiopMaxMsgSize=2147483648
 
 #
+mkdir -p `rospack find openhrp3`/workspace/.metadata/.plugins/org.eclipse.core.runtime/.settings/
 {
 cat <<EOF
 eclipse.preferences.version=1
