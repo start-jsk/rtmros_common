@@ -208,4 +208,8 @@ libsimage-dev:
   ubuntu: libsimage-dev
 libqt4-opengl:
   ubuntu: libqt4-opengl-dev
+wx-common:
+  ubuntu: wx-common
+qhull:
+  ubuntu: libqhull-dev qhull-bin
 
