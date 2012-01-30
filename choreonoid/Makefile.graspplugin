@@ -6,6 +6,9 @@ include $(shell rospack find mk)/svn_checkout.mk
 
 installed.graspplugin: $(SVN_DIR)
 	cd $(SOURCE_DIR) && cmake . -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DENABLE_INSTALL_RPATH=ON && make && make install
+	mkdir -p $(CURDIR)/share/extplugin/graspPlugin/
+	cp -fr $(SVN_DIR)/Samples $(CURDIR)/share/extplugin/graspPlugin/
+	cp -fr $(SVN_DIR)/RobotModels $(CURDIR)/share/extplugin/graspPlugin/
 
 clean.graspplugin:
 	-cd $(SOURCE_DIR) && make clean
