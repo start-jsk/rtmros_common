@@ -53,6 +53,9 @@ Please see their official web sites to see the details of their licenses.
   <rosdep name="yaml" />
   <rosdep name="qt4" />
   <rosdep name="libqt4-opengl" />
+  <rosdep name="wx-common" />
+  <rosdep name="qhull" />
+  <rosdep name="liblapack-dev" />
 
 </package>
 

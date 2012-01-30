@@ -1,0 +1,13 @@
+INSTALL_DIR = $(CURDIR)
+SVN_DIR = $(SOURCE_DIR)/extplugin/graspPlugin
+SVN_URL =  http://grasp-plugin.googlecode.com/svn/trunk/graspPlugin
+
+include $(shell rospack find mk)/svn_checkout.mk
+
+installed.graspplugin: $(SVN_DIR)
+	cd $(SOURCE_DIR) && cmake . -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DENABLE_INSTALL_RPATH=ON && make && make install
+
+clean.graspplugin:
+	-cd $(SOURCE_DIR) && make clean
+	rm -fr installed.graspplugin
+
