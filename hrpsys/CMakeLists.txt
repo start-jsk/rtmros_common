@@ -60,7 +60,7 @@ endif(_download_failed)
 ## tests
 ##
 rosbuild_add_rostest(launch/hrp4c.launch)
-rosbuild_add_rostest(launch/pa10.launch)
+#rosbuild_add_rostest(launch/pa10.launch)
 rosbuild_add_rostest(launch/samplerobot.launch)
 
 ##
