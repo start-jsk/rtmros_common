@@ -83,7 +83,7 @@ string readFromXMLFile(string filename) {
 }
 
 int main (int argc, char* argv[]) {
-	string filename = string(argv[1]);
+	string filename = string(argv[argc-1]);
 	string modelpath;
 
 	if ( filename.substr(filename.find_last_of(".")) == ".wrl" ||
