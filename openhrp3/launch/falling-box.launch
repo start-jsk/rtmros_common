@@ -14,5 +14,5 @@ This scripts starts FallingBoxes.xml project file, select StartSimulation sub-me
 
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="180"
-   test-name="FallingBoxes" args="--start-simulation --max-time=30" cwd="node" />
+   test-name="FallingBoxes" args="--start-simulation --max-time=20" cwd="node" />
 </launch>
