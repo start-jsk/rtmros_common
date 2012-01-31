@@ -30,7 +30,7 @@ Finally, `rosrun hrpsys SampleRobot_walk.sh` read walking pattern data and send 
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
    test-name="SampleRobot"
-   args="--start-simulation --max-time=60
+   args="--start-simulation --max-time=30
 	 --target-directory=$(find hrpsys)/build/images
 	 --script='sleep 5; rosrun hrpsys hrpsyspy $(find hrpsys)/scripts/hrpsys.py $(find hrpsys)/scripts/SampleRobot_inHouse.xml; rosrun hrpsys SampleRobot_walk.sh'"
    />
