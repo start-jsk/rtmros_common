@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rosrun openhrp3 grxui.sh &
+rosrun openhrp3 eclipse.sh &
 RET=1
 COUNT=0
 while [ $RET == 1 -a $COUNT -lt 30 ]; do
@@ -15,9 +15,9 @@ while [ $RET == 1 -a $COUNT -lt 30 ]; do
 done
 
 sleep 10
-xdotool mousemove --clearmodifiers 863 132
-xdotool mousedown --clearmodifiers 1
-xdotool mouseup --clearmodifiers 1
+xdotool search --name Eclipse\  key --clearmodifiers alt+w
+xdotool search --name Eclipse\  key --clearmodifiers c
+xdotool search --name Eclipse\  key --clearmodifiers Return
 sleep 3
 xdotool search --name Eclipse\  key --clearmodifiers alt+f
 xdotool search --name Eclipse\  key --clearmodifiers x
