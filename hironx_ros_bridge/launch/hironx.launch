@@ -26,6 +26,15 @@
   <node name="hironx_rviz" pkg="rviz" type="rviz" respawn="$(arg RESPAWN)"
         args="--sync -d $(find hironx_ros_bridge)/launch/hironx.vcg"/>
 
+  <node name="gripper_action_node" ns="/l_gripper_controller"
+	pkg="hironx_ros_bridge" type="hiro_gripper_action.py">
+    <param name="hand_name" value="LHAND" />
+  </node>
+  <node name="gripper_action_node" ns="/r_gripper_controller"
+	pkg="hironx_ros_bridge" type="hiro_gripper_action.py">
+    <param name="hand_name" value="RHAND" />
+  </node>
+
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hironx_ros_bridge)/launch/hironx.launch" respawn="$(arg RESPAWN)" />
   <rtconnect from="RobotHardware0.rtc:jointDatOut" to="HiroStateHolder0.rtc:jointData" subscription_type="periodic" push_rate="50"/>
