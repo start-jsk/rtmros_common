@@ -14,6 +14,7 @@ function test-grxui {
 }
 
 # do test
+rm -fr `rospack find openhrp3`/workspace/
 test-grxui openhrp3
 test-grxui hrpsys
 
