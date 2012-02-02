@@ -1,0 +1,34 @@
+// -*- mode: idl; indent-tabs-mode: t; tab-width: 4; c-basic-offset: 4; -*-
+module OpenHRP {
+  interface GrasperService
+  {
+     typedef sequence<double> DblSequence;
+
+    /**
+     * @brief Wait until the last goal posture is sent to the robot
+     * @param partMask set the bit of part id
+     * @param waitFlag whether to wait for interpolation to end
+     */
+    boolean isEmpty(in octet partMask, in boolean waitFlag);
+    
+    /**
+     * @brief Interpolate all joint angles on robot using duration specified by "tm". Returns without waiting for whole sequence to be sent to robot.
+     * @param jvs sequence of joint angles
+     * @param tm requested duration
+     * @param ttm actual duration
+     * @return current status
+     */
+    unsigned long setJointAngles(in string partName, in DblSequence jv, in double tm, out double ttm);
+
+    /**
+     * @brief Interpolate just one joint angle specified by "jname" using duration "tm". Function returns without waiting for interpolation to finish
+     * @param partName name of part to control
+     * @param jname joint name
+     * @param jv joint angle
+     * @param tm requested duration
+     * @param ttm actual duration
+     * @return current status
+     */
+    unsigned long setJointAngle(in string jname, in double jv, in double tm, out double ttm);
+  };
+};
