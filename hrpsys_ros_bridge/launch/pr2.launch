@@ -9,13 +9,18 @@ This launch file shows an example of ros bridge for pr2 robot
 .. image:: build/images/PR2_Example.gif
   :width: 600
 
+.. image:: build/images/pr2_rviz.gif
+  :width: 600
+
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
    test-name="PR2_Example"
-   args="--max-time=10 --capture-window RViz
+   args="--max-time=10
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --check-tf='/base_footprint /head_plate_frame'
 	 " /> <!-- add dummy __log:= argument to invoke roseus with non-interactive mode -->
+  <test type="ogv_encode.sh" pkg="jsk_tools" test-name="z_PR2_Example" args="$(find hrpsys_ros_bridge)/build/images/PR2_Example.ogv" time-limit="1000"/>
+  <test type="glc_encode.sh" pkg="jsk_tools" test-name="z_pr2_rviz" args="$(find hrpsys_ros_bridge)/build/images/pr2_rviz.glc --ctx 1" time-limit="2000"/>
 </launch>
 
 

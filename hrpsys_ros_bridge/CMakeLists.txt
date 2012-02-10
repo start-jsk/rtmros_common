@@ -114,15 +114,19 @@ rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/Im
 ##
 ## test
 ##
-rosbuild_add_rostest(launch/hrp4c.launch)
-rosbuild_add_rostest(launch/hrp4c_nosim.launch)
-# rosbuild_add_rostest(launch/pa10.launch) #segfault?
-rosbuild_add_rostest(launch/darwin.launch)
-rosbuild_add_rostest(launch/samplerobot.launch)
-rosbuild_add_rostest(launch/hironx.launch)
-rosbuild_add_rostest(launch/smartpal5.launch)
-rosbuild_add_rostest(launch/pr2.launch)
-rosbuild_add_rostest(launch/gr001.launch)
+
+rosbuild_check_for_display(disp)
+if(disp)
+  rosbuild_add_rostest(launch/hrp4c.launch)
+  rosbuild_add_rostest(launch/hrp4c_nosim.launch)
+  # rosbuild_add_rostest(launch/pa10.launch) #segfault?
+  rosbuild_add_rostest(launch/darwin.launch)
+  rosbuild_add_rostest(launch/samplerobot.launch)
+  rosbuild_add_rostest(launch/hironx.launch)
+  rosbuild_add_rostest(launch/smartpal5.launch)
+  rosbuild_add_rostest(launch/pr2.launch)
+  rosbuild_add_rostest(launch/gr001.launch)
+endif(disp)
 
 ##
 ## documents

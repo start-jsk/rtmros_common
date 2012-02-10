@@ -13,13 +13,18 @@ This launch file shows an example of ros bridge for sample robot and client prog
 .. image:: build/images/SampleRobot_PickUp.gif
   :width: 600
 
+.. image:: build/images/samplerobot_rviz.gif
+  :width: 600
+
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
    test-name="SampleRobot_PickUp"
-   args="--max-time=30 --capture-window RViz
+   args="--max-time=30
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --check-tf='/WAIST_LINK0 /VISION_SENSOR1'
 	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/samplerobot-pickup.l __log:=dummy'" /> <!-- add dummy __log/= argument to invoke roseus with non-interactive mode -->
+  <test type="ogv_encode.sh" pkg="jsk_tools" test-name="z_SampleRobot_PickUp" args="$(find hrpsys_ros_bridge)/build/images/SampleRobot_PickUp.ogv" time-limit="1000"/>
+  <test type="glc_encode.sh" pkg="jsk_tools" test-name="z_samplerobot_rviz" args="$(find hrpsys_ros_bridge)/build/images/samplerobot_rviz.glc --ctx 1" time-limit="2000"/>
 </launch>
 
 

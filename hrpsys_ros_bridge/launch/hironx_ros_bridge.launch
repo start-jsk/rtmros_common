@@ -6,8 +6,9 @@
     <arg name="COLLADA_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae" />
   </include>
 
-  <node name="hiro_rviz" pkg="rviz" type="rviz" respawn="true"
-	args="--sync -d $(find hrpsys_ros_bridge)/launch/hironx.vcg" />
+  <node name="hironx_rviz" pkg="rviz" type="rviz" respawn="true"
+	args="--sync -d $(find hrpsys_ros_bridge)/launch/hironx.vcg"
+        launch-prefix='glc-capture --out=$(find hrpsys_ros_bridge)/build/images/hironx_rviz.glc'  />
 
 </launch>
 

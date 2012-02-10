@@ -5,8 +5,9 @@
     <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge)/models/GR001.dae" />
   </include>
 
-  <node name="darwin_rviz" pkg="rviz" type="rviz" respawn="true"
-	args="--sync -d $(find hrpsys_ros_bridge)/launch/gr001.vcg" />
+  <node name="gr001_rviz" pkg="rviz" type="rviz" respawn="true"
+	args="--sync -d $(find hrpsys_ros_bridge)/launch/gr001.vcg"
+        launch-prefix='glc-capture --out=$(find hrpsys_ros_bridge)/build/images/gr001_rviz.glc'  />
 </launch>
 
 
