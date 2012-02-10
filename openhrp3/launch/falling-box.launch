@@ -13,6 +13,11 @@ This scripts starts FallingBoxes.xml project file, select StartSimulation sub-me
   :width: 600
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="180"
-   test-name="FallingBoxes" args="--start-simulation --max-time=20" cwd="node" />
+
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
+   test-name="FallingBoxes"
+   args="--start-simulation --target-directory=$(find openhrp3)/build/images --max-time=30" cwd="node" />
+
+  <test type="ogv_encode.sh" pkg="jsk_tools" test-name="z_FallingBoxes" args="$(find openhrp3)/build/images/FallingBoxes.ogv" time-limit="1000"/>
+
 </launch>

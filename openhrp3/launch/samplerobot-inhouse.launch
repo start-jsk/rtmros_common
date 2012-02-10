@@ -13,6 +13,10 @@ This scripts starts SampleLF.xml OpenHRP3 sample project file, the robot picks u
   :width: 600
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="1000"
-   test-name="SampleRobot_inHouse" args="--start-simulation --max-time=200" cwd="node" />
+
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
+   test-name="SampleRobot_inHouse" args="--start-simulation --target-directory=$(find openhrp3)/build/images --max-time=300" cwd="node" />
+
+  <test type="ogv_encode.sh" pkg="jsk_tools" test-name="z_SampleRobot_inHouse" args="$(find openhrp3)/build/images/SampleRobot_inHouse.ogv" time-limit="1000"/>
+
 </launch>
