@@ -21,8 +21,9 @@ This scripts starts PA10.xml hrpsys-base sample project file, First, select Star
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
    test-name="PA10"
-   args="--start-simulation --max-time=40
+   args="--start-simulation --max-time=10
 	 --target-directory=$(find hrpsys)/build/images
 	 --script='rosrun hrpsys hrpsyspy $(find hrpsys)/share/hrpsys/samples/PA10/PA10.py'"
    />
+  <test type="ogv_encode.sh" pkg="jsk_tools" test-name="z_PA10" args="$(find hrpsys)/build/images/PA10.ogv" time-limit="1000"/>
 </launch>
