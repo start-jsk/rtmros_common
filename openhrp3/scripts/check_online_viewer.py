@@ -41,7 +41,7 @@ def waitOnlineViewer():
         try:
             ret = filter(lambda x: findObject("OnlineViewer", "").getPosture(x)[0], ["floor", "longfloor", "box", "pa10"])
         except:
-            print "error on findObject onlineViewer"
+            print "[check_online_viewer] error on findObject onlineViewer"
     return ret
 
 

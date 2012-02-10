@@ -10,8 +10,7 @@ from optparse import OptionParser
 
 class TestGrxUIProject(unittest.TestCase):
     success = False
-    script_procs = [];
-    init_proc = None
+    script_proc = None;
     name = ""
 
     def setUp(self):
@@ -20,7 +19,7 @@ class TestGrxUIProject(unittest.TestCase):
                           help='do not launch grxui, just wait finish and capture files')
         parser.add_option('--max-time',action="store",type='int',dest='max_time',default=100,
                           help='wait sec until exit from grxui')
-        parser.add_option('--target-directory',action="store",type='string',dest='target_directory',default='../build/images/',
+        parser.add_option('--target-directory',action="store",type='string',dest='target_directory',default='/tmp/',
                           help='directory to write results')
         parser.add_option('--init-script',action="store",type='string',dest='init_script',default=None,
                           help='init script to execute before test')
@@ -56,8 +55,9 @@ class TestGrxUIProject(unittest.TestCase):
 
     def check_window(self,name,visible=""):
         if visible : visible = "--onlyvisible"
-        print "[%s] check window %s"%(self.id(),name)
-        return subprocess.call("xdotool search "+visible+" --name \""+name+"\"", shell=True) != 1
+        ret = subprocess.call("xdotool search "+visible+" --name \""+name+"\"", shell=True) != 1
+        print "[%s] check window %s -> %s"%(self.id(),name, ret)
+        return ret
 
     def wait_for_window(self,name):
         while subprocess.call("xdotool search --name \""+name+"\"", shell=True) == 1:
@@ -91,9 +91,6 @@ class TestGrxUIProject(unittest.TestCase):
     def start_simulation(self):
         print "[%s] start simulation"%(self.id())
         self.xdotool("Eclipse ", "mousemove --sync 400 50")
-        #subprocess.call("xdotool set_desktop 2", shell=True)
-        #subprocess.call("xdotool search --name \"Eclipse \" set_desktop_for_window 2", shell=True)
-        self.xdotool("Eclipse ", "windowmove --sync 0 0")
         self.xdotool("Eclipse ", "windowactivate --sync")
         self.xdotool("Eclipse ", "\
         windowactivate --sync \
@@ -102,97 +99,57 @@ class TestGrxUIProject(unittest.TestCase):
 
     def execute_scripts(self):
         print "[%s] start scripts %s"%(self.id(),self.scripts)
-        scripts = shlex.shlex(self.scripts)
-        whitespace = scripts.whitespace
-        scripts.whitespace = ';'
-        scripts.whitespace_split = True
-        self.script_procs = []
-        for script in scripts:
-            args = shlex.split(script)
-            self.script_procs.append(subprocess.Popen(args))
+        self.script_proc = subprocess.Popen(self.scripts, stdin=subprocess.PIPE, shell=True)
 
     def terminate_scripts(self):
-        if self.init_proc and self.init_proc.poll() == None:
-            self.init_proc.send_signal(2) ## send SIGINT
-            self.init_proc.terminate()
-            self.init_proc.kill()
-        self.init_proc = None
-        for p in self.script_procs:
-            print "[%s] __del__, process %s"%(self.id(), p)
-            ## get process that has p.pid as ppid
-            p.pid
+        p = self.script_proc
+        print "[%s] __del__, process %s"%(self.id(), p)
+        print subprocess.check_output("ps -o pid,ppid,user,command -ax", shell=True)
+        ## get process that has p.pid as ppid
+        if p :
             for sig in [signal.SIGINT, signal.SIGKILL, signal.SIGTERM]:
                 i = 0
                 while p and (p.poll() == None) and (i < 5):
                     print "[%s] __del__, send %d to process %s, poll %s, pid %d (%d)"%(self.id(), sig, p, p.poll(), p.pid, i)
                     p.send_signal(sig)
-                    subprocess.call('for child in $(ps -o pid,ppid -ax | awk "{ if ( \$2 == %d ){ print \$1}}"); do  echo $child; kill %d $child; done'%(p.pid, sig), shell=True)
+                    subprocess.call('for child in $(ps -o pid,ppid -ax | awk "{ if ( \$2 == %d ){ print \$1}}"); do  echo "[%s] __del__, kill -%d $child"; kill -%d $child; done'%(p.pid, self.id(), sig, sig), shell=True)
                     i += 1
                     time.sleep(1)
-        self.script_procs = []
-
-    def wait_times_is_up(self):
-        print "[%s] wait time is up"%(self.id())
-        i = 0
-        if not os.path.isdir(self.target_directory) :
-            os.mkdir(self.target_directory)
-        subprocess.call('rm -f %s/%s*.png'%(self.target_directory,self.name),shell=True)
-        self.xdotool(self.capture_window, "windowactivate --sync")
-        if self.scripts: self.execute_scripts()
-        while (not self.check_window("Time is up")) and (i < self.max_time) :
-            print "[%s] wait for \"Time is up\" (%d/%d) ..."%(self.id(), i, self.max_time)
-            for camera_window in ["VISION_SENSOR1","VISION_SENSOR2"]:
-                if self.check_window(camera_window, visible=True):
-                    if self.simulation_start :
-                        self.move_window(camera_window,679,509)
-            if self.check_window("Setup Controller", visible=True):
-                self.xdotool("Setup Controller", "key Tab",visible=True)
-                self.xdotool("Setup Controller", "key Return",visible=True)
-            filename="%s-%03d.png"%(self.name, i)
-            print "[%s] write %s to %s"%(self.id(), self.capture_window, filename)
-            self.xdotool(self.capture_window, "windowactivate --sync", visible=True)
-            #ret = subprocess.call('import -frame -screen -window %s %s/%s'%(self.capture_window, self.target_directory, filename), shell=True)
-            ret = subprocess.call('import -frame -resize 50%% -screen -window root %s/%s'%(self.target_directory, filename), shell=True)
-            print "[%s] import returns %s"%(self.id(), ret)
-            self.assertEqual(ret, 0) #
-            if self.script_procs and all(map(lambda x: x.poll()!=None, self.script_procs)) :
-                for p in self.script_procs:
-                    print "[%s] %s"%(self.id(),repr(p.communicate()[0]))
-                self.execute_scripts()
-            i+=1
-        print "[%s] wait for \"Time is up\" ... done"%(self.id())
-        self.unmap_window("Time is up")
-
-    def capture_eclipse(self):
-        subprocess.call('import -frame -screen -window %s %s/%s.png'%(self.capture_window, self.target_directory, self.name), shell=True)
+            self.script_proc = None
 
     def exit_eclipse(self):
         self.map_window("Time is up")
         if self.check_window("Time is up"):
             self.return_window("Time is up")
+            print "[%s] send return to \"Time is up\""%(self.id())
             self.wait_for_window("Simulation Finished")
             self.return_window("Simulation Finished")
+            print "[%s] send return to \"Simulation finished\""%(self.id())
+        print "[%s] send Alt+f -> x -> Return"%(self.id())
         subprocess.call("xdotool search --name \"Eclipse \" windowactivate --sync key --clearmodifiers alt+f key --clearmodifiers x", shell=True)
         subprocess.call("xdotool key --clearmodifiers Return", shell=True)
         subprocess.call("pkill omniNames", shell=True)
-        # wait scripts
-        self.terminate_scripts()
-        # create animation gif
-        print "[%s] convert png to gif"%(self.id())
-        subprocess.call('convert -delay 10 -loop 0 %s/%s-*.png %s/%s.gif'%(self.target_directory, self.name, self.target_directory, self.name), shell=True)
-        self.success = True
 
     def test_grxui_simulation(self):
-        if self.init_script :
-            print shlex.split(self.init_script)
-            self.init_proc = subprocess.Popen(shlex.split(self.init_script))
-        import check_online_viewer
+        import check_online_viewer,psutil
         # wait online viewer
         check_online_viewer.waitOnlineViewer()
+        # check window id
+        time.sleep(3)
+        winid = subprocess.check_output("xdotool search \"Eclipse \"", shell=True).rstrip()
+        print "[%s] eclipse winid %s"%(self.id(), winid)
+
+        # for pa10
+        if self.check_window("Restoring Problems") :
+            print "[%s] Restoring Problems"%(self.id())
+            self.xdotool("Restoring Problems", "key Tab",visible=True)
+            self.xdotool("Restoring Problems", "key Return",visible=True)
+
         # start simualation
         if self.simulation_start :
             self.start_simulation()
-        # wait for tf
+
+        # wait tf
         if self.check_tf :
             print "[%s] check tf %s"%(self.id(),self.check_tf)
             self.check_tf = shlex.split(self.check_tf)
@@ -205,12 +162,64 @@ class TestGrxUIProject(unittest.TestCase):
                 except:
                     print "%s wait for %s"%(self.id(), self.check_tf)
                 time.sleep(1)
-        # wait for a time
-        self.wait_times_is_up()
-        # capture result
-        self.capture_eclipse()
-        # exit
+            # send shift-F8 to rviz to start glc capture
+            self.xdotool("RViz", "windowactivate --sync",visible=True)
+            time.sleep(1);
+            subprocess.call("xdotool key --clearmodifiers \"shift+F8\"", shell=True)
+            time.sleep(1);
+            self.xdotool("Eclipse ", "windowactivate --sync",visible=True)
+
+        # start scripts
+        if self.scripts:
+            self.execute_scripts()
+
+        # start capture
+        if not os.path.exists(self.target_directory) : os.makedirs(self.target_directory)
+        ret = subprocess.Popen("recordmydesktop --no-cursor --windowid=%s --overwrite --output=%s/%s"%(winid,self.target_directory,self.name), shell=True)
+
+        # wait for max time
+        start_time = time.time()
+        camera_window_names = ['VISION_SENSOR1','VISION_SENSOR2','camera1']
+        while 1:
+            elapsed_time = time.time() - start_time
+            print "[%s] wait for finish... %0.3f/%s"%(self.id(), elapsed_time, self.max_time)
+            if  elapsed_time > self.max_time :
+                break
+            if self.check_window("Time is up") :
+                break
+            if self.scripts:
+                if self.script_proc.poll() == 0 :
+                    break;
+            for camera_window in camera_window_names :
+                if self.check_window(camera_window, visible=True):
+                    # self.move_window(camera_window,679,509) # for lucid
+                    self.move_window(camera_window,749,509) # for oneirick
+                    camera_window_names.remove(camera_window)
+            #
+            if self.check_window("Setup Controller", visible=True):
+                self.xdotool("Setup Controller", "key Tab",visible=True)
+                self.xdotool("Setup Controller", "key Return",visible=True)
+
+        # stop terminal
+        if self.script_proc :
+            self.script_proc.communicate("\u0003\n")
+
+        # stop record my desktop
+        print "[%s] killing recordmydesktop .."%(self.id())
+        subprocess.call("pkill recordmydesktop", shell=True)
+
+        # wait for record my desktop
         self.exit_eclipse()
+        print "[%s] wait for recordmydesktop encoding..."%(self.id())
+        wait_for_recordmydesktop = True
+        while wait_for_recordmydesktop :
+            print "[%s] wait for recordmydesktop encoding..."%(self.id())
+            if all(not p.name == "recordmydesktop" for p in psutil.process_iter()) :
+                wait_for_recordmydesktop = False
+            time.sleep(1)
+        print "[%s] recordmydesktop terminated"%(self.id())
+
+        self.success = True
 
     def __del__(self):
         # check sucess
@@ -218,8 +227,10 @@ class TestGrxUIProject(unittest.TestCase):
         #
         print "[%s] __del__, pkill omniNames"%(self.id())
         subprocess.call("pkill omniNames", shell=True)
+        subprocess.call("pkill recordmydesktop", shell=True)
+        subprocess.call("pkill recordmydesktop", shell=True)
         # wait scripts
-        self.terminate_scripts()
+        #self.terminate_scripts()
 
 
 if __name__ == '__main__':
