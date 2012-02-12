@@ -80,6 +80,7 @@ http://code.google.com/p/openhrp-aist-grx/
 
 
   <rosdep name="libxml2" />
+  <rosdep name="libxtst-dev" /> <!-- xdotool require /usr/include/X11/extentions -->
   <rosdep name="xdotool" />
 
   <!-- for rostest -->
