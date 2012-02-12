@@ -82,6 +82,7 @@ http://code.google.com/p/openhrp-aist-grx/
   <rosdep name="libxml2" />
   <rosdep name="xdotool" />
 
+  <depend package="jsk_tools" />
 
 </package>
 
