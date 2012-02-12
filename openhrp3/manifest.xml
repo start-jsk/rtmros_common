@@ -82,7 +82,9 @@ http://code.google.com/p/openhrp-aist-grx/
   <rosdep name="libxml2" />
   <rosdep name="xdotool" />
 
+  <!-- for rostest -->
   <depend package="jsk_tools" />
+  <rosdep name="python-psutil" />
 
 </package>
 

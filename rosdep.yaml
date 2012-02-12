@@ -80,6 +80,8 @@ python-omniorb:
    oneiric: python-omniorb
 python-tk:
   ubuntu: python-tk
+python-psutil:
+  ubuntu: python-psutil
 
 # math
 liblapack3gf:
