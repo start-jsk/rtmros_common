@@ -2,7 +2,7 @@ sun-java6-jdk:
   ubuntu: |
    #!/bin/bash
    if [ ! -f /etc/apt/sources.list.d/ferramroberto-java-`lsb_release -cs`.list ] ; then
-     sudo add-apt-repository -y ppa:ferramroberto/java
+     yes | sudo add-apt-repository ppa:ferramroberto/java
      sudo aptitude update
    fi
    echo "sun-java6-jdk shared/accepted-sun-dlj-v1-1 select true" | sudo debconf-set-selections
