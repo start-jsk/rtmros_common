@@ -55,7 +55,7 @@ class TestGrxUIProject(unittest.TestCase):
 
     def check_window(self,name,visible=""):
         if visible : visible = "--onlyvisible"
-        ret = subprocess.call("xdotool search "+visible+" --maxdepth 1 --name \""+name+"\"", shell=True) != 1
+        ret = subprocess.call("xdotool search "+visible+" --maxdepth 3 --name \""+name+"\"", shell=True) != 1
         print "[%s] check window %s -> %s"%(self.id(),name, ret)
         return ret
 
