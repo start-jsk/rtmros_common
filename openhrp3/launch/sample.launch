@@ -9,7 +9,7 @@
   <sphinxdoc><![CDATA[
 This scripts starts Sample.xml project file, select StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
 
-.. image:: build/images/Sample.gif
+.. video:: build/images/Sample
   :width: 600
 
   ]]></sphinxdoc>

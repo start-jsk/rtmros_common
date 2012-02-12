@@ -9,7 +9,7 @@
   <sphinxdoc><![CDATA[
 This scripts starts FallingBoxes.xml project file, select StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
 
-.. image:: build/images/FallingBoxes.gif
+.. video:: build/images/FallingBoxes
   :width: 600
 
   ]]></sphinxdoc>

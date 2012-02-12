@@ -9,7 +9,7 @@
   <sphinxdoc><![CDATA[
 This scripts starts SampleLF.xml OpenHRP3 sample project file, the robot picks up the yellow box from the ground by selecting StartSimulation sub-menu from GrxUI menu, or clock simulation start button.
 
-.. image:: build/images/SampleRobot_inHouse.gif
+.. video:: build/images/SampleRobot_inHouse
   :width: 600
 
   ]]></sphinxdoc>
