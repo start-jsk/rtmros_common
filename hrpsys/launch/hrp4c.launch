@@ -15,7 +15,7 @@ select StartSimulation sub-menu from GrxUI menu, or clock Simulation Start butto
   rosrun hrpsys hrpsyspy `rospack find hrpsys`/share/hrpsys/samples/HRP-4C/HRP4C.py
 
 
-.. image:: build/images/HRP4C.gif
+.. video:: build/images/HRP4C
   :width: 600
 
   ]]></sphinxdoc>

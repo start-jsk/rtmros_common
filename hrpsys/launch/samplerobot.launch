@@ -24,7 +24,7 @@ Then type `rosrun hrpsys hrpsyspy hrpsys.py <project xml file>` to start Sequenc
 
 Finally, `rosrun hrpsys SampleRobot_walk.sh` read walking pattern data and send to `seq` component.
 
-.. image:: build/images/SampleRobot.gif
+.. video:: build/images/SampleRobot
   :width: 600
 
   ]]></sphinxdoc>

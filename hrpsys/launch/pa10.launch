@@ -15,7 +15,7 @@ This scripts starts PA10.xml hrpsys-base sample project file, First, select Star
 
   rosrun hrpsys hrpsyspy `rospack find hrpsys`/share/hrpsys/samples/PA10/PA10.py
 
-.. image:: build/images/PA10.gif
+.. video:: build/images/PA10
   :width: 600
 
   ]]></sphinxdoc>
