@@ -20,10 +20,10 @@ After that, we need to invoke the client program. Following program is the examp
 
 3. `rosrun roseus roseus kawada-hironx-example.l` : sample euslisp script to control the robot.
 
-.. image:: build/images/HIRONX_Example.gif
+.. video:: build/images/HIRONX_Example
   :width: 600
 
-.. image:: build/images/hironx_rviz.gif
+.. video:: build/images/hironx_rviz-1
   :width: 600
 
   ]]></sphinxdoc>
@@ -34,7 +34,7 @@ After that, we need to invoke the client program. Following program is the examp
 	 --check-tf='/WAIST /HEAD_JOINT1_Link'
 	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/kawada-hironx-example.l __log:=dummy'" /> <!-- add dummy __log/= argument to invoke roseus with non-interactive mode -->
   <test type="ogv_encode.sh" pkg="jsk_tools" test-name="z_HIRONX_Example" args="$(find hrpsys_ros_bridge)/build/images/HIRONX_Example.ogv" time-limit="1000"/>
-  <test type="glc_encode.sh" pkg="jsk_tools" test-name="z_hironx_rviz" args="$(find hrpsys_ros_bridge)/build/images/hironx_rviz.glc --ctx 1" time-limit="2000"/>
+  <test type="glc_encode.sh" pkg="jsk_tools" test-name="z_hironx_rviz" args="$(find hrpsys_ros_bridge)/build/images/hironx_rviz.glc" time-limit="2000"/>
 </launch>
 
 

@@ -10,10 +10,10 @@
 
 This launch file shows an example of ros bridge for darwin robot and sample client program `darwin-pickup.l`
 
-.. image:: build/images/Darwin_PickUp.gif
+.. video:: build/images/Darwin_PickUp
   :width: 600
 
-.. image:: build/images/darwin_rviz.gif
+.. video:: build/images/darwin_rviz-1
   :width: 600
 
   ]]></sphinxdoc>
