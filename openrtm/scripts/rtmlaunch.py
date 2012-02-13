@@ -82,6 +82,7 @@ def rtconnect(nameserver, tags):
         print >>sys.stderr, "Connect from ",source_path,"to",dest_path
         #print source_path, source_full_path, dest_path, dest_full_path;
         try:
+            sub_type = str(sub_type)
             props = {'dataport.subscription_type': sub_type}
             if sub_type == 'new':
                 props['dataport.publisher.push_policy'] = 'all'
