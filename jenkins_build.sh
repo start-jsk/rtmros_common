@@ -1,10 +1,29 @@
 #!/bin/bash
 
-trap 'exit 1' ERR
+usage_exit () {
+    echo "Usage : $0 [-t|--target TARGET_PACKAGE] ROS_DISTRIBUTION" 1>&2
+    exit 1
+}
+trap usage ERR
 
 export LANG=C
 
+# command line parse
+GETOPT=`getopt -o ht: -l help,target: -- "$@"` ; [ $? != 0 ] && usage_exit
+
+TARGET=""
+eval set -- "$GETOPT"
+while [ -n "$1" ] ; do
+    case $1 in
+        -t|--target) TARGET=$2; shift 2;;
+        -h|--help) usage_exit ;;
+        --) shift; break;;
+        *) echo "Unknown option($1)"; usage_exit;;
+    esac
+done
+
 DISTRIBUTION=${@-"electric"}
+echo "Running $0 with {distribution:$DISTRIBUTION, target:$TARGET}"
 
 # setup workspace and buildspace
 if [ "$WORKSPACE" == "" ]; then # if not jenkins
@@ -36,11 +55,18 @@ rospack profile
 export ROS_PARALLEL_JOBS=-j4
 unset SVN_REVISION ## this conflicts with mk/svn_checkout.mk
 # rosmake
-ROSMAKE='rosmake --status-rate=0 --rosdep-install --rosdep-yes'
+
+ROSMAKE='rosmake --status-rate=0 --rosdep-install --rosdep-yes --profile -V -r'
 (cd `rospack find euslisp`; svn up; svn up)
-$ROSMAKE euscollada || $ROSMAKE euscollada || $ROSMAKE euscollada || $ROSMAKE  euscollada
-$ROSMAKE rtmros_common
-$ROSMAKE openhrp3
-$ROSMAKE hrpsys_ros_bridge
-$ROSMAKE mrobot_ros_bridge
-$ROSMAKE RS003
+if [ ! $TARGET ]; then
+    $ROSMAKE euscollada || $ROSMAKE euscollada || $ROSMAKE euscollada || $ROSMAKE  euscollada
+    $ROSMAKE rtmros_common
+    $ROSMAKE openhrp3
+    $ROSMAKE hrpsys_ros_bridge
+    $ROSMAKE mrobot_ros_bridge
+    $ROSMAKE RS003
+else
+    $ROSMAKE $TARGET
+exit
+
+
