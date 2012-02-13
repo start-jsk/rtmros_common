@@ -27,8 +27,8 @@ static const char* hrpsysseqstaterosbridge_spec[] =
 // </rtc-template>
 
 HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
-  HrpsysSeqStateROSBridgeImpl(manager),
-  server(nh, "fullbody_controller/joint_trajectory_action", false)
+  server(nh, "fullbody_controller/joint_trajectory_action", false),
+  HrpsysSeqStateROSBridgeImpl(manager)
 {
   // ros
   server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
