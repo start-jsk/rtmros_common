@@ -45,9 +45,8 @@ if [ $INSTALL == 1 ]; then
     /usr/local/bin/rosinstall --rosdep-yes --continue-on-error  --delete-changed-uris $ROS_INSTALLDIR /opt/ros/$DISTRIBUTION  http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall || rosinstall $ROS_INSTALLDIR
 
     # copy jenkins source
-    if [ "$JENKINS_HOME" != "" ]; then #if jenkins
-	rm -fr $ROS_INSTALLDIR/rtm-ros-robotics/rtmros_common/
-	cp -r $WORKSPACE/rtm-ros-robotics/rtmros_common $ROS_INSTALLDIR/rtm-ros-robotics/rtmros_common
+    if [ "$JENKINS_HOME" != "" ]; then #if jenkins, use jenkins SVN_REVISION to sync with jenkins SCM plugin
+	(cd $ROS_INSTALLDIR/rtm-ros-robotics/rtmros_common/; svn up -r $SVN_REVISION)
 	# set ROS_HOME under workspace so that we can check from web interface
 	echo "export ROS_HOME=$WORKSPACE/.ros" >> $ROS_INSTALLDIR/setup.sh
     fi
