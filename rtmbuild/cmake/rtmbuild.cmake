@@ -55,7 +55,7 @@ macro(rtmbuild_genidl)
 
     # call the  rule to compile idl
     add_custom_command(OUTPUT ${_output_idl_hh}
-      COMMAND ${_genidl_exe} `${_openrtm_pkg_dir}/bin/rtm-config --idlflags` -I`${_openrtm_pkg_dir}/bin/rtm-config --prefix`/include/rtm/idl -I${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl -C${_output_cpp_dir} ${_input_idl}
+      COMMAND ${_genidl_exe} `${_openrtm_pkg_dir}/bin/rtm-config --idlflags` `${_openrtm_pkg_dir}/bin/rtm-config --cflags | sed 's/\(^-\| -\)[^I]\S*//g'` -I${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl -C${_output_cpp_dir} ${_input_idl}
       DEPENDS ${_input_idl} ${${_idl}_depends})
     add_custom_command(OUTPUT ${_output_stub_cpp} ${_output_skel_cpp}
       COMMAND cp ${_input_idl} ${_output_cpp_dir}
