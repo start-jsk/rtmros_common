@@ -1,0 +1,91 @@
+Index: ec/hrpEC/CMakeLists.txt
+===================================================================
+--- ec/hrpEC/CMakeLists.txt.orig	2012-02-14 03:42:48.265993795 +0900
++++ ec/hrpEC/CMakeLists.txt	2012-02-14 03:44:25.373990359 +0900
+@@ -1,4 +1,4 @@
+-set(idl_flags -bcxx -Wbuse_quotes -Wbh=.hh -Wbs=Sk.cpp -I${OPENRTM_DIR}/include/rtm/idl)
++set(idl_flags -bcxx -Wbuse_quotes -Wbh=.hh -Wbs=Sk.cpp -I${OPENRTM_IDL_DIR})
+ set(package_path OpenHRP)
+ 
+ macro(generate_stub_skel idl_basename)
+@@ -9,7 +9,7 @@
+   add_custom_command(
+     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${idl_basename}.hh ${CMAKE_CURRENT_BINARY_DIR}/${idl_basename}Sk.cpp ${jarfile} ${CMAKE_CURRENT_BINARY_DIR}/../../python/${idl_basename}_idl.py
+     COMMAND omniidl ${idl_flags} ${idl_file}
+-    COMMAND omniidl -bpython -C../../python -I${OPENRTM_DIR}/include/rtm/idl ${idl_file}
+-    COMMAND ${IDLJ} ${idlj_flags} -I${CMAKE_CURRENT_SOURCE_DIR}/../../idl/ -I${OPENRTM_DIR}/include/rtm/idl ${idl_file}
++    COMMAND omniidl -bpython -C../../python -I${OPENRTM_IDL_DIR} ${idl_file}
++    COMMAND ${IDLJ} ${idlj_flags} -I${CMAKE_CURRENT_SOURCE_DIR}/../../idl/ -I${OPENRTM_IDL_DIR} ${idl_file}
+     COMMAND ${JAVAC} ${javac_flags} src/${package_path}/*.java
+     COMMAND ${JAR} cf ${jarfile} -C ${CMAKE_CURRENT_BINARY_DIR} ${package_path}
+Index: rtc/CMakeLists.txt
+===================================================================
+--- rtc/CMakeLists.txt	(リビジョン 76)
++++ rtc/CMakeLists.txt	(作業コピー)
+@@ -1,4 +1,4 @@
+-set(idl_flags -bcxx -Wbuse_quotes -Wbh=.hh -Wbs=Sk.cpp -Wba -Wbd=DynSk.cpp -I${OPENRTM_DIR}/include/rtm/idl)
++set(idl_flags -bcxx -Wbuse_quotes -Wbh=.hh -Wbs=Sk.cpp -Wba -Wbd=DynSk.cpp -I${OPENRTM_IDL_DIR})
+ set(package_path OpenHRP)
+ 
+ macro(generate_stub_skel idl_basename)
+@@ -9,8 +9,8 @@
+   add_custom_command(
+     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${idl_basename}.hh ${CMAKE_CURRENT_BINARY_DIR}/${idl_basename}Sk.cpp ${CMAKE_CURRENT_BINARY_DIR}/${idl_basename}DynSk.cpp ${jarfile} ${CMAKE_CURRENT_BINARY_DIR}/../../python/${idl_basename}_idl.py
+     COMMAND omniidl ${idl_flags} ${idl_file}
+-    COMMAND omniidl -bpython -C../../python -I${OPENRTM_DIR}/include/rtm/idl ${idl_file}
+-    COMMAND ${IDLJ} ${idlj_flags} -I${OPENRTM_DIR}/include/rtm/idl ${idl_file}
++    COMMAND omniidl -bpython -C../../python -I${OPENRTM_IDL_DIR} ${idl_file}
++    COMMAND ${IDLJ} ${idlj_flags} -I${OPENRTM_IDL_DIR} ${idl_file}
+     COMMAND ${JAVAC} ${javac_flags} src/${package_path}/*.java
+     COMMAND ${JAR} cf ${jarfile} -C ${CMAKE_CURRENT_BINARY_DIR} ${package_path}
+     COMMAND cp -f ${jarfile} ${PROJECT_SOURCE_DIR}/plugin
+@@ -35,7 +35,7 @@
+     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${idl_basename}.hh ${CMAKE_CURRENT_BINARY_DIR}/${idl_basename}Sk.cpp ${CMAKE_CURRENT_BINARY_DIR}/${idl_basename}DynSk.cpp ${jarfile} #${CMAKE_CURRENT_BINARY_DIR}/../../python/${idl_basename}_idl.py
+     COMMAND omniidl ${idl_flags} ${idl_file}
+ #    COMMAND omniidl -bpython -C../../python ${idl_file}
+-    COMMAND ${IDLJ} ${idlj_flags} -I${OPENRTM_DIR}/include/rtm/idl ${idl_file}
++    COMMAND ${IDLJ} ${idlj_flags} -I${OPENRTM_IDL_DIR} ${idl_file}
+     COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/cls
+     COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/cls/${package_path}
+     COMMAND ${JAVAC} ${javac_flags} src/${package_path}*.java
+Index: cmake_modules/FindOpenRTM.cmake
+===================================================================
+--- cmake_modules/FindOpenRTM.cmake	(リビジョン 76)
++++ cmake_modules/FindOpenRTM.cmake	(作業コピー)
+@@ -38,8 +38,15 @@
+ 
+     if(RESULT EQUAL 0)
+       if(OPENRTM_DIR)
+-	list(APPEND OPENRTM_INCLUDE_DIRS "${OPENRTM_DIR}/include")
+-	list(APPEND OPENRTM_INCLUDE_DIRS "${OPENRTM_DIR}/include/rtm/idl")
++	if(OPENRTM_VERSION STREQUAL "1.1.0")
++	  set(OPENRTM_IDL_DIR ${OPENRTM_DIR}/include/openrtm-1.1/rtm/idl)
++	  list(APPEND OPENRTM_INCLUDE_DIRS "${OPENRTM_DIR}/include/openrtm-1.1")
++	  list(APPEND OPENRTM_INCLUDE_DIRS "${OPENRTM_DIR}/include/openrtm-1.1/rtm/idl")
++	else()
++	  set(OPENRTM_IDL_DIR ${OPENRTM_DIR}/include/rtm/idl)
++	  list(APPEND OPENRTM_INCLUDE_DIRS "${OPENRTM_DIR}/include")
++	  list(APPEND OPENRTM_INCLUDE_DIRS "${OPENRTM_DIR}/include/rtm/idl")
++	endif()
+       endif()
+     else()
+       set(OPENRTM_FOUND FALSE)
+Index: jython/CMakeLists.txt
+===================================================================
+--- jython/CMakeLists.txt.orig	2012-02-14 03:46:26.933986061 +0900
++++ jython/CMakeLists.txt	2012-02-14 03:46:16.101986443 +0900
+@@ -5,10 +5,10 @@
+ 
+ add_custom_command(
+   OUTPUT ${jarfile}
+-  COMMAND ${IDLJ} ${idlj_flags} -I. -I${CMAKE_CURRENT_BINARY_DIR}/../idl/ -I${OPENRTM_DIR}/include/rtm/idl ${OPENRTM_DIR}/include/rtm/idl/Manager.idl
+-  COMMAND ${IDLJ} ${idlj_flags} -I. -I${CMAKE_CURRENT_BINARY_DIR}/../idl/ -I${OPENRTM_DIR}/include/rtm/idl ${OPENRTM_DIR}/include/rtm/idl/OpenRTM.idl
+-  COMMAND ${IDLJ} ${idlj_flags} -I. -I${CMAKE_CURRENT_BINARY_DIR}/../idl/ -I${OPENRTM_DIR}/include/rtm/idl ${OPENRTM_DIR}/include/rtm/idl/DataPort.idl
+-  COMMAND ${IDLJ} ${idlj_flags} -I. -I${CMAKE_CURRENT_BINARY_DIR}/include/rtm/idl ${OPENRTM_DIR}/include/rtm/idl/InterfaceDataTypes.idl
++  COMMAND ${IDLJ} ${idlj_flags} -I. -I${CMAKE_CURRENT_BINARY_DIR}/../idl/ -I${OPENRTM_IDL_DIR} ${OPENRTM_IDL_DIR}/Manager.idl
++  COMMAND ${IDLJ} ${idlj_flags} -I. -I${CMAKE_CURRENT_BINARY_DIR}/../idl/ -I${OPENRTM_IDL_DIR} ${OPENRTM_IDL_DIR}/OpenRTM.idl
++  COMMAND ${IDLJ} ${idlj_flags} -I. -I${CMAKE_CURRENT_BINARY_DIR}/../idl/ -I${OPENRTM_IDL_DIR} ${OPENRTM_IDL_DIR}/DataPort.idl
++  COMMAND ${IDLJ} ${idlj_flags} -I. -I${OPENRTM_IDL_DIR} ${OPENRTM_IDL_DIR}/InterfaceDataTypes.idl
+   COMMAND ${JAVAC} ${javac_flags} src/*/*.java
+   COMMAND ${JAR} cf ${jarfile} OpenRTM RTC RTM _SDOPackage
+ )
