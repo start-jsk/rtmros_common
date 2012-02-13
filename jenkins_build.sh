@@ -71,6 +71,7 @@ if [ ! $TARGET ]; then
     $ROSMAKE RS003
 else
     $ROSMAKE $TARGET
-exit
+fi
 
+exit 0
 
