@@ -14,8 +14,8 @@ if [ "`pgrep omniNames -u 0`" ]; then
 fi
 
 do_stop(){
+    echo -n "Kill omniNames " 1>&2 ; pgrep omniNames -lx 1>&2; echo "" 1>&2
     pkill -KILL omniNames
-    pgrep omniNames -lx
 }
 
 do_start()
