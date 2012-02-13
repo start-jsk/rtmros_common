@@ -17,7 +17,7 @@ $(HG_DIR):
 check-java-version:
 	@if [ ! "`java -version 2>&1 | grep Java\(TM\)\ SE`" ]; then \
 	   /bin/echo -e "\e[1;34mSwitch java runtime to to Sun (TM) SE\e[m"; \
-	   gksu 'update-java-alternatives -s java-6-sun'; \
+	   sudo update-java-alternatives -s java-6-sun; \
 	fi
 
 installed: $(HG_DIR) patched
