@@ -14,7 +14,7 @@ This scripts starts PA10Sample.xml OpenHRP3 sample project file, the robot picks
 
   ]]></sphinxdoc>
 
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="200"
    test-name="PA10Sample" args="--start-simulation --target-directory=$(find openhrp3)/build/images --max-time=100" cwd="node" />
 
   <test type="ogv_encode.sh" pkg="jsk_tools" test-name="z_PA10Sample" args="$(find openhrp3)/build/images/PA10Sample.ogv" time-limit="1000"/>
