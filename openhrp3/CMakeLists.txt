@@ -74,7 +74,7 @@ if(disp AND NOT EXISTS ${PROJECT_SOURCE_DIR}/workspace)
   execute_process(COMMAND ${PROJECT_SOURCE_DIR}/scripts/_setup_grxui.sh)
 endif(disp AND NOT EXISTS ${PROJECT_SOURCE_DIR}/workspace)
 if(disp)
-  rosbuild_add_rostest(launch/_stop_rtmnaming.launch) # this launch at the last?
+  rosbuild_add_rostest(launch/${openhrp3_PACKAGE_PATH}/_stop_rtmnaming.launch) # this launch at the last?
   rosbuild_add_rostest(launch/sample.launch)
   rosbuild_add_rostest(launch/falling-box.launch)
   rosbuild_add_rostest(launch/pa10.launch)
