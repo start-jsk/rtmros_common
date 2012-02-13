@@ -117,6 +117,7 @@ rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/Im
 
 rosbuild_check_for_display(disp)
 if(disp)
+  rosbuild_add_rostest(launch/_stop_rtmnaming.launch) # this launch at the last?
   rosbuild_add_rostest(launch/hrp4c.launch)
   rosbuild_add_rostest(launch/hrp4c_nosim.launch)
   # rosbuild_add_rostest(launch/pa10.launch) #segfault?
