@@ -175,7 +175,7 @@ class TestGrxUIProject(unittest.TestCase):
 
         # start capture
         if not os.path.exists(self.target_directory) : os.makedirs(self.target_directory)
-        ret = subprocess.Popen("recordmydesktop --no-wm-check --no-sound --no-cursor --windowid=%s --overwrite --output=%s/%s"%(winid,self.target_directory,self.name), shell=True)
+        ret = subprocess.Popen("recordmydesktop --no-wm-check --no-sound --no-cursor --windowid=%s --on-the-fly-encoding --v_quality=40 --overwrite --output=%s/%s"%(winid,self.target_directory,self.name), shell=True)
 
         # wait for max time
         start_time = time.time()
