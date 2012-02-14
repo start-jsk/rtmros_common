@@ -13,6 +13,28 @@ if [ "`pgrep omniNames -u 0`" ]; then
     fi
 fi
 
+##
+GETOPT=`getopt -o o: -l output:,text,ctx:,gtest_output: -- "$@"` ; [ $? != 0 ] && usage_exit
+eval set -- "$GETOPT"
+while true
+do
+  case $1 in
+  --gtest_output)  OUTFILE=$2      ; shift 2 ;;
+  *)   shift ; break ;;
+  esac
+done
+
+OUTFILE=${OUTFILE/xml:/}
+if [ "${OUTFILE}" ]; then
+    cat<<EOF > ${OUTFILE}
+<testsuite errors="0" failures="0" name="unittest.suite.TestSuite" tests="1" time="0.0">
+  <testcase classname="__main__.TestGlcEncode" name="test_glc_encode" time="0.0"></testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
+EOF
+fi
+
 do_stop(){
     echo -n "Kill omniNames " 1>&2 ; pgrep omniNames -lx 1>&2; echo "" 1>&2
     pkill -KILL omniNames
