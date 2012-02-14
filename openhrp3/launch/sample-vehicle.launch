@@ -14,7 +14,7 @@ This scripts starts SampleSV.xml OpenHRP3 sample project file, the robot picks u
 
   ]]></sphinxdoc>
 
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="110"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="200"
    test-name="SampleSV" args="--start-simulation --target-directory=$(find openhrp3)/build/images --max-time=100" cwd="node" />
 
   <test type="ogv_encode.sh" pkg="jsk_tools" test-name="z_SampleSV" args="$(find openhrp3)/build/images/SampleSV.ogv" time-limit="1000"/>
