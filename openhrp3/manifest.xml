@@ -86,7 +86,7 @@ http://code.google.com/p/openhrp-aist-grx/
   <!-- for rostest -->
   <depend package="jsk_tools" />
   <rosdep name="python-psutil" />
-  <rosdep name="python-pysvn" />
+  <rosdep name="python-svn" />
 
 </package>
 
