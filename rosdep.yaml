@@ -82,6 +82,8 @@ python-tk:
   ubuntu: python-tk
 python-psutil:
   ubuntu: python-psutil
+python-pysvn:
+  ubuntu: python-pysvn
 
 # math
 liblapack3gf:
