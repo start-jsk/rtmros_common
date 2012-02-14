@@ -4,7 +4,7 @@ INSTALL_DIR=`rospack find hrpsys`
 SVN_DIR = build/hrpsys-base
 SVN_URL = http://hrpsys-base.googlecode.com/svn/trunk/
 #SVN_REVISION=-r@REVISION@
-SVN_PATCH = patch/tvmet.patch patch/idlj.patch patch/rpath.patch patch/hrpsysin.path patch/hrp4cxml.patch patch/hrp4cpy.patch patch/hrp4csh.patch patch/hrpsys-1.1.0.patch
+SVN_PATCH = patch/tvmet.patch patch/rpath.patch patch/hrpsysin.path patch/hrp4cxml.patch patch/hrp4cpy.patch patch/hrp4csh.patch
 
 include $(shell rospack find mk)/svn_checkout.mk
 
