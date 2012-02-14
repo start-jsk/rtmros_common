@@ -1,3 +1,0 @@
-<launch>
-  <test test-name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" args="stop"/>
-</launch>
