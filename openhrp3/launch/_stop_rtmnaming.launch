@@ -1,3 +1,3 @@
 <launch>
-  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" args="stop"/>
+  <test test-name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" args="stop"/>
 </launch>
