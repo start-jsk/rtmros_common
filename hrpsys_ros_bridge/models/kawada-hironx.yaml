@@ -26,10 +26,10 @@ head:
 ## end-coords
 ##
 larm-end-coords:
-  translate : [-0.1, 0, 0]
+  translate : [-0.05, 0, 0]
   rotate    : [0, 1, 0, 90]
 rarm-end-coords:
-  translate : [-0.1, 0, 0]
+  translate : [-0.05, 0, 0]
   rotate    : [0, 1, 0, 90]
 head-end-coords:
   translate : [0.10, 0, 0.10]
