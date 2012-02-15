@@ -1,0 +1,30 @@
+<launch>
+  <!-- Launch before  -->
+  <!-- <include file="$(find move_base_stage_tutorial)/robot.launch" /> -->
+
+  <!-- PYTHONPATH must contains path for rtshell  -->
+  <env name="PYTHONPATH" value="$(env PYTHONPATH)" />
+  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
+
+  <!-- Dataport bridge node -->
+  <node pkg="rosnode_rtc" type="rtmros-data-bridge.py" name="bridge"
+	clear_params="true" cwd="node" output="screen">
+    <param name="~input_topic" value="/odom /move_base/result" />
+    <param name="~output_topic" value="/cmd_vel /move_base/goal" />
+  </node>
+
+  <!-- RTM sample -->
+  <anode pkg="rosnode_rtc" type="dataport_rtinject.sh" name="rtinject"
+	args="cmd_vel &quot;RTMROSDataBridge.geometry_msgs_Twist(linear=RTMROSDataBridge.geometry_msgs_Vector3(x=0.5,y=0,z=0),angular=RTMROSDataBridge.geometry_msgs_Vector3(x=0,y=0,z=0))&quot;"
+	launch-prefix="xterm -e"/>
+  <anode pkg="rosnode_rtc" type="dataport_rtprint.sh" name="rtprint"
+	args="move_base_goal"
+	launch-prefix="xterm -e"/>
+
+  <!-- BEGIN:openrtm connection -->
+  <node name="rtmlaunch_data_bridge" pkg="openrtm" type="rtmlaunch.py"
+	args="$(find rosnode_rtc)/sample/stage_sample.launch"/>
+  <rtactivate component="RTMROSDataBridge0.rtc" />
+  <!-- END:openrtm connection -->
+
+</launch>
