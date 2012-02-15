@@ -30,7 +30,7 @@ execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} make -f Makefile.op
 if (_make_failed)
   message(FATAL_ERROR "Build of OpenRTM C++ failed")
 endif(_make_failed)
-execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} make -f Makefile.openrtm-python
+execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} make -f Makefile.openrtm-python-${OPENRTM_VERSION}
                 RESULT_VARIABLE _make_failed)
 if (_make_failed)
   message(FATAL_ERROR "Build of OpenRTM Python failed")
