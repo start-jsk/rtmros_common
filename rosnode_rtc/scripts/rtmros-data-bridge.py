@@ -187,6 +187,7 @@ class RtmRosDataIdl:
         if not output: return None
         for slot in output.__slots__:
             var = getattr(data, slot)
+            ovar = getattr(output, slot)
             typ = type(var)
             if typ in [bool, int, long, float, str]:
                 arg = var
@@ -197,8 +198,8 @@ class RtmRosDataIdl:
                     arg = var
                 else:
                     arg = [self.rtm2ros(da) for da in list(var)]
-            elif typ == RTC.Time:
-                arg = roslib.rostime.Time(var.secs, var.nsecs)
+            elif type(ovar) in [roslib.rostime.Time, roslib.rostime.Duration]:
+                arg = roslib.rostime.Time(var.sec, var.nsec)
             else:
                 arg = self.rtm2ros(var)
             setattr(output, slot, arg)
@@ -217,7 +218,7 @@ class RtmRosDataIdl:
                     arg = var
                 else:
                     arg = [self.ros2rtm(da) for da in list(var)]
-            elif typ == roslib.rostime.Time:
+            elif typ in [roslib.rostime.Time, roslib.rostime.Duration]:
                 arg = RTC.Time(var.secs, var.nsecs)
             else:
                 arg = self.ros2rtm(var)
