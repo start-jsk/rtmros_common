@@ -32,16 +32,16 @@ def findObject(name, kind):
     except CosNaming.NamingContext.NotFound, ex:
         return Null
 
-def waitOnlineViewer():
+def waitForObject(name="OnlineViewer"):
     initCORBA(sys.argv)
     ret = False
     while not ret :
         time.sleep(1)
-        print "[check_online_viewer] wait for online viewer..."
+        print "[check_online_viewer] wait for %s ..."%(name)
         try:
-            ret = filter(lambda x: findObject("OnlineViewer", "").getPosture(x)[0], ["floor", "longfloor", "box", "pa10"])
+            ret = filter(lambda x: findObject(name, "").getPosture(x)[0], ["floor", "longfloor", "box", "pa10"])
         except:
-            print "[check_online_viewer] error on findObject onlineViewer"
+            print "[check_online_viewer] error on waitForObject(%s)"%(name)
     return ret
 
 

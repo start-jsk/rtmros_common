@@ -17,6 +17,8 @@ class TestGrxUIProject(unittest.TestCase):
         parser = OptionParser(description='grxui project testing')
         parser.add_option('--capture-window',action="store",type='string',dest='capture_window',default="Eclipse ",
                           help='do not launch grxui, just wait finish and capture files')
+        parser.add_option('--viewer-name',action="store",type='string',dest='viewer_name',default="OnlineViewer",
+                          help='do not launch grxui, just wait finish and capture files')
         parser.add_option('--max-time',action="store",type='int',dest='max_time',default=100,
                           help='wait sec until exit from grxui')
         parser.add_option('--target-directory',action="store",type='string',dest='target_directory',default='/tmp/',
@@ -43,6 +45,7 @@ class TestGrxUIProject(unittest.TestCase):
         self.scripts = options.scripts
         self.check_tf = options.check_tf
         self.capture_window = options.capture_window
+        self.viewer_name = options.viewer_name
 
     def xdotool(self,name,action,visible=""):
         ret = 1
@@ -133,10 +136,12 @@ class TestGrxUIProject(unittest.TestCase):
     def test_grxui_simulation(self):
         import check_online_viewer,psutil
         # wait online viewer
-        check_online_viewer.waitOnlineViewer()
+        if self.viewer_name != '' :
+            check_online_viewer.waitForObject(self.viewer_name)
+        else:
+            time.sleep(10)
         # check window id
-        time.sleep(3)
-        winid = subprocess.check_output("xdotool search \"Eclipse \"", shell=True).rstrip()
+        winid = subprocess.check_output("xdotool search \"%s \""%(self.capture_window), shell=True).rstrip()
         print "[%s] eclipse winid %s"%(self.id(), winid)
 
         # for pa10
@@ -209,7 +214,8 @@ class TestGrxUIProject(unittest.TestCase):
         subprocess.call("pkill recordmydesktop", shell=True)
 
         # wait for record my desktop
-        self.exit_eclipse()
+        if self.simulation_start :
+            self.exit_eclipse()
         print "[%s] wait for recordmydesktop encoding..."%(self.id())
         wait_for_recordmydesktop = True
         while wait_for_recordmydesktop :
