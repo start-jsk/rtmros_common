@@ -66,3 +66,28 @@
    }
  
    void Manager::notifyFinalized(RTObject_impl* comp)
+---  src/lib/rtm/Manager.cpp.org	2012-02-15 20:17:01.139261763 +0900
++++  src/lib/rtm/Manager.cpp	2012-02-15 20:18:11.587261074 +0900
+@@ -1614,6 +1614,10 @@
+ 	    name_prop.load(conff);
+ 	  }
+       }
++    if (m_config.findNode(category + "." + inst_name) != NULL)
++      {
++	name_prop << m_config.getNode(category + "." + inst_name);
++      }
+     
+     if (!m_config[type_conf].empty())
+       {
+@@ -1623,6 +1627,11 @@
+ 	    type_prop.load(conff);
+ 	  }
+       }
++    if (m_config.findNode(category + "." + type_name) != NULL)
++      {
++	type_prop << m_config.getNode(category + "." + type_name);
++      }
++
+     // Merge Properties. type_prop is merged properties
+     comp->getProperties() << prop;
+     type_prop << name_prop;
