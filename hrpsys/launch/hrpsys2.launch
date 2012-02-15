@@ -1,0 +1,39 @@
+<launch>
+  <!-- BEGIN:openrtm setting -->
+  <arg name="nameserver" default="localhost" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+  <!-- END:openrtm setting -->
+  <arg name="MODEL_FILE" />
+  <arg name="CONF_FILE" />
+  <arg name="RESPAWN" default="true"/>
+  <arg name="OUTPUT" default="log"/>
+  <env name="LANG" value="C" />
+  <env name="ORBgiopMaxMsgSize" value="2147483648" />
+
+  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
+
+  <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
+
+  <node name="viewer" pkg="hrpsys" type="ViewerComp" args='$(arg openrtm_args) -o "example.Viewer0.conf.default.project:$(arg MODEL_FILE)"' />
+  <node name="simulator" pkg="hrpsys" type="SimulatorComp" args='$(arg openrtm_args) -o "example.Simulator0.conf.default.project:$(arg MODEL_FILE)"' respawn="$(arg RESPAWN)" />
+
+  <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" /> <!-- loading dae files crushes model loader -->
+
+  <node name="rtcd" pkg="openrtm" type="rtcd" output="$(arg OUTPUT)"
+	args='$(arg openrtm_args) -o "exec_cxt.periodic.rate:1000" -o "manager.shutdown_onrtcs:NO" -o "manager.is_master:YES" -o "manager.modules.load_path:$(find hrpsys)/lib" -o "example.SequencePlayer.config_file:$(arg CONF_FILE)"' />
+
+  <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
+  <node name="hrpsys" pkg="hrpsys" type="hrpsyspy" output="screen"
+	args='$(find hrpsys)/scripts/hrpsys2.py $(arg MODEL_FILE)' />
+
+  <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="$(arg OUTPUT)"
+	args="$(arg openrtm_args)" respawn="$(arg RESPAWN)" />
+
+  <!-- BEGIN:openrtm connection -->
+  <arg name="ROBOT_NAME" value="dummy" />
+  <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hrpsys)/launch/hrpsys2.launch" respawn="$(arg RESPAWN)" />
+  <rtactivate component="Viewer0.rtc" />
+  <rtconnect from="Simulator0.rtc:state" to="Viewer0.rtc:state" />
+  <!-- END:openrtm connection -->
+</launch>
