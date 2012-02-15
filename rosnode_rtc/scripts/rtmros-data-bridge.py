@@ -52,6 +52,7 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
     def onInitialize(self):
         input_topic  = rospy.get_param('~input_topic','').split(' ')
         output_topic = rospy.get_param('~output_topic','').split(' ')
+        rospy.loginfo('onInitialize Start')
         self.update_ports(input_topic, output_topic)
         rospy.loginfo('onInitialize Finished')
         return RTC.RTC_OK
@@ -59,34 +60,32 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
     def update_ports(self, in_topic, out_topic):
 
         for topic in in_topic:
-            if topic in self.outports.keys() or \
-               not (topic in idlman.topicinfo.keys()):
-                rospy.loginfo('Failed to add OutPort %s', port)
-                continue
-            topic_type = idlman.topicinfo[topic]
-
             port = topic.lstrip('/').replace('/','_')
+            topic_type = idlman.topicinfo.get(topic, None)
+            if (topic in self.outports.keys()) or not topic_type:
+                rospy.loginfo('Failed to add OutPort "%s"', port)
+                continue
+
             _data = idlman.get_rtmobj(topic_type)
             _outport = OpenRTM_aist.OutPort(port, _data)
             self.registerOutPort(port, _outport)
             self.outports[topic] = (_outport, _data)
             self.add_sub(topic)
-            rospy.loginfo('Add OutPort %s[%s]', port, topic_type)
+            rospy.loginfo('Add OutPort "%s"[%s]', port, topic_type)
 
         for topic in out_topic:
-            if topic in self.inports.keys() or \
-               not (topic in idlman.topicinfo.keys()):
-                rospy.loginfo('Failed to add InPort %s', port)
-                continue
-            topic_type = idlman.topicinfo[topic]
-
             port = topic.lstrip('/').replace('/','_')
+            topic_type = idlman.topicinfo.get(topic, None)
+            if topic in self.inports.keys() or not topic_type:
+                rospy.loginfo('Failed to add InPort "%s"', port)
+                continue
+
             _data = idlman.get_rtmobj(topic_type)
             _inport = OpenRTM_aist.InPort(port, _data)
             self.registerInPort(port, _inport)
             self.inports[topic] = (_inport, _data)
             self.add_pub(topic)
-            rospy.loginfo('Add InPort %s[%s]', port, topic_type)
+            rospy.loginfo('Add InPort "%s"[%s]', port, topic_type)
 
         return
 

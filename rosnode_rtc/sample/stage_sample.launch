@@ -31,7 +31,7 @@ Usage:
 
 Launch this configuration file and confirm the bridge node is Activated
 
-3. rosrun stage_sample_send_goal.sh
+3. rosrun rosnode_rtc stage_sample_send_goal.sh
 
 Send navigation target pose from RT-Component
 
