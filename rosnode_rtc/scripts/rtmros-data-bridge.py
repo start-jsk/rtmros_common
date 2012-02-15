@@ -181,12 +181,10 @@ class RtmRosDataIdl:
         self.update_idl(new_topic_type)
 
     def rtm2ros(self, data, output=None):
+        datatype = str(data).split('(')[0].split('.')[1]
         for msgtype in self.msg2obj.keys():
-            # TODO incomplete type estimation
-            rosobj = self.msg2obj[msgtype][0]()
-            rtmslot = [s for s in dir(data) if s[0]!='_']
-            if set(rosobj.__slots__) == set(rtmslot):
-                output = rosobj
+            if datatype == msgtype.replace('/','_'):
+                output = self.msg2obj[msgtype][0]()
                 break
         if not output: return None
         for slot in output.__slots__:

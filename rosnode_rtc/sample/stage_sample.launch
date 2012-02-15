@@ -18,7 +18,12 @@
   <!-- END:openrtm connection -->
 
   <sphinxdoc><![CDATA[
-Usage
+
+To use this RTC, run the below command each bash terminal.
+
+  source `rospack find openrtm`/scripts/rtshell-setup.sh
+
+Usage:
 
 1. roslaunch move_base_stage_tutorial robot.launch
 
