@@ -11,14 +11,6 @@
     <param name="~output_topic" value="/cmd_vel /move_base_simple/goal" />
   </node>
 
-  <!-- RTM sample -->
-  <anode pkg="rosnode_rtc" type="dataport_rtinject.sh" name="rtinject"
-	args="cmd_vel &quot;RTMROSDataBridge.geometry_msgs_Twist(linear=RTMROSDataBridge.geometry_msgs_Vector3(x=0.5,y=0,z=0),angular=RTMROSDataBridge.geometry_msgs_Vector3(x=0,y=0,z=0))&quot;"
-	launch-prefix="xterm -e"/>
-  <anode pkg="rosnode_rtc" type="dataport_rtprint.sh" name="rtprint"
-	args="move_base_goal"
-	launch-prefix="xterm -e"/>
-
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_data_bridge" pkg="openrtm" type="rtmlaunch.py"
 	args="$(find rosnode_rtc)/sample/stage_sample.launch"/>
@@ -30,9 +22,13 @@ Usage
 
 1. roslaunch move_base_stage_tutorial robot.launch
 
-2. launch this configuration file and confirm the bridge node is Activated
+2. roslaunch rosnode_rtc stage_sample.launch
+
+Launch this configuration file and confirm the bridge node is Activated
 
 3. rosrun stage_sample_send_goal.sh
+
+Send navigation target pose from RT-Component
 
   ]]></sphinxdoc>
 

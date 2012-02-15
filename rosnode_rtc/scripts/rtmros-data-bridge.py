@@ -59,8 +59,10 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
     def update_ports(self, in_topic, out_topic):
 
         for topic in in_topic:
-            if topic in self.outports.keys(): continue
-            if not (topic in idlman.topicinfo.keys()): continue
+            if topic in self.outports.keys() or \
+               not (topic in idlman.topicinfo.keys()):
+                rospy.loginfo('Failed to add OutPort %s', port)
+                continue
             topic_type = idlman.topicinfo[topic]
 
             port = topic.lstrip('/').replace('/','_')
@@ -69,11 +71,13 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
             self.registerOutPort(port, _outport)
             self.outports[topic] = (_outport, _data)
             self.add_sub(topic)
-            rospy.loginfo('Add OutPort %s' % port)
+            rospy.loginfo('Add OutPort %s[%s]', port, topic_type)
 
         for topic in out_topic:
-            if topic in self.inports.keys(): continue
-            if not (topic in idlman.topicinfo.keys()): continue
+            if topic in self.inports.keys() or \
+               not (topic in idlman.topicinfo.keys()):
+                rospy.loginfo('Failed to add InPort %s', port)
+                continue
             topic_type = idlman.topicinfo[topic]
 
             port = topic.lstrip('/').replace('/','_')
@@ -82,7 +86,7 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
             self.registerInPort(port, _inport)
             self.inports[topic] = (_inport, _data)
             self.add_pub(topic)
-            rospy.loginfo('Add InPort %s' % port)
+            rospy.loginfo('Add InPort %s[%s]', port, topic_type)
 
         return
 
