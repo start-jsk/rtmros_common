@@ -322,8 +322,8 @@ if __name__ == '__main__':
 
     # RTC Manager initialize
     conf = roslib.rospack.rospackexec(['find',rospackage])+'/scripts/rtc.conf'
-    print conf
-    mgr = OpenRTM_aist.Manager.init(sys.argv + ['-f',conf])
+    print sys.argv
+    mgr = OpenRTM_aist.Manager.init(sys.argv[0:1] + ['-f',conf])
 
     # -o is not implemented (OpenRTM-Python)
     #nameserver = os.environ['RTCTREE_NAMESERVERS']
