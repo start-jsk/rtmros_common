@@ -96,7 +96,6 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
             if _inport.isNew():
                 _data = _inport.read()
                 msg = idlman.rtm2ros(_data)
-                print msg
                 if msg:
                     self.pubs[topic].publish(msg)
         return RTC.RTC_OK
@@ -314,7 +313,7 @@ module RTMROSDataBridge
             exec('import ' + ros_typ_tuple[0] + '.msg')
             self.msg2obj[msg] = (eval(ros_typ), eval(rtm_typ))
 
-        rospy.loginfo('%s is %s', msg, self.get_rtmobj(msg))
+        rospy.loginfo('Data[%s] in RTC = "%s"', msg, self.get_rtmobj(msg))
 
 #
 def RTMROSDataBridgeInit(manager):

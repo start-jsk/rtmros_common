@@ -2,5 +2,6 @@
 
 port=$1
 
+echo "sleep 5 seconds, then rtprint"
 sleep 5
-xterm -e rtprint -m RTMROSDataBridge -p /tmp /localhost/RTMROSDataBridge0.rtc:${port}
+rtprint -p /tmp -m RTMROSDataBridge /localhost/RTMROSDataBridge0.rtc:${port}
