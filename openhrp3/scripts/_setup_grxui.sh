@@ -1,6 +1,8 @@
 #!/bin/bash
 
 rosrun openhrp3 eclipse.sh &
+PID=$!
+
 RET=1
 COUNT=0
 while [ $RET == 1 -a $COUNT -lt 30 ]; do
@@ -28,3 +30,4 @@ for child in $(ps -o pid,command -axwww | awk "{if ( /eclipse.equinox.launcher/ 
     echo "kill $child"
     kill -KILL $child
 done
+kill -KILL $PID
