@@ -3,11 +3,23 @@
 
      dataport_ros_bridge
 
+     rtmros-data-bridge.py is a RT-Component for data bridge.
+     This automatically convert ROS/topic into RTM/dataport.
+
   </description>
-  <author>Manabu Saito73A3</author>
+  <author>Manabu Saito</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/dataport_ros_bridge</url>
+
+  <depend package="rospy" />
+  <depend package="rostopic" />
+
+  <depend package="openrtm" />
+
+  <!-- for samples -->
+  <depend package="roscpp_tutorials" />
+  <depend package="move_base_stage_tutorial" />
 
 </package>
 

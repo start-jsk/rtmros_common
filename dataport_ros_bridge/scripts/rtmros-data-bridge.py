@@ -14,13 +14,10 @@ import math
 from subprocess import *
 
 # ros modules
-import roslib;
-roslib.load_manifest('rospy')
-roslib.load_manifest('rostopic')
+rospackage='dataport_ros_bridge'
+import roslib; roslib.load_manifest(rospackage)
 import rospy
 import rostopic
-
-rospackage='dataport_ros_bridge'
 
 # rtm modules
 import RTC
@@ -74,7 +71,7 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
             self.add_sub(topic)
             rospy.loginfo('Add OutPort %s' % port)
 
-        for topic in out_topic: # TODO not working
+        for topic in out_topic:
             if topic in self.inports.keys(): continue
             if not (topic in idlman.topicinfo.keys()): continue
             topic_type = idlman.topicinfo[topic]
@@ -136,6 +133,7 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
 
 #
 # topic(ROS) -> idl(RTM) converter methods
+#   `rosmsg show` -> .idl -> python module
 #
 class RtmRosDataIdl:
     def __init__(self, idldir, idlfile='rosbridge.idl'):
@@ -162,6 +160,8 @@ class RtmRosDataIdl:
             'byte'   : 'octet',         # deplicated
             'time'   : 'RTC::Time',     # builtin
             'duration' : 'RTC::Time'}   # builtin
+        self.dummyslot = 'dummy_padding_' # for empty message
+
         self.topicinfo = {} # topicname: msgtype, msgclass
         self.msg2obj = {}   # msgname: -> (rostype, rtmtype)
 
@@ -225,6 +225,8 @@ class RtmRosDataIdl:
                 setattr(output, slot, arg)
             else:
                 args += [arg]
+        if args == []:
+            args += [''] # for dummy slot in empty message
         if output:
             return output
         else:
@@ -236,11 +238,14 @@ class RtmRosDataIdl:
     def update_idl(self, msgnames=[]):
         for msg in msgnames:
             self.add_msg_definition(msg)
+            rospy.loginfo('Data[%s] in RTC = "%s"', msg, self.get_rtmobj(msg))
 
     def get_message_definition(self, msg):
         text = Popen(['rosmsg','show',msg], stdout=PIPE, stderr=PIPE).communicate()[0]
-        text = '\n'.join([l for l in text.split('\n')
-                          if not ((len(l) == 0) or (l[0] in ' [') or ('=' in l))]) + '\n'
+        text = ''.join([l+'\n' for l in text.split('\n')
+                          if not ((len(l) == 0) or (l[0] in ' [') or ('=' in l))])
+        if text == '':
+            text = 'string %s\n' % self.dummyslot
         p = re.compile( '(^|\n)Header[ ]')
         text = p.sub( r'\1std_msgs/Header ', text)
         return text
@@ -313,7 +318,7 @@ module RTMROSDataBridge
             exec('import ' + ros_typ_tuple[0] + '.msg')
             self.msg2obj[msg] = (eval(ros_typ), eval(rtm_typ))
 
-        rospy.loginfo('Data[%s] in RTC = "%s"', msg, self.get_rtmobj(msg))
+        return True
 
 #
 def RTMROSDataBridgeInit(manager):
