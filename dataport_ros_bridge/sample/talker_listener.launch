@@ -1,0 +1,11 @@
+<launch>
+  <include file="$(find rospy_tutorials)/001_talker_listener/talker_listener.launch"/>
+
+  <env name="PYTHONPATH" value="$(env PYTHONPATH)" />
+  <node pkg="dataport_ros_bridge" type="rtmros-data-bridge.py" name="bridge"
+	cwd="node" output="screen">
+    <param name="~input_topic" value="/chatter" />
+  </node>
+  <node pkg="dataport_ros_bridge" type="dataport_rtprint.sh"
+	name="rtprint" args="chatter"/>
+</launch>
