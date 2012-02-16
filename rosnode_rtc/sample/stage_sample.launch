@@ -31,9 +31,21 @@ Usage:
 
 Launch this configuration file and confirm the bridge node is Activated
 
-3. rosrun rosnode_rtc stage_sample_send_goal.sh
+3a. rosrun rosnode_rtc stage_sample_send_goal.sh
 
-Send navigation target pose from RT-Component
+Send navigation target pose to /move_base_simple/goal topic from RT-Component
+台車が動けば成功です。
+
+3b. TkJoyStickコンポーネントを使う(http://www.openrtm.org/openrtm/ja/node/819)
+・rosnode_rtc/samples内のTimedFloatSeq2Twist.pyを実行します。
+これが実質的なデータの変換（単位、符号など）を行う部分になっています。
+・TkJoyStickを実行します。
+roscd openrtm/build/OpenRTM-aist-Python-1.0.1/OpenRTM_aist/examples/TkJoyStickで移動して、python TkJoyStickComp.py
+
+TkJoyStick0:posとTimedFloatSeq2Twist0:in、
+TimedFloatSeq2Twist0:outとRTMROSDataBridge0:cmd_velをつないでから、
+３つのコンポーネント全てをActivateします。
+台車が動けば成功です。
 
   ]]></sphinxdoc>
 
