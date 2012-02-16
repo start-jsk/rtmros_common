@@ -13,6 +13,9 @@ This launch file shows an example of ros bridge for sample robot and client prog
 .. video:: build/images/SampleRobot_PickUp
   :width: 600
 
+.. video:: build/images/samplerobot_rviz-1
+  :width: 600
+
 .. video:: build/images/samplerobot_rviz-2
   :width: 600
 
