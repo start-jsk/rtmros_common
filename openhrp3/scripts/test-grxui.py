@@ -141,7 +141,7 @@ class TestGrxUIProject(unittest.TestCase):
         else:
             time.sleep(10)
         # check window id
-        winid = subprocess.check_output("xdotool search \"%s \""%(self.capture_window), shell=True).rstrip()
+        winid = subprocess.check_output("xdotool search \"%s\""%(self.capture_window), shell=True).rstrip()
         print "[%s] eclipse winid %s"%(self.id(), winid)
 
         # for pa10
