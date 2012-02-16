@@ -340,15 +340,12 @@ if __name__ == '__main__':
     idlman.update_topicinfo(input_topic+output_topic)
 
     # RTC Manager initialize
-    conf = roslib.rospack.rospackexec(['find',rospackage])+'/scripts/rtc.conf'
-    mgr = OpenRTM_aist.Manager.init(sys.argv[0:1] + ['-f',conf])
+    if OpenRTM_aist.version.openrtm_version == '1.0.0':
+        # -o is not implemented (OpenRTM-Python-1.0.0)
+        conf = roslib.rospack.rospackexec(['find',rospackage])+'/scripts/rtc.conf'
+        sys.argv += ['-f',conf]
 
-    # -o is not implemented (OpenRTM-Python)
-    #nameserver = os.environ['RTCTREE_NAMESERVERS']
-    #sys.argv += ['-o','naming.formats:%n.rtc',
-    #             '-o','corba.nameservers:'+nameserver+':2809',
-    #             '-o','logger.file_name:/tmp/rtc%p.log']
-
+    mgr = OpenRTM_aist.Manager.init(sys.argv)
     mgr.setModuleInitProc(RTMROSDataBridgeInit)
     mgr.activateManager()
     mgr.runManager()
