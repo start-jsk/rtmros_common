@@ -12,6 +12,11 @@
     <param name="~ignore_unbound" value="True" />
   </node>
 
+  <!-- RTM sample -->
+  <node pkg="rosnode_rtc" type="dataport_rtprint.sh" name="rtprint"
+	args="move_base_feedback"
+	launch-prefix="xterm -e" />
+
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_data_bridge" pkg="openrtm" type="rtmlaunch.py"
 	args="$(find rosnode_rtc)/sample/stage_sample.launch"/>
@@ -46,6 +51,8 @@ Send navigation target pose to /move_base_simple/goal topic from RT-Component
 
 .. image:: sample/image/navigation.png
   :width: 600
+
+目的地に到達するとxtermの画面にROSの動作経過トピックがrtprintで表示されます。
 
 3b. TkJoyStickコンポーネントを使う(http://www.openrtm.org/openrtm/ja/node/819)
 ・rosnode_rtc/samples内のTimedFloatSeq2Twist.pyを実行します。

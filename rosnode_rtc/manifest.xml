@@ -3,7 +3,9 @@
 
      rosnode_rtc
 
-     rtmros-data-bridge.py is a RT-Component for data bridge.
+     This package gives transparency between RTM and ROS.
+
+     rtmros-data-bridge.py is a RT-Component for dataport/topic.
      This automatically convert ROS/topic into RTM/dataport.
 
   </description>
@@ -20,6 +22,10 @@
   <!-- for samples -->
   <depend package="roscpp_tutorials" />
   <depend package="move_base_stage_tutorial" />
+
+  <export>
+    <rosdoc config="rosdoc.yaml" />
+  </export>
 
 </package>
 

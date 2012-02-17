@@ -52,11 +52,13 @@ def get_topicname_by_node(nodename):
 def get_topic_names_by_param():
     input_topic  = rospy.get_param('~input_topic','').split(' ')
     output_topic = rospy.get_param('~output_topic','').split(' ')
-    wrap_node = rospy.get_param('~wrap_node','')
-    node_in, node_out = get_topicname_by_node(wrap_node)
-    node_in  = [t for t in node_in if not (t in output_topic)]
-    node_out = [t for t in node_out if not (t in input_topic)]
-    return input_topic+node_in, output_topic+node_out
+    wrap_node = rospy.get_param('~wrap_node',None)
+    if wrap_node:
+        node_in, node_out = get_topicname_by_node(wrap_node)
+        node_in  = [t for t in node_in if not (t in output_topic)]
+        node_out = [t for t in node_out if not (t in input_topic)]
+        return input_topic+node_in, output_topic+node_out
+    return input_topic, output_topic
 
 #
 # RTM <-> ROS Dataport Bridge Component
