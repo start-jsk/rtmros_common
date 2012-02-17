@@ -20,6 +20,7 @@ import rospy
 import rostopic
 
 # rtm modules
+import time
 import RTC
 import OpenRTM_aist
 
@@ -304,6 +305,7 @@ module RTMROSDataBridge
         rtmpkg = rtmpkg.rstrip('\n')
 
         call([genidl_bin, '-bpython', '-I%s/include/rtm/idl'%rtmpkg, '-C'+self.idldir, self.idldir+'/'+self.idlfile])
+        time.sleep(1) # ??
 
         # reload RTC data object
         global RTMROSDataBridge
