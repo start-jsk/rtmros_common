@@ -18,7 +18,7 @@
 
   <!-- RTM sample -->
   <node pkg="rosnode_rtc" type="dataport_rtinject.sh" name="rtinject"
-	args="chatter &quot;RTMROSDataBridge.std_msgs_String(data='hello')&quot;"
+	args="/localhost/RTMROSDataBridge0.rtc:chatter &quot;RTMROSDataBridge.std_msgs_String(data='hello')&quot;"
 	launch-prefix="xterm -e"/>
 
   <!-- BEGIN:openrtm connection -->

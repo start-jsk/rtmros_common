@@ -2,8 +2,10 @@
 
 port=$1
 
-waitsec=10
-
-echo "sleep ${waitsec} seconds, then rtprint"
-sleep ${waitsec}
-rosrun openrtm rtprint -p /tmp -m RTMROSDataBridge /localhost/RTMROSDataBridge0.rtc:${port}
+while [ 0 -eq `rtcat ${port} | grep "+DataOutPort" | wc -l` ]
+do
+    echo "sleep"
+    sleep 1
+done
+echo "start listening ${port}"
+rosrun openrtm rtprint -p /tmp -m RTMROSDataBridge ${port}

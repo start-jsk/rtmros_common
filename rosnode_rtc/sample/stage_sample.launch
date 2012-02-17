@@ -14,7 +14,7 @@
 
   <!-- RTM sample -->
   <node pkg="rosnode_rtc" type="dataport_rtprint.sh" name="rtprint"
-	args="move_base_feedback"
+	args="/localhost/move_base_node0.rtc:move_base_feedback"
 	launch-prefix="xterm -e" />
 
   <!-- BEGIN:openrtm connection -->

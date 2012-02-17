@@ -15,6 +15,6 @@
 
   <!-- RTM sample -->
   <node pkg="rosnode_rtc" type="dataport_rtprint.sh" name="rtprint"
-	args="chatter"
+	args="/localhost/RTMROSDataBridge0.rtc:chatter"
 	launch-prefix="xterm -e" />
 </launch>
