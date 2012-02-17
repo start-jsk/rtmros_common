@@ -7,17 +7,22 @@
   <!-- Dataport bridge node -->
   <node pkg="rosnode_rtc" type="rtmros-data-bridge.py" name="bridge"
 	clear_params="true" cwd="node" output="screen">
-    <param name="~input_topic" value="/odom /move_base/result" />
-    <param name="~output_topic" value="/cmd_vel /move_base_simple/goal" />
+    <param name="~output_topic" value="/cmd_vel" />
+    <param name="~wrap_node" value="/move_base_node" />
+    <param name="~ignore_unbound" value="True" />
   </node>
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_data_bridge" pkg="openrtm" type="rtmlaunch.py"
 	args="$(find rosnode_rtc)/sample/stage_sample.launch"/>
-  <rtactivate component="RTMROSDataBridge0.rtc" />
+  <rtactivate component="move_base_node0.rtc" />
   <!-- END:openrtm connection -->
 
   <sphinxdoc><![CDATA[
+TODO
+rxgraphとsystemEditorの対応関係を画像にする
+ROS-navが動いているような画像
+ドキュメント
 
 To use this RTC, run the below command each bash terminal.
 
@@ -31,10 +36,16 @@ Usage:
 
 Launch this configuration file and confirm the bridge node is Activated
 
+.. image:: sample/image/rosnode-rtc-sysedit.png
+  :width: 600
+
 3a. rosrun rosnode_rtc stage_sample_send_goal.sh
 
 Send navigation target pose to /move_base_simple/goal topic from RT-Component
 台車が動けば成功です。
+
+.. image:: sample/image/navigation.png
+  :width: 600
 
 3b. TkJoyStickコンポーネントを使う(http://www.openrtm.org/openrtm/ja/node/819)
 ・rosnode_rtc/samples内のTimedFloatSeq2Twist.pyを実行します。
@@ -43,9 +54,22 @@ Send navigation target pose to /move_base_simple/goal topic from RT-Component
 roscd openrtm/build/OpenRTM-aist-Python-1.0.1/OpenRTM_aist/examples/TkJoyStickで移動して、python TkJoyStickComp.py
 
 TkJoyStick0:posとTimedFloatSeq2Twist0:in、
-TimedFloatSeq2Twist0:outとRTMROSDataBridge0:cmd_velをつないでから、
+TimedFloatSeq2Twist0:outとmove_base_node0.rtc:cmd_velをつないでから、
 ３つのコンポーネント全てをActivateします。
 台車が動けば成功です。
+
+.. image:: sample/image/joy-controll.png
+  :width: 600
+
+<仕様メモ>
+wrap_nodeでノード名を指定した場合には全てのトピックをデータポート化します。
+この場合にはinput_topicとoutput_topicで指定したトピックが優先されます。
+
+可変長のデータを含むメッセージ型を無視するように設定されています。
+全てのトピックを出したいときはignore_unboundパラメタでFalseに指定する。
+
+また、InPortとOutPortで同じ名前を指定できないため、
+ROSノードが送受信をする場合には対応するOutPortを作りません。
 
   ]]></sphinxdoc>
 

@@ -54,6 +54,8 @@ def get_topic_names_by_param():
     output_topic = rospy.get_param('~output_topic','').split(' ')
     wrap_node = rospy.get_param('~wrap_node','')
     node_in, node_out = get_topicname_by_node(wrap_node)
+    node_in  = [t for t in node_in if not (t in output_topic)]
+    node_out = [t for t in node_out if not (t in input_topic)]
     return input_topic+node_in, output_topic+node_out
 
 #
@@ -79,20 +81,6 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
 
     def update_ports(self, in_topic, out_topic):
 
-        for topic in in_topic:
-            port = topic.lstrip('/').replace('/','_')
-            topic_type = idlman.topicinfo.get(topic, None)
-            _data = idlman.get_rtmobj(topic_type)
-            if (topic in self.outports.keys()) or not topic_type or not _data:
-                rospy.loginfo('Failed to add OutPort "%s"', port)
-                continue
-            rospy.loginfo('Add OutPort "%s"[%s]', port, topic_type)
-            _outport = OpenRTM_aist.OutPort(port, _data)
-            self.registerOutPort(port, _outport)
-            self.outports[topic] = (_outport, _data)
-            self.add_sub(topic)
-
-
         for topic in out_topic:
             port = topic.lstrip('/').replace('/','_')
             topic_type = idlman.topicinfo.get(topic, None)
@@ -105,6 +93,19 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
             self.registerInPort(port, _inport)
             self.inports[topic] = (_inport, _data)
             self.add_pub(topic)
+
+        for topic in in_topic:
+            port = topic.lstrip('/').replace('/','_')
+            topic_type = idlman.topicinfo.get(topic, None)
+            _data = idlman.get_rtmobj(topic_type)
+            if (topic in self.outports.keys()) or not topic_type or not _data:
+                rospy.loginfo('Failed to add OutPort "%s"', port)
+                continue
+            rospy.loginfo('Add OutPort "%s"[%s]', port, topic_type)
+            _outport = OpenRTM_aist.OutPort(port, _data)
+            self.registerOutPort(port, _outport)
+            self.outports[topic] = (_outport, _data)
+            self.add_sub(topic)
 
         return
 
@@ -159,7 +160,7 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
 #
 class RtmRosDataIdl:
     def __init__(self, idldir, idlfile='rosbridge.idl'):
-        self.ignore_unbound_type = True
+        self.ignore_unbound_type = rospy.get_param('~ignore_unbound',True)
         self.idldir  = idldir
         self.idlfile = idlfile
         site.addsitedir(self.idldir)
