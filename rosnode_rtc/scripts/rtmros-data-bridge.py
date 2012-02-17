@@ -345,7 +345,7 @@ module RTMROSDataBridge
 #
 def RTMROSDataBridgeInit(manager):
     nodename = rospy.get_param('~wrap_node','RTMROSDataBridge')
-    compname = 'ROS_' + nodename.lstrip('/').replace('/','_')
+    compname = nodename.lstrip('/').replace('/','_')
     module_spec[module_spec.index('<implementation_id>')] = compname
     module_spec[module_spec.index('<type_name>')] = compname
 
