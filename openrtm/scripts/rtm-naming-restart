@@ -14,6 +14,13 @@ if [ "`pgrep omniNames -u 0`" ]; then
 fi
 
 port=2809
+while getopts p: OPT
+do
+    case $OPT in
+	"p") port=${OPTARG}; shift 2;;
+    esac
+done
+
 cosnames="/usr/bin/omniNames"
 orb="omniORB"
 hostname=`hostname`
