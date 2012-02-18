@@ -48,7 +48,7 @@ fi
 
 # for jenkins
 if [ "$JENKINS_HOME" != "" ]; then #if jenkins, use jenkins SVN_REVISION to sync with jenkins SCM plugin
-    (cd $ROS_INSTALLDIR/rtm-ros-robotics/rtmros_common/; svn up -r $SVN_REVISION)
+    (cd $ROS_INSTALLDIR/rtm-ros-robotics/rtmros_common/; svn cleanup --non-interactive; svn up -r $SVN_REVISION)
     # set ROS_HOME under workspace so that we can check from web interface
     echo "export ROS_HOME=$WORKSPACE/.ros" >> $ROS_INSTALLDIR/setup.sh
 fi
