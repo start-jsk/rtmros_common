@@ -23,6 +23,7 @@
   <depend package="roscpp_tutorials" />
   <depend package="move_base_stage_tutorial" />
 
+  <depend package="jsk_tools" />
   <export>
     <rosdoc config="rosdoc.yaml" />
   </export>
