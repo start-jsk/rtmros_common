@@ -7,7 +7,7 @@ roslib.load_manifest('joy')
 roslib.load_manifest('nav_msgs')
 import rospy
 import geometry_msgs.msg
-from joy.msg import Joy
+from sensor_msgs.msg import Joy
 from nav_msgs.msg import Odometry
 import math
 
