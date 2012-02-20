@@ -88,9 +88,9 @@ def rtconnect(nameserver, tags):
             elif sub_type == 'periodic':
                 props['dataport.publisher.push_policy'] = 'all'
                 if tag.attributes.get("push_rate") != None:
-                    props['dataport.push_rate'] = tag.attributes.get("push_rate").value
+                    props['dataport.push_rate'] = str(tag.attributes.get("push_rate").value)
                 else:
-                    props['dataport.push_rate'] = '50.0'
+                    props['dataport.push_rate'] = str('50.0')
             options = optparse.Values({'verbose': False, 'id': '', 'name': None, 'properties': props})
             print >>sys.stderr, "Connect from",source_path,"to",dest_path,"with",options
             rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, tree=None)
