@@ -79,7 +79,6 @@ def rtconnect(nameserver, tags):
         except Exception, e:
             print >>sys.stderr, 'Could not Connect : ', e,' '
             return 1
-        print >>sys.stderr, "Connect from ",source_path,"to",dest_path
         #print source_path, source_full_path, dest_path, dest_full_path;
         try:
             sub_type = str(sub_type)
@@ -93,6 +92,7 @@ def rtconnect(nameserver, tags):
                 else:
                     props['dataport.push_rate'] = '50.0'
             options = optparse.Values({'verbose': False, 'id': '', 'name': None, 'properties': props})
+            print >>sys.stderr, "Connect from",source_path,"to",dest_path,"with",options
             rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, tree=None)
         except Exception, e:
             print >>sys.stderr, '{0}: {1}'.format(os.path.basename(sys.argv[0]), e)
