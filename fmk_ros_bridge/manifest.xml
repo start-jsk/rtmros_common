@@ -1,0 +1,24 @@
+<package>
+  <description brief="fmk">
+
+     fmk
+
+  </description>
+  <author>Manabu Saito, Haseru Chen</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/fmk</url>
+
+  <export>
+    <rosdoc config="rosdoc.yaml" />
+  </export>
+
+  <depend package="tf"/>
+  <depend package="std_srvs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="nav_msgs"/>
+
+  <depend package="jsk_tools"/>
+</package>
+
+

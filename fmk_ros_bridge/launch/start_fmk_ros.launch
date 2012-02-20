@@ -1,0 +1,55 @@
+<launch>
+  <sphinxdoc><![CDATA[
+  <initial setting>
+  1)We assumed that rtmros_common and eclipse is already build up.
+  2)Put local PC's IP address as 192.168.128.1 .
+  3)Unzip VehicleUnitRTC.zip, and move RTC directory under /(root).
+  4)Sudo apt-get install ftp server.
+  $ sudo apt-get install wu-ftpd
+  $ sudo useradd fmk
+  $ sudo passwd fmk
+  Edit /etc/passwd like below.
+  Example)fmk:x:1001:1001::/:/bin/sh
+
+  <normal startup>
+  1)Connect local PC and fmk with LAN.
+  2)Switch on fmk.
+  3)Wait about 30 seconds.
+  ($ sudo tail -f /var/log/wu-ftpd/xferlog ;;Check until Mobility.out,Interface.out,VehicleServiceProviderComp.outare send to fmk.)
+  4) <new terminal> $ rosrun fmk run-vehicle-gui.sh
+  5) <new terminal> $ rosrun openhrp3 eclipse.sh
+  Connect provider and consumer, and activate them.
+  6) Push GUI's PowerOn,ServoOn button.
+  7) <new terminal> $ rosrun fmk start_fmk_ros.launch
+  activate rosbridge on eclipse.
+  ]]></sphinxdoc>
+
+  <arg name="nameserver" default="192.168.128.14" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
+  <node name="rtm_naming" pkg="openrtm"
+  	type="rtm-naming-restart" output="screen" />
+  <anode pkg="openhrp3" name="starteclipse"
+	 type="eclipse.sh" output="screen"/>
+  <node pkg="fmk" type="FmkRobotROSBridgeComp" name="fmkrosbridge"
+	args="-f $(find fmk)/rtc.conf" output="screen">
+    <rosparam>
+      max_vx: 0.3
+      max_vw: 0.5
+      max_ax: 0.3
+      max_aw: 0.5
+    </rosparam>
+  </node>
+  <node pkg="fmk" type="ftp-log-1.sh" name="ftp_log_1" output="screen" />
+  <node pkg="fmk" type="ftp-log-2.sh" name="ftp_log_2" output="screen" />
+  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" output="screen"
+  	args="$(find fmk)/launch/start_fmk_ros.launch" />
+  <rtconnect from="FmkRobotROSBridge0.rtc:VehicleService"
+  	      to="VehicleServiceProvider0.rtc:VehicleService" />
+  <rtactivate component="VehicleServiceProvider0.rtc" />
+  <rtactivate component="FmkRobotROSBridge0.rtc" />
+
+  <machine name="localhost" address="localhost" user="root" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="true" />
+  <node pkg="ps3joy" name="ps3joy" type="ps3joy.py" output="screen" machine="localhost"/>
+  <node pkg="joy" name="joy_node" type="joy_node" output="screen"/>
+  <node pkg="mrobot_ros_bridge" name="joy_teleop" type="joy_teleop.py" output="screen"/>
+</launch>
