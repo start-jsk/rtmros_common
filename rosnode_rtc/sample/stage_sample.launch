@@ -43,7 +43,8 @@ To use this RTC, run the below command each bash terminal.
 Usage:
 
 1. roslaunch move_base_stage_tutorial robot.launch
-   rosrun rviz rviz -d \`rospack find move_base_stage_tutorial\`/config/rviz.vcg 
+
+   (rosrun rviz rviz -d \`rospack find move_base_stage_tutorial\`/config/rviz.vcg )
 
 2. roslaunch rosnode_rtc stage_sample.launch
 
