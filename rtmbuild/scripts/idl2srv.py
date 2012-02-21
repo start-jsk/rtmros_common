@@ -602,7 +602,10 @@ if __name__ == '__main__':
         option = ''
 
     fd = os.popen('/usr/bin/omnicpp %s "%s"' % (option, idlfile), 'r')
-    tree = _omniidl.compile(fd)
+    try:
+        tree = _omniidl.compile(fd, idlfile) # newer version API
+    except:
+        tree = _omniidl.compile(fd)          # old version API
 
     # output msg/srv and bridge component src
     if options.interfaces:
