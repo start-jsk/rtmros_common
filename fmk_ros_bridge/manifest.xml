@@ -17,6 +17,7 @@
   <depend package="std_srvs"/>
   <depend package="geometry_msgs"/>
   <depend package="nav_msgs"/>
+  <depend package="openrtm"/>
 
   <depend package="jsk_tools"/>
 </package>
