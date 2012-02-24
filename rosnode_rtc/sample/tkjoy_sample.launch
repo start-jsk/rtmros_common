@@ -1,0 +1,23 @@
+<launch>
+
+  <!-- PYTHONPATH must contains path for rtshell  -->
+  <env name="PYTHONPATH" value="$(env PYTHONPATH):$(find openrtm)/lib/python2.7/site-packages/OpenRTM_aist/RTM_IDL/" />
+
+  <!-- start tkjoystick -->
+  <node pkg="rosnode_rtc" type="TimedFloatSeq2Twist.py" name="timedfloatseq2twist" output="screen" cwd="node" />
+  <node pkg="rosnode_rtc" type="tkjoy_comp.sh" name="tkjoy" output="screen" />
+
+  <!-- BEGIN:openrtm connection -->
+  <node name="tkjoy_sample_launch" pkg="openrtm" type="rtmlaunch.py"
+	args="$(find rosnode_rtc)/sample/tkjoy_sample.launch"/>
+  <rtactivate component="TimedFloatSeq2Twist0.rtc" />
+  <rtactivate component="TkJoyStick0.rtc" />
+  <rtconnect from="TkJoyStick0.rtc:pos" to="TimedFloatSeq2Twist0.rtc:in" />
+  <rtconnect from="TimedFloatSeq2Twist0.rtc:out" to="move_base_node0.rtc:cmd_vel" />
+  <!-- END:openrtm connection -->
+
+  <sphinxdoc><![CDATA[
+
+  ]]></sphinxdoc>
+
+</launch>
