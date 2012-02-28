@@ -5,7 +5,7 @@
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
   <!-- END:openrtm setting -->
   <arg name="MODEL_FILE" />
-  <arg name="CONF_FILE" />
+  <arg name="SCHEDULER_ARGS" default=""/>
   <arg name="RESPAWN" default="true"/>
   <arg name="OUTPUT" default="log"/>
   <env name="LANG" value="C" />
@@ -15,25 +15,28 @@
 
   <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
 
-  <node name="viewer" pkg="hrpsys" type="ViewerComp" args='$(arg openrtm_args) -o "example.Viewer0.conf.default.project:$(arg MODEL_FILE)"' />
-  <node name="simulator" pkg="hrpsys" type="SimulatorComp" args='$(arg openrtm_args) -o "example.Simulator0.conf.default.project:$(arg MODEL_FILE)"' respawn="$(arg RESPAWN)" />
-
+  <node name="grxui" pkg="openhrp3" type="grxui.sh" args="$(find openhrp3)/scripts/grxui_3dview.xml" />
   <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" /> <!-- loading dae files crushes model loader -->
 
-  <node name="rtcd" pkg="openrtm" type="rtcd" output="$(arg OUTPUT)"
-	args='$(arg openrtm_args) -o "exec_cxt.periodic.rate:1000" -o "manager.shutdown_onrtcs:NO" -o "manager.is_master:YES" -o "manager.modules.load_path:$(find hrpsys)/lib" -o "example.SequencePlayer.config_file:$(arg CONF_FILE)"' />
+  <node name="scheduler" pkg="openhrp3" type="openhrp-scheduler" output="$(arg OUTPUT)"
+	args="$(arg MODEL_FILE) $(arg SCHEDULER_ARGS)" respawn="$(arg RESPAWN)" />  <!-- nosim -->
+
+  <node name="controller" pkg="hrpsys" type="openhrp-controller-bridge.sh" output="$(arg OUTPUT)"
+	args="$(arg MODEL_FILE)" respawn="$(arg RESPAWN)" />
 
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
-  <node name="hrpsys" pkg="hrpsys" type="hrpsyspy" output="screen"
-	args='$(find hrpsys)/scripts/hrpsys2.py $(arg MODEL_FILE)' />
+  <node name="hrpsys" pkg="hrpsys" type="hrpsyspy" output="$(arg OUTPUT)"
+	args='$(find hrpsys)/scripts/hrpsys.py $(arg MODEL_FILE)' />
 
   <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="$(arg OUTPUT)"
 	args="$(arg openrtm_args)" respawn="$(arg RESPAWN)" />
 
   <!-- BEGIN:openrtm connection -->
   <arg name="ROBOT_NAME" value="dummy" />
-  <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hrpsys)/launch/hrpsys2.launch" respawn="$(arg RESPAWN)" />
-  <rtactivate component="Viewer0.rtc" />
-  <rtconnect from="Simulator0.rtc:state" to="Viewer0.rtc:state" />
+  <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hrpsys)/launch/hrpsys.launch" respawn="$(arg RESPAWN)" />
+  <rtconnect from="$(arg ROBOT_NAME)(Robot)0.rtc:pr" to="AbsTransformToPosRpy0.rtc:pr" />
+  <rtconnect from="AbsTransformToPosRpy0.rtc:basePos"  to="StateHolder0.rtc:basePosIn" />
+  <rtconnect from="AbsTransformToPosRpy0.rtc:baseRpy"  to="StateHolder0.rtc:baseRpyIn" />
+  <rtactivate component="AbsTransformToPosRpy0.rtc" />
   <!-- END:openrtm connection -->
 </launch>
