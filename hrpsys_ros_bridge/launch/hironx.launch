@@ -1,5 +1,5 @@
 <launch>
-  <include file="$(find hrpsys_ros_bridge)/launch/hironx_startup.launch" >
+  <include file="$(find hrpsys_ros_bridge)/launch/hironx_startup.launch" />
   <include file="$(find hrpsys_ros_bridge)/launch/hironx_ros_bridge.launch" />
 
   <sphinxdoc><![CDATA[
