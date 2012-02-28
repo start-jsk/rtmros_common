@@ -36,50 +36,84 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 ## wrl,dae models
 ##
 set(wrl_robots)
-macro(compile_openhrp_model wrlfile workdir daename yamlname lispname)
-  add_custom_command(OUTPUT ${workdir}/${lispname}
-    COMMAND rosrun euscollada collada2eus ${workdir}/${daename} ${PROJECT_SOURCE_DIR}/models/${yamlname} ${workdir}/${lispname}
-    DEPENDS ${workdir}/${daename})
-  add_custom_command(OUTPUT ${workdir}/${daename}
-    COMMAND rosrun openhrp3 export-collada -i ${wrlfile} -o ${workdir}/${daename}
+rosbuild_find_ros_package(openhrp3)
+rosbuild_find_ros_package(hrpsys)
+rosbuild_find_ros_package(collada_robots)
+rosbuild_find_ros_package(choreonoid)
+rosbuild_find_ros_package(webots_simulator)
+
+##
+## define macros
+##
+macro(compile_openhrp_model wrlfile)
+  set(_workdir ${PROJECT_SOURCE_DIR}/models)
+  if("${ARGN}" STREQUAL "")
+    get_filename_component(_name ${wrlfile} NAME_WE)
+  else()
+    set(_name "${ARGN}")
+  endif()
+  set(_daefile "${_workdir}/${_name}.dae")
+  set(_xmlfile "${_workdir}/${_name}.xml")
+  string(TOLOWER ${_name} _name)
+  set(_yamlfile "${_workdir}/${_name}.yaml")
+  set(_lispfile "${_workdir}/${_name}.l")
+  if(EXISTS ${_yamlfile})
+    add_custom_command(OUTPUT ${_lispfile}
+      COMMAND rosrun euscollada collada2eus ${_daefile} ${_yamlfile} ${_lispfile}
+      DEPENDS ${_daefile})
+  else(EXISTS ${_yamlfile})
+    add_custom_command(OUTPUT ${_lispfile}
+      COMMAND rosrun euscollada collada2eus ${_daefile} ${_lispfile}
+      DEPENDS ${_daefile})
+  endif(EXISTS ${_yamlfile})
+  add_custom_command(OUTPUT ${_daefile}
+    COMMAND rosrun openhrp3 export-collada -i ${wrlfile} -o ${_daefile}
     DEPENDS ${wrlfile})
-  list(APPEND all_robots ${workdir}/${lispname})
+  add_custom_command(OUTPUT ${_xmlfile}
+    COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${_daefile} OUTPUT:=${_xmlfile}
+    DEPENDS ${wrlfile})
+  list(APPEND all_robots ${_lispfile} ${_xmlfile} ${_daefile})
 endmacro(compile_openhrp_model)
 
-rosbuild_find_ros_package(hrpsys)
+macro(compile_collada_robot daefile)
+  set(_workdir ${PROJECT_SOURCE_DIR}/models)
+  get_filename_component(_name ${daefile} NAME_WE)
+  set(_xmlfile "${_workdir}/${_name}.xml")
+  string(TOLOWER ${_name} _name)
+  set(_yamlfile "${_workdir}/${_name}.yaml")
+  set(_lispfile "${_workdir}/${_name}.l")
+
+  add_custom_command(OUTPUT ${_lispfile}
+    COMMAND rosrun euscollada collada2eus ${daefile} ${_yamlfile} ${_lispfile}
+    DEPENDS ${daefile})
+  add_custom_command(OUTPUT ${_xmlfile}
+    COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${daefile} OUTPUT:=${_xmlfile}
+    DEPENDS ${daefile})
+  list(APPEND all_robots ${_lispfile} ${_xmlfile})
+endmacro(compile_collada_robot daefile)
+
+###
+### convert
+###
 if(EXISTS ${hrpsys_PACKAGE_PATH}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl)
   compile_openhrp_model(
     ${hrpsys_PACKAGE_PATH}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl
-    ${PROJECT_SOURCE_DIR}/models
-    HRP4C.dae hrp4c.yaml hrp4c.l)
+    HRP4C)
 endif(EXISTS ${hrpsys_PACKAGE_PATH}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl)
 
-rosbuild_find_ros_package(openhrp3)
 compile_openhrp_model(
-  ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl
-  ${PROJECT_SOURCE_DIR}/models
-  PA10.dae pa10.yaml pa10.l)
+  ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl)
 compile_openhrp_model(
-  ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/sample1.wrl
-  ${PROJECT_SOURCE_DIR}/models
-  SampleRobot.dae samplerobot.yaml samplerobot.l)
+  ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/sample1.wrl SampleRobot)
 
-rosbuild_find_ros_package(collada_robots)
-add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/models/kawada-hironx.l
-  COMMAND rosrun euscollada collada2eus ${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae ${PROJECT_SOURCE_DIR}/models/kawada-hironx.yaml ${PROJECT_SOURCE_DIR}/models/kawada-hironx.l
-  DEPENDS ${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae)
-list(APPEND all_robots ${PROJECT_SOURCE_DIR}/models/kawada-hironx.l)
+compile_collada_robot(${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae)
 
 # generate webots model
-rosbuild_find_ros_package(webots_simulator)
 add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/models/DARWIN.wrl
   COMMAND rosrun roseus roseus ${PROJECT_SOURCE_DIR}/scripts/webotsvrml2openhrp3vrml.l
   "\\(progn \\(convert-webots-vrml-\\>openhrp3-vrml-for-darwin \\\"${PROJECT_SOURCE_DIR}/models/DARWIN.wrl\\\"\\) \\(exit\\)\\)"
   DEPENDS ${webots_simulator_PACKAGE_PATH}/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto)
-compile_openhrp_model(
-  ${PROJECT_SOURCE_DIR}/models/DARWIN.wrl
-  ${PROJECT_SOURCE_DIR}/models
-  DARWIN.dae darwin.yaml darwin.l)
+compile_openhrp_model(${PROJECT_SOURCE_DIR}/models/DARWIN.wrl)
 
 # yaskawa model
 rosbuild_download_data(http://openhrp-aist-grx.googlecode.com/files/YaskawaSmartPal5.zip build/YaskawaSmartPal5.zip 3db916d5dc5ef4259c7dfc1ac85dd380)
@@ -88,20 +122,13 @@ add_custom_command(
   COMMAND unzip -o ${PROJECT_SOURCE_DIR}/build/YaskawaSmartPal5.zip
   COMMAND cp    -rf ${PROJECT_SOURCE_DIR}/build/YaskawaSmartPal5/* ${PROJECT_SOURCE_DIR}/models/
   DEPENDS ${PROJECT_SOURCE_DIR}/build/YaskawaSmartPal5.zip)
-compile_openhrp_model(
-  ${PROJECT_SOURCE_DIR}/models/YaskawaSmartPal5.wrl
-  ${PROJECT_SOURCE_DIR}/models
-  SmartPal5.dae smartpal5.yaml smartpal5.l)
+compile_openhrp_model(${PROJECT_SOURCE_DIR}/models/YaskawaSmartPal5.wrl)
 
 # choreonoid model
-rosbuild_find_ros_package(choreonoid)
-compile_openhrp_model(
-  ${choreonoid_PACKAGE_PATH}/share/choreonoid-1.1/models/GR001/GR001.wrl
-  ${PROJECT_SOURCE_DIR}/models
-  GR001.dae gr001.yaml gr001.l)
+compile_openhrp_model(${choreonoid_PACKAGE_PATH}/share/choreonoid-1.1/models/GR001/GR001.wrl)
 
+## ALL
 add_custom_target(openhrp_robots ALL DEPENDS ${all_robots})
-
 
 
 ##
