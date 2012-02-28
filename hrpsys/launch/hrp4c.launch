@@ -1,5 +1,5 @@
 <launch>
-  <include file="$(find hrpsys)/launch/hrpsys2.launch" >
+  <include file="$(find hrpsys)/launch/hrpsys.launch" >
     <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.xml" />
     <arg name="CONF_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.conf" />
   </include>
