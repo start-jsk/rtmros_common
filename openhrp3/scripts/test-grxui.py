@@ -172,7 +172,7 @@ class TestGrxUIProject(unittest.TestCase):
             time.sleep(1);
             subprocess.call("xdotool key --clearmodifiers \"shift+F8\"", shell=True)
             time.sleep(1);
-            self.xdotool("Eclipse ", "windowactivate --sync",visible=True)
+            self.xdotool(self.capture_window, "windowactivate --sync",visible=True)
 
         # start scripts
         if self.scripts:
