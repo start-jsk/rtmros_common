@@ -71,7 +71,7 @@ macro(compile_openhrp_model wrlfile)
     DEPENDS ${wrlfile})
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${_daefile} OUTPUT:=${_xmlfile}
-    DEPENDS ${wrlfile})
+    DEPENDS ${_daefile})
   add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_daefile})
   list(APPEND compile_robots ${_name}_compile)
 endmacro(compile_openhrp_model)
