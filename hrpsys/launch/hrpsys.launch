@@ -6,6 +6,7 @@
   <!-- END:openrtm setting -->
   <arg name="PROJECT_FILE" />
   <arg name="MODEL_FILE" />
+  <arg name="CONF_FILE" />
   <arg name="RESPAWN" default="true"/>
   <arg name="OUTPUT" default="log"/>
   <env name="LANG" value="C" />
