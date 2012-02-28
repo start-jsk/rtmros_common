@@ -1,6 +1,7 @@
 <launch>
   <include file="$(find hrpsys)/launch/hrpsys.launch" >
-    <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.xml" />
+    <arg name="PROJECT_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.xml" />
+    <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl" />
     <arg name="CONF_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.conf" />
   </include>
 
@@ -19,7 +20,7 @@ select StartSimulation sub-menu from GrxUI menu, or clock Simulation Start butto
   ]]></sphinxdoc>
   <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
    test-name="HRP4C"
-   args="--start-simulation --max-time=100
+   args="--max-time=100
 	 --viewer-name='' #
 	 --no-start-simulation
 	 --capture-window='Irrlicht'
