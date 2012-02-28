@@ -72,7 +72,8 @@ macro(compile_openhrp_model wrlfile)
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${_daefile} OUTPUT:=${_xmlfile}
     DEPENDS ${wrlfile})
-  list(APPEND all_robots ${_lispfile} ${_xmlfile} ${_daefile})
+  add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_daefile})
+  list(APPEND compile_robots ${_name}_compile)
 endmacro(compile_openhrp_model)
 
 macro(compile_collada_robot daefile)
@@ -89,7 +90,8 @@ macro(compile_collada_robot daefile)
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${daefile} OUTPUT:=${_xmlfile}
     DEPENDS ${daefile})
-  list(APPEND all_robots ${_lispfile} ${_xmlfile})
+  add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile})
+  list(APPEND compile_robots ${_name}_compile)
 endmacro(compile_collada_robot daefile)
 
 ###
@@ -128,8 +130,14 @@ compile_openhrp_model(${PROJECT_SOURCE_DIR}/models/YaskawaSmartPal5.wrl)
 compile_openhrp_model(${choreonoid_PACKAGE_PATH}/share/choreonoid-1.1/models/GR001/GR001.wrl)
 
 ## ALL
-add_custom_target(openhrp_robots ALL DEPENDS ${all_robots})
-
+list(GET compile_robots 0 compile_robot)
+list(REMOVE_AT compile_robots 0)
+add_custom_target(openhrp_robots ALL DEPENDS ${compile_robot})
+foreach(compile_target ${compile_robots})
+  add_dependencies(${compile_robot} ${compile_target})
+  list(GET compile_robots 0 compile_robot)
+  list(REMOVE_AT compile_robots 0)
+endforeach(compile_target ${compile_robots})
 
 ##
 ## hrpsys ros bridge tools
