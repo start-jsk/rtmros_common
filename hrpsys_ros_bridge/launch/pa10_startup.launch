@@ -1,7 +1,7 @@
 <launch>
-  <arg name="SCHEDULER_ARGS" default="--nosim" />
   <include file="$(find hrpsys)/launch/hrpsys.launch">
-    <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/PA10/PA10.xml" />
-    <arg name="SCHEDULER_ARGS" value="$(arg SCHEDULER_ARGS)" />
+    <arg name="PROJECT_FILE" value="$(find hrpsys_ros_bridge)/models/pa10.xml" />
+    <arg name="MODEL_FILE" value="$(find hrpsys_ros_bridge)/models/pa10.dae" />
+    <arg name="CONF_FILE" value="$(find hrpsys_ros_bridge)/models/pa10.conf" />
   </include>
 </launch>

@@ -23,6 +23,9 @@ This launch file shows an example of ros bridge for sample robot and client prog
   <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
    test-name="SampleRobot_PickUp"
    args="--max-time=30
+	 --viewer-name='' #
+	 --no-start-simulation
+	 --capture-window='Irrlicht'
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --check-tf='/WAIST_LINK0 /VISION_SENSOR1'
 	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/samplerobot-pickup.l __log:=dummy'" /> <!-- add dummy __log/= argument to invoke roseus with non-interactive mode -->

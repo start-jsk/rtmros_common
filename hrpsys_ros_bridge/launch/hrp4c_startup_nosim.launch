@@ -1,6 +1,7 @@
 <launch>
-  <arg name="SCHEDULER_ARGS" default="" />
-  <include file="$(find hrpsys_ros_bridge)/launch/hrp4c_startup.launch">
-    <arg name="SCHEDULER_ARGS" value="--nosim" />
+  <include file="$(find hrpsys)/launch/hrpsys.launch">
+    <arg name="PROJECT_FILE" value="$(find hrpsys_ros_bridge)/models/HRP4C.xml" />
+    <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl" />
+    <arg name="CONF_FILE" value="$(find hrpsys_ros_bridge)/models/HRP4C.conf" />
   </include>
 </launch>

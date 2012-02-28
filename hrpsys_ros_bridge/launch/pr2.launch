@@ -16,6 +16,9 @@ This launch file shows an example of ros bridge for pr2 robot
   <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
    test-name="PR2_Example"
    args="--max-time=10
+	 --viewer-name='' #
+	 --no-start-simulation
+	 --capture-window='Irrlicht'
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --check-tf='/base_footprint /head_plate_frame'
 	 " /> <!-- add dummy __log:= argument to invoke roseus with non-interactive mode -->

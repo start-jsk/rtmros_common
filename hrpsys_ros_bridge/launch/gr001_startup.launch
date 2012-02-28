@@ -1,7 +1,7 @@
 <launch>
-  <arg name="SCHEDULER_ARGS" default="" />
   <include file="$(find hrpsys)/launch/hrpsys.launch">
+    <arg name="PROJECT_FILE" value="$(find choreonoid)/share/choreonoid-1.1/models/GR001/GR001.xml" />
     <arg name="MODEL_FILE" value="$(find choreonoid)/share/choreonoid-1.1/models/GR001/GR001.wrl" />
-    <arg name="SCHEDULER_ARGS" value="$(arg SCHEDULER_ARGS)" />
+    <arg name="CONF_FILE" value="$(find choreonoid)/share/choreonoid-1.1/models/GR001/GR001.conf" />
   </include>
 </launch>

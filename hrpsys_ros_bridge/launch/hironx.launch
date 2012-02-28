@@ -1,7 +1,5 @@
 <launch>
   <include file="$(find hrpsys_ros_bridge)/launch/hironx_startup.launch" >
-    <arg name="SCHEDULER_ARGS" value="--nosim" />
-  </include>
   <include file="$(find hrpsys_ros_bridge)/launch/hironx_ros_bridge.launch" />
 
   <sphinxdoc><![CDATA[
@@ -30,6 +28,9 @@ After that, we need to invoke the client program. Following program is the examp
   <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
    test-name="HIRONX_Example"
    args="--max-time=10
+	 --viewer-name='' #
+	 --no-start-simulation
+	 --capture-window='Irrlicht'
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --check-tf='/WAIST /HEAD_JOINT1_Link'
 	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/kawada-hironx-example.l __log:=dummy'" /> <!-- add dummy __log/= argument to invoke roseus with non-interactive mode -->

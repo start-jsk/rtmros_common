@@ -20,6 +20,9 @@ This launch file shows an example of ros bridge for darwin robot and sample clie
   <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
    test-name="Darwin_PickUp"
    args="--max-time=30
+	 --viewer-name='' #
+	 --no-start-simulation
+	 --capture-window='Irrlicht'
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --check-tf='/DBODY_LINK /DHEAD_LINK'
 	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/darwin-pickup.l __log\:=dummy'" /> <!-- add dummy __log:= argument to invoke roseus with non-interactive mode -->

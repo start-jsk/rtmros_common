@@ -1,7 +1,7 @@
 <launch>
-  <arg name="SCHEDULER_ARGS" default="" />
   <include file="$(find hrpsys)/launch/hrpsys.launch">
-    <arg name="MODEL_FILE" value="$(find hrpsys)/scripts/SampleRobot_inHouse.xml" />
-    <arg name="SCHEDULER_ARGS" value="$(arg SCHEDULER_ARGS)" />
+    <arg name="PROJECT_FILE" value="$(find hrpsys_ros_bridge)/models/SampleRobot.xml" />
+    <arg name="MODEL_FILE" value="$(find hrpsys_ros_bridge)/models/SampleRobot.dae" />
+    <arg name="CONF_FILE" value="$(find hrpsys_ros_bridge)/models/SampleRobot.conf" />
   </include>
 </launch>

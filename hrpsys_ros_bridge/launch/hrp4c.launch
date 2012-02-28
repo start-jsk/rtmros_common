@@ -32,6 +32,9 @@ After that, we need to invoke the client program. Following program is the examp
    test-name="HRP4C_PickUp"
    args="--max-time=30
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
+	 --viewer-name='' #
+	 --no-start-simulation
+	 --capture-window='Irrlicht'
 	 --check-tf='/BODY /R_HAND_J1_LINK'
 	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/hrp4c-pickup.l __log:=dummy'" /> <!-- add dummy __log/= argument to invoke roseus with non-interactive mode -->
   <test type="ogv_encode.sh" pkg="jsk_tools" test-name="z_HRP4C_PickUp" args="$(find hrpsys_ros_bridge)/build/images/HRP4C_PickUp.ogv" time-limit="1000"/>

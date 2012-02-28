@@ -18,6 +18,9 @@ This launch file shows an example of ros bridge for yaskawa samartpal5 robot.
   <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
    test-name="SmartPal5_PickUp"
    args="--max-time=10
+	 --viewer-name='' #
+	 --no-start-simulation
+	 --capture-window='Irrlicht'
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --check-tf='/WAIST_LINK0 /VISION_SENSOR1'
 	 "/> <!-- add dummy __log:= argument to invoke roseus with non-interactive mode -->
