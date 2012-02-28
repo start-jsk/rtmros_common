@@ -5,25 +5,30 @@ from rtm import *
 from OpenHRP import *
 
 def connectComps():
-    connectPorts(bridge.port("q"), seq.port("qInit"))
+    connectPorts(sim.port("q"), seq.port("qInit"))
     #
     connectPorts(seq.port("qRef"), hgc.port("qIn"))
     #
-    connectPorts(bridge.port("q"), sh.port("qIn"))
+    connectPorts(hgc.port("qOut"), sim.port("qCmd"))
+    connectPorts(hgc.port("dqOut"), sim.port("dqCmd"))
+    connectPorts(hgc.port("ddqOut"), sim.port("ddqCmd"))
+    #
+    connectPorts(sim.port("q"), sh.port("qIn"))
 
 def activateComps():
-    rtm.serializeComponents([bridge, seq, sh])
+    rtm.serializeComponents([sim, seq])
+    sim.start()
     seq.start()
-    sh.start()
+    hgc.start()
 
 def createComps():
-    global bridge, seq, seq_svc, sh, sh_svc, hgc
+    global sim, seq, seq_svc, sh, sh_svc, hgc
 
-    bridge = None
-    print "[hrpsys.py] createComps -> findRTC : ",name+"(Robot)0"
-    while bridge == None :
-        bridge = findRTC(name+"(Robot)0")
-        print "[hrpsys.py] createComps -> bridge : ",bridge
+    sim = None
+    print "[hrpsys.py] createComps -> find SimulationRTC"
+    while sim == None :
+        sim = findRTC("Simulator0")
+        print "[hrpsys.py] createComps -> sim : ",sim
 
     ms.load("SequencePlayer")
     seq = ms.create("SequencePlayer", "seq")
@@ -31,12 +36,15 @@ def createComps():
     print "[hrpsys.py] createComps -> SequencePlayer : ",seq
     seq_svc = SequencePlayerServiceHelper.narrow(seq.service("service0"))
 
+    ms.load("HGcontroller");
+    hgc = ms.create("HGcontroller")
+    print "[hrpsys.py] createComps -> HGcontroller : ",hgc
+
     ms.load("StateHolder");
     sh = ms.create("StateHolder", "StateHolder0")
     print "[hrpsys.py] createComps -> StateHolder : ",sh
     sh_svc = StateHolderServiceHelper.narrow(sh.service("service0"));
 
-    hgc = findRTC("HGcontroller0")
 
 def init(_name):
     global ms
@@ -54,11 +62,12 @@ def init(_name):
     print "[hrpsys.py] creating components"
     createComps()
 
+    print "[hrpsys.py] activating components"
+    activateComps()
+
     print "[hrpsys.py] connecting components"
     connectComps()
 
-    print "[hrpsys.py] activating components"
-    activateComps()
     print "[hrpsys.py] initialized successfully"
 
 
