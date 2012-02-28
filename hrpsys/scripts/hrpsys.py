@@ -16,19 +16,22 @@ def connectComps():
     connectPorts(sim.port("q"), sh.port("qIn"))
 
 def activateComps():
-    rtm.serializeComponents([sim, seq])
+    rtm.serializeComponents([sim, seq, sh, hgc])
     sim.start()
     seq.start()
+    sh.start()
     hgc.start()
 
 def createComps():
     global sim, seq, seq_svc, sh, sh_svc, hgc
 
     sim = None
-    print "[hrpsys.py] createComps -> find SimulationRTC"
+    #ms.load("Simulator")
+    #sim = ms.create("Simulator", "sim")
     while sim == None :
         sim = findRTC("Simulator0")
-        print "[hrpsys.py] createComps -> sim : ",sim
+
+    print "[hrpsys.py] createComps -> Simulation : ",sim
 
     ms.load("SequencePlayer")
     seq = ms.create("SequencePlayer", "seq")
@@ -46,11 +49,9 @@ def createComps():
     sh_svc = StateHolderServiceHelper.narrow(sh.service("service0"));
 
 
-def init(_name):
+def init():
     global ms
-    global name
 
-    name = _name
     ms = None
 
     while ms == None :
@@ -72,22 +73,12 @@ def init(_name):
 
 
 if __name__ == '__main__':
-    import sys,os,time
-    if len(sys.argv) < 2 :
-        sys.exit("Usage : "+sys.argv[0]+" [XMLFILE]")
 
     while hrp.findModelLoader() == None: # seq uses modelloader
         time.sleep(3);
         print "[hrpsys.py] wait for ModelLoader"
 
-    modelname=""
-    while modelname=="" :
-        prog=os.popen("rospack find openhrp3").read().strip()+"/bin/extract-robotname "+sys.argv[1];
-        modelname=os.popen(prog).read().strip()
-
-    os.environ['LD_LIBRARY_PATH']=os.environ['LD_LIBRARY_PATH']+":"+os.popen("rospack find hrpsys").read().strip()+"/lib"
-
-    print "[hrpsys.py] start hrpsys for ",modelname
-    init(modelname)
+    print "[hrpsys.py] start hrpsys"
+    init()
 
 
