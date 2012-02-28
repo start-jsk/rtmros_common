@@ -9,6 +9,8 @@
   <arg name="CONF_FILE" />
   <arg name="RESPAWN" default="true"/>
   <arg name="OUTPUT" default="log"/>
+  <arg name="HRPSYS_PERIODIC_RATE" default="200"/>
+  <arg name="OPENHRP3_SIM_PERIODIC_RATE" default="200"/>
   <env name="LANG" value="C" />
   <env name="ORBgiopMaxMsgSize" value="2147483648" />
 
@@ -17,12 +19,12 @@
   <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
 
   <node name="viewer" pkg="hrpsys" type="ViewerComp" args='$(arg openrtm_args) -o "example.Viewer0.conf.default.project:$(arg PROJECT_FILE)" -o "exec_cxt.periodic.rate:30"' />
-  <node name="simulator" pkg="hrpsys" type="SimulatorComp" args='$(arg openrtm_args) -o "example.Simulator0.conf.default.project:$(arg PROJECT_FILE)"' respawn="$(arg RESPAWN)" />
+  <node name="simulator" pkg="hrpsys" type="SimulatorComp" args='$(arg openrtm_args) -o "example.Simulator0.conf.default.project:$(arg PROJECT_FILE)" -o "exec_cxt.periodic.rate:$(arg OPENHRP3_SIM_PERIODIC_RATE)"' respawn="$(arg RESPAWN)" />
 
   <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" /> <!-- loading dae files crushes model loader -->
 
   <node name="rtcd" pkg="openrtm" type="rtcd" output="$(arg OUTPUT)"
-	args='$(arg openrtm_args) -o "exec_cxt.periodic.rate:1000" -o "manager.shutdown_onrtcs:NO" -o "manager.is_master:YES" -o "manager.modules.load_path:$(find hrpsys)/lib" -o "example.SequencePlayer.config_file:$(arg CONF_FILE)"' />
+	args='$(arg openrtm_args) -o "exec_cxt.periodic.rate:$(arg HRPSYS_PERIODIC_RATE)" -o "manager.shutdown_onrtcs:NO" -o "manager.is_master:YES" -o "manager.modules.load_path:$(find hrpsys)/lib" -o "example.SequencePlayer.config_file:$(arg CONF_FILE)"' />
 
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
   <node name="hrpsys" pkg="hrpsys" type="hrpsyspy" output="screen"
