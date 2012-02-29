@@ -219,8 +219,8 @@ class TestGrxUIProject(unittest.TestCase):
         subprocess.call("pkill recordmydesktop", shell=True)
 
         # wait for record my desktop
-        if self.simulation_start :
-            self.exit_eclipse()
+        #if self.simulation_start :
+        #    self.exit_eclipse()
         print "[%s] wait for recordmydesktop encoding..."%(self.id())
         wait_for_recordmydesktop = True
         while wait_for_recordmydesktop :
