@@ -1,6 +1,11 @@
 #!/bin/bash
 
-trap 'rosrun rosunit clean_junit_xml.py; exit 1' ERR
+function error {
+    rosrun rosunit clean_junit_xml.py
+    echo "source $ROS_WORKSPACE/setup.bash"
+    exit 1
+}
+trap error ERR
 
 function test-grxui {
     local package=$1
