@@ -141,9 +141,13 @@ class TestGrxUIProject(unittest.TestCase):
         else:
             time.sleep(10)
         # check window id
-        winid = subprocess.check_output("xdotool search \"%s\""%(self.capture_window), shell=True).rstrip()
-        print "[%s] eclipse winid %s"%(self.id(), winid)
-
+        winid = None
+        while winid == None:
+            try:
+                winid = subprocess.check_output("xdotool search \"%s\""%(self.capture_window), shell=True).rstrip()
+                print "[%s] eclipse winid %s"%(self.id(), winid)
+            except:
+                print "[%s] eclipse winid %s .. retry"%(self.id(), winid)
         # for pa10
         if self.check_window("Restoring Problems") :
             print "[%s] Restoring Problems"%(self.id())
