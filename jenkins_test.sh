@@ -5,6 +5,7 @@ function error {
     echo "source $ROS_WORKSPACE/setup.bash"
     exit 1
 }
+rm -fr $ROS_HOME/test_results/_hudson
 trap error ERR
 
 function test-grxui {
