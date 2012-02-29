@@ -14,7 +14,7 @@ This scripts starts Sample.xml project file, select StartSimulation sub-menu fro
 
   ]]></sphinxdoc>
 
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="110"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
    test-name="Sample" args="--start-simulation --target-directory=$(find openhrp3)/build/images --max-time=10" cwd="node" />
 
   <test type="ogv_encode.sh" pkg="jsk_tools" test-name="z_Sample" args="$(find openhrp3)/build/images/Sample.ogv" time-limit="1000"/>

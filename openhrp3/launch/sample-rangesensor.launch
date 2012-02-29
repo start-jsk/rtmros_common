@@ -14,7 +14,7 @@ This scripts starts SampleSV_RangeSensor.xml OpenHRP3 sample project file, the r
 
   ]]></sphinxdoc>
 
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="200"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
    test-name="SampleSV_RangeSensor" args="--start-simulation --target-directory=$(find openhrp3)/build/images --max-time=100" cwd="node" />
 
   <test type="ogv_encode.sh" pkg="jsk_tools" test-name="z_SampleSV_RangeSensor" args="$(find openhrp3)/build/images/SampleSV_RangeSensor.ogv" time-limit="1000"/>
