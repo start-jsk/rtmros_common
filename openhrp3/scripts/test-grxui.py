@@ -51,19 +51,19 @@ class TestGrxUIProject(unittest.TestCase):
         ret = 1
         if visible : visible = "--onlyvisible"
         while 1 :
-            ret = subprocess.call("xdotool search %s --name \"%s\" %s"%(visible,name,action), shell=True)
+            ret = subprocess.call("xdotool search %s --maxdepth 3 --name \"%s\" %s"%(visible,name,action), shell=True)
             if ret != 1 : break
             time.sleep(1)
         return ret
 
     def check_window(self,name,visible=""):
         if visible : visible = "--onlyvisible"
-        ret = subprocess.call("xdotool search "+visible+" --maxdepth 3 --name \""+name+"\"", shell=True) != 1
+        ret = subprocess.call("xdotool search %s --maxdepth 3 --name \"%s\""%(visible,name), shell=True) != 1
         print "[%s] check window %s -> %s"%(self.id(),name, ret)
         return ret
 
     def wait_for_window(self,name):
-        while subprocess.call("xdotool search --name \""+name+"\"", shell=True) == 1:
+        while subprocess.call("xdotool search --maxdepth 3 --name \""+name+"\"", shell=True) == 1:
             print "[%s] wait for %s ..."%(self.id(),name)
             time.sleep(1)
         print "[%s] wait for %s ... done"%(self.id(),name)
