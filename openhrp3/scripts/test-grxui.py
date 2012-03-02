@@ -210,9 +210,9 @@ class TestGrxUIProject(unittest.TestCase):
                 self.xdotool("Setup Controller", "key Return",visible=True)
 
         # stop terminal
-        print "[%s] killing script? .."%(self.id())
-        #if self.script_proc :
-        #    self.script_proc.communicate("\u0003\n")
+        print "[%s] killing script? .. %s"%(self.id(),self.script_proc)
+        if self.script_proc :
+            self.script_proc.communicate("\u0003\n")
 
         # stop record my desktop
         print "[%s] killing recordmydesktop .."%(self.id())
@@ -241,7 +241,7 @@ class TestGrxUIProject(unittest.TestCase):
         subprocess.call("pkill recordmydesktop", shell=True)
         subprocess.call("pkill recordmydesktop", shell=True)
         # wait scripts
-        #self.terminate_scripts()
+        self.terminate_scripts()
 
 
 if __name__ == '__main__':
