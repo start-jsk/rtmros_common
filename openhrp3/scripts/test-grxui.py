@@ -184,6 +184,7 @@ class TestGrxUIProject(unittest.TestCase):
 
         # start capture
         if not os.path.exists(self.target_directory) : os.makedirs(self.target_directory)
+        subprocess.call("pkill recordmydesktop", shell=True)
         ret = subprocess.Popen("recordmydesktop --no-wm-check --no-sound --no-cursor --windowid=%s --on-the-fly-encoding --v_quality=40 --overwrite --output=%s/%s"%(winid,self.target_directory,self.name), shell=True)
 
         # wait for max time
@@ -211,8 +212,11 @@ class TestGrxUIProject(unittest.TestCase):
 
         # stop terminal
         print "[%s] killing script? .. %s"%(self.id(),self.script_proc)
-        if self.script_proc :
-            self.script_proc.communicate("\u0003\n")
+        if self.script_proc and self.script_proc.poll() :
+            try:
+                self.script_proc.terminate()
+            except Exception,e:
+                print e
 
         # stop record my desktop
         print "[%s] killing recordmydesktop .."%(self.id())
