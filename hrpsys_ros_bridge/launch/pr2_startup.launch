@@ -1,7 +1,7 @@
 <launch>
   <include file="$(find hrpsys)/launch/hrpsys.launch">
-    <arg name="PROJECT_FILE" value="$(find hrpsys_ros_bridge)/models/pr2.xml" />
+    <arg name="PROJECT_FILE" value="$(find hrpsys_ros_bridge)/models/willowgarage-pr2.xml" />
     <arg name="MODEL_FILE" value="$(find collada_robots)/data/robots/willowgarage-pr2.dae" />
-    <arg name="CONF_FILE" value="$(find hrpsys_ros_bridge)/models/pr2.conf" />
+    <arg name="CONF_FILE" value="$(find hrpsys_ros_bridge)/models/willowgarage-pr2.conf" />
   </include>
 </launch>
