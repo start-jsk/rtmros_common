@@ -84,9 +84,15 @@ macro(compile_collada_robot daefile)
   set(_yamlfile "${_workdir}/${_name}.yaml")
   set(_lispfile "${_workdir}/${_name}.l")
 
-  add_custom_command(OUTPUT ${_lispfile}
-    COMMAND rosrun euscollada collada2eus ${daefile} ${_yamlfile} ${_lispfile}
-    DEPENDS ${daefile})
+  if(EXISTS ${_yamlfile})
+    add_custom_command(OUTPUT ${_lispfile}
+      COMMAND rosrun euscollada collada2eus ${daefile} ${_yamlfile} ${_lispfile}
+      DEPENDS ${daefile})
+  else(EXISTS ${_yamlfile})
+    add_custom_command(OUTPUT ${_lispfile}
+      COMMAND rosrun euscollada collada2eus ${daefile} ${_lispfile} || echo 'ok'
+      DEPENDS ${daefile})
+  endif(EXISTS ${_yamlfile})
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${daefile} OUTPUT:=${_xmlfile}
     DEPENDS ${daefile})
@@ -109,6 +115,7 @@ compile_openhrp_model(
   ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/sample1.wrl SampleRobot)
 
 compile_collada_robot(${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae)
+compile_collada_robot(${collada_robots_PACKAGE_PATH}/data/robots/willowgarage-pr2.dae)
 
 # generate webots model
 add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/models/DARWIN.wrl
