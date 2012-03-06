@@ -30,21 +30,15 @@
   	type="rtm-naming-restart" output="screen" />
   <anode pkg="openhrp3" name="starteclipse"
 	 type="eclipse.sh" output="screen"/>
-  <node pkg="fmk" type="FmkRobotROSBridgeComp" name="fmkrosbridge"
-	args="-f $(find fmk)/rtc.conf" output="screen">
-    <rosparam>
-      max_vx: 0.3
-      max_vw: 0.5
-      max_ax: 0.3
-      max_aw: 0.5
-    </rosparam>
+  <node pkg="fmk_ros_bridge" type="FmkRobotROSBridgeComp" name="fmkrosbridge"
+	args="-f $(find fmk_ros_bridge)/rtc.conf" output="screen">
   </node>
-  <node pkg="fmk" type="ftp-log-1.sh" name="ftp_log_1" output="screen" />
-  <node pkg="fmk" type="ftp-log-2.sh" name="ftp_log_2" output="screen" />
+  <node pkg="fmk_ros_bridge" type="ftp-log-1.sh" name="ftp_log_1" output="screen" />
+  <node pkg="fmk_ros_bridge" type="ftp-log-2.sh" name="ftp_log_2" output="screen" />
   <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" output="screen"
   	args="$(find fmk_ros_bridge)/launch/start_fmk_ros.launch" />
   <rtconnect from="FmkRobotROSBridge0.rtc:VehicleService"
-	     to="VehicleServiceProvider0.rtc:VehicleService" />
+  	      to="VehicleServiceProvider0.rtc:VehicleService" />
   <rtactivate component="VehicleServiceProvider0.rtc" />
   <rtactivate component="FmkRobotROSBridge0.rtc" />
 
