@@ -135,6 +135,8 @@ class FmkRobotROSBridge  : public RTC::DataFlowComponentBase
   tf::TransformBroadcaster tf_pub;
   geometry_msgs::Twist velocity;
   double max_vx, max_vw, max_ax, max_aw;
+  Position pos_prev;
+  ros::Time tm_prev;
 
 };
 

@@ -31,7 +31,7 @@ FmkRobotROSBridge::FmkRobotROSBridge(RTC::Manager* manager)
     m_VehicleServicePort("VehicleService")
     // </rtc-template>
 {
-
+  pos_prev.x = pos_prev.y = pos_prev.theta = 0;
 }
 
 FmkRobotROSBridge::~FmkRobotROSBridge()
@@ -149,6 +149,7 @@ RTC::ReturnCode_t FmkRobotROSBridge::onExecute(RTC::UniqueId ec_id)
     }
 
     Position pos;
+    static std::vector<double> xhist, zhist;
     if( m_service0->getPosition(pos) ) {
       if(verbose) {
 	std::cout << "pos = (" << pos.x  << "[mm],"
@@ -163,7 +164,44 @@ RTC::ReturnCode_t FmkRobotROSBridge::onExecute(RTC::UniqueId ec_id)
       odom.pose.pose.position.y = pos.y / 1000.0;
       odom.pose.pose.orientation.w = cos((pos.theta*(M_PI/180.0))/2.0);
       odom.pose.pose.orientation.z = sin((pos.theta*(M_PI/180.0))/2.0);
+
+      // for(int i=0;i<36;i++){
+      // 	odom.pose.covariance[i] = 0.01;
+      // 	odom.twist.covariance[i] = 0.01;
+      // } //for robot_pose_ekf
+
+      double elapsed = (odom.header.stamp.toSec() - tm_prev.toSec());
+      // pos [mm], linear[m]
+      // pos [deg], angular[rad]
+      // std::cerr << "pos.x = " << pos.x ;
+      // std::cerr << ", pos.x = " << pos.y ;
+      // std::cerr << ", pos.theta = " << pos.theta ;
+      // std::cerr << ", pos.x = " << pos.x << " "  << pos_prev.x;
+      // std::cerr << ", pos.x = " << pos.x << " "  << pos_prev.x;
+      double x, y, z;
+      x = (pos.x - pos_prev.x) / 1000.0 / elapsed;
+      y = (pos.y - pos_prev.y) / 1000.0 / elapsed;
+      // std::cerr << " : x = " << x;
+      // std::cerr << " , y = " << y;
+      //
+      x = cos(pos_prev.theta*M_PI/180)*x + sin(pos_prev.theta*M_PI/180)*y;
+      y = sin(pos_prev.theta*M_PI/180)*x - cos(pos_prev.theta*M_PI/180)*y;
+      z = (pos.theta - pos_prev.theta)*M_PI/180.0 / elapsed;
+      // average filter
+      xhist.push_back(x); zhist.push_back(z);
+      double sum=0;
+      for(int i=0;i<xhist.size(); i++) x = (sum+=xhist[i])/xhist.size();
+      sum = 0;
+      for(int i=0;i<zhist.size(); i++) z = (sum+=zhist[i])/zhist.size();
+      while(30 < xhist.size()) xhist.erase(xhist.begin());
+      while(30 < zhist.size()) zhist.erase(zhist.begin());
+      //
+      odom.twist.twist.linear.x = x;
+      odom.twist.twist.linear.y = y;
+      odom.twist.twist.angular.z = z;
       odometry_pub.publish(odom);
+      pos_prev = pos;
+      tm_prev = odom.header.stamp;
       //
       tf::Transform transform;
       transform.setOrigin( tf::Vector3(odom.pose.pose.position.x,
@@ -221,8 +259,11 @@ void FmkRobotROSBridge::onVelocityCommand(const geometry_msgs::TwistConstPtr& ms
   //latest_v = ros::Time::now();
   velocity = geometry_msgs::Twist(*msg);
   //
+  ros::Time t1 = ros::Time::now();
   try {
-    m_service0->setJogTimeout(100); // command interval < 100[msec].
+    // limit 0.031 m/sec
+    //       0.021 rad/s
+    m_service0->setJogTimeout(500); // command interval < 100[msec].
     if( !m_service0->moveJog(velocity.linear.x * 1000.0, // m -> mm
 			     velocity.linear.y * 1000.0, // m -> mm
 			     velocity.angular.z * 180.0 / M_PI) ) {
@@ -232,6 +273,13 @@ void FmkRobotROSBridge::onVelocityCommand(const geometry_msgs::TwistConstPtr& ms
   catch (...) {
     ROS_ERROR("Error occur in onCommandVelocity");
   }
+  ros::Time t2 = ros::Time::now();
+  // ROS_WARN_STREAM("fmk-cb " << velocity.linear.x << " "
+  // 		  << velocity.linear.y << " "
+  // 		  << velocity.angular.z << " "
+  // 		  << t2 << " "
+  // 		  << t2.toSec() - t1.toSec() );
+
 }
 bool FmkRobotROSBridge::onHaltMotorService(std_srvs::Empty::Request  &req,
 					   std_srvs::Empty::Response &res) {
