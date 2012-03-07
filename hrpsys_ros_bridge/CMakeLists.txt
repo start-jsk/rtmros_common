@@ -139,7 +139,8 @@ compile_openhrp_model(${choreonoid_PACKAGE_PATH}/share/choreonoid-1.1/models/GR0
 ## ALL
 list(GET compile_robots 0 compile_robot)
 list(REMOVE_AT compile_robots 0)
-add_custom_target(openhrp_robots ALL DEPENDS ${compile_robot})
+add_custom_target(openhrp_robots ALL)
+add_dependencies(openhrp_robots ${compile_robot})
 foreach(compile_target ${compile_robots})
   add_dependencies(${compile_robot} ${compile_target})
   list(GET compile_robots 0 compile_robot)
