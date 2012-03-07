@@ -9,10 +9,7 @@ This script is "no-sim" version of `hrp4.launch`, launch `hrp4c_startup_nosim.la
 .. video:: build/images/HRP4C_NoSimPickUp
   :width: 600
 
-.. video:: build/images/hrp4c_nosim_rviz-1
-  :width: 600
-
-.. video:: build/images/hrp4c_nosim_rviz-2
+.. video:: build/images/hrp4c_nosim_rviz
   :width: 600
 
   ]]></sphinxdoc>

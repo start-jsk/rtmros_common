@@ -10,7 +10,7 @@ This launch file shows an example of ros bridge for yaskawa samartpal5 robot.
 .. video:: build/images/SmartPal5_PickUp
   :width: 600
 
-.. video:: build/images/smartpal5_rviz-1
+.. video:: build/images/smartpal5_rviz
   :width: 600
 
 

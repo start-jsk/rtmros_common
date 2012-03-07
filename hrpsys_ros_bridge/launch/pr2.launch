@@ -10,7 +10,7 @@ This launch file shows an example of ros bridge for pr2 robot
 .. video:: build/images/PR2_Example
   :width: 600
 
-.. video:: build/images/pr2_rviz-1
+.. video:: build/images/pr2_rviz
   :width: 600
 
   ]]></sphinxdoc>

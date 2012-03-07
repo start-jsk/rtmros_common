@@ -21,10 +21,7 @@ After that, we need to invoke the client program. Following program is the examp
 .. video:: build/images/HRP4C_PickUp
   :width: 600
 
-.. video:: build/images/hrp4c_rviz-2
-  :width: 600
-
-.. video:: build/images/hrp4c_rviz-1
+.. video:: build/images/hrp4c_rviz
   :width: 600
 
   ]]></sphinxdoc>
