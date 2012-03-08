@@ -2,7 +2,7 @@ include $(shell rospack find mk)/cmake.mk
 
 ##
 ## hrpsys-base (http://hrpsys-base.googlecode.com/svn/trunk/)
-## revision 83 is required
+## revision newer than 83 is required
 ##
 
 wipe: clean
