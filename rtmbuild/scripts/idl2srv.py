@@ -412,7 +412,6 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         #service_name = idlutil.ccolonName(interface.scopedName())
         service_name = interface.identifier()
         idl_name = os.path.split(idlfile)[1]
-        tmpdir = '/tmp/idl2srv'
         wd = basedir + '/src_gen'
 
         Comp_cpp = wd + '/' + module_name + 'Comp.cpp'
@@ -498,7 +497,7 @@ RTC::ReturnCode_t %s::onExecute(RTC::UniqueId ec_id) {
         open(wd + '/' + module_name + '.h', 'w').write(compsrc)
 
         # finialize
-        os.system("rm -f %s/*%s*" % (tmpdir, module_name))
+        ## os.system("rm -f %s" % tmpdir) remove tmpdir in rtmbuild.cmake
         return
 
 # all types depended by a interface
@@ -575,7 +574,7 @@ class InterfaceNameVisitor (idlvisitor.AstVisitor):
 
 
 if __name__ == '__main__':
-    global options, basedir, pkgname
+    global options, basedir, pkgname, tmpdir
 
     parser = OptionParser()
     parser.add_option("-i", "--idl", dest="idlfile",
@@ -591,11 +590,15 @@ if __name__ == '__main__':
     parser.add_option("--interfaces", action="store_true",
                       dest="interfaces", default=False,
                       help="print interface names")
+    parser.add_option("--tmpdir", action="store", type="string",
+                      dest="tmpdir", default="/tmp/idl2srv",
+                      help="tmporary directory")
     (options, args) = parser.parse_args()
 
     idlfile = options.idlfile
     if not os.path.exists(idlfile):
         exit
+    tmpdir = options.tmpdir
     idlfile = os.path.abspath(idlfile)
     idldir = os.path.split(idlfile)[0]
     basedir = os.path.split(idldir)[0]

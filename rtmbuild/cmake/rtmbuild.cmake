@@ -213,8 +213,9 @@ macro(rtmbuild_genbridge_init)
       endforeach(_autogen_file ${_autogen_files})
       #
       list(APPEND _autogen ${_autogen_files})
+      get_filename_component(_project_name ${CMAKE_SOURCE_DIR} NAME)
       add_custom_command(OUTPUT ${_autogen_files}
-	COMMAND rosrun rtmbuild idl2srv.py -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs=${_include_dirs}
+	COMMAND rosrun rtmbuild idl2srv.py -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs=${_include_dirs} --tmpdir="/tmp/idl2srv/${_project_name}"
 	DEPENDS ${PROJECT_SOURCE_DIR}/idl/${_idl})
     endif(_autogen_files)
     foreach(_autogen_file ${_autogen_files})
@@ -243,6 +244,12 @@ macro(rtmbuild_genbridge)
   rosbuild_genmsg()
   rosbuild_gensrv()
   rtmbuild_get_idls(_idllist)
+  # rm tmp/idl2srv
+  add_custom_command(OUTPUT /_tmp/idl2srv
+    COMMAND rm -fr /tmp/idl2srv/${_project} DEPENDS ${_autogen})
+  add_dependencies(rtmbuild_genbridge RTMBUILD_rm_idl2srv)
+  add_custom_target(RTMBUILD_rm_idl2srv ALL DEPENDS /_tmp/idl2srv)
+  #
   foreach(_idl ${_idllist})
     execute_process(COMMAND rosrun rtmbuild idl2srv.py --interfaces -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_include_dirs}" OUTPUT_VARIABLE _interface
       OUTPUT_STRIP_TRAILING_WHITESPACE)
