@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Exec=bash -i -c "rosrun rosnode_rtc stage_sample_send_goal.sh"
+Name=3 Send Goal RTC
+Icon=/usr/share/pixmaps/gnome-term.png
