@@ -198,11 +198,20 @@ macro(rtmbuild_genbridge_init)
 
   set(_autogen "")
   foreach(_idl ${_idllist})
-    message("[rtmbuild_genbridge_init] Generate srvs from ${_idl}")
+    message("[rtmbuild_genbridge_init] Generate msgs/srvs from ${_idl}")
     message("[rtmbuild_genbridge_init] rosrun rtmbuild idl2srv.py --filenames -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs=\"${_include_dirs}\"")
     execute_process(COMMAND rosrun rtmbuild idl2srv.py --filenames -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_include_dirs}" OUTPUT_VARIABLE _autogen_files OUTPUT_STRIP_TRAILING_WHITESPACE)
     if(_autogen_files)
       string(REPLACE "\n" ";" _autogen_files  ${_autogen_files})
+      # remove already generated msg(_autogen) from _autogen_files
+      foreach(_autogen_file ${_autogen_files})
+	list(FIND _autogen ${_autogen_file} _found_autogen_file)
+	if(${_found_autogen_file} GREATER -1)
+	  list(REMOVE_ITEM _autogen_files ${_autogen_file})
+	  message("[rtmbuild_genbridge_init] remove already generated file ${_autogen_file}")
+	endif(${_found_autogen_file} GREATER -1)
+      endforeach(_autogen_file ${_autogen_files})
+      #
       list(APPEND _autogen ${_autogen_files})
       add_custom_command(OUTPUT ${_autogen_files}
 	COMMAND rosrun rtmbuild idl2srv.py -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs=${_include_dirs}
