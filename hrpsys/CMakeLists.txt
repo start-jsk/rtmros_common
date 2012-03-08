@@ -76,7 +76,7 @@ endif(_download_failed)
 rosbuild_check_for_display(disp)
 if(disp)
   rosbuild_add_rostest(launch/hrp4c.launch)
-  rosbuild_add_rostest(launch/pa10.launch)
+  #rosbuild_add_rostest(launch/pa10.launch)
   rosbuild_add_rostest(launch/samplerobot.launch)
 endif(disp)
 
