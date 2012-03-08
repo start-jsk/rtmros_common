@@ -413,7 +413,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         service_name = interface.identifier()
         idl_name = os.path.split(idlfile)[1]
         tmpdir = '/tmp/idl2srv'
-        wd = basedir + '/src'
+        wd = basedir + '/src_gen'
 
         Comp_cpp = wd + '/' + module_name + 'Comp.cpp'
         mod_cpp = wd + '/' + module_name + '.cpp'
