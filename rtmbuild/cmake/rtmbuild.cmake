@@ -186,12 +186,14 @@ macro(rtmbuild_genbridge)
     file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/srv)
   endif(NOT _idllist)
 
+  include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
+  execute_process(COMMAND rospack find openrtm OUTPUT_VARIABLE _openrtm_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
   execute_process(COMMAND rospack find openhrp3 OUTPUT_VARIABLE _openhrp3_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
-  execute_process(COMMAND rosrun openrtm rtm-config --cflags | sed 's/ -[^I]\\S*//g' | sed 's/^-[^I]\\S*//g' | sed 's/-I//g' OUTPUT_VARIABLE _rtm_include_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND ${_openrtm_pkg_dir}/bin/rtm-config --cflags OUTPUT_VARIABLE _rtm_include_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND sh -c "echo ${_rtm_include_dir} | sed 's/^-[^I]\\S*//g' | sed 's/\ -[^I]\\S*//g' | sed 's/-I//g'" OUTPUT_VARIABLE _rtm_include_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
   set(_include_dirs "${_rtm_include_dir} ${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl")
 
   set(_autogen "")
-  include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
   foreach(_idl ${_idllist})
     message("[rtmbuild_genbridge] Generate srvs from ${_idl}")
     execute_process(COMMAND rosrun rtmbuild idl2srv.py --filenames -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_include_dirs}" OUTPUT_VARIABLE _autogen_files
