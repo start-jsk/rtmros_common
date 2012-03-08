@@ -3,7 +3,7 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 rosbuild_find_ros_package(rtmbuild)
 include(${rtmbuild_PACKAGE_PATH}/cmake/rtmbuild.cmake)
 
-# rtmbuild_genbridge() # this macro should be before rosbuild_init
+rtmbuild_genbridge() # this macro should be before rosbuild_init
 
 # Set the build type.  Options are:
 #  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
@@ -47,7 +47,6 @@ rtmbuild_genidl()
 ## tools
 ##
 rtmbuild_add_executable(AbsTransformToPosRpy src/AbsTransformToPosRpy.cpp src/AbsTransformToPosRpyComp.cpp)
-target_link_libraries(AbsTransformToPosRpy hrpUtil-3.1)
 
 macro(rtmbridge interface)
   rtmbuild_add_executable(${interface}Comp src/${interface}.cpp src/${interface}Comp.cpp)
@@ -77,7 +76,7 @@ endif(_download_failed)
 rosbuild_check_for_display(disp)
 if(disp)
   rosbuild_add_rostest(launch/hrp4c.launch)
-  #rosbuild_add_rostest(launch/pa10.launch)
+  rosbuild_add_rostest(launch/pa10.launch)
   rosbuild_add_rostest(launch/samplerobot.launch)
 endif(disp)
 
