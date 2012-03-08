@@ -60,7 +60,7 @@ macro(rtmbuild_genidl)
     add_custom_command(OUTPUT ${_output_stub_cpp} ${_output_skel_cpp}
       COMMAND cp ${_input_idl} ${_output_cpp_dir}
       COMMAND ${_openrtm_pkg_dir}/bin/rtm-skelwrapper --include-dir="" --skel-suffix=Skel --stub-suffix=Stub  --idl-file=${_idl}
-      COMMAND rm ${_output_cpp_dir}/${_idl}
+      #COMMAND rm ${_output_cpp_dir}/${_idl} # does not work in parallel make
       WORKING_DIRECTORY ${_output_cpp_dir}
       DEPENDS ${_output_idl_hh})
     add_custom_command(OUTPUT ${_output_stub_lib}
