@@ -498,7 +498,7 @@ RTC::ReturnCode_t %s::onExecute(RTC::UniqueId ec_id) {
         open(wd + '/' + module_name + '.h', 'w').write(compsrc)
 
         # finialize
-        os.system("rm -rf %s" % tmpdir)
+        os.system("rm -f %s/*%s*" % (tmpdir, module_name))
         return
 
 # all types depended by a interface
