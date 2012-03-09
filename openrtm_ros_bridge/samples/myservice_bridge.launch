@@ -26,7 +26,11 @@
 	     to="MyServiceROSBridge0.rtc:MyService"/>
   <!-- END:openrtm connection -->
 
-  <alaunchdoc/>
-  <atest/>
+  <sphinxdoc><![CDATA[
+  This is sample launch file for auto-generated ROS bridge for SimpleService in OpenRTM/samples.
+  ]]></sphinxdoc>
+
+  <test type="test_myservice_bridge.l" pkg="openrtm_ros_bridge"
+	time-limit="300" test-name="test_myservice_bridge" />
 
 </launch>
