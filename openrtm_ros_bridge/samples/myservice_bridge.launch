@@ -22,8 +22,8 @@
         args="$(find openrtm_ros_bridge)/samples/myservice_bridge.launch"/>
   <rtactivate component="MyServiceProvider0.rtc" />
   <rtactivate component="MyServiceROSBridge0.rtc" />
-  <artconnect from="MyServiceProvider0.rtc:myservice0"
-	     to="MyServiceROSBridge0.rtc:myservice0"/>
+  <rtconnect from="MyServiceProvider0.rtc:MyService"
+	     to="MyServiceROSBridge0.rtc:MyService"/>
   <!-- END:openrtm connection -->
 
   <alaunchdoc/>

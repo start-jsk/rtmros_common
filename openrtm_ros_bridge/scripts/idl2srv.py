@@ -450,8 +450,9 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         #  make ROS bridge functions in .cpp
         compsrc = open(tmpdir + '/' + module_name + '.cpp').read()
 
-        port_name_src = """  std::string port_name;
-  nh.param<std::string>("service_port", port_name, "service0");"""
+        port_name_src = """  ros::NodeHandle nh("~");
+  std::string port_name = "service0";
+  nh.getParam("service_port", port_name);"""
         compsrc = addline(port_name_src, compsrc, 'Set service consumers to Ports')
         compsrc = compsrc.replace('registerConsumer("service0"','registerConsumer(port_name.c_str()')
 
@@ -491,8 +492,6 @@ RTC::ReturnCode_t %s::onExecute(RTC::UniqueId ec_id) {
 
         defsrv = "  ros::ServiceServer " + ', '.join(['_srv%d' % i for i in range(len(operations))]) + ';'
         compsrc = addline(defsrv, compsrc, 'private:')
-
-        compsrc = addline("  ros::NodeHandle nh;", compsrc, 'private:')
 
         open(wd + '/' + module_name + '.h', 'w').write(compsrc)
 
