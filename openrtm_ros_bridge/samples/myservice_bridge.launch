@@ -1,0 +1,32 @@
+<launch>
+  <!-- BEGIN:openrtm setting -->
+  <arg name="nameserver" default="localhost" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+  <!-- END:openrtm setting -->
+
+  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
+
+  <!-- RTC Service Provider sample -->
+  <node name="provider" pkg="openrtm" type="MyServiceProviderComp"
+	args='$(arg openrtm_args)'/>
+
+  <!-- Sample Service Bridge component -->
+  <node name="bridge" pkg="openrtm_ros_bridge" type="MyServiceROSBridgeComp"
+	args='$(arg openrtm_args)'>
+    <param name="service_port" value="myservice0"/>
+  </node>
+
+  <!-- BEGIN:openrtm connection -->
+  <node name="rtmlaunch_data_bridge" pkg="openrtm" type="rtmlaunch.py"
+        args="$(find openrtm_ros_bridge)/samples/myservice_bridge.launch"/>
+  <rtactivate component="MyServiceProvider0.rtc" />
+  <rtactivate component="MyServiceROSBridge0.rtc" />
+  <artconnect from="MyServiceProvider0.rtc:myservice0"
+	     to="MyServiceROSBridge0.rtc:myservice0"/>
+  <!-- END:openrtm connection -->
+
+  <alaunchdoc/>
+  <atest/>
+
+</launch>
