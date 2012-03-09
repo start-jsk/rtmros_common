@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 function error {
     rosrun rosunit clean_junit_xml.py
