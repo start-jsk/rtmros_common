@@ -5,5 +5,5 @@ Version=1.0
 Type=Application
 Terminal=true
 Exec=bash -i -c "rosrun openrtm_ros_bridge 03-get-value.sh"
-Name=3 GetValue Service
+Name=4 GetValue Service
 Icon=/usr/share/icons/hicolor/scalable/apps/gdu-emblem-raid3.svg

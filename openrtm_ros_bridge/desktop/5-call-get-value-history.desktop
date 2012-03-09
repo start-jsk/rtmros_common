@@ -5,5 +5,5 @@ Version=1.0
 Type=Application
 Terminal=true
 Exec=bash -i -c "rosrun openrtm_ros_bridge 04-get-value-history.sh"
-Name=4 GetValueHistory Service
+Name=5 GetValueHistory Service
 Icon=/usr/share/icons/hicolor/scalable/apps/gdu-emblem-raid4.svg

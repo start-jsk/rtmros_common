@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Exec=bash -i -c "roslaunch openrtm_ros_bridge myservice_rosbridge.launch"
+Name=1 Start ROS Bridge
+Icon=/usr/share/icons/hicolor/scalable/apps/category-show-all.svg

@@ -1,0 +1,37 @@
+<launch>
+  <!-- BEGIN:openrtm setting -->
+  <arg name="nameserver" default="localhost" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+  <!-- END:openrtm setting -->
+
+  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
+  <node name="rtsysedit" pkg="openhrp3" type="rtsysedit.sh" />
+
+  <!-- RTC Service Provider sample -->
+  <node name="provider" pkg="openrtm" type="MyServiceProviderComp"
+	args='$(arg openrtm_args)' launch-prefix="xterm -fn 10x20 -geometry 60x20 -e"/>
+
+  <!-- RTC Service COnsumet sample -->
+  <node name="consumer" pkg="openrtm" type="MyServiceConsumerComp"
+	args='$(arg openrtm_args)' launch-prefix="xterm -fn 10x20 -geometry 60x20 -e" />
+
+
+  <!-- BEGIN:openrtm connection -->
+  <node name="rtmlaunch_data_bridge" pkg="openrtm" type="rtmlaunch.py"
+        args="$(find openrtm_ros_bridge)/samples/myservice_example.launch"/>
+  <rtactivate component="MyServiceProvider0.rtc" />
+  <rtactivate component="MyServiceConsumer0.rtc" />
+  <rtconnect from="MyServiceProvider0.rtc:MyService"
+	     to="MyServiceConsumer0.rtc:MyService"/>
+  <!-- END:openrtm connection -->
+
+  <sphinxdoc><![CDATA[
+sample programs for OpenRTM service port connection
+
+.. image:: samples/image/service-example.png
+  :width: 800
+
+  ]]></sphinxdoc>
+
+</launch>

@@ -12,6 +12,10 @@
   <depend package="roscpp"/>
   <depend package="openrtm"/>
 
+  <export>
+    <rosdoc config="rosdoc.yaml" />
+  </export>
+
 </package>
 
 

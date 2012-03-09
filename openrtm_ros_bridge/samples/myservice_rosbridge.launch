@@ -5,12 +5,6 @@
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
   <!-- END:openrtm setting -->
 
-  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
-
-  <!-- RTC Service Provider sample -->
-  <node name="provider" pkg="openrtm" type="MyServiceProviderComp"
-	args='$(arg openrtm_args)'/>
-
   <!-- Sample Service Bridge component -->
   <node name="bridge" pkg="openrtm_ros_bridge" type="MyServiceROSBridgeComp"
 	args='$(arg openrtm_args)'>
@@ -19,8 +13,7 @@
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_data_bridge" pkg="openrtm" type="rtmlaunch.py"
-        args="$(find openrtm_ros_bridge)/samples/myservice_bridge.launch"/>
-  <rtactivate component="MyServiceProvider0.rtc" />
+        args="$(find openrtm_ros_bridge)/samples/myservice_rosbridge.launch"/>
   <rtactivate component="MyServiceROSBridge0.rtc" />
   <rtconnect from="MyServiceProvider0.rtc:MyService"
 	     to="MyServiceROSBridge0.rtc:MyService"/>
@@ -28,6 +21,44 @@
 
   <sphinxdoc><![CDATA[
   This is sample launch file for auto-generated ROS bridge for SimpleService in OpenRTM/samples.
+
+.. image:: samples/image/service-rosbridge.png
+  :width: 800
+
+.. image:: samples/image/service-rosbridge-rxgraph.png
+  :width: 800
+
+MyServiceROSBridgeComp provides fowllonwg ros service
+
+.. code-block:: bash
+
+  $ rosservice  list
+  /bridge/echo
+  /bridge/get_echo_history
+  /bridge/get_loggers
+  /bridge/get_value
+  /bridge/get_value_history
+  /bridge/set_logger_level
+  /bridge/set_value
+
+from following IDL file
+
+.. code-block:: bash
+
+  module SimpleService {
+  typedef sequence<string> EchoList;
+  typedef sequence<float> ValueList;
+  interface MyService
+  {
+    string echo(in string msg);
+    EchoList get_echo_history();
+    void set_value(in float value);
+    float get_value();
+    ValueList get_value_history();
+  };
+  };
+
+
   ]]></sphinxdoc>
 
   <test type="test_myservice_bridge.l" pkg="openrtm_ros_bridge"
