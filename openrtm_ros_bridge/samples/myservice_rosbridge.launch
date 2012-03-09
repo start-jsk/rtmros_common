@@ -12,7 +12,7 @@
   </node>
 
   <!-- BEGIN:openrtm connection -->
-  <node name="rtmlaunch_data_bridge" pkg="openrtm" type="rtmlaunch.py"
+  <node name="rtmlaunch_rosbridge" pkg="openrtm" type="rtmlaunch.py"
         args="$(find openrtm_ros_bridge)/samples/myservice_rosbridge.launch"/>
   <rtactivate component="MyServiceROSBridge0.rtc" />
   <rtconnect from="MyServiceProvider0.rtc:MyService"
@@ -60,8 +60,5 @@ from following IDL file
 
 
   ]]></sphinxdoc>
-
-  <test type="test_myservice_bridge.l" pkg="openrtm_ros_bridge"
-	time-limit="300" test-name="test_myservice_bridge" />
 
 </launch>

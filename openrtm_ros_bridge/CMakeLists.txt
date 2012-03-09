@@ -42,7 +42,7 @@ rtmbuild_genbridge()
 ##
 ## tests
 ##
-rosbuild_add_rostest(samples/myservice_rosbridge.launch)
+rosbuild_add_rostest(samples/test_myservice_rosbridge.launch)
 
 ##
 ## documents
