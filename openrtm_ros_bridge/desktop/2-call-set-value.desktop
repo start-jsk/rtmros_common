@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Exec=bash -i -c "rosrun openrtm_ros_bridge 02-set-value.sh"
+Name=2 SetValue Service
+Icon=/usr/share/icons/hicolor/scalable/apps/gdu-emblem-raid2.svg

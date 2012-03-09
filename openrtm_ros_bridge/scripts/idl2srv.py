@@ -48,7 +48,7 @@ MultiArrayTypeNameMap = { # for ROS msg/srv
     idltype.tk_ulonglong:'std_msgs/Uint64MultiArray',
     idltype.tk_float:    'std_msgs/Float32MultiArray',
     idltype.tk_double:   'std_msgs/Float64MultiArray',
-    idltype.tk_string:   'rtmbuild/StringMultiArray'}
+    idltype.tk_string:   'openrtm_ros_bridge/StringMultiArray'}
 
 # convert functions for IDL/ROS
 # _CORBA_String_element type is env depend ??
