@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.4.6)
+#cmake_minimum_required(VERSION 2.4.6) ## this file is included from rtmbuild.cmake and cmake_minimum_required is defined in that file
 
 # generate msg/srv files from idl, this will be called in rtmbuild_init
 macro(rtmbuild_genbridge_init)
