@@ -1,0 +1,8 @@
+<launch>
+  <include file="$(find openrtm_ros_bridge)/samples/myservice_example.launch" />
+  <include file="$(find openrtm_ros_bridge)/samples/myservice_rosbridge.launch" />
+
+  <test type="test_myservice_rosbridge.l" pkg="openrtm_ros_bridge"
+	time-limit="300" test-name="test_myservice_rosbridge" />
+
+</launch>
