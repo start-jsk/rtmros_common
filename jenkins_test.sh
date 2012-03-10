@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 function error {
     rosrun rosunit clean_junit_xml.py
@@ -21,6 +21,7 @@ function test-grxui {
 }
 
 # do test
+set -x
 rm -fr `rospack find openhrp3`/workspace/
 test-grxui openhrp3
 test-grxui hrpsys
