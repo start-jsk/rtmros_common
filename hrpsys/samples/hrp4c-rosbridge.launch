@@ -1,0 +1,83 @@
+<launch>
+  <!-- BEGIN:openrtm setting -->
+  <arg name="nameserver" default="localhost" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+  <!-- END:openrtm setting -->
+
+  <!-- Sample Service Bridge component -->
+  <node name="SequencePlayerServiceROSBridgeComp" pkg="hrpsys" type="SequencePlayerServiceROSBridgeComp"
+	args='$(arg openrtm_args)'>
+    <param name="service_port" value="service0"/>
+  </node>
+
+  <!-- BEGIN:openrtm connection -->
+  <node name="rtmlaunch_rosbridge" pkg="openrtm" type="rtmlaunch.py"
+        args="$(find hrpsys)/launch/hrp4c-rosbridge.launch"/>
+  <rtactivate component="SequencePlayerServiceROSBridge0.rtc" />
+  <rtconnect from="SequencePlayerServiceROSBridge0.rtc:SequencePlayerService"
+	     to="seq.rtc:SequencePlayerService"/>
+  <!-- END:openrtm connection -->
+
+  <sphinxdoc><![CDATA[
+This is sample launch file for auto-generated ROS bridge for hrp4c simulatoin. Before launch this file please launch hrp4c.launch file
+
+.. image:: samples/image/sequence-player-ros-bridge-rxgraph.png
+  :width: 800
+
+.. image:: samples/image/sequence-player-ros-bridge-rtsysedit-all.png
+  :width: 800
+
+SequencePlayerServiceROSBridgeComp provides following services
+
+.. code-block:: bash
+
+  $ rosservice list
+  /SequencePlayerServiceROSBridgeComp/clear
+  /SequencePlayerServiceROSBridgeComp/clearNoWait
+  /SequencePlayerServiceROSBridgeComp/get_loggers
+  /SequencePlayerServiceROSBridgeComp/isEmpty
+  /SequencePlayerServiceROSBridgeComp/loadPattern
+  /SequencePlayerServiceROSBridgeComp/playPattern
+  /SequencePlayerServiceROSBridgeComp/setBasePos
+  /SequencePlayerServiceROSBridgeComp/setBaseRpy
+  /SequencePlayerServiceROSBridgeComp/setInterpolationMode
+  /SequencePlayerServiceROSBridgeComp/setJointAngle
+  /SequencePlayerServiceROSBridgeComp/setJointAngles
+  /SequencePlayerServiceROSBridgeComp/setJointAnglesWithMask
+  /SequencePlayerServiceROSBridgeComp/setZmp
+  /SequencePlayerServiceROSBridgeComp/set_logger_level
+  /SequencePlayerServiceROSBridgeComp/waitInterpolation
+
+from hrpsys/idl/SequencePlayerService.idl file
+
+.. code-block:: bash
+  
+  module OpenHRP
+  {
+    interface SequencePlayerService
+    {
+      void waitInterpolation();
+      boolean setJointAngles(in dSequence jvs, in double tm);
+      boolean setJointAnglesWithMask(in dSequence jvs, in bSequence mask,
+  				   in double tm);
+      boolean setJointAngle(in string jname, in double jv, in double tm);
+      boolean setBasePos(in dSequence pos, in double tm);
+      boolean setBaseRpy(in dSequence rpy, in double tm);
+      boolean setZmp(in dSequence zmp, in double tm);
+      boolean isEmpty();
+      void loadPattern(in string basename, in double tm);
+      void playPattern(in dSequenceSequence pos, 
+  		     in dSequenceSequence rpy,
+  		     in dSequenceSequence zmp, 
+  		     in dSequence tm);
+      void clear();
+      void clearNoWait();
+      boolean setInterpolationMode(in interpolationMode i_mode_);
+    };
+  };
+  
+  
+]]></sphinxdoc>
+
+</launch>
