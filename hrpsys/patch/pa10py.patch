@@ -1,0 +1,13 @@
+Index: sample/PA10/PA10.py
+===================================================================
+--- sample/PA10/PA10.py	(リビジョン 91)
++++ sample/PA10/PA10.py	(作業コピー)
+@@ -46,7 +46,7 @@
+ 
+     ms = rtm.findRTCmanager()
+ 
+-    if rtm.findRTC("RobotHardware0") and waitInputSelect("Restart Manager?") == 1:
++    if rtm.findRTC("RobotHardware0") :
+         ms.restart()
+ 
+     rh = rtm.findRTC("RobotHardware0")
