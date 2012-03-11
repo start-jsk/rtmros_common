@@ -15,7 +15,7 @@ This launch file shows an example of ros bridge for yaskawa samartpal5 robot.
 
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
    test-name="SmartPal5_PickUp"
    args="--max-time=10
 	 --viewer-name='' #
