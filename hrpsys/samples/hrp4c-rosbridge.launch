@@ -13,7 +13,7 @@
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_rosbridge" pkg="openrtm" type="rtmlaunch.py"
-        args="$(find hrpsys)/launch/hrp4c-rosbridge.launch"/>
+        args="$(find hrpsys)/samples/hrp4c-rosbridge.launch"/>
   <rtactivate component="SequencePlayerServiceROSBridge0.rtc" />
   <rtconnect from="SequencePlayerServiceROSBridge0.rtc:SequencePlayerService"
 	     to="seq.rtc:SequencePlayerService"/>
