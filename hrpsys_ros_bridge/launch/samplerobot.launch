@@ -17,7 +17,7 @@ This launch file shows an example of ros bridge for sample robot and client prog
   :width: 600
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="600"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="1200"
    test-name="SampleRobot_PickUp"
    args="--max-time=30
 	 --viewer-name='' #
