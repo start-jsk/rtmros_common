@@ -17,9 +17,9 @@ This launch file shows an example of ros bridge for darwin robot and sample clie
   :width: 600
 
   ]]></sphinxdoc>
-  <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="500"
    test-name="GR001_Motion"
-   args="--max-time=10
+   args="--max-time=30
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --viewer-name='' #
 	 --no-start-simulation
