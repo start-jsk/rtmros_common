@@ -91,8 +91,6 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
 
   // DataInPort declaration
   // <rtc-template block="inport_declare">
-  TimedDoubleSeq m_angle;
-  InPort<TimedDoubleSeq> m_angleIn;
   TimedDoubleSeq m_rsangle;
   InPort<TimedDoubleSeq> m_rsangleIn;
   TimedDoubleSeq m_mcangle;

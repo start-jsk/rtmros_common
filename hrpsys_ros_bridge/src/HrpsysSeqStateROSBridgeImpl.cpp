@@ -29,7 +29,6 @@ static const char* hrpsysseqstaterosbridgeimpl_spec[] =
 HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     // <rtc-template block="initializer">
   : RTC::DataFlowComponentBase(manager),
-    m_angleIn("angle", m_angle),
     m_rsangleIn("rsangle", m_rsangle),
     m_mcangleIn("mcangle", m_mcangle),
     m_rsrfsensorIn("rsrfsensor", m_rsrfsensor),
@@ -56,7 +55,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   // Registration: InPort/OutPort/Service
   // <rtc-template block="registration">
   // Set InPort buffers
-  addInPort("angle", m_angleIn);
   addInPort("rsangle", m_rsangleIn);
   addInPort("mcangle", m_mcangleIn);
   addInPort("rsrfsensor", m_rsrfsensorIn);
