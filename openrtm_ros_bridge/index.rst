@@ -65,7 +65,8 @@ myservice_rosbridge.launch
   roslaunch openrtm_ros_bridge myservice_rosbridge.launch
 
 
-  This is sample launch file for auto-generated ROS bridge for SimpleService in OpenRTM/samples.
+
+This is sample launch file for auto-generated ROS bridge for SimpleService in OpenRTM/samples.
 
 .. image:: samples/image/service-rosbridge.png
   :width: 800
@@ -103,6 +104,11 @@ from following IDL file
   };
   };
 
+Now you can call OpenRTM service in MyServiceProviderComp from following ros command
+
+.. code-block:: bash
+
+ rosservice call /bridge/echo "hello , this is echo sample"
 
   
 
