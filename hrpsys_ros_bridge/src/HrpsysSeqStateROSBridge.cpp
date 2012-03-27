@@ -37,6 +37,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   joint_state_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
   lfsensor_pub = nh.advertise<geometry_msgs::WrenchStamped>("lfsensor", 10);
   rfsensor_pub = nh.advertise<geometry_msgs::WrenchStamped>("rfsensor", 10);
+  joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
 
   server.start();
 }
@@ -188,6 +189,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   sensor_msgs::JointState joint_state;
   joint_state.header.stamp = ros::Time::now();
 
+  pr2_controllers_msgs::JointTrajectoryControllerState joint_controller_state;
+  joint_controller_state.header.stamp = ros::Time::now();
+
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
     ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew() << ", lfsensor:" << m_rslfsensorIn.isNew() << ", rfsensor:" << m_rsrfsensorIn.isNew());
@@ -224,6 +228,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       ROS_DEBUG_STREAM(j->name << " - " << j->q);
       joint_state.name.push_back(j->name);
       joint_state.position.push_back(j->q);
+      joint_controller_state.joint_names.push_back(j->name);
+      joint_controller_state.actual.positions.push_back(j->q);
       //joint_state.velocity
       //joint_state.effort
       ++it;
@@ -269,6 +275,34 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     if ( tm.interval() > interval ) {
       ROS_WARN_STREAM("[" << getInstanceName() << "] @onExecutece " << ec_id << " is not executed last " << interval << "[sec]");
       tm.tick();
+    }
+  }
+
+  if ( m_mcangleIn.isNew () ) {
+    //ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", mc:" << m_mcangleIn.isNew () << ", pose:" << m_poseIn.isNew() << ", lfsensor:" << m_mclfsensorIn.isNew() << ", rfsensor:" << m_mcrfsensorIn.isNew());
+    try {
+      m_mcangleIn.read();
+    }
+    catch(const std::runtime_error &e)
+      {
+	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+    // joint controller state publish <- only if both rsangle and mcangle are prepared.
+    if ( !joint_controller_state.joint_names.empty() && !joint_controller_state.actual.positions.empty() ) {
+      for ( unsigned int i = 0; i < body->joints().size() ; i++ ){
+        ROS_DEBUG_STREAM(body->joint(i)->name << " - " << m_mcangle.data[i]);
+        joint_controller_state.desired.positions.push_back(m_mcangle.data[i]);
+        joint_controller_state.error.positions.push_back(joint_controller_state.actual.positions[i]-joint_controller_state.desired.positions[i]);
+      }
+      /* set zero for all velocities and accelerations */
+      joint_controller_state.desired.velocities.resize(joint_controller_state.joint_names.size());
+      joint_controller_state.desired.accelerations.resize(joint_controller_state.joint_names.size());
+      joint_controller_state.actual.velocities.resize(joint_controller_state.joint_names.size());
+      joint_controller_state.actual.accelerations.resize(joint_controller_state.joint_names.size());
+      joint_controller_state.error.velocities.resize(joint_controller_state.joint_names.size());
+      joint_controller_state.error.accelerations.resize(joint_controller_state.joint_names.size());
+
+      joint_controller_state_pub.publish(joint_controller_state);
     }
   }
 
