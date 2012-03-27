@@ -32,7 +32,7 @@ macro(compile_openhrp_model wrlfile)
   list(APPEND compile_robots ${_name}_compile)
 endmacro(compile_openhrp_model)
 
-macro(compile_collada_robot daefile)
+macro(compile_collada_model daefile)
   set(_workdir ${PROJECT_SOURCE_DIR}/models)
   get_filename_component(_name ${daefile} NAME_WE)
   set(_xmlfile "${_workdir}/${_name}.xml")
@@ -54,6 +54,6 @@ macro(compile_collada_robot daefile)
     DEPENDS ${daefile})
   add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile})
   list(APPEND compile_robots ${_name}_compile)
-endmacro(compile_collada_robot daefile)
+endmacro(compile_collada_model daefile)
 
 

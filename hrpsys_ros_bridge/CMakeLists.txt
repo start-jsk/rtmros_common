@@ -57,8 +57,8 @@ compile_openhrp_model(
 compile_openhrp_model(
   ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/sample1.wrl SampleRobot)
 
-compile_collada_robot(${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae)
-compile_collada_robot(${collada_robots_PACKAGE_PATH}/data/robots/willowgarage-pr2.dae)
+compile_collada_model(${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae)
+compile_collada_model(${collada_robots_PACKAGE_PATH}/data/robots/willowgarage-pr2.dae)
 
 # generate webots model
 add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/models/DARWIN.wrl
