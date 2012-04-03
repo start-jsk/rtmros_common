@@ -192,6 +192,18 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   pr2_controllers_msgs::JointTrajectoryControllerState joint_controller_state;
   joint_controller_state.header.stamp = ros::Time::now();
 
+  // rstorqueIn
+  if ( m_rstorqueIn.isNew () ) {
+    try {
+      m_rstorqueIn.read();
+      for ( unsigned int i = 0; i < m_rstorque.data.length() ; i++ ) std::cerr << m_rstorque.data[i] << " "; std::cerr << std::endl;
+    }
+    catch(const std::runtime_error &e)
+      {
+	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
     ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", pose:" << m_poseIn.isNew() << ", lfsensor:" << m_rslfsensorIn.isNew() << ", rfsensor:" << m_rsrfsensorIn.isNew());
@@ -235,7 +247,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       ++it;
     }
     joint_state.velocity.resize(joint_state.name.size());
-    joint_state.effort.resize(joint_state.name.size());
+    // set effort if m_rstorque is available
+    if (m_rstorque.data.length() == body->joints().size()) {
+      for ( unsigned int i = 0; i < body->joints().size() ; i++ ){
+	joint_state.effort.push_back(m_rstorque.data[i]);
+      }
+    } else {
+      joint_state.effort.resize(joint_state.name.size());
+    }
     joint_state_pub.publish(joint_state);
     // sensors publish
     tf::Transform transform;
