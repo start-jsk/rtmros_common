@@ -1,9 +1,0 @@
-<launch>
-  <node ns="/camera/rgb" pkg="image_proc" type="image_proc"
-	respawn="true" name="beego_image_proc" />
-  <!-- mjpeg_server for web -->
-  <node pkg="mjpeg_server" type="mjpeg_server"
-	name="mjpeg_server" output="screen">
-    <param name="port" type="int" value="8081" />
-  </node>
-</launch>

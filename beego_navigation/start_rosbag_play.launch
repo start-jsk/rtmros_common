@@ -1,7 +1,0 @@
-<launch>
-  <param name="use_sim_time" value="true"/>
-  <node name="beego_rosbag_play" pkg="rosbag" type="play" output="screen"
-	args=' /home/chen/Desktop/20111215-beego_navigation_with_avoiding_human.bag -l --clock' />
-  <node name="beego_robot_pub" pkg="beego_navigation" type="pub_test.l"
-	output="screen" />
-</launch>
