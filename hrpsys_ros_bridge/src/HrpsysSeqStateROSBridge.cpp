@@ -196,7 +196,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_rstorqueIn.isNew () ) {
     try {
       m_rstorqueIn.read();
-      for ( unsigned int i = 0; i < m_rstorque.data.length() ; i++ ) std::cerr << m_rstorque.data[i] << " "; std::cerr << std::endl;
+      //for ( unsigned int i = 0; i < m_rstorque.data.length() ; i++ ) std::cerr << m_rstorque.data[i] << " "; std::cerr << std::endl;
     }
     catch(const std::runtime_error &e)
       {
