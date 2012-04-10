@@ -102,6 +102,7 @@ rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/Im
 
 rosbuild_check_for_display(disp)
 if(disp)
+  file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/build/images)
   rosbuild_add_rostest(launch/hrp4c.launch)
   rosbuild_add_rostest(launch/hrp4c_nosim.launch)
   # rosbuild_add_rostest(launch/pa10.launch) #segfault?
