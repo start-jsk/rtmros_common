@@ -16,16 +16,11 @@
   （具体的には
   $ sudo tail -f /var/log/wu-ftpd/xferlog
   をみて、Mobility.out,Interface.out,VehicleServiceProviderComp.outの３つがfmkに送られるまで）
-  4) <new terminal> $ rosrun fmk run-vehicle-gui.sh
-  5) <new terminal> $ rosrun openhrp3 eclipse.sh
-  providerとconsumerをつなげてactivate
-  6) 4)で立ち上がったGUIでPowerOn,ServoOnボタンを順に押す
-  ～ここまででfmkを渡された時に動かした状況になる～
-  7) <new terminal> $ rosrun fmk start_fmk_ros.launch
-  eclipseでrosbridgeがでてくるのでactivateする（なれてきたら自動化する）
+  4) <new terminal> $ rosrun fmk start_fmk_ros.launch
   (ps3joyはssh root@localhostがno passで入れる環境でないと動かない.
   無理な場合は  $ sudo bash;
   $ rosrun ps3joy ps3joy.pyでつなげる )
+  5) <new terminal> $ rosservice call /reset_motors
   ～ここまででROSとつながり、ps3のコントローラで動くようになる～
-  8) <new terminal> $ rosrun fmk start_move_base.launch
+  6) <new terminal> $ rosrun fmk start_move_base.launch
   地図があがる. hokuyo_nodeが起動して自己位置同定開始. ナビゲーション開始.

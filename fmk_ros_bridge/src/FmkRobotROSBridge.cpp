@@ -42,10 +42,14 @@ FmkRobotROSBridge::~FmkRobotROSBridge()
 RTC::ReturnCode_t FmkRobotROSBridge::onInitialize()
 {
   // Parameter velocity/acceleration
-  ros::param::param<double>("~max_vx", max_vx, 0.3);
-  ros::param::param<double>("~max_vw", max_vw, 0.5);
-  ros::param::param<double>("~max_ax", max_ax, 0.3);
-  ros::param::param<double>("~max_aw", max_aw, 0.5);
+  // ros::param::param<double>("~max_vx", max_vx, 0.3);
+  // ros::param::param<double>("~max_vw", max_vw, 0.5);
+  // ros::param::param<double>("~max_ax", max_ax, 0.3);
+  // ros::param::param<double>("~max_aw", max_aw, 0.5);
+  ros::param::param<double>("~max_vx", max_vx, 1.0);
+  ros::param::param<double>("~max_vw", max_vw, 2.0);
+  ros::param::param<double>("~max_ax", max_ax, 1.0);
+  ros::param::param<double>("~max_aw", max_aw, 2.0);
   // ROS msg/srv port
   odometry_pub = nh.advertise<nav_msgs::Odometry>("odom", 1);
   velocity_sub = nh.subscribe<geometry_msgs::Twist>("cmd_vel", 1, &FmkRobotROSBridge::onVelocityCommand, this);
@@ -263,10 +267,12 @@ void FmkRobotROSBridge::onVelocityCommand(const geometry_msgs::TwistConstPtr& ms
   try {
     // limit 0.031 m/sec
     //       0.021 rad/s
+
     m_service0->setJogTimeout(500); // command interval < 100[msec].
+
     if( !m_service0->moveJog(velocity.linear.x * 1000.0, // m -> mm
 			     velocity.linear.y * 1000.0, // m -> mm
-			     velocity.angular.z * 180.0 / M_PI) ) {
+			     velocity.angular.z * 180.0 / M_PI * 13 / 9) ) {
       ROS_WARN("commanded velocity is invalid");
     }
   }
@@ -295,15 +301,22 @@ bool FmkRobotROSBridge::onResetMotorService(std_srvs::Empty::Request  &req,
 
   // check velocity/acceleration
   Velocity vel;
+  Acc acc;
   m_service0->getVelocityLimit(vel.translation, vel.rotation);
+  m_service0->getAccelerationLimit(acc.translation, acc.rotation);
+  ROS_WARN("Velocity Limit : translation=%lf, rotation=%lf",vel.translation,vel.rotation);
+  ROS_WARN("Acceleration Limit : translation=%lf, rotation=%lf",acc.translation,acc.rotation);
+
   vel.translation = std::min(vel.translation, max_vx * 1000);
   vel.rotation    = std::min(vel.rotation,    max_vw * 180.0 / M_PI);
   m_service0->setVelocity(vel);
-  Acc acc;
-  m_service0->getAccelerationLimit(acc.translation, acc.rotation);
+
   acc.translation = std::min(acc.translation, max_ax * 1000);
   acc.rotation    = std::min(acc.rotation,    max_aw * 180.0 / M_PI);
   m_service0->setAcceleration(acc);
+
+  ROS_WARN("Set Velocity Limit : translation=%lf, rotation=%lf",vel.translation,vel.rotation);
+  ROS_WARN("Set Acceleration Limit : translation=%lf, rotation=%lf",acc.translation,acc.rotation);
 
   // start
   m_service0->clearAlarm();
