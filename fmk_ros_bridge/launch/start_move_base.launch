@@ -28,7 +28,7 @@
   <!-- Run move_base -->
   <node pkg="move_base" type="move_base" respawn="false"
 	name="move_base" output="screen">
-    <remap from="cmd_vel" to="navigation/cmd_vel">
+    <remap from="cmd_vel" to="navigation/cmd_vel"/>
     <rosparam file="$(find fmk_ros_bridge)/launch/yaml/costmap_common_params.yaml"
 	      command="load" ns="global_costmap" />
     <rosparam file="$(find fmk_ros_bridge)/launch/yaml/costmap_common_params.yaml"
