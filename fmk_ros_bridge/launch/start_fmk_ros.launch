@@ -16,20 +16,13 @@
   2)Switch on fmk.
   3)Wait about 30 seconds.
   ($ sudo tail -f /var/log/wu-ftpd/xferlog ;;Check until Mobility.out,Interface.out,VehicleServiceProviderComp.outare send to fmk.)
-  4) <new terminal> $ rosrun fmk run-vehicle-gui.sh
-  5) <new terminal> $ rosrun openhrp3 eclipse.sh
-  Connect provider and consumer, and activate them.
-  6) Push GUI's PowerOn,ServoOn button.
-  7) <new terminal> $ rosrun fmk start_fmk_ros.launch
-  activate rosbridge on eclipse.
+  4) <new terminal> $ rosrun fmk start_fmk_ros.launch
   ]]></sphinxdoc>
 
   <arg name="nameserver" default="192.168.128.14" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <node name="rtm_naming" pkg="openrtm"
   	type="rtm-naming-restart" output="screen" />
-  <anode pkg="openhrp3" name="starteclipse"
-	 type="eclipse.sh" output="screen"/>
   <node pkg="fmk_ros_bridge" type="FmkRobotROSBridgeComp" name="fmkrosbridge"
 	args="-f $(find fmk_ros_bridge)/rtc.conf" output="screen">
   </node>
@@ -42,8 +35,25 @@
   <rtactivate component="VehicleServiceProvider0.rtc" />
   <rtactivate component="FmkRobotROSBridge0.rtc" />
 
-  <machine name="localhost" address="localhost" user="root" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="true" />
-  <node pkg="ps3joy" name="ps3joy" type="ps3joy.py" output="screen" machine="localhost"/>
+  <machine name="localhost" address="localhost" user="root"
+	   ros-root="$(env ROS_ROOT)" default="true"
+	   ros-package-path="$(env ROS_PACKAGE_PATH)" />
+  <node pkg="ps3joy" name="ps3joy" type="ps3joy.py"
+	output="screen" machine="localhost"/>
   <node pkg="joy" name="joy_node" type="joy_node" output="screen"/>
-  <node pkg="mrobot_ros_bridge" name="joy_teleop" type="joy_teleop.py" output="screen"/>
+  <node pkg="fmk_ros_bridge" name="joy_teleop"
+	type="joy_teleop.py" output="screen"/>
+
+  <node pkg="topic_tools" type="mux" name="cmd_vel_mux" respawn="true"
+	args="/cmd_vel /navigation/cmd_vel /teleop/cmd_vel">
+    <remap from="mux" to="cmd_vel_mux" />
+  </node>
+
+  <node pkg="jsk_pr2_startup" type="mux_selector.py"
+	name="cmd_vel_selector" respawn="true" output="screen"
+	args="/joy 'm.buttons[9]==0 and m.buttons[10]==1' /navigation/cmd_vel /teleop/cmd_vel 'True' /navigation/cmd_vel">
+    <remap from="mux" to="cmd_vel_mux" />
+    <param name="default_select" value="/navigation/cmd_vel"/>
+  </node>
+
 </launch>
