@@ -7,16 +7,16 @@
 
   <!-- Sample Service Bridge component -->
   <node name="bridge" pkg="openrtm_ros_bridge" type="MyServiceROSBridgeComp"
-	args='$(arg openrtm_args)'>
+	args='$(arg openrtm_args)' output="screen">
     <param name="service_port" value="myservice0"/>
   </node>
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_rosbridge" pkg="openrtm" type="rtmlaunch.py"
         args="$(find openrtm_ros_bridge)/samples/myservice_rosbridge.launch"/>
-  <rtactivate component="MyServiceROSBridge0.rtc" />
+  <rtactivate component="bridge.rtc" />
   <rtconnect from="MyServiceProvider0.rtc:MyService"
-	     to="MyServiceROSBridge0.rtc:MyService"/>
+	     to="bridge.rtc:MyService"/>
   <!-- END:openrtm connection -->
 
   <sphinxdoc><![CDATA[

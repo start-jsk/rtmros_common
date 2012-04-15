@@ -439,10 +439,17 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             idx = dest.find('\n',idx)
             return dest[0:idx] + '\n' + src + dest[idx:]
 
+        def replaceline(src, dest, ref):
+            idx1 = dest.find(ref)
+            idx2 = dest.find('\n',idx1)
+            return dest[0:idx1] + src + dest[idx2:]
+
         # Comp.cpp
+        #  use ros node name as rtm component name
         #  call ros::init in Comp.cpp
         compsrc = open(tmpdir + '/' + module_name + 'Comp.cpp').read()
         compsrc = addline('  ros::init(argc, argv, "' + module_name + '", ros::init_options::NoSigintHandler);', compsrc, 'RTC::Manager::init(argc, argv);')
+        compsrc = replaceline('  comp = manager->createComponent(std::string("'+module_name+'?instance_name="+ros::this_node::getName().substr(1)).c_str()); // skip root name space for OpenRTM instance name', compsrc, '  comp = manager->createComponent("'+module_name+'");')
         open(wd + '/' + module_name + 'Comp.cpp', 'w').write(compsrc)
 
         #.cpp
