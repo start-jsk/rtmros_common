@@ -4,7 +4,7 @@
  import sys
  import getopt
  
-+os.environ['PATH'] = os.environ['PATH'] + ":" + "@OPENRTM_BIN_PATH@"
++os.environ['PATH'] = "@OPENRTM_BIN_PATH@" + ":" + os.environ['PATH']
  libdir_path = os.popen("rtm-config --libdir", "r").read().split("\n")
  pyhelper_path = libdir_path[0] + "/py_helper"
  sys.path.append(pyhelper_path)
@@ -15,7 +15,7 @@ diff -ur OpenRTM-aist-1.0.0/utils/rtc-template/rtc-template OpenRTM-aist-1.0.0.b
    def __init__(self):
        return
  
-+os.environ['PATH'] = os.environ['PATH'] + ":" + "@OPENRTM_BIN_PATH@"
++os.environ['PATH'] = "@OPENRTM_BIN_PATH@" + ":" + os.environ['PATH']
  libdir_path = os.popen("rtm-config --libdir", "r").read().split("\n")
  if libdir_path[0] != '':
     pyhelper_path = libdir_path[0] + "/py_helper"
