@@ -6,7 +6,8 @@ macro(compile_openhrp_model wrlfile)
   if("${ARGN}" STREQUAL "")
     get_filename_component(_name ${wrlfile} NAME_WE)
   else()
-    set(_name "${ARGN}")
+    set(_name ${ARGV1})
+    set(_export_collada_option ${ARGN})
   endif()
   set(_daefile "${_workdir}/${_name}.dae")
   set(_xmlfile "${_workdir}/${_name}.xml")
@@ -23,7 +24,7 @@ macro(compile_openhrp_model wrlfile)
       DEPENDS ${_daefile})
   endif(EXISTS ${_yamlfile})
   add_custom_command(OUTPUT ${_daefile}
-    COMMAND rosrun openhrp3 export-collada -i ${wrlfile} -o ${_daefile}
+    COMMAND rosrun openhrp3 export-collada -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
     DEPENDS ${wrlfile})
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile}

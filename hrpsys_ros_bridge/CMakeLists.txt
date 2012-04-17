@@ -49,7 +49,9 @@ rosbuild_find_ros_package(webots_simulator)
 if(EXISTS ${hrpsys_PACKAGE_PATH}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl)
   compile_openhrp_model(
     ${hrpsys_PACKAGE_PATH}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl
-    HRP4C)
+    HRP4C
+    -a rightarm_torso,BODY,R_WRIST_R_LINK,0,0,0,0.707,0,0.707,0 -a leftarm_torso,BODY,L_WRIST_R_LINK,0,0,0,0.707,0,0.707,0 -a rightarm,BODY,CHEST_Y_LINK,0,0,0,0.707,0,0.707,0 -a leftarm,CHEST_Y_LINK,L_WRIST_R_LINK,0,0,0,0.707,0,0.707,0
+)
 endif(EXISTS ${hrpsys_PACKAGE_PATH}/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl)
 
 compile_openhrp_model(
