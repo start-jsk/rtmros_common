@@ -20,7 +20,7 @@ Index: sample/HRP-4C/HRP4C.py
  
      bridge = findRTC("HRP-4C(Robot)0")
  
-@@ -22,7 +24,12 @@
+@@ -22,6 +24,11 @@
      seq = ms.create("SequencePlayer", "seq")
      seq_svc = SequencePlayerServiceHelper.narrow(seq.service("service0"))
  
@@ -32,4 +32,10 @@ Index: sample/HRP-4C/HRP4C.py
      hgc = findRTC("HGcontroller0")
  
  def init():
+@@ -44,5 +51,6 @@
+     seq_svc.waitInterpolation()
  
+ init()
+-loadPattern("data/walk2m")
++import subprocess
++loadPattern(subprocess.check_output(["rospack","find","hrpsys"]).rstrip()+"/share/hrpsys/samples/HRP-4C/data/walk2m")
