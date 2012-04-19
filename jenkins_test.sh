@@ -14,7 +14,7 @@ function test-grxui {
     (cd `rospack find $package`; make test)
     (cd `rospack find $package`; rosrun rosdoc rosdoc $package 2>&1 | tee build/rosdoc.log; [ `grep WARNING build/rosdoc.log | wc -l` -gt 1 ] && exit 1 || true) # we assume .static does not exist... warning
 
-    (cd `rospack find $package`;  svn add --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m "update index.rst,conf.py by Jenkins" index.rst conf.py; svn commit --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m "update index.rst,conf.py by Jenkins" index.rst conf.py)
+    (cd `rospack find $package`;  svn add --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 index.rst conf.py; svn commit --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m "update index.rst,conf.py by Jenkins" index.rst conf.py)
     if [ -n "$WORKSPACE" ]; then # only for jenkins to copy to results
 	rm -fr $WORKSPACE/$package-example
 	cp -r `rospack find $package`/doc/$package/html $WORKSPACE/$package-example
