@@ -32,10 +32,13 @@ Index: sample/HRP-4C/HRP4C.py
      hgc = findRTC("HGcontroller0")
  
  def init():
-@@ -44,4 +51,5 @@
+@@ -44,5 +51,6 @@
      seq_svc.waitInterpolation()
  
  init()
 -loadPattern("data/walk2m")
 +import os
 +loadPattern(os.popen("rospack find hrpsys").read().rstrip()+"/share/hrpsys/samples/HRP-4C/data/walk2m")
+
+
+
