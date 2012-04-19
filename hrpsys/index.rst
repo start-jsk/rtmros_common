@@ -142,6 +142,7 @@ Contents
       <arg name="PROJECT_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.xml" />
       <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl" />
       <arg name="CONF_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.conf" />
+      <arg name="SIMULATOR_NAME" value="HRP-4C(Robot)0" />
     </include>
   
     <test args="--max-time=100   --viewer-name='' #   --no-start-simulation   --capture-window='Irrlicht'   --target-directory=$(find hrpsys)/build/images   --script='$(find hrpsys)/scripts/hrp4c_walk.sh'" pkg="openhrp3" test-name="HRP4C" time-limit="300" type="test-grxui.py" />
