@@ -9,6 +9,7 @@
   <arg name="CONF_FILE" />
   <arg name="RESPAWN" default="true"/>
   <arg name="OUTPUT" default="log"/>
+  <arg name="SIMULATOR_NAME" default="Simulator"/>
   <arg name="HRPSYS_PERIODIC_RATE" default="200"/>
   <arg name="OPENHRP3_SIM_PERIODIC_RATE" default="200"/>
   <env name="LANG" value="C" />
@@ -19,7 +20,7 @@
   <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
 
   <node name="viewer" pkg="hrpsys" type="ViewerComp" args='$(arg openrtm_args) -o "example.Viewer0.conf.default.project:$(arg PROJECT_FILE)" -o "exec_cxt.periodic.rate:30"' />
-  <node name="simulator" pkg="hrpsys" type="SimulatorComp" args='$(arg openrtm_args) -o "example.Simulator0.conf.default.project:$(arg PROJECT_FILE)" -o "exec_cxt.periodic.rate:$(arg OPENHRP3_SIM_PERIODIC_RATE)"' respawn="$(arg RESPAWN)" />
+  <node name="simulator" pkg="hrpsys" type="SimulatorComp" args='$(arg openrtm_args) -o "example.Simulator.instance_name:$(arg SIMULATOR_NAME)" -o "example.Simulator.conf.default.project:$(arg PROJECT_FILE)" -o "exec_cxt.periodic.rate:$(arg OPENHRP3_SIM_PERIODIC_RATE)"' respawn="$(arg RESPAWN)" />
 
   <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" /> <!-- loading dae files crushes model loader -->
 
@@ -28,7 +29,7 @@
 
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
   <node name="hrpsys" pkg="hrpsys" type="hrpsyspy" output="screen"
-	args='$(find hrpsys)/scripts/hrpsys.py' />
+	args='$(find hrpsys)/scripts/hrpsys.py $(arg SIMULATOR_NAME)' />
 
   <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="$(arg OUTPUT)"
 	args="$(arg openrtm_args)" respawn="$(arg RESPAWN)" />
@@ -37,6 +38,6 @@
   <arg name="ROBOT_NAME" value="dummy" />
   <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hrpsys)/launch/hrpsys.launch" respawn="$(arg RESPAWN)" />
   <rtactivate component="Viewer0.rtc" />
-  <rtconnect from="Simulator0.rtc:state" to="Viewer0.rtc:state" />
+  <rtconnect from="$(arg SIMULATOR_NAME).rtc:state" to="Viewer0.rtc:state" />
   <!-- END:openrtm connection -->
 </launch>

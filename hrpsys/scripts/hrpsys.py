@@ -1,3 +1,4 @@
+import sys
 import rtm
 import hrp
 
@@ -23,15 +24,7 @@ def activateComps():
     hgc.start()
 
 def createComps():
-    global sim, seq, seq_svc, sh, sh_svc, hgc
-
-    sim = None
-    #ms.load("Simulator")
-    #sim = ms.create("Simulator", "sim")
-    while sim == None :
-        sim = findRTC("Simulator0")
-
-    print "[hrpsys.py] createComps -> Simulation : ",sim
+    global seq, seq_svc, sh, sh_svc, hgc
 
     ms.load("SequencePlayer")
     seq = ms.create("SequencePlayer", "seq")
@@ -49,8 +42,8 @@ def createComps():
     sh_svc = StateHolderServiceHelper.narrow(sh.service("service0"));
 
 
-def init():
-    global ms
+def init(simulator="Simulator"):
+    global ms,sim
 
     ms = None
 
@@ -60,6 +53,14 @@ def init():
         print "[hrpsys.py] wait for RTCmanager : ",ms
 
     print "[hrpsys.py] createRTCmanager : ",ms
+
+    sim = None
+
+    while sim == None :
+        sim = findRTC(simulator)
+
+    print "[hrpsys.py] createComps -> Simulation : ",sim
+
     print "[hrpsys.py] creating components"
     createComps()
 
@@ -79,6 +80,11 @@ if __name__ == '__main__':
         print "[hrpsys.py] wait for ModelLoader"
 
     print "[hrpsys.py] start hrpsys"
-    init()
+
+    if len(sys.argv) > 1 :
+        init(sys.argv[1])
+    else :
+        init()
+
 
 

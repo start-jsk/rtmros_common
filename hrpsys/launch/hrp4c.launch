@@ -3,6 +3,7 @@
     <arg name="PROJECT_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.xml" />
     <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl" />
     <arg name="CONF_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.conf" />
+    <arg name="SIMULATOR_NAME" value="HRP-4C(Robot)0" />
   </include>
 
   <sphinxdoc><![CDATA[
