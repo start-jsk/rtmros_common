@@ -13,6 +13,9 @@
   <depend package="amcl"/>
   <depend package="openni_camera"/>
   <depend package="pointcloud_to_laserscan"/>
+  <depend package="hrpsys"/>
+  <depend package="mrobot_ros_bridge"/>
+  <depend package="openrtm"/>
 </package>
 
 
