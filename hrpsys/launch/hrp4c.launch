@@ -6,6 +6,11 @@
     <arg name="SIMULATOR_NAME" value="HRP-4C(Robot)0" />
   </include>
 
+  <!-- BEGIN:openrtm connection -->
+  <node name="rtmlaunch_hrp4c" pkg="hrpsys" type="hrpsys-launch.sh" args="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl $(find hrpsys)/launch/hrp4c.launch" />
+  <rtconnect from="HRP-4C(Robot)0.rtc:state" to="Viewer0.rtc:state" />
+  <!-- END:openrtm connection -->
+
   <sphinxdoc><![CDATA[
 This scripts starts HRP-4C.xml hrpsys-base sample project file. First, 
 select StartSimulation sub-menu from GrxUI menu, or clock Simulation Start button to start simulation, then execute `HRP4C.py` program as followings to make the robot walk.
