@@ -145,6 +145,11 @@ Contents
       <arg name="SIMULATOR_NAME" value="HRP-4C(Robot)0" />
     </include>
   
+    
+    <node args="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl $(find hrpsys)/launch/hrp4c.launch" name="rtmlaunch_hrp4c" pkg="hrpsys" type="hrpsys-launch.sh" />
+    <rtconnect from="HRP-4C(Robot)0.rtc:state" to="Viewer0.rtc:state" />
+    
+  
     <test args="--max-time=100   --viewer-name='' #   --no-start-simulation   --capture-window='Irrlicht'   --target-directory=$(find hrpsys)/build/images   --script='$(find hrpsys)/scripts/hrp4c_walk.sh'" pkg="openhrp3" test-name="HRP4C" time-limit="300" type="test-grxui.py" />
     <test args="$(find hrpsys)/build/images/HRP4C.ogv" pkg="jsk_tools" test-name="z_HRP4C" time-limit="1000" type="ogv_encode.sh" />
   </launch>
