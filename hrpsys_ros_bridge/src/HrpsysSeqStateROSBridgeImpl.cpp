@@ -31,6 +31,7 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
   : RTC::DataFlowComponentBase(manager),
     m_rsangleIn("rsangle", m_rsangle),
     m_mcangleIn("mcangle", m_mcangle),
+    m_rsJointTemperatureIn("rsJointTemperature", m_rsJointTemperature),
     m_rsrfsensorIn("rsrfsensor", m_rsrfsensor),
     m_rslfsensorIn("rslfsensor", m_rslfsensor),
     m_rsrhsensorIn("rsrhsensor", m_rsrhsensor),
@@ -58,6 +59,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   // Set InPort buffers
   addInPort("rsangle", m_rsangleIn);
   addInPort("mcangle", m_mcangleIn);
+  addInPort("rsJointTemperature", m_rsJointTemperatureIn);
   addInPort("rsrfsensor", m_rsrfsensorIn);
   addInPort("rslfsensor", m_rslfsensorIn);
   addInPort("rsrhsensor", m_rsrhsensorIn);

@@ -325,6 +325,17 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
   }
 
+  if ( m_rsJointTemperatureIn.isNew () ) {
+    try {
+      m_rsJointTemperatureIn.read();
+      //for ( unsigned int i = 0; i < m_rsJointTemperature.data.length() ; i++ ) std::cerr << m_rsJointTemperature.data[i] << " "; std::cerr << std::endl;
+    }
+    catch(const std::runtime_error &e)
+      {
+	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
   if ( m_poseIn.isNew () ) {
     m_poseIn.read();
     tf::Transform base;
