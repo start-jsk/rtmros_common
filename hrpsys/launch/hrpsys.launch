@@ -13,7 +13,7 @@
   <arg name="SIMULATOR_NAME" default="Simulator"/>
   <arg name="HRPSYS_PERIODIC_RATE" default="200"/>
   <arg name="OPENHRP3_SIM_PERIODIC_RATE" default="200"/>
-  <arg name="KINEMATICS_ONLY" default="false"/>
+  <arg name="KINEMATICS_ONLY" default="0"/>
   <env name="LANG" value="C" />
   <env name="ORBgiopMaxMsgSize" value="2147483648" />
 
