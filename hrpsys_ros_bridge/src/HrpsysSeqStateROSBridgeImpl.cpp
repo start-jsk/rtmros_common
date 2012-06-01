@@ -38,7 +38,7 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_rslhsensorIn("rslhsensor", m_rslhsensor),
     m_gsensorIn("gsensor", m_gsensor),
     m_gyrometerIn("gyrometer", m_gyrometer),
-    m_poseIn("pose", m_pose),
+    m_baseTformIn("baseTform", m_baseTform),
     m_rstorqueIn("rstorque", m_rstorque),
     m_mctorqueOut("mctorque", m_mctorque),
     m_SequencePlayerServicePort("SequencePlayerService")
@@ -66,7 +66,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("rslhsensor", m_rslhsensorIn);
   addInPort("gsensor", m_gsensorIn);
   addInPort("gyrometer", m_gyrometerIn);
-  addInPort("pose", m_poseIn);
+  addInPort("baseTform", m_baseTformIn);
   addInPort("rstorque", m_rstorqueIn);
 
   // Set OutPort buffer

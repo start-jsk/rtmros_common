@@ -17,7 +17,7 @@
 #    --inport=rsrfsensor:TimedDoubleSeq --inport=rslfsensor:TimedDoubleSeq \
 #    --inport=rsrhsensor:TimedDoubleSeq --inport=rslhsensor:TimedDoubleSeq \
 #    --inport=gsensor:TimedDoubleSeq --inport=gyrometer:TimedDoubleSeq \
-#    --inport=pose:TimedPose3D --outport=torque:TimedDoubleSeq \
+#    --inport=baseTform:TimedDoubleSeq --outport=torque:TimedDoubleSeq \
 #    --consumer=SequencePlayerService:service0:SequencePlayerService \
 #    --consumer-idl=SequencePlayerService.idl 
 #
@@ -235,11 +235,11 @@ InPorts:
   SubscriptionType: Periodic,New,Flush
   MaxOut: 
 
-  Name:             pose
-  VarName:          pose
+  Name:             baseTform
+  VarName:          baseTform
   PortNumber:       9
   Description:      
-  Type:             TimedPose3D
+  Type:             TimedDoubleSeq
   InterfaceType:    CorbaPort
   DataflowType:     Push,Pull
   SubscriptionType: Periodic,New,Flush
