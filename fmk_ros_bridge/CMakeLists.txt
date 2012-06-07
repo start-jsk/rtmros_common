@@ -27,4 +27,4 @@ rtmbuild_genbridge()
 rtmbuild_add_executable(FmkRobotROSBridgeComp src/FmkRobotROSBridgeComp.cpp src/FmkRobotROSBridge.cpp)
 
 rosbuild_find_ros_package("jsk_tools")
-execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_PACKAGE_PATH}/bin/launchdoc-generator.py ${PROJECT_NAME} --output_dir=. --nomakefile RESULT_VARIABLE _make_failed)
+execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_PACKAGE_PATH}/bin/launchdoc-generator.py ${PROJECT_NAME} --output_dir=./build/ --nomakefile RESULT_VARIABLE _make_failed)
