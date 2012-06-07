@@ -1,7 +1,7 @@
 all: installed.c++
 
 INSTALL_DIR = `rospack find openrtm`
-FILENAME    = OpenRTM-aist-1.1.0-RC3.tar.gz
+FILENAME    = OpenRTM-aist-1.1.0-RELEASE.tar.gz
 TARBALL     = build/$(FILENAME)
 TARBALL_URL = http://www.openrtm.org/pub/OpenRTM-aist/cxx/1.1.0/$(FILENAME)
 SOURCE_DIR  = build/OpenRTM-aist-1.1.0
