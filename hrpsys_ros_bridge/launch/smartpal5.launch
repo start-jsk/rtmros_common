@@ -5,7 +5,7 @@
   <sphinxdoc><![CDATA[
 
 
-This launch file shows an example of ros bridge for yaskawa samartpal5 robot.
+This launch file shows an example of ros bridge for yaskawa smartpal5 robot.
 
 .. video:: build/images/SmartPal5_PickUp
   :width: 600

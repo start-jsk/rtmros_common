@@ -43,9 +43,11 @@ darwin.launch
 This launch file shows an example of ros bridge for darwin robot and sample client program `darwin-pickup.l`
 
 .. video:: build/images/Darwin_PickUp
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/Darwin_PickUp
   :width: 600
 
 .. video:: build/images/darwin_rviz
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/darwin_rviz
   :width: 600
 
   
@@ -59,7 +61,7 @@ Contents
     <include file="$(find hrpsys_ros_bridge)/launch/darwin_startup.launch" />
     <include file="$(find hrpsys_ros_bridge)/launch/darwin_ros_bridge.launch" />
   
-    <test args="--max-time=30   --viewer-name='' #   --no-start-simulation   --capture-window='Irrlicht'   --target-directory=$(find hrpsys_ros_bridge)/build/images   --check-tf='/DBODY_LINK /DHEAD_LINK'   --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/darwin-pickup.l __log\:=dummy'" pkg="openhrp3" test-name="Darwin_PickUp" time-limit="600" type="test-grxui.py" /> 
+    <test args="--max-time=30   --viewer-name=&apos;&apos; #   --no-start-simulation   --capture-window=&apos;Irrlicht&apos;   --target-directory=$(find hrpsys_ros_bridge)/build/images   --check-tf=&apos;/DBODY_LINK /DHEAD_LINK&apos;   --script=&apos;rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/darwin-pickup.l __log\:=dummy&apos;" pkg="openhrp3" test-name="Darwin_PickUp" time-limit="600" type="test-grxui.py" /> 
     <test args="$(find hrpsys_ros_bridge)/build/images/Darwin_PickUp.ogv" pkg="jsk_tools" test-name="z_Darwin_PickUp" time-limit="1000" type="ogv_encode.sh" />
     <test args="$(find hrpsys_ros_bridge)/build/images/darwin_rviz.glc" pkg="jsk_tools" test-name="z_darwin_rviz" time-limit="2000" type="glc_encode.sh" />
   </launch>
@@ -94,9 +96,11 @@ gr001.launch
 This launch file shows an example of ros bridge for darwin robot and sample client program `darwin-pickup.l`
 
 .. video:: build/images/GR001_Motion
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/GR001_Motion
   :width: 600
 
 .. video:: build/images/gr001_rviz
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/gr001_rviz
   :width: 600
 
   
@@ -110,7 +114,7 @@ Contents
     <include file="$(find hrpsys_ros_bridge)/launch/gr001_startup.launch" />
     <include file="$(find hrpsys_ros_bridge)/launch/gr001_ros_bridge.launch" />
   
-    <test args="--max-time=30   --target-directory=$(find hrpsys_ros_bridge)/build/images   --viewer-name='' #   --no-start-simulation   --capture-window='Irrlicht'   --check-tf='/WAIST_LINK /NECK_Y_LINK'   --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/gr001-motion.l __log\:=dummy'" pkg="openhrp3" test-name="GR001_Motion" time-limit="500" type="test-grxui.py" /> 
+    <test args="--max-time=30   --target-directory=$(find hrpsys_ros_bridge)/build/images   --viewer-name=&apos;&apos; #   --no-start-simulation   --capture-window=&apos;Irrlicht&apos;   --check-tf=&apos;/WAIST_LINK /NECK_Y_LINK&apos;   --script=&apos;rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/gr001-motion.l __log\:=dummy&apos;" pkg="openhrp3" test-name="GR001_Motion" time-limit="500" type="test-grxui.py" /> 
     <test args="$(find hrpsys_ros_bridge)/build/images/GR001_Motion.ogv" pkg="jsk_tools" test-name="z_GR001_Motion" time-limit="1000" type="ogv_encode.sh" />
     <test args="$(find hrpsys_ros_bridge)/build/images/gr001_rviz.glc" pkg="jsk_tools" test-name="z_gr001_rviz" time-limit="2000" type="glc_encode.sh" />
   </launch>
@@ -153,9 +157,11 @@ After that, we need to invoke the client program. Following program is the examp
 3. `rosrun roseus roseus kawada-hironx-example.l` : sample euslisp script to control the robot.
 
 .. video:: build/images/HIRONX_Example
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/HIRONX_Example
   :width: 600
 
 .. video:: build/images/hironx_rviz
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/hironx_rviz
   :width: 600
 
   
@@ -169,7 +175,7 @@ Contents
     <include file="$(find hrpsys_ros_bridge)/launch/hironx_startup.launch" />
     <include file="$(find hrpsys_ros_bridge)/launch/hironx_ros_bridge.launch" />
   
-    <test args="--max-time=10   --viewer-name='' #   --no-start-simulation   --capture-window='Irrlicht'   --target-directory=$(find hrpsys_ros_bridge)/build/images   --check-tf='/WAIST /HEAD_JOINT1_Link'   --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/kawada-hironx-example.l __log:=dummy'" pkg="openhrp3" test-name="HIRONX_Example" time-limit="300" type="test-grxui.py" /> 
+    <test args="--max-time=10   --viewer-name=&apos;&apos; #   --no-start-simulation   --capture-window=&apos;Irrlicht&apos;   --target-directory=$(find hrpsys_ros_bridge)/build/images   --check-tf=&apos;/WAIST /HEAD_JOINT1_Link&apos;   --script=&apos;rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/kawada-hironx-example.l __log:=dummy&apos;" pkg="openhrp3" test-name="HIRONX_Example" time-limit="300" type="test-grxui.py" /> 
     <test args="$(find hrpsys_ros_bridge)/build/images/HIRONX_Example.ogv" pkg="jsk_tools" test-name="z_HIRONX_Example" time-limit="1000" type="ogv_encode.sh" />
     <test args="$(find hrpsys_ros_bridge)/build/images/hironx_rviz.glc" pkg="jsk_tools" test-name="z_hironx_rviz" time-limit="2000" type="glc_encode.sh" />
   </launch>
@@ -212,9 +218,11 @@ After that, we need to invoke the client program. Following program is the examp
 3. `rosrun roseus roseus hrp4c-pickup.l` : sample euslisp script to control the robot.
 
 .. video:: build/images/HRP4C_PickUp
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/HRP4C_PickUp
   :width: 600
 
 .. video:: build/images/hrp4c_rviz
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/hrp4c_rviz
   :width: 600
 
   
@@ -228,7 +236,7 @@ Contents
     <include file="$(find hrpsys_ros_bridge)/launch/hrp4c_startup.launch" />
     <include file="$(find hrpsys_ros_bridge)/launch/hrp4c_ros_bridge.launch" />
   
-    <test args="--max-time=30   --target-directory=$(find hrpsys_ros_bridge)/build/images   --viewer-name='' #   --no-start-simulation   --capture-window='Irrlicht'   --check-tf='/BODY /R_HAND_J1_LINK'   --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/hrp4c-pickup.l __log:=dummy'" pkg="openhrp3" test-name="HRP4C_PickUp" time-limit="600" type="test-grxui.py" /> 
+    <test args="--max-time=30   --target-directory=$(find hrpsys_ros_bridge)/build/images   --viewer-name=&apos;&apos; #   --no-start-simulation   --capture-window=&apos;Irrlicht&apos;   --check-tf=&apos;/BODY /R_HAND_J1_LINK&apos;   --script=&apos;rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/hrp4c-pickup.l __log:=dummy&apos;" pkg="openhrp3" test-name="HRP4C_PickUp" time-limit="600" type="test-grxui.py" /> 
     <test args="$(find hrpsys_ros_bridge)/build/images/HRP4C_PickUp.ogv" pkg="jsk_tools" test-name="z_HRP4C_PickUp" time-limit="1000" type="ogv_encode.sh" />
     <test args="$(find hrpsys_ros_bridge)/build/images/hrp4c_rviz.glc" pkg="jsk_tools" test-name="z_hrp4c_rviz" time-limit="2000" type="glc_encode.sh" />
   </launch>
@@ -245,9 +253,11 @@ hrp4c_nosim.launch
 This script is "no-sim" version of `hrp4.launch`, launch `hrp4c_startup_nosim.launch` instead of `hrp4c_startup.launch` to run OpenHRP3 simulator without forward dynamics calculation.
 
 .. video:: build/images/HRP4C_NoSimPickUp
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/HRP4C_NoSimPickUp
   :width: 600
 
 .. video:: build/images/hrp4c_nosim_rviz
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/hrp4c_nosim_rviz
   :width: 600
 
   
@@ -261,7 +271,7 @@ Contents
     <include file="$(find hrpsys_ros_bridge)/launch/hrp4c_startup_nosim.launch" />
     <include file="$(find hrpsys_ros_bridge)/launch/hrp4c_ros_bridge.launch" />
   
-    <test args="--max-time=10   --viewer-name='' #   --no-start-simulation   --capture-window='Irrlicht'   --target-directory=$(find hrpsys_ros_bridge)/build/images   --check-tf='/BODY /R_HAND_J1_LINK'   --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/hrp4c-pickup.l __log:=dummy'" pkg="openhrp3" test-name="HRP4C_NoSimPickUp" time-limit="600" type="test-grxui.py" /> 
+    <test args="--max-time=10   --viewer-name=&apos;&apos; #   --no-start-simulation   --capture-window=&apos;Irrlicht&apos;   --target-directory=$(find hrpsys_ros_bridge)/build/images   --check-tf=&apos;/BODY /R_HAND_J1_LINK&apos;   --script=&apos;rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/hrp4c-pickup.l __log:=dummy&apos;" pkg="openhrp3" test-name="HRP4C_NoSimPickUp" time-limit="600" type="test-grxui.py" /> 
     <test args="$(find hrpsys_ros_bridge)/build/images/HRP4C_NoSimPickUp.ogv" pkg="jsk_tools" test-name="z_HRP4C_NoSimPickUp" time-limit="1000" type="ogv_encode.sh" />
     <test args="$(find hrpsys_ros_bridge)/build/images/hrp4c_rviz.glc -o $(find hrpsys_ros_bridge)/build/images/hrp4c_nosim_rviz" pkg="jsk_tools" test-name="z_hrp4c_nosim_rviz" time-limit="2000" type="glc_encode.sh" />
   </launch>
@@ -344,9 +354,11 @@ pr2.launch
 This launch file shows an example of ros bridge for pr2 robot
 
 .. video:: build/images/PR2_Example
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/PR2_Example
   :width: 600
 
 .. video:: build/images/pr2_rviz
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/pr2_rviz
   :width: 600
 
   
@@ -361,7 +373,7 @@ Contents
     <include file="$(find hrpsys_ros_bridge)/launch/pr2_startup.launch" />
     <include file="$(find hrpsys_ros_bridge)/launch/pr2_ros_bridge.launch" />
   
-    <test args="--max-time=10   --viewer-name='' #   --no-start-simulation   --capture-window='Irrlicht'   --target-directory=$(find hrpsys_ros_bridge)/build/images   --check-tf='/base_footprint /head_plate_frame'   " pkg="openhrp3" test-name="PR2_Example" time-limit="600" type="test-grxui.py" /> 
+    <test args="--max-time=10   --viewer-name=&apos;&apos; #   --no-start-simulation   --capture-window=&apos;Irrlicht&apos;   --target-directory=$(find hrpsys_ros_bridge)/build/images   --check-tf=&apos;/base_footprint /head_plate_frame&apos;   " pkg="openhrp3" test-name="PR2_Example" time-limit="600" type="test-grxui.py" /> 
     <test args="$(find hrpsys_ros_bridge)/build/images/PR2_Example.ogv" pkg="jsk_tools" test-name="z_PR2_Example" time-limit="1000" type="ogv_encode.sh" />
     <test args="$(find hrpsys_ros_bridge)/build/images/pr2_rviz.glc" pkg="jsk_tools" test-name="z_pr2_rviz" time-limit="2000" type="glc_encode.sh" />
   </launch>
@@ -396,9 +408,11 @@ samplerobot.launch
 This launch file shows an example of ros bridge for sample robot and client program `samplerobot-pickup.l`
 
 .. video:: build/images/SampleRobot_PickUp
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/SampleRobot_PickUp
   :width: 600
 
 .. video:: build/images/samplerobot_rviz-1
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/samplerobot_rviz-1
   :width: 600
 
   
@@ -412,7 +426,7 @@ Contents
     <include file="$(find hrpsys_ros_bridge)/launch/samplerobot_startup.launch" />
     <include file="$(find hrpsys_ros_bridge)/launch/samplerobot_ros_bridge.launch" />
   
-    <test args="--max-time=30   --viewer-name='' #   --no-start-simulation   --target-directory=$(find hrpsys_ros_bridge)/build/images   --check-tf='/WAIST_LINK0 /VISION_SENSOR1'   --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/samplerobot-pickup.l __log:=dummy'" pkg="openhrp3" test-name="SampleRobot_PickUp" time-limit="1200" type="test-grxui.py" /> 
+    <test args="--max-time=30   --viewer-name=&apos;&apos; #   --no-start-simulation   --target-directory=$(find hrpsys_ros_bridge)/build/images   --check-tf=&apos;/WAIST_LINK0 /VISION_SENSOR1&apos;   --script=&apos;rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/samplerobot-pickup.l __log:=dummy&apos;" pkg="openhrp3" test-name="SampleRobot_PickUp" time-limit="1200" type="test-grxui.py" /> 
     <test args="$(find hrpsys_ros_bridge)/build/images/SampleRobot_PickUp.ogv" pkg="jsk_tools" test-name="z_SampleRobot_PickUp" time-limit="1000" type="ogv_encode.sh" />
     <test args="$(find hrpsys_ros_bridge)/build/images/samplerobot_rviz.glc" pkg="jsk_tools" test-name="z_samplerobot_rviz" time-limit="2000" type="glc_encode.sh" />
   </launch>
@@ -441,12 +455,14 @@ smartpal5.launch
 
 
 
-This launch file shows an example of ros bridge for yaskawa samartpal5 robot.
+This launch file shows an example of ros bridge for yaskawa smartpal5 robot.
 
 .. video:: build/images/SmartPal5_PickUp
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/SmartPal5_PickUp
   :width: 600
 
 .. video:: build/images/smartpal5_rviz
+  :url: http://jenkins.jsk.imi.i.u-tokyo.ac.jp:8080/job/agentsystem-test/lastSuccessfulBuild/artifact/hrpsys_ros_bridge-example/_images/smartpal5_rviz
   :width: 600
 
 
@@ -461,7 +477,7 @@ Contents
     <include file="$(find hrpsys_ros_bridge)/launch/smartpal5_startup.launch" />
     <include file="$(find hrpsys_ros_bridge)/launch/smartpal5_ros_bridge.launch" />
   
-    <test args="--max-time=10   --viewer-name='' #   --no-start-simulation   --capture-window='Irrlicht'   --target-directory=$(find hrpsys_ros_bridge)/build/images   --check-tf='/WAIST_LINK0 /VISION_SENSOR1'   " pkg="openhrp3" test-name="SmartPal5_PickUp" time-limit="600" type="test-grxui.py" /> 
+    <test args="--max-time=10   --viewer-name=&apos;&apos; #   --no-start-simulation   --capture-window=&apos;Irrlicht&apos;   --target-directory=$(find hrpsys_ros_bridge)/build/images   --check-tf=&apos;/WAIST_LINK0 /VISION_SENSOR1&apos;   " pkg="openhrp3" test-name="SmartPal5_PickUp" time-limit="600" type="test-grxui.py" /> 
     <test args="$(find hrpsys_ros_bridge)/build/images/SmartPal5_PickUp.ogv" pkg="jsk_tools" test-name="z_SmartPal5_PickUp" time-limit="1000" type="ogv_encode.sh" />
     <test args="$(find hrpsys_ros_bridge)/build/images/smartpal5_rviz.glc" pkg="jsk_tools" test-name="z_smartpal5_rviz" time-limit="2000" type="glc_encode.sh" />
   </launch>
