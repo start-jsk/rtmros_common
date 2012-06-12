@@ -1,6 +1,6 @@
-diff -ur src/ext/artlinux/art_ec/artlinux/ArtExecutionContext.cpp.orig src/ext/ec/artlinux/ArtExecutionContext.cpp
---- src/ext/artlinux/art_ec/artlinux/ArtExecutionContext.cpp.orig	2012-05-24 23:18:13.613646037 +0900
-+++ src/ext/artlinux/art_ec/artlinux/ArtExecutionContext.cpp	2012-06-12 18:52:25.216903029 +0900
+diff -ur src/ext/artlinux/art_ec/ArtExecutionContext.cpp.orig src/ext/ec/artlinux/ArtExecutionContext.cpp
+--- src/ext/artlinux/art_ec/ArtExecutionContext.cpp.orig	2012-05-24 23:18:13.613646037 +0900
++++ src/ext/artlinux/art_ec/ArtExecutionContext.cpp	2012-06-12 18:52:25.216903029 +0900
 @@ -29,8 +29,17 @@
  namespace RTC
  {
@@ -29,9 +29,9 @@ diff -ur src/ext/artlinux/art_ec/artlinux/ArtExecutionContext.cpp.orig src/ext/e
        {
  	std::cerr << "fatal error: art_enter" << std::endl;
        }
-diff -ur src/ext/artlinux/art_ec/artlinux/ArtExecutionContext.h.orig src/ext/artlinux/art_ec/artlinux/ArtExecutionContext.h
---- src/ext/artlinux/art_ec/artlinux/ArtExecutionContext.h.orig	2012-05-24 23:18:13.617202824 +0900
-+++ src/ext/artlinux/art_ec/artlinux/ArtExecutionContext.h	2012-06-12 18:35:44.618520333 +0900
+diff -ur src/ext/artlinux/art_ec/ArtExecutionContext.h.orig src/ext/artlinux/art_ec/ArtExecutionContext.h
+--- src/ext/artlinux/art_ec/ArtExecutionContext.h.orig	2012-05-24 23:18:13.617202824 +0900
++++ src/ext/artlinux/art_ec/ArtExecutionContext.h	2012-06-12 18:35:44.618520333 +0900
 @@ -38,6 +38,22 @@
      ArtExecutionContext();
      virtual ~ArtExecutionContext();
@@ -55,9 +55,9 @@ diff -ur src/ext/artlinux/art_ec/artlinux/ArtExecutionContext.h.orig src/ext/art
    };
  };
  
-diff -ur src/ext/artlinux/art_ec/artlinux/Makefile.am.orig src/ext/artlinux/art_ec/artlinux/Makefile.am
---- src/ext/artlinux/art_ec/artlinux/Makefile.am.orig	2012-05-24 23:18:13.617202824 +0900
-+++ src/ext/artlinux/art_ec/artlinux/Makefile.am	2012-06-12 18:49:09.984828415 +0900
+diff -ur src/ext/artlinux/art_ec/Makefile.am.orig src/ext/artlinux/art_ec/Makefile.am
+--- src/ext/artlinux/art_ec/Makefile.am.orig	2012-05-24 23:18:13.617202824 +0900
++++ src/ext/artlinux/art_ec/Makefile.am	2012-06-12 18:49:09.984828415 +0900
 @@ -19,7 +19,7 @@
  module_LTLIBRARIES = ArtExecutionContext.la
  
