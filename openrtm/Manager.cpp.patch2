@@ -1,5 +1,5 @@
---- OpenRTM-aist-1.0.0/src/lib/rtm/Manager.cpp.org	2012-04-19 12:32:20.797925566 +0900
-+++ OpenRTM-aist-1.0.0/src/lib/rtm/Manager.cpp	2012-04-19 12:34:46.961920398 +0900
+--- src/lib/rtm/Manager.cpp.org	2012-04-19 12:32:20.797925566 +0900
++++ src/lib/rtm/Manager.cpp	2012-04-19 12:34:46.961920398 +0900
 @@ -1603,6 +1603,7 @@
      std::string name_conf(category + "." + inst_name + ".config_file");
      
@@ -75,9 +75,9 @@
      comp->getProperties() << type_prop;
      
      //------------------------------------------------------------
-diff -ru OpenRTM-aist-1.0.0/src/lib/rtm/ManagerConfig.cpp OpenRTM-aist-1.0.0-new//src/lib/rtm/ManagerConfig.cpp
---- OpenRTM-aist-1.0.0/src/lib/rtm/ManagerConfig.cpp.org	2010-01-28 13:21:45.000000000 +0900
-+++ OpenRTM-aist-1.0.0/src/lib/rtm/ManagerConfig.cpp	2012-04-19 12:27:48.301935206 +0900
+diff -ru src/lib/rtm/ManagerConfig.cpp.org src/lib/rtm/ManagerConfig.cpp
+--- src/lib/rtm/ManagerConfig.cpp.org	2010-01-28 13:21:45.000000000 +0900
++++ src/lib/rtm/ManagerConfig.cpp	2012-04-19 12:27:48.301935206 +0900
 @@ -114,6 +114,7 @@
  
      // Properties from arguments are marged finally
@@ -86,8 +86,8 @@ diff -ru OpenRTM-aist-1.0.0/src/lib/rtm/ManagerConfig.cpp OpenRTM-aist-1.0.0-new
    }
    
    /*!
---- OpenRTM-aist-1.0.0/src/lib/rtm/RTObject.cpp.org	2010-01-28 13:21:45.000000000 +0900
-+++ OpenRTM-aist-1.0.0/src/lib/rtm/RTObject.cpp		2012-04-19 21:26:34.861018182 +0900
+--- src/lib/rtm/RTObject.cpp.org	2010-01-28 13:21:45.000000000 +0900
++++ src/lib/rtm/RTObject.cpp		2012-04-19 21:26:34.861018182 +0900
 @@ -742,10 +742,12 @@
                                                "default");
          if (m_configsets.haveConfig(active_set.c_str()))
