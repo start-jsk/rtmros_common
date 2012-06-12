@@ -93,7 +93,10 @@ def rtconnect(nameserver, tags):
                     props['dataport.push_rate'] = str('50.0')
             options = optparse.Values({'verbose': False, 'id': '', 'name': None, 'properties': props})
             print >>sys.stderr, "Connect from",source_path,"to",dest_path,"with",options
-            rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, tree=None)
+            try :
+                rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, tree=None)
+            except Exception, e: # openrtm 1.1.0
+                rtcon.connect_ports([(source_path,source_full_path), (dest_path, dest_full_path)], options, tree=None)
         except Exception, e:
             print >>sys.stderr, '{0}: {1}'.format(os.path.basename(sys.argv[0]), e)
     return 0
@@ -116,7 +119,10 @@ def rtactivate(nameserver, tags):
             return 1
         try:
             options = optparse.Values({"ec_index": 0, 'verbose': False})
-            state_control_base.alter_component_state(activate_action, cmd_path, full_path, options, None)
+            try :
+                state_control_base.alter_component_state(activate_action, cmd_path, full_path, options, None)
+            except Exception, e: # openrtm 1.1.0
+                state_control_base.alter_component_states(activate_action, [(cmd_path, full_path)], options, None)
         except Exception, e:
             print >>sys.stderr, '{0}: {1}'.format(os.path.basename(sys.argv[0]), e)
             return 1
