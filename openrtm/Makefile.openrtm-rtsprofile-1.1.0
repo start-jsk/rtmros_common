@@ -1,0 +1,26 @@
+all: installed.rtsprofile
+
+INSTALL_DIR = `rospack find openrtm`
+GIT_DIR     = build/rtsprofile
+GIT_URL     = https://github.com/gbiggs/rtsprofile.git
+GIT_PATCH   = 
+PYTHONDIR   = `python -c 'import sys; print "python%s"%sys.version[:3]'`
+include $(shell rospack find mk)/git_checkout.mk
+
+installed.rtsprofile: wiped.rtsprofile $(GIT_DIR)
+	cd $(GIT_DIR) && echo "y" | python ./setup.py build && echo "y" | python ./setup.py install --prefix=$(INSTALL_DIR)
+	touch installed.rtsprofile
+
+clean:
+	-cd $(GIT_DIR) && make clean
+
+wipe: clean
+	rm -fr installed.rtsprofile
+	rm -fr $(GIT_DIR)
+	rm -fr lib/$(PYTHONDIR)/site-packages/rtsprofile
+	rm -fr lib/$(PYTHONDIR)/site-packages/rtsprofile-1.0.0-py2.6.egg-info
+
+wiped.rtsprofile:  Makefile.openrtm-rtsprofile-1.1.0
+	make -f Makefile.openrtm-rtsprofile-1.1.0 wipe
+	touch wiped.rtsprofile
+
