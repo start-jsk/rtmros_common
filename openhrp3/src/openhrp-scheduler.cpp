@@ -302,10 +302,21 @@ public:
 					path.replace(path.find("$(CURRENT_DIR)"),14, filename.substr(0, filename.find_last_of("/")));
 				}
 				if ( path.find("$(PROJECT_DIR)") != string::npos ) {
-					rospack::ROSPack rp;
 					try {
+#ifdef ROSPACK_EXPORT
+						rospack::ROSPack rp;
 						rospack::Package *p = rp.get_pkg("openhrp3");
 						path.replace(path.find("$(PROJECT_DIR)"),14, p->path+"/share/OpenHRP-3.1/sample/project");
+#else
+						rospack::Rospack rp;
+						std::vector<std::string> search_path;
+						rp.getSearchPathFromEnv(search_path);
+						rp.crawl(search_path, 1);
+						std::string pkgpath;
+						if (rp.find("openhrp3",pkgpath)==true) {
+							path.replace(path.find("$(PROJECT_DIR)"),14, pkgpath+"/share/OpenHRP-3.1/sample/project");
+						}
+#endif
 					} catch (runtime_error &e) {
 					}
 				}
@@ -444,9 +455,20 @@ public:
 		}
 		{
 			ModelItem m;
+#ifdef ROSPACK_EXPORT
 			rospack::ROSPack rp;
 			rospack::Package *p = rp.get_pkg("openhrp3");
 			m.url = string("file://")+p->path+"/share/OpenHRP-3.1/sample/model/floor.wrl";
+#else
+			rospack::Rospack rp;
+			std::vector<std::string> search_path;
+			rp.getSearchPathFromEnv(search_path);
+			rp.crawl(search_path, 1);
+			std::string pkgpath;
+			if (rp.find("openhrp3",pkgpath)==true) {
+				m.url = string("file://")+pkgpath+"/share/OpenHRP-3.1/sample/model/floor.wrl";
+			}
+#endif
 			LinkInfoSequence_var links = body->links();
 			string rootLinkName = string(links[0].name);
 			m.joint[rootLinkName].mode = DynamicsSimulator::HIGH_GAIN_MODE;
