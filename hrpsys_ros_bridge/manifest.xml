@@ -49,7 +49,6 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <depend package="euscollada"/>
   <depend package="choreonoid"/>
   <depend package="collada_robots"/>
-  <depend package="webots_simulator"/>
 
   <!-- examples -->
   <depend package="rviz"/>
