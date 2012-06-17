@@ -3,7 +3,7 @@
 (require :kawadahironx "package://hrpsys_ros_bridge/models/kawada-hironx.l")
 
 (defclass kawadahironx-interface
-  :super robot-interface
+  :super rtm-ros-robot-interface
   :slots (r-gripper-action l-gripper-action))
 (defmethod kawadahironx-interface
   (:init (&rest args)

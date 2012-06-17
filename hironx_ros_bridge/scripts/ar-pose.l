@@ -10,7 +10,7 @@
 (ros::roseus "ar_pose_clinet")
 
 (defclass kawadahironx-interface
-  :super robot-interface
+  :super rtm-ros-robot-interface
   :slots ())
 (defmethod kawadahironx-interface
   (:init (&rest args)
