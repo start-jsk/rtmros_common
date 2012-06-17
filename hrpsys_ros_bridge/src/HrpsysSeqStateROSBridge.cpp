@@ -38,6 +38,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   lfsensor_pub = nh.advertise<geometry_msgs::WrenchStamped>("lfsensor", 10);
   rfsensor_pub = nh.advertise<geometry_msgs::WrenchStamped>("rfsensor", 10);
   joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
+  mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
 
   server.start();
 }
@@ -192,6 +193,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   pr2_controllers_msgs::JointTrajectoryControllerState joint_controller_state;
   joint_controller_state.header.stamp = ros::Time::now();
 
+  hrpsys_ros_bridge::MotorStates mot_states;
+  mot_states.header.stamp = ros::Time::now();
+
   // rstorqueIn
   if ( m_rstorqueIn.isNew () ) {
     try {
@@ -334,6 +338,12 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       {
 	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
+    //
+    for ( unsigned int i = 0; i < body->joints().size() ; i++ ){
+      mot_states.name.push_back(body->joint(i)->name);
+      mot_states.temperature.push_back(m_rsJointTemperature.data[i]);
+    }
+    mot_states_pub.publish(mot_states);
   }
 
   if ( m_baseTformIn.isNew () ) {

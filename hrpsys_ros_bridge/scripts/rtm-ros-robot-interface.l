@@ -1,6 +1,8 @@
 (load "package://pr2eus/robot-interface.l")
 
 (ros::load-ros-manifest "dynamic_reconfigure")
+(ros::roseus-add-msgs "hrpsys_ros_bridge")
+
 (defmethod robot-interface
   (:sendmsg
    (strs &optional (service-name "sendmsg"))

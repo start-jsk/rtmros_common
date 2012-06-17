@@ -27,6 +27,7 @@
 #include "pr2_controllers_msgs/JointTrajectoryControllerState.h"
 #include "tf/transform_broadcaster.h"
 #include "dynamic_reconfigure/Reconfigure.h"
+#include "hrpsys_ros_bridge/MotorStates.h"
 
 extern const char* hrpsysseqstaterosbridgeimpl_spec[];
 
@@ -49,7 +50,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   hrp::BodyPtr body;
 
   ros::NodeHandle nh;
-  ros::Publisher joint_state_pub, lfsensor_pub, rfsensor_pub, joint_controller_state_pub;
+  ros::Publisher joint_state_pub, lfsensor_pub, rfsensor_pub, joint_controller_state_pub, mot_states_pub;
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> server;
   ros::ServiceServer sendmsg_srv;
   bool interpolationp;
