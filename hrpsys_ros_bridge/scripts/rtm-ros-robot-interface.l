@@ -3,7 +3,12 @@
 (ros::load-ros-manifest "dynamic_reconfigure")
 (ros::roseus-add-msgs "hrpsys_ros_bridge")
 
-(defmethod robot-interface
+(defclass rtm-ros-robot-interface
+  :super robot-interface
+  :slots ()
+  )
+
+(defmethod rtm-ros-robot-interface
   (:sendmsg
    (strs &optional (service-name "sendmsg"))
    (ros::service-call

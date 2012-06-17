@@ -3,7 +3,7 @@
 (require :samplerobot "package://hrpsys_ros_bridge/models/samplerobot.l")
 
 (defclass samplerobot-interface
-  :super robot-interface
+  :super rtm-ros-robot-interface
   :slots ())
 (defmethod samplerobot-interface
   (:init (&rest args)

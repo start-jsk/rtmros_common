@@ -2,7 +2,7 @@
 (require :hrp4c "package://hrpsys_ros_bridge/models/hrp4c.l")
 
 (defclass hrp4c-interface
-  :super robot-interface
+  :super rtm-ros-robot-interface
   :slots ())
 (defmethod hrp4c-interface
   (:init (&rest args)

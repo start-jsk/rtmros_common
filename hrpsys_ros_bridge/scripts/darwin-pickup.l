@@ -2,7 +2,7 @@
 (require :darwin "package://hrpsys_ros_bridge/models/darwin.l")
 
 (defclass darwin-interface
-  :super robot-interface
+  :super rtm-ros-robot-interface
   :slots ())
 (defmethod darwin-interface
   (:init (&rest args)

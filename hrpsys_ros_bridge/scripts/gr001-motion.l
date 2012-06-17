@@ -2,7 +2,7 @@
 (require :gr001 "package://hrpsys_ros_bridge/models/gr001.l")
 
 (defclass gr001-interface
-  :super robot-interface
+  :super rtm-ros-robot-interface
   :slots ())
 (defmethod gr001-interface
   (:init (&rest args)
