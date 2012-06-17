@@ -68,3 +68,14 @@ diff -ur src/ext/artlinux/art_ec/Makefile.am.orig src/ext/artlinux/art_ec/Makefi
  ArtExecutionContext_la_FLAGS   = -L$(top_builddir)/src/lib/rtm/.lib
  ArtExecutionContext_la_LIBADD  = $(top_builddir)/src/lib/rtm/libRTC.la
  
+--- src/ext/artlinux/art_ec/Makefile.in.org	2012-06-15 19:45:04.104162375 +0900
++++ src/ext/artlinux/art_ec/Makefile.in	2012-06-15 19:45:21.820589893 +0900
+@@ -230,7 +230,7 @@
+ moduledir = $(pkgdatadir)/modules
+ module_LTLIBRARIES = ArtExecutionContext.la
+ ArtExecutionContext_la_SOURCES = ArtExecutionContext.cpp ArtExecutionContext.h
+-ArtExecutionContext_la_LDFLAGS = -module -shared
++ArtExecutionContext_la_LDFLAGS = -module -shared $(ARTLIB)
+ ArtExecutionContext_la_FLAGS = -L$(top_builddir)/src/lib/rtm/.lib
+ ArtExecutionContext_la_LIBADD = $(top_builddir)/src/lib/rtm/libRTC.la
+ all: all-am
