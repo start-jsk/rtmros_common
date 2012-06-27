@@ -1,7 +1,9 @@
 <launch>
+  <arg name="KILL_SERVERS" default="false" />
   <include file="$(find hrpsys)/launch/hrpsys.launch">
     <arg name="PROJECT_FILE" value="$(find hrpsys_ros_bridge)/models/kawada-hironx.xml" />
     <arg name="MODEL_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae" />
     <arg name="CONF_FILE" value="$(find hrpsys_ros_bridge)/models/kawada-hironx.conf" />
+    <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
   </include>
 </launch>
