@@ -1,9 +1,11 @@
 <launch>
+  <arg name="KILL_SERVERS" default="false" />
   <include file="$(find hrpsys)/launch/hrpsys.launch" >
     <arg name="PROJECT_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.xml" />
     <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl" />
     <arg name="CONF_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP-4C.conf" />
     <arg name="SIMULATOR_NAME" value="HRP-4C(Robot)0" />
+    <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
   </include>
 
   <!-- BEGIN:openrtm connection -->
