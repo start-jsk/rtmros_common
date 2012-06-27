@@ -2,6 +2,7 @@
 <launch>
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
+  <arg name="KILL_SERVERS" default="false" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
   <!-- END:openrtm setting -->
@@ -19,7 +20,9 @@
 
   <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
 
-  <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
+  <group if="$(arg KILL_SERVERS)">
+    <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
+  </group>
 
   <node name="viewer" pkg="hrpsys" type="ViewerComp" args='$(arg openrtm_args) -o "example.Viewer0.conf.default.project:$(arg PROJECT_FILE)" -o "exec_cxt.periodic.rate:30"' />
   <node name="simulator" pkg="hrpsys" type="SimulatorComp" args='$(arg openrtm_args) -o "example.Simulator.instance_name:$(arg SIMULATOR_NAME)" -o "example.Simulator.conf.default.project:$(arg PROJECT_FILE)" -o "example.Simulator.conf.default.kinematics_only:$(arg KINEMATICS_ONLY)" -o "exec_cxt.periodic.rate:$(arg OPENHRP3_SIM_PERIODIC_RATE)"' respawn="$(arg RESPAWN)" />
