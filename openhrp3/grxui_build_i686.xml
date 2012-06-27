@@ -81,20 +81,28 @@
 
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.ui_3.7.0.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.swt_3.7.0.dist.jar"/>
+        <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.swt_3.7.2.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.swt.gtk.linux.x86_3.7.0.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.jface_3.7.0.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.core.commands_3.6.0.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.ui.workbench_3.7.0.dist.jar"/>
+        <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.ui.workbench_3.7.1.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.core.runtime_3.7.0.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.osgi_3.7.0.dist.jar"/>
+        <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.osgi_3.7.2.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.equinox.common_3.6.0.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.core.jobs_3.5.100.dist.jar"/>
+        <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.core.jobs_3.5.101.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.core.runtime.compatibility.registry_3.5.0.dist/runtime_registry_compatibility.jar"/>
+        <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.core.runtime.compatibility.auth_3.2.200.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.equinox.registry_3.5.100.dist.jar"/>
+        <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.equinox.registry_3.5.101.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.equinox.preferences_3.4.0.dist.jar"/>
+        <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.equinox.preferences_3.4.2.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.core.contenttype_3.4.100.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.equinox.app_1.3.100.dist.jar"/>
         <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.core.resources_3.7.100.dist.jar"/>
+        <pathelement location="/usr/lib/eclipse/plugins/org.eclipse.core.resources_3.7.101.dist.jar"/>
 
 			<pathelement path="/usr/lib/eclipse/plugins/org.eclipse.ui_3.5.2.M20100120-0800.jar"/>
 			<pathelement path="/usr/lib/eclipse/plugins/org.eclipse.core.runtime_3.5.0.v20090525.jar"/>
