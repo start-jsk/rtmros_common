@@ -1,6 +1,7 @@
 <launch>
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
+  <arg name="KILL_SERVERS" default="false" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
   <!-- END:openrtm setting -->
@@ -13,7 +14,9 @@
 
   <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
 
-  <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
+  <group if="$(arg KILL_SERVERS)">
+    <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
+  </group>
 
   <node name="grxui" pkg="openhrp3" type="grxui.sh" args="$(find openhrp3)/scripts/grxui_3dview2.xml" />
   <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" /> <!-- loading dae files crushes model loader -->
