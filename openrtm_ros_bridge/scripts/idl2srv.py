@@ -380,13 +380,19 @@ class ServiceVisitor (idlvisitor.AstVisitor):
                 else:
                     req_code += '  convert(req.%s, %s);\n' % (var, var)
 
+        code += '\n'
+        code += '  ROS_INFO_STREAM("%s::%s()");\n' % (ifname, op.identifier())
+
+        code += '\n' + req_code + '\n'
+
+        code += '  try {\n'
+
         params = ', '.join(params)
-        code += ('  ROS_INFO("call %s");\n' % op.identifier()) + '\n' + req_code
 
         if op.oneway() or op.returnType().kind() == idltype.tk_void:
-            code += '  m_service0->%s(%s);\n' % (op.identifier(), params)
+            code += '    m_service0->%s(%s);\n' % (op.identifier(), params)
         elif isinstance(op.returnType().unalias(), idltype.Base):
-            code += '  res.operation_return = m_service0->%s(%s);\n' % (op.identifier(), params)
+            code += '    res.operation_return = m_service0->%s(%s);\n' % (op.identifier(), params)
         else:
             rtype = op.returnType()
             if isinstance(rtype.unalias(), idltype.String):
@@ -397,9 +403,29 @@ class ServiceVisitor (idlvisitor.AstVisitor):
                 ptr = ('*' if cxx.types.variableDecl(rtype.decl()) else '')
             else: ptr = ''
             code += '  %s operation_return;\n' % self.getCppTypeText(rtype, out=True, full=CPP_FULL)
-            code += '  operation_return = m_service0->%s(%s);\n' % (op.identifier(), params)
-            code += '  convert(%soperation_return, res.operation_return);\n' % ptr
+            code += '    operation_return = m_service0->%s(%s);\n' % (op.identifier(), params)
+            code += '    convert(%soperation_return, res.operation_return);\n' % ptr
 
+        code += '  } catch(CORBA::COMM_FAILURE& ex) {\n'
+        code += '      ROS_ERROR_STREAM("%s::%s : Caught system exception COMM_FAILURE -- unable to contact the object.");\n' % (ifname, op.identifier())
+        code += '      return false;\n'
+        code += '  } catch(CORBA::SystemException&) {\n'
+        code += '      ROS_ERROR_STREAM("%s::%s : Caught CORBA::SystemException.");\n' % (ifname, op.identifier())
+        code += '      return false;\n'
+        code += '  } catch(CORBA::Exception&) {\n'
+        code += '      ROS_ERROR_STREAM("%s::%s : Caught CORBA::Exception.");\n' % (ifname, op.identifier())
+        code += '      return false;\n'
+        code += '  } catch(omniORB::fatalException& fe) {\n'
+        code += '      ROS_ERROR_STREAM("%s::%s : Caught omniORB::fatalException:");\n' % (ifname, op.identifier())
+        code += '      ROS_ERROR_STREAM("  file: " << fe.file());\n'
+        code += '      ROS_ERROR_STREAM("  line: " << fe.line());\n'
+        code += '      ROS_ERROR_STREAM("  mesg: " << fe.errmsg());\n'
+        code += '      return false;\n'
+        code += '  }\n'
+        code += '  catch(...) {\n'
+        code += '      ROS_ERROR_STREAM("%s::%s : Caught unknown exception.");\n' % (ifname, op.identifier())
+        code += '      return false;\n'
+        code += '  }\n'
 
         code += res_code
 
