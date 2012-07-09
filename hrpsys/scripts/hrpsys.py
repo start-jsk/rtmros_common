@@ -21,10 +21,11 @@ def activateComps():
     sim.start()
     seq.start()
     sh.start()
+    log.start()
     hgc.start()
 
 def createComps():
-    global seq, seq_svc, sh, sh_svc, hgc
+    global seq, seq_svc, sh, sh_svc, hgc, log, log_svc
 
     ms.load("SequencePlayer")
     seq = ms.create("SequencePlayer", "seq")
@@ -40,6 +41,17 @@ def createComps():
     sh = ms.create("StateHolder", "StateHolder0")
     print "[hrpsys.py] createComps -> StateHolder : ",sh
     sh_svc = StateHolderServiceHelper.narrow(sh.service("service0"));
+
+    ms.load("DataLogger");
+    log = ms.create("DataLogger", "log")
+    print "[hrpsys.py] createComps -> DataLogger : ",log
+    log_svc = DataLoggerServiceHelper.narrow(log.service("service0"));
+
+
+# setup logger
+def setupLogger():
+    log_svc.add("TimedDoubleSeq", "q")
+    connectPorts(sim.port("q"), log.port("q"))
 
 
 def init(simulator="Simulator"):
@@ -72,6 +84,8 @@ def init(simulator="Simulator"):
 
     print "[hrpsys.py] initialized successfully"
 
+    setupLogger()
+    print "[hrpsys.py] setup logger done"
 
 if __name__ == '__main__':
 
