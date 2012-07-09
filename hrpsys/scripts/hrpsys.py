@@ -56,6 +56,9 @@ def setupLogger(url=""):
     connectPorts(sim.port("q"), log.port("q"))
     connectPorts(sim.port("pos"), log.port("pos"))
     connectPorts(sim.port("rpy"), log.port("rpy"))
+    if sim.port("tau") != None:
+        log_svc.add("TimedDoubleSeq", "tau")
+        connectPorts(sim.port("tau"), log.port("tau"))
     # sensor logger ports
     import org.omg.CosNaming
     import jp.go.aist.hrp.simulator
