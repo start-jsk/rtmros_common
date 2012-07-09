@@ -51,7 +51,15 @@ def createComps():
 # setup logger
 def setupLogger():
     log_svc.add("TimedDoubleSeq", "q")
+    log_svc.add("TimedPoint3D", "pos")
+    log_svc.add("TimedOrientation3D", "rpy")
+    log_svc.add("TimedAngularVelocity3D", "gyrometer")
+    log_svc.add("TimedAcceleration3D", "gsensor")
     connectPorts(sim.port("q"), log.port("q"))
+    connectPorts(sim.port("pos"), log.port("pos"))
+    connectPorts(sim.port("rpy"), log.port("rpy"))
+    connectPorts(sim.port("gyrometer"), log.port("gyrometer"))
+    connectPorts(sim.port("gsensor"), log.port("gsensor"))
 
 
 def init(simulator="Simulator"):
