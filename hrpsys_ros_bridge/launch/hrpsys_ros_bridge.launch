@@ -23,6 +23,8 @@
 	output="$(arg OUTPUT)" args="$(arg openrtm_args)" >
     <param name="frame_id" value="/VISION_SENSOR1" />
   </node>
+  <node pkg="hrpsys" name="DataLoggerServiceROSBridge" type="DataLoggerServiceROSBridgeComp"
+  	output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
   <!-- -o "exec_cxt.periodic.type:SynchExtTriggerEC" -->
 
   <param name="robot_description" textfile="$(arg COLLADA_FILE)" />
@@ -35,8 +37,10 @@
   <rtconnect from="StateHolder0.rtc:baseTformOut" to="HrpsysSeqStateROSBridge0.rtc:baseTform" />
   <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" />
   <rtconnect from="$(arg ROBOT_NAME)(Robot)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" />
+  <rtconnect from="DataLoggerServiceROSBridge.rtc:DataLoggerService" to="log.rtc:DataLoggerService" />
   <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
   <rtactivate component="ImageSensorROSBridge0.rtc" />
+  <rtactivate component="DataLoggerServiceROSBridge.rtc" />
   <!-- END:openrtm connection -->
 </launch>
 
