@@ -41,6 +41,7 @@
 
   <!-- BEGIN:openrtm connection -->
   <arg name="ROBOT_NAME" value="dummy" />
+  <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)"/>
   <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hrpsys)/launch/hrpsys.launch" respawn="$(arg RESPAWN)" />
   <rtactivate component="Viewer0.rtc" />
   <rtconnect from="$(arg SIMULATOR_NAME).rtc:state" to="Viewer0.rtc:state" />

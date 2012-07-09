@@ -10,7 +10,6 @@
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_hrp4c" pkg="hrpsys" type="hrpsys-launch.sh" args="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl $(find hrpsys)/launch/hrp4c.launch" />
-  <rtconnect from="HRP-4C(Robot)0.rtc:state" to="Viewer0.rtc:state" />
   <!-- END:openrtm connection -->
 
   <sphinxdoc><![CDATA[
