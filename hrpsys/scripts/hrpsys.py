@@ -17,7 +17,7 @@ def connectComps():
     connectPorts(sim.port("q"), sh.port("qIn"))
 
 def activateComps():
-    rtm.serializeComponents([sim, seq, sh, hgc])
+    rtm.serializeComponents([sim, seq, sh, log, hgc])
     sim.start()
     seq.start()
     sh.start()
