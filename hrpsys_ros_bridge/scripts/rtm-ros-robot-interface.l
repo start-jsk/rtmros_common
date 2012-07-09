@@ -2,6 +2,7 @@
 
 (ros::load-ros-manifest "dynamic_reconfigure")
 (ros::roseus-add-msgs "hrpsys_ros_bridge")
+(ros::roseus-add-srvs "hrpsys")
 
 (defclass rtm-ros-robot-interface
   :super robot-interface
@@ -41,4 +42,11 @@
 	       (let ((str""))
 		 (dotimes (i (length v)) (setq str (format nil "~A ~A" str (deg2rad (elt v i)))))
 		 (format nil "~A ~A" str (* 1e-3 tm))))))
+  ;; for logger
+  (:save-log
+   (fname)
+   (ros::service-call
+    "DataLoggerServiceROSBridge/save"
+    (instance hrpsys::Openhrp_Dataloggerservice_saveRequest :init :basename fname))
+   )
   )
