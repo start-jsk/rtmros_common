@@ -49,20 +49,39 @@ def createComps():
 
 
 # setup logger
-def setupLogger():
+def setupLogger(url=""):
     log_svc.add("TimedDoubleSeq", "q")
     log_svc.add("TimedPoint3D", "pos")
     log_svc.add("TimedOrientation3D", "rpy")
-    log_svc.add("TimedAngularVelocity3D", "gyrometer")
-    log_svc.add("TimedAcceleration3D", "gsensor")
     connectPorts(sim.port("q"), log.port("q"))
     connectPorts(sim.port("pos"), log.port("pos"))
     connectPorts(sim.port("rpy"), log.port("rpy"))
-    connectPorts(sim.port("gyrometer"), log.port("gyrometer"))
-    connectPorts(sim.port("gsensor"), log.port("gsensor"))
+    # sensor logger ports
+    import org.omg.CosNaming
+    import jp.go.aist.hrp.simulator
+    obj = rtm.rootnc.resolve([org.omg.CosNaming.NameComponent('ModelLoader', '')])
+    mdlldr = jp.go.aist.hrp.simulator.ModelLoaderHelper.narrow(obj)
+    print "[bodyinfo] URL = file://"+url
+    bodyInfo = mdlldr.getBodyInfo("file://"+url)
+    ret = []
+    for ll in bodyInfo.links():
+        if len(ll.sensors) > 0:
+            ret.extend(ll.sensors)
+    for sen in map(lambda x : x.name, ret):
+        if sen == "gyrometer":
+            sen_type = "TimedAngularVelocity3D"
+        elif sen == "gsensor":
+            sen_type = "TimedAcceleration3D"
+        elif sen.find("fsensor") != -1:
+            sen_type = "TimedDoubleSeq"
+        else:
+            continue
+        print sen_type, sen
+        log_svc.add(sen_type, sen)
+        connectPorts(sim.port(sen), log.port(sen))
 
 
-def init(simulator="Simulator"):
+def init(simulator="Simulator", url=""):
     global ms,sim
 
     ms = None
@@ -92,7 +111,7 @@ def init(simulator="Simulator"):
 
     print "[hrpsys.py] initialized successfully"
 
-    setupLogger()
+    setupLogger(url)
     print "[hrpsys.py] setup logger done"
 
 if __name__ == '__main__':
@@ -104,7 +123,7 @@ if __name__ == '__main__':
     print "[hrpsys.py] start hrpsys"
 
     if len(sys.argv) > 1 :
-        init(sys.argv[1])
+        init(sys.argv[1], sys.argv[2])
     else :
         init()
 
