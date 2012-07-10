@@ -8,7 +8,7 @@
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
-  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "manager.modules.load_path:$(find hrpsys)/lib" -o "manager.modules.preload:hrpEC.so" -o "exec_cxt.periodic.type:hrpExecutionContext" -o "logger.file_name:/tmp/rtc%p.log"' />
   <!-- END:openrtm setting -->
   <arg name="OUTPUT" default="screen"/>
   <env name="LANG" value="C" />
