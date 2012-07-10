@@ -5,6 +5,9 @@
  * $Id$ 
  */
 #include "HrpsysSeqStateROSBridge.h"
+#include "rtm/idl/RTC.hh"
+#include "hrpsys/idl/ExecutionProfileService.hh"
+#include <boost/format.hpp>
 
 // Module specification
 // <rtc-template block="module_spec">
@@ -39,6 +42,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   rfsensor_pub = nh.advertise<geometry_msgs::WrenchStamped>("rfsensor", 10);
   joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
+  diagnostics_pub = nh.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
 
   server.start();
 }
@@ -55,6 +59,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   // impl
   HrpsysSeqStateROSBridgeImpl::onInitialize();
 
+  nameserver = m_pManager->getConfig ()["corba.nameservers"];
   // initialize
   ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @Initilize name : " << getInstanceName());
 
@@ -201,6 +206,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     try {
       m_rstorqueIn.read();
       //for ( unsigned int i = 0; i < m_rstorque.data.length() ; i++ ) std::cerr << m_rstorque.data[i] << " "; std::cerr << std::endl;
+
     }
     catch(const std::runtime_error &e)
       {
@@ -404,6 +410,88 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       {
 	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
+  }
+
+  static int loop = 0;
+  static ros::Time last_updated = ros::Time::now();
+  if ( loop++ % 1000 == 0 ) {
+      diagnostic_msgs::DiagnosticArray diagnostic;
+      diagnostic.header.stamp = ros::Time::now();
+
+      diagnostic_msgs::DiagnosticStatus status;
+      diagnostic_msgs::KeyValue value;
+
+      status.name = nameserver + " hrpEC profile";
+      status.message = "OK";
+      status.hardware_id = nameserver;
+
+      value.key = "Time Since Update";
+      value.value = str(boost::format("%f")%(ros::Time::now() - last_updated).toSec());
+      status.values.push_back(value);
+
+      last_updated = ros::Time::now();
+
+      value.key = "Name Server";
+      value.value = nameserver;
+      status.values.push_back(value);
+
+      std::vector<RTObject_impl *> comps = m_pManager->getComponents();
+      for (std::vector<RTObject_impl *>::iterator it = comps.begin(); it != comps.end(); it++) {
+	  diagnostic_msgs::KeyValue value;
+	  value.key = "Component";
+	  value.value = (*it)->getInstanceName();
+	  status.values.push_back(value);
+      }
+      ExecutionContext_ptr ec = this->get_context(ec_id);
+      value.key = "State";
+      value.value = (ec->is_running()?"Running":"Stopped");
+      status.values.push_back(value);
+      value.key = "Rate";
+      value.value = str(boost::format("%f")%ec->get_rate());
+      status.values.push_back(value);
+      value.key = "Kind";
+      switch (ec->get_kind()) {
+      case RTC::PERIODIC:
+	  value.value = "PERIODIC"; break;
+      case RTC::EVENT_DRIVEN:
+	  value.value = "EVENT_DRIVEN"; break;
+      default:
+	  value.value = "OTHER";
+      }
+      status.values.push_back(value);
+
+      try {
+	  OpenHRP::ExecutionProfileService_var ep;
+	  ep = OpenHRP::ExecutionProfileService::_narrow(ec);
+	  OpenHRP::ExecutionProfileService::Profile* profile = ep->getProfile();
+	  value.key = "Max Period";
+	  value.value = str(boost::format("%f")%profile->max_period);
+	  status.values.push_back(value);
+	  value.key = "Min Period";
+	  value.value = str(boost::format("%f")%profile->min_period);
+	  status.values.push_back(value);
+	  value.key = "Average Period";
+	  value.value = str(boost::format("%f")%profile->avg_period);
+	  status.values.push_back(value);
+	  value.key = "Max Total Process";
+	  value.value = str(boost::format("%f")%profile->max_total_process);
+	  status.values.push_back(value);
+	  value.key = "Count";
+	  value.value = str(boost::format("%d")%profile->count);
+	  status.values.push_back(value);
+	  value.key = "Time Over";
+	  value.value = str(boost::format("%d")%profile->timeover);
+	  status.values.push_back(value);
+      } catch(CORBA::SystemException& e) {
+	  status.message = e._name();
+	  status.level = diagnostic_msgs::DiagnosticStatus::ERROR;
+      } catch (...) {
+	  status.message = "ERROR";
+	  status.level = diagnostic_msgs::DiagnosticStatus::ERROR;
+      }
+
+      diagnostic.status.push_back(status);
+      diagnostics_pub.publish(diagnostic);
   }
   //
   return RTC::RTC_OK;

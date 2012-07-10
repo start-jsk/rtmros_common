@@ -28,6 +28,7 @@
 #include "tf/transform_broadcaster.h"
 #include "dynamic_reconfigure/Reconfigure.h"
 #include "hrpsys_ros_bridge/MotorStates.h"
+#include "diagnostic_msgs/DiagnosticArray.h"
 
 extern const char* hrpsysseqstaterosbridgeimpl_spec[];
 
@@ -50,7 +51,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   hrp::BodyPtr body;
 
   ros::NodeHandle nh;
-  ros::Publisher joint_state_pub, lfsensor_pub, rfsensor_pub, joint_controller_state_pub, mot_states_pub;
+  ros::Publisher joint_state_pub, lfsensor_pub, rfsensor_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub;
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> server;
   ros::ServiceServer sendmsg_srv;
   bool interpolationp;
@@ -59,6 +60,8 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   coil::Mutex m_mutex;
   coil::TimeMeasure tm;
+
+  std::string nameserver;
 };
 
 
