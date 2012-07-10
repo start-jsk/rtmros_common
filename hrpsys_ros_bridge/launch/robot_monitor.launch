@@ -4,8 +4,8 @@
 
   <!-- Monitor CPU temp, usage -->
   <node pkg="pr2_computer_monitor" name="realtime_cpu_monitor" type="cpu_monitor.py" output="screen" >
-    <param name="check_core_temps" type="bool" value="True" /> <!-- add user to sudoers -->
-    <param name="check_ipmi_tool" type="bool" value="False" /> <!-- ?? -->
+    <param name="check_core_temps" type="bool" value="False" /> <!-- add user to sudoers -->
+    <param name="check_ipmi_tool" type="bool" value="False" /> <!-- apt-get install ipmitool freeipmi-common -->
     <param name="check_nfs" type="bool" value="False" />
     <param name="enforce_clock_speed" type="bool" value="False" />
     <param name="num_cores" type="int" value="4" />
