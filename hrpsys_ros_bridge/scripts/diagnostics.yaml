@@ -1,0 +1,16 @@
+pub_rate: 1.0 # Optional
+base_path: '' # Optional, prepended to all diagnostic output
+analyzers:
+  computers:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: 'Computers'
+    contains: [
+      'HD Temp',
+      'CPU Usage',
+      'CPU Temperature',
+      'HD Usage',
+      'NFS']
+  hrpsys:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: 'Hrpsys'
+    contains: ['hrpEC']
