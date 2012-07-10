@@ -44,6 +44,10 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <depend package="image_transport" />
   <depend package="dynamic_reconfigure" />
 
+  <!-- dashboard -->
+  <depend package="robot_monitor"/>
+  <depend package="pr2_dashboard"/>
+
   <!-- models -->
   <depend package="roseus"/>
   <depend package="euscollada"/>
