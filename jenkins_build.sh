@@ -4,7 +4,7 @@ wget https://jsk-ros-pkg.svn.sourceforge.net/svnroot/jsk-ros-pkg/trunk/jsk.rosbu
 . /tmp/jsk.rosbuild -e $@
 
 function install-rtm-ros-robotics {
-    install-pkg http://jsk-ros-pkg.svn.sourceforge.net/viewvc/jsk-ros-pkg/trunk/jsk.rosinstall http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstal
+    install-pkg http://jsk-ros-pkg.svn.sourceforge.net/viewvc/jsk-ros-pkg/trunk/jsk.rosinstall http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall
 }
 function compile-rtm-ros-robotics {
     compile-pkg euscollada rtmros_common openhrp3 hrpsys_ros_bridge mrobot_ros_bridge RS003 openrtm_ros_bridge
