@@ -15,7 +15,7 @@ e_pr2
 }
 
 setup-ros
-apt-get-ros-pkg
+apt-get-ros-package
 install-rtm-ros-robotics
 compile-rtm-ros-robotics
 
