@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# setup workspace and buildspace
-if [ "$WORKSPACE" == "" ]; then # if not jenkins
-    export WORKSPACE=$HOME
-fi
-. $WORKSPACE/ros/electric/jsk-ros-pkg/jsk.rosbuild -e $@
+wget https://jsk-ros-pkg.svn.sourceforge.net/svnroot/jsk-ros-pkg/trunk/jsk.rosbuild -O /tmp/jsk.rosbuild
+. /tmp/jsk.rosbuild -e $@
 
 function install-rtm-ros-robotics {
     install-pkg http://jsk-ros-pkg.svn.sourceforge.net/viewvc/jsk-ros-pkg/trunk/jsk.rosinstall http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstal
