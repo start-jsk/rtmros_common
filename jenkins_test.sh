@@ -11,7 +11,7 @@ trap error ERR
 function test-grxui {
     local package=$1
     trap error ERR
-    (cd `rospack find $package`; make test)
+    (cd `rospack find rtmbuild`; make test || (sudo /etc/init.d/omniorb4-nameserver stop; rosrun openhrp openhrp3-shutdown-servers; make test) )
     (cd `rospack find $package`; rosrun rosdoc rosdoc $package 2>&1 | tee build/rosdoc.log; [ `grep "WARNING: cannot copy" build/rosdoc.log | wc -l` -gt 0 ] && exit 1 || true) # we assume .static does not exist... warning
 
     (cd `rospack find $package`; copy build/index.rst .; copy build/conf.py .;svn add --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 index.rst conf.py; svn commit --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -m "update index.rst,conf.py by Jenkins" index.rst conf.py)
