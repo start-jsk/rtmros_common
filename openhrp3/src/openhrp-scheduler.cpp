@@ -9,6 +9,8 @@
 #include <hrpCorba/ClockGenerator.hh>
 #include <hrpUtil/Tvmet3d.h>
 #include <fstream>
+#include <iomanip>
+#include <stdexcept>
 #include <stdlib.h>
 #include <getopt.h>
 

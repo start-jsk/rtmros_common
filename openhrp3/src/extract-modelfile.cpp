@@ -7,6 +7,8 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
+#include <stdexcept>
+
 #include <rospack/rospack.h>
 
 using namespace std;
@@ -60,7 +62,7 @@ string readFromXMLFile(string filename) {
 						path.replace(path.find("$(PROJECT_DIR)"),14, pkgpath+"/share/OpenHRP-3.1/sample/project");
 					}
 #endif
-				} catch (runtime_error &e) {
+				} catch (std::runtime_error &e) {
 				}
 			}
 			if ( path[0] != '/' ) {
