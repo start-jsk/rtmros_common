@@ -6,6 +6,7 @@
  */
 #include "AbsTransformToPosRpy.h"
 #include <hrpUtil/Tvmet3d.h>
+#include <iomanip>
 
 
 // Module specification
