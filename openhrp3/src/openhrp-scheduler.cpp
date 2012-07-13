@@ -692,7 +692,7 @@ public:
 			cerr << "[openhrp-scheduler] Collision : " << objectName1 << "#" << it->jointName1 << " <> " << objectName2 << "#" << it->jointName2 << " Friction static : "<< it->staticFriction << " slideing : " << it->slidingFriction << " culling : " << it->cullingThresh << " " << "sprintDamperModel : " << it->sprintDamperModel << endl;
 			dynamicsSimulator->registerCollisionCheckPair(objectName1.c_str(), it->jointName1.c_str(),
 														  objectName2.c_str(), it->jointName2.c_str(),
-														  it->staticFriction,it->slidingFriction,K,C,it->cullingThresh);
+														  it->staticFriction,it->slidingFriction,K,C,it->cullingThresh, 0);
 
 		}
 		dynamicsSimulator->initSimulation();
