@@ -200,6 +200,8 @@ libxml2:
 # libreadline5-dev
 libirrlicht-dev:
   ubuntu: libirrlicht-dev
+libglew-dev:
+  ubuntu: libglew1.5-dev libglew1.5
 
 # for openrtm-python-example
 tix:

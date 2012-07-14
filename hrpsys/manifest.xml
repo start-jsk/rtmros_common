@@ -16,6 +16,7 @@
 
   <rosdep name="doxygen" />
   <rosdep name="libirrlicht-dev" />
+  <rosdep name="libglew-dev" />
 </package>
 
 
