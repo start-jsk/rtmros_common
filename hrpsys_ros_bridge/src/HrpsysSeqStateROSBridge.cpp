@@ -274,7 +274,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
 	hrp::Vector3 rpy = hrp::rpyFromRot(sensor->localR);
 	transform.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
-	br.sendTransform(tf::StampedTransform(transform, joint_state.header.stamp, sensor->link->link_name, sensor->name));
+	br.sendTransform(tf::StampedTransform(transform, joint_state.header.stamp, sensor->link->name, sensor->name));
       }
     }
 
@@ -363,7 +363,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     base.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
 
     // odom publish
-    br.sendTransform(tf::StampedTransform(base, joint_state.header.stamp, "odom", body->rootLink()->link_name));
+    br.sendTransform(tf::StampedTransform(base, joint_state.header.stamp, "odom", body->rootLink()->name));
   }
 
   //
