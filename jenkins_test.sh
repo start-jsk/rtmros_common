@@ -25,7 +25,7 @@ function test-grxui {
 set -x
 rm -fr `rospack find openhrp3`/workspace/
 sudo /etc/init.d/omniorb4-nameserver stop
-rosrun openhrp3 openhrp-shutdown-servers
+(rosrun openhrp3 openhrp-shutdown-servers; exit 0)
 test-grxui openhrp3
 test-grxui hrpsys
 
