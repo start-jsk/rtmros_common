@@ -192,9 +192,6 @@ bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 {
-  sensor_msgs::JointState joint_state;
-  joint_state.header.stamp = ros::Time::now();
-
   pr2_controllers_msgs::JointTrajectoryControllerState joint_controller_state;
   joint_controller_state.header.stamp = ros::Time::now();
 
@@ -216,6 +213,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
+    sensor_msgs::JointState joint_state;
+    // convert openrtm time to ros time
+    joint_state.header.stamp = ros::Time(m_rsangle.tm.sec, m_rsangle.tm.nsec);
+
     ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", baseTform:" << m_baseTformIn.isNew() << ", lfsensor:" << m_rslfsensorIn.isNew() << ", rfsensor:" << m_rsrfsensorIn.isNew());
     try {
       m_rsangleIn.read();
@@ -363,7 +364,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     base.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
 
     // odom publish
-    br.sendTransform(tf::StampedTransform(base, joint_state.header.stamp, "odom", body->rootLink()->name));
+    br.sendTransform(tf::StampedTransform(base, ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec), "odom", body->rootLink()->name));
   }
 
   //
@@ -373,7 +374,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute lfsensor size = " << m_rslfsensor.data.length() );
       if ( m_rslfsensor.data.length() >= 6 ) {
 	geometry_msgs::WrenchStamped lfsensor;
-	lfsensor.header.stamp = joint_state.header.stamp;
+	lfsensor.header.stamp = ros::Time(m_rslfsensor.tm.sec, m_rslfsensor.tm.nsec);
 	lfsensor.header.frame_id = "lfsensor";
 	lfsensor.wrench.force.x = m_rslfsensor.data[0];
 	lfsensor.wrench.force.y = m_rslfsensor.data[1];
@@ -395,7 +396,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute rfsensor size = " << m_rsrfsensor.data.length() );
       if ( m_rsrfsensor.data.length() >= 6 ) {
 	geometry_msgs::WrenchStamped rfsensor;
-	rfsensor.header.stamp = joint_state.header.stamp;
+	rfsensor.header.stamp = ros::Time(m_rsrfsensor.tm.sec, m_rsrfsensor.tm.nsec);
 	rfsensor.header.frame_id = "rfsensor";
 	rfsensor.wrench.force.x = m_rsrfsensor.data[0];
 	rfsensor.wrench.force.y = m_rsrfsensor.data[1];
