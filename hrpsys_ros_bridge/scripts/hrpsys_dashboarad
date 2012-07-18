@@ -168,17 +168,20 @@ class HrpsysFrame(wx.Frame):
       self._motors_button.toggle(False)
       
 
+    # from hrpsys/idl/RobotHardwareService.idl
+    # enum SwitchStatus {SWITCH_ON, SWITCH_OFF};
+    
     def on_servo_on(self, evt):
       servo = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/servo", OpenHRP_RobotHardwareService_servo )
       try:
-        servo(OpenHRP_RobotHardwareService_servoRequest("all",1))
+        servo(OpenHRP_RobotHardwareService_servoRequest("all",0))
       except rospy.ServiceException, e:
         wx.MessageBox("Failed to put the hrpsys in servo on mode: service call failed with error: %s"%(e), "Error", wx.OK|wx.ICON_ERROR)
 
     def on_servo_off(self, evt):
       servo = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/servo", OpenHRP_RobotHardwareService_servo )
       try:
-        servo(OpenHRP_RobotHardwareService_servoRequest("all",0));
+        servo(OpenHRP_RobotHardwareService_servoRequest("all",1));
       except rospy.ServiceException, e:
         wx.MessageBox("Failed to put the hrpsys in serv off mode: service call failed with error: %s"%(e), "Error", wx.OK|wx.ICON_ERROR)
 
