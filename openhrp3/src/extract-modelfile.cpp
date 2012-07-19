@@ -7,6 +7,7 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
+#include <iostream>
 #include <stdexcept>
 
 #include <rospack/rospack.h>
