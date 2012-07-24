@@ -1,18 +1,23 @@
-import sys
+#!/usr/bin/env python
+import roslib; roslib.load_manifest("hrpsys")
+
+import os
 import rtm
-import hrp
 
 from rtm import *
 from OpenHRP import *
+
+import socket
+import time
 
 def connectComps():
     connectPorts(sim.port("q"), seq.port("qInit"))
     #
     connectPorts(seq.port("qRef"), hgc.port("qIn"))
     #
-    connectPorts(hgc.port("qOut"), sim.port("qCmd"))
-    connectPorts(hgc.port("dqOut"), sim.port("dqCmd"))
-    connectPorts(hgc.port("ddqOut"), sim.port("ddqCmd"))
+    connectPorts(hgc.port("qOut"), sim.port("qRef"))
+    connectPorts(hgc.port("dqOut"), sim.port("dqRef"))
+    connectPorts(hgc.port("ddqOut"), sim.port("ddqRef"))
     #
     connectPorts(sim.port("q"), sh.port("qIn"))
 
@@ -31,7 +36,7 @@ def createComps():
     seq = ms.create("SequencePlayer", "seq")
 
     print "[hrpsys.py] createComps -> SequencePlayer : ",seq
-    seq_svc = SequencePlayerServiceHelper.narrow(seq.service("service0"))
+    seq_svc = narrow(seq.service("service0"), "SequencePlayerService")
 
     ms.load("HGcontroller");
     hgc = ms.create("HGcontroller")
@@ -40,7 +45,7 @@ def createComps():
     ms.load("StateHolder");
     sh = ms.create("StateHolder", "StateHolder0")
     print "[hrpsys.py] createComps -> StateHolder : ",sh
-    sh_svc = StateHolderServiceHelper.narrow(sh.service("service0"));
+    sh_svc = narrow(sh.service("service0"), "StateHolderService");
 
     ms.load("DataLogger");
     log = ms.create("DataLogger", "log")
@@ -119,9 +124,9 @@ def init(simulator="Simulator", url=""):
 
 if __name__ == '__main__':
 
-    while hrp.findModelLoader() == None: # seq uses modelloader
-        time.sleep(3);
-        print "[hrpsys.py] wait for ModelLoader"
+#    while hrp.findModelLoader() == None: # seq uses modelloader
+#        time.sleep(3);
+#        print "[hrpsys.py] wait for ModelLoader"
 
     print "[hrpsys.py] start hrpsys"
 
