@@ -2,11 +2,12 @@
 
 HRP4C_DOWNLOAD_FILE=$HOME/Downloads/HRP-4C.zip
 HRP4C_MODEL_DIR=`rospack find hrpsys`/share/hrpsys/samples/
-HRP4C_MODEL_PATH=${HRP4C_MODEL_DIR}/HRP-4C/HRP4Cmain.wrl
+HRP4C_MODEL_PATH=${HRP4C_MODEL_DIR}/HRP4C/HRP4Cmain.wrl
 
 if [ ! -f ${HRP4C_MODEL_PATH} ]; then
     if [ -f ${HRP4C_DOWNLOAD_FILE} ]; then
 	unzip ${HRP4C_DOWNLOAD_FILE} -d ${HRP4C_MODEL_DIR}
+	mv ${HRP4C_MODEL_DIR}/HRP-4C ${HRP4C_MODEL_DIR}/HRP4C
     else
 	echo "======================================================"
 	echo "======================================================"
@@ -21,8 +22,8 @@ if [ ! -f ${HRP4C_MODEL_PATH} ]; then
     fi
 fi
 if [ -f ${HRP4C_MODEL_PATH} ]; then
-    (cd ${HRP4C_MODEL_DIR}; patch -N HRP-4C/HRP4Cmain.wrl < `rospack find hrpsys`/patch/HRP4Cmain.view.patch)
-    (cd ${HRP4C_MODEL_DIR}/HRP-4C/cover; sed -i 's/^\(.*ccw.*\)$/#\1/' L_*.wrl  CHEST_*.wrl WAIST.wrl NECK_*.wrl)
+    (cd ${HRP4C_MODEL_DIR}; patch -N HRP4C/HRP4Cmain.wrl < `rospack find hrpsys`/patch/HRP4Cmain.view.patch)
+    (cd ${HRP4C_MODEL_DIR}/HRP4C/cover; sed -i 's/^\(.*ccw.*\)$/#\1/' L_*.wrl  CHEST_*.wrl WAIST.wrl NECK_*.wrl)
     echo 0
 fi
 
