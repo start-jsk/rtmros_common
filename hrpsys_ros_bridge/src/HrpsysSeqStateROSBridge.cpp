@@ -7,6 +7,7 @@
 #include "HrpsysSeqStateROSBridge.h"
 #include "rtm/idl/RTC.hh"
 #include "hrpsys/idl/ExecutionProfileService.hh"
+#include "hrpsys/idl/RobotHardwareService.hh"
 #include <boost/format.hpp>
 
 // Module specification
@@ -122,6 +123,7 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
   duration.length(goal->trajectory.points.size()) ;
 
   std::vector<std::string> joint_names = goal->trajectory.joint_names;
+
   for (unsigned int i=0; i < goal->trajectory.points.size(); i++) {
     angles[i].length(body->joints().size());
 
@@ -129,6 +131,7 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
     for (unsigned int j=0; j < goal->trajectory.joint_names.size(); j++ ) {
       body->link(joint_names[j])->q = point.positions[j];
     }
+
     body->calcForwardKinematics();
 
     int j = 0;
@@ -138,8 +141,8 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
       angles[i][j] = l->q;
       ++it;++j;
     }
-    m_mutex.unlock();
-    ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction : " << goal->trajectory.points[i].time_from_start.toSec());
+
+    ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction : time_from_start " << goal->trajectory.points[i].time_from_start.toSec());
     if ( i > 0 ) {
       duration[i] =  goal->trajectory.points[i].time_from_start.toSec() - goal->trajectory.points[i-1].time_from_start.toSec();
     } else { // if i == 0
@@ -150,6 +153,9 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
       }
     }
   }
+
+  m_mutex.unlock();
+
   if ( duration.length() == 1 ) {
     m_service0->setJointAngles(angles[0], duration[0]);
   } else {
@@ -197,6 +203,36 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   hrpsys_ros_bridge::MotorStates mot_states;
   mot_states.header.stamp = ros::Time::now();
+
+  // servoStateIn
+  if ( m_servoStateIn.isNew () ) {
+    try {
+      m_servoStateIn.read();
+      mot_states.header.stamp = ros::Time(m_servoState.tm.sec, m_servoState.tm.nsec);
+      //for ( unsigned int i = 0; i < m_servoState.data.length() ; i++ ) std::cerr << m_servoState.data[i] << " "; std::cerr << std::endl;
+      assert(m_servoState.data.length() == body->joints().size());
+      int joint_size = body->joints().size();
+      mot_states.name.resize(joint_size);
+      mot_states.calib_state.resize(joint_size);
+      mot_states.servo_state.resize(joint_size);
+      mot_states.power_state.resize(joint_size);
+      mot_states.servo_alarm.resize(joint_size);
+      mot_states.driver_temp.resize(joint_size);
+      for ( unsigned int i = 0; i < joint_size ; i++ ){
+	mot_states.name[i] = body->joint(i)->name;
+	mot_states.calib_state[i] = (m_servoState.data[i] & OpenHRP::RobotHardwareService::CALIB_STATE_MASK) >> OpenHRP::RobotHardwareService::CALIB_STATE_SHIFT;
+	mot_states.servo_state[i] = (m_servoState.data[i] & OpenHRP::RobotHardwareService::SERVO_STATE_MASK) >> OpenHRP::RobotHardwareService::SERVO_STATE_SHIFT;
+	mot_states.power_state[i] = (m_servoState.data[i] & OpenHRP::RobotHardwareService::POWER_STATE_MASK) >> OpenHRP::RobotHardwareService::POWER_STATE_SHIFT;
+	mot_states.servo_alarm[i] = (m_servoState.data[i] & OpenHRP::RobotHardwareService::SERVO_ALARM_MASK) >> OpenHRP::RobotHardwareService::SERVO_ALARM_SHIFT;
+	mot_states.driver_temp[i] = (m_servoState.data[i] & OpenHRP::RobotHardwareService::DRIVER_TEMP_MASK) >> OpenHRP::RobotHardwareService::DRIVER_TEMP_SHIFT;
+      }
+      mot_states_pub.publish(mot_states);
+    }
+    catch(const std::runtime_error &e)
+      {
+	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
 
   // rstorqueIn
   if ( m_rstorqueIn.isNew () ) {
