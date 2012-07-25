@@ -14,7 +14,27 @@
 # All arrays in this message should have the same size, or be empty.
 # This is the only way to uniquely associate the motor name with the correct states.
 
+# hrpsys/idl/RobotHardwareService.idl
+#
+#   interface RobotHardwareService
+#   {
+#     const unsigned long CALIB_STATE_MASK = 0x00000001;
+#     const unsigned long CALIB_STATE_SHIFT = 0;
+#     const unsigned long SERVO_STATE_MASK = 0x00000002;
+#     const unsigned long SERVO_STATE_SHIFT = 1;
+#     const unsigned long POWER_STATE_MASK = 0x00000004;
+#     const unsigned long POWER_STATE_SHIFT = 2;
+#     const unsigned long SERVO_ALARM_MASK = 0x0007fff8;
+#     const unsigned long SERVO_ALARM_SHIFT = 3;
+#     const unsigned long DRIVER_TEMP_MASK = 0xff000000;
+#     const unsigned long DRIVER_TEMP_SHIFT = 24;
+
 Header header
 
 string[] name
+bool[] calib_state
+bool[] servo_state
+bool[] power_state
+int32[] servo_alarm
+int16[] driver_temp
 float64[] temperature
