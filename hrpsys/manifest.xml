@@ -11,7 +11,7 @@
 
   <export>
     <rosdoc config="rosdoc.yaml" />
-    <python path="${prefix}/share/hrpsys/python:${prefix}/src" />
+    <python path="${prefix}/src:${prefix}/share/hrpsys/python" />
   </export>
   <depend package="openhrp3"/>
 
