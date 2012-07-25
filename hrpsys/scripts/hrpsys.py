@@ -58,12 +58,12 @@ def setupLogger(url=""):
     log_svc.add("TimedDoubleSeq", "q")
     log_svc.add("TimedPoint3D", "pos")
     log_svc.add("TimedOrientation3D", "rpy")
-    connectPorts(sim.port("q"), log.port("q"))
-    connectPorts(sim.port("pos"), log.port("pos"))
-    connectPorts(sim.port("rpy"), log.port("rpy"))
-    if sim.port("tau") != None:
-        log_svc.add("TimedDoubleSeq", "tau")
-        connectPorts(sim.port("tau"), log.port("tau"))
+    #connectPorts(sim.port("q"), log.port("q"))
+    #connectPorts(sim.port("pos"), log.port("pos"))
+    #connectPorts(sim.port("rpy"), log.port("rpy"))
+    #if sim.port("tau") != None:
+    #    log_svc.add("TimedDoubleSeq", "tau")
+    #    connectPorts(sim.port("tau"), log.port("tau"))
     # sensor logger ports
     import org.omg.CosNaming
     import jp.go.aist.hrp.simulator
@@ -119,7 +119,7 @@ def init(simulator="Simulator", url=""):
 
     print "[hrpsys.py] initialized successfully"
 
-    setupLogger(url)
+    #setupLogger(url)
     print "[hrpsys.py] setup logger done"
 
 def findModelLoader():
