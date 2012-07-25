@@ -50,7 +50,7 @@ def createComps():
     ms.load("DataLogger");
     log = ms.create("DataLogger", "log")
     print "[hrpsys.py] createComps -> DataLogger : ",log
-    log_svc = DataLoggerServiceHelper.narrow(log.service("service0"));
+    log_svc = narrow(log.service("service0"), "DataLoggerService");
 
 
 # setup logger
@@ -122,11 +122,17 @@ def init(simulator="Simulator", url=""):
     setupLogger(url)
     print "[hrpsys.py] setup logger done"
 
+def findModelLoader():
+    try:
+        return rtm.findObject("ModelLoader")
+    except:
+        return None
+
 if __name__ == '__main__':
 
-#    while hrp.findModelLoader() == None: # seq uses modelloader
-#        time.sleep(3);
-#        print "[hrpsys.py] wait for ModelLoader"
+    while findModelLoader() == None: # seq uses modelloader
+        print "[hrpsys.py] wait for ModelLoader"
+        time.sleep(3);
 
     print "[hrpsys.py] start hrpsys"
 
