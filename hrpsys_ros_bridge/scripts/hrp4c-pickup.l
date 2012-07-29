@@ -22,7 +22,7 @@
 (defun hrp4c-walk ()
   (let ((eof (gensym)) avs av tms tm (tmp 0) s l)
     (with-open-file
-     (f (ros::resolve-ros-path "package://hrpsys/share/hrpsys/samples/HRP-4C/data/walk2m.pos") :direction :input)
+     (f (ros::resolve-ros-path "package://hrpsys/share/hrpsys/samples/HRP4C/data/walk2m.pos") :direction :input)
      (while (not (eq (setq l (read-line f nil eof)) eof))
        (setq s (make-string-input-stream l))
        (setq tm (* 1000 (read s)))
