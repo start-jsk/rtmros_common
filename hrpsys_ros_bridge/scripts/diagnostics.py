@@ -13,7 +13,6 @@ def states_cb(msg):
 
     for i in range(len(msg.name)) :
         if ( msg.servo_alarm[i] > 0 ) :
-            status.level   = DiagnosticStatus.ERROR
             status.message = "Servo Off"
 
     diagnostic.status.append(status)
