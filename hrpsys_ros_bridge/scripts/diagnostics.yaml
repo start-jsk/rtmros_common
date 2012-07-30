@@ -14,3 +14,7 @@ analyzers:
     type: diagnostic_aggregator/GenericAnalyzer
     path: 'Hrpsys'
     contains: ['hrpEC']
+  mode:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: 'Mode'
+    contains: ['Operating Mode']
