@@ -80,9 +80,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   bool ret = false;
   while ( ! ret ) {
     try  {
-      ret = loadBodyFromModelLoader (body,
-				     modelfile.c_str(),
-				     CosNaming::NamingContext::_duplicate(naming.getRootContext()));
+      bodyinfo = hrp::loadBodyInfo(modelfile.c_str(), CosNaming::NamingContext::_duplicate(naming.getRootContext()));
+      ret = loadBodyFromBodyInfo(body, bodyinfo);
     } catch ( CORBA::SystemException& ex ) {
       ROS_ERROR_STREAM("[HrpsysSeqStateROSBridge] CORBA::SystemException " << ex._name());
       sleep(1);
@@ -400,7 +399,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     base.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
 
     // odom publish
-    br.sendTransform(tf::StampedTransform(base, ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec), "odom", body->rootLink()->name));
+    br.sendTransform(tf::StampedTransform(base, ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec), "odom", std::string((*(bodyinfo->links()))[0].segments[0].name)));
   }
 
   //

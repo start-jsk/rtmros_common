@@ -48,6 +48,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 		dynamic_reconfigure::Reconfigure::Response &res);
 
  private:
+  OpenHRP::BodyInfo_var bodyinfo;
   hrp::BodyPtr body;
 
   ros::NodeHandle nh;
