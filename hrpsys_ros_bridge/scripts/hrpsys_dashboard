@@ -173,7 +173,9 @@ class HrpsysFrame(wx.Frame):
     
     def on_servo_on(self, evt):
       servo = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/servo", OpenHRP_RobotHardwareService_servo )
+      actual = rospy.ServiceProxy("/StateHolderServiceROSBridge/goActual", OpenHRP_StateHolderService_goActual )
       try:
+        actual(OpenHRP_StateHolderService_goActualRequest())
         servo(OpenHRP_RobotHardwareService_servoRequest("all",0))
       except rospy.ServiceException, e:
         wx.MessageBox("Failed to put the hrpsys in servo on mode: service call failed with error: %s"%(e), "Error", wx.OK|wx.ICON_ERROR)
