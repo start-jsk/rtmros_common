@@ -100,6 +100,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
 
   tm.tick();
 
+  rootlink_name = std::string((*(bodyinfo->links()))[0].segments[0].name);
   interpolationp = false;
 
   ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @Initilize name : " << getInstanceName() << " done");
@@ -399,7 +400,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     base.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
 
     // odom publish
-    br.sendTransform(tf::StampedTransform(base, ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec), "odom", std::string((*(bodyinfo->links()))[0].segments[0].name)));
+    br.sendTransform(tf::StampedTransform(base, ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec), "odom", rootlink_name));
   }
 
   //

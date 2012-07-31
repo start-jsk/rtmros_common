@@ -63,6 +63,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   coil::TimeMeasure tm;
 
   std::string nameserver;
+  std::string rootlink_name;
 };
 
 
