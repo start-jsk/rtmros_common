@@ -38,7 +38,7 @@
        (setq av (concatenate float-vector (reverse av)))
 
        (push av avs)
-       (push (- tm tmp) tms)
+       (push (- (round tm) (round tmp)) tms)
        (setq tmp tm)
        )
      (setq avs (reverse avs))
