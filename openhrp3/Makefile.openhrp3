@@ -2,7 +2,7 @@ INSTALL_DIR = $(CURDIR)
 FILENAME    = OpenHRP-3.1.3.zip
 TARBALL     = build/$(FILENAME)
 SOURCE_DIR  = build/OpenHRP-3.1.3
-TARBALL_PATCH = ColladaWriter.patch
+TARBALL_PATCH = patch/ColladaWriter.patch patch/ColladaWriter2.patch patch/TriangleMeshShaper.patch
 UNPACK_CMD  = unzip
 MD5SUM_FILE = $(FILENAME).md5sum
 WGET_COMMAND = --post-data "fname=OpenHRP-3.1.3.zip" --no-check-certificate https://openrtp.jp/openhrp3/script-jp/download_file.php -O $(TARBALL)

@@ -1,0 +1,13 @@
+--- hrplib/hrpUtil/TriangleMeshShaper.cpp.org	2012-06-25 14:57:26.000000000 +0900
++++ hrplib/hrpUtil/TriangleMeshShaper.cpp	2012-08-02 13:02:03.105897321 +0900
+@@ -967,7 +967,9 @@
+         Vector3Ref v1(getVector3Ref(vertices[triangles[faceIndex * 4 + 1]].data()));
+         Vector3Ref v2(getVector3Ref(vertices[triangles[faceIndex * 4 + 2]].data()));
+         Vector3 normal((v1 - v0).cross(v2 - v0));
+-        normal.normalize();
++        if ( ! normal.isZero() ) {
++            normal.normalize();
++        }
+         faceNormals.push_back(normal);
+ 
+         if(triangleMesh->normalPerVertex){
