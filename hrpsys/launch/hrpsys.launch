@@ -32,7 +32,7 @@
 
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
   <node name="hrpsys" pkg="hrpsys" type="hrpsys.py" output="screen"
-	args='$(arg SIMULATOR_NAME)' />
+	args='$(arg SIMULATOR_NAME) $(arg MODEL_FILE)' />
 
   <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="$(arg OUTPUT)"
 	args="$(arg openrtm_args)" respawn="$(arg RESPAWN)" />

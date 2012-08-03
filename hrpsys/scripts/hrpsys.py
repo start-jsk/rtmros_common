@@ -64,28 +64,29 @@ def setupLogger(url=""):
         log_svc.add("TimedDoubleSeq", "tau")
         connectPorts(sim.port("tau"), log.port("tau"))
     # sensor logger ports
-    # import org.omg.CosNaming
-    # import jp.go.aist.hrp.simulator
-    # obj = rtm.rootnc.resolve([org.omg.CosNaming.NameComponent('ModelLoader', '')])
-    # mdlldr = jp.go.aist.hrp.simulator.ModelLoaderHelper.narrow(obj)
-    # print "[bodyinfo] URL = file://"+url
-    # bodyInfo = mdlldr.getBodyInfo("file://"+url)
-    # ret = []
-    # for ll in bodyInfo.links():
-    #     if len(ll.sensors) > 0:
-    #         ret.extend(ll.sensors)
-    # for sen in map(lambda x : x.name, ret):
-    #     if sen == "gyrometer":
-    #         sen_type = "TimedAngularVelocity3D"
-    #     elif sen == "gsensor":
-    #         sen_type = "TimedAcceleration3D"
-    #     elif sen.find("fsensor") != -1:
-    #         sen_type = "TimedDoubleSeq"
-    #     else:
-    #         continue
-    #     print sen_type, sen
-    #     log_svc.add(sen_type, sen)
-    #     connectPorts(sim.port(sen), log.port(sen))
+    print "[hrpsys.py] sensor names for DataLogger"
+    import CosNaming
+    obj = rtm.rootnc.resolve([CosNaming.NameComponent('ModelLoader', '')])
+    mdlldr = obj._narrow(ModelLoader)
+    print "[hrpsys.py]   bodyinfo URL = file://"+url
+    bodyInfo = mdlldr.getBodyInfo("file://"+url)
+    ret = []
+    for ll in bodyInfo._get_links():
+         if len(ll.sensors) > 0:
+             ret.extend(ll.sensors)
+    for sen in map(lambda x : x.name, ret):
+        if sen == "gyrometer":
+            sen_type = "TimedAngularVelocity3D"
+        elif sen == "gsensor":
+            sen_type = "TimedAcceleration3D"
+        elif sen.find("fsensor") != -1:
+            sen_type = "TimedDoubleSeq"
+        else:
+            continue
+        print "[hrpsys.py]   type =", sen_type, ",name = ", sen, ",port = ", sim.port(sen)
+        if sim.port(sen) != None:
+            log_svc.add(sen_type, sen)
+            connectPorts(sim.port(sen), log.port(sen))
 
 
 def init(simulator="Simulator", url=""):
