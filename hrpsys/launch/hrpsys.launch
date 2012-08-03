@@ -11,7 +11,7 @@
   <arg name="CONF_FILE" />
   <arg name="RESPAWN" default="true"/>
   <arg name="OUTPUT" default="log"/>
-  <arg name="SIMULATOR_NAME" default="Simulator"/>
+  <arg name="SIMULATOR_NAME"/>
   <arg name="HRPSYS_PERIODIC_RATE" default="200"/>
   <arg name="OPENHRP3_SIM_PERIODIC_RATE" default="200"/>
   <arg name="KINEMATICS_ONLY" default="0"/>
@@ -37,9 +37,4 @@
   <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="$(arg OUTPUT)"
 	args="$(arg openrtm_args)" respawn="$(arg RESPAWN)" />
 
-  <!-- BEGIN:openrtm connection -->
-  <arg name="ROBOT_NAME" value="dummy" />
-  <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)"/>
-  <node name="rtmlaunch_hrpsys" pkg="hrpsys" type="hrpsys-launch.sh" args="$(arg MODEL_FILE) $(find hrpsys)/launch/hrpsys.launch" respawn="$(arg RESPAWN)" />
-  <!-- END:openrtm connection -->
 </launch>
