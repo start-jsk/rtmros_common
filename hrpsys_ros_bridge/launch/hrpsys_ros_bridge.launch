@@ -2,6 +2,7 @@
   <arg name="ROBOT_NAME" />
   <arg name="MODEL_FILE" />
   <arg name="COLLADA_FILE" />
+  <arg name="SIMULATOR_NAME" default="$(arg ROBOT_NAME)(Robot)0"/>
   <!--
       roslaunch hrpsys_ros_bridge sample.launch nameserver:=192.168.1.1
   -->
@@ -32,8 +33,9 @@
 
   <!-- BEGIN:openrtm connection -->
   <env name="ROBOT_NAME" value="$(arg ROBOT_NAME)" />
+  <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
   <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch"/>
-  <rtconnect from="$(arg ROBOT_NAME)(Robot)0.rtc:q" to="HrpsysSeqStateROSBridge0.rtc:rsangle" />
+  <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="HrpsysSeqStateROSBridge0.rtc:rsangle" />
   <rtconnect from="StateHolder0.rtc:baseTformOut" to="HrpsysSeqStateROSBridge0.rtc:baseTform" />
   <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" />
   <rtconnect from="$(arg ROBOT_NAME)(Robot)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" />
