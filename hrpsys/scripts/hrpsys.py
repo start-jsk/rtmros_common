@@ -55,37 +55,37 @@ def createComps():
 # setup logger
 def setupLogger(url=""):
     log_svc.add("TimedDoubleSeq", "q")
-    log_svc.add("TimedPoint3D", "pos")
-    log_svc.add("TimedOrientation3D", "rpy")
-    #connectPorts(sim.port("q"), log.port("q"))
+    #log_svc.add("TimedPoint3D", "pos")
+    #log_svc.add("TimedOrientation3D", "rpy")
+    connectPorts(sim.port("q"), log.port("q"))
     #connectPorts(sim.port("pos"), log.port("pos"))
     #connectPorts(sim.port("rpy"), log.port("rpy"))
     #if sim.port("tau") != None:
     #    log_svc.add("TimedDoubleSeq", "tau")
     #    connectPorts(sim.port("tau"), log.port("tau"))
     # sensor logger ports
-    import org.omg.CosNaming
-    import jp.go.aist.hrp.simulator
-    obj = rtm.rootnc.resolve([org.omg.CosNaming.NameComponent('ModelLoader', '')])
-    mdlldr = jp.go.aist.hrp.simulator.ModelLoaderHelper.narrow(obj)
-    print "[bodyinfo] URL = file://"+url
-    bodyInfo = mdlldr.getBodyInfo("file://"+url)
-    ret = []
-    for ll in bodyInfo.links():
-        if len(ll.sensors) > 0:
-            ret.extend(ll.sensors)
-    for sen in map(lambda x : x.name, ret):
-        if sen == "gyrometer":
-            sen_type = "TimedAngularVelocity3D"
-        elif sen == "gsensor":
-            sen_type = "TimedAcceleration3D"
-        elif sen.find("fsensor") != -1:
-            sen_type = "TimedDoubleSeq"
-        else:
-            continue
-        print sen_type, sen
-        log_svc.add(sen_type, sen)
-        connectPorts(sim.port(sen), log.port(sen))
+    # import org.omg.CosNaming
+    # import jp.go.aist.hrp.simulator
+    # obj = rtm.rootnc.resolve([org.omg.CosNaming.NameComponent('ModelLoader', '')])
+    # mdlldr = jp.go.aist.hrp.simulator.ModelLoaderHelper.narrow(obj)
+    # print "[bodyinfo] URL = file://"+url
+    # bodyInfo = mdlldr.getBodyInfo("file://"+url)
+    # ret = []
+    # for ll in bodyInfo.links():
+    #     if len(ll.sensors) > 0:
+    #         ret.extend(ll.sensors)
+    # for sen in map(lambda x : x.name, ret):
+    #     if sen == "gyrometer":
+    #         sen_type = "TimedAngularVelocity3D"
+    #     elif sen == "gsensor":
+    #         sen_type = "TimedAcceleration3D"
+    #     elif sen.find("fsensor") != -1:
+    #         sen_type = "TimedDoubleSeq"
+    #     else:
+    #         continue
+    #     print sen_type, sen
+    #     log_svc.add(sen_type, sen)
+    #     connectPorts(sim.port(sen), log.port(sen))
 
 
 def init(simulator="Simulator", url=""):
@@ -118,7 +118,7 @@ def init(simulator="Simulator", url=""):
 
     print "[hrpsys.py] initialized successfully"
 
-    #setupLogger(url)
+    setupLogger(url)
     print "[hrpsys.py] setup logger done"
 
 def findModelLoader():
