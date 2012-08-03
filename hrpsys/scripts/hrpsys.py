@@ -13,13 +13,12 @@ import time
 def connectComps():
     connectPorts(sim.port("q"), seq.port("qInit"))
     #
-    connectPorts(seq.port("qRef"), hgc.port("qIn"))
+    connectPorts(seq.port("qRef"), sh.port("qIn"))
+    connectPorts(sh.port("qOut"), hgc.port("qIn"))
     #
     connectPorts(hgc.port("qOut"), sim.port("qRef"))
     connectPorts(hgc.port("dqOut"), sim.port("dqRef"))
     connectPorts(hgc.port("ddqOut"), sim.port("ddqRef"))
-    #
-    connectPorts(sim.port("q"), sh.port("qIn"))
 
 def activateComps():
     rtm.serializeComponents([sim, seq, sh, log, hgc])
