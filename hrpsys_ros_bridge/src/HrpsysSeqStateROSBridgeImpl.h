@@ -14,6 +14,7 @@
 #include <rtm/CorbaPort.h>
 #include <rtm/DataInPort.h>
 #include <rtm/DataOutPort.h>
+#include "HRPDataTypes.hh"
 
 // Service implementation headers
 // <rtc-template block="service_impl_h">
@@ -113,8 +114,8 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   InPort<TimedDoubleSeq> m_baseTformIn;
   TimedDoubleSeq m_rstorque;
   InPort<TimedDoubleSeq> m_rstorqueIn;
-  TimedLongSeq m_servoState;
-  InPort<TimedLongSeq> m_servoStateIn;
+  OpenHRP::TimedLongSeqSeq m_servoState;
+  InPort<OpenHRP::TimedLongSeqSeq> m_servoStateIn;
 
   // </rtc-template>
 
