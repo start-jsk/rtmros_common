@@ -31,6 +31,13 @@
   <param name="robot_description" textfile="$(arg COLLADA_FILE)" />
   <node pkg="robot_state_publisher" type="state_publisher" name="hrpsys_state_publisher" />
 
+  <!-- diagnostics -->
+  <node pkg="hrpsys_ros_bridge" name="hrpsys_ros_diagnostics" type="diagnostics.py" />
+  <node pkg="hrpsys_ros_bridge" name="hrpsys_profile" type="hrpsys_profile.py" />
+  <node pkg="diagnostic_aggregator" type="aggregator_node" name="diagnostic_aggregator" >
+    <rosparam command="load" file="$(find hrpsys_ros_bridge)/scripts/diagnostics.yaml" />
+  </node>
+
   <!-- BEGIN:openrtm connection -->
   <env name="ROBOT_NAME" value="$(arg ROBOT_NAME)" />
   <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
