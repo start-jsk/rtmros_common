@@ -510,8 +510,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	  value.key = "Average Period";
 	  value.value = str(boost::format("%f")%profile->avg_period);
 	  status.values.push_back(value);
-	  value.key = "Max Total Process";
-	  value.value = str(boost::format("%f")%profile->max_total_process);
+	  value.key = "Max Process";
+	  value.value = str(boost::format("%f")%profile->max_process);
 	  status.values.push_back(value);
 	  value.key = "Count";
 	  value.value = str(boost::format("%d")%profile->count);
