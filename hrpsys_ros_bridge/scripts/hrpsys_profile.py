@@ -24,31 +24,25 @@ def rtc_init () :
         ms = rtm.findRTCmanager()
         print "[hrpsys_profile.py] wait for RTCmanager : ",ms
 
-    #
-    #for c in [ findRTC(x.name()) for x in ms.get_components() ] :
-    #    eps = narrow(c.owned_ecs[0], "ExecutionProfileService")
-    #    print c.name(), c.owned_ecs[0], eps
-
-    rh = findRTC('RobotHardware0')
-    eps = narrow(rh.owned_ecs[0], "ExecutionProfileService")
-
 def hrpsys_profile() :
     global ms, rh, eps
 
-    rospy.init_node('hrpsys_profile_diagnostics')
-    pub = rospy.Publisher('diagnostics', DiagnosticArray)
+    diagnostic = DiagnosticArray()
+    diagnostic.header.stamp = rospy.Time.now()
 
-    r = rospy.Rate(10) # 10hz
+    components = ms.get_components()
+    for component in components :
+        component_name = component.name()
+        component_rtc = findRTC(component_name)
+        eps = narrow(component_rtc.owned_ecs[0], "ExecutionProfileService")
 
-    while not rospy.is_shutdown():
-
-        diagnostic = DiagnosticArray()
-        diagnostic.header.stamp = rospy.Time.now()
+        if not eps : 
+            continue
 
         total_prof = eps.getProfile()
-        components = [ findRTC(x.name()) for x in ms.get_components() ]
 
-        status = DiagnosticStatus(name = 'hrpEC Profile', level = DiagnosticStatus.OK, message = "Running")
+        status = DiagnosticStatus(name = 'hrpEC Profile ('+component_name+')', level = DiagnosticStatus.OK)
+        status.message = "Running : Average Period : %7.5f, Max Period : %7.5f" % (total_prof.avg_period*1000, total_prof.max_period*1000);
         status.values.append(KeyValue(key = "Max Period", value = str(total_prof.max_period*1000)))
         status.values.append(KeyValue(key = "Min Period", value = str(total_prof.min_period*1000)))
         status.values.append(KeyValue(key = "Average Period", value = str(total_prof.avg_period*1000)))
@@ -57,36 +51,47 @@ def hrpsys_profile() :
         status.values.append(KeyValue(key = "Timeover", value = str(total_prof.timeover)))
         if ( total_prof.timeover > 0 ) :
             status.level   = DiagnosticStatus.WARN
-            status.message = "Max Period : %7.3f, Average Period : %7.3f" % (total_prof.max_period*1000, total_prof.avg_period*1000);
 
         diagnostic.status.append(status)
+
 
         for c in components :
             try :
                 prof = eps.getComponentProfile(c.ref)
-                #print c.name(), prof.count, prof.max_process*1000, prof.avg_process*1000
-
-                status = DiagnosticStatus(name =  c.name()+' hrpEC Profile', level = DiagnosticStatus.OK, message = "Running")
+                status = DiagnosticStatus(name =  'hrpEC Profile (RTC: ' + c.name() + ')', level = DiagnosticStatus.OK)
+                status.message = "Running : Average Period %7.5f" % (prof.avg_process*1000)
                 status.values.append(KeyValue(key = "Max Process", value = str(prof.max_process*1000)))
                 status.values.append(KeyValue(key = "Avg Process", value = str(prof.avg_process*1000)))
                 status.values.append(KeyValue(key = "Count", value = str(prof.count)))
                 diagnostic.status.append(status)
-            except :
-                #print c.name()
-                None
+            except ExecutionProfileService.ExecutionProfileServiceException:
+                True
 
             
-            if ( total_prof.count > 100000 ) :
-                print "eps.resetProfile()"
-                eps.resetProfile() 
+        if ( total_prof.count > 100000 ) :
+            rospy.loginfo("eps.resetProfile()")
+            eps.resetProfile() 
             
-        pub.publish(diagnostic)
-        r.sleep()
+    pub.publish(diagnostic)
+
 
 if __name__ == '__main__':
     try:
+        rospy.init_node('hrpsys_profile_diagnostics')
+        pub = rospy.Publisher('diagnostics', DiagnosticArray)
+
+        r = rospy.Rate(10) # 10hz
+
         rtc_init()
-        hrpsys_profile()
+        while not rospy.is_shutdown():
+            try :
+                hrpsys_profile()
+            except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE):
+                print "hogb"
+                rtc_init()
+
+            r.sleep()
+        
     except rospy.ROSInterruptException: pass
 
 
