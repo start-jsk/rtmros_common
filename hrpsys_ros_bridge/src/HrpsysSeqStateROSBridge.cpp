@@ -39,8 +39,6 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
   sendmsg_srv = nh.advertiseService(std::string("sendmsg"), &HrpsysSeqStateROSBridge::sendMsg, this);
   joint_state_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
-  lfsensor_pub = nh.advertise<geometry_msgs::WrenchStamped>("lfsensor", 10);
-  rfsensor_pub = nh.advertise<geometry_msgs::WrenchStamped>("rfsensor", 10);
   joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
   diagnostics_pub = nh.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
@@ -57,45 +55,16 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onFinalize() {
 }
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
-  // impl
-  HrpsysSeqStateROSBridgeImpl::onInitialize();
-
-  nameserver = m_pManager->getConfig ()["corba.nameservers"];
   // initialize
   ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @Initilize name : " << getInstanceName());
 
-  body = new hrp::Body();
+  // impl
+  HrpsysSeqStateROSBridgeImpl::onInitialize();
 
-  std::string nameServer = m_pManager->getConfig ()["corba.nameservers"];
-  int comPos = nameServer.find (",");
-  if (comPos < 0)
-    {
-      comPos = nameServer.length();
-    }
-  nameServer = nameServer.substr(0, comPos);
-  ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] nameserver " << nameServer.c_str());
-  RTC::CorbaNaming naming(m_pManager->getORB(), nameServer.c_str());
-  std::string modelfile =  m_pManager->getConfig ()["model"];
-
-  bool ret = false;
-  while ( ! ret ) {
-    try  {
-      bodyinfo = hrp::loadBodyInfo(modelfile.c_str(), CosNaming::NamingContext::_duplicate(naming.getRootContext()));
-      ret = loadBodyFromBodyInfo(body, bodyinfo);
-    } catch ( CORBA::SystemException& ex ) {
-      ROS_ERROR_STREAM("[HrpsysSeqStateROSBridge] CORBA::SystemException " << ex._name());
-      sleep(1);
-    } catch ( ... ) {
-      ROS_ERROR_STREAM("[HrpsysSeqStateROSBridge] failed to load model[" << modelfile << "]");
-      sleep(1);
-    }
-  }
   if ( body == NULL ) {
-    ROS_FATAL_STREAM("[HrpsysSeqStateROSBridge] Error on loading " << modelfile);
     return RTC::RTC_ERROR;
   }
-
-  ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] Loaded " << body->name() << " from " << modelfile);
+  ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] Loaded " << body->name());
   body->calcForwardKinematics();
 
   tm.tick();
@@ -104,6 +73,12 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   interpolationp = false;
 
   ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @Initilize name : " << getInstanceName() << " done");
+
+  fsensor_pub.resize(m_rsforceIn.size());
+  for (unsigned int i=0; i<m_rsforceIn.size(); i++){
+    hrp::Sensor *s = body->sensor(hrp::Sensor::FORCE, i);
+    fsensor_pub[i] = nh.advertise<geometry_msgs::WrenchStamped>(s->name, 10);
+  }
 
   return RTC::RTC_OK;
 }
@@ -253,7 +228,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     // convert openrtm time to ros time
     joint_state.header.stamp = ros::Time(m_rsangle.tm.sec, m_rsangle.tm.nsec);
 
-    ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", baseTform:" << m_baseTformIn.isNew() << ", lfsensor:" << m_rslfsensorIn.isNew() << ", rfsensor:" << m_rsrfsensorIn.isNew());
+    ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", baseTform:" << m_baseTformIn.isNew());
     try {
       m_rsangleIn.read();
       //for ( unsigned int i = 0; i < m_rsangle.data.length() ; i++ ) std::cerr << m_rsangle.data[i] << " "; std::cerr << std::endl;
@@ -311,9 +286,18 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
 	hrp::Vector3 rpy = hrp::rpyFromRot(sensor->localR);
 	transform.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
-	br.sendTransform(tf::StampedTransform(transform, joint_state.header.stamp, sensor->link->name, sensor->name));
+	OpenHRP::LinkInfoSequence_var links = bodyinfo->links();
+	for ( int k = 0; k < links->length(); k++ ) {
+	  OpenHRP::SensorInfoSequence& sensors = links[k].sensors;
+	  for ( int l = 0; l < sensors.length(); l++ ) {
+	      if ( std::string(sensors[l].name) == std::string(sensor->name) ) {
+		br.sendTransform(tf::StampedTransform(transform, joint_state.header.stamp, std::string(links[k].segments[0].name), sensor->name));
+	      }
+	    }
+	  }
+	}
       }
-    }
+    
 
     m_mutex.unlock();
 
@@ -403,50 +387,31 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     br.sendTransform(tf::StampedTransform(base, ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec), "odom", rootlink_name));
   }
 
-  //
-  if ( m_rslfsensorIn.isNew () ) {
-    try {
-      m_rslfsensorIn.read();
-      ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute lfsensor size = " << m_rslfsensor.data.length() );
-      if ( m_rslfsensor.data.length() >= 6 ) {
-	geometry_msgs::WrenchStamped lfsensor;
-	lfsensor.header.stamp = ros::Time(m_rslfsensor.tm.sec, m_rslfsensor.tm.nsec);
-	lfsensor.header.frame_id = "lfsensor";
-	lfsensor.wrench.force.x = m_rslfsensor.data[0];
-	lfsensor.wrench.force.y = m_rslfsensor.data[1];
-	lfsensor.wrench.force.z = m_rslfsensor.data[2];
-	lfsensor.wrench.torque.x = m_rslfsensor.data[3];
-	lfsensor.wrench.torque.y = m_rslfsensor.data[4];
-	lfsensor.wrench.torque.z = m_rslfsensor.data[5];
-	lfsensor_pub.publish(lfsensor);
+  // publish forces sonsors
+  for (unsigned int i=0; i<m_rsforceIn.size(); i++){
+    hrp::Sensor *s = body->sensor(hrp::Sensor::FORCE, i);
+    if ( m_rsforceIn[i]->isNew() ) {
+      try {
+	m_rsforceIn[i]->read();
+	ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute lfsensor size = " << m_rsforce[i].data.length() );
+	if ( m_rsforce[i].data.length() >= 6 ) {
+	  geometry_msgs::WrenchStamped fsensor;
+	  fsensor.header.stamp = ros::Time(m_rsforce[i].tm.sec, m_rsforce[i].tm.nsec);
+	  fsensor.header.frame_id = s->name;
+	  fsensor.wrench.force.x = m_rsforce[i].data[0];
+	  fsensor.wrench.force.y = m_rsforce[i].data[1];
+	  fsensor.wrench.force.z = m_rsforce[i].data[2];
+	  fsensor.wrench.torque.x = m_rsforce[i].data[3];
+	  fsensor.wrench.torque.y = m_rsforce[i].data[4];
+	  fsensor.wrench.torque.z = m_rsforce[i].data[5];
+	  fsensor_pub[i].publish(fsensor);
+	}
       }
+      catch(const std::runtime_error &e)
+	{
+	  ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+	}
     }
-    catch(const std::runtime_error &e)
-      {
-	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
-      }
-  }
-  if ( m_rsrfsensorIn.isNew () ) {
-    try {
-      m_rsrfsensorIn.read();
-      ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute rfsensor size = " << m_rsrfsensor.data.length() );
-      if ( m_rsrfsensor.data.length() >= 6 ) {
-	geometry_msgs::WrenchStamped rfsensor;
-	rfsensor.header.stamp = ros::Time(m_rsrfsensor.tm.sec, m_rsrfsensor.tm.nsec);
-	rfsensor.header.frame_id = "rfsensor";
-	rfsensor.wrench.force.x = m_rsrfsensor.data[0];
-	rfsensor.wrench.force.y = m_rsrfsensor.data[1];
-	rfsensor.wrench.force.z = m_rsrfsensor.data[2];
-	rfsensor.wrench.torque.x = m_rsrfsensor.data[3];
-	rfsensor.wrench.torque.y = m_rsrfsensor.data[4];
-	rfsensor.wrench.torque.z = m_rsrfsensor.data[5];
-	rfsensor_pub.publish(rfsensor);
-      }
-    }
-    catch(const std::runtime_error &e)
-      {
-	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
-      }
   }
 
   static int loop = 0;

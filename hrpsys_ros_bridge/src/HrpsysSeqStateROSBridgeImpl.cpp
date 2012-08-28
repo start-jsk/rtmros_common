@@ -32,10 +32,6 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_rsangleIn("rsangle", m_rsangle),
     m_mcangleIn("mcangle", m_mcangle),
     m_rsJointTemperatureIn("rsJointTemperature", m_rsJointTemperature),
-    m_rsrfsensorIn("rsrfsensor", m_rsrfsensor),
-    m_rslfsensorIn("rslfsensor", m_rslfsensor),
-    m_rsrhsensorIn("rsrhsensor", m_rsrhsensor),
-    m_rslhsensorIn("rslhsensor", m_rslhsensor),
     m_gsensorIn("gsensor", m_gsensor),
     m_gyrometerIn("gyrometer", m_gyrometer),
     m_baseTformIn("baseTform", m_baseTform),
@@ -61,10 +57,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("rsangle", m_rsangleIn);
   addInPort("mcangle", m_mcangleIn);
   addInPort("rsJointTemperature", m_rsJointTemperatureIn);
-  addInPort("rsrfsensor", m_rsrfsensorIn);
-  addInPort("rslfsensor", m_rslfsensorIn);
-  addInPort("rsrhsensor", m_rsrhsensorIn);
-  addInPort("rslhsensor", m_rslhsensorIn);
   addInPort("gsensor", m_gsensorIn);
   addInPort("gyrometer", m_gyrometerIn);
   addInPort("baseTform", m_baseTformIn);
@@ -86,6 +78,51 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
 
   // <rtc-template block="bind_config">
   // Bind variables and configuration variable
+
+  RTC::Properties& prop = getProperties();
+
+  body = new hrp::Body();
+
+  RTC::Manager& rtcManager = RTC::Manager::instance();
+  std::string nameServer = rtcManager.getConfig()["corba.nameservers"];
+  int comPos = nameServer.find(",");
+  if (comPos < 0){
+    comPos = nameServer.length();
+  }
+  nameServer = nameServer.substr(0, comPos);
+  RTC::CorbaNaming naming(rtcManager.getORB(), nameServer.c_str());
+  std::string modelfile =  m_pManager->getConfig ()["model"];
+
+  if (!loadBodyFromModelLoader(body, modelfile.c_str(), 
+			       CosNaming::NamingContext::_duplicate(naming.getRootContext())
+			       )){
+    std::cerr << "[HrpsysSeqStateROSBridge] failed to load model[" << prop["model"] << "]" 
+	      << std::endl;
+  }
+  bool ret = false;
+  while ( ! ret ) {
+    try  {
+      bodyinfo = hrp::loadBodyInfo(modelfile.c_str(), CosNaming::NamingContext::_duplicate(naming.getRootContext()));
+      ret = loadBodyFromBodyInfo(body, bodyinfo);
+    } catch ( CORBA::SystemException& ex ) {
+      std::cerr << "[HrpsysSeqStateROSBridge] CORBA::SystemException " << ex._name() << std::endl;
+      sleep(1);
+    } catch ( ... ) {
+      std::cerr << "[HrpsysSeqStateROSBridge] failed to load model[" << modelfile << "]" << std::endl;;
+      sleep(1);
+    }
+  }
+
+
+  int nforce = body->numSensors(hrp::Sensor::FORCE);
+  m_rsforce.resize(nforce);
+  m_rsforceIn.resize(nforce);
+  for (unsigned int i=0; i<m_rsforce.size(); i++){
+    hrp::Sensor *s = body->sensor(hrp::Sensor::FORCE, i);
+    m_rsforceIn[i] = new InPort<TimedDoubleSeq>(s->name.c_str(), m_rsforce[i]);
+    m_rsforce[i].data.length(6);
+    registerInPort(s->name.c_str(), *m_rsforceIn[i]);
+  }
 
   // </rtc-template>
   return RTC::RTC_OK;

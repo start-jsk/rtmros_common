@@ -12,12 +12,6 @@
 // rtm
 #include <rtm/CorbaNaming.h>
 
-// hrp
-#include <hrpCorba/ModelLoader.hh>
-#include <hrpModel/Sensor.h>
-#include <hrpModel/Link.h>
-#include <hrpModel/ModelLoaderUtil.h>
-
 // ros
 #include "ros/ros.h"
 #include "sensor_msgs/JointState.h"
@@ -48,11 +42,9 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 		dynamic_reconfigure::Reconfigure::Response &res);
 
  private:
-  OpenHRP::BodyInfo_var bodyinfo;
-  hrp::BodyPtr body;
-
   ros::NodeHandle nh;
-  ros::Publisher joint_state_pub, lfsensor_pub, rfsensor_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub;
+  ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub;
+  std::vector<ros::Publisher> fsensor_pub;
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> server;
   ros::ServiceServer sendmsg_srv;
   bool interpolationp;
