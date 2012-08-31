@@ -83,6 +83,9 @@ void convert(S& s, boost::array<T,n>& v){
 template<class S,class T,std::size_t n>
 void convert(boost::array<T,n>& v, S& s){
   for(std::size_t i=0; i<n; i++) convert(v[i],s[i]);}
+
+// special case for RTC::LightweightRTObject_var
+template<class T> void convert(T& in, RTC::LightweightRTObject_var out){ std::cerr << "convert from RTC::LightweightRTObject_var is not supported" << std::endl; }
 """
 
 multiarray_conversion = """
@@ -173,7 +176,10 @@ class ServiceVisitor (idlvisitor.AstVisitor):
            isinstance(typ, idlast.Interface) or \
            isinstance(typ, idlast.Operation):
             if full == CPP_FULL:
-                return idlutil.ccolonName(typ.scopedName())
+                if ( idlutil.ccolonName(typ.scopedName()) == "RTC::LightweightRTObject") :
+                    return idlutil.ccolonName(typ.scopedName())+"_var"
+                else:
+                    return idlutil.ccolonName(typ.scopedName())
             elif full == ROS_FULL:
                 return '_'.join(typ.scopedName())
             else:
