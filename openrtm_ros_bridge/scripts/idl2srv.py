@@ -157,11 +157,8 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             return cxx.types.basic_map[typ.kind()]
         if isinstance(typ, idltype.String):
             return ('char*' if out else 'const char*') # ??
-        if isinstance(typ, idltype.Declared) and out:
-            postfix = ('*' if cxx.types.variableDecl(typ.decl()) else '')
-            return self.getCppTypeText(typ.decl(), False, full) + postfix
-        if isinstance(typ, idltype.Declared) and not out:
-            postfix = ('_var' if cxx.types.variableDecl(typ.decl()) else '')
+        if isinstance(typ, idltype.Declared):
+            postfix = ('*' if out and cxx.types.variableDecl(typ.decl()) else '')
             return self.getCppTypeText(typ.decl(), False, full) + postfix
 
         if isinstance(typ, idlast.Struct):
@@ -381,7 +378,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
                     res_code += '  convert(%s%s, res.%s);\n' % (ptr, var, var)
 
                 else:
-                    req_code += '  ROS_WARN_STREAM("Could not convert %s"); // convert(req.%s, %s);\n' % (self.getCppTypeText(ptype, out=is_out, full=CPP_FULL), var, var)
+                    req_code += '  convert(req.%s, %s);\n' % (var, var)
 
         code += '\n'
         code += '  ROS_INFO_STREAM("%s::%s()");\n' % (ifname, op.identifier())
