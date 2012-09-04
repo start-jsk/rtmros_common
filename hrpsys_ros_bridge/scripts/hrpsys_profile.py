@@ -80,14 +80,13 @@ if __name__ == '__main__':
         rospy.init_node('hrpsys_profile_diagnostics')
         pub = rospy.Publisher('diagnostics', DiagnosticArray)
 
-        r = rospy.Rate(10) # 10hz
+        r = rospy.Rate(1) # 10hz
 
         rtc_init()
         while not rospy.is_shutdown():
             try :
                 hrpsys_profile()
             except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE):
-                print "hogb"
                 rtc_init()
 
             r.sleep()
