@@ -193,6 +193,18 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       mot_states.power_state.resize(joint_size);
       mot_states.servo_alarm.resize(joint_size);
       mot_states.driver_temp.resize(joint_size);
+
+      int extra_size = 0;
+      if ( joint_size > 0 ) extra_size = m_servoState.data[0].length() - 1;
+      mot_states.extra_data.layout.dim.resize(2);
+      mot_states.extra_data.layout.dim[0].label = "joint";
+      mot_states.extra_data.layout.dim[0].size = joint_size;
+      mot_states.extra_data.layout.dim[0].stride = joint_size*extra_size;
+      mot_states.extra_data.layout.dim[1].label = "extra_data";
+      mot_states.extra_data.layout.dim[1].size = extra_size;
+      mot_states.extra_data.layout.dim[1].stride = extra_size;
+      mot_states.extra_data.data.resize(joint_size*extra_size);
+
       for ( unsigned int i = 0; i < joint_size ; i++ ){
 	mot_states.name[i] = body->joint(i)->name;
 	mot_states.calib_state[i] = (m_servoState.data[i][0] & OpenHRP::RobotHardwareService::CALIB_STATE_MASK) >> OpenHRP::RobotHardwareService::CALIB_STATE_SHIFT;
@@ -200,6 +212,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	mot_states.power_state[i] = (m_servoState.data[i][0] & OpenHRP::RobotHardwareService::POWER_STATE_MASK) >> OpenHRP::RobotHardwareService::POWER_STATE_SHIFT;
 	mot_states.servo_alarm[i] = (m_servoState.data[i][0] & OpenHRP::RobotHardwareService::SERVO_ALARM_MASK) >> OpenHRP::RobotHardwareService::SERVO_ALARM_SHIFT;
 	mot_states.driver_temp[i] = (m_servoState.data[i][0] & OpenHRP::RobotHardwareService::DRIVER_TEMP_MASK) >> OpenHRP::RobotHardwareService::DRIVER_TEMP_SHIFT;
+        for ( unsigned int j = 0; j < extra_size; j++ ) {
+            mot_states.extra_data.data[i*extra_size+j] = ((float *)&(m_servoState.data[i][1]))[j];
+        }
       }
       mot_states_pub.publish(mot_states);
     }
