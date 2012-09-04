@@ -56,6 +56,12 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   std::string nameserver;
   std::string rootlink_name;
+
+  typedef struct  {
+    std::string link_name;
+    tf::Transform transform;
+  } SensorInfo;
+  std::map<std::string, SensorInfo> sensor_info;
 };
 
 
