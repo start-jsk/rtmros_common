@@ -1,0 +1,24 @@
+--- hrplib/hrpModel/ColdetLinkPair.h.org	2012-06-25 14:57:26.000000000 +0900
++++ hrplib/hrpModel/ColdetLinkPair.h	2012-09-07 15:52:52.510987598 +0900
+@@ -16,7 +16,7 @@
+     class HRPMODEL_API ColdetLinkPair : public ColdetModelPair
+     {
+       public:
+-        ColdetLinkPair(Link* link1, Link* link2);
++        ColdetLinkPair(Link* link1, Link* link2, double tolerance=0);
+         
+         ColdetLinkPair(const ColdetLinkPair& org);
+         
+--- hrplib/hrpModel/ColdetLinkPair.cpp.org	2012-06-25 14:57:26.000000000 +0900
++++ hrplib/hrpModel/ColdetLinkPair.cpp	2012-09-07 15:53:18.870987342 +0900
+@@ -13,8 +13,8 @@
+     
+     class Link;
+     
+-    ColdetLinkPair::ColdetLinkPair(Link* link1, Link* link2)
+-     : ColdetModelPair(link1->coldetModel, link2->coldetModel) {
++    ColdetLinkPair::ColdetLinkPair(Link* link1, Link* link2, double tolerance)
++    : ColdetModelPair(link1->coldetModel, link2->coldetModel, tolerance) {
+         links[0] = link1;
+         links[1] = link2;
+     }
