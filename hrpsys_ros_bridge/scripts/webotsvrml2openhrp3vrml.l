@@ -334,10 +334,13 @@
   (def-all-print-name)
   t)
 
+(defun darwin-vrml-file-path ()
+  (format nil "~A/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto" (ros::resolve-ros-path "package://webots_simulator")))
+
 (defun preprocess-for-vrml-convert-for-darwin ()
-  (preprocess-for-vrml-convert (format nil "~A/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto" (ros::resolve-ros-path "package://webots_simulator")))
+  (preprocess-for-vrml-convert (darwin-vrml-file-path))
   ;; remove subdivision field from Cylinder Node in webots vrml because subdivision field does not exist in default VRML specification. Why?
-  (unix:system "grep -v \"subdivision\" $(rospack find webots_simulator)/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto > /tmp/DARwInOP.proto")
+  (unix:system (format nil "grep -v \"subdivision\" ~A > /tmp/DARwInOP.proto" (darwin-vrml-file-path)))
   ;; rename webots Gyro -> Gyro2 because the name 'Gyro' is duplicate name
   (unix:system "sed -i -e s/Gyro/Gyro2/g /tmp/DARwInOP.proto")
   t)
@@ -488,9 +491,8 @@
 (defun convert-webots-vrml->openhrp3-vrml-for-darwin
   (&optional (openhrp3-vrml-fname "DARWIN.wrl"))
   (in-package "VRML") ;; execute all conversion in "VRML" package because of using vrml:: grobal variables in vrmlNodeSpec.l
-  (let* ((webots-vrml-fname "DARwInOP.proto")
-	 (webots-vrml-original-path (format nil "~A/build/webots/resources/projects/robots/darwin-op/protos/~A"
-					    (ros::resolve-ros-path "package://webots_simulator") webots-vrml-fname)))
+  (let* ((webots-vrml-original-path (darwin-vrml-file-path))
+	 (webots-vrml-fname (format nil "~A.~A" (pathname-name webots-vrml-original-path) (pathname-type webots-vrml-original-path))))
     (unless (probe-file webots-vrml-original-path)
       (warning-message 1 "~A is not found. exitting~%" webots-vrml-original-path)
       (in-package "USER")
