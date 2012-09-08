@@ -11,40 +11,46 @@ import socket
 import time
 
 def connectComps():
-    connectPorts(sim.port("q"), seq.port("qInit"))
+    connectPorts(rh.port("q"), sh.port("currentQIn"))
     #
     connectPorts(seq.port("qRef"), sh.port("qIn"))
-    connectPorts(sh.port("qOut"), hgc.port("qIn"))
     #
-    connectPorts(hgc.port("qOut"), sim.port("qRef"))
-    connectPorts(hgc.port("dqOut"), sim.port("dqRef"))
-    connectPorts(hgc.port("ddqOut"), sim.port("ddqRef"))
+    connectPorts(seq.port("basePos"), sh.port("basePosIn"))
+    connectPorts(seq.port("baseRpy"), sh.port("baseRpyIn"))
+    connectPorts(seq.port("zmpRef"),  sh.port("zmpIn"))
+    #
+    connectPorts(sh.port("qOut"),  ic.port("qRef"))
+    connectPorts(ic.port("q"),  [seq.port("qInit"), rh.port("qRef")])
+    #
+    connectPorts(sh.port("basePosOut"), seq.port("basePosInit"))
+    connectPorts(sh.port("baseRpyOut"), seq.port("baseRpyInit"))
 
 def activateComps():
-    rtm.serializeComponents([sim, seq, sh, log, hgc])
-    sim.start()
+    rtm.serializeComponents([rh, seq, sh, ic, log])
+    rh.start()
     seq.start()
     sh.start()
+    ic.start()
     log.start()
-    hgc.start()
 
 def createComps():
-    global seq, seq_svc, sh, sh_svc, hgc, log, log_svc
+    global seq, seq_svc, sh, sh_svc, ic, ic_svc, log, log_svc
 
     ms.load("SequencePlayer")
     seq = ms.create("SequencePlayer", "seq")
-
     print "[hrpsys.py] createComps -> SequencePlayer : ",seq
     seq_svc = narrow(seq.service("service0"), "SequencePlayerService")
-
-    ms.load("HGcontroller");
-    hgc = ms.create("HGcontroller")
-    print "[hrpsys.py] createComps -> HGcontroller : ",hgc
 
     ms.load("StateHolder");
     sh = ms.create("StateHolder", "StateHolder0")
     print "[hrpsys.py] createComps -> StateHolder : ",sh
     sh_svc = narrow(sh.service("service0"), "StateHolderService");
+    tk_svc = narrow(sh.service("service1"), "TimeKeeperService")
+
+    ms.load("ImpedanceController");
+    ic = ms.create("ImpedanceController", "ImpedanceController0")
+    print "[hrpsys.py] createComps -> ImpedanceController : ",ic
+    ic_svc = narrow(ic.service("service0"), "ImpedanceControllerService");
 
     ms.load("DataLogger");
     log = ms.create("DataLogger", "log")
@@ -54,15 +60,12 @@ def createComps():
 
 # setup logger
 def setupLogger(url=""):
+    #
     log_svc.add("TimedDoubleSeq", "q")
-    #log_svc.add("TimedPoint3D", "pos")
-    #log_svc.add("TimedOrientation3D", "rpy")
-    connectPorts(sim.port("q"), log.port("q"))
-    #connectPorts(sim.port("pos"), log.port("pos"))
-    #connectPorts(sim.port("rpy"), log.port("rpy"))
-    if sim.port("tau") != None:
-        log_svc.add("TimedDoubleSeq", "tau")
-        connectPorts(sim.port("tau"), log.port("tau"))
+    connectPorts(rh.port("q"), log.port("q"))
+
+    log_svc.add("TimedDoubleSeq", "tau")
+    connectPorts(rh.port("tau"), log.port("tau"))
     # sensor logger ports
     print "[hrpsys.py] sensor names for DataLogger"
     import CosNaming
@@ -86,27 +89,28 @@ def setupLogger(url=""):
         print "[hrpsys.py]   type =", sen_type, ",name = ", sen, ",port = ", sim.port(sen)
         if sim.port(sen) != None:
             log_svc.add(sen_type, sen)
-            connectPorts(sim.port(sen), log.port(sen))
+            connectPorts(rh.port(sen), log.port(sen))
 
+    log.owned_ecs[0].start()
+    log.start(log.owned_ecs[0])
 
-def init(simulator="Simulator", url=""):
-    global ms,sim
+def init(robotname="Robot"):
+    global ms, rh, rh_svc, ep_svc, simulation_mode
 
-    ms = None
-
+    ms = rtm.findRTCmanager()
     while ms == None :
         time.sleep(1);
         ms = rtm.findRTCmanager()
         print "[hrpsys.py] wait for RTCmanager : ",ms
 
-    print "[hrpsys.py] createRTCmanager : ",ms
-
-    sim = None
-
-    while sim == None :
-        sim = findRTC(simulator)
-
-    print "[hrpsys.py] createComps -> Simulation : ",sim
+    rh = rtm.findRTC("RobotHardware0")
+    if rh:
+        rh_svc = narrow(rh.service("service0"), "RobotHardwareService")
+        ep_svc = narrow(rh.ec, "ExecutionProfileService")
+    else:
+        rh = rtm.findRTC(robotname+"Controller(Robot)0")
+        simulation_mode = 1
+    simulation_mode = 0
 
     print "[hrpsys.py] creating components"
     createComps()
@@ -121,6 +125,7 @@ def init(simulator="Simulator", url=""):
 
     setupLogger(url)
     print "[hrpsys.py] setup logger done"
+
 
 def findModelLoader():
     try:
