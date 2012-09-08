@@ -494,12 +494,14 @@
 (defun convert-webots-vrml->openhrp3-vrml-for-darwin
   (&optional (openhrp3-vrml-fname "DARWIN.wrl"))
   (in-package "VRML") ;; execute all conversion in "VRML" package because of using vrml:: grobal variables in vrmlNodeSpec.l
-  (unless (probe-file openhrp3-vrml-fname)
-    (warning-message 1 "~A is not found. exitting~%" openhrp3-vrml-fname)
-    (return-from convert-webots-vrml->openhrp3-vrml-for-darwin))
-  (preprocess-for-vrml-convert-for-darwin)
   (let* ((webots-vrml-fname "DARwInOP.proto")
-	 (aa (read-vrml-file-with-vrml-fix (format nil "/tmp/~A" webots-vrml-fname)))
+	 (webots-vrml-original-path (format nil "~A/build/webots/resources/projects/robots/darwin-op/protos/~A" (get-rospack-find-str "webots_simulator") webots-vrml-fname)))
+    (unless (probe-file webots-vrml-original-path)
+      (warning-message 1 "~A is not found. exitting~%" webots-vrml-original-path)
+      (in-package "USER")
+      (return-from convert-webots-vrml->openhrp3-vrml-for-darwin))
+  (preprocess-for-vrml-convert-for-darwin)
+  (let* ((aa (read-vrml-file-with-vrml-fix (format nil "/tmp/~A" webots-vrml-fname)))
 	 (openhrp-vrml-data
 	  (append-openhrp3-humanoid
 	   (replace-all-objects-for-Webots->OpenHRP3
@@ -521,7 +523,7 @@
     (unix:system "rm -f mp_*.jpg mp_*.txt DARwIn-OP_Dynamics.zip")
     ;;(unix:system "rm -f mp_*.jpg mp_*.txt")
     (in-package "USER")
-    t))
+    t)))
 (export '(convert-webots-vrml->openhrp3-vrml-for-darwin))
 (warn "(convert-webots-vrml->openhrp3-vrml-for-darwin)~%")
 
