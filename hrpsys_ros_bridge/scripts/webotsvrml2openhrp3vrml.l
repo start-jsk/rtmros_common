@@ -494,6 +494,9 @@
 (defun convert-webots-vrml->openhrp3-vrml-for-darwin
   (&optional (openhrp3-vrml-fname "DARWIN.wrl"))
   (in-package "VRML") ;; execute all conversion in "VRML" package because of using vrml:: grobal variables in vrmlNodeSpec.l
+  (unless (probe-file openhrp3-vrml-fname)
+    (warning-message 1 "~A is not found. exitting~%" openhrp3-vrml-fname)
+    (return-from convert-webots-vrml->openhrp3-vrml-for-darwin))
   (preprocess-for-vrml-convert-for-darwin)
   (let* ((webots-vrml-fname "DARwInOP.proto")
 	 (aa (read-vrml-file-with-vrml-fix (format nil "/tmp/~A" webots-vrml-fname)))

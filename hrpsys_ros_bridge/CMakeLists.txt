@@ -69,7 +69,11 @@ add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/models/DARWIN.wrl
   COMMAND rosrun roseus roseus ${PROJECT_SOURCE_DIR}/scripts/webotsvrml2openhrp3vrml.l
   "\\(progn \\(convert-webots-vrml-\\>openhrp3-vrml-for-darwin \\\"${PROJECT_SOURCE_DIR}/models/DARWIN.wrl\\\"\\) \\(exit\\)\\)"
   DEPENDS ${webots_simulator_PACKAGE_PATH}/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto)
-compile_openhrp_model(${PROJECT_SOURCE_DIR}/models/DARWIN.wrl)
+if (EXISTS ${webots_simulator_PACKAGE_PATH}/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto)
+  compile_openhrp_model(${PROJECT_SOURCE_DIR}/models/DARWIN.wrl)
+else()
+  message("\n\n\n\n${webots_simulator_PACKAGE_PATH}/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto is not found..\n\n\n\n")
+endif()
 
 # yaskawa model
 rosbuild_download_data(http://openhrp-aist-grx.googlecode.com/files/YaskawaSmartPal5.zip build/YaskawaSmartPal5.zip 3db916d5dc5ef4259c7dfc1ac85dd380)
