@@ -36,7 +36,7 @@ def hrpsys_profile() :
         component_rtc = findRTC(component_name)
         eps = narrow(component_rtc.owned_ecs[0], "ExecutionProfileService")
 
-        if not eps : 
+        if not eps :
             continue
 
         total_prof = eps.getProfile()
@@ -54,23 +54,10 @@ def hrpsys_profile() :
 
         diagnostic.status.append(status)
 
-
-        for c in components :
-            try :
-                prof = eps.getComponentProfile(c.ref)
-                status = DiagnosticStatus(name =  'hrpEC Profile (RTC: ' + c.name() + ')', level = DiagnosticStatus.OK)
-                status.message = "Running : Average Period %7.5f" % (prof.avg_process*1000)
-                status.values.append(KeyValue(key = "Max Process", value = str(prof.max_process*1000)))
-                status.values.append(KeyValue(key = "Avg Process", value = str(prof.avg_process*1000)))
-                status.values.append(KeyValue(key = "Count", value = str(prof.count)))
-                diagnostic.status.append(status)
-            except ExecutionProfileService.ExecutionProfileServiceException:
-                True
-
             
         if ( total_prof.count > 100000 ) :
             rospy.loginfo("eps.resetProfile()")
-            eps.resetProfile() 
+            eps.resetProfile()
             
     pub.publish(diagnostic)
 
@@ -86,7 +73,8 @@ if __name__ == '__main__':
         while not rospy.is_shutdown():
             try :
                 hrpsys_profile()
-            except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE):
+            except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE), e :
+                print "[hrpsys_profile.py] catch exception", e
                 rtc_init()
 
             r.sleep()
