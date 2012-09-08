@@ -500,30 +500,30 @@
       (warning-message 1 "~A is not found. exitting~%" webots-vrml-original-path)
       (in-package "USER")
       (return-from convert-webots-vrml->openhrp3-vrml-for-darwin))
-  (preprocess-for-vrml-convert-for-darwin)
-  (let* ((aa (read-vrml-file-with-vrml-fix (format nil "/tmp/~A" webots-vrml-fname)))
-	 (openhrp-vrml-data
-	  (append-openhrp3-humanoid
-	   (replace-all-objects-for-Webots->OpenHRP3
-	    (insert-segment
-	     (append-openhrp3-waist-joint
-	      (split-nodes
-	       (cadddr aa)
-	       nil) ;; debug print nil
-	      (list 0 0 0.33951) (list 0.57735 0.57735 0.57735 2.09439) ;; WAIST translation and rotation
-	      )
-	     (darwin-inertia-lists)) ;; inertia-maps for insert-segment
-	    (darwin-min-max-lists) (darwin-joint-rotation-lists))
-	   "DARWIN")))
-    (print-all-vrml-nodes-fields
-     openhrp3-vrml-fname openhrp-vrml-data
-     #'(lambda (fstrm)
-	 (print-comment-header-for-vrml-file fstrm)
-	 (print-openhrp3-vrml-protos fstrm)))
-    (unix:system "rm -f mp_*.jpg mp_*.txt DARwIn-OP_Dynamics.zip")
-    ;;(unix:system "rm -f mp_*.jpg mp_*.txt")
-    (in-package "USER")
-    t)))
+    (preprocess-for-vrml-convert-for-darwin)
+    (let* ((aa (read-vrml-file-with-vrml-fix (format nil "/tmp/~A" webots-vrml-fname)))
+	   (openhrp-vrml-data
+	    (append-openhrp3-humanoid
+	     (replace-all-objects-for-Webots->OpenHRP3
+	      (insert-segment
+	       (append-openhrp3-waist-joint
+		(split-nodes
+		 (cadddr aa)
+		 nil) ;; debug print nil
+		(list 0 0 0.33951) (list 0.57735 0.57735 0.57735 2.09439) ;; WAIST translation and rotation
+		)
+	       (darwin-inertia-lists)) ;; inertia-maps for insert-segment
+	      (darwin-min-max-lists) (darwin-joint-rotation-lists))
+	     "DARWIN")))
+      (print-all-vrml-nodes-fields
+       openhrp3-vrml-fname openhrp-vrml-data
+       #'(lambda (fstrm)
+	   (print-comment-header-for-vrml-file fstrm)
+	   (print-openhrp3-vrml-protos fstrm)))
+      (unix:system "rm -f mp_*.jpg mp_*.txt DARwIn-OP_Dynamics.zip")
+      ;;(unix:system "rm -f mp_*.jpg mp_*.txt")
+      (in-package "USER")
+      t)))
 (export '(convert-webots-vrml->openhrp3-vrml-for-darwin))
 (warn "(convert-webots-vrml->openhrp3-vrml-for-darwin)~%")
 
