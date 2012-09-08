@@ -42,13 +42,13 @@ def createComps():
     seq_svc = narrow(seq.service("service0"), "SequencePlayerService")
 
     ms.load("StateHolder");
-    sh = ms.create("StateHolder", "StateHolder0")
+    sh = ms.create("StateHolder", "sh")
     print "[hrpsys.py] createComps -> StateHolder : ",sh
     sh_svc = narrow(sh.service("service0"), "StateHolderService");
     tk_svc = narrow(sh.service("service1"), "TimeKeeperService")
 
     ms.load("ImpedanceController");
-    ic = ms.create("ImpedanceController", "ImpedanceController0")
+    ic = ms.create("ImpedanceController", "ic")
     print "[hrpsys.py] createComps -> ImpedanceController : ",ic
     ic_svc = narrow(ic.service("service0"), "ImpedanceControllerService");
 
