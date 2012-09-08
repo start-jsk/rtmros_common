@@ -323,13 +323,7 @@
 ;; Preprocess for VRML convert
 ;;;;;;;;;;;;;;;;;;;;;;;;
 (defun get-vrml-convert-script-dir ()
-  (format nil "~A/scripts" (get-rospack-find-str "hrpsys_ros_bridge")))
-
-(defun get-rospack-find-str (package-name-str)
-  (let* ((strm (piped-fork (format nil "rospack find ~A" package-name-str)))
-	 (str (read-line strm nil nil)))
-    (close strm)
-    str))
+  (format nil "~A/scripts" (ros::resolve-ros-path "package://hrpsys_ros_bridge")))
 
 (defun preprocess-for-vrml-convert (robot-vrml-fname)
   ;; define OpenHRP3 PROTOs
@@ -341,7 +335,7 @@
   t)
 
 (defun preprocess-for-vrml-convert-for-darwin ()
-  (preprocess-for-vrml-convert (format nil "~A/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto" (get-rospack-find-str "webots_simulator")))
+  (preprocess-for-vrml-convert (format nil "~A/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto" (ros::resolve-ros-path "package://webots_simulator")))
   ;; remove subdivision field from Cylinder Node in webots vrml because subdivision field does not exist in default VRML specification. Why?
   (unix:system "grep -v \"subdivision\" $(rospack find webots_simulator)/build/webots/resources/projects/robots/darwin-op/protos/DARwInOP.proto > /tmp/DARwInOP.proto")
   ;; rename webots Gyro -> Gyro2 because the name 'Gyro' is duplicate name
@@ -495,7 +489,8 @@
   (&optional (openhrp3-vrml-fname "DARWIN.wrl"))
   (in-package "VRML") ;; execute all conversion in "VRML" package because of using vrml:: grobal variables in vrmlNodeSpec.l
   (let* ((webots-vrml-fname "DARwInOP.proto")
-	 (webots-vrml-original-path (format nil "~A/build/webots/resources/projects/robots/darwin-op/protos/~A" (get-rospack-find-str "webots_simulator") webots-vrml-fname)))
+	 (webots-vrml-original-path (format nil "~A/build/webots/resources/projects/robots/darwin-op/protos/~A"
+					    (ros::resolve-ros-path "package://webots_simulator") webots-vrml-fname)))
     (unless (probe-file webots-vrml-original-path)
       (warning-message 1 "~A is not found. exitting~%" webots-vrml-original-path)
       (in-package "USER")
