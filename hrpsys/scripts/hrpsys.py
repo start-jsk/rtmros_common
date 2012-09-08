@@ -59,7 +59,7 @@ def createComps():
 
 
 # setup logger
-def setupLogger(url=""):
+def setupLogger(url=None):
     #
     log_svc.add("TimedDoubleSeq", "q")
     connectPorts(rh.port("q"), log.port("q"))
@@ -67,34 +67,35 @@ def setupLogger(url=""):
     log_svc.add("TimedDoubleSeq", "tau")
     connectPorts(rh.port("tau"), log.port("tau"))
     # sensor logger ports
-    print "[hrpsys.py] sensor names for DataLogger"
-    import CosNaming
-    obj = rtm.rootnc.resolve([CosNaming.NameComponent('ModelLoader', '')])
-    mdlldr = obj._narrow(ModelLoader)
-    print "[hrpsys.py]   bodyinfo URL = file://"+url
-    bodyInfo = mdlldr.getBodyInfo("file://"+url)
-    ret = []
-    for ll in bodyInfo._get_links():
-         if len(ll.sensors) > 0:
-             ret.extend(ll.sensors)
-    for sen in map(lambda x : x.name, ret):
-        if sen == "gyrometer":
-            sen_type = "TimedAngularVelocity3D"
-        elif sen == "gsensor":
-            sen_type = "TimedAcceleration3D"
-        elif sen.find("fsensor") != -1:
-            sen_type = "TimedDoubleSeq"
-        else:
-            continue
-        print "[hrpsys.py]   type =", sen_type, ",name = ", sen, ",port = ", sim.port(sen)
-        if sim.port(sen) != None:
-            log_svc.add(sen_type, sen)
-            connectPorts(rh.port(sen), log.port(sen))
+    if url :
+        print "[hrpsys.py] sensor names for DataLogger"
+        import CosNaming
+        obj = rtm.rootnc.resolve([CosNaming.NameComponent('ModelLoader', '')])
+        mdlldr = obj._narrow(ModelLoader)
+        print "[hrpsys.py]   bodyinfo URL = file://"+url
+        bodyInfo = mdlldr.getBodyInfo("file://"+url)
+        ret = []
+        for ll in bodyInfo._get_links():
+            if len(ll.sensors) > 0:
+                ret.extend(ll.sensors)
+        for sen in map(lambda x : x.name, ret):
+            if sen == "gyrometer":
+                sen_type = "TimedAngularVelocity3D"
+            elif sen == "gsensor":
+                sen_type = "TimedAcceleration3D"
+            elif sen.find("fsensor") != -1:
+                sen_type = "TimedDoubleSeq"
+            else:
+                continue
+            print "[hrpsys.py]   type =", sen_type, ",name = ", sen, ",port = ", sim.port(sen)
+            if rh.port(sen) != None:
+                log_svc.add(sen_type, sen)
+                connectPorts(rh.port(sen), log.port(sen))
 
     log.owned_ecs[0].start()
     log.start(log.owned_ecs[0])
 
-def init(robotname="Robot"):
+def init(robotname="Robot", url=""):
     global ms, rh, rh_svc, ep_svc, simulation_mode
 
     ms = rtm.findRTCmanager()
@@ -142,6 +143,8 @@ if __name__ == '__main__':
     print "[hrpsys.py] start hrpsys"
 
     if len(sys.argv) > 1 :
+        init(sys.argv[1])
+    elif len(sys.argv) > 2 :
         init(sys.argv[1], sys.argv[2])
     else :
         init()
