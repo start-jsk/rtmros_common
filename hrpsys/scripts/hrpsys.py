@@ -87,7 +87,7 @@ def setupLogger(url=None):
                 sen_type = "TimedDoubleSeq"
             else:
                 continue
-            print "[hrpsys.py]   type =", sen_type, ",name = ", sen, ",port = ", sim.port(sen)
+            print "[hrpsys.py]   type =", sen_type, ",name = ", sen, ",port = ", rh.port(sen)
             if rh.port(sen) != None:
                 log_svc.add(sen_type, sen)
                 connectPorts(rh.port(sen), log.port(sen))
@@ -142,10 +142,10 @@ if __name__ == '__main__':
 
     print "[hrpsys.py] start hrpsys"
 
-    if len(sys.argv) > 1 :
-        init(sys.argv[1])
-    elif len(sys.argv) > 2 :
+    if len(sys.argv) > 2 :
         init(sys.argv[1], sys.argv[2])
+    elif len(sys.argv) > 1 :
+        init(sys.argv[1])
     else :
         init()
 
