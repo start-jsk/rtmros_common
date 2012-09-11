@@ -139,9 +139,9 @@ xulrunner-1.9.2:
       echo "oneric does not need xulrunner"
 
 # etc
-zlib1g-dev:
+zlib:
   ubuntu: zlib1g-dev
-libjpeg62-dev:
+libjpeg:
   ubuntu: libjpeg62-dev
 libpng12-dev:
   ubuntu: libpng12-dev
@@ -210,15 +210,17 @@ tix:
 # choreonoid
 doxygen:
   ubuntu: doxygen
-openscenegraph:
+libopenscenegraph:
   ubuntu: libopenscenegraph-dev openscenegraph-doc
 libsimage-dev:
   ubuntu: libsimage-dev
+libqt4-dev:
+  ubuntu: libqt4-dev
 libqt4-opengl:
   ubuntu: libqt4-opengl-dev
 wx-common:
   ubuntu: wx-common
-libqhull-dev:
+libqhull:
   ubuntu: libqhull-dev
 qhull-bin:
   ubuntu: qhull-bin
