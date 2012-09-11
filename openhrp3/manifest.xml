@@ -46,11 +46,9 @@ http://code.google.com/p/openhrp-aist-grx/
   <rosdep name="libomniorb4-dev" />
   <rosdep name="libomnithread3-dev" />
   <rosdep name="omnievents" />
-  <rosdep name="omniidl4" />
   <rosdep name="omniidl-python" />
-  <rosdep name="omniorb4" />
+  <rosdep name="omniorb" />
   <rosdep name="omniorb4-idl" />
-  <rosdep name="omniorb4-nameserver" />
   <rosdep name="python-omniorb" />
   <rosdep name="python-tk" />
 

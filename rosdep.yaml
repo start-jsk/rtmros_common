@@ -48,13 +48,6 @@ omniidl-python:
     maverick: omniidl-python
     natty: omniidl-python
     oneiric: omniidl-python
-omniorb4:
-  ubuntu:
-    kermic: omniorb4
-    lucid: omniorb4
-    maverick: omniorb4
-    natty: omniorb4
-    oneiric: omniorb
 omniorb4-idl:
   ubuntu:
     kermic: omniorb4-idl
@@ -62,13 +55,13 @@ omniorb4-idl:
     maverick: omniorb4-idl
     natty: omniorb4-idl
     oneiric: omniorb-idl
-omniorb4-nameserver:
+omniorb:
   ubuntu:
-    kermic: omniorb4-nameserver
-    lucid: omniorb4-nameserver
-    maverick: omniorb4-nameserver
-    natty: omniorb4-nameserver
-    oneiric: omniorb-nameserver
+    kermic: omniorb4 omniidl4 omniorb4-nameserver libomniorb4-1 libomniorb4-dev libomnithread3-dev libomnithread3c2
+    lucid: omniorb4 omniidl4 omniorb4-nameserver libomniorb4-1 libomniorb4-dev libomnithread3-dev libomnithread3c2
+    maverick: omniorb4 omniidl4 omniorb4-nameserver libomniorb4-1 libomniorb4-dev libomnithread3-dev libomnithread3c2
+    natty: omniorb4 omniidl4 omniorb4-nameserver libomniorb4-1 libomniorb4-dev libomnithread3-dev libomnithread3c2
+    oneiric: omniorb omniidl omniorb-nameserver libomniorb4-1 libomniorb4-dev libomnithread3-dev libomnithread3c2
 libomniorb4-dev:
   ubuntu: libomniorb4-dev
 python-omniorb:
