@@ -28,7 +28,7 @@ http://code.google.com/p/openhrp-aist-grx/
   <depend package="common_rosdeps" />
 
   <!-- collada -->
-  <arosdep name="collada15dom" />
+  <rosdep name="collada15dom" />
 
   <!-- java -->
   <rosdep name="java" />
