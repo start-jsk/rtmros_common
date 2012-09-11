@@ -11,7 +11,7 @@
 
   <rosdep name="tix" />
   <rosdep name="omniorb" />
-  <rosdep name="omniidl-python" />
+  <rosdep name="python-omniorb" />
 
   <depend package="rtmbuild" />
   <depend package="xdot" />
