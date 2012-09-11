@@ -11,8 +11,7 @@
 
   <depend package="std_msgs"/>
 
-  <rosdep name="omniidl4"/>
-  <rosdep name="libomniorb4-dev"/>
+  <rosdep name="omniorb"/>
 
 </package>
 

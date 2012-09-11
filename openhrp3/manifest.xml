@@ -28,10 +28,10 @@ http://code.google.com/p/openhrp-aist-grx/
   <depend package="common_rosdeps" />
 
   <!-- collada -->
-  <rosdep name="collada15dom" />
+  <arosdep name="collada15dom" />
 
   <!-- java -->
-  <rosdep name="sun-java6-jdk" />
+  <rosdep name="java" />
   <rosdep name="jython" />
   <rosdep name="libreadline-java" />
 
@@ -41,40 +41,24 @@ http://code.google.com/p/openhrp-aist-grx/
   <rosdep name="ttf-kochi-mincho" />
 
   <!-- omniORB -->
-  <rosdep name="libcos4-dev" />
-  <rosdep name="libomnievents-dev" />
-  <rosdep name="libomniorb4-dev" />
-  <rosdep name="libomnithread3-dev" />
-  <rosdep name="omnievents" />
-  <rosdep name="omniidl-python" />
   <rosdep name="omniorb" />
-  <rosdep name="omniorb4-idl" />
   <rosdep name="python-omniorb" />
   <rosdep name="python-tk" />
 
   <!-- math -->
-  <rosdep name="liblapack3gf" />
-  <rosdep name="liblapack-dev" />
-  <rosdep name="libatlas-base-dev" />
-  <rosdep name="libblas3gf" />
-  <rosdep name="libblas-dev" />
+  <rosdep name="atlas" />
   <rosdep name="f2c" />
-  <rosdep name="libf2c2" />
-  <rosdep name="libf2c2-dev" />
   <rosdep name="libgfortran3" />
-  <rosdep name="libgfortran3-dbg" />
-
-  <!-- boost -->
 
   <!-- eclipse3.4.2 -->
   <rosdep name="eclipse" />
   <rosdep name="xulrunner-1.9.2" />
 
   <!-- etc -->
-  <rosdep name="zlib1g-dev" />
-  <rosdep name="libjpeg62-dev" />
+  <rosdep name="zlib" />
+  <rosdep name="libjpeg" />
   <rosdep name="libpng12-dev" />
-  <rosdep name="uuid-dev" />
+  <rosdep name="uuid" />
 
 
   <rosdep name="libxml2" />

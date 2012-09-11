@@ -1,4 +1,4 @@
-sun-java6-jdk:
+java:
   ubuntu: |
    #!/bin/bash
    if [ ! -f /etc/apt/sources.list.d/ferramroberto-java-`lsb_release -cs`.list ] ; then
@@ -24,37 +24,6 @@ ttf-kochi-mincho:
   ubuntu: ttf-kochi-mincho
 
 # omniORB
-libcos4-dev:
-  ubuntu: libcos4-dev
-libomnievents-dev:
-  ubuntu: libomnievents-dev
-libomniorb4-dev:
-  ubuntu: libomniorb4-dev
-libomnithread3-dev:
-  ubuntu: libomnithread3-dev
-omnievents:
-  ubuntu: omnievents
-omniidl4:
-  ubuntu:
-    kermic: omniidl4
-    lucid: omniidl4
-    maverick: omniidl4
-    natty: omniidl4
-    oneiric: omniidl
-omniidl-python:
-  ubuntu:
-    kermic: omniidl4-python
-    lucid: omniidl4-python
-    maverick: omniidl-python
-    natty: omniidl-python
-    oneiric: omniidl-python
-omniorb4-idl:
-  ubuntu:
-    kermic: omniorb4-idl
-    lucid: omniorb4-idl
-    maverick: omniorb4-idl
-    natty: omniorb4-idl
-    oneiric: omniorb-idl
 omniorb:
   ubuntu:
     kermic: omniorb4 omniidl4 omniorb4-nameserver libomniorb4-1 libomniorb4-dev libomnithread3-dev libomnithread3c2
@@ -62,8 +31,6 @@ omniorb:
     maverick: omniorb4 omniidl4 omniorb4-nameserver libomniorb4-1 libomniorb4-dev libomnithread3-dev libomnithread3c2
     natty: omniorb4 omniidl4 omniorb4-nameserver libomniorb4-1 libomniorb4-dev libomnithread3-dev libomnithread3c2
     oneiric: omniorb omniidl omniorb-nameserver libomniorb4-1 libomniorb4-dev libomnithread3-dev libomnithread3c2
-libomniorb4-dev:
-  ubuntu: libomniorb4-dev
 python-omniorb:
   ubuntu:
    kermic: python-omniorb2
@@ -79,26 +46,12 @@ python-svn:
   ubuntu: python-svn
 
 # math
-liblapack3gf:
-  ubuntu: liblapack3gf
-liblapack-dev:
-  ubuntu: liblapack-dev
-libatlas-base-dev:
+atlas:
   ubuntu: libatlas-base-dev
-libblas3gf:
-  ubuntu: libblas3gf
-libblas-dev:
-  ubuntu: libblas-dev
 f2c:
-  ubuntu: f2c
-libf2c2:
-  ubuntu: libf2c2
-libf2c2-dev:
-  ubuntu: libf2c2-dev
+  ubuntu: f2c libf2c2 libf2c2-dev
 libgfortran3:
   ubuntu: libgfortran3
-libgfortran3-dbg:
-  ubuntu: libgfortran3-dbg
 tvmet:
   ubuntu: tvmet
 
@@ -138,7 +91,7 @@ libjpeg:
   ubuntu: libjpeg62-dev
 libpng12-dev:
   ubuntu: libpng12-dev
-uuid-dev:
+uuid:
   ubuntu: uuid-dev
 
 # openhrp3 test
