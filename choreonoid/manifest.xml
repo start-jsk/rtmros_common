@@ -45,16 +45,16 @@ Please see their official web sites to see the details of their licenses.
 
   <rosdep name="doxygen" />
   <rosdep name="graphviz" />
-  <rosdep name="zlib1g-dev" />
-  <rosdep name="libjpeg62-dev" />
+  <rosdep name="zlib" />
+  <rosdep name="libjpeg" />
   <rosdep name="libpng12-dev" />
-  <rosdep name="openscenegraph" />
+  <rosdep name="libopenscenegraph" />
   <rosdep name="libsimage-dev" />
   <rosdep name="yaml" />
-  <rosdep name="qt4" />
+  <rosdep name="libqt4-dev" />
   <rosdep name="libqt4-opengl" />
   <rosdep name="wx-common" />
-  <rosdep name="libqhull-dev" />
+  <rosdep name="libqhull" />
   <rosdep name="qhull-bin" />
 
 </package>
