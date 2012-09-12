@@ -40,20 +40,32 @@ def hrpsys_profile() :
 
         total_prof = eps.getProfile()
 
-        status = DiagnosticStatus(name = 'hrpEC Profile ('+component_name+')', level = DiagnosticStatus.OK)
-        status.message = "Running : Average Period : %7.5f, Max Period : %7.5f" % (total_prof.avg_period*1000, total_prof.max_period*1000);
-        status.values.append(KeyValue(key = "Max Period", value = str(total_prof.max_period*1000)))
-        status.values.append(KeyValue(key = "Min Period", value = str(total_prof.min_period*1000)))
-        status.values.append(KeyValue(key = "Average Period", value = str(total_prof.avg_period*1000)))
-        status.values.append(KeyValue(key = "Max Process", value = str(total_prof.max_process*1000)))
-        status.values.append(KeyValue(key = "Count", value = str(total_prof.count)))
-        status.values.append(KeyValue(key = "Timeover", value = str(total_prof.timeover)))
-        if ( total_prof.timeover > 0 ) :
-            status.level   = DiagnosticStatus.WARN
+        if total_prof.count > 0 :
+            status = DiagnosticStatus(name = 'hrpEC Profile ('+component_name+')', level = DiagnosticStatus.OK)
+            status.message = "Running : Average Period : %7.5f, Max Period : %7.5f" % (total_prof.avg_period*1000, total_prof.max_period*1000);
+            status.values.append(KeyValue(key = "Max Period", value = str(total_prof.max_period*1000)))
+            status.values.append(KeyValue(key = "Min Period", value = str(total_prof.min_period*1000)))
+            status.values.append(KeyValue(key = "Average Period", value = str(total_prof.avg_period*1000)))
+            status.values.append(KeyValue(key = "Max Process", value = str(total_prof.max_process*1000)))
+            status.values.append(KeyValue(key = "Count", value = str(total_prof.count)))
+            status.values.append(KeyValue(key = "Timeover", value = str(total_prof.timeover)))
+            if ( total_prof.timeover > 0 ) :
+                status.level   = DiagnosticStatus.WARN
 
-        diagnostic.status.append(status)
+            diagnostic.status.append(status)
 
-            
+        for c in components :
+            try:
+                prof = eps.getComponentProfile(c.ref)
+                status = DiagnosticStatus(name =  'hrpEC Profile (RTC: ' + c.name() + ')', level = DiagnosticStatus.OK)
+                status.message = "Running : Average Process : %7.5f, Max Process : %7.5f" % (prof.avg_process*1000, prof.max_process*1000);
+                status.values.append(KeyValue(key = "Max Process", value = str(prof.max_process*1000)))
+                status.values.append(KeyValue(key = "Avg Process", value = str(prof.avg_process*1000)))
+                status.values.append(KeyValue(key = "Count", value = str(prof.count)))
+                diagnostic.status.append(status)
+            except :
+                True
+
         if ( total_prof.count > 100000 ) :
             rospy.loginfo("eps.resetProfile()")
             eps.resetProfile()
