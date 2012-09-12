@@ -13,15 +13,14 @@ from OpenHRP import *
 import socket
 import time
 
-def rtc_init () :
+def rtc_init (hostname="localhost") :
     global ms, rh, eps
 
     initCORBA()
-
-    ms = None;
+    ms = rtm.findRTCmanager(hostname)
     while ms == None :
         time.sleep(1);
-        ms = rtm.findRTCmanager()
+        ms = rtm.findRTCmanager(hostname)
         print "[hrpsys_profile.py] wait for RTCmanager : ",ms
 
 def hrpsys_profile() :
@@ -63,19 +62,24 @@ def hrpsys_profile() :
 
 
 if __name__ == '__main__':
+    hostname = socket.gethostname()
+    if len(sys.argv) > 1 :
+        hostname=sys.argv[1]
+
     try:
         rospy.init_node('hrpsys_profile_diagnostics')
         pub = rospy.Publisher('diagnostics', DiagnosticArray)
 
         r = rospy.Rate(1) # 10hz
 
-        rtc_init()
+        rtc_init(hostname)
         while not rospy.is_shutdown():
+            hrpsys_profile()
             try :
                 hrpsys_profile()
             except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE), e :
                 print "[hrpsys_profile.py] catch exception", e
-                rtc_init()
+                rtc_init(hostname)
 
             r.sleep()
         

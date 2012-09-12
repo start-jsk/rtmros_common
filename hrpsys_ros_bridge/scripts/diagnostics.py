@@ -12,7 +12,7 @@ def states_cb(msg):
     status = DiagnosticStatus(name = 'Operating Mode', level = DiagnosticStatus.OK, message = "Servo On")
 
     for i in range(len(msg.name)) :
-        if ( msg.servo_alarm[i] > 0 ) :
+        if ( msg.servo_alarm[i] > 0 or msg.servo_state[i] == False ) :
             status.message = "Servo Off"
 
     diagnostic.status.append(status)
