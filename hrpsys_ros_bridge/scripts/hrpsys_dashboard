@@ -35,6 +35,7 @@ from roslib import rosenv
 
 from os import path
 import threading
+import time
 
 ##
 from pr2_dashboard.status_control import StatusControl
@@ -84,14 +85,23 @@ class HrpsysFrame(wx.Frame):
         self._motors_button.SetToolTip(wx.ToolTip("Mode"))
         static_sizer.Add(self._motors_button, 0)
         self._motors_button.Bind(wx.EVT_LEFT_DOWN, self.on_motors_clicked)
+
+        # power / motor
+        static_sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, "Power"), wx.HORIZONTAL)
+        sizer.Add(static_sizer, 0)
+
+        self._power_button = StatusControl(self, wx.ID_ANY, icons_path, "runstop", False)
+        self._power_button.SetToolTip(wx.ToolTip("Power"))
+        static_sizer.Add(self._power_button, 0)
+
         
         static_sizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, "Battery"), wx.HORIZONTAL)
         sizer.Add(static_sizer, 0)
         
         # Battery State
-        self._power_state_ctrl = PowerStateControl(self, wx.ID_ANY, icons_path)
-        self._power_state_ctrl.SetToolTip(wx.ToolTip("Battery: Stale"))
-        static_sizer.Add(self._power_state_ctrl, 1, wx.EXPAND)
+        self._battery_state_ctrl = PowerStateControl(self, wx.ID_ANY, icons_path)
+        self._battery_state_ctrl.SetToolTip(wx.ToolTip("Battery: Stale"))
+        static_sizer.Add(self._battery_state_ctrl, 1, wx.EXPAND)
         
         self._config = wx.Config("hrpsys_dashboard")
         
@@ -143,8 +153,8 @@ class HrpsysFrame(wx.Frame):
       
       if (rospy.get_time() - self._last_dashboard_message_time > 5.0):
           self._motors_button.set_stale()
-          self._power_state_ctrl.set_stale()
-          ctrls = [self._motors_button, self._power_state_ctrl]
+          self._battery_state_ctrl.set_stale()
+          ctrls = [self._motors_button, self._battery_state_ctrl]
           for ctrl in ctrls:
               ctrl.SetToolTip(wx.ToolTip("No message received on dashboard_agg in the last 5 seconds"))
         
@@ -173,17 +183,24 @@ class HrpsysFrame(wx.Frame):
     
     def on_servo_on(self, evt):
       servo = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/servo", OpenHRP_RobotHardwareService_servo )
+      power = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/power", OpenHRP_RobotHardwareService_power )
       actual = rospy.ServiceProxy("/StateHolderServiceROSBridge/goActual", OpenHRP_StateHolderService_goActual )
       try:
+        power(OpenHRP_RobotHardwareService_powerRequest("all",0))
+        time.sleep(1)
         actual(OpenHRP_StateHolderService_goActualRequest())
+        time.sleep(2)
         servo(OpenHRP_RobotHardwareService_servoRequest("all",0))
       except rospy.ServiceException, e:
         wx.MessageBox("Failed to put the hrpsys in servo on mode: service call failed with error: %s"%(e), "Error", wx.OK|wx.ICON_ERROR)
 
     def on_servo_off(self, evt):
       servo = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/servo", OpenHRP_RobotHardwareService_servo )
+      power = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/power", OpenHRP_RobotHardwareService_power )
       try:
         servo(OpenHRP_RobotHardwareService_servoRequest("all",1));
+        time.sleep(1)
+        power(OpenHRP_RobotHardwareService_powerRequest("all",1))
       except rospy.ServiceException, e:
         wx.MessageBox("Failed to put the hrpsys in serv off mode: service call failed with error: %s"%(e), "Error", wx.OK|wx.ICON_ERROR)
 
@@ -200,17 +217,20 @@ class HrpsysFrame(wx.Frame):
             
       battery_status = {}
       op_mode = None
+      pw_mode = None
       for status in msg.status:
           if status.name == "/Power System/Battery":
               for value in status.values:
                   battery_status[value.key]=value.value
           if status.name == "/Mode/Operating Mode":
               op_mode=status.message
+          if status.name == "/Mode/Power Mode":
+              pw_mode=status.message
 
       if (battery_status):
-        self._power_state_ctrl.set_power_state(battery_status)
+        self._battery_state_ctrl.set_power_state(battery_status)
       else:
-        self._power_state_ctrl.set_stale()
+        self._battery_state_ctrl.set_stale()
 
       if (op_mode):
         if (op_mode=='Servo On'):
@@ -222,6 +242,17 @@ class HrpsysFrame(wx.Frame):
       else:
           if (self._motors_button.set_stale()):
               self._motors_button.SetToolTip(wx.ToolTip("Mode: Stale"))
+
+      if (pw_mode):
+        if (pw_mode=='Power On'):
+          if (self._power_button.set_ok()):
+              self._power_button.SetToolTip(wx.ToolTip("Mode: Power On"))
+        elif(pw_mode=='Power Off'):
+          if (self._power_button.set_error()):
+              self._power_button.SetToolTip(wx.ToolTip("Mode: Power Off"))
+      else:
+          if (self._power_button.set_stale()):
+              self._power_button.SetToolTip(wx.ToolTip("Mode: Stale"))
 
       
           
