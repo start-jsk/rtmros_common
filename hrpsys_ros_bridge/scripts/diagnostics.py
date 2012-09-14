@@ -2,6 +2,7 @@
 import roslib; roslib.load_manifest('hrpsys_ros_bridge')
 import rospy
 import time
+import copy
 from std_msgs.msg import String
 from diagnostic_msgs.msg import *
 from hrpsys_ros_bridge.msg import MotorStates
@@ -21,7 +22,9 @@ servo_alarm = {
     0x800 : 'SS_OTHER'
 }
 
-def states_cb(msg):
+diagnostic = None
+def states_cb(msg) :
+    global diagnostic
     diagnostic = DiagnosticArray()
     diagnostic.header.stamp = msg.header.stamp
 
@@ -57,27 +60,18 @@ def states_cb(msg):
             status.level   = DiagnosticStatus.WARN
     diagnostic.status.append(status)
 
-
-    # error
-    for i in range(len(msg.name)) :
-        status = DiagnosticStatus(name = 'Motor ('+msg.name[i]+')', level = DiagnosticStatus.OK, message = "OK")
-        if ( msg.servo_alarm[i] != 0 ) :
-            status.message = "NG"
-            status.level   = DiagnosticStatus.WARN
-        status.values.append(KeyValue(key = "Calib State", value = str(msg.calib_state[i])))
-        status.values.append(KeyValue(key = "Servo State", value = str(msg.servo_state[i])))
-        status.values.append(KeyValue(key = "Power State", value = str(msg.power_state[i])))
-        status.values.append(KeyValue(key = "Servo Alarm", value = str(msg.servo_alarm[i])))
-        status.values.append(KeyValue(key = "Driver Temprature", value = str(msg.driver_temp[i])))
-        diagnostic.status.append(status)
-
-    pub.publish(diagnostic)
+    return diagnostic
 
 if __name__ == '__main__':
     try:
-        global initial_flag, time_latest
-        rospy.init_node('hrpsys_diagnostics')
+        last_message_stamp = 0
+        rospy.init_node('operation_mode_diagnostics')
         sub = rospy.Subscriber('motor_states', MotorStates, states_cb)
         pub = rospy.Publisher('diagnostics', DiagnosticArray)
-        rospy.spin()
+        r = rospy.Rate(10)
+        while not rospy.is_shutdown():
+            if diagnostic and diagnostic.header.stamp != last_message_stamp :
+                last_message_stamp = copy.copy(diagnostic.header.stamp)
+                pub.publish(diagnostic)
+            r.sleep()
     except rospy.ROSInterruptException: pass
