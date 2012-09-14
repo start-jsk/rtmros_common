@@ -38,6 +38,20 @@ def states_cb(msg):
             status.values.append(KeyValue(key = msg.name[i], value = servo_alarm.get(msg.servo_alarm[i], str(msg.servo_alarm[i]))))
 
     diagnostic.status.append(status)
+
+    #
+    for i in range(len(msg.name)) :
+        status = DiagnosticStatus(name = 'Motor ('+msg.name[i]+')', level = DiagnosticStatus.OK, message = "OK")
+        if ( msg.servo_alarm[i] != 0 ) :
+            status.mesage = "NG"
+            status.level   = DiagnosticStatus.WARN
+        status.values.append(KeyValue(key = "Calib State", value = str(msg.calib_state[i])))
+        status.values.append(KeyValue(key = "Servo State", value = str(msg.servo_state[i])))
+        status.values.append(KeyValue(key = "Power State", value = str(msg.power_state[i])))
+        status.values.append(KeyValue(key = "Servo Alarm", value = str(msg.servo_alarm[i])))
+        status.values.append(KeyValue(key = "Driver Temprature", value = str(msg.driver_temp[i])))
+        diagnostic.status.append(status)
+
     pub.publish(diagnostic)
 
 if __name__ == '__main__':
