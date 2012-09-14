@@ -17,4 +17,8 @@ analyzers:
   mode:
     type: diagnostic_aggregator/GenericAnalyzer
     path: 'Mode'
-    contains: ['Operating Mode']
+    contains: ['Operating Mode','Calibration Mode', 'Power Mode']
+  motor:
+    type: diagnostic_aggregator/GenericAnalyzer
+    path: 'Motor'
+    contains: ['Motor']
