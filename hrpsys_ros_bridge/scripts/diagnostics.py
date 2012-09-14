@@ -24,8 +24,9 @@ servo_alarm = {
 def states_cb(msg):
     diagnostic = DiagnosticArray()
     diagnostic.header.stamp = msg.header.stamp
-    status = DiagnosticStatus(name = 'Operating Mode', level = DiagnosticStatus.OK, message = "Servo On")
 
+    # servo on
+    status = DiagnosticStatus(name = 'Operating Mode', level = DiagnosticStatus.OK, message = "Servo On")
     alarm_mesasge = ''
     for i in range(len(msg.name)) :
         if ( status.level == DiagnosticStatus.OK and
@@ -36,14 +37,32 @@ def states_cb(msg):
             status.message = "Servo Error Alarm"
             status.level   = DiagnosticStatus.ERROR
             status.values.append(KeyValue(key = msg.name[i], value = servo_alarm.get(msg.servo_alarm[i], str(msg.servo_alarm[i]))))
-
     diagnostic.status.append(status)
 
-    #
+    # calib done
+    status = DiagnosticStatus(name = 'Calibration Mode', level = DiagnosticStatus.OK, message = "Done")
+    for i in range(len(msg.name)) :
+        if ( msg.calib_state[i] == False ) :
+            if ( status.level == DiagnosticStatus.OK ) :
+                status.message = "Not Calibrated"
+                status.level   = DiagnosticStatus.WARN
+            status.message += ", " + msg.name
+    diagnostic.status.append(status)
+
+    # power on
+    status = DiagnosticStatus(name = 'Power Mode', level = DiagnosticStatus.OK, message = "Power On")
+    for i in range(len(msg.name)) :
+        if ( msg.power_state[i] == False ) :
+            status.message = "Power Off"
+            status.level   = DiagnosticStatus.WARN
+    diagnostic.status.append(status)
+
+
+    # error
     for i in range(len(msg.name)) :
         status = DiagnosticStatus(name = 'Motor ('+msg.name[i]+')', level = DiagnosticStatus.OK, message = "OK")
         if ( msg.servo_alarm[i] != 0 ) :
-            status.mesage = "NG"
+            status.message = "NG"
             status.level   = DiagnosticStatus.WARN
         status.values.append(KeyValue(key = "Calib State", value = str(msg.calib_state[i])))
         status.values.append(KeyValue(key = "Servo State", value = str(msg.servo_state[i])))
