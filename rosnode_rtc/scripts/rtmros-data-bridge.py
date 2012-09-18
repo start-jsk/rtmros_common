@@ -331,7 +331,7 @@ module RTMROSDataBridge
         genidl_bin = genidl_bin.rstrip('\n')
         rtmpkg = rtmpkg.rstrip('\n')
 
-        call([genidl_bin, '-bpython', '-I%s/include/rtm/idl'%rtmpkg, '-C'+self.idldir, self.idldir+'/'+self.idlfile])
+        call([genidl_bin, '-bpython', '-I%s/include/openrtm-1.1/rtm/idl'%rtmpkg, '-C'+self.idldir, self.idldir+'/'+self.idlfile])
         time.sleep(1) # ??
 
         # reload RTC data object
