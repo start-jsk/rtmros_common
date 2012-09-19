@@ -31,10 +31,12 @@
 
 // Service Consumer stub headers
 // <rtc-template block="consumer_stub_h">
+
 #include "hrpsys/idl/SequencePlayerServiceStub.h"
 
 // </rtc-template>
 
+#include "tf/transform_broadcaster.h"
 using namespace RTC;
 
 class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
@@ -148,8 +150,13 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   hrp::BodyPtr body;
   OpenHRP::BodyInfo_var bodyinfo;
 
- private:
+  typedef struct  {
+    std::string link_name;
+    tf::Transform transform;
+  } SensorInfo;
+  std::map<std::string, SensorInfo> sensor_info;
 
+ private:
 };
 
 

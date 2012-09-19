@@ -124,15 +124,51 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     m_rsforceName.push_back(s->name);
   }
 
+  for (int j = 0 ; j < body->numSensorTypes(); j++) {
+    for (int i = 0 ; i < body->numSensors(j); i++) {
+      hrp::Sensor* sensor = body->sensor(j, i);
+      SensorInfo si;
+      si.transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
+      hrp::Vector3 rpy = hrp::rpyFromRot(sensor->localR);
+      si.transform.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
+      OpenHRP::LinkInfoSequence_var links = bodyinfo->links();
+      for ( int k = 0; k < links->length(); k++ ) {
+        OpenHRP::SensorInfoSequence& sensors = links[k].sensors;
+        for ( int l = 0; l < sensors.length(); l++ ) {
+          if ( std::string(sensors[l].name) == std::string(sensor->name) ) {
+            si.link_name = links[k].segments[0].name;
+            sensor_info[sensor->name] = si;
+          }
+        }
+      }
+    }
+  }
+
   coil::vstring virtual_force_sensor = coil::split(m_pManager->getConfig()["virtual_force_sensor"], ",");
   for(int j = 0, i = m_rsforce.size(); j < virtual_force_sensor.size()/10; j++, i++ ){
     std::string name = virtual_force_sensor[j*10+0];
+    std::string base = virtual_force_sensor[j*10+1];
+    std::string target = virtual_force_sensor[j*10+2];
+    hrp::dvector tr(7);
+    for (int k = 0; k < 7; k++ ) {
+        coil::stringTo(tr[k], virtual_force_sensor[j*10+3+k].c_str());
+    }
     m_rsforce.resize(i+1);
     m_rsforceIn.push_back(new InPort<TimedDoubleSeq>(name.c_str(), m_rsforce[i]));
     m_rsforce[i].data.length(6);
     registerInPort(name.c_str(), *m_rsforceIn[i]);
     std::cerr << "virtual force sensor : " << name << std::endl;
     m_rsforceName.push_back(name);
+    SensorInfo si;
+    si.transform.setOrigin( tf::Vector3(tr[0], tr[1], tr[2]) );
+    si.transform.setRotation( tf::Quaternion(tr[3], tr[4], tr[5], tr[6]) );
+    OpenHRP::LinkInfoSequence_var links = bodyinfo->links();
+    for ( int k = 0; k < links->length(); k++ ) {
+      if ( std::string(links[k].name) == target ) {
+        si.link_name = links[k].segments[0].name;
+      }
+    }
+    sensor_info[name] = si;
   }
 
 

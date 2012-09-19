@@ -19,7 +19,6 @@
 #include "actionlib/server/simple_action_server.h"
 #include "pr2_controllers_msgs/JointTrajectoryAction.h"
 #include "pr2_controllers_msgs/JointTrajectoryControllerState.h"
-#include "tf/transform_broadcaster.h"
 #include "dynamic_reconfigure/Reconfigure.h"
 #include "hrpsys_ros_bridge/MotorStates.h"
 #include "diagnostic_msgs/DiagnosticArray.h"
@@ -57,11 +56,6 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   std::string nameserver;
   std::string rootlink_name;
 
-  typedef struct  {
-    std::string link_name;
-    tf::Transform transform;
-  } SensorInfo;
-  std::map<std::string, SensorInfo> sensor_info;
 };
 
 

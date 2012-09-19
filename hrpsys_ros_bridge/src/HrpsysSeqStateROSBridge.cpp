@@ -78,25 +78,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
     fsensor_pub[i] = nh.advertise<geometry_msgs::WrenchStamped>(m_rsforceName[i], 10);
   }
 
-  for (int j = 0 ; j < body->numSensorTypes(); j++) {
-    for (int i = 0 ; i < body->numSensors(j); i++) {
-      hrp::Sensor* sensor = body->sensor(j, i);
-      SensorInfo si;
-      si.transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
-      hrp::Vector3 rpy = hrp::rpyFromRot(sensor->localR);
-      si.transform.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
-      OpenHRP::LinkInfoSequence_var links = bodyinfo->links();
-      for ( int k = 0; k < links->length(); k++ ) {
-        OpenHRP::SensorInfoSequence& sensors = links[k].sensors;
-        for ( int l = 0; l < sensors.length(); l++ ) {
-          if ( std::string(sensors[l].name) == std::string(sensor->name) ) {
-            si.link_name = links[k].segments[0].name;
-            sensor_info[sensor->name] = si;
-          }
-        }
-      }
-    }
-  }
   return RTC::RTC_OK;
 }
 
