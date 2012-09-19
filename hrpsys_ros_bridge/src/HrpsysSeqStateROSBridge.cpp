@@ -75,8 +75,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
 
   fsensor_pub.resize(m_rsforceIn.size());
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
-    hrp::Sensor *s = body->sensor(hrp::Sensor::FORCE, i);
-    fsensor_pub[i] = nh.advertise<geometry_msgs::WrenchStamped>(s->name, 10);
+    fsensor_pub[i] = nh.advertise<geometry_msgs::WrenchStamped>(m_rsforceName[i], 10);
   }
 
   for (int j = 0 ; j < body->numSensorTypes(); j++) {
@@ -391,15 +390,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   // publish forces sonsors
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
-    hrp::Sensor *s = body->sensor(hrp::Sensor::FORCE, i);
     if ( m_rsforceIn[i]->isNew() ) {
       try {
 	m_rsforceIn[i]->read();
-	ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute lfsensor size = " << m_rsforce[i].data.length() );
+	ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute " << m_rsforceName[i] << " size = " << m_rsforce[i].data.length() );
 	if ( m_rsforce[i].data.length() >= 6 ) {
 	  geometry_msgs::WrenchStamped fsensor;
 	  fsensor.header.stamp = ros::Time(m_rsforce[i].tm.sec, m_rsforce[i].tm.nsec);
-	  fsensor.header.frame_id = s->name;
+	  fsensor.header.frame_id = m_rsforceName[i];
 	  fsensor.wrench.force.x = m_rsforce[i].data[0];
 	  fsensor.wrench.force.y = m_rsforce[i].data[1];
 	  fsensor.wrench.force.z = m_rsforce[i].data[2];

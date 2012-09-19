@@ -120,7 +120,21 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     m_rsforceIn[i] = new InPort<TimedDoubleSeq>(s->name.c_str(), m_rsforce[i]);
     m_rsforce[i].data.length(6);
     registerInPort(s->name.c_str(), *m_rsforceIn[i]);
+    std::cerr << "physical force sensor : " << s->name << std::endl;
+    m_rsforceName.push_back(s->name);
   }
+
+  coil::vstring virtual_force_sensor = coil::split(m_pManager->getConfig()["virtual_force_sensor"], ",");
+  for(int j = 0, i = m_rsforce.size(); j < virtual_force_sensor.size()/10; j++, i++ ){
+    std::string name = virtual_force_sensor[j*10+0];
+    m_rsforce.resize(i+1);
+    m_rsforceIn.push_back(new InPort<TimedDoubleSeq>(name.c_str(), m_rsforce[i]));
+    m_rsforce[i].data.length(6);
+    registerInPort(name.c_str(), *m_rsforceIn[i]);
+    std::cerr << "virtual force sensor : " << name << std::endl;
+    m_rsforceName.push_back(name);
+  }
+
 
   // </rtc-template>
   return RTC::RTC_OK;
