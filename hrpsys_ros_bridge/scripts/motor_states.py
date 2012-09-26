@@ -21,8 +21,11 @@ def publish_motor_states_diagnostics(msg) :
     # motor
     i = publish_motor_id % len(msg.name)
     status = DiagnosticStatus(name = 'Motor ('+str(i)+":"+msg.name[i]+')', level = DiagnosticStatus.OK, message = "OK")
-    if ( msg.servo_alarm[i] != 0 ) :
+    if msg.servo_alarm[i] != 0 :
         status.message = "NG"
+        status.level   = DiagnosticStatus.WARN
+    if msg.driver_temp[i] > 55 :
+        status.message = "High Temperature (" + str(msg.driver_temp[i])  + ")"
         status.level   = DiagnosticStatus.WARN
     status.values.append(KeyValue(key = "Calib State", value = str(msg.calib_state[i])))
     status.values.append(KeyValue(key = "Servo State", value = str(msg.servo_state[i])))
