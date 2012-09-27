@@ -1,0 +1,107 @@
+*** server/ModelLoader/BodyInfo_impl.cpp.org	2012-09-24 13:09:18.888256776 +0900
+--- server/ModelLoader/BodyInfo_impl.cpp	2012-09-21 17:07:16.463534808 +0900
+***************
+*** 328,333 ****
+--- 328,340 ----
+      copyVrmlField( fmap, "uvlimit", linkInfo.uvlimit );
+      copyVrmlField( fmap, "lvlimit", linkInfo.lvlimit );
+  
++     if(fmap["tlimit"].typeId() != UNDETERMINED_FIELD_TYPE){
++         copyVrmlField( fmap, "tlimit", linkInfo.tlimit );
++     }else{
++         std::cout << "No tlimit type. tlimit was ignored." << std::endl;        
++         linkInfo.tlimit.length((CORBA::ULong)0); // dummy
++     }
++ 
+      copyVrmlField( fmap, "gearRatio",     linkInfo.gearRatio );
+      copyVrmlField( fmap, "rotorInertia",  linkInfo.rotorInertia );
+      copyVrmlField( fmap, "rotorResistor", linkInfo.rotorResistor );
+*** server/ModelLoader/ColladaWriter.h.org	2012-09-26 23:28:12.863827975 +0900
+--- server/ModelLoader/ColladaWriter.h	2012-09-21 12:15:06.578297641 +0900
+***************
+*** 326,333 ****
+                  domCommon_float_or_paramRef speed = daeSafeCast<domCommon_float_or_param>(mai->add(COLLADA_ELEMENT_SPEED));
+                  daeSafeCast<domCommon_float_or_param::domFloat>(speed->add(COLLADA_ELEMENT_FLOAT))->setValue(pjoint.uvlimit[0]);
+              }
+!             //domCommon_float_or_paramRef accel = daeSafeCast<domCommon_float_or_param>(mai->add(COLLADA_ELEMENT_ACCELERATION));
+!             //daeSafeCast<domCommon_float_or_param::domFloat>(accel->add(COLLADA_ELEMENT_FLOAT))->setValue(0);
+          }
+  
+          // write the bindings
+--- 326,335 ----
+                  domCommon_float_or_paramRef speed = daeSafeCast<domCommon_float_or_param>(mai->add(COLLADA_ELEMENT_SPEED));
+                  daeSafeCast<domCommon_float_or_param::domFloat>(speed->add(COLLADA_ELEMENT_FLOAT))->setValue(pjoint.uvlimit[0]);
+              }
+!             if( pjoint.tlimit.length() > 0 ) {
+!                 domCommon_float_or_paramRef accel = daeSafeCast<domCommon_float_or_param>(mai->add(COLLADA_ELEMENT_ACCELERATION));
+!                 daeSafeCast<domCommon_float_or_param::domFloat>(accel->add(COLLADA_ELEMENT_FLOAT))->setValue(pjoint.tlimit[0]);
+!             }
+          }
+  
+          // write the bindings
+*** server/ModelLoader/ColladaWriter.h.org	2012-09-24 13:09:18.888256776 +0900
+--- server/ModelLoader/ColladaWriter.h	2012-09-21 18:59:42.899296186 +0900
+***************
+*** 1140,1146 ****
+          double max_speed = plink.uvlimit.length()/2*M_PI > 0 ? plink.uvlimit[0] : 0;
+          domactuator->add("max_speed")->setCharData(str(boost::format("%f")%max_speed));
+          domactuator->add("no_load_speed")->setCharData(str(boost::format("%f")%max_speed));
+!         domactuator->add("nominal_torque")->setCharData("0");
+          domactuator->add("nominal_voltage")->setCharData("0");
+          domactuator->add("rotor_inertia")->setCharData(str(boost::format("%f")%(plink.rotorInertia)));
+          domactuator->add("speed_constant")->setCharData("0");
+--- 1142,1149 ----
+          double max_speed = plink.uvlimit.length()/2*M_PI > 0 ? plink.uvlimit[0] : 0;
+          domactuator->add("max_speed")->setCharData(str(boost::format("%f")%max_speed));
+          domactuator->add("no_load_speed")->setCharData(str(boost::format("%f")%max_speed));
+!         double max_torque = plink.tlimit.length() > 0 ? plink.tlimit[0] : 0;
+!         domactuator->add("nominal_torque")->setCharData(str(boost::format("%f")%max_torque));
+          domactuator->add("nominal_voltage")->setCharData("0");
+          domactuator->add("rotor_inertia")->setCharData(str(boost::format("%f")%(plink.rotorInertia)));
+          domactuator->add("speed_constant")->setCharData("0");
+*** hrplib/hrpModel/Link.h.org	2012-09-24 13:09:17.848256812 +0900
+--- hrplib/hrpModel/Link.h	2012-09-21 17:07:16.375534814 +0900
+***************
+*** 163,168 ****
+--- 163,169 ----
+          double llimit;  ///< the lower limit of joint values
+          double uvlimit; ///< the upper limit of joint velocities
+          double lvlimit; ///< the lower limit of joint velocities
++         double tlimit; ///< the upper limit of joint torque
+  
+          double defaultJointValue;
+          double torqueConst;
+*** idl/OpenHRP/ModelLoader.idl.org	2012-09-24 13:09:19.092256768 +0900
+--- idl/OpenHRP/ModelLoader.idl	2012-09-21 17:07:16.483534811 +0900
+***************
+*** 151,156 ****
+--- 151,157 ----
+      DblSequence   llimit;       ///< 最小関節値
+      DblSequence   uvlimit;      ///< 最大関節速度値
+      DblSequence   lvlimit;      ///< 最小関節速度値
++     DblSequence   tlimit;       ///< 最大関節トルク値
+  
+      DblArray3     translation;  ///< ローカル座標系原点(親リンク相対)
+  
+*** hrplib/hrpModel/ModelLoaderUtil.cpp.org	2012-09-24 13:09:17.844256812 +0900
+--- hrplib/hrpModel/ModelLoaderUtil.cpp	2012-09-21 17:07:16.375534814 +0900
+***************
+*** 269,274 ****
+--- 269,275 ----
+      DblSequence llimit  = linkInfo.llimit;
+      DblSequence uvlimit = linkInfo.uvlimit;
+      DblSequence lvlimit = linkInfo.lvlimit;
++     DblSequence tlimit = linkInfo.tlimit;
+  
+      double maxlimit = (numeric_limits<double>::max)();
+  
+***************
+*** 276,281 ****
+--- 277,283 ----
+      link->llimit  = getLimitValue(llimit,  -maxlimit);
+      link->uvlimit = getLimitValue(uvlimit, +maxlimit);
+      link->lvlimit = getLimitValue(lvlimit, -maxlimit);
++     link->tlimit  = getLimitValue(tlimit,  +maxlimit);
+  
+      link->c = Rs * Vector3(linkInfo.centerOfMass[0], linkInfo.centerOfMass[1], linkInfo.centerOfMass[2]);
+  
