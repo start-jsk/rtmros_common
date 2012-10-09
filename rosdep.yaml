@@ -33,11 +33,11 @@ omniorb:
     oneiric: omniorb omniidl omniorb-nameserver libomniorb4-1 libomniorb4-dev libomnithread3-dev libomnithread3c2
 python-omniorb:
   ubuntu:
-   kermic: python-omniorb2
-   lucid: python-omniorb2
-   maverick: python-omniorb
-   natty: python-omniorb
-   oneiric: python-omniorb
+   kermic: python-omniorb2 omniidl4-python
+   lucid: python-omniorb2 omniidl4-python
+   maverick: python-omniorb omniidl-python
+   natty: python-omniorb omniidl-python
+   oneiric: python-omniorb omniidl-python
 python-tk:
   ubuntu: python-tk
 python-psutil:
@@ -126,7 +126,7 @@ openrtm:
    fi
    sudo apt-get -y --force-yes install openrtm-aist openrtm-aist-doc openrtm-aist-dev openrtm-aist-example openrtm-aist-python openrtm-aist-python-example
 
-collada15dom:
+collada-dom:
   ubuntu: |
    #!/bin/bash
    if [ ! -f /etc/apt/sources.list.d/openrave-release*.list ] ; then
@@ -134,7 +134,7 @@ collada15dom:
      sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 58E6B835EDC85D09
      sudo apt-get -y update
    fi
-   sudo apt-get -y --force-yes install libcollada15dom-dev
+   sudo apt-get -y --force-yes install collada-dom-dev
 
 # for openhrp3
 libxml2:
