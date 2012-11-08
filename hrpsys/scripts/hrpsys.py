@@ -11,7 +11,7 @@ import socket
 import time
 
 def connectComps():
-    connectPorts(rh.port("q"), sh.port("currentQIn"))
+    connectPorts(rh.port("q"), [sh.port("currentQIn"), el.port("qCurrent")])
     #
     connectPorts(seq.port("qRef"), sh.port("qIn"))
     #
@@ -20,21 +20,23 @@ def connectComps():
     connectPorts(seq.port("zmpRef"),  sh.port("zmpIn"))
     #
     connectPorts(sh.port("qOut"),  ic.port("qRef"))
-    connectPorts(ic.port("q"),  [seq.port("qInit"), rh.port("qRef")])
+    connectPorts(ic.port("q"),  el.port("qRef"))
+    connectPorts(el.port("q"),  [seq.port("qInit"), rh.port("qRef")])
     #
     connectPorts(sh.port("basePosOut"), seq.port("basePosInit"))
     connectPorts(sh.port("baseRpyOut"), seq.port("baseRpyInit"))
 
 def activateComps():
-    rtm.serializeComponents([rh, seq, sh, ic, log])
+    rtm.serializeComponents([rh, seq, sh, ic, el, log])
     rh.start()
     seq.start()
     sh.start()
     ic.start()
+    el.start()
     log.start()
 
 def createComps():
-    global seq, seq_svc, sh, sh_svc, ic, ic_svc, log, log_svc
+    global seq, seq_svc, sh, sh_svc, ic, ic_svc, el, log, log_svc
 
     ms.load("SequencePlayer")
     seq = ms.create("SequencePlayer", "seq")
@@ -52,6 +54,10 @@ def createComps():
     print "[hrpsys.py] createComps -> ImpedanceController : ",ic
     ic_svc = narrow(ic.service("service0"), "ImpedanceControllerService");
 
+    ms.load("SoftErrorLimiter");
+    el = ms.create("SoftErrorLimiter", "el")
+    print "[hrpsys.py] createComps -> SoftErrorLimiter : ",el
+
     ms.load("DataLogger");
     log = ms.create("DataLogger", "log")
     print "[hrpsys.py] createComps -> DataLogger : ",log
@@ -61,11 +67,13 @@ def createComps():
 # setup logger
 def setupLogger(url=None):
     #
-    log_svc.add("TimedDoubleSeq", "q")
-    connectPorts(rh.port("q"), log.port("q"))
+    if rh.port("u") :
+        log_svc.add("TimedDoubleSeq", "q")
+        connectPorts(rh.port("q"), log.port("q"))
 
-    log_svc.add("TimedDoubleSeq", "tau")
-    connectPorts(rh.port("tau"), log.port("tau"))
+    if rh.port("tau") :
+        log_svc.add("TimedDoubleSeq", "tau")
+        connectPorts(rh.port("tau"), log.port("tau"))
     # sensor logger ports
     if url :
         print "[hrpsys.py] sensor names for DataLogger"
@@ -104,14 +112,14 @@ def init(robotname="Robot", url=""):
         ms = rtm.findRTCmanager()
         print "[hrpsys.py] wait for RTCmanager : ",ms
 
+    simulation_mode = 0
     rh = rtm.findRTC("RobotHardware0")
     if rh:
         rh_svc = narrow(rh.service("service0"), "RobotHardwareService")
         ep_svc = narrow(rh.ec, "ExecutionProfileService")
     else:
-        rh = rtm.findRTC(robotname+"Controller(Robot)0")
+        rh = rtm.findRTC(robotname)
         simulation_mode = 1
-    simulation_mode = 0
 
     print "[hrpsys.py] creating components"
     createComps()
