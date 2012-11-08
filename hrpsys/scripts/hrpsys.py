@@ -21,7 +21,11 @@ def connectComps():
     #
     connectPorts(sh.port("qOut"),  ic.port("qRef"))
     connectPorts(ic.port("q"),  el.port("qRef"))
-    connectPorts(el.port("q"),  [seq.port("qInit"), rh.port("qRef")])
+    if simulation_mode :
+        connectPorts(el.port("q"),  hgc.port("qIn"))
+        connectPorts(hgc.port("qOut"), [seq.port("qInit"), rh.port("qRef")])
+    else :
+        connectPorts(el.port("q"),  [seq.port("qInit"), rh.port("qRef")])
     #
     connectPorts(sh.port("basePosOut"), seq.port("basePosInit"))
     connectPorts(sh.port("baseRpyOut"), seq.port("baseRpyInit"))
@@ -104,7 +108,7 @@ def setupLogger(url=None):
     log.start(log.owned_ecs[0])
 
 def init(robotname="Robot", url=""):
-    global ms, rh, rh_svc, ep_svc, simulation_mode
+    global ms, rh, rh_svc, ep_svc, hgc, simulation_mode
 
     ms = rtm.findRTCmanager()
     while ms == None :
@@ -112,14 +116,14 @@ def init(robotname="Robot", url=""):
         ms = rtm.findRTCmanager()
         print "[hrpsys.py] wait for RTCmanager : ",ms
 
-    simulation_mode = 0
     rh = rtm.findRTC("RobotHardware0")
     if rh:
         rh_svc = narrow(rh.service("service0"), "RobotHardwareService")
         ep_svc = narrow(rh.ec, "ExecutionProfileService")
     else:
         rh = rtm.findRTC(robotname)
-        simulation_mode = 1
+        hgc = findRTC("HGcontroller0")
+        simulation_mode = True
 
     print "[hrpsys.py] creating components"
     createComps()
