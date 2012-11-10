@@ -9,7 +9,14 @@ check-java-version:
 	   sudo update-java-alternatives -s java-6-sun; \
 	fi
 
-installed: installed.openhrp3
+check-eclipse-launch:
+	if [ `lsb_release -r -s | cut -d '.' -f 1` -ge 12 ]; then \
+           if [ "`grep 'java.library.path=/usr/lib/jni' /etc/eclipse.ini`" = "" ]; then \
+              /bin/echo "-Djava.library.path=/usr/lib/jni" | sudo bash -c 'cat >> /etc/eclipse.ini'; \
+           fi ; \
+        fi
+
+installed: check-eclipse-launch installed.openhrp3
 
 clean: clean.openhrp3
 
