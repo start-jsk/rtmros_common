@@ -25,6 +25,6 @@ JYTHON_LIB=$JYTHON_LIB
 EOF
 } > `rospack find openhrp3`/workspace/.metadata/.plugins/org.eclipse.core.runtime/.settings/com.generalrobotix.ui.grxui.prefs
 
-/usr/bin/eclipse -data `rospack find openhrp3`/workspace -consolelog -clean $@ --launcher.appendVmargs -vmargs -Dorg.osgi.framework.os.version=`uname -r`
+/usr/bin/eclipse -data `rospack find openhrp3`/workspace -consolelog -clean $@ --launcher.appendVmargs -vmargs -Djava.library.path=/usr/lib/jni -Dorg.osgi.framework.os.version=`uname -r`
 
 

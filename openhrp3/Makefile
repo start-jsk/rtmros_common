@@ -16,7 +16,7 @@ check-eclipse-launch:
            fi ; \
         fi
 
-installed: check-eclipse-launch installed.openhrp3
+installed: installed.openhrp3
 
 clean: clean.openhrp3
 
