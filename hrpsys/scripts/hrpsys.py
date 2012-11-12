@@ -21,11 +21,12 @@ def connectComps():
     #
     connectPorts(sh.port("qOut"),  ic.port("qRef"))
     connectPorts(ic.port("q"),  el.port("qRef"))
+    out_port = el.port("q")
     if simulation_mode :
-        connectPorts(el.port("q"),  hgc.port("qIn"))
+        connectPorts(out_port,  hgc.port("qIn"))
         connectPorts(hgc.port("qOut"), [seq.port("qInit"), rh.port("qRef")])
     else :
-        connectPorts(el.port("q"),  [seq.port("qInit"), rh.port("qRef")])
+        connectPorts(out_port,  [seq.port("qInit"), rh.port("qRef")])
     #
     connectPorts(sh.port("basePosOut"), seq.port("basePosInit"))
     connectPorts(sh.port("baseRpyOut"), seq.port("baseRpyInit"))
