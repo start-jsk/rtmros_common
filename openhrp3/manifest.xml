@@ -25,6 +25,7 @@ http://code.google.com/p/openhrp-aist-grx/
   <!-- openhrp3 -->
   <depend package="tvmet" />
   <depend package="openrtm" />
+  <depend package="openrtm_ros_bridge" />
   <depend package="common_rosdeps" />
 
   <!-- collada -->
