@@ -82,6 +82,7 @@ void convert(S& s, boost::array<T,n>& v){
   for(std::size_t i=0; i<n; i++) convert(s[i],v[i]);}
 template<class S,class T,std::size_t n>
 void convert(boost::array<T,n>& v, S& s){
+  s = S(n, S::allocbuf(n), 1);
   for(std::size_t i=0; i<n; i++) convert(v[i],s[i]);}
 
 // special case for RTC::LightweightRTObject_var
