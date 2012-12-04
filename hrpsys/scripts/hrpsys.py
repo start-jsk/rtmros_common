@@ -11,7 +11,7 @@ import socket
 import time
 
 def connectComps():
-    connectPorts(rh.port("q"), [sh.port("currentQIn"), el.port("qCurrent")])
+    connectPorts(rh.port("q"), [sh.port("currentQIn"), el.port("qCurrent"), ic.port("qCurrent")])
     #
     connectPorts(seq.port("qRef"), sh.port("qIn"))
     #
