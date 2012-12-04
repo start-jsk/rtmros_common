@@ -21,7 +21,7 @@
 	args = "$(arg openrtm_args) -o model:$(arg MODEL_FILE)"
 	output = "$(arg OUTPUT)" />
   <node pkg="hrpsys_ros_bridge" name="ImageSensorROSBridge" type="ImageSensorROSBridge"
-	output="$(arg OUTPUT)" args="$(arg openrtm_args)" >
+    output="$(arg OUTPUT)" args="$(arg openrtm_args)" >
     <param name="frame_id" value="/VISION_SENSOR1" />
   </node>
   <node pkg="hrpsys" name="DataLoggerServiceROSBridge" type="DataLoggerServiceROSBridgeComp"
@@ -43,7 +43,7 @@
   <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
   <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch"/>
   <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="HrpsysSeqStateROSBridge0.rtc:rsangle" />
-  <rtconnect from="StateHolder0.rtc:baseTformOut" to="HrpsysSeqStateROSBridge0.rtc:baseTform" />
+  <rtconnect from="sh.rtc:baseTformOut" to="HrpsysSeqStateROSBridge0.rtc:baseTform" />
   <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" />
   <rtconnect from="$(arg ROBOT_NAME)(Robot)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" />
   <rtconnect from="DataLoggerServiceROSBridge.rtc:DataLoggerService" to="log.rtc:DataLoggerService" />
