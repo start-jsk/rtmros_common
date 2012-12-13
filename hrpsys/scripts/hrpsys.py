@@ -125,6 +125,13 @@ def init(robotname="Robot", url=""):
         rh = rtm.findRTC(robotname)
         hgc = findRTC("HGcontroller0")
         simulation_mode = True
+    if not rh:
+        print "[hrpsys.py] Could not find ", robotname
+        print "[hrpsys.py] Candidates are .... ", [x.name()  for x in ms.get_components()]
+        print "[hrpsys.py] Exitting.... ", robotname
+        return
+
+    print "[hrpsys.py] findComps -> RobotHardware : ",rh
 
     print "[hrpsys.py] creating components"
     createComps()
