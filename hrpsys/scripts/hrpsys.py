@@ -79,7 +79,7 @@ def createComps():
 # setup logger
 def setupLogger(url=None):
     #
-    if rh.port("u") :
+    if rh.port("q") :
         log_svc.add("TimedDoubleSeq", "q")
         connectPorts(rh.port("q"), log.port("q"))
 
