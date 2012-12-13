@@ -1,0 +1,34 @@
+<launch>
+  <arg name="KILL_SERVERS" default="false" />
+  <include file="$(find hrpsys)/launch/hrpsys.launch" >
+    <arg name="PROJECT_FILE" value="$(find hrpsys)/share/hrpsys/samples/PA10/PA10simulation.xml" />
+    <arg name="MODEL_FILE" value="$(find openhrp3)/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl" />
+    <arg name="CONF_FILE" value="$(find hrpsys)/share/hrpsys/samples/PA10/PA10.conf" />
+    <arg name="SIMULATOR_NAME" value="PA10Controller(Robot)0" />
+    <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
+  </include>
+
+  <sphinxdoc><![CDATA[
+This scripts starts HRP-4C.xml hrpsys-base sample project file. First, 
+select StartSimulation sub-menu from GrxUI menu, or clock Simulation Start button to start simulation, then execute `HRP4C.py` program as followings to make the robot walk.
+
+.. code-block:: bash
+
+  rosrun hrpsys hrpsyspy `rospack find hrpsys`/share/hrpsys/samples/HRP-4C/HRP4C.py
+
+
+.. video:: build/images/HRP4C
+  :width: 600
+
+  ]]></sphinxdoc>
+  <test type="test-grxui.py" pkg="openhrp3" time-limit="300"
+   test-name="HRP4C"
+   args="--max-time=100
+	 --viewer-name='' #
+	 --no-start-simulation
+	 --capture-window='Irrlicht'
+	 --target-directory=$(find hrpsys)/build/images
+	 --script='$(find hrpsys)/scripts/hrp4c_walk.sh'"
+   />
+  <test type="ogv_encode.sh" pkg="jsk_tools" test-name="z_HRP4C" args="$(find hrpsys)/build/images/HRP4C.ogv" time-limit="1000"/>
+</launch>
