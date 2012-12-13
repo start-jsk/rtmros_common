@@ -11,7 +11,7 @@ import socket
 import time
 
 def connectComps():
-    connectPorts(rh.port("q"), [sh.port("currentQIn"), el.port("qCurrent"), ic.port("qCurrent")])
+    connectPorts(rh.port("q"), [sh.port("currentQIn"), co.port("qCurrent"), el.port("qCurrent"), ic.port("qCurrent")])
     #
     connectPorts(seq.port("qRef"), sh.port("qIn"))
     #
@@ -20,7 +20,8 @@ def connectComps():
     connectPorts(seq.port("zmpRef"),  sh.port("zmpIn"))
     #
     connectPorts(sh.port("qOut"),  ic.port("qRef"))
-    connectPorts(ic.port("q"),  el.port("qRef"))
+    connectPorts(ic.port("q"),  co.port("qRef"))
+    connectPorts(co.port("q"),  el.port("qRef"))
     out_port = el.port("q")
     if simulation_mode :
         connectPorts(out_port,  hgc.port("qIn"))
@@ -32,16 +33,17 @@ def connectComps():
     connectPorts(sh.port("baseRpyOut"), seq.port("baseRpyInit"))
 
 def activateComps():
-    rtm.serializeComponents([rh, seq, sh, ic, el, log])
+    rtm.serializeComponents([rh, seq, sh, ic, co, el, log])
     rh.start()
     seq.start()
     sh.start()
     ic.start()
+    co.start()
     el.start()
     log.start()
 
 def createComps():
-    global seq, seq_svc, sh, sh_svc, ic, ic_svc, el, log, log_svc
+    global seq, seq_svc, sh, sh_svc, ic, ic_svc, co, co_svc, el, log, log_svc
 
     ms.load("SequencePlayer")
     seq = ms.create("SequencePlayer", "seq")
@@ -58,6 +60,11 @@ def createComps():
     ic = ms.create("ImpedanceController", "ic")
     print "[hrpsys.py] createComps -> ImpedanceController : ",ic
     ic_svc = narrow(ic.service("service0"), "ImpedanceControllerService");
+
+    ms.load("CollisionDetector");
+    co = ms.create("CollisionDetector", "co")
+    print "[hrpsys.py] createComps -> CollisionDetector : ",co
+    co_svc = narrow(co.service("service0"), "CollisionDetectorService");
 
     ms.load("SoftErrorLimiter");
     el = ms.create("SoftErrorLimiter", "el")
