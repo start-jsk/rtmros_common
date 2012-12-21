@@ -42,6 +42,14 @@
 	       (let ((str""))
 		 (dotimes (i (length v)) (setq str (format nil "~A ~A" str (deg2rad (elt v i)))))
 		 (format nil "~A ~A" str (* 1e-3 tm))))))
+  ;;
+  ;; CollisionDetectorService.idl
+  (:set-tolerance
+   (&key (tolerance 0.1) (link_pair_name "all"))
+   (let* ((req (instance hrpsys::OpenHRP_CollisionDetectorService_setToleranceRequest :init
+			 :link_pair_name link_pair_name
+			 :tolerance tolerance)))
+     (ros::service-call "CollisionDetectorServiceROSBridge/setTolerance" req)))
   ;; for logger
   (:save-log
    (fname)
