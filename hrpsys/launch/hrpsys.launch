@@ -5,6 +5,12 @@
   <arg name="KILL_SERVERS" default="false" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+  <!-- see http://code.google.com/p/hrpsys-base/issues/detail?id=14 for  exec_cxt.periodic.rate:100000 -->
+  <arg name="REALTIME" default="false" />
+  <arg name="hrpsys_args" value='-o "exec_cxt.periodic.rate:1000000" -o "manager.shutdown_onrtcs:NO" -o "manager.is_master:YES" -o "manager.modules.load_path:$(find hrpsys)/lib" -o "manager.modules.preload:HGcontroller.so" -o "manager.components.precreate:HGcontroller" -o "exec_cxt.periodic.type:SynchExtTriggerEC" -o "example.SequencePlayer.config_file:$(arg CONF_FILE)" -o "example.ImpedanceController.config_file:$(arg CONF_FILE)" -o "example.StateHolder.config_file:$(arg CONF_FILE)" -o "example.KalmanFilter.config_file:$(arg CONF_FILE)" -o "example.Stabilizer.config_file:$(arg CONF_FILE)" -o "example.CollisionDetector.config_file:$(arg CONF_FILE)" -o "example.SoftErrorLimiter.config_file:$(arg CONF_FILE)"' />
+  <arg unless="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless " />
+  <arg     if="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless -realtime" />
+
   <!-- END:openrtm setting -->
   <arg name="PROJECT_FILE" />
   <arg name="MODEL_FILE" />
@@ -15,7 +21,6 @@
   <arg name="HRPSYS_PERIODIC_RATE" default="200"/>
   <arg name="OPENHRP3_SIM_PERIODIC_RATE" default="200"/>
   <arg name="KINEMATICS_ONLY" default="0"/>
-  <arg name="REALTIME" default="false" />
   <env name="LANG" value="C" />
   <env name="ORBgiopMaxMsgSize" value="2147483648" />
 
@@ -27,13 +32,8 @@
 
   <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" /> <!-- loading dae files crushes model loader -->
 
-  <!-- see http://code.google.com/p/hrpsys-base/issues/detail?id=14 for  exec_cxt.periodic.rate:100000 -->
-  <arg name="hrpsys_simulator_args" value='$(arg PROJECT_FILE) $(arg openrtm_args) -endless -o "exec_cxt.periodic.rate:1000000" -o "manager.shutdown_onrtcs:NO" -o "manager.is_master:YES" -o "manager.modules.load_path:$(find hrpsys)/lib" -o "manager.modules.preload:HGcontroller.so" -o "manager.components.precreate:HGcontroller" -o "exec_cxt.periodic.type:SynchExtTriggerEC" -o "example.SequencePlayer.config_file:$(arg CONF_FILE)" -o "example.ImpedanceController.config_file:$(arg CONF_FILE)" -o "example.StateHolder.config_file:$(arg CONF_FILE)" -o "example.KalmanFilter.config_file:$(arg CONF_FILE)" -o "example.Stabilizer.config_file:$(arg CONF_FILE)" -o "example.CollisionDetector.config_file:$(arg CONF_FILE)" -o "example.SoftErrorLimiter.config_file:$(arg CONF_FILE)"' />
-  <arg unless="$(arg REALTIME)" name="hrpsys_simulator_opt_args" value="" />
-  <arg     if="$(arg REALTIME)" name="hrpsys_simulator_opt_args" value="-realtime" />
-
   <node name="hrpsys_simulator" pkg="hrpsys" type="hrpsys-simulator" output="$(arg OUTPUT)"
-	args="$(arg hrpsys_simulator_args) $(arg hrpsys_simulator_opt_args)" />
+	args="$(arg PROJECT_FILE) $(arg openrtm_args) $(arg hrpsys_opt_args)$(arg hrpsys_args)" />
 
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
   <node name="hrpsys" pkg="hrpsys" type="hrpsys.py" output="screen"
