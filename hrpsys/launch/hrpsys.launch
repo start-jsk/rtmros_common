@@ -33,7 +33,7 @@
   <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" /> <!-- loading dae files crushes model loader -->
 
   <node name="hrpsys_simulator" pkg="hrpsys" type="hrpsys-simulator" output="$(arg OUTPUT)"
-	args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_opt_args)$(arg hrpsys_args)" />
+	args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_opt_args) $(arg hrpsys_args)" />
 
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
   <node name="hrpsys" pkg="hrpsys" type="hrpsys.py" output="screen"
