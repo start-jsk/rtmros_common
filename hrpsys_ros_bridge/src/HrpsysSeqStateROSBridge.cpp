@@ -261,7 +261,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     if ( use_sim_time ) {
         rosgraph_msgs::Clock clock_msg;
         clock_msg.clock = ros::Time(m_rsangle.tm.sec,m_rsangle.tm.nsec);
-        std::cerr << clock_msg.clock << std::endl;
         clock_pub.publish(clock_msg);
     }
 
