@@ -14,6 +14,7 @@
 
 // ros
 #include "ros/ros.h"
+#include "rosgraph_msgs/Clock.h"
 #include "sensor_msgs/JointState.h"
 #include "geometry_msgs/WrenchStamped.h"
 #include "actionlib/server/simple_action_server.h"
@@ -42,11 +43,11 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
  private:
   ros::NodeHandle nh;
-  ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub;
+  ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub;
   std::vector<ros::Publisher> fsensor_pub;
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> server;
   ros::ServiceServer sendmsg_srv;
-  bool interpolationp;
+  bool interpolationp, use_sim_time;
 
   tf::TransformBroadcaster br;
 

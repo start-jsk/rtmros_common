@@ -31,6 +31,7 @@ static const char* hrpsysseqstaterosbridge_spec[] =
 // </rtc-template>
 
 HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
+  use_sim_time(false),
   server(nh, "fullbody_controller/joint_trajectory_action", false),
   HrpsysSeqStateROSBridgeImpl(manager)
 {
@@ -41,6 +42,12 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   joint_state_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
   joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
+
+  // is use_sim_time is set, publish clock time
+  nh.getParam("/use_sim_time", use_sim_time);
+  if ( use_sim_time ) {
+      clock_pub = nh.advertise<rosgraph_msgs::Clock>("/clock", 5);
+  }
 
   server.start();
 }
@@ -251,6 +258,12 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
     //
+    if ( use_sim_time ) {
+        rosgraph_msgs::Clock clock_msg;
+        clock_msg.clock = ros::Time(m_rsangle.tm.sec,m_rsangle.tm.nsec);
+        std::cerr << clock_msg.clock << std::endl;
+        clock_pub.publish(clock_msg);
+    }
 
     m_mutex.lock();
     body->calcForwardKinematics();
