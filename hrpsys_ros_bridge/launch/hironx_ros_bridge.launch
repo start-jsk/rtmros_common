@@ -7,8 +7,8 @@
   </include>
 
   <node name="hironx_rviz" pkg="rviz" type="rviz" respawn="true"
-	args="--sync -d $(find hrpsys_ros_bridge)/launch/hironx.vcg"
-        launch-prefix='glc-capture --out=$(find hrpsys_ros_bridge)/build/images/hironx_rviz.glc'  />
+	args="-sync -d $(find hrpsys_ros_bridge)/launch/hironx.vcg"
+        />
 
 </launch>
 
