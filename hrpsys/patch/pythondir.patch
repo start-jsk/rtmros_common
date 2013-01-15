@@ -1,0 +1,15 @@
+--- CMakeLists.txt.orig	2012-12-29 19:14:18.035970811 +0900
++++ CMakeLists.txt	2013-01-10 13:54:50.361325387 +0900
+@@ -104,11 +108,7 @@
+ find_package(GLUT REQUIRED)
+ find_package(QuickHull REQUIRED)
+ 
+-execute_process(
+-  COMMAND python -c "from distutils import sysconfig; print sysconfig.get_config_var(\"VERSION\")"
+-  OUTPUT_VARIABLE PYTHON_VERSION
+-  OUTPUT_STRIP_TRAILING_WHITESPACE)
+-set(python_dist_pkg_dir ${CMAKE_INSTALL_PREFIX}/lib/python${PYTHON_VERSION}/dist-packages)
++set(python_dist_pkg_dir ${CMAKE_INSTALL_PREFIX}/share/hrpsys/python)
+ 
+ configure_file(hrpsys-base.pc.in ${CMAKE_CURRENT_BINARY_DIR}/hrpsys-base.pc @ONLY)
+ install(FILES

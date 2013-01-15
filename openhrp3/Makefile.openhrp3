@@ -1,16 +1,18 @@
 INSTALL_DIR = $(CURDIR)
-FILENAME    = OpenHRP-3.1.3.zip
+FILENAME    = OpenHRP-3.1.4.zip
 TARBALL     = build/$(FILENAME)
-SOURCE_DIR  = build/OpenHRP-3.1.3
-TARBALL_PATCH = patch/ColladaWriter.patch patch/ColladaWriter2.patch patch/TriangleMeshShaper.patch patch/ColdetLinkPair.patch patch/TorqueLimit.patch
+SOURCE_DIR  = build/OpenHRP-3.1.4
+#TARBALL_PATCH =
 UNPACK_CMD  = unzip
 MD5SUM_FILE = $(FILENAME).md5sum
-WGET_COMMAND = --post-data "fname=OpenHRP-3.1.3.zip" --no-check-certificate https://openrtp.jp/openhrp3/script-jp/download_file.php -O $(TARBALL)
+WGET_COMMAND = --post-data "fname=OpenHRP-3.1.4.zip" --no-check-certificate https://openrtp.jp/openhrp3/script-jp/download_file.php -O $(TARBALL)
 include $(shell rospack find mk)/download_unpack_build.mk
 
 $(SOURCE_DIR)/unpacked:
 	-mkdir -p build
-	wget $(WGET_COMMAND) || wget $(WGET_COMMAND) || wget $(WGET_COMMAND)
+	 if [ "`md5sum $(TARBALL) | cut -f1 -d\ `" != "`cat $(FILENAME).md5sum | cut -f1 -d\ `" ]; then \
+	    wget $(WGET_COMMAND) || wget $(WGET_COMMAND) || wget $(WGET_COMMAND); \
+	fi
 	if [ "`md5sum $(TARBALL) | cut -f1 -d\ `" != "`cat $(FILENAME).md5sum | cut -f1 -d\ `" ]; then echo "ERROR: md5sum mismatch (`md5sum $(TARBALL) | cut -f1 -d\ ` != `cat $(FILENAME).md5sum | cut -f1 -d\ ` ), Aborting.." ; exit 1; fi
 	touch -c $(TARBALL)
 	rm -rf $(SOURCE_DIR) $(INITIAL_DIR)
