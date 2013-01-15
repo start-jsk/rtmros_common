@@ -6,8 +6,9 @@ HRP4C_MODEL_PATH=${HRP4C_MODEL_DIR}/HRP4C/HRP4Cmain.wrl
 
 if [ ! -f ${HRP4C_MODEL_PATH} ]; then
     if [ -f ${HRP4C_DOWNLOAD_FILE} ]; then
-	unzip ${HRP4C_DOWNLOAD_FILE} -d ${HRP4C_MODEL_DIR}
-	mv ${HRP4C_MODEL_DIR}/HRP-4C/* ${HRP4C_MODEL_DIR}/HRP4C
+        mkdir -p /tmp/$$.HRP-4C/
+	unzip ${HRP4C_DOWNLOAD_FILE} -d /tmp/$$.HRP-4C/
+	mv /tmp/$$.HRP-4C/HRP-4C/* ${HRP4C_MODEL_DIR}/HRP4C
     else
 	echo "======================================================"
 	echo "======================================================"
