@@ -18,6 +18,7 @@
 #include "sensor_msgs/JointState.h"
 #include "geometry_msgs/WrenchStamped.h"
 #include "actionlib/server/simple_action_server.h"
+#include "control_msgs/FollowJointTrajectoryAction.h"
 #include "pr2_controllers_msgs/JointTrajectoryAction.h"
 #include "pr2_controllers_msgs/JointTrajectoryControllerState.h"
 #include "dynamic_reconfigure/Reconfigure.h"
@@ -36,8 +37,11 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   RTC::ReturnCode_t onFinalize();
   RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
 
+  void onJointTrajectory(trajectory_msgs::JointTrajectory trajectory);
   void onJointTrajectoryActionGoal();
   void onJointTrajectoryActionPreempt();
+  void onFollowJointTrajectoryActionGoal();
+  void onFollowJointTrajectoryActionPreempt();
   bool sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
 		dynamic_reconfigure::Reconfigure::Response &res);
 
@@ -45,7 +49,8 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   ros::NodeHandle nh;
   ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub;
   std::vector<ros::Publisher> fsensor_pub;
-  actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> server;
+  actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> joint_trajectory_server;
+  actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> follow_joint_trajectory_server;
   ros::ServiceServer sendmsg_srv;
   bool interpolationp, use_sim_time;
 

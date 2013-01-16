@@ -32,12 +32,15 @@ static const char* hrpsysseqstaterosbridge_spec[] =
 
 HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   use_sim_time(false),
-  server(nh, "fullbody_controller/joint_trajectory_action", false),
+  joint_trajectory_server(nh, "fullbody_controller/joint_trajectory_action", false),
+  follow_joint_trajectory_server(nh, "fullbody_controller/follow_joint_trajectory_action", false),
   HrpsysSeqStateROSBridgeImpl(manager)
 {
   // ros
-  server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
-  server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
+  joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
+  joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
+  follow_joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal, this));
+  follow_joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt, this));
   sendmsg_srv = nh.advertiseService(std::string("sendmsg"), &HrpsysSeqStateROSBridge::sendMsg, this);
   joint_state_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
   joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
@@ -49,14 +52,16 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
       clock_pub = nh.advertise<rosgraph_msgs::Clock>("/clock", 5);
   }
 
-  server.start();
+  joint_trajectory_server.start();
+  follow_joint_trajectory_server.start();
 }
 
 HrpsysSeqStateROSBridge::~HrpsysSeqStateROSBridge() {};
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onFinalize() {
   ROS_ERROR_STREAM("[HrpsysSeqStateROSBridge] @onFinalize : " << getInstanceName());
-  server.setPreempted();
+  joint_trajectory_server.setPreempted();
+  follow_joint_trajectory_server.setPreempted();
   return RTC_OK;
 }
 
@@ -89,8 +94,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
 }
 
 
-void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
-  pr2_controllers_msgs::JointTrajectoryGoalConstPtr goal = server.acceptNewGoal();
+void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
   m_mutex.lock();
 
   ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction ");
@@ -99,16 +103,16 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
   OpenHRP::dSequenceSequence angles;
   OpenHRP::dSequence duration;
 
-  angles.length(goal->trajectory.points.size()) ;
-  duration.length(goal->trajectory.points.size()) ;
+  angles.length(trajectory.points.size()) ;
+  duration.length(trajectory.points.size()) ;
 
-  std::vector<std::string> joint_names = goal->trajectory.joint_names;
+  std::vector<std::string> joint_names = trajectory.joint_names;
 
-  for (unsigned int i=0; i < goal->trajectory.points.size(); i++) {
+  for (unsigned int i=0; i < trajectory.points.size(); i++) {
     angles[i].length(body->joints().size());
 
-    trajectory_msgs::JointTrajectoryPoint point = goal->trajectory.points[i];
-    for (unsigned int j=0; j < goal->trajectory.joint_names.size(); j++ ) {
+    trajectory_msgs::JointTrajectoryPoint point = trajectory.points[i];
+    for (unsigned int j=0; j < trajectory.joint_names.size(); j++ ) {
       body->link(joint_names[j])->q = point.positions[j];
     }
 
@@ -122,14 +126,14 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
       ++it;++j;
     }
 
-    ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction : time_from_start " << goal->trajectory.points[i].time_from_start.toSec());
+    ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction : time_from_start " << trajectory.points[i].time_from_start.toSec());
     if ( i > 0 ) {
-      duration[i] =  goal->trajectory.points[i].time_from_start.toSec() - goal->trajectory.points[i-1].time_from_start.toSec();
+      duration[i] =  trajectory.points[i].time_from_start.toSec() - trajectory.points[i-1].time_from_start.toSec();
     } else { // if i == 0
-      if ( goal->trajectory.points.size()== 1 ) {
-	duration[i] = goal->trajectory.points[i].time_from_start.toSec();
+      if ( trajectory.points.size()== 1 ) {
+	duration[i] = trajectory.points[i].time_from_start.toSec();
       } else { // 0.2 is magic number writtein in roseus/euslisp/robot-interface.l
-	duration[i] = goal->trajectory.points[i].time_from_start.toSec() - 0.2;
+	duration[i] = trajectory.points[i].time_from_start.toSec() - 0.2;
       }
     }
   }
@@ -146,8 +150,22 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
   interpolationp = true;
 }
 
+void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
+  pr2_controllers_msgs::JointTrajectoryGoalConstPtr goal = joint_trajectory_server.acceptNewGoal();
+  onJointTrajectory(goal->trajectory);
+}
+
+void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal() {
+  control_msgs::FollowJointTrajectoryGoalConstPtr goal = follow_joint_trajectory_server.acceptNewGoal();
+  onJointTrajectory(goal->trajectory);
+}
+
 void HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt() {
-  server.setPreempted();
+  joint_trajectory_server.setPreempted();
+}
+
+void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt() {
+  follow_joint_trajectory_server.setPreempted();
 }
 
 bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
@@ -180,6 +198,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 {
   pr2_controllers_msgs::JointTrajectoryControllerState joint_controller_state;
   joint_controller_state.header.stamp = ros::Time::now();
+
+  control_msgs::FollowJointTrajectoryFeedback follow_joint_trajectory_feedback;
+  follow_joint_trajectory_feedback.header.stamp = ros::Time::now();
 
   hrpsys_ros_bridge::MotorStates mot_states;
   mot_states.header.stamp = ros::Time::now();
@@ -291,6 +312,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       joint_controller_state.actual.positions.push_back(j->q);
       //joint_state.velocity
       //joint_state.effort
+      follow_joint_trajectory_feedback.joint_names.push_back(j->name);
+      follow_joint_trajectory_feedback.desired.positions.push_back(j->q);
+      follow_joint_trajectory_feedback.actual.positions.push_back(j->q);
+      follow_joint_trajectory_feedback.error.positions.push_back(0);
       ++it;
     }
     joint_state.velocity.resize(joint_state.name.size());
@@ -312,10 +337,17 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
     m_mutex.unlock();
 
-    if ( server.isActive() &&
+    if ( joint_trajectory_server.isActive() &&
 	 interpolationp == true &&  m_service0->isEmpty() == true ) {
       pr2_controllers_msgs::JointTrajectoryResult result;
-      server.setSucceeded(result);
+      joint_trajectory_server.setSucceeded(result);
+      interpolationp = false;
+    }
+    if ( follow_joint_trajectory_server.isActive() &&
+	 interpolationp == true &&  m_service0->isEmpty() == true ) {
+      control_msgs::FollowJointTrajectoryResult result;
+      result.error_code = control_msgs::FollowJointTrajectoryResult::SUCCESSFUL;
+      follow_joint_trajectory_server.setSucceeded(result);
       interpolationp = false;
     }
 
@@ -364,6 +396,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       joint_controller_state.error.accelerations.resize(joint_controller_state.joint_names.size());
 
       joint_controller_state_pub.publish(joint_controller_state);
+    }
+    if ( !follow_joint_trajectory_feedback.joint_names.empty() &&
+         !follow_joint_trajectory_feedback.actual.positions.empty() ) {
+      follow_joint_trajectory_server.publishFeedback(follow_joint_trajectory_feedback);
     }
   }
 

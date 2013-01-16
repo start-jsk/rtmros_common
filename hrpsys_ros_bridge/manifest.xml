@@ -37,6 +37,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <depend package="robot_state_publisher"/>
   <depend package="actionlib"/>
   <depend package="pr2_controllers_msgs"/>
+  <depend package="control_msgs"/>
   <depend package="tf" />
 
   <!-- image ros bridge -->
