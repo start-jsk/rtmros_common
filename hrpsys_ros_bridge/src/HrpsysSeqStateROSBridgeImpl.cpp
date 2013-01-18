@@ -79,7 +79,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
 
   RTC::Properties& prop = getProperties();
 
-  body = new hrp::Body();
+  body = hrp::BodyPtr(new hrp::Body());
 
   RTC::Manager& rtcManager = RTC::Manager::instance();
   std::string nameServer = rtcManager.getConfig()["corba.nameservers"];
