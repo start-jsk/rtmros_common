@@ -16,6 +16,9 @@ def connectComps():
     connectPorts(seq.port("qRef"), sh.port("qIn"))
     #
     connectPorts(rh.port("tau"), tf.port("tauIn"))
+    connectPorts(rh.port("rate"), kf.port("rate"))
+    connectPorts(rh.port("acc"), kf.port("acc"))
+    connectPorts(seq.port("accRef"), kf.port("accRef"))
     #
     connectPorts(seq.port("basePos"), sh.port("basePosIn"))
     connectPorts(seq.port("baseRpy"), sh.port("baseRpyIn"))
@@ -35,18 +38,19 @@ def connectComps():
     connectPorts(sh.port("baseRpyOut"), seq.port("baseRpyInit"))
 
 def activateComps():
-    rtm.serializeComponents([rh, seq, sh, tf, ic, co, el, log])
+    rtm.serializeComponents([rh, seq, sh, tf, kf, ic, co, el, log])
     rh.start()
     seq.start()
     sh.start()
     tf.start()
+    kf.start()
     ic.start()
     co.start()
     el.start()
     log.start()
 
 def createComps():
-    global seq, seq_svc, sh, sh_svc, tf, ic, ic_svc, co, co_svc, el, log, log_svc
+    global seq, seq_svc, sh, sh_svc, tf, kf, kf_svc, ic, ic_svc, co, co_svc, el, log, log_svc
 
     ms.load("SequencePlayer")
     seq = ms.create("SequencePlayer", "seq")
@@ -62,6 +66,11 @@ def createComps():
     ms.load("TorqueFilter");
     tf = ms.create("TorqueFilter", "tf")
     print "[hrpsys.py] createComps -> TorqueFilter : ",tf
+
+    ms.load("KalmanFilter");
+    kf = ms.create("KalmanFilter", "kf")
+    print "[hrpsys.py] createComps -> KalmanFilter : ",kf
+    kf_svc = narrow(kf.service("service0"), "KalmanFilterService")
 
     ms.load("ImpedanceController");
     ic = ms.create("ImpedanceController", "ic")
