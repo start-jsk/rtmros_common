@@ -2,7 +2,7 @@ all: installed build/robothardware_eclipse.zip
 
 INSTALL_DIR=`rospack find hrpsys`
 SVN_DIR = build/hrpsys-base
-SVN_URL = http://hrpsys-base.googlecode.com/svn/tags/3.1.4
+SVN_URL = http://hrpsys-base.googlecode.com/svn/trunk
 #SVN_REVISION=-r@REVISION@
 SVN_PATCH = patch/tvmet.patch patch/rpath.patch patch/pa10py.patch patch/pa10conf.patch patch/pythondir.patch
 
