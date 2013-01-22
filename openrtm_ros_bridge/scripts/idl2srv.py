@@ -287,7 +287,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             print msgfile
             return
 
-        if os.path.exists(msgfile) and not options.overwrite:
+        if os.path.exists(msgfile) and (os.stat(msgfile).st_mtime > os.stat(idlfile).st_mtime) and not options.overwrite:
             return # do not overwrite
 
         os.system('mkdir -p %s/msg' % basedir)
@@ -314,7 +314,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             print srvfile
             return
 
-        if os.path.exists(srvfile) and not options.overwrite:
+        if os.path.exists(srvfile) and (os.stat(srvfile).st_mtime > os.stat(idlfile).st_mtime) and not options.overwrite:
             return # do not overwrite
         os.system('mkdir -p %s/srv' % basedir)
         args = op.parameters()
@@ -459,7 +459,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             print mod_h
             return
 
-        if os.path.exists(Comp_cpp) and os.path.exists(mod_cpp) and os.path.exists(mod_h) and not options.overwrite:
+        if all([ os.path.exists(x) and os.stat(x).st_mtime > os.stat(idlfile).st_mtime for x in [Comp_cpp, mod_cpp, mod_h]]) and not options.overwrite:
             return # do not overwrite
 
         command = "rosrun openrtm rtc-template -bcxx --module-name=%s --consumer=%s:service0:'%s' --consumer-idl=%s --idl-include=%s" % (module_name, service_name, service_name, idlfile, idldir)
