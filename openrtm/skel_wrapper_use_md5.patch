@@ -1,0 +1,50 @@
+--- utils/rtm-skelwrapper/skel_wrapper.py.orig	2013-01-23 02:06:16.046735749 +0900
++++ utils/rtm-skelwrapper/skel_wrapper.py	2012-05-24 23:18:16.265727842 +0900
+@@ -20,6 +20,7 @@
+ import sys
+ import os
+ import time
++import hashlib
+ 
+ 
+ #------------------------------------------------------------
+@@ -29,6 +30,7 @@
+ /*!
+  *
+  * THIS FILE IS GENERATED AUTOMATICALLY!! DO NOT EDIT!!
++ * FROM [idl_fname] ([idl_md5])
+  *
+  * @file [skel_h]
+  
+@@ -77,6 +79,7 @@
+ /*!
+  *
+  * THIS FILE IS GENERATED AUTOMATICALLY!! DO NOT EDIT!!
++ * FROM [idl_fname] ([idl_md5])
+  *
+  * @file [skel_cpp]
+  
+@@ -121,6 +124,7 @@
+ /*!
+  *
+  * THIS FILE IS GENERATED AUTOMATICALLY!! DO NOT EDIT!!
++ * FROM [idl_fname] ([idl_md5])
+  *
+  * @file [stub_h]
+  
+@@ -166,6 +170,7 @@
+ /*!
+  *
+  * THIS FILE IS GENERATED AUTOMATICALLY!! DO NOT EDIT!!
++ * FROM [idl_fname] ([idl_md5])
+  *
+  * @file [stub_cpp]
+  
+@@ -216,6 +221,7 @@
+ 		self.data["include_dir"] = include_dir
+ 		self.data["output_dir"] = output_dir
+ 		self.data["idl_fname"] = idl_fname
++		self.data["idl_md5"] = hashlib.md5(open(idl_fname, 'r').read()).hexdigest()
+ 		m = re.search("\.[iI][dD][lL]$", idl_fname)
+ 		if m:
+ 			basename = idl_fname.replace(m.group(0), "")

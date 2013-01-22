@@ -5,7 +5,7 @@ FILENAME    = OpenRTM-aist-1.1.0-RELEASE.tar.gz
 TARBALL     = build/$(FILENAME)
 TARBALL_URL = http://www.openrtm.org/pub/OpenRTM-aist/cxx/1.1.0/$(FILENAME)
 SOURCE_DIR  = build/OpenRTM-aist-1.1.0
-TARBALL_PATCH = SDOPackage.idl-1.1.0.patch Manager.cpp.patch2 ArtEC-1.1.0.patch build/openrtm-bin-1.1.0.patch
+TARBALL_PATCH = SDOPackage.idl-1.1.0.patch Manager.cpp.patch2 ArtEC-1.1.0.patch build/openrtm-bin-1.1.0.patch skel_wrapper_use_md5.patch
 UNPACK_CMD  = tar xzf
 MD5SUM_FILE = $(FILENAME).md5sum
 include $(shell rospack find mk)/download_unpack_build.mk
