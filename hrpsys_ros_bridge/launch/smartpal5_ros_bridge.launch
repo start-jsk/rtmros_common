@@ -7,7 +7,7 @@
 
   <node name="smartpal5_rviz" pkg="rviz" type="rviz" respawn="true"
 	args="--sync -d $(find hrpsys_ros_bridge)/launch/hrp4c.vcg"
-        launch-prefix='glc-capture --out=$(find hrpsys_ros_bridge)/build/images/smartpal5_rviz.glc' />
+        />
 </launch>
 
 

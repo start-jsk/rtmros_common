@@ -8,7 +8,7 @@
 
   <node name="samplerobot_rviz" pkg="rviz" type="rviz" respawn="true"
 	args="--sync -d $(find hrpsys_ros_bridge)/launch/samplerobot.vcg"
-        launch-prefix='glc-capture --out=$(find hrpsys_ros_bridge)/build/images/samplerobot_rviz.glc'  />
+        />
 
   <node name="image_proc" pkg="image_proc" type="image_proc" output="screen" />
   <include file="$(find roseus_tutorials)/launch/image-view.launch" />

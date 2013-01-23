@@ -7,7 +7,7 @@
 
   <node name="pa10_rviz" pkg="rviz" type="rviz" respawn="true"
 	args="--sync -d $(find hrpsys_ros_bridge)/launch/pa10.vcg"
-        launch-prefix='glc-capture --out=$(find hrpsys_ros_bridge)/build/images/pa10_rviz.glc'  />
+        />
 </launch>
 
 
