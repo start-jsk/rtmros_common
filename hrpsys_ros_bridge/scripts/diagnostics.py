@@ -49,7 +49,7 @@ def states_cb(msg) :
             if ( status.level == DiagnosticStatus.OK ) :
                 status.message = "Not Calibrated"
                 status.level   = DiagnosticStatus.WARN
-            status.message += ", " + msg.name
+            status.message += ", " + msg.name[i]
     diagnostic.status.append(status)
 
     # power on
