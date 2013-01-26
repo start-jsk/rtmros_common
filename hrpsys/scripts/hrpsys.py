@@ -16,8 +16,9 @@ def connectComps():
     connectPorts(seq.port("qRef"), sh.port("qIn"))
     #
     connectPorts(rh.port("tau"), tf.port("tauIn"))
-    connectPorts(rh.port("rate"), kf.port("rate"))
-    connectPorts(rh.port("acc"), kf.port("acc"))
+    if ( rh.port("rate") and rh.port("acc") ) :
+        connectPorts(rh.port("rate"), kf.port("rate"))
+        connectPorts(rh.port("acc"), kf.port("acc"))
     connectPorts(seq.port("accRef"), kf.port("accRef"))
     #
     connectPorts(seq.port("basePos"), sh.port("basePosIn"))
