@@ -57,4 +57,21 @@
     "DataLoggerServiceROSBridge/save"
     (instance hrpsys::Openhrp_Dataloggerservice_saveRequest :init :basename fname))
    )
+  ;; for seq
+  (:setBasePose
+   (&optional base-coords (tm 0.1))
+   (unless base-coords
+     (setq base-coords (send robot :worldcoords)))
+   (let ((pos_req (instance hrpsys::OpenHRP_SequencePlayerService_setBasePosRequest :init))
+         (rpy_req (instance hrpsys::OpenHRP_SequencePlayerService_setBaseRpyRequest :init)))
+     (send pos_req :pos (scale 0.001 (send base-coords :pos)))
+     (send pos_req :tm tm)
+     (let ((rpy (coerce (car (send base-coords :rpy-angle)) float-vector)))
+       (send rpy_req :rpy rpy)
+       (send rpy_req :tm tm))
+     (ros::service-call
+      "SequencePlayerServiceROSBridge/setBasePos" pos_req)
+     (ros::service-call
+      "SequencePlayerServiceROSBridge/setBaseRpy" rpy_req)
+     ))
   )
