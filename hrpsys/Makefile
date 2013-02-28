@@ -7,10 +7,10 @@ include $(shell rospack find mk)/cmake.mk
 
 wipe: clean
 	# make -f Makefile.hrpsys-base wipe
-	rm -fr build share
+	rm -fr build share patched
 	touch wiped
 
 clean: Makefile.hrpsys-base
 	make -f Makefile.hrpsys-base clean
-	-rm -fr installed patched include bin lib idl idl_gen msg msg_gen srv srv_gen src_gen
+	-rm -fr installed include bin lib idl idl_gen msg msg_gen srv srv_gen src_gen
 
