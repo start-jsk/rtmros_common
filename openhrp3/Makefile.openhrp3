@@ -1,5 +1,5 @@
 INSTALL_DIR = $(CURDIR)
-SVN_DIR     = build/OpenHRR-3
+SVN_DIR     = build/OpenHRP-3
 SVN_URL     = https://openrtp.jp/svn/hrg/openhrp/3.1/trunk
 #SVN_REVISION = r@REVISION@
 #SVN_PATCH = 
