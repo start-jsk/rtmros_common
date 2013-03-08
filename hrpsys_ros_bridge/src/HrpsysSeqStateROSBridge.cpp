@@ -172,11 +172,17 @@ bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request
 				       dynamic_reconfigure::Reconfigure::Response &res)
 {
   if ( req.config.strs.size() == 2 ) {
+    res.config.strs = req.config.strs;
     ROS_INFO_STREAM("[" << getInstanceName() << "] @sendMsg [" << req.config.strs[0].value << "]");
     if (req.config.strs[0].value == "setInterpolationMode") {
       ROS_INFO_STREAM("[" << getInstanceName() << "] @sendMsg [" << req.config.strs[1].value  << "]");
-      if ( req.config.strs[1].value == ":linear" ) m_service0->setInterpolationMode(OpenHRP::SequencePlayerService::LINEAR);
-      else m_service0->setInterpolationMode(OpenHRP::SequencePlayerService::HOFFARBIB);
+      if ( req.config.strs[1].value == ":linear" ) {
+        ROS_DEBUG("set interpolation mode -> :linear");
+        m_service0->setInterpolationMode(OpenHRP::SequencePlayerService::LINEAR);
+      } else {
+        ROS_DEBUG("set interpolation mode -> :hoffarbib");
+        m_service0->setInterpolationMode(OpenHRP::SequencePlayerService::HOFFARBIB);
+      }
     } else if (req.config.strs[0].value == "setJointAngles") {
       std::istringstream iss(req.config.strs[1].value);
       OpenHRP::dSequence js;
@@ -190,6 +196,7 @@ bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request
     }
   } else {
     ROS_ERROR_STREAM("[" << getInstanceName() << "] @sendMsg [Invalid argument string length]");
+    return false;
   }
   return true;
 }
