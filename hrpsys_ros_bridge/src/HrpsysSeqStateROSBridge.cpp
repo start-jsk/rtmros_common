@@ -203,14 +203,15 @@ bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 {
+  ros::Time tm_on_execute = ros::Time::now();
   pr2_controllers_msgs::JointTrajectoryControllerState joint_controller_state;
-  joint_controller_state.header.stamp = ros::Time::now();
+  joint_controller_state.header.stamp = tm_on_execute;
 
   control_msgs::FollowJointTrajectoryFeedback follow_joint_trajectory_feedback;
-  follow_joint_trajectory_feedback.header.stamp = ros::Time::now();
+  follow_joint_trajectory_feedback.header.stamp = tm_on_execute;
 
   hrpsys_ros_bridge::MotorStates mot_states;
-  mot_states.header.stamp = ros::Time::now();
+  mot_states.header.stamp = tm_on_execute;
 
   // servoStateIn
   if ( m_servoStateIn.isNew () ) {
@@ -255,7 +256,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       {
 	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
-  }
+  }  // end: servoStateIn
 
   // rstorqueIn
   if ( m_rstorqueIn.isNew () ) {
@@ -268,7 +269,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       {
 	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
-  }
+  }  // end: rstorqueIn
 
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
@@ -376,8 +377,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       ROS_WARN_STREAM("[" << getInstanceName() << "] @onExecutece " << ec_id << " is not executed last " << interval << "[sec]");
       tm.tick();
     }
-  }
+  } // end: m_in_rsangleIn
 
+  // m_mcangleIn
   if ( m_mcangleIn.isNew () ) {
     //ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", mc:" << m_mcangleIn.isNew () << ", baseTform:" << m_baseTformIn.isNew() << ", lfsensor:" << m_mclfsensorIn.isNew() << ", rfsensor:" << m_mcrfsensorIn.isNew());
     try {
@@ -408,8 +410,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
          !follow_joint_trajectory_feedback.actual.positions.empty() ) {
       follow_joint_trajectory_server.publishFeedback(follow_joint_trajectory_feedback);
     }
-  }
+  } // end: m_mcangleIn
 
+  // m_baseTformIn
   if ( m_baseTformIn.isNew () ) {
     m_baseTformIn.read();
     tf::Transform base;
@@ -422,7 +425,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
     // odom publish
     br.sendTransform(tf::StampedTransform(base, ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec), "odom", rootlink_name));
-  }
+  }  // end: m_baseTformIn
 
   // publish forces sonsors
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
@@ -448,7 +451,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	  ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
 	}
     }
-  }
+  } // end: publish forces sonsors
 
   //
   return RTC::RTC_OK;
