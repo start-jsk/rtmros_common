@@ -1,0 +1,62 @@
+--- hrplib/hrpModel/ModelNodeSet.org.cpp	2013-03-09 00:34:53.496033998 +0900
++++ hrplib/hrpModel/ModelNodeSet.cpp	2013-03-08 23:34:26.701614758 +0900
+@@ -321,10 +321,19 @@
+     requireField("rotation", SFROTATION);
+     requireField("translation", SFVEC3F);
+     requireField("jointType", SFSTRING);
+-    requireField("jointId", SFINT32);
+ 
+     VrmlVariantField* field;
+ 
++    field = protoToCheck->getField("jointId");
++    if(!field){
++        throw ModelNodeSet::Exception
++            ("Prototype of Humanoid must have the \"jointId\" field");
++    }
++    if(field->typeId() != SFFLOAT && field->typeId() != SFINT32){
++        throw ModelNodeSet::Exception
++            ("The type of \"jointId\" field in \"Humanoid\" prototype must be SFFloat or SFInt32");
++    }
++
+     field = protoToCheck->getField("jointAxis");
+     if(!field){
+         throw ModelNodeSet::Exception
+--- server/ModelLoader/BodyInfo_impl.org.cpp	2013-03-09 00:33:14.423542728 +0900
++++ server/ModelLoader/BodyInfo_impl.cpp	2013-03-09 00:57:37.958800001 +0900
+@@ -326,8 +326,21 @@
+     TProtoFieldMap& fmap = jointNode->fields;
+ 
+     CORBA::Long jointId;
+-    copyVrmlField( fmap, "jointId", jointId );
+-    linkInfo.jointId = (CORBA::Short)jointId; 
++    VrmlVariantField& fJointId = fmap["jointId"];
++    switch( fJointId.typeId() ) {
++
++    case SFFLOAT:
++      jointId = (CORBA::Long)fJointId.sfFloat();
++      break;
++		
++    case SFINT32:
++      copyVrmlField( fmap, "jointId", jointId);
++      break;
++
++    default:
++        break;
++    }
++    linkInfo.jointId = (CORBA::Short)jointId;
+ 
+     linkInfo.jointAxis[0] = 0.0;
+     linkInfo.jointAxis[1] = 0.0;
+@@ -608,7 +621,11 @@
+             sensorInfo.specValues[5] = static_cast<CORBA::Double>(height);
+ 	    
+ 	    double frameRate;
+-            copyVrmlField(fmap, "frameRate", frameRate);
++            if ( fmap.find("frameRate") != fmap.end() ) {
++              copyVrmlField(fmap, "frameRate", frameRate);
++            } else {
++              frameRate = 30.0;
++            }
+             sensorInfo.specValues[6] = frameRate;
+         } else if( sensorType == "Range" ){
+             sensorInfo.specValues.length( CORBA::ULong(4) );
