@@ -1,4 +1,4 @@
-(load "package://pr2eus/robot-interface.l")
+(require :robot-interface "package://pr2eus/robot-interface.l")
 
 (ros::load-ros-manifest "dynamic_reconfigure")
 (ros::roseus-add-msgs "hrpsys_ros_bridge")
@@ -74,4 +74,26 @@
      (ros::service-call
       "SequencePlayerServiceROSBridge/setBaseRpy" rpy_req)
      ))
+  ;; just testing code
+  (:addJointGroup (groupname jnames)
+   (let ((req (instance hrpsys::OpenHRP_SequencePlayerService_addJointGroupRequest :init)))
+     (send req :gname groupname)
+     (send req :jnames jnames)
+     (ros::service-call
+      "SequencePlayerServiceROSBridge/addJointGroup" req)))
+  (:setJointAnglesOfGroup (groupname av tm)
+   (let ((req (instance hrpsys::OpenHRP_SequencePlayerService_setJointAnglesOfGroupRequest :init)))
+     (send req :gname groupname)
+     (send req :jvs av)
+     (send req :tm tm)
+     (ros::service-call
+      "SequencePlayerServiceROSBridge/setJointAnglesOfGroup" req)))
+  (:waitInterpolationOfGroup (groupname)
+   (let ((req (instance hrpsys::OpenHRP_SequencePlayerService_waitInterpolationOfGroupRequest :init)))
+     (send req :gname groupname)
+     (ros::service-call
+      "SequencePlayerServiceROSBridge/waitInterpolationOfGroup" req)))
+  ;;(send *ri* :addJointgroup "larm" (send-all (send *robot* :larm :joint-list) :name))
+  ;;(send *ri* :setJointAnglesOfGroup "larm" (scale (/ pi 180.0) (send *robot* :larm :angle-vector)) 4.0)
+  ;;(send *ri* :waitinterpolationofgroup "larm")
   )
