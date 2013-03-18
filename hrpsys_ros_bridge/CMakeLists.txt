@@ -105,7 +105,7 @@ endforeach(compile_target ${compile_robots})
 ##
 rtmbuild_add_executable(HrpsysSeqStateROSBridge src/HrpsysSeqStateROSBridgeImpl.cpp src/HrpsysSeqStateROSBridge.cpp src/HrpsysSeqStateROSBridgeComp.cpp)
 rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/ImageSensorROSBridgeComp.cpp)
-rtmbuild_add_executable(HrpsysSeqROSJointTrajectoryBridge src/HrpsysSeqROSJointTrajectoryBridgeImpl.cpp src/HrpsysSeqStateJointTrajectory.cpp src/HrpsysSeqROSJointTrajectoryBridgeImplComp.cpp)
+
 ##
 ## test
 ##
