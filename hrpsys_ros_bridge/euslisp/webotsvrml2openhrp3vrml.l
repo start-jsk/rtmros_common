@@ -323,7 +323,7 @@
 ;; Preprocess for VRML convert
 ;;;;;;;;;;;;;;;;;;;;;;;;
 (defun get-vrml-convert-script-dir ()
-  (format nil "~A/scripts" (ros::resolve-ros-path "package://hrpsys_ros_bridge")))
+  (format nil "~A/euslisp" (ros::resolve-ros-path "package://hrpsys_ros_bridge")))
 
 (defun preprocess-for-vrml-convert (robot-vrml-fname)
   ;; define OpenHRP3 PROTOs

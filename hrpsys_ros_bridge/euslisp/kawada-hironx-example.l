@@ -1,5 +1,5 @@
 (ros::roseus "kawadahironx_pickbox")
-(load "package://hrpsys_ros_bridge/scripts/rtm-ros-robot-interface.l")
+(load "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
 (require :kawadahironx "package://hrpsys_ros_bridge/models/kawada-hironx.l")
 
 (defclass kawadahironx-interface

@@ -1,4 +1,4 @@
-(load "package://hrpsys_ros_bridge/scripts/rtm-ros-robot-interface.l")
+(load "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
 (require :darwin "package://hrpsys_ros_bridge/models/darwin.l")
 
 (defclass darwin-interface
@@ -19,7 +19,7 @@
 ;;
 (defun darwin-walk ()
   (let ((walk-data
-	 (with-open-file (f (format nil "~A/scripts/darwin-walk-data.l" (ros::resolve-ros-path "package://hrpsys_ros_bridge")) :direction :input)
+	 (with-open-file (f (format nil "~A/euslisp/darwin-walk-data.l" (ros::resolve-ros-path "package://hrpsys_ros_bridge")) :direction :input)
 			 (read f))))
     (send *ri* :set-interpolation-mode :linear)
     (send *ri* :angle-vector-sequence
