@@ -24,7 +24,7 @@ This script is "no-sim" version of `hrp4.launch`, launch `hrp4c_startup_nosim.la
 	 --capture-window='Irrlicht'
 	 --target-directory=$(find hrpsys_ros_bridge)/build/images
 	 --check-tf='/BODY /R_HAND_J1_LINK'
-	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/scripts/hrp4c-pickup.l __log:=dummy'" /> <!-- add dummy __log/= argument to invoke roseus with non-interactive mode -->
+	 --script='rosrun roseus roseus $(find hrpsys_ros_bridge)/euslisp/hrp4c-pickup.l __log:=dummy'" /> <!-- add dummy __log/= argument to invoke roseus with non-interactive mode -->
   <test type="ogv_encode.sh" pkg="jsk_tools" test-name="z_HRP4C_NoSimPickUp" args="$(find hrpsys_ros_bridge)/build/images/HRP4C_NoSimPickUp.ogv" time-limit="1000"/>
   <test type="glc_encode.sh" pkg="jsk_tools" test-name="z_hrp4c_nosim_rviz" args="$(find hrpsys_ros_bridge)/build/images/hrp4c_rviz.glc -o $(find hrpsys_ros_bridge)/build/images/hrp4c_nosim_rviz" time-limit="2000"/>
 </launch>

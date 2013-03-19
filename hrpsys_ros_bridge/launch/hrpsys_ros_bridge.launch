@@ -16,16 +16,21 @@
   <env name="ORBgiopMaxMsgSize" value="2147483648" />
 
   <node name = "HrpsysSeqStateROSBridge"
-	pkg  = "hrpsys_ros_bridge"
-	type = "HrpsysSeqStateROSBridge"
-	args = "$(arg openrtm_args) -o model:$(arg MODEL_FILE)"
-	output = "$(arg OUTPUT)" />
+        pkg  = "hrpsys_ros_bridge"
+        type = "HrpsysSeqStateROSBridge"
+        args = "$(arg openrtm_args) -o model:$(arg MODEL_FILE)"
+        output = "$(arg OUTPUT)" />
+  <node name = "HrpsysJointTrajectoryBridge"
+        pkg  = "hrpsys_ros_bridge"
+        type = "HrpsysJointTrajectoryBridge"
+        args = "$(arg openrtm_args) -o model:$(arg MODEL_FILE)"
+        output = "$(arg OUTPUT)" />
   <node pkg="hrpsys_ros_bridge" name="ImageSensorROSBridge" type="ImageSensorROSBridge"
-    output="$(arg OUTPUT)" args="$(arg openrtm_args)" >
+        output="$(arg OUTPUT)" args="$(arg openrtm_args)" >
     <param name="frame_id" value="/VISION_SENSOR1" />
   </node>
   <node pkg="hrpsys" name="DataLoggerServiceROSBridge" type="DataLoggerServiceROSBridgeComp"
-  	output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
+        output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
   <!-- -o "exec_cxt.periodic.type:SynchExtTriggerEC" -->
   <node pkg="hrpsys" name="SequencePlayerServiceROSBridge" type="SequencePlayerServiceROSBridgeComp"
         output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
@@ -34,11 +39,13 @@
   <node pkg="robot_state_publisher" type="state_publisher" name="hrpsys_state_publisher" />
 
   <!-- diagnostics -->
+  <moge>
   <node pkg="hrpsys_ros_bridge" name="hrpsys_ros_diagnostics" type="diagnostics.py" />
   <node pkg="hrpsys_ros_bridge" name="hrpsys_profile" type="hrpsys_profile.py" />
   <node pkg="diagnostic_aggregator" type="aggregator_node" name="diagnostic_aggregator" >
     <rosparam command="load" file="$(find hrpsys_ros_bridge)/scripts/diagnostics.yaml" />
   </node>
+  </moge>
 
   <!-- BEGIN:openrtm connection -->
   <env name="ROBOT_NAME" value="$(arg ROBOT_NAME)" />
@@ -47,10 +54,12 @@
   <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="HrpsysSeqStateROSBridge0.rtc:rsangle" />
   <rtconnect from="sh.rtc:baseTformOut" to="HrpsysSeqStateROSBridge0.rtc:baseTform" />
   <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" />
+  <rtconnect from="HrpsysJointTrajectoryBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" />
   <!-- <rtconnect from="$(arg ROBOT_NAME)(Robot)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" /> -->
   <rtconnect from="DataLoggerServiceROSBridge.rtc:DataLoggerService" to="log.rtc:DataLoggerService" />
   <rtconnect from="SequencePlayerServiceROSBridge.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" />
   <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
+  <rtactivate component="HrpsysJointTrajectoryBridge0.rtc" />
   <rtactivate component="ImageSensorROSBridge0.rtc" />
   <rtactivate component="DataLoggerServiceROSBridge.rtc" />
   <rtactivate component="SequencePlayerServiceROSBridge.rtc" />
