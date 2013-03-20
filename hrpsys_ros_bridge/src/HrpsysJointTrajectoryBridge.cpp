@@ -260,18 +260,25 @@ onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
     angles[i].length(parent->body->joints().size());
 
     trajectory_msgs::JointTrajectoryPoint point = trajectory.points[i];
-    for (unsigned int j=0; j < trajectory.joint_names.size(); j++ ) {
+    for (unsigned int j=0; j < joint_names.size(); j++) {
+      ROS_INFO_STREAM("b_j: " << joint_names[j] << " -> " << point.positions[j]);
       parent->body->link(joint_names[j])->q = point.positions[j];
     }
 
     parent->body->calcForwardKinematics();
 
+#if 0 // fullbody controller
     int j = 0;
     std::vector<hrp::Link*>::const_iterator it = parent->body->joints().begin();
     while ( it != parent->body->joints().end() ) {
       hrp::Link* l = ((hrp::Link*)*it);
       angles[i][j] = l->q;
       ++it;++j;
+    }
+#endif
+    for (unsigned int j=0; j < joint_names.size(); j++) {
+      ROS_INFO_STREAM("a_j: " << joint_names[j] << " -> " << point.positions[j]);
+      angles[i][j] = parent->body->link(joint_names[j])->q;
     }
 
     ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryAction (" << this->groupname << ") : time_from_start " << trajectory.points[i].time_from_start.toSec());
@@ -288,19 +295,21 @@ onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
   }
 
   parent->m_mutex.unlock();
-
   if ( duration.length() == 1 ) {
-    if (groupname.length() > 0) {
-      // group
+    if (groupname.length() > 0) { // group
       ROS_INFO_STREAM("setJointAnglesOfGroup: " << groupname);
       parent->m_service0->setJointAnglesOfGroup (groupname.c_str(), angles[0], duration[0]);
-    } else {
-      // fullbody
+    } else {  // fullbody
       parent->m_service0->setJointAngles(angles[0], duration[0]);
     }
   } else {
-    OpenHRP::dSequenceSequence rpy, zmp;
-    parent->m_service0->playPattern(angles, rpy, zmp, duration);
+    if (groupname.length() > 0) { // group
+      ROS_INFO_STREAM("playPatternGroup: " << groupname);
+      parent->m_service0->playPatternOfGroup(groupname.c_str(), angles, duration);
+    } else {
+      OpenHRP::dSequenceSequence rpy, zmp;
+      parent->m_service0->playPattern(angles, rpy, zmp, duration);
+    }
   }
 
   interpolationp = true;
