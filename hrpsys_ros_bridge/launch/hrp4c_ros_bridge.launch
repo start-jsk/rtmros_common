@@ -1,4 +1,7 @@
 <launch>
+  <rosparam command="load"
+            file="$(find hrpsys_ros_bridge)/models/HRP4C_controller_config.yaml" />
+
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="ROBOT_NAME" value="HRP4C" />
     <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP4C/HRP4Cmain.wrl" />

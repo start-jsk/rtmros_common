@@ -6,7 +6,43 @@
   :slots ())
 (defmethod hrp4c-interface
   (:init (&rest args)
-	  (send-super :init :robot hrp4-robot)))
+   (prog1 (send-super :init :robot hrp4-robot)
+     (send self :add-controller :larm-controller)
+     (send self :add-controller :rarm-controller)
+     (send self :add-controller :head-controller)
+     (send self :add-controller :torso-controller)
+     ))
+  (:larm-controller ()
+   (list
+    (list
+     (cons :controller-action "larm_controller/joint_trajectory_action")
+     (cons :controller-state "larm_controller/state")
+     (cons :action-type pr2_controllers_msgs::JointTrajectoryAction)
+     (cons :joint-names (list "L_SHOULDER_P" "L_SHOULDER_R" "L_SHOULDER_Y" "L_ELBOW_P"
+                              "L_WRIST_Y" "L_WRIST_R" "L_HAND_J0" "L_HAND_J1")))))
+  (:rarm-controller ()
+   (list
+    (list
+     (cons :controller-action "rarm_controller/joint_trajectory_action")
+     (cons :controller-state "rarm_controller/state")
+     (cons :action-type pr2_controllers_msgs::JointTrajectoryAction)
+     (cons :joint-names (list "R_SHOULDER_P" "R_SHOULDER_R" "R_SHOULDER_Y" "R_ELBOW_P"
+                              "R_WRIST_Y" "R_WRIST_R" "R_HAND_J0" "R_HAND_J1")))))
+  (:head-controller ()
+   (list
+    (list
+     (cons :controller-action "head_controller/joint_trajectory_action")
+     (cons :controller-state "head_controller/state")
+     (cons :action-type pr2_controllers_msgs::JointTrajectoryAction)
+     (cons :joint-names (list "NECK_Y" "NECK_R" "NECK_P")))))
+  (:torso-controller ()
+   (list
+    (list
+     (cons :controller-action "torso_controller/joint_trajectory_action")
+     (cons :controller-state "torso_controller/state")
+     (cons :action-type pr2_controllers_msgs::JointTrajectoryAction)
+     (cons :joint-names (list "CHEST_P" "CHEST_R" "CHEST_Y")))))
+  )
 
 (defun hrp4c-init ()
   (if (not (boundp '*ri*))
@@ -119,4 +155,17 @@
 ;(hrp4c-pickup)
 (hrp4c-fullbody-pickup)
 (hrp4c-init)
-
+#|
+;;
+(send *hrp4c* :larm :angle-vector #f(-40.0 30 20 -40 20 0.0 0.0 0.0))
+(send *ri* :angle-vector (send *hrp4c* :angle-vector) 3000 :larm-controller)
+;;
+(setq lst
+(mapcar #'(lambda (v)
+            (send *hrp4c* :larm :angle-vector v)
+            (send *hrp4c* :angle-vector))
+        (list #f(-40.0 30 20 -40 10 0.0 0.0 0.0)
+              #f(-30.0 20 40 -20 20 0.0 0.0 0.0)
+              #f(-20.0 10 20 -40 30 0.0 0.0 0.0))))
+(send *ri* :angle-vector-sequence lst (list 1000 1000 1000) :larm-controller)
+|#
