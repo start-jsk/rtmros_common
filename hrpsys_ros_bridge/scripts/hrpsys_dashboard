@@ -135,8 +135,7 @@ class HrpsysFrame(wx.Frame):
         self._dashboard_agg_sub.unregister()
         
     def on_timer(self, evt):
-      # level = self._diagnostics_frame._diagnostics_panel.get_top_level_state()
-      
+      # fuerte does not have self._diagnostics_frame._diagnostics_panel 
       if self._diagnostics_frame._diagnostics_panel is not None:
         level = self._diagnostics_frame._diagnostics_panel.get_top_level_state()
       else:
