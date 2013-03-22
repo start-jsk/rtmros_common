@@ -36,6 +36,7 @@ from roslib import rosenv
 from os import path
 import threading
 import time
+import re
 
 ##
 from pr2_dashboard.status_control import StatusControl
@@ -79,6 +80,12 @@ class HrpsysFrame(wx.Frame):
         self._rosout_button = StatusControl(self, wx.ID_ANY, icons_path, "rosout", True)
         self._rosout_button.SetToolTip(wx.ToolTip("Rosout"))
         static_sizer.Add(self._rosout_button, 0)
+
+        # Log
+        self._log_button = StatusControl(self, wx.ID_ANY, icons_path, "breakerleft", True)
+        self._log_button.SetToolTip(wx.ToolTip("Log"))
+        self._log_button.set_ok()
+        static_sizer.Add(self._log_button, 0)
         
         # Motors
         self._motors_button = StatusControl(self, wx.ID_ANY, icons_path, "motor", True)
@@ -114,11 +121,16 @@ class HrpsysFrame(wx.Frame):
         self._diagnostics_frame.Hide()
         self._diagnostics_frame.Center()
         self._diagnostics_button.Bind(wx.EVT_BUTTON, self.on_diagnostics_clicked)
-        
+      
         self._rosout_frame = RosoutFrame(self, wx.ID_ANY, "Rosout")
         self._rosout_frame.Hide()
         self._rosout_frame.Center()
         self._rosout_button.Bind(wx.EVT_BUTTON, self.on_rosout_clicked)
+
+        self._log_frame = RosoutFrame(self, wx.ID_ANY, "Log")
+        self._log_frame.Hide()
+        self._log_frame.Center()
+        self._log_button.Bind(wx.EVT_BUTTON, self.on_log_clicked)
         
         self.load_config()
         
@@ -173,6 +185,14 @@ class HrpsysFrame(wx.Frame):
     def on_rosout_clicked(self, evt):
       self._rosout_frame.Show()
       self._rosout_frame.Raise()
+
+    def on_log_clicked(self, evt):
+      hrpsys_save = rospy.ServiceProxy("/DataLoggerServiceROSBridge/save", OpenHRP_DataLoggerService_save )
+      try:
+        hrpsys_save(OpenHRP_DataLoggerService_saveRequest("/tmp/rtclog" + time.strftime("%Y%m%d%H%M%S")))
+        time.sleep(1)
+      except rospy.ServiceException, e:
+        wx.MessageBox("Failed to save rtcd log: service call failed with error: %s"%(e), "Error", wx.OK|wx.ICON_ERROR)
       
     def on_motors_clicked(self, evt):
       menu = wx.Menu()
@@ -207,10 +227,7 @@ class HrpsysFrame(wx.Frame):
         time.sleep(1)
         power(OpenHRP_RobotHardwareService_powerRequest("all",1))
       except rospy.ServiceException, e:
-        wx.MessageBox("Failed to put the hrpsys in serv off mode: service call failed with error: %s"%(e), "Error", wx.OK|wx.ICON_ERROR)
-
-      
-
+        wx.MessageBox("Failed to put the hrpsys in servo off mode: service call failed with error: %s"%(e), "Error", wx.OK|wx.ICON_ERROR)
 
     def dashboard_callback(self, msg):
       wx.CallAfter(self.new_dashboard_message, msg)
@@ -218,11 +235,11 @@ class HrpsysFrame(wx.Frame):
     def new_dashboard_message(self, msg):
       self._dashboard_message = msg
       self._last_dashboard_message_time = rospy.get_time()
-
             
       battery_status = {}
       op_mode = None
       pw_mode = None
+      log_mode = None
       for status in msg.status:
           if status.name == "/Power System/Battery":
               for value in status.values:
@@ -231,6 +248,8 @@ class HrpsysFrame(wx.Frame):
               op_mode=status.message
           if status.name == "/Mode/Power Mode":
               pw_mode=status.message
+          if status.name == "/Hrpsys/hrpEC Profile (log)":
+              log_mode = status.message
 
       if (battery_status):
         self._battery_state_ctrl.set_power_state(battery_status)
@@ -258,8 +277,14 @@ class HrpsysFrame(wx.Frame):
       else:
           if (self._power_button.set_stale()):
               self._power_button.SetToolTip(wx.ToolTip("Mode: Stale"))
-
-      
+              
+      if (log_mode):
+        if (re.search("^Running", log_mode)):
+          self._log_button.set_ok()
+        else:
+          self._log_button.set_error()
+      else:
+        self._log_button.set_stale()
           
     def update_rosout(self):
       summary_dur = 30.0
