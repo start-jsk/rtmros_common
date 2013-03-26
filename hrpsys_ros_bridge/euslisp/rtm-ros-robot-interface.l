@@ -93,6 +93,12 @@
      (send req :gname groupname)
      (ros::service-call
       "SequencePlayerServiceROSBridge/waitInterpolationOfGroup" req)))
+  (:setServoGainPercentage (name percentage)
+   (let ((req (instance hrpsys::OpenHRP_RobotHardwareService_setServoGainPercentageRequest :init)))
+     (send req :name name)
+     (send req :percentage percentage)
+     (ros::service-call
+      "RobotHardwareServiceROSBridge/setServoGainPercentage" req)))
   ;;(send *ri* :addJointgroup "larm" (send-all (send *robot* :larm :joint-list) :name))
   ;;(send *ri* :setJointAnglesOfGroup "larm" (scale (/ pi 180.0) (send *robot* :larm :angle-vector)) 4.0)
   ;;(send *ri* :waitinterpolationofgroup "larm")
