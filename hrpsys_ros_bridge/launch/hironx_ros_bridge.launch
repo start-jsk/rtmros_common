@@ -1,5 +1,8 @@
 <launch>
 
+  <rosparam command="load"
+            file="$(find hrpsys_ros_bridge)/models/HIRONX_controller_config.yaml" />
+
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="ROBOT_NAME" value="HiroNX" />
     <arg name="MODEL_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae" />
