@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import roslib
+import roslib, time
 roslib.load_manifest('hrpsys_ros_bridge')
 
 import rospy
@@ -24,7 +24,7 @@ def joystick_callback(msg) :
 if __name__ == '__main__':
     try:
         rospy.init_node('emergence_stop')
-        sub = rospy.Subscriber('/joy', Joy, joystick_callback);
+        sub = rospy.Subscriber('/joy', Joy, joystick_callback, None, 1);
         r = rospy.Rate(1)
         while not rospy.is_shutdown():
             r.sleep()
