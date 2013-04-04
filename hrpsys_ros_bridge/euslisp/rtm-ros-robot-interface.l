@@ -88,6 +88,19 @@
      (send req :tm tm)
      (ros::service-call
       "SequencePlayerServiceROSBridge/setJointAnglesOfGroup" req)))
+#| ;; angle group sample
+  (send *ri* :addJointgroup "larm" (send-all (send *robot* :larm :joint-list) :name))
+  (send *ri* :setJointAnglesOfGroup "larm" (scale (/ pi 180.0) (send *robot* :larm :angle-vector)) 4.0)
+  (send *ri* :waitinterpolationofgroup "larm")
+|#
+  (:enableCollisionDetection ()
+   (let ((req (instance hrpsys::OpenHRP_CollisionDetectorService_enableCollisionDetectionRequest :init)))
+     (ros::service-call
+      "CollisionDetectorServiceROSBridge/enableCollisionDetection" req)))
+  (:disableCollisionDetection ()
+   (let ((req (instance hrpsys::OpenHRP_CollisionDetectorService_disableCollisionDetectionRequest :init)))
+     (ros::service-call
+      "CollisionDetectorServiceROSBridge/disableCollisionDetection" req)))
   (:waitInterpolationOfGroup (groupname)
    (let ((req (instance hrpsys::OpenHRP_SequencePlayerService_waitInterpolationOfGroupRequest :init)))
      (send req :gname groupname)
@@ -99,7 +112,4 @@
      (send req :percentage percentage)
      (ros::service-call
       "RobotHardwareServiceROSBridge/setServoGainPercentage" req)))
-  ;;(send *ri* :addJointgroup "larm" (send-all (send *robot* :larm :joint-list) :name))
-  ;;(send *ri* :setJointAnglesOfGroup "larm" (scale (/ pi 180.0) (send *robot* :larm :angle-vector)) 4.0)
-  ;;(send *ri* :waitinterpolationofgroup "larm")
   )
