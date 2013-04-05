@@ -2,11 +2,11 @@
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="ROBOT_NAME" value="GR001" />
     <arg name="MODEL_FILE" value="$(find choreonoid)/share/choreonoid-1.1/models/GR001/GR001.wrl" />
-    <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge)/models/GR001.dae" />
+    <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/GR001.dae" />
   </include>
 
   <node name="gr001_rviz" pkg="rviz" type="rviz" respawn="true"
-	args="--sync -d $(find hrpsys_ros_bridge)/launch/gr001.vcg"
+	args="--sync -d $(find hrpsys_ros_bridge_tutorials)/launch/gr001.vcg"
         />
 </launch>
 

@@ -1,7 +1,7 @@
 <launch>
 
   <rosparam command="load"
-            file="$(find hrpsys_ros_bridge)/models/HIRONX_controller_config.yaml" />
+            file="$(find hrpsys_ros_bridge_tutorials)/models/HIRONX_controller_config.yaml" />
 
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="ROBOT_NAME" value="HiroNX" />
@@ -10,7 +10,7 @@
   </include>
 
   <node name="hironx_rviz" pkg="rviz" type="rviz" respawn="true"
-	args="-sync -d $(find hrpsys_ros_bridge)/launch/hironx.vcg"
+	args="-sync -d $(find hrpsys_ros_bridge_tutorials)/launch/hironx.vcg"
         />
 
 </launch>

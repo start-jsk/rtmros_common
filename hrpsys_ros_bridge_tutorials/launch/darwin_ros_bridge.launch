@@ -1,12 +1,12 @@
 <launch>
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="ROBOT_NAME" value="Darwin" />
-    <arg name="MODEL_FILE" value="$(find hrpsys_ros_bridge)/models/DARWIN.wrl" />
-    <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge)/models/DARWIN.dae" />
+    <arg name="MODEL_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/DARWIN.wrl" />
+    <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/DARWIN.dae" />
   </include>
 
   <node name="darwin_rviz" pkg="rviz" type="rviz" respawn="true"
-	args="--sync -d $(find hrpsys_ros_bridge)/launch/darwin.vcg"
+	args="--sync -d $(find hrpsys_ros_bridge_tutorials)/launch/darwin.vcg"
 	/>
 </launch>
 

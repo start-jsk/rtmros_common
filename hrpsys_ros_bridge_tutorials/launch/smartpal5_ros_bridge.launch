@@ -1,12 +1,12 @@
 <launch>
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="ROBOT_NAME" value="SMARTPAL5" />
-    <arg name="MODEL_FILE" value="$(find hrpsys_ros_bridge)/models/YaskawaSmartPal5.wrl" />
-    <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge)/models/YaskawaSmartPal5.dae" />
+    <arg name="MODEL_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/YaskawaSmartPal5.wrl" />
+    <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/YaskawaSmartPal5.dae" />
   </include>
 
   <node name="smartpal5_rviz" pkg="rviz" type="rviz" respawn="true"
-	args="--sync -d $(find hrpsys_ros_bridge)/launch/hrp4c.vcg"
+	args="--sync -d $(find hrpsys_ros_bridge_tutorials)/launch/hrp4c.vcg"
         />
 </launch>
 
