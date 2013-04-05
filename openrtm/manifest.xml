@@ -14,7 +14,6 @@
   <rosdep name="python-omniorb" />
 
   <depend package="rtmbuild" />
-  <depend package="xdot" />
 
   <export>
     <python path="${prefix}/src/openrtm:${prefix}/src/openrtm/OpenRTM_aist/:${prefix}/src/openrtm/OpenRTM_aist/utils:${prefix}/src/openrtm/OpenRTM_aist/RTM_IDL" />
