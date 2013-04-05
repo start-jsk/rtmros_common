@@ -1,0 +1,22 @@
+<package>
+  <description brief="hrpsys_tutorials">
+
+    hrpsys example files
+
+  </description>
+  <author>AIST, ROS package is maintained by Kei Okada</author>
+  <license>EPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hrpsys_tutorials</url>
+
+  <export>
+    <rosdoc config="rosdoc.yaml" />
+  </export>
+  <depend package="hrpsys"/>
+
+  <!-- for rostest -->
+  <depend package="jsk_tools" />
+
+</package>
+
+
