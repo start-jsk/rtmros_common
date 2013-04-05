@@ -1,9 +1,9 @@
 <package>
   <description brief="openhrp3">
 
-   OpenHRP3 : Robot software platform
+   OpenHRP3 : Robot software platform tutorials
 
-http://www.openrtp.jp/openhrp3/en/index.html
+http://www.openrtp.jp/openhrp3_tutorials/en/index.html
 
 http://code.google.com/p/openhrp-aist-grx/
 
@@ -11,7 +11,7 @@ http://code.google.com/p/openhrp-aist-grx/
   <author>Developed by AIST, GRX, ROS Package is maintained by Kei Okada</author>
   <license>EPL</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/openhrp3</url>
+  <url>http://ros.org/wiki/openhrp3_tutorials</url>
 
   <export>
     <rosdoc config="rosdoc.yaml" />
