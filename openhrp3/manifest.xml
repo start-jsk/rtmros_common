@@ -17,16 +17,8 @@ http://code.google.com/p/openhrp-aist-grx/
     <rosdoc config="rosdoc.yaml" />
   </export>
 
-  <depend package="rosunit" />
-  <depend package="roscpp" />
-  <depend package="rospy" />
-  <depend package="tf" />
-
   <!-- openhrp3 -->
-  <depend package="tvmet" />
   <depend package="openrtm" />
-  <depend package="openrtm_ros_bridge" />
-  <depend package="common_rosdeps" />
 
   <!-- collada -->
   <rosdep name="collada-dom" />
@@ -65,11 +57,6 @@ http://code.google.com/p/openhrp-aist-grx/
   <rosdep name="libxml2" />
   <rosdep name="libxtst-dev" /> <!-- xdotool require /usr/include/X11/extentions -->
   <rosdep name="xdotool" />
-
-  <!-- for rostest -->
-  <depend package="jsk_tools" />
-  <rosdep name="python-psutil" />
-  <rosdep name="python-svn" />
 
 </package>
 
