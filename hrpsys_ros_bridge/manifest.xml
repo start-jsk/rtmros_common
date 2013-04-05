@@ -1,22 +1,7 @@
 <package>
-  <description brief="hrpsys and ROS bridge software, launch script and examples">
-
-Summary: If you use real robot, start [robot]_ros_bridge.launch. For simulation environment, start [robot].launch. This script usually contains test code with the sample client program.
-
-[robot]_ros_bridge.launch : This file launches ros bridge software for specifi robot type. When you use real robot, launch this script after the robot started up (usually the script is named [robot]_startup.launch under the robot specific package), when you use the simulation, you do not have to call this sript, but use the [robot].launch file.
-
-[robot].launch : This file start the simulated robot in OpenHRP3 and the ROS bridge software. This script contains test tag to start sammple (EusLisp) client program
-
-[robot]_nosim.launch : This file is non dynamics version of [robot].launch
-
-Following scripts are only for internal usage:
-
-[robot]_startup.launch : This file start simulation robot in OpenHRP3 software.
-
-[robot]_startup_nosim.launch : This file start simulated robot in OpenHRP3 software with out forward dynamics calculation.
+  <description brief="hrpsys and ROS bridge software, launch script">
 
 hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, this script is usually included from other script.
-
 
 
   </description>
@@ -24,10 +9,6 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/hrprtc_ros_bridge</url>
-
-  <export>
-    <rosdoc config="rosdoc.yaml" />
-  </export>
 
   <depend package="hrpsys"/>
 
@@ -49,17 +30,6 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <depend package="robot_monitor"/>
   <depend package="pr2_dashboard"/>
 
-  <!-- models -->
-  <depend package="roseus"/>
-  <depend package="euscollada"/>
-  <depend package="choreonoid"/>
-  <depend package="collada_robots"/>
-
-  <!-- examples -->
-  <depend package="rviz"/>
-  <depend package="jsk_perception" />
-  <depend package="image_view2" />
-  <depend package="pr2eus"/>
 </package>
 
 
