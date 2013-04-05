@@ -5,12 +5,12 @@ FILENAME    = OpenRTM-aist-1.0.0-RELEASE.tar.gz
 TARBALL     = build/$(FILENAME)
 TARBALL_URL = http://www.openrtm.org/pub/OpenRTM-aist/cxx/1.0.0/$(FILENAME)
 SOURCE_DIR  = build/OpenRTM-aist-1.0.0
-TARBALL_PATCH = SDOPackage.idl-1.0.0.patch PublisherFlush.cpp.patch Manager.cpp.patch Manager.cpp.patch2 ArtEC-1.0.0.patch build/openrtm-bin-1.0.0.patch
+TARBALL_PATCH = patch/SDOPackage.idl-1.0.0.patch patch/PublisherFlush.cpp.patch patch/Manager.cpp.patch patch/Manager.cpp.patch2 patch/ArtEC-1.0.0.patch build/openrtm-bin-1.0.0.patch
 UNPACK_CMD  = tar xzf
 MD5SUM_FILE = $(FILENAME).md5sum
 include $(shell rospack find mk)/download_unpack_build.mk
 
-build/openrtm-bin-1.0.0.patch: openrtm-bin.patch-1.0.0.in
+build/openrtm-bin-1.0.0.patch: patch/openrtm-bin.patch-1.0.0.in
 installed.c++: $(SOURCE_DIR)/unpacked
 	# need enable-debug as described in http://www.openrtm.org/pipermail/openrtm-users/2011-December/003511.html
 	\cp RingBuffer.h $(SOURCE_DIR)/src/lib/rtm/

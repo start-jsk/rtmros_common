@@ -7,7 +7,7 @@ TARBALL_URL = http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/$(FILENAME)
 SOURCE_DIR  = build/rtshell-3.0.0
 UNPACK_CMD  = tar xzf
 MD5SUM_FILE = $(FILENAME).md5sum
-TARBALL_PATCH = rtcryo.patch rtstodot.patch fmt.patch
+TARBALL_PATCH = patch/rtcryo.patch patch/rtstodot.patch patch/fmt.patch
 PYTHONDIR   = `python -c 'import sys; print "python%s"%sys.version[:3]'`
 include $(shell rospack find mk)/download_unpack_build.mk
 

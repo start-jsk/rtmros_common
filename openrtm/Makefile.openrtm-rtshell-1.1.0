@@ -3,7 +3,7 @@ all: installed.rtshell
 INSTALL_DIR = `rospack find openrtm`
 GIT_DIR     = build/rtshell
 GIT_URL     = https://github.com/gbiggs/rtshell.git
-GIT_PATCH   = rtcryo.patch rtstodot.patch fmt.patch
+GIT_PATCH   = patch/rtcryo.patch patch/rtstodot.patch patch/fmt.patch
 PYTHONDIR   = `python -c 'import sys; print "python%s"%sys.version[:3]'`
 include $(shell rospack find mk)/git_checkout.mk
 

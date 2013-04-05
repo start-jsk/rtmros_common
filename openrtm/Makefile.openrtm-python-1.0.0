@@ -5,7 +5,7 @@ FILENAME    = OpenRTM-aist-Python-1.0.1.tar.gz
 TARBALL     = build/$(FILENAME)
 TARBALL_URL = http://www.openrtm.org/pub/OpenRTM-aist/python/1.0.1/$(FILENAME)
 SOURCE_DIR  = build/OpenRTM-aist-Python-1.0.1
-TARBALL_PATCH = SystemLogger-1.0.0.patch
+TARBALL_PATCH = patch/SystemLogger-1.0.0.patch
 UNPACK_CMD  = tar xzf
 MD5SUM_FILE = $(FILENAME).md5sum
 include $(shell rospack find mk)/download_unpack_build.mk
