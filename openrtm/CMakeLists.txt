@@ -20,8 +20,8 @@ else("$ENV{OPENRTM_VERSION}" STREQUAL "")
 endif("$ENV{OPENRTM_VERSION}" STREQUAL "")
 
 
-configure_file(openrtm-bin.patch-${OPENRTM_VERSION}.in openrtm-bin-${OPENRTM_VERSION}.patch)
-add_custom_target(ALL DEPENDS openrtm-bin-${OPENRTM_VERSION}.patch)
+configure_file(patch/openrtm-bin.patch-${OPENRTM_VERSION}.in patach/openrtm-bin-${OPENRTM_VERSION}.patch)
+add_custom_target(ALL DEPENDS patch/openrtm-bin-${OPENRTM_VERSION}.patch)
 
 # openrtm-c++ is installed via apt-get system
 # Build OpenHRP3
