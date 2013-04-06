@@ -6,7 +6,7 @@
   </include>
 
   <node name="smartpal5_rviz" pkg="rviz" type="rviz" respawn="true"
-	args="--sync -d $(find hrpsys_ros_bridge_tutorials)/launch/hrp4c.vcg"
+	args="-sync -d $(find hrpsys_ros_bridge_tutorials)/launch/hrp4c.vcg"
         />
 </launch>
 

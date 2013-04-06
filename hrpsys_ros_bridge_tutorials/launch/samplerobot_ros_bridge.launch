@@ -7,7 +7,7 @@
   </include>
 
   <node name="samplerobot_rviz" pkg="rviz" type="rviz" respawn="true"
-	args="--sync -d $(find hrpsys_ros_bridge_tutorials)/launch/samplerobot.vcg"
+	args="-sync -d $(find hrpsys_ros_bridge_tutorials)/launch/samplerobot.vcg"
         />
 
   <node name="image_proc" pkg="image_proc" type="image_proc" output="screen" />

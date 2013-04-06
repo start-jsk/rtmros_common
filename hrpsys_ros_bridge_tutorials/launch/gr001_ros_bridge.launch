@@ -6,7 +6,7 @@
   </include>
 
   <node name="gr001_rviz" pkg="rviz" type="rviz" respawn="true"
-	args="--sync -d $(find hrpsys_ros_bridge_tutorials)/launch/gr001.vcg"
+	args="-sync -d $(find hrpsys_ros_bridge_tutorials)/launch/gr001.vcg"
         />
 </launch>
 
