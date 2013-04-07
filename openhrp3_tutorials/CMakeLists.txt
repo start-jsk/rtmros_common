@@ -20,9 +20,6 @@ execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_
 
 
 rosbuild_check_for_display(disp)
-if(disp AND NOT EXISTS ${PROJECT_SOURCE_DIR}/workspace)
-  execute_process(COMMAND ${PROJECT_SOURCE_DIR}/scripts/_setup_grxui.sh)
-endif(disp AND NOT EXISTS ${PROJECT_SOURCE_DIR}/workspace)
 if(disp)
   rosbuild_add_rostest(launch/sample.launch)
   rosbuild_add_rostest(launch/falling-box.launch)
@@ -33,4 +30,3 @@ if(disp)
   rosbuild_add_rostest(launch/samplerobot-pickupbox.launch)
   rosbuild_add_rostest(launch/samplerobot-walk.launch)
 endif(disp)
-
