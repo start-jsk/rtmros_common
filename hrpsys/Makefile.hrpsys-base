@@ -10,7 +10,7 @@ include $(shell rospack find mk)/svn_checkout.mk
 
 installed: ${SVN_DIR} patched
 	mkdir -p build/hrpsys-base && cd build/hrpsys-base && PKG_CONFIG_PATH=`rospack find openrtm`/lib/pkgconfig:`rospack find openhrp3`/lib/pkgconfig:$(PKG_CONFIG_PATH) cmake -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) -DTVMET_DIR=`rospack find tvmet` -DOPENRTM_DIR=`rospack find openrtm` -DENABLE_INSTALL_RPATH=ON -DENABLE_INSTALL_RPATH_TO_SELF=ON ${CURDIR}/build/hrpsys-base-source && make
-	-cd $(SVN_DIR) && make install
+	-cd build/hrpsys-base && make install
 	#
 	# copy idl
 	mkdir -p $(CURDIR)/idl && cp $(CURDIR)/share/hrpsys/idl/* ./idl/
