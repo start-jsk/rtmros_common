@@ -145,6 +145,7 @@ def init(robotname="Robot", url=""):
     if rh:
         rh_svc = narrow(rh.service("service0"), "RobotHardwareService")
         ep_svc = narrow(rh.ec, "ExecutionProfileService")
+        simulation_mode = False
     else:
         rh = rtm.findRTC(robotname)
         hgc = findRTC("HGcontroller0")
