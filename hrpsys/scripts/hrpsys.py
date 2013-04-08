@@ -132,10 +132,13 @@ def setupLogger(url=None):
     log.owned_ecs[0].start()
     log.start(log.owned_ecs[0])
 
+ms = None;
+simulation_mode = False
+
 def init(robotname="Robot", url=""):
     global ms, rh, rh_svc, ep_svc, hgc, simulation_mode
 
-    ms = rtm.findRTCmanager()
+    print ms
     while ms == None :
         time.sleep(1);
         ms = rtm.findRTCmanager()
@@ -145,7 +148,6 @@ def init(robotname="Robot", url=""):
     if rh:
         rh_svc = narrow(rh.service("service0"), "RobotHardwareService")
         ep_svc = narrow(rh.ec, "ExecutionProfileService")
-        simulation_mode = False
     else:
         rh = rtm.findRTC(robotname)
         hgc = findRTC("HGcontroller0")
