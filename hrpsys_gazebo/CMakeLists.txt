@@ -39,6 +39,11 @@ add_custom_command(
   COMMAND sed -i -e 's/link=\"head\"/link=\"atlas_head\"/g' ${atlas_urdf}
   DEPENDS ${atlas_PACKAGE_PATH}/atlas.urdf
 )
+add_custom_command(
+  OUTPUT ${atlas_dae}
+  COMMAND rosrun collada_urdf_jsk_patch urdf_to_collada ${atlas_urdf} ${atlas_dae}
+  DEPENDS ${atlas_urdf}
+)
 compile_collada_model(${PROJECT_SOURCE_DIR}/models/atlas.dae)
 ## ALL
 list(GET compile_robots 0 compile_robot)
