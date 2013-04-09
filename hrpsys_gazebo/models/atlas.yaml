@@ -46,12 +46,12 @@ head:
 ## end-coords
 ##
 larm-end-coords: 
-#  parent : l_gripper_tool_frame
-  translate : [0.08, 0, 0.13]
+  parent : l_hand
+  translate : [0, 0.1, 0]
   rotate : [0, 1, 0, 0]
 rarm-end-coords:
-#  parent : r_gripper_tool_frame
-  translate : [0.08, 0, 0.13]
+  parent : r_hand
+  translate : [0, -0.1, 0]
   rotate : [0, 1, 0, 0]
 head-end-coords:
   translate : [0.08, 0, 0.13]
