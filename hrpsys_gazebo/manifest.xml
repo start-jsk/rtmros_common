@@ -1,0 +1,21 @@
+<package>
+  <description brief="hrpsys_gazebo">
+
+     hrpsys_gazebo
+
+  </description>
+  <author>Yohei Kakiuchi</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hrpsys_gazebo</url>
+
+  <depend package="roseus"/>
+  <depend package="pr2eus"/>
+
+  <depend package="atlas_utils"/>
+
+  <depend package="hrpsys_ros_bridge"/>
+
+</package>
+
+
