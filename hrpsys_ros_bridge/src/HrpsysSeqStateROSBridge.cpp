@@ -220,7 +220,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_servoStateIn.isNew () ) {
     try {
       m_servoStateIn.read();
-      mot_states.header.stamp = ros::Time(m_servoState.tm.sec, m_servoState.tm.nsec);
+      if ( use_sim_time && clock_sub.getNumPublishers() == 0 ) { // use sim_time
+          mot_states.header.stamp = ros::Time(m_servoState.tm.sec, m_servoState.tm.nsec);
+      } else{
+          mot_states.header.stamp = tm_on_execute;
+      }
       //for ( unsigned int i = 0; i < m_servoState.data.length() ; i++ ) std::cerr << m_servoState.data[i] << " "; std::cerr << std::endl;
       assert(m_servoState.data.length() == body->joints().size());
       int joint_size = body->joints().size();
@@ -278,7 +282,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_rsangleIn.isNew () ) {
     sensor_msgs::JointState joint_state;
     // convert openrtm time to ros time
-    joint_state.header.stamp = ros::Time(m_rsangle.tm.sec, m_rsangle.tm.nsec);
+    if ( use_sim_time && clock_sub.getNumPublishers() == 0 ) { // use_sim_time 
+        joint_state.header.stamp = ros::Time(m_rsangle.tm.sec, m_rsangle.tm.nsec);
+    }else{
+        joint_state.header.stamp = tm_on_execute;
+    }
 
     ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", baseTform:" << m_baseTformIn.isNew());
     try {
@@ -427,7 +435,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     base.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
 
     // odom publish
-    br.sendTransform(tf::StampedTransform(base, ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec), "odom", rootlink_name));
+    ros::Time base_time = tm_on_execute;
+    if ( use_sim_time && clock_sub.getNumPublishers() == 0 ) { // use sim_time
+        base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
+    }
+    br.sendTransform(tf::StampedTransform(base, base_time, "odom", rootlink_name));
   }  // end: m_baseTformIn
 
   // publish forces sonsors
