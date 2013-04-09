@@ -1,6 +1,6 @@
 <launch>
-  <arg name="task_no" default="1" />
-  <include file="$(find atlas_utils)/launch/qual_task_$(arg task_no).launch" />
+  <arg name="TASK_NO" default="1" />
+  <include file="$(find atlas_utils)/launch/qual_task_$(arg TASK_NO).launch" />
   <include file="$(find hrpsys_gazebo)/launch/atlas_hrpsys.launch" />
 </launch>
 
