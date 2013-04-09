@@ -31,6 +31,8 @@
   </node>
   <node pkg="hrpsys" name="DataLoggerServiceROSBridge" type="DataLoggerServiceROSBridgeComp"
         output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
+  <node pkg="hrpsys" name="ImpedanceControllerServiceROSBridge" type="ImpedanceControllerServiceROSBridgeComp"
+        output="screen" args ="$(arg openrtm_args)" />
   <!-- -o "exec_cxt.periodic.type:SynchExtTriggerEC" -->
   <node pkg="hrpsys" name="SequencePlayerServiceROSBridge" type="SequencePlayerServiceROSBridgeComp"
         output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
@@ -60,6 +62,7 @@
   <!-- <rtconnect from="$(arg ROBOT_NAME)(Robot)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" /> -->
   <rtconnect from="DataLoggerServiceROSBridge.rtc:DataLoggerService" to="log.rtc:DataLoggerService" />
   <rtconnect from="SequencePlayerServiceROSBridge.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" />
+  <rtconnect from="ImpedanceControllerServiceROSBridge.rtc:ImpedanceControllerService" to="ic.rtc:ImpedanceControllerService"  subscription_type="new"/>
   <rtconnect from="CollisionDetectorServiceROSBridge.rtc:CollisionDetectorService" to="co.rtc:CollisionDetectorService" />
   <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
   <rtactivate component="HrpsysJointTrajectoryBridge0.rtc" />
@@ -67,6 +70,7 @@
   <rtactivate component="DataLoggerServiceROSBridge.rtc" />
   <rtactivate component="SequencePlayerServiceROSBridge.rtc" />
   <rtactivate component="CollisionDetectorServiceROSBridge.rtc" />
+  <rtactivate component="ImpedanceControllerServiceROSBridge.rtc" />
   <!-- END:openrtm connection -->
 </launch>
 
