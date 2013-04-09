@@ -132,7 +132,7 @@ def setupLogger(url=None):
     log.owned_ecs[0].start()
     log.start(log.owned_ecs[0])
 
-ms = None;
+ms = None
 simulation_mode = False
 
 def init(robotname="Robot", url=""):
@@ -144,7 +144,6 @@ def init(robotname="Robot", url=""):
         ms = rtm.findRTCmanager()
         print "[hrpsys.py] wait for RTCmanager : ",ms
 
-    simulation_mode = False
     rh = rtm.findRTC("RobotHardware0")
     if rh:
         rh_svc = narrow(rh.service("service0"), "RobotHardwareService")
