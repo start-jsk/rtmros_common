@@ -1,5 +1,5 @@
 (load "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
-(require :darwin "package://hrpsys_ros_bridge/models/darwin.l")
+(require :darwin "package://hrpsys_ros_bridge_tutorials/models/darwin.l")
 
 (defclass darwin-interface
   :super rtm-ros-robot-interface

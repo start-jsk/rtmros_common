@@ -1,5 +1,5 @@
 (load "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
-(require :gr001 "package://hrpsys_ros_bridge/models/gr001.l")
+(require :gr001 "package://hrpsys_ros_bridge_tutorials/models/gr001.l")
 
 (defclass gr001-interface
   :super rtm-ros-robot-interface

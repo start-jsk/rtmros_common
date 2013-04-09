@@ -1,6 +1,6 @@
 (ros::roseus "samplerobot_pickbox")
 (load "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
-(require :samplerobot "package://hrpsys_ros_bridge/models/samplerobot.l")
+(require :samplerobot "package://hrpsys_ros_bridge_tutorials/models/samplerobot.l")
 
 (defclass samplerobot-interface
   :super rtm-ros-robot-interface
