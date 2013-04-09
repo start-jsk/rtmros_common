@@ -54,8 +54,16 @@ rarm-end-coords:
   translate : [0, -0.1, 0]
   rotate : [0, 1, 0, 0]
 head-end-coords:
-  translate : [0.08, 0, 0.13]
+  translate : [-0.01, 0, 0.1]
   rotate    : [0, 1, 0, 90]
+lleg-end-coords:
+  parent : l_foot      
+  translate : [0.0, 0, -0.08]
+  rotate    : [0, 1, 0, 0]
+rleg-end-coords:
+  parent : r_foot      
+  translate : [0.0, 0, -0.08]
+  rotate    : [0, 1, 0, 0]
 
 ##
 ## reset-pose
