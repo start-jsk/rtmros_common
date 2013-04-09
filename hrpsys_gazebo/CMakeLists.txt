@@ -29,9 +29,11 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+rosbuild_find_ros_package(atlas)
 rosbuild_find_ros_package(hrpsys_ros_bridge)
 include(${hrpsys_ros_bridge_PACKAGE_PATH}/cmake/compile_robot_model.cmake)
 set(atlas_urdf "${PROJECT_SOURCE_DIR}/build/atlas.jsk.urdf")
+set(atlas_dae  "${PROJECT_SOURCE_DIR}/models/atlas.dae")
 add_custom_command(
   OUTPUT  ${atlas_urdf}
   COMMAND cp ${atlas_PACKAGE_PATH}/atlas.urdf ${atlas_urdf}
@@ -44,7 +46,8 @@ add_custom_command(
   COMMAND rosrun collada_urdf_jsk_patch urdf_to_collada ${atlas_urdf} ${atlas_dae}
   DEPENDS ${atlas_urdf}
 )
-compile_collada_model(${PROJECT_SOURCE_DIR}/models/atlas.dae)
+
+compile_collada_model(${atlas_dae})
 ## ALL
 list(GET compile_robots 0 compile_robot)
 list(REMOVE_AT compile_robots 0)
