@@ -1,0 +1,8 @@
+<launch>
+  <arg name="task_no" default="1" />
+  <include file="$(find atlas_utils)/launch/qual_task_$(arg task_no).launch" />
+  <include file="$(find hrpsys_gazebo)/launch/atlas_hrpsys.launch" />
+</launch>
+
+
+
