@@ -220,7 +220,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_servoStateIn.isNew () ) {
     try {
       m_servoStateIn.read();
-      if ( use_sim_time && clock_sub.getNumPublishers() == 0 ) { // use sim_time
+      if ( use_sim_time && clock_sub.getNumPublishers() == 1 ) { // if use sim_time and publisher==1, which means clock publisher is only this RosBridge
           mot_states.header.stamp = ros::Time(m_servoState.tm.sec, m_servoState.tm.nsec);
       } else{
           mot_states.header.stamp = tm_on_execute;
@@ -282,7 +282,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_rsangleIn.isNew () ) {
     sensor_msgs::JointState joint_state;
     // convert openrtm time to ros time
-    if ( use_sim_time && clock_sub.getNumPublishers() == 0 ) { // use_sim_time 
+    if ( use_sim_time && clock_sub.getNumPublishers() == 1 ) { // if use sim_time and publisher==1, which means clock publisher is only this RosBridge
         joint_state.header.stamp = ros::Time(m_rsangle.tm.sec, m_rsangle.tm.nsec);
     }else{
         joint_state.header.stamp = tm_on_execute;
@@ -298,7 +298,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
     //
-    if ( use_sim_time && clock_sub.getNumPublishers() == 0 ) { // use_sim_time and no-one publishes clocks
+    if ( use_sim_time && clock_sub.getNumPublishers() == 1 ) { // if use sim_time and publisher==1, which means clock publisher is only this RosBridge
         rosgraph_msgs::Clock clock_msg;
         clock_msg.clock = ros::Time(m_rsangle.tm.sec,m_rsangle.tm.nsec);
         clock_pub.publish(clock_msg);
@@ -436,7 +436,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
     // odom publish
     ros::Time base_time = tm_on_execute;
-    if ( use_sim_time && clock_sub.getNumPublishers() == 0 ) { // use sim_time
+    if ( use_sim_time && clock_sub.getNumPublishers() == 1 ) { // if use sim_time and publisher==1, which means clock publisher is only this RosBridge
         base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
     }
     br.sendTransform(tf::StampedTransform(base, base_time, "odom", rootlink_name));
