@@ -28,7 +28,7 @@ lleg:
   - l_leg_lax : lleg-ankle-r
   - l_leg_lhy : lleg-crotch-p
   - l_leg_mhx : lleg-crotch-r
-  - l_leg_uay : lleg-angle-p
+  - l_leg_uay : lleg-ankle-p
   - l_leg_uhz : lleg-crotch-y
 
 rleg:
@@ -36,7 +36,7 @@ rleg:
   - r_leg_lax : rleg-ankle-r
   - r_leg_lhy : rleg-crotch-p
   - r_leg_mhx : rleg-crotch-r
-  - r_leg_uay : rleg-angle-p
+  - r_leg_uay : rleg-ankle-p
   - r_leg_uhz : rleg-crotch-y
 
 head:
