@@ -46,8 +46,11 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
 
-  // is use_sim_time is set, publish clock time
+  // is use_sim_time is set and no one publishes clock, publish clock time
   nh.getParam("/use_sim_time", use_sim_time);
+
+  clock_sub = nh.subscribe("/clock", 1, &HrpsysSeqStateROSBridge::clock_cb, this);
+
   if ( use_sim_time ) {
       clock_pub = nh.advertise<rosgraph_msgs::Clock>("/clock", 5);
   }
@@ -287,7 +290,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
     //
-    if ( use_sim_time ) {
+    if ( use_sim_time && clock_sub.getNumPublishers() == 0 ) { // use_sim_time and no-one publishes clocks
         rosgraph_msgs::Clock clock_msg;
         clock_msg.clock = ros::Time(m_rsangle.tm.sec,m_rsangle.tm.nsec);
         clock_pub.publish(clock_msg);

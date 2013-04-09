@@ -62,6 +62,8 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   std::string nameserver;
   std::string rootlink_name;
 
+  ros::Subscriber clock_sub;
+  void clock_cb(const rosgraph_msgs::ClockPtr& str) {};
 };
 
 
