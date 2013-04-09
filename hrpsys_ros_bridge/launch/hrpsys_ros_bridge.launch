@@ -3,7 +3,7 @@
   <arg name="MODEL_FILE" />
   <arg name="COLLADA_FILE" />
   <arg name="SIMULATOR_NAME" default="$(arg ROBOT_NAME)(Robot)0"/>
-  <arg name="launch_ros_model" default="true" />
+  <arg name="INSTALL_ROBOT_DESCRIPTION" default="true" />
   <!--
       roslaunch hrpsys_ros_bridge sample.launch nameserver:=192.168.1.1
   -->
@@ -40,9 +40,9 @@
   <node pkg="hrpsys" name="CollisionDetectorServiceROSBridge" type="CollisionDetectorServiceROSBridgeComp"
         output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
 
-  <group if="$(arg launch_ros_model)" >
-  <param name="robot_description" textfile="$(arg COLLADA_FILE)" />
-  <node pkg="robot_state_publisher" type="state_publisher" name="hrpsys_state_publisher" />
+  <group if="$(arg INSTALL_ROBOT_DESCRIPTION)" >
+    <param name="robot_description" textfile="$(arg COLLADA_FILE)" />
+    <node pkg="robot_state_publisher" type="state_publisher" name="hrpsys_state_publisher" />
   </group>
 
   <!-- diagnostics -->

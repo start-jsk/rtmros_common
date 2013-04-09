@@ -16,7 +16,7 @@
     <arg name="SIMULATOR_NAME" value="RobotHardware0" />
     <arg name="MODEL_FILE" value="$(find hrpsys_gazebo)/models/atlas.dae" />
     <arg name="COLLADA_FILE" value="$(find hrpsys_gazebo)/models/atlas.dae" />
-    <arg name="launch_ros_model" value="false" />
+    <arg name="INSTALL_ROBOT_DESCRIPTION" value="false" />
   </include>
 </launch>
 
