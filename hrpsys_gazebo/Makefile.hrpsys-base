@@ -12,5 +12,6 @@ installed:
 	-DENABLE_INSTALL_RPATH_TO_SELF=ON \
 	-DLIBIO_DIR=${CURDIR}/iob \
 	`rospack find hrpsys`/build/hrpsys-base-source && \
-	make
-	-cd build/hrpsys-base && make install
+	(cd idl && make && make install ) && \
+	(cd lib && make && make install ) && \
+	(cd rtc/RobotHardware && make && make install )
