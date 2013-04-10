@@ -8,10 +8,16 @@
 #include <ros/ros.h>
 #include <boost/algorithm/string.hpp>
 #include <osrf_msgs/JointCommands.h>
+#include <sensor_msgs/JointState.h>
+#include <sensor_msgs/Imu.h>
+#include <atlas_msgs/AtlasState.h>
+#include <atlas_msgs/AtlasCommand.h>
 
-ros::NodeHandle* rosnode;
-ros::Publisher pub_joint_commands_;
-osrf_msgs::JointCommands jointcommands;
+static ros::NodeHandle* rosnode;
+static ros::Publisher pub_joint_commands_;
+static ros::Subscriber sub_atlas_state;
+static atlas_msgs::AtlasCommand jointcommands;
+//static osrf_msgs::JointCommands jointcommands;
 
 static std::vector<double> command;
 static std::vector<std::vector<double> > forces;
@@ -430,6 +436,12 @@ int write_dio(unsigned short buf)
     return FALSE;
 }
 
+// callback
+static void setJointStates(const atlas_msgs::AtlasState::ConstPtr &js) {
+  ROS_DEBUG(";; subscribe JointState");
+  // not implemented yet
+}
+
 int open_iob(void)
 {
     static bool isInitialized = false;
@@ -442,50 +454,49 @@ int open_iob(void)
     // http://gazebosim.org/wiki/Tutorials/drcsim/2.2/sending_joint_controller_commands_over_ros
     // Hardcoded List of Joint Names
     // List of joint names in the Atlas robot. Note the order must not change for this function to work correctly.
+    std::vector<std::string> names;
+    names.push_back("atlas::back_lbz"); // 0
+    names.push_back("atlas::back_mby"); // 1
+    names.push_back("atlas::back_ubx"); // 2
+    names.push_back("atlas::neck_ay"); // 9
+    names.push_back("atlas::l_leg_uhz"); // 28
+    names.push_back("atlas::l_leg_mhx"); // 29
+    names.push_back("atlas::l_leg_lhy"); // 30
+    names.push_back("atlas::l_leg_kny"); // 31
+    names.push_back("atlas::l_leg_uay"); // 32
+    names.push_back("atlas::l_leg_lax"); // 33
+    names.push_back("atlas::r_leg_uhz"); // 34
+    names.push_back("atlas::r_leg_mhx"); // 35
+    names.push_back("atlas::r_leg_lhy"); // 36
+    names.push_back("atlas::r_leg_kny"); // 37
+    names.push_back("atlas::r_leg_uay"); // 38
+    names.push_back("atlas::r_leg_lax"); // 39
+    names.push_back("atlas::l_arm_usy"); // 3
+    names.push_back("atlas::l_arm_shx"); // 4
+    names.push_back("atlas::l_arm_ely"); // 5
+    names.push_back("atlas::l_arm_elx"); // 6
+    names.push_back("atlas::l_arm_uwy"); // 7
+    names.push_back("atlas::l_arm_mwx"); // 8
+    names.push_back("atlas::r_arm_usy"); // 21
+    names.push_back("atlas::r_arm_shx"); // 22
+    names.push_back("atlas::r_arm_ely"); // 23
+    names.push_back("atlas::r_arm_elx"); // 24
+    names.push_back("atlas::r_arm_uwy"); // 25
+    names.push_back("atlas::r_arm_mwx"); // 26
 
-    jointcommands.name.push_back("atlas::back_lbz"); // 0
-    jointcommands.name.push_back("atlas::back_mby"); // 1
-    jointcommands.name.push_back("atlas::back_ubx"); // 2
-    jointcommands.name.push_back("atlas::neck_ay"); // 9
-    jointcommands.name.push_back("atlas::l_leg_uhz"); // 28
-    jointcommands.name.push_back("atlas::l_leg_mhx"); // 29
-    jointcommands.name.push_back("atlas::l_leg_lhy"); // 30
-    jointcommands.name.push_back("atlas::l_leg_kny"); // 31
-    jointcommands.name.push_back("atlas::l_leg_uay"); // 32
-    jointcommands.name.push_back("atlas::l_leg_lax"); // 33
-    jointcommands.name.push_back("atlas::r_leg_uhz"); // 34
-    jointcommands.name.push_back("atlas::r_leg_mhx"); // 35
-    jointcommands.name.push_back("atlas::r_leg_lhy"); // 36
-    jointcommands.name.push_back("atlas::r_leg_kny"); // 37
-    jointcommands.name.push_back("atlas::r_leg_uay"); // 38
-    jointcommands.name.push_back("atlas::r_leg_lax"); // 39
-    jointcommands.name.push_back("atlas::l_arm_usy"); // 3
-    jointcommands.name.push_back("atlas::l_arm_shx"); // 4
-    jointcommands.name.push_back("atlas::l_arm_ely"); // 5
-    jointcommands.name.push_back("atlas::l_arm_elx"); // 6
-    jointcommands.name.push_back("atlas::l_arm_uwy"); // 7
-    jointcommands.name.push_back("atlas::l_arm_mwx"); // 8
-    jointcommands.name.push_back("atlas::r_arm_usy"); // 21
-    jointcommands.name.push_back("atlas::r_arm_shx"); // 22
-    jointcommands.name.push_back("atlas::r_arm_ely"); // 23
-    jointcommands.name.push_back("atlas::r_arm_elx"); // 24
-    jointcommands.name.push_back("atlas::r_arm_uwy"); // 25
-    jointcommands.name.push_back("atlas::r_arm_mwx"); // 26
-
-    //jointcommands.name.push_back("atlas::center_bottom_led_frame_joint"); // 10
-    //jointcommands.name.push_back("atlas::center_top_led_frame_joint"); // 11
-    //jointcommands.name.push_back("atlas::head_imu_joint"); // 12
-    //jointcommands.name.push_back("atlas::hokuyo_joint"); // 13
-    //jointcommands.name.push_back("atlas::head_hokuyo_joint"); // 14
-    //jointcommands.name.push_back("atlas::left_camera_frame_joint"); // 15
-    //jointcommands.name.push_back("atlas::left_camera_optical_frame_joint"); // 16
-    //jointcommands.name.push_back("atlas::left_led_frame_joint"); // 17
-    //jointcommands.name.push_back("atlas::right_camera_frame_joint"); // 18
-    //jointcommands.name.push_back("atlas::right_camera_optical_frame_joint"); // 19
-    //jointcommands.name.push_back("atlas::right_led_frame_joint"); // 20
-    //jointcommands.name.push_back("atlas::imu_joint"); // 27
-
-    unsigned int n = jointcommands.name.size();
+    //names.push_back("atlas::center_bottom_led_frame_joint"); // 10
+    //names.push_back("atlas::center_top_led_frame_joint"); // 11
+    //names.push_back("atlas::head_imu_joint"); // 12
+    //names.push_back("atlas::hokuyo_joint"); // 13
+    //names.push_back("atlas::head_hokuyo_joint"); // 14
+    //names.push_back("atlas::left_camera_frame_joint"); // 15
+    //names.push_back("atlas::left_camera_optical_frame_joint"); // 16
+    //names.push_back("atlas::left_led_frame_joint"); // 17
+    //names.push_back("atlas::right_camera_frame_joint"); // 18
+    //names.push_back("atlas::right_camera_optical_frame_joint"); // 19
+    //names.push_back("atlas::right_led_frame_joint"); // 20
+    //names.push_back("atlas::imu_joint"); // 27
+    unsigned int n = names.size();
 
     jointcommands.position.resize(n);
     jointcommands.velocity.resize(n);
@@ -499,30 +510,51 @@ int open_iob(void)
 
     for (unsigned int i = 0; i < n; i++) {
         std::vector<std::string> pieces;
-        boost::split(pieces, jointcommands.name[i], boost::is_any_of(":"));
+        boost::split(pieces, names[i], boost::is_any_of(":"));
+        double kp;
+        rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/p", kp);
+        jointcommands.kp_position[i] = kp;
 
-        rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/p",
-                          jointcommands.kp_position[i]);
+        double ki;
+        rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i", ki);
+        jointcommands.ki_position[i] = ki;
 
-        rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i",
-                          jointcommands.ki_position[i]);
+        double kd;
+        rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/d", kd);
+        jointcommands.kd_position[i] = kd;
 
-        rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/d",
-                          jointcommands.kd_position[i]);
+        double emin;
+        rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp", emin);
+        jointcommands.i_effort_min[i] = -emin;
 
-        rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
-                          jointcommands.i_effort_min[i]);
-        jointcommands.i_effort_min[i] = -jointcommands.i_effort_min[i];
-
-        rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp",
-                          jointcommands.i_effort_max[i]);
+        double emax;
+        rosnode->getParam("atlas_controller/gains/" + pieces[2] + "/i_clamp", emax);
+        jointcommands.i_effort_max[i] = emax;
 
         jointcommands.velocity[i]     = 0;
         jointcommands.effort[i]       = 0;
         jointcommands.kp_velocity[i]  = 0;
     }
     //
-    pub_joint_commands_ = rosnode->advertise<osrf_msgs::JointCommands>("/atlas/joint_commands", 1, true);
+    //pub_joint_commands_ = rosnode->advertise<osrf_msgs::JointCommands>("/atlas/joint_commands", 1, true);
+    pub_joint_commands_ = rosnode->advertise <atlas_msgs::AtlasCommand> ("/atlas/atlas_command", 1, true);
+
+    // subscribe
+    // ros topic subscribtions
+    ros::SubscribeOptions jointStatesSo =
+      ros::SubscribeOptions::create<atlas_msgs::AtlasState>("/atlas/atlas_state", 1, setJointStates,
+                                                            ros::VoidPtr(), rosnode->getCallbackQueue());
+    // Because TCP causes bursty communication with high jitter,
+    // declare a preference on UDP connections for receiving
+    // joint states, which we want to get at a high rate.
+    // Note that we'll still accept TCP connections for this topic
+    // (e.g., from rospy nodes, which don't support UDP);
+    // we just prefer UDP.
+    jointStatesSo.transport_hints =
+      ros::TransportHints().unreliable().reliable().tcpNoDelay(true);
+
+    sub_atlas_state = rosnode->subscribe(jointStatesSo);
+
 
     std::cout << "JointState IOB is opened" << std::endl;
     for (int i=0; i<number_of_joints(); i++){
@@ -722,9 +754,11 @@ int wait_for_iob_signal()
     timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
     double dt = timespec_compare(&g_ts, &now);
+    ros::spinOnce();
     if (dt <= 0){
         //printf("overrun(%d[ms])\n", -dt*1e6);
         do {
+            ros::spinOnce();
             timespec_add_ns(&g_ts, g_period_ns);
         }while(timespec_compare(&g_ts, &now)<=0);
     }
