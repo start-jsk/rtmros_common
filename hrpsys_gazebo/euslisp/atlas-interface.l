@@ -70,10 +70,16 @@
   (send *atlas* :rarm :wrist-y    :joint-angle   0)
   (send *atlas* :rarm :wrist-p    :joint-angle -20)
 
+  ;; (send *atlas* :legs :knee-p :joint-angle 30)
+  ;; (send *atlas* :legs :crotch-p :joint-angle -15)
+  ;; (send *atlas* :legs :ankle-p :joint-angle -15)
+  ;; (send *atlas* :move-centroid-on-foot :both '(:rleg :lleg :rarm :larm))
+
   (send *ri* :angle-vector (send *atlas* :angle-vector) 20000)
   (send *ri* :wait-interpolation)
 
   (send *atlas* :rarm :inverse-kinematics (make-coords :pos #f(370 -350 200)) :rotation-axis :z)
+;;  (send *atlas* :move-centroid-on-foot :both '(:rleg :lleg :rarm :larm))
   (send *ri* :angle-vector (send *atlas* :angle-vector) 15000)
   (send *ri* :wait-interpolation)
 
@@ -81,6 +87,7 @@
   (unix:usleep 3)
 
   (send *atlas* :rarm :inverse-kinematics (make-coords :pos #f(550 0 400)) :rotation-axis :z :use-torso t)
+;;  (send *atlas* :move-centroid-on-foot :both '(:rleg :lleg :rarm :larm))
   (send *ri* :angle-vector (send *atlas* :angle-vector) 15000)
   (send *ri* :wait-interpolation)
 
