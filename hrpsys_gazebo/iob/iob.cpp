@@ -18,6 +18,8 @@ static ros::Publisher pub_joint_commands_;
 static ros::Subscriber sub_atlas_state;
 static atlas_msgs::AtlasCommand jointcommands;
 //static osrf_msgs::JointCommands jointcommands;
+static atlas_msgs::AtlasState js;
+static int init_sub_flag = FALSE;
 
 static std::vector<double> command;
 static std::vector<std::vector<double> > forces;
@@ -221,10 +223,102 @@ int write_control_mode(int id, joint_control_mode s)
 
 int read_actual_angle(int id, double *angle)
 {
-    CHECK_JOINT_ID(id);
-    //*angle = command[id]+0.01;
+  CHECK_JOINT_ID(id);
+  //*angle = command[id]+0.01;
+  //*angle = command[id];
+  if(init_sub_flag){
+    switch(id){
+    case 0:
+      *angle = js.position[0];
+      break;
+    case 1:
+      *angle = js.position[1];
+      break;
+    case 2:
+      *angle = js.position[2];
+      break;
+    case 9:
+      *angle = js.position[3];
+      break;
+    case 28:
+      *angle = js.position[4];
+      break;
+    case 29:
+      *angle = js.position[5];
+      break;
+    case 30:
+      *angle = js.position[6];
+      break;
+    case 31:
+      *angle = js.position[7];
+      break;
+    case 32:
+      *angle = js.position[8];
+      break;
+    case 33:
+      *angle = js.position[9];
+      break;
+    case 34:
+      *angle = js.position[10];
+      break;
+    case 35:
+      *angle = js.position[11];
+      break;
+    case 36:
+      *angle = js.position[12];
+      break;
+    case 37:
+      *angle = js.position[13];
+      break;
+    case 38:
+      *angle = js.position[14];
+      break;
+    case 39:
+      *angle = js.position[15];
+      break;
+    case 3:
+      *angle = js.position[16];
+      break;
+    case 4:
+      *angle = js.position[17];
+      break;
+    case 5:
+      *angle = js.position[18];
+      break;
+    case 6:
+      *angle = js.position[19];
+      break;
+    case 7:
+      *angle = js.position[20];
+      break;
+    case 8:
+      *angle = js.position[21];
+      break;
+    case 21:
+      *angle = js.position[22];
+      break;
+    case 22:
+      *angle = js.position[23];
+      break;
+    case 23:
+      *angle = js.position[24];
+      break;
+    case 24:
+      *angle = js.position[25];
+      break;
+    case 25:
+      *angle = js.position[26];
+      break;
+    case 26:
+      *angle = js.position[27];
+      break;
+    default:
+      *angle = command[id];
+    }
+  }else{
     *angle = command[id];
-    return TRUE;
+  }
+  return TRUE;
 }
 
 int read_actual_angles(double *angles)
@@ -437,9 +531,10 @@ int write_dio(unsigned short buf)
 }
 
 // callback
-static void setJointStates(const atlas_msgs::AtlasState::ConstPtr &js) {
+static void setJointStates(const atlas_msgs::AtlasState::ConstPtr &_js) {
   ROS_DEBUG(";; subscribe JointState");
-  // not implemented yet
+  js = *_js;
+  init_sub_flag = TRUE;
 }
 
 int open_iob(void)
