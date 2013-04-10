@@ -10,7 +10,6 @@ UNPACK_CMD  = tar xzf
 MD5SUM_FILE = $(FILENAME).md5sum
 include $(shell rospack find mk)/download_unpack_build.mk
 
-build/openrtm-bin-1.1.0.patch: patch/openrtm-bin.patch-1.1.0.in
 installed.c++: $(SOURCE_DIR)/unpacked
 	cd $(SOURCE_DIR) && ./configure --enable-debug --prefix=$(CURDIR) && make && make install
 	touch installed.c++

@@ -10,7 +10,6 @@ UNPACK_CMD  = tar xzf
 MD5SUM_FILE = $(FILENAME).md5sum
 include $(shell rospack find mk)/download_unpack_build.mk
 
-build/openrtm-bin-1.0.0.patch: patch/openrtm-bin.patch-1.0.0.in
 installed.c++: $(SOURCE_DIR)/unpacked
 	# need enable-debug as described in http://www.openrtm.org/pipermail/openrtm-users/2011-December/003511.html
 	\cp RingBuffer.h $(SOURCE_DIR)/src/lib/rtm/
