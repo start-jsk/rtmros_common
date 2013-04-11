@@ -136,13 +136,10 @@
    (&key name)
    (let ((req (instance hrpsys::OpenHRP_ImpedanceControllerService_deleteImpedanceControllerRequest :init :name name)))
      (ros::service-call "/ImpedanceControllerServiceROSBridge/deleteImpedanceController" req)))
-  (:get-force-sensor-list-from-robot-model ;; this should be removed when force sensor methods will be commited to irtrobot.l
-   ()
-   (mapcar #'cdr (remove-if-not #'(lambda (x) (and (substringp "SENSOR" (string (car x))) (eq (send (cdr x) :get :sensor-type) :base_force6d))) (send robot :slots))))
   (:get-force-sensor-from-limb-name
    (limb)
    (find-if #'(lambda (x) (member (send x :parent) (send robot limb)))
-            (send self :get-force-sensor-list-from-robot-model)))
+            (send robot :force-sensors)))
   (:start-impedance
    (limb &rest args)
    (cond
