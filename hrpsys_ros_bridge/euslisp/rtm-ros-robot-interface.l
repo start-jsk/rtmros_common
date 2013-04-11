@@ -2,7 +2,7 @@
 
 (ros::load-ros-manifest "dynamic_reconfigure")
 (ros::roseus-add-msgs "hrpsys_ros_bridge")
-(ros::roseus-add-srvs "hrpsys")
+(ros::load-ros-manifest "hrpsys")
 
 (defclass rtm-ros-robot-interface
   :super robot-interface
@@ -112,4 +112,60 @@
      (send req :percentage percentage)
      (ros::service-call
       "RobotHardwareServiceROSBridge/setServoGainPercentage" req)))
+  ;;
+  ;; impedance control methods
+  ;;
+  ;; :start-impedance-impl and :stop-impedance-impl : private methods and please use these by modifying impedance parameter
+  (:start-impedance-impl
+   (&key name base-name target-name
+         (M-p 10) (D-p 200) (K-p 400)
+         (M-r 5) (D-r 100) (K-r 200)
+         (ref-force #f(0.0 0.0 0.0)) (ref-moment #f(0.0 0.0 0.0))
+         (force-gain #f(1.0 1.0 1.0)) (moment-gain #f(1.0 1.0 1.0))
+         (sr-gain 1) (avoid-gain 0.001) (reference-gain 0.01) (manipulability-limit 0.1))
+   (let ((req (instance hrpsys::OpenHRP_ImpedanceControllerService_setImpedanceControllerParamRequest :init))
+         (param (instance hrpsys::OpenHRP_ImpedanceControllerService_impedanceParam :init
+                          :name name :base_name base-name :target_name target-name
+                          :M_p M-p :D_p D-p :K_p K-p :M_r M-r :D_r D-r :K_r K-r
+                          :ref_force ref-force :ref_moment ref-moment
+                          :force_gain force-gain :moment_gain moment-gain
+                          :sr_gain sr-gain :avoid_gain avoid-gain :reference_gain reference-gain :manipulability_limit manipulability-limit)))
+     (send req :i_param param)
+     (ros::service-call "/ImpedanceControllerServiceROSBridge/setImpedanceControllerParam" req)))
+  (:stop-impedance-impl
+   (&key name)
+   (let ((req (instance hrpsys::OpenHRP_ImpedanceControllerService_deleteImpedanceControllerRequest :init :name name)))
+     (ros::service-call "/ImpedanceControllerServiceROSBridge/deleteImpedanceController" req)))
+  (:get-force-sensor-list-from-robot-model ;; this should be removed when force sensor methods will be commited to irtrobot.l
+   ()
+   (mapcar #'cdr (remove-if-not #'(lambda (x) (and (substringp "SENSOR" (string (car x))) (eq (send (cdr x) :get :sensor-type) :base_force6d))) (send robot :slots))))
+  (:get-force-sensor-from-limb-name
+   (limb)
+   (find-if #'(lambda (x) (member (send x :parent) (send robot limb)))
+            (send self :get-force-sensor-list-from-robot-model)))
+  (:start-impedance
+   (limb &rest args)
+   (cond
+    ((send self :get-force-sensor-from-limb-name limb)
+     (let ((fs (send self :get-force-sensor-from-limb-name limb)))
+       (send* self :start-impedance-impl
+              :name (string-downcase (send fs :name))
+              :base-name "WAIST"
+              :target-name (send (send (send fs :parent) :joint) :name) args)))
+    (:legs (dolist (l '(:rleg :lleg)) (send* self :start-impedance l args)))
+    (:arms (dolist (l '(:rarm :larm)) (send* self :start-impedance l args)))
+    (t ) ;; virtual force sensor is not supported in this file
+    ))
+  (:stop-impedance
+   (limb)
+   (cond
+    ((send self :get-force-sensor-from-limb-name limb)
+     (let ((fs (send self :get-force-sensor-from-limb-name limb)))
+       (send* self :stop-impedance-impl
+              :name (string-downcase (send fs :name)))))
+    (:legs (dolist (l '(:rleg :lleg)) (send* self :stop-impedance l)))
+    (:arms (dolist (l '(:rarm :larm)) (send* self :stop-impedance l)))
+    (t ) ;; virtual force sensor is not supported in this file
+    ))
   )
+
