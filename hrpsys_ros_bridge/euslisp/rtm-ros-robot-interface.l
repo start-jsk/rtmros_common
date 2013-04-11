@@ -150,7 +150,7 @@
      (let ((fs (send self :get-force-sensor-from-limb-name limb)))
        (send* self :start-impedance-impl
               :name (string-downcase (send fs :name))
-              :base-name "WAIST"
+              :base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)
               :target-name (send (send (send fs :parent) :joint) :name) args)))
     (:legs (dolist (l '(:rleg :lleg)) (send* self :start-impedance l args)))
     (:arms (dolist (l '(:rarm :larm)) (send* self :start-impedance l args)))
