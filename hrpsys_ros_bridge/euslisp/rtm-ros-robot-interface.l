@@ -161,10 +161,10 @@
    (cond
     ((send self :get-force-sensor-from-limb-name limb)
      (let ((fs (send self :get-force-sensor-from-limb-name limb)))
-       (send* self :stop-impedance-impl
-              :name (string-downcase (send fs :name)))))
-    (:legs (dolist (l '(:rleg :lleg)) (send* self :stop-impedance l)))
-    (:arms (dolist (l '(:rarm :larm)) (send* self :stop-impedance l)))
+       (send self :stop-impedance-impl
+             :name (string-downcase (send fs :name)))))
+    (:legs (dolist (l '(:rleg :lleg)) (send self :stop-impedance l)))
+    (:arms (dolist (l '(:rarm :larm)) (send self :stop-impedance l)))
     (t ) ;; virtual force sensor is not supported in this file
     ))
   )
