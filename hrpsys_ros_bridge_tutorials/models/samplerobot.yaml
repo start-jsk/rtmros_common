@@ -42,8 +42,10 @@ torso:
 ##
 larm-end-coords:
   translate : [0, 0, -0.10]
+  rotate    : [0, 1,  0, 90]
 rarm-end-coords:
   translate : [0, 0, -0.10]
+  rotate    : [0, 1,  0, 90]
 lleg-end-coords:
   translate : [0.00, 0, -0.07]
 rleg-end-coords:
