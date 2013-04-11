@@ -1,9 +1,9 @@
 <launch>
   <arg name="KILL_SERVERS" default="false" />
-  <include file="$(find hrpsys_ros_bridge_tutorials)/launch/samplerobot_startup_nogrxui.launch" >
+  <include file="$(find hrpsys_ros_bridge_tutorials)/launch/samplerobot_startup-grxui.launch" >
     <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
   </include>
-  <include file="$(find hrpsys_ros_bridge_tutorials)/launch/samplerobot_ros_bridge_nogrxui.launch" />
+  <include file="$(find hrpsys_ros_bridge_tutorials)/launch/samplerobot_ros_bridge-grxui.launch" />
 
   <sphinxdoc><![CDATA[
 

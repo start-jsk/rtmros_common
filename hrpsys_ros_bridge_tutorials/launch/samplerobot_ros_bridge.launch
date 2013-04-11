@@ -6,13 +6,6 @@
     <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/SampleRobot.dae" />
   </include>
 
-  <node name="samplerobot_rviz" pkg="rviz" type="rviz" respawn="true"
-	args="-sync -d $(find hrpsys_ros_bridge_tutorials)/launch/samplerobot.vcg"
-        />
-
-  <node name="image_proc" pkg="image_proc" type="image_proc" output="screen" />
-  <include file="$(find roseus_tutorials)/launch/image-view.launch" />
-  <include file="$(find roseus_tutorials)/launch/camshiftdemo.launch" />
 
 </launch>
 
