@@ -1,16 +1,7 @@
 (ros::roseus "samplerobot_pickbox")
-(load "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
-(require :samplerobot "package://hrpsys_ros_bridge_tutorials/models/samplerobot.l")
+(load "package://hrpsys_ros_bridge_tutorials/euslisp/samplerobot-interface.l")
 
-(defclass samplerobot-interface
-  :super rtm-ros-robot-interface
-  :slots ())
-(defmethod samplerobot-interface
-  (:init (&rest args)
-	  (send-super :init :robot samplerobot-robot)))
-
-(setq *ri* (instance samplerobot-interface :init))
-(setq *sr* (instance samplerobot-robot :init))
+(samplerobot-init)
 (send *sr* :reset-pose)
 (send *sr* :torso :waist-y :joint-angle -30)
 (send *sr* :torso :waist-p :joint-angle 10)
