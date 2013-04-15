@@ -18,7 +18,7 @@ macro(compile_openhrp_model wrlfile)
   if(EXISTS ${_yamlfile})
     add_custom_command(OUTPUT ${_lispfile}
       COMMAND rosrun euscollada collada2eus ${_daefile} ${_yamlfile} ${_lispfile}
-      DEPENDS ${_daefile})
+      DEPENDS ${_daefile} ${_yamlfile})
   else(EXISTS ${_yamlfile})
     add_custom_command(OUTPUT ${_lispfile}
       COMMAND rosrun euscollada collada2eus ${_daefile} ${_lispfile}
