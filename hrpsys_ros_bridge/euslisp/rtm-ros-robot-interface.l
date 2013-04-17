@@ -160,8 +160,8 @@
      (let ((fs (send self :get-force-sensor-from-limb-name limb)))
        (send self :stop-impedance-impl
              :name (string-downcase (send fs :name)))))
-    ((eq limb :legs) (mapcar #'(lambda (l) (send self :start-impedance l)) '(:rleg :lleg)))
-    ((eq limb :arms) (mapcar #'(lambda (l) (send self :start-impedance l)) '(:rarm :larm)))
+    ((eq limb :legs) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rleg :lleg)))
+    ((eq limb :arms) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rarm :larm)))
     (t ) ;; virtual force sensor is not supported in this file
     ))
   )
