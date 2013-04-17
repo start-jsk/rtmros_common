@@ -106,12 +106,18 @@
      (send req :gname groupname)
      (ros::service-call
       "SequencePlayerServiceROSBridge/waitInterpolationOfGroup" req)))
+  ;; RobotHardware
   (:setServoGainPercentage (name percentage)
    (let ((req (instance hrpsys::OpenHRP_RobotHardwareService_setServoGainPercentageRequest :init)))
      (send req :name name)
      (send req :percentage percentage)
      (ros::service-call
       "RobotHardwareServiceROSBridge/setServoGainPercentage" req)))
+  (:removeForceSensorOffset
+   ()
+   (ros::service-call
+    "RobotHardwareServiceROSBridge/removeForceSensorOffset"
+    (instance hrpsys::Openhrp_RobotHardwareservice_removeForceSensorOffsetRequest :init)))
   ;;
   ;; impedance control methods
   ;;
