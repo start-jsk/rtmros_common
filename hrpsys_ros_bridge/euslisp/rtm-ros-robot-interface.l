@@ -115,24 +115,42 @@
   ;;
   ;; impedance control methods
   ;;
-  ;; :start-impedance-impl and :stop-impedance-impl : private methods and please use these by modifying impedance parameter
-  (:start-impedance-impl
+  ;;
+  (:getImpedanceControllerParam
+   (name)
+   (let ((req (instance hrpsys::OpenHRP_ImpedanceControllerService_getImpedanceControllerParamRequest :init :name name)))
+     (send (ros::service-call "/ImpedanceControllerServiceROSBridge/getImpedanceControllerParam" req) :i_param)))
+  ;; set impedance controller param
+  ;;   params other than user-defined params are used in current parameter in ImpedanceController RTC by using getImpedanceControllerParam
+  ;;   original default parameters are defined in hrpsys-base/rtc/ImpedanceController/ImpedancControl.h
+  (:setImpedanceControllerParam
    (&key name base-name target-name
-         (M-p 10) (D-p 200) (K-p 400)
-         (M-r 5) (D-r 100) (K-r 200)
-         (ref-force #f(0.0 0.0 0.0)) (ref-moment #f(0.0 0.0 0.0))
-         (force-gain #f(1.0 1.0 1.0)) (moment-gain #f(1.0 1.0 1.0))
-         (sr-gain 1) (avoid-gain 0.001) (reference-gain 0.01) (manipulability-limit 0.1))
-   (let ((req (instance hrpsys::OpenHRP_ImpedanceControllerService_setImpedanceControllerParamRequest :init))
-         (param (instance hrpsys::OpenHRP_ImpedanceControllerService_impedanceParam :init
-                          :name name :base_name base-name :target_name target-name
-                          :M_p M-p :D_p D-p :K_p K-p :M_r M-r :D_r D-r :K_r K-r
-                          :ref_force ref-force :ref_moment ref-moment
-                          :force_gain force-gain :moment_gain moment-gain
-                          :sr_gain sr-gain :avoid_gain avoid-gain :reference_gain reference-gain :manipulability_limit manipulability-limit)))
-     (send req :i_param param)
+         M-p D-p K-p
+         M-r D-r K-r
+         ref-force ref-moment
+         force-gain moment-gain
+         sr-gain avoid-gain reference-gain manipulability-limit)
+   (let* ((current-imp-param
+           (send self :getImpedanceControllerParam name))
+          (param (instance hrpsys::OpenHRP_ImpedanceControllerService_impedanceParam :init
+                            :name name :base_name base-name :target_name target-name
+                            :M_p (if M-p M-p (send current-imp-param :M_p))
+                            :D_p (if D-p D-p (send current-imp-param :D_p))
+                            :K_p (if K-p K-p (send current-imp-param :K_p))
+                            :M_r (if M-r M-r (send current-imp-param :M_r))
+                            :D_r (if D-r D-r (send current-imp-param :D_r))
+                            :K_r (if K-r K-r (send current-imp-param :K_r))
+                            :ref_force (if ref-force ref-force (send current-imp-param :ref_force))
+                            :ref_moment (if ref-moment ref-moment (send current-imp-param :ref_moment))
+                            :force_gain (if force-gain force-gain (send current-imp-param :force_gain))
+                            :moment_gain (if moment-gain moment-gain (send current-imp-param :moment_gain))
+                            :sr_gain (if sr-gain sr-gain (send current-imp-param :sr_gain))
+                            :avoid_gain (if avoid-gain avoid-gain (send current-imp-param :avoid_gain))
+                            :reference_gain (if reference-gain reference-gain (send current-imp-param :reference_gain))
+                            :manipulability_limit (if manipulability-limit manipulability-limit (send current-imp-param :manipulability_limit))))
+          (req (instance hrpsys::OpenHRP_ImpedanceControllerService_setImpedanceControllerParamRequest :init :i_param param)))
      (ros::service-call "/ImpedanceControllerServiceROSBridge/setImpedanceControllerParam" req)))
-  (:stop-impedance-impl
+  (:deleteImpedanceController
    (&key name)
    (let ((req (instance hrpsys::OpenHRP_ImpedanceControllerService_deleteImpedanceControllerRequest :init :name name)))
      (ros::service-call "/ImpedanceControllerServiceROSBridge/deleteImpedanceController" req)))
@@ -145,7 +163,7 @@
    (cond
     ((send self :get-force-sensor-from-limb-name limb)
      (let ((fs (send self :get-force-sensor-from-limb-name limb)))
-       (send* self :start-impedance-impl
+       (send* self :setImpedanceControllerParam
               :name (string-downcase (send fs :name))
               :base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)
               :target-name (send (send (send fs :parent) :joint) :name) args)))
@@ -158,7 +176,7 @@
    (cond
     ((send self :get-force-sensor-from-limb-name limb)
      (let ((fs (send self :get-force-sensor-from-limb-name limb)))
-       (send self :stop-impedance-impl
+       (send self :deleteImpedanceController
              :name (string-downcase (send fs :name)))))
     ((eq limb :legs) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rleg :lleg)))
     ((eq limb :arms) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rarm :larm)))
