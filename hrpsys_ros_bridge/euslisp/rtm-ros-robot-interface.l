@@ -148,7 +148,7 @@
        (send* self :start-impedance-impl
               :name (string-downcase (send fs :name))
               :base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)
-              :target-name (send (send (send fs :parent) :joint) :name)) args))
+              :target-name (send (send (send fs :parent) :joint) :name) args)))
     ((eq limb :legs) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rleg :lleg)))
     ((eq limb :arms) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rarm :larm)))
     (t ) ;; virtual force sensor is not supported in this file
