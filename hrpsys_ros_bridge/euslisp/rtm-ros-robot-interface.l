@@ -15,13 +15,43 @@
    (prog1
        (send-super* :init args)
      (ros::subscribe "/motor_states" hrpsys_ros_bridge::MotorStates
-       #'send self :ros-state-callback-rtmros :groupname groupname)
+                     #'send self :rtmros-temperature-callback :groupname groupname)
+     (mapcar #'(lambda (x)
+                 (ros::subscribe (format nil "/~A" (string-downcase x)) geometry_msgs::WrenchStamped
+                                 #'send self :rtmros-force-sensor-callback x :groupname groupname))
+             (send-all (send robot :force-sensors) :name))
      ))
-  (:ros-state-callback-rtmros
+  (:rtmros-temperature-callback
    (msg)
-   (dolist (key '(:temperature))
-     (send self :set-robot-state1 key (send msg key))))
+   (send self :set-robot-state1 :temperature (send msg :temperature)))
   (:temperature-vector () (cdr (assoc :temperature robot-state)))
+  (:rtmros-force-sensor-callback
+   (fsensor-name msg)
+   (let ((wrc (send msg :wrench)))
+     (send self :set-robot-state1 fsensor-name
+           (float-vector (send (send wrc :force) :x)
+                         (send (send wrc :force) :y)
+                         (send (send wrc :force) :z)
+                         (send (send wrc :torque) :x)
+                         (send (send wrc :torque) :y)
+                         (send (send wrc :torque) :z)))))
+  (:tmp-force-moment-vector
+   (f/m &optional (limb))
+   (if limb
+       (subseq (cdr (assoc limb robot-state))
+               (if (eq f/m :force) 0 3)
+               (if (eq f/m :force) 3 6))
+     (mapcar #'(lambda (x)
+                 (subseq (cdr (assoc x robot-state))
+                         (if (eq f/m :force) 0 3)
+                         (if (eq f/m :force) 3 6)))
+             (send-all (send robot :force-sensors) :name))))
+  (:force-vector
+   (&optional (limb))
+   (send self :tmp-force-moment-vector :force limb))
+  (:moment-vector
+   (&optional (limb))
+   (send self :tmp-force-moment-vector :moment limb))
   (:sendmsg
    (strs &optional (service-name "sendmsg"))
    (ros::service-call
