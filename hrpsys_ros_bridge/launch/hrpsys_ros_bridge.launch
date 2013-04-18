@@ -53,6 +53,8 @@
     <rosparam command="load" file="$(find hrpsys_ros_bridge)/scripts/diagnostics.yaml" />
   </node>
   </moge>
+  <node pkg="hrpsys_ros_bridge" name="sensor_ros_bridge_connect" type="sensor_ros_bridge_connect.py"
+        args="$(arg MODEL_FILE) $(arg SIMULATOR_NAME) HrpsysSeqStateROSBridge0" output="$(arg OUTPUT)"/>
 
   <!-- BEGIN:openrtm connection -->
   <env name="ROBOT_NAME" value="$(arg ROBOT_NAME)" />

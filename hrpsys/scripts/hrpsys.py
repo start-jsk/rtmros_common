@@ -92,6 +92,12 @@ def createComps():
     print "[hrpsys.py] createComps -> DataLogger : ",log
     log_svc = narrow(log.service("service0"), "DataLoggerService");
 
+def getBodyInfo(url):
+    import CosNaming
+    obj = rtm.rootnc.resolve([CosNaming.NameComponent('ModelLoader', '')])
+    mdlldr = obj._narrow(ModelLoader)
+    print "[hrpsys.py]   bodyinfo URL = file://"+url
+    return mdlldr.getBodyInfo("file://"+url)
 
 # setup logger
 def setupLogger(url=None):
@@ -106,16 +112,8 @@ def setupLogger(url=None):
     # sensor logger ports
     if url :
         print "[hrpsys.py] sensor names for DataLogger"
-        import CosNaming
-        obj = rtm.rootnc.resolve([CosNaming.NameComponent('ModelLoader', '')])
-        mdlldr = obj._narrow(ModelLoader)
-        print "[hrpsys.py]   bodyinfo URL = file://"+url
-        bodyInfo = mdlldr.getBodyInfo("file://"+url)
-        ret = []
-        for ll in bodyInfo._get_links():
-            if len(ll.sensors) > 0:
-                ret.extend(ll.sensors)
-        for sen in map(lambda x : x.name, ret):
+        sensors = map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, getBodyInfo(url)._get_links()))
+        for sen in map(lambda x : x.name, sum(sensors, [])):
             if sen == "gyrometer":
                 sen_type = "TimedAngularVelocity3D"
             elif sen == "gsensor":
