@@ -27,15 +27,28 @@ JYTHON_LIB=$JYTHON_LIB
 EOF
 } > `rospack find openhrp3`/workspace/.metadata/.plugins/org.eclipse.core.runtime/.settings/com.generalrobotix.ui.grxui.prefs
 
-install_eclipse () {
+install_eclipse_plugin () {
 	/usr/bin/eclipse -data `rospack find openhrp3`/workspace \
 	-consolelog \
 	-clean -nosplash -application org.eclipse.equinox.p2.director \
 	-repository http://download.eclipse.org/releases/indigo/,$1 \
-	-installIU $2
-	#-destination $eclipse_root \
-	#--launcher.appendVmargs -vmargs -Djava.library.path=/usr/lib/jni \
-	#-Dorg.osgi.framework.os.version=`uname -r`
+	-installIU ${2}
+}
+
+install_eclipse_plugin_from_url () {
+	echo Downloading ${2} ...
+	install_eclipse_plugin ${1} ${2}
+}
+
+install_eclipse_plugin_from_archive () {
+	echo Installing ${2} from archive ...
+	if [ ! -e ${1} ]; then
+		echo "----------"
+		echo "ERROR: ${1} does not exist!"
+		echo "run 'rosmake hrpsys' and try again."
+		exit 1
+	fi
+	install_eclipse_plugin jar:file:${1}!/ ${2}
 }
 
 ## depreciated
@@ -43,12 +56,15 @@ install_eclipse () {
 #$ECLIPSE -featureId org.eclipse.gef -version 3.6.2.v20110128-0100-777B381A4Bz06565376E32322 -from http://download.eclipse.org/tools/gef/updates/releases/
 
 
-install_eclipse http://download.eclipse.org/tools/gef/updates/releases/ org.eclipse.gef.sdk.feature.group/3.6.2.v20110128-0100-7G7R77A5WNcHQDbhX8JWOYLOSeRJ,org.eclipse.xsd.doc.feature.group/2.5.0.v200906151043,org.eclipse.xsd.sdk.feature.group/2.5.0.v200906151043,org.eclipse.xsd.source.feature.group/2.5.0.v200906151043
-install_eclipse http://download.eclipse.org/modeling/emf/updates/releases/ org.eclipse.emf.all.feature.group/2.5.0.v200906151043,org.eclipse.emf.doc.feature.group/2.5.0.v200906151043,org.eclipse.emf.examples.feature.group/2.5.0.v200906151043,org.eclipse.emf.examples.source.feature.group/2.5.0.v200906151043,org.eclipse.emf.sdk.feature.group/2.5.0.v200906151043,org.eclipse.emf.source.feature.group/2.5.0.v200906151043
-install_eclipse jar:file:`rospack find openhrp3`/build/rtmtools_eclipse.zip!/ jp.go.asit.rtm.rtmtools.feature.group/1.0.0.201106111836
-install_eclipse jar:file:`rospack find openhrp3`/build/java3declipse-20090302.zip!/ java3d.feature.group/1.5.1,jogl.feature.group/1.1.2,org.java3declipse.core.feature.group/1.1.0
-install_eclipse jar:file:`rospack find openhrp3`/build/grxui_eclipse.zip!/ grxui.feature.group/1.0.0.201106111845
-install_eclipse jar:file:`rospack find hrpsys`/build/robothardware_eclipse.zip!/ RobotHardwareRTC.feature.group/1.0.0.201106130144
+install_eclipse_plugin_from_url http://download.eclipse.org/tools/gef/updates/releases/ org.eclipse.gef.sdk.feature.group/3.6.2.v20110128-0100-7G7R77A5WNcHQDbhX8JWOYLOSeRJ,org.eclipse.xsd.doc.feature.group/2.5.0.v200906151043,org.eclipse.xsd.sdk.feature.group/2.5.0.v200906151043,org.eclipse.xsd.source.feature.group/2.5.0.v200906151043
+install_eclipse_plugin_from_url http://download.eclipse.org/modeling/emf/updates/releases/ org.eclipse.emf.all.feature.group/2.5.0.v200906151043,org.eclipse.emf.doc.feature.group/2.5.0.v200906151043,org.eclipse.emf.examples.feature.group/2.5.0.v200906151043,org.eclipse.emf.examples.source.feature.group/2.5.0.v200906151043,org.eclipse.emf.sdk.feature.group/2.5.0.v200906151043,org.eclipse.emf.source.feature.group/2.5.0.v200906151043
+
+install_eclipse_plugin_from_archive `rospack find openhrp3`/build/rtmtools_eclipse.zip jp.go.asit.rtm.rtmtools.feature.group/1.0.0.201106111836
+install_eclipse_plugin_from_archive `rospack find openhrp3`/build/java3declipse-20090302.zip java3d.feature.group/1.5.1,jogl.feature.group/1.1.2,org.java3declipse.core.feature.group/1.1.0
+install_eclipse_plugin_from_archive `rospack find openhrp3`/build/grxui_eclipse.zip grxui.feature.group/1.0.0.201106111845
+install_eclipse_plugin_from_archive `rospack find hrpsys`/build/robothardware_eclipse.zip RobotHardwareRTC.feature.group/1.0.0.201106130144
+
+echo "Installation Completed."
 
 exit
 
