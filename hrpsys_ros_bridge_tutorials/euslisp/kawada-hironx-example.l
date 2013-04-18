@@ -1,16 +1,7 @@
 (ros::roseus "kawadahironx_pickbox")
-(load "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
-(require :kawadahironx "package://hrpsys_ros_bridge_tutorials/models/kawada-hironx.l")
+(load "package://hrpsys_ros_bridge_tutorials/euslisp/kawada-hironx-interface.l")
 
-(defclass kawadahironx-interface
-  :super rtm-ros-robot-interface
-  :slots ())
-(defmethod kawadahironx-interface
-  (:init (&rest args)
-	  (send-super :init :robot hironx-robot)))
-
-(setq *ri* (instance kawadahironx-interface :init))
-(setq *hiro* (instance hironx-robot :init))
+(kawada-hironx-init)
 (dotimes (i 10)
   (send *hiro* :reset-pose)
   ;;(objects (list *hiro*))
