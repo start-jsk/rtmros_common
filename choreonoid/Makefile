@@ -4,7 +4,7 @@ include $(shell rospack find mk)/cmake.mk
 include Makefile.choreoniod
 include Makefile.graspplugin
 
-installed: installed.choreonoid installed.graspplugin
+installed: installed.choreonoid # installed.graspplugin
 
 clean: clean.choreonoid
 
