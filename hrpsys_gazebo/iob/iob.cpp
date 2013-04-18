@@ -42,6 +42,20 @@ static long g_period_ns=5000000;
 #define CHECK_GYRO_SENSOR_ID(id) if ((id) < 0 || (id) >= number_of_gyro_sensors()) return E_ID
 #define CHECK_ATTITUDE_SENSOR_ID(id) if ((id) < 0 || (id) >= number_of_attitude_sensors()) return E_ID
 
+#define JOINT_ID_REAL2MODEL(id) joint_id_real2model[id]
+#define JOINT_ID_MODEL2REAL(id) joint_id_model2real(id)
+#define NUM_OF_REAL_JOINT sizeof(joint_id_real2model)/sizeof(joint_id_real2model[0])
+static int joint_id_real2model[] = {0, 1, 2, 9, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 3, 4, 5, 6, 7, 8, 21, 22, 23, 24, 25, 26};
+static int joint_id_model2real(int id)
+{
+  for (int i = 0; i < NUM_OF_REAL_JOINT; i++){
+    if (joint_id_real2model[i] == id){
+      return i;
+    }
+  }
+  return -1;
+}
+
 #ifdef __APPLE__
 typedef int clockid_t;
 #define CLOCK_MONOTONIC 0
@@ -227,93 +241,98 @@ int read_actual_angle(int id, double *angle)
   //*angle = command[id]+0.01;
   //*angle = command[id];
   if(init_sub_flag){
-    switch(id){
-    case 0:
-      *angle = js.position[0];
-      break;
-    case 1:
-      *angle = js.position[1];
-      break;
-    case 2:
-      *angle = js.position[2];
-      break;
-    case 9:
-      *angle = js.position[3];
-      break;
-    case 28:
-      *angle = js.position[4];
-      break;
-    case 29:
-      *angle = js.position[5];
-      break;
-    case 30:
-      *angle = js.position[6];
-      break;
-    case 31:
-      *angle = js.position[7];
-      break;
-    case 32:
-      *angle = js.position[8];
-      break;
-    case 33:
-      *angle = js.position[9];
-      break;
-    case 34:
-      *angle = js.position[10];
-      break;
-    case 35:
-      *angle = js.position[11];
-      break;
-    case 36:
-      *angle = js.position[12];
-      break;
-    case 37:
-      *angle = js.position[13];
-      break;
-    case 38:
-      *angle = js.position[14];
-      break;
-    case 39:
-      *angle = js.position[15];
-      break;
-    case 3:
-      *angle = js.position[16];
-      break;
-    case 4:
-      *angle = js.position[17];
-      break;
-    case 5:
-      *angle = js.position[18];
-      break;
-    case 6:
-      *angle = js.position[19];
-      break;
-    case 7:
-      *angle = js.position[20];
-      break;
-    case 8:
-      *angle = js.position[21];
-      break;
-    case 21:
-      *angle = js.position[22];
-      break;
-    case 22:
-      *angle = js.position[23];
-      break;
-    case 23:
-      *angle = js.position[24];
-      break;
-    case 24:
-      *angle = js.position[25];
-      break;
-    case 25:
-      *angle = js.position[26];
-      break;
-    case 26:
-      *angle = js.position[27];
-      break;
-    default:
+    // switch(id){
+    // case 0:
+    //   *angle = js.position[0];
+    //   break;
+    // case 1:
+    //   *angle = js.position[1];
+    //   break;
+    // case 2:
+    //   *angle = js.position[2];
+    //   break;
+    // case 9:
+    //   *angle = js.position[3];
+    //   break;
+    // case 28:
+    //   *angle = js.position[4];
+    //   break;
+    // case 29:
+    //   *angle = js.position[5];
+    //   break;
+    // case 30:
+    //   *angle = js.position[6];
+    //   break;
+    // case 31:
+    //   *angle = js.position[7];
+    //   break;
+    // case 32:
+    //   *angle = js.position[8];
+    //   break;
+    // case 33:
+    //   *angle = js.position[9];
+    //   break;
+    // case 34:
+    //   *angle = js.position[10];
+    //   break;
+    // case 35:
+    //   *angle = js.position[11];
+    //   break;
+    // case 36:
+    //   *angle = js.position[12];
+    //   break;
+    // case 37:
+    //   *angle = js.position[13];
+    //   break;
+    // case 38:
+    //   *angle = js.position[14];
+    //   break;
+    // case 39:
+    //   *angle = js.position[15];
+    //   break;
+    // case 3:
+    //   *angle = js.position[16];
+    //   break;
+    // case 4:
+    //   *angle = js.position[17];
+    //   break;
+    // case 5:
+    //   *angle = js.position[18];
+    //   break;
+    // case 6:
+    //   *angle = js.position[19];
+    //   break;
+    // case 7:
+    //   *angle = js.position[20];
+    //   break;
+    // case 8:
+    //   *angle = js.position[21];
+    //   break;
+    // case 21:
+    //   *angle = js.position[22];
+    //   break;
+    // case 22:
+    //   *angle = js.position[23];
+    //   break;
+    // case 23:
+    //   *angle = js.position[24];
+    //   break;
+    // case 24:
+    //   *angle = js.position[25];
+    //   break;
+    // case 25:
+    //   *angle = js.position[26];
+    //   break;
+    // case 26:
+    //   *angle = js.position[27];
+    //   break;
+    // default:
+    //   *angle = command[id];
+    // }
+    if (JOINT_ID_MODEL2REAL(id) < 0) {
       *angle = command[id];
+    }else{
+      *angle = js.position[JOINT_ID_MODEL2REAL(id)];
     }
   }else{
     *angle = command[id];
@@ -331,7 +350,19 @@ int read_actual_angles(double *angles)
 
 int read_actual_torques(double *torques)
 {
-    return FALSE;
+  // return FALSE;
+  
+  if(init_sub_flag) {
+    for(int i=0; i<number_of_joints(); i++){
+      if(JOINT_ID_MODEL2REAL(i) < 0) {
+	*(torques+i) = -1;
+      }else{
+	*(torques+i) = js.effort[JOINT_ID_MODEL2REAL(i)];
+      }
+    }
+  }
+
+  return TRUE;
 }
 
 int read_command_torque(int id, double *torque)
@@ -379,34 +410,38 @@ int write_command_angles(const double *angles)
 
     jointcommands.header.stamp = ros::Time::now();
 
-    jointcommands.position[0] = command[0];
-    jointcommands.position[1] = command[1];
-    jointcommands.position[2] = command[2];
-    jointcommands.position[3] = command[9];
-    jointcommands.position[4] = command[28];
-    jointcommands.position[5] = command[29];
-    jointcommands.position[6] = command[30];
-    jointcommands.position[7] = command[31];
-    jointcommands.position[8] = command[32];
-    jointcommands.position[9] = command[33];
-    jointcommands.position[10] = command[34];
-    jointcommands.position[11] = command[35];
-    jointcommands.position[12] = command[36];
-    jointcommands.position[13] = command[37];
-    jointcommands.position[14] = command[38];
-    jointcommands.position[15] = command[39];
-    jointcommands.position[16] = command[3];
-    jointcommands.position[17] = command[4];
-    jointcommands.position[18] = command[5];
-    jointcommands.position[19] = command[6];
-    jointcommands.position[20] = command[7];
-    jointcommands.position[21] = command[8];
-    jointcommands.position[22] = command[21];
-    jointcommands.position[23] = command[22];
-    jointcommands.position[24] = command[23];
-    jointcommands.position[25] = command[24];
-    jointcommands.position[26] = command[25];
-    jointcommands.position[27] = command[26];
+    // jointcommands.position[0] = command[0];
+    // jointcommands.position[1] = command[1];
+    // jointcommands.position[2] = command[2];
+    // jointcommands.position[3] = command[9];
+    // jointcommands.position[4] = command[28];
+    // jointcommands.position[5] = command[29];
+    // jointcommands.position[6] = command[30];
+    // jointcommands.position[7] = command[31];
+    // jointcommands.position[8] = command[32];
+    // jointcommands.position[9] = command[33];
+    // jointcommands.position[10] = command[34];
+    // jointcommands.position[11] = command[35];
+    // jointcommands.position[12] = command[36];
+    // jointcommands.position[13] = command[37];
+    // jointcommands.position[14] = command[38];
+    // jointcommands.position[15] = command[39];
+    // jointcommands.position[16] = command[3];
+    // jointcommands.position[17] = command[4];
+    // jointcommands.position[18] = command[5];
+    // jointcommands.position[19] = command[6];
+    // jointcommands.position[20] = command[7];
+    // jointcommands.position[21] = command[8];
+    // jointcommands.position[22] = command[21];
+    // jointcommands.position[23] = command[22];
+    // jointcommands.position[24] = command[23];
+    // jointcommands.position[25] = command[24];
+    // jointcommands.position[26] = command[25];
+    // jointcommands.position[27] = command[26];
+
+    for (int i=0; i<NUM_OF_REAL_JOINT; i++){
+      jointcommands.position[i] = command[JOINT_ID_REAL2MODEL(i)];
+    }
 
     pub_joint_commands_.publish(jointcommands);
 
@@ -437,31 +472,112 @@ int write_dgain(int id, double gain)
 
 int read_force_sensor(int id, double *forces)
 {
-    for (int i=0; i<6; i++){
-        forces[i] = ((double)random()-RAND_MAX/2)/(RAND_MAX/2)*2 
-            + 2 + force_offset[id][i]; // 2 = initial offset
+  CHECK_FORCE_SENSOR_ID(id);
+  // for (int i=0; i<6; i++){
+  //     forces[i] = ((double)random()-RAND_MAX/2)/(RAND_MAX/2)*2 
+  //         + 2 + force_offset[id][i]; // 2 = initial offset
+  // }
+  if(init_sub_flag){
+    switch(id){
+    case 0:
+      forces[0] = js.l_foot.force.x
+	+ 2 + force_offset[id][0]; // 2 = initial offset
+      forces[1] = js.l_foot.force.y
+	+ 2 + force_offset[id][1]; // 2 = initial offset
+      forces[2] = js.l_foot.force.z
+	+ 2 + force_offset[id][2]; // 2 = initial offset
+      forces[3] = js.l_foot.torque.x
+	+ 2 + force_offset[id][3]; // 2 = initial offset
+      forces[4] = js.l_foot.torque.y
+	+ 2 + force_offset[id][4]; // 2 = initial offset
+      forces[5] = js.l_foot.torque.z
+	+ 2 + force_offset[id][5]; // 2 = initial offset
+      break;
+    case 1:
+      forces[0] = js.r_foot.force.x
+	+ 2 + force_offset[id][0]; // 2 = initial offset
+      forces[1] = js.r_foot.force.y
+	+ 2 + force_offset[id][1]; // 2 = initial offset
+      forces[2] = js.r_foot.force.z
+	+ 2 + force_offset[id][2]; // 2 = initial offset
+      forces[3] = js.r_foot.torque.x
+	+ 2 + force_offset[id][3]; // 2 = initial offset
+      forces[4] = js.r_foot.torque.y
+	+ 2 + force_offset[id][4]; // 2 = initial offset
+      forces[5] = js.r_foot.torque.z
+	+ 2 + force_offset[id][5]; // 2 = initial offset
+      break;
+    case 2:
+      forces[0] = js.l_hand.force.x
+	+ 2 + force_offset[id][0]; // 2 = initial offset
+      forces[1] = js.l_hand.force.y
+	+ 2 + force_offset[id][1]; // 2 = initial offset
+      forces[2] = js.l_hand.force.z
+	+ 2 + force_offset[id][2]; // 2 = initial offset
+      forces[3] = js.l_hand.torque.x
+	+ 2 + force_offset[id][3]; // 2 = initial offset
+      forces[4] = js.l_hand.torque.y
+	+ 2 + force_offset[id][4]; // 2 = initial offset
+      forces[5] = js.l_hand.torque.z
+	+ 2 + force_offset[id][5]; // 2 = initial offset
+      break;
+    case 3:
+      forces[0] = js.r_hand.force.x
+	+ 2 + force_offset[id][0]; // 2 = initial offset
+      forces[1] = js.r_hand.force.y
+	+ 2 + force_offset[id][1]; // 2 = initial offset
+      forces[2] = js.r_hand.force.z
+	+ 2 + force_offset[id][2]; // 2 = initial offset
+      forces[3] = js.r_hand.torque.x
+	+ 2 + force_offset[id][3]; // 2 = initial offset
+      forces[4] = js.r_hand.torque.y
+	+ 2 + force_offset[id][4]; // 2 = initial offset
+      forces[5] = js.r_hand.torque.z
+	+ 2 + force_offset[id][5]; // 2 = initial offset
+      break;
     }
-    return TRUE;
+  }
+
+  return TRUE;
 }
 
 int read_gyro_sensor(int id, double *rates)
 {
-    CHECK_GYRO_SENSOR_ID(id);
-    for (int i=0; i<3; i++){
-        rates[i] = ((double)random()-RAND_MAX/2)/(RAND_MAX/2)*0.01
-            + 0.01 + gyro_offset[id][i]; // 0.01 = initial offset
-    }
-    return TRUE;
+  CHECK_GYRO_SENSOR_ID(id);
+  // for (int i=0; i<3; i++){
+  //     rates[i] = ((double)random()-RAND_MAX/2)/(RAND_MAX/2)*0.01
+  //         + 0.01 + gyro_offset[id][i]; // 0.01 = initial offset
+  // }
+  if(init_sub_flag){
+    rates[0] = js.angular_velocity.x
+      + 0.01 + gyro_offset[id][0]; // 0.01 = initial offset
+    rates[1] = js.angular_velocity.y
+      + 0.01 + gyro_offset[id][1]; // 0.01 = initial offset
+    rates[2] = js.angular_velocity.z
+      + 0.01 + gyro_offset[id][2]; // 0.01 = initial offset
+  }
+
+  return TRUE;
 }
 
 int read_accelerometer(int id, double *accels)
 {
-    for (int i=0; i<3; i++){
-        double randv = ((double)random()-RAND_MAX/2)/(RAND_MAX/2)*0.01;
-        accels[i] = (i == 2 ? (9.8+randv) : randv) 
-            + 0.01 + accel_offset[id][i]; // 0.01 = initial offset
-    }
-    return TRUE;
+  CHECK_ACCELEROMETER_ID(id);
+  // for (int i=0; i<3; i++){
+  //     double randv = ((double)random()-RAND_MAX/2)/(RAND_MAX/2)*0.01;
+  //     accels[i] = (i == 2 ? (9.8+randv) : randv) 
+  //         + 0.01 + accel_offset[id][i]; // 0.01 = initial offset
+  // }
+  if(init_sub_flag){
+    accels[0] = js.linear_acceleration.x
+      + 0.01 + accel_offset[id][0]; // 0.01 = initial offset
+    accels[1] = js.linear_acceleration.y
+      + 0.01 + accel_offset[id][1]; // 0.01 = initial offset
+    accels[2] = js.linear_acceleration.z
+      + 0.01 + accel_offset[id][2]; // 0.01 = initial offset
+  }
+
+  return TRUE;
 }
 
 int read_touch_sensors(unsigned short *onoff)
@@ -471,7 +587,7 @@ int read_touch_sensors(unsigned short *onoff)
 
 int read_attitude_sensor(int id, double *att)
 {
-    return FALSE;
+  return FALSE;
 }
 
 int read_current(int id, double *mcurrent)
