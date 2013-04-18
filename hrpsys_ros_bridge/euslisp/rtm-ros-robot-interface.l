@@ -87,7 +87,39 @@
     "DataLoggerServiceROSBridge/save"
     (instance hrpsys::Openhrp_Dataloggerservice_saveRequest :init :basename fname))
    )
-  ;; for seq
+  (:get-force-sensor-from-limb-name
+   (limb)
+   (find-if #'(lambda (x) (member (send x :parent) (send robot limb)))
+            (send robot :force-sensors)))
+  ;; impedance controller
+  (:start-impedance
+   (limb &rest args)
+   (cond
+    ((send self :get-force-sensor-from-limb-name limb)
+     (let ((fs (send self :get-force-sensor-from-limb-name limb)))
+       (send* self :setImpedanceControllerParam
+              :name (string-downcase (send fs :name))
+              :base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)
+              :target-name (send (send (send fs :parent) :joint) :name) args)))
+    ((eq limb :legs) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rleg :lleg)))
+    ((eq limb :arms) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rarm :larm)))
+    (t ) ;; virtual force sensor is not supported in this file
+    ))
+  (:stop-impedance
+   (limb)
+   (cond
+    ((send self :get-force-sensor-from-limb-name limb)
+     (let ((fs (send self :get-force-sensor-from-limb-name limb)))
+       (send self :deleteImpedanceController
+             :name (string-downcase (send fs :name)))))
+    ((eq limb :legs) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rleg :lleg)))
+    ((eq limb :arms) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rarm :larm)))
+    (t ) ;; virtual force sensor is not supported in this file
+    ))
+  )
+
+;; SequencePlayerService
+(defmethod rtm-ros-robot-interface
   (:setBasePose
    (&optional base-coords (tm 0.1))
    (unless base-coords
@@ -104,6 +136,11 @@
      (ros::service-call
       "SequencePlayerServiceROSBridge/setBaseRpy" rpy_req)
      ))
+  (:waitInterpolationOfGroup (groupname)
+   (let ((req (instance hrpsys::OpenHRP_SequencePlayerService_waitInterpolationOfGroupRequest :init)))
+     (send req :gname groupname)
+     (ros::service-call
+      "SequencePlayerServiceROSBridge/waitInterpolationOfGroup" req)))
   ;; just testing code
   (:addJointGroup (groupname jnames)
    (let ((req (instance hrpsys::OpenHRP_SequencePlayerService_addJointGroupRequest :init)))
@@ -123,6 +160,10 @@
   (send *ri* :setJointAnglesOfGroup "larm" (scale (/ pi 180.0) (send *robot* :larm :angle-vector)) 4.0)
   (send *ri* :waitinterpolationofgroup "larm")
 |#
+  )
+
+;; CollisionDetectorService
+(defmethod rtm-ros-robot-interface
   (:enableCollisionDetection ()
    (let ((req (instance hrpsys::OpenHRP_CollisionDetectorService_enableCollisionDetectionRequest :init)))
      (ros::service-call
@@ -131,12 +172,10 @@
    (let ((req (instance hrpsys::OpenHRP_CollisionDetectorService_disableCollisionDetectionRequest :init)))
      (ros::service-call
       "CollisionDetectorServiceROSBridge/disableCollisionDetection" req)))
-  (:waitInterpolationOfGroup (groupname)
-   (let ((req (instance hrpsys::OpenHRP_SequencePlayerService_waitInterpolationOfGroupRequest :init)))
-     (send req :gname groupname)
-     (ros::service-call
-      "SequencePlayerServiceROSBridge/waitInterpolationOfGroup" req)))
-  ;; RobotHardware
+  )
+
+;; RobotHardwareService
+(defmethod rtm-ros-robot-interface
   (:setServoGainPercentage (name percentage)
    (let ((req (instance hrpsys::OpenHRP_RobotHardwareService_setServoGainPercentageRequest :init)))
      (send req :name name)
@@ -148,10 +187,10 @@
    (ros::service-call
     "RobotHardwareServiceROSBridge/removeForceSensorOffset"
     (instance hrpsys::Openhrp_RobotHardwareservice_removeForceSensorOffsetRequest :init)))
-  ;;
-  ;; impedance control methods
-  ;;
-  ;;
+  )
+
+;; ImpedanceControllerService
+(defmethod rtm-ros-robot-interface
   (:getImpedanceControllerParam
    (name)
    (let ((req (instance hrpsys::OpenHRP_ImpedanceControllerService_getImpedanceControllerParamRequest :init :name name)))
@@ -190,33 +229,6 @@
    (&key name)
    (let ((req (instance hrpsys::OpenHRP_ImpedanceControllerService_deleteImpedanceControllerRequest :init :name name)))
      (ros::service-call "/ImpedanceControllerServiceROSBridge/deleteImpedanceController" req)))
-  (:get-force-sensor-from-limb-name
-   (limb)
-   (find-if #'(lambda (x) (member (send x :parent) (send robot limb)))
-            (send robot :force-sensors)))
-  (:start-impedance
-   (limb &rest args)
-   (cond
-    ((send self :get-force-sensor-from-limb-name limb)
-     (let ((fs (send self :get-force-sensor-from-limb-name limb)))
-       (send* self :setImpedanceControllerParam
-              :name (string-downcase (send fs :name))
-              :base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)
-              :target-name (send (send (send fs :parent) :joint) :name) args)))
-    ((eq limb :legs) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rleg :lleg)))
-    ((eq limb :arms) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rarm :larm)))
-    (t ) ;; virtual force sensor is not supported in this file
-    ))
-  (:stop-impedance
-   (limb)
-   (cond
-    ((send self :get-force-sensor-from-limb-name limb)
-     (let ((fs (send self :get-force-sensor-from-limb-name limb)))
-       (send self :deleteImpedanceController
-             :name (string-downcase (send fs :name)))))
-    ((eq limb :legs) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rleg :lleg)))
-    ((eq limb :arms) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rarm :larm)))
-    (t ) ;; virtual force sensor is not supported in this file
-    ))
   )
+
 
