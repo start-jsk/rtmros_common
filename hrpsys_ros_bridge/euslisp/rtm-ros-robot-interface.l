@@ -89,8 +89,9 @@
    )
   (:get-force-sensor-from-limb-name
    (limb)
-   (find-if #'(lambda (x) (member (send x :parent) (send robot limb)))
-            (send robot :force-sensors)))
+   (if (find-method robot limb)
+       (find-if #'(lambda (x) (member (send x :parent) (send robot limb)))
+                (send robot :force-sensors))))
   ;; impedance controller
   (:start-impedance
    (limb &rest args)
@@ -101,6 +102,13 @@
               :name (string-downcase (send fs :name))
               :base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)
               :target-name (send (send (send fs :parent) :joint) :name) args)))
+    ((find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb)))))
+     (let ((rlimb (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
+       (send* self :setImpedanceControllerParam
+              :name (format nil "~Cv~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor")))
+              :base-name (send (send (send (send robot rlimb :root-link) :parent) :joint) :name)
+              :target-name (send (send (send (send robot rlimb :end-coords) :parent) :joint) :name)
+              args)))
     ((eq limb :legs) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rleg :lleg)))
     ((eq limb :arms) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rarm :larm)))
     (t ) ;; virtual force sensor is not supported in this file
