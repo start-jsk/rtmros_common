@@ -84,7 +84,7 @@ compile_openhrp_model(${PROJECT_SOURCE_DIR}/models/YaskawaSmartPal5.wrl
   -a leftarm,WAIST_LINK2,LARM_LINK7,0,0,0,0.707,0,0.707,0,LARM_JOINTG,-1 -a leftarm_waist,WAIST_LINK0,LARM_LINK7,0,0,0,0.707,0,0.707,0,LARM_JOINTG,-1 -a rightarm,WAIST_LINK2,RARM_LINK7,0,0,0,0.707,0,0.707,0,RARM_JOINTG,-1 -a rightarm_waist,WAIST_LINK0,RARM_LINK7,0,0,0,0.707,0,0.707,0,RARM_JOINTG,-1)
 
 # choreonoid model
-compile_openhrp_model(${choreonoid_PACKAGE_PATH}/share/choreonoid-1.1/models/GR001/GR001.wrl)
+compile_openhrp_model(${choreonoid_PACKAGE_PATH}/share/choreonoid-1.3/model/GR001/GR001.wrl)
 
 ## ALL
 list(GET compile_robots 0 compile_robot)
