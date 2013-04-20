@@ -102,7 +102,8 @@
               :name (string-downcase (send fs :name))
               :base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)
               :target-name (send (send (send fs :parent) :joint) :name) args)))
-    ((find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb)))))
+    ((and (substringp ":v" (string-downcase limb))
+          (find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
      (let ((rlimb (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
        (send* self :setImpedanceControllerParam
               :name (format nil "~Cv~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor")))
@@ -168,6 +169,10 @@
   (send *ri* :setJointAnglesOfGroup "larm" (scale (/ pi 180.0) (send *robot* :larm :angle-vector)) 4.0)
   (send *ri* :waitinterpolationofgroup "larm")
 |#
+  (:loadPattern
+   (basename)
+   (let ((req (instance hrpsys::openhrp_sequenceplayerservice_loadpatternRequest :init :basename basename)))
+     (ros::service-call "/SequencePlayerServiceROSBridge/loadPattern" req)))
   )
 
 ;; CollisionDetectorService
