@@ -147,7 +147,13 @@ def init(robotname="Robot", url=""):
         rh_svc = narrow(rh.service("service0"), "RobotHardwareService")
         ep_svc = narrow(rh.ec, "ExecutionProfileService")
     else:
-        rh = rtm.findRTC(robotname)
+        timeout_count = 0;
+        # wait for simulator setup which sometime takes a long time
+        while rh == None and timeout_count < 3: # <- time out limit
+            time.sleep(1);
+            rh = rtm.findRTC(robotname)
+            timeout_count += 1
+            print "[hrpsys.py] wait for RTCmanager : ",rh, "(timeout ", timeout_count, " < 3)"
         hgc = findRTC("HGcontroller0")
         simulation_mode = True
     if not rh:
