@@ -19,6 +19,7 @@ http://code.google.com/p/openhrp-aist-grx/
 
   <!-- openhrp3 -->
   <depend package="openrtm" />
+  <depend package="openrtm_ros_bridge" />
 
   <!-- collada -->
   <rosdep name="collada-dom" />
