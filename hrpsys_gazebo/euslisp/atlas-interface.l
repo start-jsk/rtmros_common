@@ -95,6 +95,23 @@
   (unix:usleep 3)
   )
 
-
+(defun atlas-walk
+  ()
+  ;; limit crotch-y range which are originally inf and -inf
+  (send *atlas* :legs :crotch-y :min-angle -90)
+  (send *atlas* :legs :crotch-y :max-angle 90)
+  (format t ";; generate pattern~%")
+  (let ((pattern-list
+         (send *atlas* :calc-walk-pattern-from-footstep-list
+               (send *atlas* :go-pos-params->footstep-list
+                     500 150 45) ;; x[mm] y[mm] th[rad]
+               :debug-view :no-message :dt 0.01))
+        (fname (format nil "~A/atlas-walk-pattern"
+                       (ros::resolve-ros-path "package://hrpsys_gazebo/build"))))
+    (format t ";; dump pattern file~%")
+    (send *ri* :dump-seq-pattern-file pattern-list fname)
+    (format t ";; load pattern file~%")
+    (send *ri* :loadPattern fname)
+    ))
 
 
