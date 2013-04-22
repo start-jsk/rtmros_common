@@ -1,0 +1,8 @@
+<launch>
+  <include file="$(find atlas_utils)/launch/qual_task_1.launch" />
+  <node pkg="rostopic" type="rostopic"
+  	name="move_atlas_to_stepping_stone" args="pub /atlas/set_pose --once 'geometry_msgs/Pose' '{position: {x: 16.5, y: 8, z: 2}, orientation: {w: 1}}'"/>
+</launch>
+
+
+
