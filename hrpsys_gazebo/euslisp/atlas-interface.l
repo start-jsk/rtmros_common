@@ -2,12 +2,14 @@
 (require :hrp4c "package://hrpsys_gazebo/models/atlas.l")
 (ros::load-ros-manifest "hrpsys_gazebo")
 
+(ros::roseus "atlas_interface")
+
 (defmethod atlas-robot
   (:init-ending ()
    (prog1
        (send-super :init-ending)
-     (setq larm-root-link (send self :larm :shoulder-y :child-link))
-     (setq rarm-root-link (send self :rarm :shoulder-y :child-link))
+     ;; (setq larm-root-link (send self :larm :shoulder-y :child-link))
+     ;; (setq rarm-root-link (send self :rarm :shoulder-y :child-link))
      )
    ))
 
@@ -40,13 +42,15 @@
   (:stop-grasp  (&optional (arm :arms)) (send self :grasp 0 arm))
   )
 
-(defun atlas-init ()
+(defun atlas-init
+  (&key (set-reset-pose t))
   (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init)))
   (if (not (boundp '*atlas*)) (setq *atlas* (instance atlas-robot :init)))
-  (send *atlas* :reset-pose)
-  ;; send reset pose to real robot
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 3000)
-  (send *ri* :wait-interpolation)
+  (when set-reset-pose
+    (send *atlas* :reset-pose)
+    ;; send reset pose to real robot
+    (send *ri* :angle-vector (send *atlas* :angle-vector) 3000)
+    (send *ri* :wait-interpolation))
   )
 
 (defun atlas-tool-look ()
@@ -95,23 +99,43 @@
   (unix:usleep 3)
   )
 
-(defun atlas-walk
-  ()
+(defun atlas-walk-pattern-gen
+  (&key (no-gen nil) (fname nil))
   ;; limit crotch-y range which are originally inf and -inf
-  (send *atlas* :legs :crotch-y :min-angle -90)
-  (send *atlas* :legs :crotch-y :max-angle 90)
-  (format t ";; generate pattern~%")
-  (let ((pattern-list
-         (send *atlas* :calc-walk-pattern-from-footstep-list
-               (send *atlas* :go-pos-params->footstep-list
-                     500 150 45) ;; x[mm] y[mm] th[rad]
-               :debug-view :no-message :dt 0.01))
-        (fname (format nil "~A/atlas-walk-pattern"
-                       (ros::resolve-ros-path "package://hrpsys_gazebo/build"))))
-    (format t ";; dump pattern file~%")
-    (send *ri* :dump-seq-pattern-file pattern-list fname)
+  (let (pattern-list
+        (fname (if fname fname
+		 (format nil "~A/atlas-walk-pattern"
+			 (ros::resolve-ros-path "package://hrpsys_gazebo/build")))))
+    (unless no-gen
+      (format t ";; generate pattern~%")
+      (setq pattern-list
+	    (send *atlas* :calc-walk-pattern-from-footstep-list
+		  (send *atlas* :go-pos-params->footstep-list
+			500 150 45) ;; x[mm] y[mm] th[rad]
+		  :debug-view :no-message :dt 0.01))
+      (format t ";; dump pattern file~%")
+      (send *ri* :dump-seq-pattern-file pattern-list fname))
     (format t ";; load pattern file~%")
     (send *ri* :loadPattern fname)
     ))
+
+(defun atlas-walk
+  ()
+  (send_atlas_control_mode "Stand")
+  (atlas-init :set-reset-pose nil)
+  (objects (list *atlas*))
+  (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
+  (send *ri* :angle-vector (send *atlas* :angle-vector) 2000)
+  (send_atlas_control_mode "User")
+  (atlas-walk-pattern-gen)
+  )
+
+(ros::advertise "atlas/control_mode" std_msgs::String 1)
+(defun send_atlas_control_mode
+  (&optional (mode "Stand"))
+  (let ((msg (instance std_msgs::String :init)))
+    ;; set publish topics
+    (send msg :data mode)
+    (ros::publish "atlas/control_mode" msg)))
 
 
