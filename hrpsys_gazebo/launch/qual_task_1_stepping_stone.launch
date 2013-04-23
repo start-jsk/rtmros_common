@@ -1,7 +1,7 @@
 <launch>
   <include file="$(find atlas_utils)/launch/qual_task_1.launch" />
-  <node pkg="rostopic" type="rostopic"
-  	name="move_atlas_to_stepping_stone" args="pub /atlas/set_pose --once 'geometry_msgs/Pose' '{position: {x: 16.5, y: 8, z: 2}, orientation: {w: 1}}'"/>
+  <node pkg="hrpsys_gazebo" type="move_atlas.py"
+  	name="move_atlas_to_stepping_stone" args="16.5 8 2"/>
 </launch>
 
 
