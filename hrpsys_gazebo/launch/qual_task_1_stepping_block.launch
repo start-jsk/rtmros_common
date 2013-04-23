@@ -1,7 +1,7 @@
 <launch>
   <include file="$(find atlas_utils)/launch/qual_task_1.launch" />
   <node pkg="hrpsys_gazebo" type="move_atlas.py"
-  	name="move_atlas_to_stepping_stone" args="16.5 8 2"/>
+  	name="move_atlas" args="16.5 8 2 0"/>
 </launch>
 
 
