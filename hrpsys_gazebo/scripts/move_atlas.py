@@ -3,11 +3,12 @@
 import roslib; roslib.load_manifest('hrpsys_gazebo')
 import rospy, math
 import sys
+from math import *
 
 from std_msgs.msg import String
 from geometry_msgs.msg import Pose
 
-def move(x, y, z):
+def move(x, y, z, w=0):
     # Initialize the node
     rospy.init_node('move_atlas')
 
@@ -25,12 +26,16 @@ def move(x, y, z):
     p.position.x = x
     p.position.y = y
     p.position.z = z
-    p.orientation.w = 1
+    p.orientation.x = 0
+    p.orientation.y = 0
+    p.orientation.z = sin(w/2.0)
+    p.orientation.w = cos(w/2.0)
     set_pose.publish(p)
     rospy.sleep(0.1)
     mode.publish("harnessed")
+    control_mode.publish("Freeze")
     control_mode.publish("StandPrep")
-    rospy.sleep(3.0)
+    rospy.sleep(2.0)
     mode.publish("nominal")
     rospy.sleep(0.3)
     control_mode.publish("Stand")
@@ -38,8 +43,8 @@ def move(x, y, z):
 if __name__ == '__main__':
     argvs = sys.argv
     argc = len(argvs)
-
+    
     try:
-        move(float(argvs[1]), float(argvs[2]), float(argvs[3]))
+        move(float(argvs[1]), float(argvs[2]), float(argvs[3]), float(argvs[4])*pi/180)
     except rospy.ROSInterruptException: pass
 
