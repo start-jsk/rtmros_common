@@ -140,6 +140,38 @@
     ((eq limb :arms) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rarm :larm)))
     (t ) ;; virtual force sensor is not supported in this file
     ))
+  ;; for abc
+  (:start-auto-balancer
+   (&key (limbs '(:rleg :lleg)))
+   (send self :startABC
+         :alp (mapcar #'(lambda (limb)
+                          (instance hrpsys::openhrp_autobalancerservice_autobalancerlimbparam
+                                    :init :name (format nil "~A" limb)
+                                    :target_name (send (send (send robot limb :end-coords) :parent) :joint :name)
+                                    :base_name (if (send (send (send robot limb :root-link) :parent) :joint) (send (send (send robot limb :root-link) :parent) :joint :name) "WAIST")))
+                      limbs)
+))
+  (:stop-auto-balancer () (send self :stopABC))
+  (:go-pos-no-wait (xx yy th) (send self :goPos xx yy th))
+  (:go-pos
+   (xx yy th)
+   (send self :go-pos-no-wait xx yy th)
+   (send self :wait-foot-steps))
+  (:set-foot-steps-no-wait (fs) (send self :setFootSteps fs))
+  (:set-foot-steps
+   (fs)
+   (send self :set-foot-steps-no-wait fs)
+   (send self :wait-foot-steps))
+  (:go-velocity (vx vy vth) (send self :goVelocity vx vy vth))
+  (:go-stop () (send self :goStop))
+  (:wait-foot-steps () (send self :waitFootSteps))
+  (:eus-footstep->abc-footstep
+   (f)
+   (instance hrpsys::openhrp_autobalancerservice_footstep :init
+             :pos (scale 1e-3 (send f :worldpos))
+             :rot (matrix2quaternion (send f :worldrot))
+             :leg (print (format nil "~A" (if (find-method f :l/r) (send f :l/r) (send f :get :l/r)))))
+   )
   )
 
 ;; SequencePlayerService
@@ -259,4 +291,35 @@
      (ros::service-call "/ImpedanceControllerServiceROSBridge/deleteImpedanceController" req)))
   )
 
-
+;; AutoBalancerService
+(defmethod rtm-ros-robot-interface
+  (:startABC
+   (&key (alp))
+   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_startABCRequest :init :alp alp)))
+     (ros::service-call "AutoBalancerServiceROSBridge/startABC" req)))
+  (:stopABC
+   ()
+   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_stopABCRequest :init)))
+     (ros::service-call "AutoBalancerServiceROSBridge/stopABC" req)))
+  (:goPos
+   (xx yy th)
+   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_goPosRequest :init :x xx :y yy :th th)))
+     (ros::service-call "AutoBalancerServiceROSBridge/goPos" req)))
+  (:goVelocity
+   (xx yy th)
+   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_goVelocityRequest :init :vx xx :vy yy :vth th)))
+     (ros::service-call "AutoBalancerServiceROSBridge/goVelocity" req)))
+  (:goStop
+   ()
+   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_goStopRequest :init)))
+     (ros::service-call "AutoBalancerServiceROSBridge/goStop" req)))
+  (:setFootSteps
+   (fs)
+   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_setFootStepsRequest :init
+                        :fs (mapcar #'(lambda (x) (send self :eus-footstep->abc-footstep x)) fs))))
+     (ros::service-call "AutoBalancerServiceROSBridge/setFootSteps" req)))
+  (:waitFootSteps
+   ()
+   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_waitFootStepsRequest :init)))
+     (ros::service-call "AutoBalancerServiceROSBridge/waitFootSteps" req)))
+  )
