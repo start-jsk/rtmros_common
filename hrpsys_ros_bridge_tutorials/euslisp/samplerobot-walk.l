@@ -11,7 +11,23 @@
   (send *ri* :wait-interpolation)
   (send *ri* :start-auto-balancer)
   (send *ri* :go-pos 0.5 0.15 45) ;; x[m] y[m] th[rad]
+  (send *ri* :stop-auto-balancer)
   )
+(warn ";; (samplerobot-walk) ;; example to specify target x, y, theta~%")
+
+(defun samplerobot-walk2
+  ()
+  (send *sr* :reset-pose)
+  (send *ri* :angle-vector (send *sr* :angle-vector) 3000)
+  (send *ri* :wait-interpolation)
+  (send *ri* :start-auto-balancer)
+  (send *ri* :go-velocity 0.1 0.05 5)
+  (print ";; Press Enter to Stop")
+  (read-line)
+  (send *ri* :go-stop)
+  (send *ri* :stop-auto-balancer)
+  )
+(warn ";; (samplerobot-walk) ;; example to specify target velocity~%")
 
 (defun samplerobot-walk-eus
   ()
@@ -31,4 +47,4 @@
     (format t ";; load pattern file~%")
     (send *ri* :loadPattern fname)
     ))
-(warn ";; (samplerobot-walk) ;; walk sample~%")
+
