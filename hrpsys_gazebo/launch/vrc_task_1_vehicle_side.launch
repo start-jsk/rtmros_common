@@ -1,0 +1,8 @@
+<launch>
+  <include file="$(find atlas_utils)/launch/vrc_task_1.launch" />
+  <node pkg="hrpsys_gazebo" type="move_atlas.py"
+  	name="move_atlas" args="0 -2 0 0"/>
+</launch>
+
+
+
