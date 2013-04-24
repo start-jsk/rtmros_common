@@ -46,6 +46,7 @@
   (&key (set-reset-pose t))
   (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init)))
   (if (not (boundp '*atlas*)) (setq *atlas* (instance atlas-robot :init)))
+  (send_atlas_control_mode "User")
   (when set-reset-pose
     (send *atlas* :reset-pose)
     ;; send reset pose to real robot
