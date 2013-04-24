@@ -26,7 +26,8 @@ def connectComps():
     connectPorts(seq.port("zmpRef"),  sh.port("zmpIn"))
     #
     connectPorts(sh.port("qOut"),  ic.port("qRef"))
-    connectPorts(ic.port("q"),  co.port("qRef"))
+    connectPorts(ic.port("q"), abc.port("qRef"))
+    connectPorts(abc.port("q"),  co.port("qRef"))
     connectPorts(co.port("q"),  el.port("qRef"))
     out_port = el.port("q")
     if simulation_mode :
@@ -39,19 +40,20 @@ def connectComps():
     connectPorts(sh.port("baseRpyOut"), seq.port("baseRpyInit"))
 
 def activateComps():
-    rtm.serializeComponents([rh, seq, sh, tf, kf, ic, co, el, log])
+    rtm.serializeComponents([rh, seq, sh, tf, kf, ic, abc, co, el, log])
     rh.start()
     seq.start()
     sh.start()
     tf.start()
     kf.start()
     ic.start()
+    abc.start()
     co.start()
     el.start()
     log.start()
 
 def createComps():
-    global seq, seq_svc, sh, sh_svc, tf, kf, kf_svc, ic, ic_svc, co, co_svc, el, log, log_svc
+    global seq, seq_svc, sh, sh_svc, tf, kf, kf_svc, ic, ic_svc, co, co_svc, el, log, log_svc, abc, abc_svc
 
     ms.load("SequencePlayer")
     seq = ms.create("SequencePlayer", "seq")
@@ -77,6 +79,11 @@ def createComps():
     ic = ms.create("ImpedanceController", "ic")
     print "[hrpsys.py] createComps -> ImpedanceController : ",ic
     ic_svc = narrow(ic.service("service0"), "ImpedanceControllerService");
+
+    ms.load("AutoBalancer");
+    abc = ms.create("AutoBalancer", "abc")
+    print "[hrpsys.py] createComps -> AutoBalancerController : ",abc
+    abc_svc = narrow(abc.service("service0"), "AutoBalancerService");
 
     ms.load("CollisionDetector");
     co = ms.create("CollisionDetector", "co")
