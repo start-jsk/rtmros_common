@@ -6,6 +6,15 @@
 
 (defun samplerobot-walk
   ()
+  (send *sr* :reset-pose)
+  (send *ri* :angle-vector (send *sr* :angle-vector) 3000)
+  (send *ri* :wait-interpolation)
+  (send *ri* :start-auto-balancer)
+  (send *ri* :go-pos 0.5 0.15 45) ;; x[m] y[m] th[rad]
+  )
+
+(defun samplerobot-walk-eus
+  ()
   ;; limit crotch-y range which are originally inf and -inf
   (send *sr* :legs :crotch-y :min-angle -90)
   (send *sr* :legs :crotch-y :max-angle 90)
