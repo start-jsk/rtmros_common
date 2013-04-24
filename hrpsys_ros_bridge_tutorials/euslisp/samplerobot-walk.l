@@ -1,8 +1,19 @@
 (ros::roseus "samplerobot_walk")
 (load "package://hrpsys_ros_bridge_tutorials/euslisp/samplerobot-interface.l")
 
+(defun cmd-vel-cb (msg)
+  (send *ri* :go-velocity
+        (send (send msg :linear) :x)
+        (send (send msg :linear) :y)
+        (send (send msg :angular) :z))
+  )
+
 (samplerobot-init)
 (objects (list *sr*))
+(ros::subscribe
+  "/cmd_vel"
+  geometry_msgs::Twist
+  #'cmd-vel-cb)
 
 (defun samplerobot-walk
   ()
@@ -21,13 +32,18 @@
   (send *ri* :angle-vector (send *sr* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
   (send *ri* :start-auto-balancer)
-  (send *ri* :go-velocity 0.1 0.05 5)
+  (send *ri* :go-velocity 0 0 0)
   (print ";; Press Enter to Stop")
-  (read-line)
+  (ros::rate 10)
+  (do-until-key
+   (send *ri* :go-velocity 0 0 0)
+   (ros::spin-once)
+   (ros::sleep)
+   )
   (send *ri* :go-stop)
   (send *ri* :stop-auto-balancer)
   )
-(warn ";; (samplerobot-walk) ;; example to specify target velocity~%")
+(warn ";; (samplerobot-walk2) ;; example to specify target velocity~%")
 
 (defun samplerobot-walk-eus
   ()

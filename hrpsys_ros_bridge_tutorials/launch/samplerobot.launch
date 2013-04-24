@@ -1,9 +1,12 @@
 <launch>
   <arg name="KILL_SERVERS" default="false" />
+  <arg name="LAUNCH_TELEOP" default="false" />
   <include file="$(find hrpsys_ros_bridge_tutorials)/launch/samplerobot_startup.launch" >
     <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
   </include>
-  <include file="$(find hrpsys_ros_bridge_tutorials)/launch/samplerobot_ros_bridge.launch" />
+  <include file="$(find hrpsys_ros_bridge_tutorials)/launch/samplerobot_ros_bridge.launch">
+    <arg name="LAUNCH_TELEOP" default="$(arg LAUNCH_TELEOP)" />
+  </include>
 
   <sphinxdoc><![CDATA[
 
