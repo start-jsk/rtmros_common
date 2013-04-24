@@ -1,5 +1,5 @@
-(load "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
-(require :hrp4c "package://hrpsys_gazebo/models/atlas.l")
+(require :rtm-ros-robotics-interface "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
+(require :atlas "package://hrpsys_gazebo/models/atlas.l")
 (ros::load-ros-manifest "hrpsys_gazebo")
 
 (ros::roseus "atlas_interface")
@@ -40,6 +40,7 @@
        )))
   (:start-grasp (&optional (arm :arms)) (send self :grasp 1 arm))
   (:stop-grasp  (&optional (arm :arms)) (send self :grasp 0 arm))
+
   )
 
 (defun atlas-init
@@ -134,9 +135,56 @@
 (ros::advertise "atlas/control_mode" std_msgs::String 1)
 (defun send_atlas_control_mode
   (&optional (mode "Stand"))
-  (let ((msg (instance std_msgs::String :init)))
-    ;; set publish topics
-    (send msg :data mode)
+  (let ((msg (instance std_msgs::String :init :data mode)))
     (ros::publish "atlas/control_mode" msg)))
 
+;; do not use in Qualification
+(ros::advertise "atlas/mode" std_msgs::String 1)
+(defun send_atlas_mode
+  (&optional (mode "Stand"))
+  (let ((msg (instance std_msgs::String :init :data mode)))
+    (ros::publish "atlas/control_mode" msg)))
 
+;; action lib
+(setq *walk-action*
+      (instance ros::simple-action-client :init
+                "atlas/bdi_control" atlas_msgs::WalkDemoAction))
+(defun send_atlas_footstep (footstep-list &key (step-duration 0.63) (swing-height 0.3))
+  (let* ((fstep (car footstep-list))
+         (offset (copy-object (send fstep :worldpos))))
+    (setf (elt offset 1) 0.0)
+    (scale -1.0 offset offset)
+    (instance atlas_msgs::WalkDemoActionGoal :init)
+    (let ((walk-goal (send *walk-action* :make-goal-instance))
+          (goal (instance atlas_msgs::WalkDemoGoal :init))
+          ;;(step-params  (instance atlas_msgs::AtlasBehaviorStepParams :init))
+          ;;(stand-params (instance atlas_msgs::AtlasBehaviorStandParams :init))
+          ;;(manip-params (instance atlas_msgs::AtlasBehaviorManipulateParams :init))
+          (k-effort (instantiate integer-vector 28))
+          steps (step-idx 0))
+      ;;(fill k-effort 255)
+      (dolist (fstep footstep-list)
+        (let ((step (instance atlas_msgs::AtlasBehaviorStepData
+                              :init :step_index step-idx
+                              :foot_index (if (eq (get fstep :l/r) :rleg) 1 0) ;; :lleg -> 0 / :rleg -> 1
+                              :duration step-duration
+                              :swing_height swing-height)))
+          (send fstep :translate offset :world)
+          ;;(cond
+          ;;((eq (get fstep :l/r) :lleg)
+          ;;(send fstep :translate (float-vector 0 11 0)))
+          ;;(t (send fstep :translate (float-vector 0 -11 0))))
+          (send step :pose (ros::coords->tf-pose fstep))
+          (push step steps)
+          (incf step-idx)
+          ))
+      ;;(send goal :header (instancd std_msgs::header :init))
+      (send goal :behavior atlas_msgs::WalkDemoGoal::*WALK*)
+      (send goal :k_effort k-effort)
+      (send goal :steps (nreverse steps))
+      (send walk-goal :header :seq 1)
+      (send walk-goal :header :stamp (ros::time-now))
+      (send walk-goal :goal goal)
+      (send *walk-action* :send-goal walk-goal)
+      )))
+;;(send_atlas_footstep (send *atlas* :go-pos-params->footstep-list 3000 0 0))

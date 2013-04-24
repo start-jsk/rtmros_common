@@ -13,10 +13,12 @@
   <depend package="pr2eus"/>
 
   <depend package="atlas_utils"/>
+  <depend package="atlas_msgs" />
   <depend package="sandia_hand_msgs"/>
 
   <depend package="hrpsys_ros_bridge"/>
 
+  <!-- depend package="laser_assembler" /-->
 </package>
 
 
