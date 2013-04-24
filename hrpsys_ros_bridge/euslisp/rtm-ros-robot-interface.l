@@ -145,12 +145,14 @@
    (&key (limbs '(:rleg :lleg)))
    (send self :startABC
          :alp (mapcar #'(lambda (limb)
-                          (instance hrpsys::openhrp_autobalancerservice_autobalancerlimbparam
-                                    :init :name (format nil "~A" limb)
-                                    :target_name (send (send (send robot limb :end-coords) :parent) :joint :name)
-                                    :base_name (if (send (send (send robot limb :root-link) :parent) :joint) (send (send (send robot limb :root-link) :parent) :joint :name) "WAIST")))
-                      limbs)
-))
+                          (let ((target2foot (send (send (send robot limb :end-coords) :parent) :transformation (send robot limb :end-coords))))
+                            (instance hrpsys::openhrp_autobalancerservice_autobalancerlimbparam
+                                      :init :name (format nil "~A" limb)
+                                      :target_name (send (send (send robot limb :end-coords) :parent) :joint :name)
+                                      :base_name (if (send (send (send robot limb :root-link) :parent) :joint) (send (send (send robot limb :root-link) :parent) :joint :name) "WAIST")
+                                      :target2foot_offset_pos (scale 1e-3 (send target2foot :worldpos))
+                                      :target2foot_offset_rot (matrix2quaternion (send target2foot :worldrot)))))
+                      limbs)))
   (:stop-auto-balancer () (send self :stopABC))
   (:go-pos-no-wait (xx yy th) (send self :goPos xx yy th))
   (:go-pos
