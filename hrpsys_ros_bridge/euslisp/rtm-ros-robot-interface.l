@@ -322,4 +322,31 @@
    ()
    (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_waitFootStepsRequest :init)))
      (ros::service-call "AutoBalancerServiceROSBridge/waitFootSteps" req)))
+  (:getGaitGeneratorParam
+   ()
+   (let ((req (instance hrpsys::openhrp_AutoBalancerService_getGaitGeneratorParamRequest :init)))
+     (send (ros::service-call "/AutoBalancerServiceROSBridge/getGaitGeneratorParam" req) :i_param)))
+  (:setGaitGeneratorParam
+   (&key default-step-time default-step-height stride-parameter)
+   (let* ((current-param (send self :getGaitGeneratorParam))
+          (param (instance hrpsys::Openhrp_AutoBalancerService_GaitGeneratorParam
+                           :init
+                           :default_step_time (if default-step-time default-step-time (send current-param :default_step_time))
+                           :default_step_height (if default-step-height default-step-height (send current-param :default_step_height))
+                           :stride_parameter (if stride-parameter stride-parameter (send current-param :stride_parameter))))
+          (req (instance hrpsys::openhrp_AutoBalancerService_setGaitGeneratorParamRequest :init :i_param param)))
+     (ros::service-call "/AutoBalancerServiceROSBridge/setGaitGeneratorParam" req)))
+  (:getAutoBalancerParam
+   ()
+   (let ((req (instance hrpsys::openhrp_AutoBalancerService_getAutoBalancerParamRequest :init)))
+     (send (ros::service-call "/AutoBalancerServiceROSBridge/getAutoBalancerParam" req) :i_param)))
+  (:setAutoBalancerParam
+   (&key default-zmp-offsets move-base-gain)
+   (let* ((current-param (send self :getAutoBalancerParam))
+          (param (instance hrpsys::Openhrp_AutoBalancerService_AutoBalancerParam
+                           :init
+                           :default_zmp_offsets (if default-zmp-offsets default-zmp-offsets (send current-param :default_zmp_offsets))
+                           :move_base_gain (if move-base-gain move-base-gain (send current-param :move_base_gain))))
+          (req (instance hrpsys::openhrp_AutoBalancerService_setAutoBalancerParamRequest :init :i_param param)))
+     (ros::service-call "/AutoBalancerServiceROSBridge/setAutoBalancerParam" req)))
   )
