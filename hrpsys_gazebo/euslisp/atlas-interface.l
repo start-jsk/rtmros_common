@@ -47,6 +47,9 @@
   (&key (set-reset-pose t))
   (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init)))
   (if (not (boundp '*atlas*)) (setq *atlas* (instance atlas-robot :init)))
+  ;; parameter for bdi_control
+  (setf (get *atlas* :footstep-parameter)
+        '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
   (send_atlas_control_mode "User")
   (when set-reset-pose
     (send *atlas* :reset-pose)
@@ -121,8 +124,7 @@
     (send *ri* :loadPattern fname)
     ))
 
-(defun atlas-walk
-  ()
+(defun atlas-walk ()
   (send_atlas_control_mode "Stand")
   (atlas-init :set-reset-pose nil)
   (objects (list *atlas*))
@@ -141,15 +143,16 @@
 ;; do not use in Qualification
 (ros::advertise "atlas/mode" std_msgs::String 1)
 (defun send_atlas_mode
-  (&optional (mode "Stand"))
+  (&optional (mode "nominal"))
   (let ((msg (instance std_msgs::String :init :data mode)))
-    (ros::publish "atlas/control_mode" msg)))
+    (ros::publish "atlas/mode" msg)))
 
-;; action lib
+;; action lib / needs node of atlas_msgs/actionlib_server
 (setq *walk-action*
       (instance ros::simple-action-client :init
                 "atlas/bdi_control" atlas_msgs::WalkDemoAction))
 (defun send_atlas_footstep (footstep-list &key (step-duration 0.63) (swing-height 0.3))
+  ;;(send_atlas_control_mode "Walk")
   (let* ((fstep (car footstep-list))
          (offset (copy-object (send fstep :worldpos))))
     (setf (elt offset 1) 0.0)
@@ -160,9 +163,21 @@
           ;;(step-params  (instance atlas_msgs::AtlasBehaviorStepParams :init))
           ;;(stand-params (instance atlas_msgs::AtlasBehaviorStandParams :init))
           ;;(manip-params (instance atlas_msgs::AtlasBehaviorManipulateParams :init))
-          (k-effort (instantiate integer-vector 28))
+          ;;(k-effort (instantiate integer-vector 28))
+          (k-effort (instantiate string 28))
           steps (step-idx 0))
-      ;;(fill k-effort 255)
+      (fill k-effort 0)
+      ;; add first step
+      (let* ((ffstep (copy-object (car footstep-list)))
+             (step (instance atlas_msgs::AtlasBehaviorStepData
+                             :init :step_index step-idx
+                             :foot_index (if (eq (get ffstep :l/r) :rleg) 1 0) ;; :lleg -> 0 / :rleg -> 1
+                             :duration 0
+                             :swing_height 0)))
+        (send ffstep :translate offset :world)
+        (send step :pose (ros::coords->tf-pose fstep))
+        (push step steps)
+        (incf step-idx))
       (dolist (fstep footstep-list)
         (let ((step (instance atlas_msgs::AtlasBehaviorStepData
                               :init :step_index step-idx
@@ -170,10 +185,6 @@
                               :duration step-duration
                               :swing_height swing-height)))
           (send fstep :translate offset :world)
-          ;;(cond
-          ;;((eq (get fstep :l/r) :lleg)
-          ;;(send fstep :translate (float-vector 0 11 0)))
-          ;;(t (send fstep :translate (float-vector 0 -11 0))))
           (send step :pose (ros::coords->tf-pose fstep))
           (push step steps)
           (incf step-idx)
@@ -184,7 +195,23 @@
       (send goal :steps (nreverse steps))
       (send walk-goal :header :seq 1)
       (send walk-goal :header :stamp (ros::time-now))
+      (send walk-goal :goal_id :stamp (send walk-goal :header :stamp))
       (send walk-goal :goal goal)
       (send *walk-action* :send-goal walk-goal)
       )))
-;;(send_atlas_footstep (send *atlas* :go-pos-params->footstep-list 3000 0 0))
+(defun bdi_walk (x y &optional (theta 0))
+  (send_atlas_footstep
+   (send *atlas* :go-pos-params->footstep-list x y theta)))
+
+(ros::advertise "atlas/set_pose" geometry_msgs::Pose 1)
+(defun move_atlas (coords)
+  (unix::usleep (* 100 1000))
+  (send_atlas_mode "harnessed")
+  (send_atlas_control_mode "Freeze")
+  (send_atlas_control_mode "StandPrep")
+  (unix::usleep (* 2 1000 1000))
+  (send_atlas_mode "nominal")
+  (unix::usleep (* 100 1000))
+  (ros::publish "atlas/set_pose" (ros::coords->tf-pose coords))
+  (unix::usleep (* 200 1000))
+  (send_atlas_control_mode "Stand"))
