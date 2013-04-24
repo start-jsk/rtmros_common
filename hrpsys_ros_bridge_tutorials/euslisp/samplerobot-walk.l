@@ -43,7 +43,7 @@
   (send *ri* :go-stop)
   (send *ri* :stop-auto-balancer)
   )
-(warn ";; (samplerobot-walk2) ;; example to specify target velocity~%")
+(warn ";; (samplerobot-walk2) ;; example to specify target velocity ;; please use \"teleop_pr2_keyboard\" terminal~%")
 
 (defun samplerobot-walk-eus
   ()
