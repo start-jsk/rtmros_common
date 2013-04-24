@@ -30,14 +30,16 @@ def move(x, y, z, w=0):
     p.orientation.y = 0
     p.orientation.z = sin(w/2.0)
     p.orientation.w = cos(w/2.0)
-    set_pose.publish(p)
+
     rospy.sleep(0.1)
     mode.publish("harnessed")
     control_mode.publish("Freeze")
     control_mode.publish("StandPrep")
     rospy.sleep(2.0)
     mode.publish("nominal")
-    rospy.sleep(0.3)
+    rospy.sleep(0.1)
+    set_pose.publish(p)
+    rospy.sleep(0.2)
     control_mode.publish("Stand")
 
 if __name__ == '__main__':
