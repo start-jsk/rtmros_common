@@ -7,7 +7,7 @@
   (send *ri* :wait-interpolation)
   )
 
-(defun hrp4c-walk ()
+(defun hrp4c-walk-eus ()
   (let ((eof (gensym)) avs av tms tm (tmp 0) s l)
     (with-open-file
      (f (ros::resolve-ros-path "package://hrpsys/share/hrpsys/samples/HRP4C/data/walk2m.pos") :direction :input)
@@ -56,6 +56,12 @@
     (send *ri* :set-interpolation-mode :hoffarbib)
     ))
 
+(defun hrp4c-walk ()
+  (send *ri* :setAutoBalancerParam :move-base-gain 0.9)
+  (send *ri* :start-auto-balancer)
+  (send *ri* :go-pos 2 0 0)
+  (send *ri* :stop-auto-balancer)
+  )
 
 (defun hrp4c-lookdown ()
   ;; reset manip pose
