@@ -2,6 +2,4 @@
   <arg name="TASK_NO" default="1" />
   <include file="$(find atlas_utils)/launch/qual_task_$(arg TASK_NO).launch" />
   <include file="$(find hrpsys_gazebo)/launch/atlas_hrpsys.launch" />
-
-  <node pkg="atlas_msgs" type="actionlib_server" name="walking_actionlib_server"/>
 </launch>

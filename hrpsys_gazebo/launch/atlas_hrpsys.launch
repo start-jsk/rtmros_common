@@ -18,7 +18,7 @@
     <arg name="COLLADA_FILE" value="$(find hrpsys_gazebo)/models/atlas.dae" />
     <arg name="INSTALL_ROBOT_DESCRIPTION" value="false" />
   </include>
+
+  <!-- bdi_controller -->
+  <node pkg="atlas_msgs" type="actionlib_server" name="walking_actionlib_server"/>
 </launch>
-
-
-
