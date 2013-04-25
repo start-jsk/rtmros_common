@@ -164,8 +164,22 @@ def findRTCManagerAndRoboHardware(robotname="Robot"):
 
     print "[hrpsys.py] findComps -> RobotHardware : ",rh
 
+def findModelLoader():
+    try:
+        return rtm.findObject("ModelLoader")
+    except:
+        return None
+
+def waitForModelLoader():
+    while findModelLoader() == None: # seq uses modelloader
+        print "[hrpsys.py] wait for ModelLoader"
+        time.sleep(3);
 
 def init(robotname="Robot", url=""):
+    print "[hrpsys.py] waiting ModelLoader"
+    waitForModelLoader()
+    print "[hrpsys.py] start hrpsys"
+
     print "[hrpsys.py] finding RTCManager and RobotHardware"
     findRTCManagerAndRoboHardware(robotname)
 
@@ -184,20 +198,7 @@ def init(robotname="Robot", url=""):
     print "[hrpsys.py] setup logger done"
 
 
-def findModelLoader():
-    try:
-        return rtm.findObject("ModelLoader")
-    except:
-        return None
-
 if __name__ == '__main__':
-
-    while findModelLoader() == None: # seq uses modelloader
-        print "[hrpsys.py] wait for ModelLoader"
-        time.sleep(3);
-
-    print "[hrpsys.py] start hrpsys"
-
     if len(sys.argv) > 2 :
         init(sys.argv[1], sys.argv[2])
     elif len(sys.argv) > 1 :
