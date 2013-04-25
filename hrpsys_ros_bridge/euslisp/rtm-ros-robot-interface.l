@@ -109,8 +109,8 @@
     "DataLoggerServiceROSBridge/clear"
     (instance hrpsys::Openhrp_Dataloggerservice_clearRequest :init))
    )
-  (:set-maxlength
-   (&optional (maxlength 40000)) ;; 40 secs
+  (:set-log-maxlength
+   (&optional (maxlength 4000))
    (ros::service-call
     "DataLoggerServiceROSBridge/maxLength"
     (instance hrpsys::Openhrp_Dataloggerservice_maxLengthRequest :init :len maxlength))
