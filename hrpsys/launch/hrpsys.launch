@@ -46,7 +46,7 @@
   <node name="hrpsys_py" pkg="$(arg HRPSYS_PY_PKG)" type="hrpsys.py" output="screen"
         args='$(arg SIMULATOR_NAME) $(arg MODEL_FILE)' />
 
-  <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="$(arg OUTPUT)"
-	args="$(arg openrtm_args)" respawn="$(arg RESPAWN)" />
+  <!-- <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="$(arg OUTPUT)" -->
+  <!--       args="$(arg openrtm_args)" respawn="$(arg RESPAWN)" /> -->
 
 </launch>
