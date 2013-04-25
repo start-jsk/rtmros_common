@@ -95,6 +95,7 @@
 			 :link_pair_name link_pair_name
 			 :tolerance tolerance)))
      (ros::service-call "CollisionDetectorServiceROSBridge/setTolerance" req)))
+  ;;
   ;; for logger
   (:save-log
    (fname)
@@ -102,6 +103,19 @@
     "DataLoggerServiceROSBridge/save"
     (instance hrpsys::Openhrp_Dataloggerservice_saveRequest :init :basename fname))
    )
+  (:start-log ;; clear log
+   ()
+   (ros::service-call
+    "DataLoggerServiceROSBridge/clear"
+    (instance hrpsys::Openhrp_Dataloggerservice_clearRequest :init))
+   )
+  (:set-maxlength
+   (&optional (maxlength 40000)) ;; 40 secs
+   (ros::service-call
+    "DataLoggerServiceROSBridge/maxLength"
+    (instance hrpsys::Openhrp_Dataloggerservice_maxLengthRequest :init :len maxlength))
+   )
+  ;;
   (:get-force-sensor-from-limb-name
    (limb)
    (if (find-method robot limb)
