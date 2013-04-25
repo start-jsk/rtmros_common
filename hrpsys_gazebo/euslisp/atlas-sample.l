@@ -33,7 +33,8 @@
   (set-k-effort)
   (setq r *atlas*)
   ;;
-  (imu-init)
+  (imu-init)                  ;;subscribe /atlus/imu
+  (forcetorque-init)          ;;subscribe /atlus_msg/ForceTorqueSensor
   (objects (list *atlas*))
   )
 #|
@@ -252,42 +253,60 @@
 
 ;;
 (defun stand-up
-  ()
-  (print "set k-effort 255")
-  (set-k-effort 255)
-  ;;(unix:sleep 1)
-  ;;
-  (print "set pose1")
-  (pose1 :s-time 15000)
-  (send *ri* :wait-interpolation)
-  (print "set pose2")
-  (pose2 :s-time 15000)
-  (send *ri* :wait-interpolation)
-  (print "set pose3")
-  (pose3)
-  (send *ri* :wait-interpolation)
-  (warn "wait for totally landing, then push enter key~%")
-  (setq w (read-line))
-  (when (equal w "e")
-    (fall-down :s-time 15000)
-    (send *ri* :wait-interpolation)
-    (return-from stand-up))
-  (print "set pose4-1")
-  (pose4-1 :s-time 20000 :run t)
-  (send *ri* :wait-interpolation)
-  ;;
-  (print "set pose4-2")
-  (pose4-2 :s-time 20000 :run t)
-  (send *ri* :wait-interpolation)
-  ;;
-  (print "set pose4-3")
-  (pose4-3 :s-time 20000 :run t)
-  (send *ri* :wait-interpolation)
-  ;;
-  ;;ここから怪しいがたまに成功する
-  (print "set pose4-4(final pose)")
-  (pose4-4 :s-time 50000 :run t)
-  (send *ri* :wait-interpolation)
+  (&key (recover t))   ;;recover = tの場合、最後のこけてしまっていたらやりなおす
+  (tagbody
+   :start
+   (print "set k-effort 255")
+   (set-k-effort 255)
+   ;;(unix:sleep 1)
+   ;;
+   (print "set pose1")
+   (pose1 :s-time 15000)
+   (send *ri* :wait-interpolation)
+   (print "set pose2")
+   (pose2 :s-time 15000)
+   (send *ri* :wait-interpolation)
+   (print "set pose3")
+   (pose3)
+   (send *ri* :wait-interpolation)
+   (warn "wait for totally landing, then push enter key~%")
+   (let ((counter 0))
+     (while (not (setq foot-on-ground-flag (check_feet_on_ground)))  ;;地面に足がつくまで
+       (if (not foot-on-ground-flag)
+	   (print "  not yet foot on ground, then please wait...")
+	 )
+       (unix:sleep 1)
+       (incf counter)
+       (when (> counter 20)
+	 (print "something wrong is occured! retry!")
+	 (pose1)
+	 (send *ri* :wait-interpolation)
+	 (unix:sleep 1)
+	 (when (eq :aomuke (check_utubuse_or_not))
+	   (print "detect aomuke situation, do rolling-over")
+	   (rolling-over)
+	   )
+	 (go :start)
+	 )))
+   ;;
+   (unix:sleep 1)
+   (print "set pose4-1")
+   (pose4-1 :s-time 20000 :run t)
+   (send *ri* :wait-interpolation)
+   ;;
+   (print "set pose4-2")
+   (pose4-2 :s-time 20000 :run t)
+   (send *ri* :wait-interpolation)
+   ;;
+   (print "set pose4-3")
+   (pose4-3 :s-time 20000 :run t)
+   (send *ri* :wait-interpolation)
+   ;;
+   ;;ここから怪しいがたまに成功する
+   (print "set pose4-4(final pose)")
+   (pose4-4 :s-time 50000 :run t)
+   (send *ri* :wait-interpolation)
+#|
   (unix:sleep 1)
   (print "set k-effort 200")
   (set-k-effort 200)   ;;walking mode
@@ -297,10 +316,24 @@
   ;;(unix:sleep 3)
   (print "set k-effort 0")
   (set-k-effort 0)   ;;walking mode
-  ;;(unix:sleep 3)
-  (print "if atlas keep standing, walking mode!")
-  )
-
+|#
+   ;;(unix:sleep 3)
+   
+   ;;失敗していたらやりなおす
+   (when recover
+     (ros::spin-once)
+     (cond
+      ((> (abs (elt *atlas_rpy* 1)) 10)   ;;体幹のpitch姿勢が10の中に入っていなければこけていると思っていい
+       (print "detect standing-up failure, retry!")
+       ;;さらに、仰向けかうつ伏せかを判定する
+       (when (eq :aomuke (check_utubuse_or_not))
+	 (print "detect aomuke situation, do rolling-over")
+	 (rolling-over)
+	 )
+       (unix:sleep 1)
+       ;;やりなおし
+       (go :start))))
+   ))
 ;;
 ;;仰向け→うつ伏せになる
 ;;
@@ -415,7 +448,50 @@
 					  (send q :y) 
 					  (send q :z)))))))
     ))
-;;
+(defun forcetorque-init
+  ()
+  (ros::subscribe "/atlas/force_torque_sensors" atlas_msgs::ForceTorqueSensors #'get_forcetorque_sensors 1)
+  )
+(defvar *atlas_forcetorque* nil)
+(defun get_forcetorque_sensors
+  (msg)
+  (let* ((lf (send msg :l_foot))
+	 (rf (send msg :r_foot))
+	 (la (send msg :l_hand))
+	 (ra (send msg :r_hand))
+	 (ret)
+	 )
+    (setq *atlas_forcetorque*
+	  (list
+	   (cons :l_foot
+		 (float-vector (send lf :force :x)
+			       (send lf :force :y)
+			       (send lf :force :z)
+			       (send lf :torque :x)
+			       (send lf :torque :y)
+			       (send lf :torque :z)))
+	   (cons :r_foot
+		 (float-vector (send rf :force :x)
+			       (send rf :force :y)
+			       (send rf :force :z)
+			       (send rf :torque :x)
+			       (send rf :torque :y)
+			       (send rf :torque :z)))
+	   (cons :l_hand
+		 (float-vector (send la :force :x)
+			       (send la :force :y)
+			       (send la :force :z)
+			       (send la :torque :x)
+			       (send la :torque :y)
+			       (send la :torque :z)))
+	   (cons :r_hand
+		 (float-vector (send ra :force :x)
+			       (send ra :force :y)
+			       (send ra :force :z)
+			       (send ra :torque :x)
+			       (send ra :torque :y)
+			       (send ra :torque :z)))
+	   ))))
 
 #|
  4足歩行モード（蛙飛びが一番楽かな)
@@ -471,5 +547,46 @@
    (pose1 :s-time 2000)
    (send *ri* :wait-interpolation) 
    (unix:sleep 5))
+  )
 
-;;回転かあ
+#|
+  左右の足が地面にちゃんとついているかどうかの判定
+  起き上がりの際に使う
+  *atlas_forcetorque* に力センサの値は格納される
+|#
+(defun check_feet_on_ground
+  ()
+  (let (lf-force rf-force (ret-flag nil))
+    (ros::spin-once)   ;;ROSのセンサtopicを更新
+    (setq lf-force (cdr (assoc :l_foot *atlas_forcetorque*)))  ;; #f(fx fy fz mx my mz)
+    (setq rf-force (cdr (assoc :r_foot *atlas_forcetorque*)))  ;; #f(fx fy fz mx my mz)
+    ;;
+    ;;なお、atlasは、足首力センサは３成分のみ fz, mx, my
+    ;;  両足で地面にたっている条件
+    ;;    lfz, rfz > 300
+    ;;    root( lmx*lmx +  lmy*lmy ) < 33
+    ;;    root( rmx*rmx +  rmy*rmy ) < 33
+    (if (and (> (aref lf-force 2) 300)
+	     (> (aref rf-force 2) 300)
+	     (< (sqrt (+ (* (aref lf-force 3) (aref lf-force 3)) (* (aref lf-force 4) (aref lf-force 4)))) 33)
+	     (< (sqrt (+ (* (aref rf-force 3) (aref rf-force 3)) (* (aref rf-force 4) (aref rf-force 4)))) 33)
+	     )
+	(setq ret-flag t))
+    ret-flag))
+#|
+  仰向け？うつ伏せ？
+|#
+(defun check_utubuse_or_not
+  ()
+  (let (ret)
+    (ros::spin-once)
+    (cond 
+     ((> (elt *atlas_rpy* 1) 80)
+      (setq ret :utubuse)
+      )
+     ((< (elt *atlas_rpy* 1) -80)
+      (setq ret :aomuke))
+     (t
+      (setq ret :unknown)))
+    ret))
+  
