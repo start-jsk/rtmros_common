@@ -40,17 +40,10 @@ def connectComps():
     connectPorts(sh.port("baseRpyOut"), seq.port("baseRpyInit"))
 
 def activateComps():
-    rtm.serializeComponents([rh, seq, sh, tf, kf, ic, abc, co, el, log])
-    rh.start()
-    seq.start()
-    sh.start()
-    tf.start()
-    kf.start()
-    ic.start()
-    abc.start()
-    co.start()
-    el.start()
-    log.start()
+    rtcList = [rh, seq, sh, tf, kf, ic, abc, co, el, log];
+    rtm.serializeComponents(rtcList)
+    for r in rtcList:
+        r.start()
 
 def createComps():
     global seq, seq_svc, sh, sh_svc, tf, kf, kf_svc, ic, ic_svc, co, co_svc, el, log, log_svc, abc, abc_svc
