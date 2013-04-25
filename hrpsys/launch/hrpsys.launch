@@ -19,6 +19,8 @@
   <arg name="RESPAWN" default="true"/>
   <arg name="OUTPUT" default="log"/>
   <arg name="SIMULATOR_NAME"/>
+  <arg name="RTCD_LAUNCH_PREFIX" default=""/>
+  <arg name="HRPSYS_PY_PKG" default="hrpsys"/>
   <env name="LANG" value="C" />
   <env name="ORBgiopMaxMsgSize" value="2147483648" />
 
@@ -32,14 +34,16 @@
 
   <node if="$(arg USE_RTCD)"
         name="hrpsys" pkg="openrtm" type="rtcd" output="$(arg OUTPUT)"
+        launch-prefix="$(arg RTCD_LAUNCH_PREFIX)"
         args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_args)" />
   <node unless="$(arg USE_RTCD)"
         name="hrpsys" pkg="hrpsys" type="hrpsys-simulator" output="$(arg OUTPUT)"
+        launch-prefix="$(arg RTCD_LAUNCH_PREFIX)"
         args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_opt_args) $(arg hrpsys_args)" />
 
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
 
-  <node name="hrpsys_py" pkg="hrpsys" type="hrpsys.py" output="screen"
+  <node name="hrpsys_py" pkg="$(arg HRPSYS_PY_PKG)" type="hrpsys.py" output="screen"
         args='$(arg SIMULATOR_NAME) $(arg MODEL_FILE)' />
 
   <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="$(arg OUTPUT)"
