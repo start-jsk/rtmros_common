@@ -10,7 +10,7 @@ from hrpsys import *
 program_name = '[sensor_ros_bridge_connect.py] '
 
 def connecSensorRosBridgePort(url, rh, bridge):
-    sensors = map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, getBodyInfo(url)._get_links()))
+    sensors = map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, hcf.getBodyInfo(url)._get_links()))
     for sen in sum(sensors, []): # sum is for list flatten
         print sen.name
         if sen.type == 'Acceleration':
@@ -26,25 +26,18 @@ def connecSensorRosBridgePort(url, rh, bridge):
             continue
 
 def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name):
-    ms = None
+    hcf.waitForModelLoader()
+    hcf.findRTCManagerAndRoboHardware(simulator_name)
     bridge = None
-    rh = None
-    while ms == None :
-        time.sleep(1);
-        ms = rtm.findRTCmanager()
-        print "[hrpsys.py] wait for RTCmanager : ",ms
-    while rh == None :
-        time.sleep(1);
-        rh = rtm.findRTC(simulator_name)
-        print "[hrpsys.py] wait for ", simulator_name, " : ",rh
     while bridge == None :
         time.sleep(1);
         bridge = rtm.findRTC(rosbridge_name)
         print "[hrpsys.py] wait for ", rosbridge_name, " : ",bridge
-    connecSensorRosBridgePort(url, rh, bridge)
+    connecSensorRosBridgePort(url, hcf.rh, bridge)
 
 if __name__ == '__main__':
     print program_name, "start"
+    hcf=HrpsysConfigurator()
     if len(sys.argv) > 3 :
         initSensorRosBridgeConnection(sys.argv[1], sys.argv[2], sys.argv[3])
     else :

@@ -10,201 +10,204 @@ from OpenHRP import *
 import socket
 import time
 
-def connectComps():
-    connectPorts(rh.port("q"), [sh.port("currentQIn"), co.port("qCurrent"), el.port("qCurrent"), ic.port("qCurrent")])
-    #
-    connectPorts(seq.port("qRef"), sh.port("qIn"))
-    #
-    connectPorts(rh.port("tau"), tf.port("tauIn"))
-    if ( rh.port("rate") and rh.port("acc") ) :
-        connectPorts(rh.port("rate"), kf.port("rate"))
-        connectPorts(rh.port("acc"), kf.port("acc"))
-    connectPorts(seq.port("accRef"), kf.port("accRef"))
-    #
-    connectPorts(seq.port("basePos"), sh.port("basePosIn"))
-    connectPorts(seq.port("baseRpy"), sh.port("baseRpyIn"))
-    connectPorts(seq.port("zmpRef"),  sh.port("zmpIn"))
-    #
-    connectPorts(sh.port("qOut"),  ic.port("qRef"))
-    connectPorts(ic.port("q"), abc.port("qRef"))
-    connectPorts(abc.port("q"),  co.port("qRef"))
-    connectPorts(co.port("q"),  el.port("qRef"))
-    out_port = el.port("q")
-    if simulation_mode :
-        connectPorts(out_port,  hgc.port("qIn"))
-        connectPorts(hgc.port("qOut"), [seq.port("qInit"), rh.port("qRef")])
-    else :
-        connectPorts(out_port,  [seq.port("qInit"), rh.port("qRef")])
-    #
-    connectPorts(sh.port("basePosOut"), seq.port("basePosInit"))
-    connectPorts(sh.port("baseRpyOut"), seq.port("baseRpyInit"))
+# class for configure hrpsys RTCs and ports
+class HrpsysConfigurator:
+    def connectComps(self):
+        connectPorts(self.rh.port("q"), [self.sh.port("currentQIn"), self.co.port("qCurrent"), self.el.port("qCurrent"), self.ic.port("qCurrent")])
+        #
+        connectPorts(self.seq.port("qRef"), self.sh.port("qIn"))
+        #
+        connectPorts(self.rh.port("tau"), self.tf.port("tauIn"))
+        if ( self.rh.port("rate") and self.rh.port("acc") ) :
+            connectPorts(self.rh.port("rate"), self.kf.port("rate"))
+            connectPorts(self.rh.port("acc"), self.kf.port("acc"))
+        connectPorts(self.seq.port("accRef"), self.kf.port("accRef"))
+        #
+        connectPorts(self.seq.port("basePos"), self.sh.port("basePosIn"))
+        connectPorts(self.seq.port("baseRpy"), self.sh.port("baseRpyIn"))
+        connectPorts(self.seq.port("zmpRef"),  self.sh.port("zmpIn"))
+        #
+        connectPorts(self.sh.port("qOut"),  self.ic.port("qRef"))
+        connectPorts(self.ic.port("q"), self.abc.port("qRef"))
+        connectPorts(self.abc.port("q"),  self.co.port("qRef"))
+        connectPorts(self.co.port("q"),  self.el.port("qRef"))
+        out_port = self.el.port("q")
+        if self.simulation_mode :
+            connectPorts(out_port,  self.hgc.port("qIn"))
+            connectPorts(self.hgc.port("qOut"), [self.seq.port("qInit"), self.rh.port("qRef")])
+        else :
+            connectPorts(out_port,  [self.seq.port("qInit"), self.rh.port("qRef")])
+        #
+        connectPorts(self.sh.port("basePosOut"), self.seq.port("basePosInit"))
+        connectPorts(self.sh.port("baseRpyOut"), self.seq.port("baseRpyInit"))
 
-def activateComps():
-    rtcList = [rh, seq, sh, tf, kf, ic, abc, co, el, log];
-    rtm.serializeComponents(rtcList)
-    for r in rtcList:
-        r.start()
+    def activateComps(self, rtcList):
+        rtm.serializeComponents(rtcList)
+        for r in rtcList:
+            r.start()
 
-def createComps():
-    global seq, seq_svc, sh, sh_svc, tf, kf, kf_svc, ic, ic_svc, co, co_svc, el, log, log_svc, abc, abc_svc
+    def createComps(self):
 
-    ms.load("SequencePlayer")
-    seq = ms.create("SequencePlayer", "seq")
-    print "[hrpsys.py] createComps -> SequencePlayer : ",seq
-    seq_svc = narrow(seq.service("service0"), "SequencePlayerService")
+        self.ms.load("SequencePlayer")
+        self.seq = self.ms.create("SequencePlayer", "seq")
+        print "[hrpsys.py] createComps -> SequencePlayer : ",self.seq
+        self.seq_svc = narrow(self.seq.service("service0"), "SequencePlayerService")
 
-    ms.load("StateHolder");
-    sh = ms.create("StateHolder", "sh")
-    print "[hrpsys.py] createComps -> StateHolder : ",sh
-    sh_svc = narrow(sh.service("service0"), "StateHolderService");
-    tk_svc = narrow(sh.service("service1"), "TimeKeeperService")
+        self.ms.load("StateHolder");
+        self.sh = self.ms.create("StateHolder", "sh")
+        print "[hrpsys.py] createComps -> StateHolder : ",self.sh
+        self.sh_svc = narrow(self.sh.service("service0"), "StateHolderService");
+        self.tk_svc = narrow(self.sh.service("service1"), "TimeKeeperService")
 
-    ms.load("TorqueFilter");
-    tf = ms.create("TorqueFilter", "tf")
-    print "[hrpsys.py] createComps -> TorqueFilter : ",tf
+        self.ms.load("TorqueFilter");
+        self.tf = self.ms.create("TorqueFilter", "tf")
+        print "[hrpsys.py] createComps -> TorqueFilter : ",self.tf
 
-    ms.load("KalmanFilter");
-    kf = ms.create("KalmanFilter", "kf")
-    print "[hrpsys.py] createComps -> KalmanFilter : ",kf
-    kf_svc = narrow(kf.service("service0"), "KalmanFilterService")
+        self.ms.load("KalmanFilter");
+        self.kf = self.ms.create("KalmanFilter", "kf")
+        print "[hrpsys.py] createComps -> KalmanFilter : ",self.kf
+        self.kf_svc = narrow(self.kf.service("service0"), "KalmanFilterService")
 
-    ms.load("ImpedanceController");
-    ic = ms.create("ImpedanceController", "ic")
-    print "[hrpsys.py] createComps -> ImpedanceController : ",ic
-    ic_svc = narrow(ic.service("service0"), "ImpedanceControllerService");
+        self.ms.load("ImpedanceController");
+        self.ic = self.ms.create("ImpedanceController", "ic")
+        print "[hrpsys.py] createComps -> ImpednanceController : ",self.ic
+        self.ic_svc = narrow(self.ic.service("service0"), "ImpedanceControllerService");
 
-    ms.load("AutoBalancer");
-    abc = ms.create("AutoBalancer", "abc")
-    print "[hrpsys.py] createComps -> AutoBalancerController : ",abc
-    abc_svc = narrow(abc.service("service0"), "AutoBalancerService");
+        self.ms.load("AutoBalancer");
+        self.abc = self.ms.create("AutoBalancer", "abc")
+        print "[hrpsys.py] createComps -> AutoBalancerController : ",self.abc
+        self.abc_svc = narrow(self.abc.service("service0"), "AutoBalancerService");
 
-    ms.load("CollisionDetector");
-    co = ms.create("CollisionDetector", "co")
-    print "[hrpsys.py] createComps -> CollisionDetector : ",co
-    co_svc = narrow(co.service("service0"), "CollisionDetectorService");
+        self.ms.load("CollisionDetector");
+        self.co = self.ms.create("CollisionDetector", "co")
+        print "[hrpsys.py] createComps -> CollisionDetector : ",self.co
+        self.co_svc = narrow(self.co.service("service0"), "CollisionDetectorService");
 
-    ms.load("SoftErrorLimiter");
-    el = ms.create("SoftErrorLimiter", "el")
-    print "[hrpsys.py] createComps -> SoftErrorLimiter : ",el
+        self.ms.load("SoftErrorLimiter");
+        self.el = self.ms.create("SoftErrorLimiter", "el")
+        print "[hrpsys.py] createComps -> SoftErrorLimiter : ",self.el
 
-    ms.load("DataLogger");
-    log = ms.create("DataLogger", "log")
-    print "[hrpsys.py] createComps -> DataLogger : ",log
-    log_svc = narrow(log.service("service0"), "DataLoggerService");
+        self.ms.load("DataLogger");
+        self.log = self.ms.create("DataLogger", "log")
+        print "[hrpsys.py] createComps -> DataLogger : ",self.log
+        self.log_svc = narrow(self.log.service("service0"), "DataLoggerService");
 
-def getBodyInfo(url):
-    import CosNaming
-    obj = rtm.rootnc.resolve([CosNaming.NameComponent('ModelLoader', '')])
-    mdlldr = obj._narrow(ModelLoader)
-    print "[hrpsys.py]   bodyinfo URL = file://"+url
-    return mdlldr.getBodyInfo("file://"+url)
+    def getRTCList(self):
+        return [self.rh, self.seq, self.sh, self.tf, self.kf, self.ic, self.abc, self.co, self.el, self.log]
 
-# setup logger
-def setupLogger(url=None):
-    #
-    if rh.port("q") :
-        log_svc.add("TimedDoubleSeq", "q")
-        connectPorts(rh.port("q"), log.port("q"))
+    def getBodyInfo(self, url):
+        import CosNaming
+        obj = rtm.rootnc.resolve([CosNaming.NameComponent('ModelLoader', '')])
+        mdlldr = obj._narrow(ModelLoader)
+        print "[hrpsys.py]   bodyinfo URL = file://"+url
+        return mdlldr.getBodyInfo("file://"+url)
 
-    if rh.port("tau") :
-        log_svc.add("TimedDoubleSeq", "tau")
-        connectPorts(rh.port("tau"), log.port("tau"))
-    # sensor logger ports
-    if url :
-        print "[hrpsys.py] sensor names for DataLogger"
-        sensors = map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, getBodyInfo(url)._get_links()))
-        for sen in map(lambda x : x.name, sum(sensors, [])):
-            if sen == "gyrometer":
-                sen_type = "TimedAngularVelocity3D"
-            elif sen == "gsensor":
-                sen_type = "TimedAcceleration3D"
-            elif sen.find("fsensor") != -1:
-                sen_type = "TimedDoubleSeq"
+    # setup logger
+    def setupLogger(self, url=None):
+        #
+        if self.rh.port("q") :
+            self.log_svc.add("TimedDoubleSeq", "q")
+            connectPorts(self.rh.port("q"), self.log.port("q"))
+
+        if self.rh.port("tau") :
+            self.log_svc.add("TimedDoubleSeq", "tau")
+            connectPorts(self.rh.port("tau"), self.log.port("tau"))
+        # sensor logger ports
+        if url :
+            print "[hrpsys.py] sensor names for DataLogger"
+            sensors = map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, self.getBodyInfo(url)._get_links()))
+            for sen in map(lambda x : x.name, sum(sensors, [])):
+                if sen == "gyrometer":
+                    sen_type = "TimedAngularVelocity3D"
+                elif sen == "gsensor":
+                    sen_type = "TimedAcceleration3D"
+                elif sen.find("fsensor") != -1:
+                    sen_type = "TimedDoubleSeq"
+                else:
+                    continue
+                print "[hrpsys.py]   type =", sen_type, ",name = ", sen, ",port = ", self.rh.port(sen)
+                if self.rh.port(sen) != None:
+                    self.log_svc.add(sen_type, sen)
+                    connectPorts(self.rh.port(sen), self.log.port(sen))
+
+        self.log.owned_ecs[0].start()
+        self.log.start(self.log.owned_ecs[0])
+
+    def findRTCManagerAndRoboHardware(self, robotname="Robot"):
+
+        self.ms = None
+        while self.ms == None :
+            time.sleep(1);
+            self.ms = rtm.findRTCmanager()
+            print "[hrpsys.py] wait for RTCmanager : ",self.ms
+
+        self.rh = None
+        timeout_count = 0;
+        self.simulation_mode = False
+        # wait for simulator or RobotHardware setup which sometime takes a long time
+        while self.rh == None and timeout_count < 3: # <- time out limit
+            time.sleep(1);
+            self.rh = rtm.findRTC("RobotHardware0")
+            if self.rh:
+                self.rh_svc = narrow(self.rh.service("service0"), "RobotHardwareService")
+                self.ep_svc = narrow(self.rh.ec, "ExecutionProfileService")
             else:
-                continue
-            print "[hrpsys.py]   type =", sen_type, ",name = ", sen, ",port = ", rh.port(sen)
-            if rh.port(sen) != None:
-                log_svc.add(sen_type, sen)
-                connectPorts(rh.port(sen), log.port(sen))
+                self.rh = rtm.findRTC(robotname)
+                self.hgc = findRTC("HGcontroller0")
+                self.simulation_mode = True
+            print "[hrpsys.py] wait for Simulator or RobotHardware : ",self.rh, "(timeout ", timeout_count, " < 3)"
+            timeout_count += 1
 
-    log.owned_ecs[0].start()
-    log.start(log.owned_ecs[0])
+        if not self.rh:
+            print "[hrpsys.py] Could not find ", robotname
+            print "[hrpsys.py] Candidates are .... ", [x.name()  for x in self.ms.get_components()]
+            print "[hrpsys.py] Exitting.... ", robotname
+            return
 
-def findRTCManagerAndRoboHardware(robotname="Robot"):
-    global ms, rh, rh_svc, ep_svc, hgc, simulation_mode
+        print "[hrpsys.py] findComps -> RobotHardware : ",self.rh
 
-    ms = None
-    while ms == None :
-        time.sleep(1);
-        ms = rtm.findRTCmanager()
-        print "[hrpsys.py] wait for RTCmanager : ",ms
+    def findModelLoader(self):
+        try:
+            return rtm.findObject("ModelLoader")
+        except:
+            return None
 
-    rh = None
-    timeout_count = 0;
-    simulation_mode = False
-    # wait for simulator or RobotHardware setup which sometime takes a long time
-    while rh == None and timeout_count < 3: # <- time out limit
-        time.sleep(1);
-        rh = rtm.findRTC("RobotHardware0")
-        if rh:
-            rh_svc = narrow(rh.service("service0"), "RobotHardwareService")
-            ep_svc = narrow(rh.ec, "ExecutionProfileService")
-        else:
-            rh = rtm.findRTC(robotname)
-            hgc = findRTC("HGcontroller0")
-            simulation_mode = True
-        print "[hrpsys.py] wait for Simulator or RobotHardware : ",rh, "(timeout ", timeout_count, " < 3)"
-        timeout_count += 1
+    def waitForModelLoader(self):
+        while self.findModelLoader() == None: # seq uses modelloader
+            print "[hrpsys.py] wait for ModelLoader"
+            time.sleep(3);
 
-    if not rh:
-        print "[hrpsys.py] Could not find ", robotname
-        print "[hrpsys.py] Candidates are .... ", [x.name()  for x in ms.get_components()]
-        print "[hrpsys.py] Exitting.... ", robotname
-        return
+    def init(self, robotname="Robot", url=""):
+        print "[hrpsys.py] waiting ModelLoader"
+        self.waitForModelLoader()
+        print "[hrpsys.py] start hrpsys"
 
-    print "[hrpsys.py] findComps -> RobotHardware : ",rh
+        print "[hrpsys.py] finding RTCManager and RobotHardware"
+        self.findRTCManagerAndRoboHardware(robotname)
 
-def findModelLoader():
-    try:
-        return rtm.findObject("ModelLoader")
-    except:
-        return None
+        print "[hrpsys.py] creating components"
+        self.createComps()
 
-def waitForModelLoader():
-    while findModelLoader() == None: # seq uses modelloader
-        print "[hrpsys.py] wait for ModelLoader"
-        time.sleep(3);
+        print "[hrpsys.py] activating components"
+        self.activateComps(self.getRTCList())
 
-def init(robotname="Robot", url=""):
-    print "[hrpsys.py] waiting ModelLoader"
-    waitForModelLoader()
-    print "[hrpsys.py] start hrpsys"
+        print "[hrpsys.py] connecting components"
+        self.connectComps()
 
-    print "[hrpsys.py] finding RTCManager and RobotHardware"
-    findRTCManagerAndRoboHardware(robotname)
+        print "[hrpsys.py] initialized successfully"
 
-    print "[hrpsys.py] creating components"
-    createComps()
-
-    print "[hrpsys.py] activating components"
-    activateComps()
-
-    print "[hrpsys.py] connecting components"
-    connectComps()
-
-    print "[hrpsys.py] initialized successfully"
-
-    setupLogger(url)
-    print "[hrpsys.py] setup logger done"
+        self.setupLogger(url)
+        print "[hrpsys.py] setup logger done"
 
 
 if __name__ == '__main__':
+    hcf = HrpsysConfigurator()
     if len(sys.argv) > 2 :
-        init(sys.argv[1], sys.argv[2])
+        hcf.init(sys.argv[1], sys.argv[2])
     elif len(sys.argv) > 1 :
-        init(sys.argv[1])
+        hcf.init(sys.argv[1])
     else :
-        init()
+        hcf.init()
 
 
 
