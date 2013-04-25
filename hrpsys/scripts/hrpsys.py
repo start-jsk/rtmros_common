@@ -130,13 +130,10 @@ def setupLogger(url=None):
     log.owned_ecs[0].start()
     log.start(log.owned_ecs[0])
 
-ms = None
-simulation_mode = False
-
-def init(robotname="Robot", url=""):
+def findRTCManagerAndRoboHardware(robotname="Robot"):
     global ms, rh, rh_svc, ep_svc, hgc, simulation_mode
 
-    print ms
+    ms = None
     while ms == None :
         time.sleep(1);
         ms = rtm.findRTCmanager()
@@ -144,6 +141,7 @@ def init(robotname="Robot", url=""):
 
     rh = None
     timeout_count = 0;
+    simulation_mode = False
     # wait for simulator or RobotHardware setup which sometime takes a long time
     while rh == None and timeout_count < 3: # <- time out limit
         time.sleep(1);
@@ -165,6 +163,11 @@ def init(robotname="Robot", url=""):
         return
 
     print "[hrpsys.py] findComps -> RobotHardware : ",rh
+
+
+def init(robotname="Robot", url=""):
+    print "[hrpsys.py] finding RTCManager and RobotHardware"
+    findRTCManagerAndRoboHardware(robotname)
 
     print "[hrpsys.py] creating components"
     createComps()
