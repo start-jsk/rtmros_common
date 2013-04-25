@@ -15,13 +15,13 @@ def connecSensorRosBridgePort(url, rh, bridge):
         print sen.name
         if sen.type == 'Acceleration':
             print program_name, "connect ", rh.port('acc'), bridge.port("gsensor")
-            connectPorts(rh.port('acc'), bridge.port("gsensor"))
+            connectPorts(rh.port('acc'), bridge.port("gsensor"), "new")
         elif sen.type == 'RateGyro':
             print program_name, "connect ", rh.port('rate'), bridge.port('gyrometer')
-            connectPorts(rh.port('rate'), bridge.port('gyrometer'))
+            connectPorts(rh.port('rate'), bridge.port('gyrometer'), "new")
         elif sen.type == 'Force':
             print program_name, "connect ", rh.port(sen.name), bridge.port(sen.name)
-            connectPorts(rh.port(sen.name), bridge.port(sen.name))
+            connectPorts(rh.port(sen.name), bridge.port(sen.name), "new")
         else:
             continue
 
