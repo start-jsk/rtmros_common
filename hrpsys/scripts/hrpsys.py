@@ -19,10 +19,10 @@ class HrpsysConfigurator:
         #
         connectPorts(self.rh.port("tau"), self.tf.port("tauIn"))
         # currently use first acc and rate sensors for kf
-        s_acc=filter(lambda s : s.type == 'Acceleration', hcf.getSensors(self.url))[0]
+        s_acc=filter(lambda s : s.type == 'Acceleration', self.getSensors(self.url))[0]
         if (s_acc):
             connectPorts(self.rh.port(s_acc.name), self.kf.port("acc"))
-        s_rate=filter(lambda s : s.type == 'RateGyro', hcf.getSensors(self.url))[0]
+        s_rate=filter(lambda s : s.type == 'RateGyro', self.getSensors(self.url))[0]
         if (s_rate):
             connectPorts(self.rh.port(s_rate.name), self.kf.port("rate"))
         connectPorts(self.seq.port("accRef"), self.kf.port("accRef"))
