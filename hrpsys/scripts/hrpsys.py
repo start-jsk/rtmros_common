@@ -18,9 +18,13 @@ class HrpsysConfigurator:
         connectPorts(self.seq.port("qRef"), self.sh.port("qIn"))
         #
         connectPorts(self.rh.port("tau"), self.tf.port("tauIn"))
-        if ( self.rh.port("rate") and self.rh.port("acc") ) :
-            connectPorts(self.rh.port("rate"), self.kf.port("rate"))
-            connectPorts(self.rh.port("acc"), self.kf.port("acc"))
+        # currently use first acc and rate sensors for kf
+        s_acc=filter(lambda s : s.type == 'Acceleration', hcf.getSensors(self.url))[0]
+        if (s_acc):
+            connectPorts(self.rh.port(s_acc.name), self.kf.port("acc"))
+        s_rate=filter(lambda s : s.type == 'RateGyro', hcf.getSensors(self.url))[0]
+        if (s_rate):
+            connectPorts(self.rh.port(s_rate.name), self.kf.port("rate"))
         connectPorts(self.seq.port("accRef"), self.kf.port("accRef"))
         #
         connectPorts(self.seq.port("basePos"), self.sh.port("basePosIn"))
@@ -102,6 +106,9 @@ class HrpsysConfigurator:
         print "[hrpsys.py]   bodyinfo URL = file://"+url
         return mdlldr.getBodyInfo("file://"+url)
 
+    def getSensors(self, url):
+        return sum(map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, self.getBodyInfo(url)._get_links())), [])  # sum is for list flatten
+
     # setup logger
     def setupLogger(self, url=None):
         #
@@ -115,20 +122,12 @@ class HrpsysConfigurator:
         # sensor logger ports
         if url :
             print "[hrpsys.py] sensor names for DataLogger"
-            sensors = map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, self.getBodyInfo(url)._get_links()))
-            for sen in map(lambda x : x.name, sum(sensors, [])):
-                if sen == "gyrometer":
-                    sen_type = "TimedAngularVelocity3D"
-                elif sen == "gsensor":
-                    sen_type = "TimedAcceleration3D"
-                elif sen.find("fsensor") != -1:
-                    sen_type = "TimedDoubleSeq"
-                else:
-                    continue
-                print "[hrpsys.py]   type =", sen_type, ",name = ", sen, ",port = ", self.rh.port(sen)
-                if self.rh.port(sen) != None:
-                    self.log_svc.add(sen_type, sen)
-                    connectPorts(self.rh.port(sen), self.log.port(sen))
+            for sen in hcf.getSensors(url):
+                if self.rh.port(sen.name) != None:
+                    sen_type = rtm.dataTypeOfPort(self.rh.port(sen.name)).split("/")[1].split(":")[0]
+                    print "[hrpsys.py]   type =", sen_type, ",name = ", sen.name, ",port = ", self.rh.port(sen.name)
+                    self.log_svc.add(sen_type, sen.name)
+                    connectPorts(self.rh.port(sen.name), self.log.port(sen.name))
 
         self.log.owned_ecs[0].start()
         self.log.start(self.log.owned_ecs[0])
@@ -178,6 +177,7 @@ class HrpsysConfigurator:
             time.sleep(3);
 
     def init(self, robotname="Robot", url=""):
+        self.url = url
         print "[hrpsys.py] waiting ModelLoader"
         self.waitForModelLoader()
         print "[hrpsys.py] start hrpsys"

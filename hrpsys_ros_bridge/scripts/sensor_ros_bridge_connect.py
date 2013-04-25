@@ -10,14 +10,13 @@ from hrpsys import *
 program_name = '[sensor_ros_bridge_connect.py] '
 
 def connecSensorRosBridgePort(url, rh, bridge):
-    sensors = map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, hcf.getBodyInfo(url)._get_links()))
-    for sen in sum(sensors, []): # sum is for list flatten
+    for sen in hcf.getSensors(url):
         print sen.name
         if sen.type == 'Acceleration':
-            print program_name, "connect ", rh.port('acc'), bridge.port("gsensor")
+            print program_name, "connect ", rh.port('gsensor'), bridge.port("gsensor")
             connectPorts(rh.port('gsensor'), bridge.port("gsensor"), "new")
         elif sen.type == 'RateGyro':
-            print program_name, "connect ", rh.port('rate'), bridge.port('gyrometer')
+            print program_name, "connect ", rh.port('gyrometer'), bridge.port('gyrometer')
             connectPorts(rh.port('gyrometer'), bridge.port('gyrometer'), "new")
         elif sen.type == 'Force':
             print program_name, "connect ", rh.port(sen.name), bridge.port(sen.name)
