@@ -142,20 +142,22 @@ def init(robotname="Robot", url=""):
         ms = rtm.findRTCmanager()
         print "[hrpsys.py] wait for RTCmanager : ",ms
 
-    rh = rtm.findRTC("RobotHardware0")
-    if rh:
-        rh_svc = narrow(rh.service("service0"), "RobotHardwareService")
-        ep_svc = narrow(rh.ec, "ExecutionProfileService")
-    else:
-        timeout_count = 0;
-        # wait for simulator setup which sometime takes a long time
-        while rh == None and timeout_count < 3: # <- time out limit
-            time.sleep(1);
+    rh = None
+    timeout_count = 0;
+    # wait for simulator or RobotHardware setup which sometime takes a long time
+    while rh == None and timeout_count < 3: # <- time out limit
+        time.sleep(1);
+        rh = rtm.findRTC("RobotHardware0")
+        if rh:
+            rh_svc = narrow(rh.service("service0"), "RobotHardwareService")
+            ep_svc = narrow(rh.ec, "ExecutionProfileService")
+        else:
             rh = rtm.findRTC(robotname)
-            timeout_count += 1
-            print "[hrpsys.py] wait for RTCmanager : ",rh, "(timeout ", timeout_count, " < 3)"
-        hgc = findRTC("HGcontroller0")
-        simulation_mode = True
+            hgc = findRTC("HGcontroller0")
+            simulation_mode = True
+        print "[hrpsys.py] wait for Simulator or RobotHardware : ",rh, "(timeout ", timeout_count, " < 3)"
+        timeout_count += 1
+
     if not rh:
         print "[hrpsys.py] Could not find ", robotname
         print "[hrpsys.py] Candidates are .... ", [x.name()  for x in ms.get_components()]
