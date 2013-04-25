@@ -41,6 +41,8 @@
         output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
   <node pkg="hrpsys" name="AutoBalancerServiceROSBridge" type="AutoBalancerServiceROSBridgeComp"
         output="screen" args ="$(arg openrtm_args)" />
+  <node pkg="hrpsys" name="StateHolderServiceROSBridge" type="StateHolderServiceROSBridgeComp"
+        output="screen" args ="$(arg openrtm_args)" />
 
   <group if="$(arg INSTALL_ROBOT_DESCRIPTION)" >
     <param name="robot_description" textfile="$(arg COLLADA_FILE)" />
@@ -73,6 +75,7 @@
   <rtconnect from="ImpedanceControllerServiceROSBridge.rtc:ImpedanceControllerService" to="ic.rtc:ImpedanceControllerService"  subscription_type="new"/>
   <rtconnect from="AutoBalancerServiceROSBridge.rtc:AutoBalancerService" to="abc.rtc:AutoBalancerService"  subscription_type="new"/>
   <rtconnect from="CollisionDetectorServiceROSBridge.rtc:CollisionDetectorService" to="co.rtc:CollisionDetectorService" subscription_type="new"/>
+  <rtconnect from="StateHolderServiceROSBridge.rtc:StateHolderService" to="sh.rtc:StateHolderService"  subscription_type="new"/>
   <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
   <rtactivate component="HrpsysJointTrajectoryBridge0.rtc" />
   <rtactivate component="ImageSensorROSBridge0.rtc" />
@@ -81,6 +84,7 @@
   <rtactivate component="CollisionDetectorServiceROSBridge.rtc" />
   <rtactivate component="ImpedanceControllerServiceROSBridge.rtc" />
   <rtactivate component="AutoBalancerServiceROSBridge.rtc" />
+  <rtactivate component="StateHolderServiceROSBridge.rtc" />
   <!-- END:openrtm connection -->
 </launch>
 
