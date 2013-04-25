@@ -17,15 +17,19 @@
 (warn "(init)~%")
 (defun init
   (&key (fall nil))
+  (if (not (boundp '*atlas*)) (setq *atlas* (instance atlas-robot :init)))
+  (if (not (boundp '*irtviewer*)) (make-irtviewer))
   (cond 
    (fall
-    (if (not (boundp '*atlas*)) (setq *atlas* (instance atlas-robot :init)))
     (send *atlas* :torso-waist-p :joint-angle 40)
     (send *atlas* :lleg-ankle-p :joint-angle -20)
     (send *atlas* :rleg-ankle-p :joint-angle -20)
     (atlas-init :set-reset-pose nil))
-   (t
-    (atlas-init)))
+   (t    
+    (atlas-init :set-reset-pose nil)
+    (adapt)
+    ))
+  (send *ri* :angle-vector (send *atlas* :angle-vector))
   (set-k-effort)
   (setq r *atlas*)
   ;;
@@ -249,6 +253,10 @@
 ;;
 (defun stand-up
   ()
+  (print "set k-effort 255")
+  (set-k-effort 255)
+  ;;(unix:sleep 1)
+  ;;
   (print "set pose1")
   (pose1 :s-time 15000)
   (send *ri* :wait-interpolation)
@@ -264,19 +272,33 @@
     (fall-down :s-time 15000)
     (send *ri* :wait-interpolation)
     (return-from stand-up))
+  (print "set pose4-1")
   (pose4-1 :s-time 20000 :run t)
   (send *ri* :wait-interpolation)
   ;;
+  (print "set pose4-2")
   (pose4-2 :s-time 20000 :run t)
   (send *ri* :wait-interpolation)
+  ;;
+  (print "set pose4-3")
   (pose4-3 :s-time 20000 :run t)
   (send *ri* :wait-interpolation)
   ;;
   ;;ここから怪しいがたまに成功する
+  (print "set pose4-4(final pose)")
   (pose4-4 :s-time 50000 :run t)
   (send *ri* :wait-interpolation)
   (unix:sleep 1)
+  (print "set k-effort 200")
+  (set-k-effort 200)   ;;walking mode
+  ;;(unix:sleep 3)
+  (print "set k-effort 100")
+  (set-k-effort 100)   ;;walking mode
+  ;;(unix:sleep 3)
+  (print "set k-effort 0")
   (set-k-effort 0)   ;;walking mode
+  ;;(unix:sleep 3)
+  (print "if atlas keep standing, walking mode!")
   )
 
 ;;
