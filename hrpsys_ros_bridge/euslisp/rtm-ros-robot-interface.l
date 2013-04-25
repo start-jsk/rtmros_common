@@ -157,15 +157,24 @@
   (:go-pos-no-wait (xx yy th) (send self :goPos xx yy th))
   (:go-pos
    (xx yy th)
+   (send self :start-auto-balancer)
    (send self :go-pos-no-wait xx yy th)
    (send self :wait-foot-steps))
   (:set-foot-steps-no-wait (fs) (send self :setFootSteps fs))
   (:set-foot-steps
    (fs)
+   (send self :start-auto-balancer)
    (send self :set-foot-steps-no-wait fs)
-   (send self :wait-foot-steps))
-  (:go-velocity (vx vy vth) (send self :goVelocity vx vy vth))
-  (:go-stop () (send self :goStop))
+   (send self :wait-foot-steps)
+   (send self :stop-auto-balancer))
+  (:go-velocity
+   (vx vy vth)
+   (send self :start-auto-balancer)
+   (send self :goVelocity vx vy vth))
+  (:go-stop
+   ()
+   (send self :goStop)
+   (send self :stop-auto-balancer))
   (:wait-foot-steps () (send self :waitFootSteps))
   (:eus-footstep->abc-footstep
    (f)

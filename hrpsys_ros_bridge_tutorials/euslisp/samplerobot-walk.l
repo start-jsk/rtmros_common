@@ -20,9 +20,7 @@
   (send *sr* :reset-pose)
   (send *ri* :angle-vector (send *sr* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
-  (send *ri* :start-auto-balancer)
   (send *ri* :go-pos 0.5 0.15 45) ;; x[m] y[m] th[rad]
-  (send *ri* :stop-auto-balancer)
   )
 (warn ";; (samplerobot-walk) ;; example to specify target x, y, theta~%")
 
@@ -31,7 +29,6 @@
   (send *sr* :reset-pose)
   (send *ri* :angle-vector (send *sr* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
-  (send *ri* :start-auto-balancer)
   (send *ri* :go-velocity 0 0 0)
   (print ";; Press Enter to Stop")
   (ros::rate 10)
@@ -41,7 +38,6 @@
    (ros::sleep)
    )
   (send *ri* :go-stop)
-  (send *ri* :stop-auto-balancer)
   )
 (warn ";; (samplerobot-walk2) ;; example to specify target velocity ;; please use \"teleop_pr2_keyboard\" terminal~%")
 
