@@ -256,9 +256,16 @@
   (&key (recover t))   ;;recover = tの場合、最後のこけてしまっていたらやりなおす
   (tagbody
    :start
-   (print "set k-effort 255")
-   (set-k-effort 255)
-   ;;(unix:sleep 1)
+   ;;仰向けかうつ伏せかを判定し、仰向けならうつ伏せに移行
+   (cond 
+    ((eq :aomuke (check_utubuse_or_not))
+     (print "detect aomuke situation, do rolling-over")
+     (rolling-over)
+     )
+    (t
+     (print "set k-effort 255")
+     (set-k-effort 255)))
+   (unix:sleep 2)
    ;;
    (print "set pose1")
    (pose1 :s-time 15000)
@@ -322,17 +329,11 @@
    ;;失敗していたらやりなおす
    (when recover
      (ros::spin-once)
-     (cond
-      ((> (abs (elt *atlas_rpy* 1)) 10)   ;;体幹のpitch姿勢が10の中に入っていなければこけていると思っていい
+     ;;体幹のpitch姿勢が10の中に入っていなければこけていると思っていい
+     (when (> (abs (elt *atlas_rpy* 1)) 10)   
        (print "detect standing-up failure, retry!")
-       ;;さらに、仰向けかうつ伏せかを判定する
-       (when (eq :aomuke (check_utubuse_or_not))
-	 (print "detect aomuke situation, do rolling-over")
-	 (rolling-over)
-	 )
        (unix:sleep 1)
-       ;;やりなおし
-       (go :start))))
+       (go :start)))
    ))
 ;;
 ;;仰向け→うつ伏せになる
@@ -581,10 +582,10 @@
   (let (ret)
     (ros::spin-once)
     (cond 
-     ((> (elt *atlas_rpy* 1) 80)
+     ((> (elt *atlas_rpy* 1) 70)
       (setq ret :utubuse)
       )
-     ((< (elt *atlas_rpy* 1) -80)
+     ((< (elt *atlas_rpy* 1) -70)
       (setq ret :aomuke))
      (t
       (setq ret :unknown)))
