@@ -311,7 +311,8 @@
    (xx yy th)
    (send self :start-auto-balancer)
    (send self :go-pos-no-wait xx yy th)
-   (send self :wait-foot-steps))
+   (send self :wait-foot-steps)
+   (send self :stop-auto-balancer))
   (:set-foot-steps-no-wait (fs) (send self :setFootSteps fs))
   (:set-foot-steps
    (fs)

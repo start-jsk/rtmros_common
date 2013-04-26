@@ -57,6 +57,6 @@
     (format t ";; dump pattern file~%")
     (send *ri* :dump-seq-pattern-file pattern-list fname)
     (format t ";; load pattern file~%")
-    (send *ri* :loadPattern fname)
+    (send *ri* :load-pattern fname)
     ))
 
