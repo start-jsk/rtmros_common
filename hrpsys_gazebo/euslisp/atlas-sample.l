@@ -389,7 +389,7 @@
 #| 
  がちゃがちゃやると回転している
 |#
-(defun rolling-over
+(defun rolling-over-old2
   ()
   (set-k-effort 255)   ;;eus control mode
   (unix:usleep 1)
@@ -421,6 +421,55 @@
   (send-pose)
   (unix:sleep 5)
   ;;(read-line)
+  (pose1)
+  )
+(defun rolling-over ()
+  (set-k-effort 255)   ;;eus control mode
+  (unix:usleep 1)
+  (pose1)
+  (send *ri* :wait-interpolation)
+  (unix:sleep 2)
+  ;;
+  (pose2)
+  (send *ri* :wait-interpolation)
+  (unix:sleep 2)
+  ;;
+  (send *atlas* :rarm-elbow-p :joint-angle 0)
+  (send *atlas* :larm-elbow-p :joint-angle 0)
+  (send *atlas* :larm-shoulder-r :joint-angle -80)
+  (send-pose)
+  (send *ri* :wait-interpolation)
+  (send *atlas* :rarm-shoulder-r :joint-angle 80)
+  (send *atlas* :rarm-shoulder-y :joint-angle 90)
+  (send-pose)
+  (send *ri* :wait-interpolation)
+  ;;(read-line)
+  (unix:sleep 2)
+  ;;
+  ;;(pose2 :run nil)
+  (send *atlas* :torso-waist-p :joint-angle 0)
+  (send *atlas* :lleg :angle-vector #f(0 0 0 0 0 0))
+  (send *atlas* :lleg :crotch-p :joint-angle -60)
+  (send *atlas* :rleg :angle-vector #f(0 0 0 0 0 0))
+  (send *atlas* :rarm-shoulder-r :joint-angle 30)
+  (send-pose)
+  (send *ri* :wait-interpolation)
+  (unix:sleep 3)
+
+  (send *atlas* :larm :angle-vector #f(0 0 0 -60 -20 0))
+  (send-pose)
+  (send *ri* :wait-interpolation)
+  (unix:sleep 2)
+
+  ;; skip ???
+  (send *atlas* :larm :shoulder-y :joint-angle 60)
+  (send *atlas* :rleg :crotch-p :joint-angle -40)
+  (send-pose 2000)
+  (send *ri* :wait-interpolation)
+  (send *atlas* :rarm :shoulder-r :joint-angle -120)
+  (send-pose 2000)
+  (unix:sleep 2)
+
   (pose1)
   )
 
