@@ -11,7 +11,10 @@ import socket
 import time
 
 # class for configure hrpsys RTCs and ports
+#   In order to specify robot-dependent code, please inherit this HrpsysConfigurator
 class HrpsysConfigurator:
+
+    # public method
     def connectComps(self):
         connectPorts(self.rh.port("q"), [self.sh.port("currentQIn"), self.co.port("qCurrent"), self.el.port("qCurrent"), self.ic.port("qCurrent")])
         #
@@ -51,7 +54,6 @@ class HrpsysConfigurator:
             r.start()
 
     def createComps(self):
-
         self.ms.load("SequencePlayer")
         self.seq = self.ms.create("SequencePlayer", "seq")
         print "[hrpsys.py] createComps -> SequencePlayer : ",self.seq
@@ -96,9 +98,11 @@ class HrpsysConfigurator:
         print "[hrpsys.py] createComps -> DataLogger : ",self.log
         self.log_svc = narrow(self.log.service("service0"), "DataLoggerService");
 
+    # public method to configure all RTCs to be activated on rtcd
     def getRTCList(self):
         return [self.rh, self.seq, self.sh, self.tf, self.kf, self.ic, self.abc, self.co, self.el, self.log]
 
+    # public method to get bodyInfo
     def getBodyInfo(self, url):
         import CosNaming
         obj = rtm.rootnc.resolve([CosNaming.NameComponent('ModelLoader', '')])
@@ -106,10 +110,11 @@ class HrpsysConfigurator:
         print "[hrpsys.py]   bodyinfo URL = file://"+url
         return mdlldr.getBodyInfo("file://"+url)
 
+    # public method to get sensors list
     def getSensors(self, url):
         return sum(map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, self.getBodyInfo(url)._get_links())), [])  # sum is for list flatten
 
-    # setup logger
+    # public method to configure default logger data ports
     def setupLogger(self, url=None):
         #
         if self.rh.port("q") :
@@ -132,8 +137,7 @@ class HrpsysConfigurator:
         self.log.owned_ecs[0].start()
         self.log.start(self.log.owned_ecs[0])
 
-    def findRTCManagerAndRoboHardware(self, robotname="Robot"):
-
+    def waitForRTCManagerAndRoboHardware(self, robotname="Robot"):
         self.ms = None
         while self.ms == None :
             time.sleep(1);
@@ -183,7 +187,7 @@ class HrpsysConfigurator:
         print "[hrpsys.py] start hrpsys"
 
         print "[hrpsys.py] finding RTCManager and RobotHardware"
-        self.findRTCManagerAndRoboHardware(robotname)
+        self.waitForRTCManagerAndRoboHardware(robotname)
 
         print "[hrpsys.py] creating components"
         self.createComps()
