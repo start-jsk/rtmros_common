@@ -14,7 +14,7 @@
    (&rest args)
    (prog1
        (send-super* :init args)
-     ;;(send self :define-all-ROSBridge-srv-methods)
+     (send self :define-all-ROSBridge-srv-methods)
      (ros::subscribe "/motor_states" hrpsys_ros_bridge::MotorStates
                      #'send self :rtmros-temperature-callback :groupname groupname)
      (mapcar #'(lambda (x)
@@ -55,7 +55,7 @@
    (send self :tmp-force-moment-vector :moment limb))
   ;; automatically define methods for ROSBridge services
   (:define-all-ROSBridge-srv-methods
-   (&key (debug-view t) (ros-pkg-name "hrpsys"))
+   (&key (debug-view nil) (ros-pkg-name "hrpsys"))
    (let ((srv-fnames (send self :get-ROSBridge-srv-fnames ros-pkg-name)))
      (dolist (idl (send self :get-ROSBridge-idl-fnames ros-pkg-name))
        (let ((rtc-name (pathname-name idl)))
@@ -129,210 +129,115 @@
       (format f "~%")
       )))
   ;;
-  ;; CollisionDetectorService.idl
-  (:set-tolerance
-   (&key (tolerance 0.1) (link_pair_name "all"))
-   (let* ((req (instance hrpsys::OpenHRP_CollisionDetectorService_setToleranceRequest :init
-			 :link_pair_name link_pair_name
-			 :tolerance tolerance)))
-     (ros::service-call "CollisionDetectorServiceROSBridge/setTolerance" req)))
-  ;;
-  ;; for logger
-  (:save-log
-   (fname)
-   (ros::service-call
-    "DataLoggerServiceROSBridge/save"
-    (instance hrpsys::Openhrp_Dataloggerservice_saveRequest :init :basename fname))
-   )
-  (:start-log ;; clear log
-   ()
-   (ros::service-call
-    "DataLoggerServiceROSBridge/clear"
-    (instance hrpsys::Openhrp_Dataloggerservice_clearRequest :init))
-   )
-  (:set-log-maxlength
-   (&optional (maxlength 4000))
-   (ros::service-call
-    "DataLoggerServiceROSBridge/maxLength"
-    (instance hrpsys::Openhrp_Dataloggerservice_maxLengthRequest :init :len maxlength))
-   )
-  ;;
   (:get-force-sensor-from-limb-name
    (limb)
    (if (find-method robot limb)
        (find-if #'(lambda (x) (member (send x :parent) (send robot limb)))
                 (send robot :force-sensors))))
-  ;; impedance controller
-  (:start-impedance
-   (limb &rest args)
-   (cond
-    ((send self :get-force-sensor-from-limb-name limb)
-     (let ((fs (send self :get-force-sensor-from-limb-name limb)))
-       (send* self :setImpedanceControllerParam
-              :name (string-downcase (send fs :name))
-              :base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)
-              :target-name (send (send (send fs :parent) :joint) :name) args)))
-    ((and (substringp ":v" (string-downcase limb))
-          (find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
-     (let ((rlimb (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
-       (send* self :setImpedanceControllerParam
-              :name (format nil "~Cv~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor")))
-              :base-name (send (send (send (send robot rlimb :root-link) :parent) :joint) :name)
-              :target-name (send (send (send (send robot rlimb :end-coords) :parent) :joint) :name)
-              args)))
-    ((eq limb :legs) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rleg :lleg)))
-    ((eq limb :arms) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rarm :larm)))
-    (t ) ;; virtual force sensor is not supported in this file
-    ))
-  (:stop-impedance
-   (limb)
-   (cond
-    ((send self :get-force-sensor-from-limb-name limb)
-     (let ((fs (send self :get-force-sensor-from-limb-name limb)))
-       (send self :deleteImpedanceController
-             :name (string-downcase (send fs :name)))))
-    ((eq limb :legs) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rleg :lleg)))
-    ((eq limb :arms) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rarm :larm)))
-    (t ) ;; virtual force sensor is not supported in this file
-    ))
-  ;; for abc
-  (:start-auto-balancer
-   (&key (limbs '(:rleg :lleg)))
-   (send self :startABC
-         :alp (mapcar #'(lambda (limb)
-                          (let ((target2foot (send (send (send robot limb :end-coords) :parent) :transformation (send robot limb :end-coords))))
-                            (instance hrpsys::openhrp_autobalancerservice_autobalancerlimbparam
-                                      :init :name (format nil "~A" limb)
-                                      :target_name (send (send (send robot limb :end-coords) :parent) :joint :name)
-                                      :base_name (if (send (send (send robot limb :root-link) :parent) :joint) (send (send (send robot limb :root-link) :parent) :joint :name) "WAIST")
-                                      :target2foot_offset_pos (scale 1e-3 (send target2foot :worldpos))
-                                      :target2foot_offset_rot (matrix2quaternion (send target2foot :worldrot)))))
-                      limbs)))
-  (:stop-auto-balancer () (send self :stopABC))
-  (:go-pos-no-wait (xx yy th) (send self :goPos xx yy th))
-  (:go-pos
-   (xx yy th)
-   (send self :start-auto-balancer)
-   (send self :go-pos-no-wait xx yy th)
-   (send self :wait-foot-steps))
-  (:set-foot-steps-no-wait (fs) (send self :setFootSteps fs))
-  (:set-foot-steps
-   (fs)
-   (send self :start-auto-balancer)
-   (send self :set-foot-steps-no-wait fs)
-   (send self :wait-foot-steps)
-   (send self :stop-auto-balancer))
-  (:go-velocity
-   (vx vy vth)
-   (send self :start-auto-balancer)
-   (send self :goVelocity vx vy vth))
-  (:go-stop
-   ()
-   (send self :goStop)
-   (send self :stop-auto-balancer))
-  (:wait-foot-steps () (send self :waitFootSteps))
-  (:eus-footstep->abc-footstep
-   (f)
-   (instance hrpsys::openhrp_autobalancerservice_footstep :init
-             :pos (scale 1e-3 (send f :worldpos))
-             :rot (matrix2quaternion (send f :worldrot))
-             :leg (print (format nil "~A" (if (find-method f :l/r) (send f :l/r) (send f :get :l/r)))))
-   )
   )
 
 ;; SequencePlayerService
 (defmethod rtm-ros-robot-interface
-  (:setBasePose
+  (:set-base-pose
    (&optional base-coords (tm 0.1))
    (unless base-coords
      (setq base-coords (send robot :worldcoords)))
-   (let ((pos_req (instance hrpsys::OpenHRP_SequencePlayerService_setBasePosRequest :init))
-         (rpy_req (instance hrpsys::OpenHRP_SequencePlayerService_setBaseRpyRequest :init)))
-     (send pos_req :pos (scale 0.001 (send base-coords :pos)))
-     (send pos_req :tm tm)
-     (let ((rpy (coerce (car (send base-coords :rpy-angle)) float-vector)))
-       (send rpy_req :rpy rpy)
-       (send rpy_req :tm tm))
-     (ros::service-call
-      "SequencePlayerServiceROSBridge/setBasePos" pos_req)
-     (ros::service-call
-      "SequencePlayerServiceROSBridge/setBaseRpy" rpy_req)
-     ))
-  (:waitInterpolationOfGroup (groupname)
-   (let ((req (instance hrpsys::OpenHRP_SequencePlayerService_waitInterpolationOfGroupRequest :init)))
-     (send req :gname groupname)
-     (ros::service-call
-      "SequencePlayerServiceROSBridge/waitInterpolationOfGroup" req)))
+   (send self :sequenceplayerservice_setbasepos :pos (scale 0.001 (send base-coords :pos)) :tm)
+   (send self :sequenceplayerservice_setbasepos :rpy (coerce (car (send base-coords :rpy-angle)) float-vector) :tm))
+  (:wait-interpolation-of-group
+   (groupname)
+   (send self :sequenceplayerservice_waitinterpolationofgroup :gname groupname))
   ;; just testing code
-  (:addJointGroup (groupname jnames)
-   (let ((req (instance hrpsys::OpenHRP_SequencePlayerService_addJointGroupRequest :init)))
-     (send req :gname groupname)
-     (send req :jnames jnames)
-     (ros::service-call
-      "SequencePlayerServiceROSBridge/addJointGroup" req)))
-  (:setJointAnglesOfGroup (groupname av tm)
-   (let ((req (instance hrpsys::OpenHRP_SequencePlayerService_setJointAnglesOfGroupRequest :init)))
-     (send req :gname groupname)
-     (send req :jvs av)
-     (send req :tm tm)
-     (ros::service-call
-      "SequencePlayerServiceROSBridge/setJointAnglesOfGroup" req)))
+  (:add-joint-group
+   (groupname jnames)
+   (send self :sequenceplayerservice_addjointgroup :gname groupname :jnames jnames))
+  (:set-joint-angles-of-group
+   (groupname av tm)
+   (send self :sequenceplayerservice_setjointangle :gname groupname :jvs av :tm tm))
+  (:load-pattern (basename) (send self :sequenceplayerservice_loadpattern :basename basename))
+  ;; deprecated
+  (:setBasePose
+   (&optional base-coords (tm 0.1))
+   (warning-message 1 ";; :setBasePose is deprecated!! Please use :set-base-pose !!~%")
+   (send self :set-base-pose base-coords tm))
+  (:waitInterpolationOfGroup
+   (groupname)
+   (warning-message 1 ";; :waitInterpolationOfGroup is deprecated!! Please use :wait-interpolation-of-group!!~%")
+   (send self :wait-interpolation-of-group groupname))
+  (:addJointGroup
+   (groupname jnames)
+   (warning-message 1 ";; :addJointGroup is deprecated!! Please use :add-joint-group!!~%")
+   (send self :add-joint-group groupname jnames))
+  (:setJointAnglesOfGroup
+   (groupname av tm)
+   (warning-message 1 ";; :setJointAnglesOfGroup is deprecated!! Please use :set-joint-angles-of-group !!~%")
+   (send self :set-joint-angles-of-group groupname av tm))
 #| ;; angle group sample
-  (send *ri* :addJointgroup "larm" (send-all (send *robot* :larm :joint-list) :name))
-  (send *ri* :setJointAnglesOfGroup "larm" (scale (/ pi 180.0) (send *robot* :larm :angle-vector)) 4.0)
-  (send *ri* :waitinterpolationofgroup "larm")
+  (send *ri* :add-joint-group "larm" (send-all (send *robot* :larm :joint-list) :name))
+  (send *ri* :set-jointangles-of-group "larm" (scale (/ pi 180.0) (send *robot* :larm :angle-vector)) 4.0)
+  (send *ri* :waitinterpolation-of-group "larm")
 |#
-  (:loadPattern
-   (basename)
-   (let ((req (instance hrpsys::openhrp_sequenceplayerservice_loadpatternRequest :init :basename basename)))
-     (ros::service-call "/SequencePlayerServiceROSBridge/loadPattern" req)))
   )
 
 ;; CollisionDetectorService
 (defmethod rtm-ros-robot-interface
-  (:enableCollisionDetection ()
-   (let ((req (instance hrpsys::OpenHRP_CollisionDetectorService_enableCollisionDetectionRequest :init)))
-     (ros::service-call
-      "CollisionDetectorServiceROSBridge/enableCollisionDetection" req)))
+  (:set-tolerance
+   (&key (tolerance 0.1) (link-pair-name "all"))
+   (send self :collisiondetectorservice_settolerance
+         :link_pair_name link-pair-name :tolerance tolerance))
+  (:start-collision-detection
+   ()
+   (send self :collisiondetectorservice_enablecollisiondetection))
+  (:stop-collision-detection
+   ()
+   (send self :collisiondetectorservice_disablecollisiondetection))
+  ;; deprecated
+  (:enableCollisionDetection
+   ()
+   (warning-message 1 ";; :enableCollisionDetection is deprecated!! Please use :start-collision-detection!!~%")
+   (send self :start-collision-detection))
   (:disableCollisionDetection ()
-   (let ((req (instance hrpsys::OpenHRP_CollisionDetectorService_disableCollisionDetectionRequest :init)))
-     (ros::service-call
-      "CollisionDetectorServiceROSBridge/disableCollisionDetection" req)))
+   (warning-message 1 ";; :disableCollisionDetection is deprecated!! Please use :stop-collision-detection!!~%")
+   (send self :stop-collision-detection))
+  )
+
+;; DataLoggerService
+(defmethod rtm-ros-robot-interface
+  (:save-log (fname) (send self :dataloggerservice_save :basename fname))
+  ;; start log by clearing log
+  (:start-log () (send self :dataloggerservice_clear))
+  (:set-log-maxlength
+   (&optional (maxlength 4000))
+   (send self :dataloggerservice_maxlength :len maxlength))
   )
 
 ;; RobotHardwareService
 (defmethod rtm-ros-robot-interface
-  (:setServoGainPercentage (name percentage)
-   (let ((req (instance hrpsys::OpenHRP_RobotHardwareService_setServoGainPercentageRequest :init)))
-     (send req :name name)
-     (send req :percentage percentage)
-     (ros::service-call
-      "RobotHardwareServiceROSBridge/setServoGainPercentage" req)))
-  (:removeForceSensorOffset
-   ()
-   (ros::service-call
-    "RobotHardwareServiceROSBridge/removeForceSensorOffset"
-    (instance hrpsys::Openhrp_RobotHardwareservice_removeForceSensorOffsetRequest :init)))
+  (:set-servo-gain-percentage
+   (name percentage)
+   (send self :robothardwareservice_setservogainpercentage name percentage))
+  (:remove-force-sensor-offset () (send self :robothardwareservice_removeforcesensoroffset))
+  ;; deprecated
+  (:setServoGainPercentage
+   (name percentage)
+   (warning-message 1 ";; :setServoGainPercentage is deprecated!! Please use :set-servo-gain-percentage!!~%")
+   (send self :set-servo-gain-percentage name percentage))
   )
 
 ;; ImpedanceControllerService
 (defmethod rtm-ros-robot-interface
-  (:getImpedanceControllerParam
-   (name)
-   (let ((req (instance hrpsys::OpenHRP_ImpedanceControllerService_getImpedanceControllerParamRequest :init :name name)))
-     (send (ros::service-call "/ImpedanceControllerServiceROSBridge/getImpedanceControllerParam" req) :i_param)))
+  (:get-impedance-controller-param (name) (send (send self :impedancecontrollerservice_getimpedancecontrollerparam :name name) :i_param))
   ;; set impedance controller param
   ;;   params other than user-defined params are used in current parameter in ImpedanceController RTC by using getImpedanceControllerParam
   ;;   original default parameters are defined in hrpsys-base/rtc/ImpedanceController/ImpedancControl.h
-  (:setImpedanceControllerParam
+  (:set-impednace-controller-param
    (&key name base-name target-name
          M-p D-p K-p
          M-r D-r K-r
          ref-force ref-moment
          force-gain moment-gain
          sr-gain avoid-gain reference-gain manipulability-limit)
-   (let* ((current-imp-param
-           (send self :getImpedanceControllerParam name))
+   (let* ((current-imp-param (send self :get-impedance-controller-param name))
           (param (instance hrpsys::OpenHRP_ImpedanceControllerService_impedanceParam :init
                             :name name :base_name base-name :target_name target-name
                             :M_p (if M-p M-p (send current-imp-param :M_p))
@@ -348,71 +253,111 @@
                             :sr_gain (if sr-gain sr-gain (send current-imp-param :sr_gain))
                             :avoid_gain (if avoid-gain avoid-gain (send current-imp-param :avoid_gain))
                             :reference_gain (if reference-gain reference-gain (send current-imp-param :reference_gain))
-                            :manipulability_limit (if manipulability-limit manipulability-limit (send current-imp-param :manipulability_limit))))
-          (req (instance hrpsys::OpenHRP_ImpedanceControllerService_setImpedanceControllerParamRequest :init :i_param param)))
-     (ros::service-call "/ImpedanceControllerServiceROSBridge/setImpedanceControllerParam" req)))
-  (:deleteImpedanceController
-   (&key name)
-   (let ((req (instance hrpsys::OpenHRP_ImpedanceControllerService_deleteImpedanceControllerRequest :init :name name)))
-     (ros::service-call "/ImpedanceControllerServiceROSBridge/deleteImpedanceController" req)))
+                            :manipulability_limit (if manipulability-limit manipulability-limit (send current-imp-param :manipulability_limit)))))
+     (send self :impedancecontrollerservice_setimpedancecontrollerparam :i_param param)))
+  (:start-impedance
+   (limb &rest args)
+   (cond
+    ((send self :get-force-sensor-from-limb-name limb)
+     (let ((fs (send self :get-force-sensor-from-limb-name limb)))
+       (send* self :set-impednace-controller-param
+              :name (string-downcase (send fs :name))
+              :base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)
+              :target-name (send (send (send fs :parent) :joint) :name) args)))
+    ((and (substringp ":v" (string-downcase limb))
+          (find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
+     (let ((rlimb (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
+       (send* self :set-impednace-controller-param
+              :name (format nil "~Cv~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor")))
+              :base-name (send (send (send (send robot rlimb :root-link) :parent) :joint) :name)
+              :target-name (send (send (send (send robot rlimb :end-coords) :parent) :joint) :name)
+              args)))
+    ((eq limb :legs) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rleg :lleg)))
+    ((eq limb :arms) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rarm :larm)))
+    (t ) ;; virtual force sensor is not supported in this file
+    ))
+  (:stop-impedance
+   (limb)
+   (cond
+    ((send self :get-force-sensor-from-limb-name limb)
+     (let ((fs (send self :get-force-sensor-from-limb-name limb)))
+       (send self :impedancecontrollerservice_deleteimpedancecontroller
+             :name (string-downcase (send fs :name)))))
+    ((eq limb :legs) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rleg :lleg)))
+    ((eq limb :arms) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rarm :larm)))
+    (t ) ;; virtual force sensor is not supported in this file
+    ))
   )
 
 ;; AutoBalancerService
 (defmethod rtm-ros-robot-interface
-  (:startABC
-   (&key (alp))
-   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_startABCRequest :init :alp alp)))
-     (ros::service-call "AutoBalancerServiceROSBridge/startABC" req)))
-  (:stopABC
-   ()
-   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_stopABCRequest :init)))
-     (ros::service-call "AutoBalancerServiceROSBridge/stopABC" req)))
-  (:goPos
+  (:start-auto-balancer
+   (&key (limbs '(:rleg :lleg)))
+   (send self :autobalancerservice_startABC
+         :alp (mapcar #'(lambda (limb)
+                          (let ((target2foot (send (send (send robot limb :end-coords) :parent) :transformation (send robot limb :end-coords))))
+                            (instance hrpsys::openhrp_autobalancerservice_autobalancerlimbparam
+                                      :init :name (format nil "~A" limb)
+                                      :target_name (send (send (send robot limb :end-coords) :parent) :joint :name)
+                                      :base_name (if (send (send (send robot limb :root-link) :parent) :joint) (send (send (send robot limb :root-link) :parent) :joint :name) "WAIST")
+                                      :target2foot_offset_pos (scale 1e-3 (send target2foot :worldpos))
+                                      :target2foot_offset_rot (matrix2quaternion (send target2foot :worldrot)))))
+                      limbs)))
+  (:stop-auto-balancer () (send self :autobalancerservice_stopABC))
+  (:go-pos-no-wait
    (xx yy th)
-   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_goPosRequest :init :x xx :y yy :th th)))
-     (ros::service-call "AutoBalancerServiceROSBridge/goPos" req)))
-  (:goVelocity
+   (send self :autobalancerservice_goPos :x xx :y yy :th th))
+  (:go-pos
    (xx yy th)
-   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_goVelocityRequest :init :vx xx :vy yy :vth th)))
-     (ros::service-call "AutoBalancerServiceROSBridge/goVelocity" req)))
-  (:goStop
-   ()
-   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_goStopRequest :init)))
-     (ros::service-call "AutoBalancerServiceROSBridge/goStop" req)))
-  (:setFootSteps
+   (send self :start-auto-balancer)
+   (send self :go-pos-no-wait xx yy th)
+   (send self :wait-foot-steps))
+  (:set-foot-steps-no-wait (fs) (send self :setFootSteps fs))
+  (:set-foot-steps
    (fs)
-   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_setFootStepsRequest :init
-                        :fs (mapcar #'(lambda (x) (send self :eus-footstep->abc-footstep x)) fs))))
-     (ros::service-call "AutoBalancerServiceROSBridge/setFootSteps" req)))
-  (:waitFootSteps
+   (send self :start-auto-balancer)
+   (send self :set-foot-steps-no-wait fs)
+   (send self :wait-foot-steps)
+   (send self :stop-auto-balancer))
+  (:go-velocity
+   (vx vy vth)
+   (send self :start-auto-balancer)
+   (send self :autobalancerservice_goVelocity :vx vx :vy vy :vth vth))
+  (:go-stop
    ()
-   (let ((req (instance hrpsys::OpenHRP_AutoBalancerService_waitFootStepsRequest :init)))
-     (ros::service-call "AutoBalancerServiceROSBridge/waitFootSteps" req)))
-  (:getGaitGeneratorParam
+   (send self :autobalancerservice_goStop)
+   (send self :stop-auto-balancer))
+  (:wait-foot-steps
    ()
-   (let ((req (instance hrpsys::openhrp_AutoBalancerService_getGaitGeneratorParamRequest :init)))
-     (send (ros::service-call "/AutoBalancerServiceROSBridge/getGaitGeneratorParam" req) :i_param)))
-  (:setGaitGeneratorParam
+   (send self :autobalancerservice_waitFootSteps))
+  (:get-auto-balancer-param
+   ()
+   (send (send self :autobalancerservice_getautobalancerparam) :i_param))
+  (:get-gait-generator-param
+   ()
+   (send (send self :autobalancerservice_getgaitgeneratorparam) :i_param))
+  (:set-gait-generator-param
    (&key default-step-time default-step-height stride-parameter)
-   (let* ((current-param (send self :getGaitGeneratorParam))
+   (let* ((current-param (send self :get-gait-generator-param))
           (param (instance hrpsys::Openhrp_AutoBalancerService_GaitGeneratorParam
                            :init
                            :default_step_time (if default-step-time default-step-time (send current-param :default_step_time))
                            :default_step_height (if default-step-height default-step-height (send current-param :default_step_height))
-                           :stride_parameter (if stride-parameter stride-parameter (send current-param :stride_parameter))))
-          (req (instance hrpsys::openhrp_AutoBalancerService_setGaitGeneratorParamRequest :init :i_param param)))
-     (ros::service-call "/AutoBalancerServiceROSBridge/setGaitGeneratorParam" req)))
-  (:getAutoBalancerParam
-   ()
-   (let ((req (instance hrpsys::openhrp_AutoBalancerService_getAutoBalancerParamRequest :init)))
-     (send (ros::service-call "/AutoBalancerServiceROSBridge/getAutoBalancerParam" req) :i_param)))
-  (:setAutoBalancerParam
+                           :stride_parameter (if stride-parameter stride-parameter (send current-param :stride_parameter)))))
+     (send self :autobalancerservice_setgaitgeneratorparam :i_param param)))
+  (:set-auto-balancer-param
    (&key default-zmp-offsets move-base-gain)
-   (let* ((current-param (send self :getAutoBalancerParam))
+   (let* ((current-param (send self :get-auto-balancer-param))
           (param (instance hrpsys::Openhrp_AutoBalancerService_AutoBalancerParam
                            :init
                            :default_zmp_offsets (if default-zmp-offsets default-zmp-offsets (send current-param :default_zmp_offsets))
-                           :move_base_gain (if move-base-gain move-base-gain (send current-param :move_base_gain))))
-          (req (instance hrpsys::openhrp_AutoBalancerService_setAutoBalancerParamRequest :init :i_param param)))
-     (ros::service-call "/AutoBalancerServiceROSBridge/setAutoBalancerParam" req)))
+                           :move_base_gain (if move-base-gain move-base-gain (send current-param :move_base_gain)))))
+     (send self :autobalancerservice_setautobalancerparam :i_param param)))
+  (:eus-footstep->abc-footstep
+   (f)
+   (instance hrpsys::openhrp_autobalancerservice_footstep :init
+             :pos (scale 1e-3 (send f :worldpos))
+             :rot (matrix2quaternion (send f :worldrot))
+             :leg (print (format nil "~A" (if (find-method f :l/r) (send f :l/r) (send f :get :l/r)))))
+   )
   )
