@@ -31,8 +31,6 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
   : RTC::DataFlowComponentBase(manager),
     m_rsangleIn("rsangle", m_rsangle),
     m_mcangleIn("mcangle", m_mcangle),
-    m_gsensorIn("gsensor", m_gsensor),
-    m_gyrometerIn("gyrometer", m_gyrometer),
     m_baseTformIn("baseTform", m_baseTform),
     m_rstorqueIn("rstorque", m_rstorque),
     m_servoStateIn("servoState", m_servoState),
@@ -55,8 +53,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   // Set InPort buffers
   addInPort("rsangle", m_rsangleIn);
   addInPort("mcangle", m_mcangleIn);
-  addInPort("gsensor", m_gsensorIn);
-  addInPort("gyrometer", m_gyrometerIn);
   addInPort("baseTform", m_baseTformIn);
   addInPort("rstorque", m_rstorqueIn);
   addInPort("servoState", m_servoStateIn);
@@ -147,7 +143,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     }
   }
 
-
   for(unsigned int j = 0, i = npforce; j < nvforce; j++, i++ ){
     std::string name = virtual_force_sensor[j*10+0];
     std::string base = virtual_force_sensor[j*10+1];
@@ -182,6 +177,25 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     std::cerr << i << " virtual force sensor : " << name << ": "  << base << "," << target << std::endl;
   }
 
+  int nacc = body->numSensors(hrp::Sensor::ACCELERATION);
+  m_gsensor.resize(nacc);
+  m_gsensorIn.resize(nacc);
+  for (unsigned int i=0; i<nacc; i++){
+    hrp::Sensor *s = body->sensor(hrp::Sensor::ACCELERATION, i);
+    m_gsensorIn[i] = new InPort<TimedAcceleration3D>(s->name.c_str(), m_gsensor[i]);
+    registerInPort(s->name.c_str(), *m_gsensorIn[i]);
+    std::cerr << i << " acceleration sensor : " << s->name.c_str() << std::endl;
+  }
+
+  int ngyro = body->numSensors(hrp::Sensor::RATE_GYRO);
+  m_gyrometer.resize(ngyro);
+  m_gyrometerIn.resize(ngyro);
+  for (unsigned int i=0; i<ngyro; i++){
+    hrp::Sensor *s = body->sensor(hrp::Sensor::RATE_GYRO, i);
+    m_gyrometerIn[i] = new InPort<TimedAngularVelocity3D>(s->name.c_str(), m_gyrometer[i]);
+    registerInPort(s->name.c_str(), *m_gyrometerIn[i]);
+    std::cerr << i << " rate sensor : " << s->name.c_str() << std::endl;
+  }
 
   // </rtc-template>
   return RTC::RTC_OK;

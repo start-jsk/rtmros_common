@@ -11,15 +11,8 @@ program_name = '[sensor_ros_bridge_connect.py] '
 
 def connecSensorRosBridgePort(url, rh, bridge):
     for sen in hcf.getSensors(url):
-        print sen.name
-        if sen.type == 'Acceleration':
-            print program_name, "connect ", rh.port('gsensor'), bridge.port("gsensor")
-            connectPorts(rh.port('gsensor'), bridge.port("gsensor"), "new")
-        elif sen.type == 'RateGyro':
-            print program_name, "connect ", rh.port('gyrometer'), bridge.port('gyrometer')
-            connectPorts(rh.port('gyrometer'), bridge.port('gyrometer'), "new")
-        elif sen.type == 'Force':
-            print program_name, "connect ", rh.port(sen.name), bridge.port(sen.name)
+        if sen.type in ['Acceleration', 'RateGyro', 'Force']:
+            print program_name, "connect ", sen.name, rh.port(sen.name), bridge.port(sen.name)
             connectPorts(rh.port(sen.name), bridge.port(sen.name), "new")
         else:
             continue

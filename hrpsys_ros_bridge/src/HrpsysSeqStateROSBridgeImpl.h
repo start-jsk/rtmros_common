@@ -109,10 +109,10 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   std::vector<TimedDoubleSeq> m_rsforce;
   std::vector<InPort<TimedDoubleSeq> *> m_rsforceIn;
   std::vector<std::string> m_rsforceName;
-  TimedAcceleration3D m_gsensor;
-  InPort<TimedAcceleration3D> m_gsensorIn;
-  TimedAngularVelocity3D m_gyrometer;
-  InPort<TimedAngularVelocity3D> m_gyrometerIn;
+  std::vector<TimedAcceleration3D> m_gsensor;
+  std::vector<InPort<TimedAcceleration3D> *> m_gsensorIn;
+  std::vector<TimedAngularVelocity3D> m_gyrometer;
+  std::vector<InPort<TimedAngularVelocity3D> *> m_gyrometerIn;
   TimedDoubleSeq m_baseTform;
   InPort<TimedDoubleSeq> m_baseTformIn;
   TimedDoubleSeq m_rstorque;
