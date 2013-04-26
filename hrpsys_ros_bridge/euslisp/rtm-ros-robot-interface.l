@@ -14,6 +14,7 @@
    (&rest args)
    (prog1
        (send-super* :init args)
+     ;;(send self :define-all-ROSBridge-srv-methods)
      (ros::subscribe "/motor_states" hrpsys_ros_bridge::MotorStates
                      #'send self :rtmros-temperature-callback :groupname groupname)
      (mapcar #'(lambda (x)
@@ -52,6 +53,46 @@
   (:moment-vector
    (&optional (limb))
    (send self :tmp-force-moment-vector :moment limb))
+  ;; automatically define methods for ROSBridge services
+  (:define-all-ROSBridge-srv-methods
+   (&key (debug-view t) (ros-pkg-name "hrpsys"))
+   (let ((srv-fnames (send self :get-ROSBridge-srv-fnames ros-pkg-name)))
+     (dolist (idl (send self :get-ROSBridge-idl-fnames ros-pkg-name))
+       (let ((rtc-name (pathname-name idl)))
+         (dolist (srv-name (mapcar #'pathname-name (remove-if-not #'(lambda (x) (substringp rtc-name x)) srv-fnames)))
+           (let ((method-def (send self :get-ROSBridge-method-def-macro rtc-name srv-name)))
+             (when method-def
+               (if debug-view (pprint (macroexpand method-def)))
+               (eval method-def)
+               )))))))
+  (:get-ROSBridge-fnames-from-type
+   (type-name &optional (ros-pkg-name "hrpsys"))
+   (let ((path (ros::resolve-ros-path (format nil "package://~A" ros-pkg-name))))
+     (remove-if-not #'(lambda (x) (substringp (format nil ".~A" type-name) x)) (directory (format nil "~A/~A" path type-name)))
+     ))
+  (:get-ROSBridge-idl-fnames (&optional (ros-pkg-name "hrpsys")) (send self :get-ROSBridge-fnames-from-type "idl" ros-pkg-name))
+  (:get-ROSBridge-srv-fnames (&optional (ros-pkg-name "hrpsys")) (send self :get-ROSBridge-fnames-from-type "srv" ros-pkg-name))
+  (:get-ROSBridge-method-def-macro
+   (rtc-name srv-name)
+   (let* ((meth-name (string-left-trim "_" (string-left-trim rtc-name (string-left-trim "_" (string-left-trim "OpenHRP" srv-name)))))
+          (srv-request (read-from-string (format nil "hrpsys::~ARequest" srv-name)))
+          (init-method (find-if #'(lambda (x) (eq (car x) :init)) (send (eval srv-request) :methods)))
+          ;;(new-method-name (read-from-string (format nil ":~A" (string-left-trim "_" (string-left-trim rtc-name (string-left-trim "_" (string-left-trim "OpenHRP" srv-name))))))))
+          (new-method-name (read-from-string (format nil ":~A" (string-left-trim "_" (string-left-trim "OpenHRP" srv-name))))))
+     (if (find-method self new-method-name)
+         (progn
+           (warn ";; Method conflict in ROSBridge defmethod!! ;; ~A~%" srv-name)
+           nil)
+       `(defmethod rtm-ros-robot-interface
+          (,new-method-name
+           ,(cadr init-method)
+           (ros::service-call
+            ,(format nil "/~AROSBridge/~A" rtc-name meth-name)
+            (instance ,(eval srv-request) :init ,@(mapcan #'(lambda (x) (list (caar x) (cadar x))) (cdadr init-method))))
+           )
+          )
+       )))
+  ;;
   (:sendmsg
    (strs &optional (service-name "sendmsg"))
    (ros::service-call
