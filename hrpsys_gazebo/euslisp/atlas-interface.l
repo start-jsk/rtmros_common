@@ -128,6 +128,8 @@
   (setf (get *atlas* :footstep-parameter)
         '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
   (send_atlas_control_mode "User")
+  (send *ri* :set-soft-error-limit "all" 100) ;; disable SoftErrorLimiter
+  (send *ri* :set-servo-error-limit "all" 0) ;; disable RobotHardware error limit
   (when set-reset-pose
     (send *atlas* :reset-pose)
     ;; send reset pose to real robot
