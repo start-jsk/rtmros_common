@@ -920,13 +920,13 @@ int read_torque_limit(int id, double *limit)
 unsigned long long read_iob_frame()
 {
     ++frame;
-    if (frame == 5) frame = 0;
+    //if (frame == 5) frame = 0;
     return frame;
 }
 
 int number_of_substeps()
 {
-    return 5;
+    return 1;
 }
 
 int read_power(double *voltage, double *current)
@@ -965,11 +965,10 @@ int wait_for_iob_signal()
     timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
     double dt = timespec_compare(&g_ts, &now);
-    ros::spinOnce();
+
     if (dt <= 0){
-        //printf("overrun(%d[ms])\n", -dt*1e6);
+        fprintf(stderr, "iob::overrun (%d[ms])\n", -dt*1e6);
         do {
-            ros::spinOnce();
             timespec_add_ns(&g_ts, g_period_ns);
         }while(timespec_compare(&g_ts, &now)<=0);
     }
