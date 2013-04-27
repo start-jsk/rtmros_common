@@ -168,6 +168,7 @@ class HrpsysConfigurator:
             return
 
         print "[hrpsys.py] findComps -> RobotHardware : ",self.rh
+        print "[hrpsys.py] simulation_mode : ", self.simulation_mode
 
     def findModelLoader(self):
         try:
