@@ -217,6 +217,10 @@
    (name percentage)
    (send self :robothardwareservice_setservogainpercentage name percentage))
   (:remove-force-sensor-offset () (send self :robothardwareservice_removeforcesensoroffset))
+  (:set-servo-error-limit
+    (name limit)
+    (send self :robothardwareservice_setservoerrorlimit :name name :limit limit)
+    )
   ;; deprecated
   (:setServoGainPercentage
    (name percentage)
@@ -362,3 +366,12 @@
              :leg (print (format nil "~A" (if (find-method f :l/r) (send f :l/r) (send f :get :l/r)))))
    )
   )
+
+;; SoftErrorLimiterService
+(defmethod rtm-ros-robot-interface
+  (:set-soft-error-limit
+    (name limit)
+    (send self :softerrorlimiterservice_setservoerrorlimit :name name :limit limit)
+    )
+  )
+
