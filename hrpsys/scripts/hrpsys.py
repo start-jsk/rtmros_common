@@ -23,10 +23,10 @@ class HrpsysConfigurator:
         connectPorts(self.rh.port("tau"), self.tf.port("tauIn"))
         # currently use first acc and rate sensors for kf
         s_acc=filter(lambda s : s.type == 'Acceleration', self.getSensors(self.url))
-        if (len(s_acc)>0):
-            connectPorts(self.rh.port(s_acc[0].name), self.kf.port("acc"))
+        if (len(s_acc)>0) and self.rh.port(s_acc[0].name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
+            connectPorts(self.rh.port(s_acc[0].name), self.kf.port('acc'))
         s_rate=filter(lambda s : s.type == 'RateGyro', self.getSensors(self.url))
-        if (len(s_rate)>0):
+        if (len(s_rate)>0) and self.rh.port(s_rate[0].name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
             connectPorts(self.rh.port(s_rate[0].name), self.kf.port("rate"))
         connectPorts(self.seq.port("accRef"), self.kf.port("accRef"))
         #

@@ -12,8 +12,9 @@ program_name = '[sensor_ros_bridge_connect.py] '
 def connecSensorRosBridgePort(url, rh, bridge):
     for sen in hcf.getSensors(url):
         if sen.type in ['Acceleration', 'RateGyro', 'Force']:
-            print program_name, "connect ", sen.name, rh.port(sen.name), bridge.port(sen.name)
-            connectPorts(rh.port(sen.name), bridge.port(sen.name), "new")
+            if rh.port(sen.name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
+                print program_name, "connect ", sen.name, rh.port(sen.name), bridge.port(sen.name)
+                connectPorts(rh.port(sen.name), bridge.port(sen.name), "new")
         else:
             continue
 
