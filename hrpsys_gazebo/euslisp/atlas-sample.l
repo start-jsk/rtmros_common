@@ -389,7 +389,7 @@
 #| 
  がちゃがちゃやると回転している
 |#
-(defun rolling-over-old2
+(defun rolling-over
   ()
   (set-k-effort 255)   ;;eus control mode
   (unix:usleep 1)
@@ -423,7 +423,7 @@
   ;;(read-line)
   (pose1)
   )
-(defun rolling-over ()
+(defun rolling-over-reverse () ;; utubuse -> aomuke
   (set-k-effort 255)   ;;eus control mode
   (unix:usleep 1)
   (pose1)
