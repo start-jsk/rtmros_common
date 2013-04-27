@@ -15,12 +15,24 @@
 
 (defclass atlas-interface
   :super rtm-ros-robot-interface
-  :slots (l_hand_grasp_pub r_hand_grasp_pub))
+  :slots (l_hand_grasp_pub r_hand_grasp_pub bdi-action))
 (defmethod atlas-interface
-  (:init ()
+  (:init (&optional (qualify nil))
    (prog1 (send-super :init :robot atlas-robot)
-     (setq l_hand_grasp_pub (ros::advertise "/sandia_hands/l_hand/simple_grasp" sandia_hand_msgs::SimpleGrasp 1)
-           r_hand_grasp_pub (ros::advertise "/sandia_hands/r_hand/simple_grasp" sandia_hand_msgs::SimpleGrasp 1))
+     (setq l_hand_grasp_pub (ros::advertise "/sandia_hands/l_hand/simple_grasp"
+                                            sandia_hand_msgs::SimpleGrasp 1)
+           r_hand_grasp_pub (ros::advertise "/sandia_hands/r_hand/simple_grasp"
+                                            sandia_hand_msgs::SimpleGrasp 1))
+     (ros::advertise "atlas/control_mode" std_msgs::String 1)
+     ;; do not use in Qualification
+     (unless qualify
+       (ros::advertise "atlas/mode" std_msgs::String 1)
+       (ros::advertise "atlas/set_pose" geometry_msgs::Pose 1))
+     ;; action lib / needs node of atlas_msgs/actionlib_server
+     (setq bdi-action
+           (instance ros::simple-action-client :init
+                     "atlas/bdi_control" atlas_msgs::WalkDemoAction))
+     (send bdi-action :wait-for-server 3)
 ;     (send self :add-controller :larm-controller)
 ;     (send self :add-controller :rarm-controller)
 ;     (send self :add-controller :head-controller)
@@ -40,7 +52,72 @@
        )))
   (:start-grasp (&optional (arm :arms)) (send self :grasp 1 arm))
   (:stop-grasp  (&optional (arm :arms)) (send self :grasp 0 arm))
-
+  (:control-mode (&optional (mode "Stand")) (send_atlas_control_mode mode))
+  (:atlas-mode   (&optional (mode "nominal")) (send_atlas_mode mode))
+  (:bdi_footstep
+   (footstep-list &key (step-duration 0.63) (swing-height 0.3))
+   ;;(send_atlas_control_mode "Walk")
+   (let* ((fstep (car footstep-list))
+          (offset (copy-object (send fstep :worldpos))))
+     (setf (elt offset 1) 0.0)
+     (scale -1.0 offset offset)
+     (instance atlas_msgs::WalkDemoActionGoal :init)
+     (let ((walk-goal (send bdi-action :make-goal-instance))
+           (goal (instance atlas_msgs::WalkDemoGoal :init))
+           ;;(step-params  (instance atlas_msgs::AtlasBehaviorStepParams :init))
+           ;;(stand-params (instance atlas_msgs::AtlasBehaviorStandParams :init))
+           ;;(manip-params (instance atlas_msgs::AtlasBehaviorManipulateParams :init))
+           ;;(k-effort (instantiate integer-vector 28))
+           (k-effort (instantiate string 28))
+           steps (step-idx 0))
+       (fill k-effort 0)
+       ;; add first step ???
+       (let* ((ffstep (copy-object (car footstep-list)))
+              (step (instance atlas_msgs::AtlasBehaviorStepData
+                              :init :step_index step-idx
+                              :foot_index (if (eq (get ffstep :l/r) :rleg) 1 0) ;; :lleg -> 0 / :rleg -> 1
+                              :duration 0
+                              :swing_height 0)))
+         (send ffstep :translate offset :world)
+         (send step :pose (ros::coords->tf-pose fstep))
+         (push step steps)
+         (incf step-idx))
+       ;;
+       (dolist (fstep footstep-list)
+         (let ((step (instance atlas_msgs::AtlasBehaviorStepData
+                               :init :step_index step-idx
+                               :foot_index (if (eq (get fstep :l/r) :rleg) 1 0) ;; :lleg -> 0 / :rleg -> 1
+                               :duration step-duration
+                               :swing_height swing-height)))
+           (send fstep :translate offset :world)
+           (send step :pose (ros::coords->tf-pose fstep))
+           (push step steps)
+           (incf step-idx)
+           ))
+       ;;(send goal :header (instancd std_msgs::header :init))
+       (send goal :behavior atlas_msgs::WalkDemoGoal::*WALK*)
+       (send goal :k_effort k-effort)
+       (send goal :steps (nreverse steps))
+       (send walk-goal :header :seq 1)
+       (send walk-goal :header :stamp (ros::time-now))
+       (send walk-goal :goal_id :stamp (send walk-goal :header :stamp))
+       (send walk-goal :goal goal)
+       (send bdi-action :send-goal walk-goal)
+       )))
+  (:bdi-go-pos (x y &optional (theta 0) (r robot))
+   (send self :bdi_footstep
+         (send robot :go-pos-params->footstep-list x y theta)))
+  (:teleport-to (coords)
+   (unix::usleep (* 100 1000))
+   (send self :atlas-mode "harnessed")
+   (send self :control-mode "Freeze")
+   (send self :control-mode "StandPrep")
+   (unix::usleep (* 2 1000 1000))
+   (send self :atlas-mode "nominal")
+   (unix::usleep (* 100 1000))
+   (ros::publish "atlas/set_pose" (ros::coords->tf-pose coords))
+   (unix::usleep (* 200 1000))
+   (send self :control-mode "Stand"))
   )
 
 (defun atlas-init
@@ -134,84 +211,13 @@
   (atlas-walk-pattern-gen)
   )
 
-(ros::advertise "atlas/control_mode" std_msgs::String 1)
 (defun send_atlas_control_mode
   (&optional (mode "Stand"))
   (let ((msg (instance std_msgs::String :init :data mode)))
     (ros::publish "atlas/control_mode" msg)))
 
 ;; do not use in Qualification
-(ros::advertise "atlas/mode" std_msgs::String 1)
 (defun send_atlas_mode
   (&optional (mode "nominal"))
   (let ((msg (instance std_msgs::String :init :data mode)))
     (ros::publish "atlas/mode" msg)))
-
-;; action lib / needs node of atlas_msgs/actionlib_server
-(setq *walk-action*
-      (instance ros::simple-action-client :init
-                "atlas/bdi_control" atlas_msgs::WalkDemoAction))
-(defun send_atlas_footstep (footstep-list &key (step-duration 0.63) (swing-height 0.3))
-  ;;(send_atlas_control_mode "Walk")
-  (let* ((fstep (car footstep-list))
-         (offset (copy-object (send fstep :worldpos))))
-    (setf (elt offset 1) 0.0)
-    (scale -1.0 offset offset)
-    (instance atlas_msgs::WalkDemoActionGoal :init)
-    (let ((walk-goal (send *walk-action* :make-goal-instance))
-          (goal (instance atlas_msgs::WalkDemoGoal :init))
-          ;;(step-params  (instance atlas_msgs::AtlasBehaviorStepParams :init))
-          ;;(stand-params (instance atlas_msgs::AtlasBehaviorStandParams :init))
-          ;;(manip-params (instance atlas_msgs::AtlasBehaviorManipulateParams :init))
-          ;;(k-effort (instantiate integer-vector 28))
-          (k-effort (instantiate string 28))
-          steps (step-idx 0))
-      (fill k-effort 0)
-      ;; add first step
-      (let* ((ffstep (copy-object (car footstep-list)))
-             (step (instance atlas_msgs::AtlasBehaviorStepData
-                             :init :step_index step-idx
-                             :foot_index (if (eq (get ffstep :l/r) :rleg) 1 0) ;; :lleg -> 0 / :rleg -> 1
-                             :duration 0
-                             :swing_height 0)))
-        (send ffstep :translate offset :world)
-        (send step :pose (ros::coords->tf-pose fstep))
-        (push step steps)
-        (incf step-idx))
-      (dolist (fstep footstep-list)
-        (let ((step (instance atlas_msgs::AtlasBehaviorStepData
-                              :init :step_index step-idx
-                              :foot_index (if (eq (get fstep :l/r) :rleg) 1 0) ;; :lleg -> 0 / :rleg -> 1
-                              :duration step-duration
-                              :swing_height swing-height)))
-          (send fstep :translate offset :world)
-          (send step :pose (ros::coords->tf-pose fstep))
-          (push step steps)
-          (incf step-idx)
-          ))
-      ;;(send goal :header (instancd std_msgs::header :init))
-      (send goal :behavior atlas_msgs::WalkDemoGoal::*WALK*)
-      (send goal :k_effort k-effort)
-      (send goal :steps (nreverse steps))
-      (send walk-goal :header :seq 1)
-      (send walk-goal :header :stamp (ros::time-now))
-      (send walk-goal :goal_id :stamp (send walk-goal :header :stamp))
-      (send walk-goal :goal goal)
-      (send *walk-action* :send-goal walk-goal)
-      )))
-(defun bdi_walk (x y &optional (theta 0))
-  (send_atlas_footstep
-   (send *atlas* :go-pos-params->footstep-list x y theta)))
-
-(ros::advertise "atlas/set_pose" geometry_msgs::Pose 1)
-(defun move_atlas (coords)
-  (unix::usleep (* 100 1000))
-  (send_atlas_mode "harnessed")
-  (send_atlas_control_mode "Freeze")
-  (send_atlas_control_mode "StandPrep")
-  (unix::usleep (* 2 1000 1000))
-  (send_atlas_mode "nominal")
-  (unix::usleep (* 100 1000))
-  (ros::publish "atlas/set_pose" (ros::coords->tf-pose coords))
-  (unix::usleep (* 200 1000))
-  (send_atlas_control_mode "Stand"))
