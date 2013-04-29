@@ -35,6 +35,7 @@ static bool isLocked = false;
 static int frame = 0;
 static timespec g_ts;
 static long g_period_ns=5000000;
+static ros::Time rg_ts;
 
 #define CHECK_JOINT_ID(id) if ((id) < 0 || (id) >= number_of_joints()) return E_ID
 #define CHECK_FORCE_SENSOR_ID(id) if ((id) < 0 || (id) >= number_of_force_sensors()) return E_ID
@@ -774,6 +775,7 @@ int open_iob(void)
         servo[i] = OFF;
     }
     clock_gettime(CLOCK_MONOTONIC, &g_ts);
+    rg_ts = ros::Time::now();
 
     isInitialized = true;
     return TRUE;
@@ -960,6 +962,8 @@ double timespec_compare(timespec *ts1, timespec *ts2)
 
 int wait_for_iob_signal()
 {
+#if 0
+    // use system clock
     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &g_ts, 0);
     timespec_add_ns(&g_ts, g_period_ns);
     timespec now;
@@ -972,6 +976,24 @@ int wait_for_iob_signal()
             timespec_add_ns(&g_ts, g_period_ns);
         }while(timespec_compare(&g_ts, &now)<=0);
     }
+#endif
+#if 1
+    // use ROS Time
+    ros::Time::sleepUntil(rg_ts);
+    {
+      ros::Duration tm = ros::Duration(0, g_period_ns);
+      rg_ts += tm;
+    }
+    ros::Time rnow = ros::Time::now();
+    ros::Duration rdt = rg_ts - rnow;
+    if ((rg_ts - rnow).toSec() <= 0) {
+      fprintf(stderr, "iob::overrun (%d[ms])\n", (rnow - rg_ts).toSec()*1000);
+      do {
+        ros::Duration tm = ros::Duration(0, g_period_ns);
+        rg_ts += tm;
+      } while ((rg_ts - rnow).toSec() <= 0);
+    }
+#endif
     return 0;
 }
 
