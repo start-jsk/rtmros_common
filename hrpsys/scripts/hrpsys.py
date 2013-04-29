@@ -134,9 +134,6 @@ class HrpsysConfigurator:
                     self.log_svc.add(sen_type, sen.name)
                     connectPorts(self.rh.port(sen.name), self.log.port(sen.name))
 
-        self.log.owned_ecs[0].start()
-        self.log.start(self.log.owned_ecs[0])
-
     def waitForRTCManagerAndRoboHardware(self, robotname="Robot"):
         self.ms = None
         while self.ms == None :
