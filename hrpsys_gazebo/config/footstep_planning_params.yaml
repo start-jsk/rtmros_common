@@ -1,0 +1,41 @@
+### Planning parameterization for a large humanoid, similar to ASIMO or HRP-2 ##
+
+# cost to perform one footstep (in addition to distance costs, corresponds to 'meters')
+step_cost: 0.1
+
+# cost to estimate the difference between the current orientation and the goal
+# orientation; used in the heuristic it can easily overestimate the true path
+# cost since this cost is not incorporated in each step
+#diff_angle_cost: 0.0
+diff_angle_cost: 0.1
+
+# the size of the used hash map (the bigger the better); should be something
+# with 2^X (initially 2^16=65536)
+#max_hash_size: 65536
+max_hash_size: 1048576
+
+#heuristic_type: PathCostHeuristic
+heuristic_type: EuclideanHeuristic
+#heuristic_type: EuclStepCostHeuristic
+
+accuracy:
+  # footstep collision check accuracy
+  # - 0 (just the circumcircle of the foot)
+  # - 1 (just the incircle of the foot)
+  # - 2 (circumcircle and incircle recursivly checked for the whole foot)
+  collision_check: 2
+  cell_size: 0.01
+  num_angle_bins: 64
+
+#allocated_time: 7.0
+allocated_time: 15.0
+
+# the limit of changed states that decides whether to replan or to start a hole
+# new planning task
+changed_cells_limit: 20000
+
+# define the planner of choice provided by the SBPL package
+# - ARAPlanner
+# - ADPlanner
+# - RSTARPlanner
+planner_type: ARAPlanner
