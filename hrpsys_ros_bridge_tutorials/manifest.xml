@@ -30,6 +30,9 @@ Following scripts are only for internal usage:
 
   <depend package="hrpsys_tutorials"/>
 
+  <!-- for robot models -->
+  <depend package="collada_robots"/>
+
   <!-- examples -->
   <depend package="rviz"/>
   <depend package="jsk_perception" />
