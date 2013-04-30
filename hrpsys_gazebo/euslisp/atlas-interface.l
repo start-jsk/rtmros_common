@@ -15,7 +15,7 @@
 
 (defclass atlas-interface
   :super rtm-ros-robot-interface
-  :slots (l_hand_grasp_pub r_hand_grasp_pub bdi-action))
+  :slots (l_hand_grasp_pub r_hand_grasp_pub bdi-action walk-seq))
 (defmethod atlas-interface
   (:init (&optional (qualify nil))
    (prog1 (send-super :init :robot atlas-robot)
@@ -24,6 +24,8 @@
            r_hand_grasp_pub (ros::advertise "/sandia_hands/r_hand/simple_grasp"
                                             sandia_hand_msgs::SimpleGrasp 1))
      (ros::advertise "atlas/control_mode" std_msgs::String 1)
+     (ros::advertise "atlas/atlas_sim_interface_command"
+                     atlas_msgs::AtlasSimInterfaceCommand 1)
      ;; do not use in Qualification
      (unless qualify
        (ros::advertise "atlas/mode" std_msgs::String 1)
@@ -37,6 +39,9 @@
 ;     (send self :add-controller :rarm-controller)
 ;     (send self :add-controller :head-controller)
 ;     (send self :add-controller :torso-controller)
+     (setf (get robot :footstep-parameter)
+           '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
+     (setq walk-seq 0)
      ))
   (:grasp
    (value &optional (arm :arms))
@@ -54,8 +59,32 @@
   (:stop-grasp  (&optional (arm :arms)) (send self :grasp 0 arm))
   (:control-mode (&optional (mode "Stand")) (send_atlas_control_mode mode))
   (:atlas-mode   (&optional (mode "nominal")) (send_atlas_mode mode))
+  (:set-simulation-mode  (&key (effort 255) (sleep 0.5) (mode :user))
+   (let ((msg (instance atlas_msgs::AtlasSimInterfaceCommand :init))
+         (k-effort (instantiate string 28)))
+     (case mode
+       (:stand
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STAND*))
+       (:freeze
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*FREEZE*))
+       (:stand-prep
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STAND_PREP*))
+       (:walk
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*WALK*))
+       (:step
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STEP*))
+       (:manipulate
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*MANIPULATE*))
+       ((:user t)
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*USER*)))
+     (send msg :behavior mode)
+     (fill k-effort effort)
+     (send msg :k_effort k-effort)
+     (ros::publish "atlas/atlas_sim_interface_command" msg)
+     (when sleep (unix::usleep (round (* sleep 1000 1000))))
+     ))
   (:bdi_footstep
-   (footstep-list &key (step-duration 0.63) (swing-height 0.3))
+   (footstep-list &key (step-duration 0.63) (swing-height 0.3) &allow-other-keys)
    ;;(send_atlas_control_mode "Walk")
    (let* ((fstep (car footstep-list))
           (offset (copy-object (send fstep :worldpos))))
@@ -79,7 +108,7 @@
                               :duration 0
                               :swing_height 0)))
          (send ffstep :translate offset :world)
-         (send step :pose (ros::coords->tf-pose fstep))
+         (send step :pose (ros::coords->tf-pose ffstep))
          (push step steps)
          (incf step-idx))
        ;;
@@ -98,15 +127,17 @@
        (send goal :behavior atlas_msgs::WalkDemoGoal::*WALK*)
        (send goal :k_effort k-effort)
        (send goal :steps (nreverse steps))
-       (send walk-goal :header :seq 1)
+       (send walk-goal :header :seq walk-seq)
+       (incf walk-seq)
        (send walk-goal :header :stamp (ros::time-now))
+       (send goal :header :stamp (send walk-goal :header :stamp))
        (send walk-goal :goal_id :stamp (send walk-goal :header :stamp))
        (send walk-goal :goal goal)
        (send bdi-action :send-goal walk-goal)
        )))
-  (:bdi-go-pos (x y &optional (theta 0) (r robot))
+  (:bdi-go-pos (x y &optional (theta 0) &key (r robot)) ;; x [m],  y[m], theta [rad]
    (send self :bdi_footstep
-         (send robot :go-pos-params->footstep-list x y theta)))
+         (send robot :go-pos-params->footstep-list (* x 1000) (* y 1000) theta)))
   (:teleport-to (coords)
    (unix::usleep (* 100 1000))
    (send self :atlas-mode "harnessed")
