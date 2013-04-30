@@ -14,7 +14,7 @@ def move(x, y, z, w=0):
 
     # Setup the publishers
     mode = rospy.Publisher('/atlas/mode', String, None, False, True, None)
-    control_mode = rospy.Publisher('/atlas/control_mode', String, None, False, True, None)
+    control_mode = rospy.Publisher('/atlas/atlas_sim_interface_command', String, None, False, True, None)
     set_pose= rospy.Publisher('/atlas/set_pose', Pose, None, False, True, None)
 
     while set_pose.get_num_connections() == 0:
@@ -45,7 +45,7 @@ def move(x, y, z, w=0):
 if __name__ == '__main__':
     argvs = sys.argv
     argc = len(argvs)
-    
+
     try:
         move(float(argvs[1]), float(argvs[2]), float(argvs[3]), float(argvs[4])*pi/180)
     except rospy.ROSInterruptException: pass

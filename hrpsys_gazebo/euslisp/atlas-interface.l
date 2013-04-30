@@ -247,7 +247,7 @@
 (defun send_atlas_control_mode
   (&optional (mode "Stand"))
   (let ((msg (instance std_msgs::String :init :data mode)))
-    (ros::publish "atlas/control_mode" msg)))
+    (ros::publish "atlas/atlas_sim_interface_command" msg)))
 
 ;; do not use in Qualification
 (defun send_atlas_mode
