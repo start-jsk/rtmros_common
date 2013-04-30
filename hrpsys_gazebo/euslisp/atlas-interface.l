@@ -135,7 +135,7 @@
        (send walk-goal :goal goal)
        (send bdi-action :send-goal walk-goal)
        )))
-  (:bdi-go-pos (x y &optional (theta 0) &key (r robot)) ;; x [m],  y[m], theta [rad]
+  (:bdi-go-pos (x y &optional (theta 0) &key (r robot)) ;; x [m],  y[m], theta [deg]
    (send self :bdi_footstep
          (send robot :go-pos-params->footstep-list (* x 1000) (* y 1000) theta)))
   (:teleport-to (coords)
@@ -254,3 +254,49 @@
   (&optional (mode "nominal"))
   (let ((msg (instance std_msgs::String :init :data mode)))
     (ros::publish "atlas/mode" msg)))
+
+
+(defvar *footstep-planning-service* "/plan_footsteps")
+
+(ros::load-ros-manifest "footstep_planner")
+
+(defun make-ros-footstep (start goal)
+  (let ((req (instance humanoid_nav_msgs::PlanFootstepsRequest :init)))
+    ;;
+    (let ((pos (send start :pos))
+          (theta (caar (send start :rpy-angle))))
+      (send req :start :x (* 1e-3 (elt pos 0)))
+      (send req :start :y (* 1e-3 (elt pos 1)))
+      (send req :start :theta theta))
+    ;;
+    (let ((pos (send goal :pos))
+          (theta (caar (send goal :rpy-angle))))
+      (send req :goal :x (* 1e-3 (elt pos 0)))
+      (send req :goal :y (* 1e-3 (elt pos 1)))
+      (send req :goal :theta theta))
+    ;;
+    (ros::service-call *footstep-planning-service* req)
+    ))
+
+(defun footstep-planning-armin
+  (start goal)
+  (let* ((res
+          (make-ros-footstep start goal))
+         (path
+          (mapcar
+           #'(lambda (msg)
+	       (let (coords)
+		 (setq coords (make-coords :pos (float-vector
+						 (* 1000 (send msg :pose :x))
+						 (* 1000 (send msg :pose :y)) 0)))
+		 (send coords :rotate (send msg :pose :theta) :z)
+		 (send coords :put :l/r
+		       (cond
+			((= (send msg :leg) humanoid_nav_msgs::StepTarget::*left*) :lleg)
+			((= (send msg :leg) humanoid_nav_msgs::StepTarget::*right*) :rleg)))
+		 coords))
+           (send res :footsteps))))
+    ;; append first 1 or 2 step(s)
+    path))
+
+;; (footstep-planning-armin (make-coords :pos (scale 1000 (float-vector 1.7 1.5 0)) :rpy (list pi/2 0 0)) (make-coords :pos (scale 1000 (float-vector 1.7 5.6 0)) :rpy (list pi/2 0 0)))
