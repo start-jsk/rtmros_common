@@ -2,7 +2,7 @@
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="ROBOT_NAME" value="HRP1" />
     <arg name="MODEL_FILE" value="$(find openhrp3)/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl" />
-    <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/PA10.dae" />
+    <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/pa10.dae" />
   </include>
 
   <node name="pa10_rviz" pkg="rviz" type="rviz" respawn="true"
