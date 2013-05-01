@@ -96,14 +96,30 @@ if __name__ == '__main__':
     if wrd != []:
         print "(list"
         for inc in wrd[0].getElementsByTagName('include'):
-            modelf = getText(inc.getElementsByTagName('uri')[0].childNodes)
-            pose = getText(inc.getElementsByTagName('pose')[0].childNodes)
-            modelf =  check_model_url(modelf)
+            pose = ''
+            name = ''
+            modelf = ''
+
+            elem = inc.getElementsByTagName('uri')
+            if elem:
+                modelf = getText(elem[0].childNodes)
+                modelf =  check_model_url(modelf)
+
+            elem = inc.getElementsByTagName('pose')
+            if elem:
+                pose = getText(elem[0].childNodes)
+
+            elem = inc.getElementsByTagName('name')
+            if elem:
+                name = getText(elem[0].childNodes)
 
             print "(list (list :model \"%s\")" % modelf
             if pose != '':
                 print "      (list :pose \"%s\")" % pose
+            if name != '':
+                print "      (list :name \"%s\")" % name
             print ")"
+
         for mdl in wrd[0].getElementsByTagName('model'):
             nm = mdl.getAttribute('name')
             if nm:

@@ -42,9 +42,9 @@
     (let* ((urlname (url-pathname fname))
            (package-name (send urlname :host))
            (path-name (namestring urlname))
-           (package-path (search-gazebo-dir package-name
+           (package-path (search-gazebo-dir (format nil "~A/~A" package-name path-name)
                                             (unix::getenv "GAZEBO_RESOURCE_PATH") nil)))
-      (format nil "~A~A" package-path path-name)))
+      package-path))
    (t fname)))
 
 (unless (fboundp 'ros::resolve-ros-path-org)
@@ -79,7 +79,7 @@
         (let* ((dir (ros::resolve-ros-path mdl))
                (fn (format nil "~A/model.sdf" dir)))
           (when (probe-file fn)
-            (pprint fn)
+            ;; (pprint fn)
             (let (cds)
             (when pose
               (let ((pf (when pose (make-string-input-stream pose)))
@@ -100,7 +100,7 @@
   (let ((model-lst (eval (read
                           (piped-fork
                            (format nil "~A ~A" *parse-world-script* world-fname))))))
-    (pprint model-lst)
+    ;; (pprint model-lst)
     (make-gazebo-scene model-lst)))
 
 (defun read-material-to-list (material-file)
@@ -125,10 +125,8 @@
       (let (uri)
         (setq uri (cadr (assoc 'uri script)))
         (unless uri (return-from :read-uri))
-        (when uri
-          (push uri uris)
-          (setq script (delete uri script)))))
-    ;;(pprint (list (list 'name name) (list 'uris uris)))
+        (push uri uris)
+        (setq script (delete uri script))))
     (let (material)
       (push (list :name name) material)
       (dolist (uri uris)
@@ -143,11 +141,39 @@
                (push (list :filename fname) material)))
             (:directory
              (push (list :dirname fname) material)))))
-      ;;(print material)
-      (parse-gazebo-material material)
-      )
-    obj
-    ))
+      (setq material (append material (parse-gazebo-material material)))
+      ;;(pprint material)
+      (block :add-texture
+        (let ((texfile (cadr (assoc :texture-file material))))
+          ;;
+          (when (probe-file texfile)
+            (let ((img (read-image-file texfile)))
+              (dolist (f (send obj :faces))
+                (send obj :paste-texture-to-face f :image img)))
+            (return-from :add-texture))
+          ;;
+          (when texfile
+            (let* ((pname (pathname texfile))
+                   (fname (if (send pname :type)
+                              (format nil "~A.~A" (send pname :name) (send pname :type))
+                            (send pname :name)))
+                   (gname (format nil "file://media/materials/textures/~A" fname)))
+              (setq gname (ros::resolve-ros-path gname))
+              (when (probe-file gname)
+                (let ((img (read-image-file gname)))
+                  (dolist (f (send obj :faces))
+                    (send obj :paste-texture-to-face f :image img)))
+                (return-from :add-texture))
+              ))
+          ;;
+          (let ((amb (cadr (assoc :ambient material)))
+                (dif (cadr (assoc :diffuse material)))
+                (spec (cadr (assoc :specular material))))
+            (when dif
+              (setf (get obj :face-color) (coerce dif float-vector))))
+          ))
+      obj
+      )))
 
 (defun assoc-read-value (alist key &optional (len 3))
   (let ((pos (position key alist))
@@ -173,16 +199,22 @@
       ;;(setq texture-file (cadr (assoc 'texture alist)))
       (let ((p (position 'texture alist)))
         (when p (setq texture-file (elt alist (1+ p)))))
-      (dolist (key (list (list 'ambient 4) (list 'diffuse 4) (list 'specular 5)))
+      (dolist (key (list (list 'ambient 4 :ambient) (list 'diffuse 4 :diffuse)
+                         (list 'specular 5 :specular)))
         (let ((r (assoc-read-value alist (car key) (cadr key))))
-          (when r (push (list (car key) r) ret)))))
-    (pprint (list texture-dir texture-file ret))
+          (when r (push (list (caddr key) r) ret)))))
+    (when texture-dir
+      (push (list :texture-dir texture-dir) ret))
+    (when texture-file
+      (push
+       (if texture-dir (list :texture-file (format nil "~A/~A" texture-dir texture-file))
+         (list :texture-file texture-file))
+       ret))
+    ret
     ))
+
 #|
 (convert-world-to-eus "/usr/share/drcsim-2.5/worlds/qual_task_1.world")
 (read-material-to-list "/usr/share/gazebo-1.7/media/materials/scripts/gazebo.material")
 (read-material-to-list "/usr/share/drcsim-2.5/media/materials/scripts/drc_qual.material")
-
-(setq img (read-image-file "/usr/share/drcsim-2.5/media/materials/textures/metal_plate.jpg")
-(dolist (f (send cc :faces)) (send cc :paste-texture-to-face f :image img))
 |#
