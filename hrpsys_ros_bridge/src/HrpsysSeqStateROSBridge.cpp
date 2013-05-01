@@ -442,6 +442,32 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     br.sendTransform(tf::StampedTransform(base, base_time, "odom", rootlink_name));
   }  // end: m_baseTformIn
 
+  bool updateTfImu = false;
+  // m_basePosIn
+  if (m_basePosIn.isNew()){
+    m_basePosIn.read();
+    updateTfImu = true;
+  } // end: m_basePosIn
+
+  // m_baseRpyIn
+  if (m_baseRpyIn.isNew()){
+    m_baseRpyIn.read();
+    updateTfImu = true;
+  } // end: m_baseRpyIn
+
+  if (updateTfImu){
+    tf::Transform base;
+    base.setOrigin( tf::Vector3(m_basePos.data.x, m_basePos.data.y, m_basePos.data.z) );
+    base.setRotation( tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y));
+
+    // publish base_footprint calculated from IMU
+    ros::Time base_time = tm_on_execute;
+    if ( use_sim_time && clock_sub.getNumPublishers() == 1 ) { // if use sim_time and publisher==1, which means clock publisher is only this RosBridge
+        base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
+    }
+    br.sendTransform(tf::StampedTransform(base.inverse(), base_time, rootlink_name, "base_footprint"));
+  }
+
   // publish forces sonsors
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
     if ( m_rsforceIn[i]->isNew() ) {
