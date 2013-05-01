@@ -4,15 +4,6 @@
 
 (ros::roseus "atlas_interface")
 
-(defmethod atlas-robot
-  (:init-ending ()
-   (prog1
-       (send-super :init-ending)
-     ;; (setq larm-root-link (send self :larm :shoulder-y :child-link))
-     ;; (setq rarm-root-link (send self :rarm :shoulder-y :child-link))
-     )
-   ))
-
 (defclass atlas-interface
   :super rtm-ros-robot-interface
   :slots (l_hand_grasp_pub r_hand_grasp_pub bdi-action walk-seq))
@@ -152,12 +143,12 @@
   )
 
 (defun atlas-init
-  (&key (set-reset-pose t))
+  (&key (set-reset-pose nil))
   (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init)))
   (if (not (boundp '*atlas*)) (setq *atlas* (instance atlas-robot :init)))
   ;; parameter for bdi_control
   (setf (get *atlas* :footstep-parameter)
-        '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
+       '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
   (send_atlas_control_mode "User")
   (send *ri* :set-soft-error-limit "all" 100) ;; disable SoftErrorLimiter
   (send *ri* :set-servo-error-limit "all" 0) ;; disable RobotHardware error limit
@@ -247,7 +238,8 @@
 (defun send_atlas_control_mode
   (&optional (mode "Stand"))
   (let ((msg (instance std_msgs::String :init :data mode)))
-    (ros::publish "atlas/atlas_sim_interface_command" msg)))
+    (ros::publish "atlas/control_mode" msg)
+    (warn ";; send_atlas_control_mode is deprecated! use (send *ri* :set-simulation-mode :mode :hogehoge) instead")))
 
 ;; do not use in Qualification
 (defun send_atlas_mode
@@ -290,13 +282,16 @@
 						 (* 1000 (send msg :pose :x))
 						 (* 1000 (send msg :pose :y)) 0)))
 		 (send coords :rotate (send msg :pose :theta) :z)
+		 (setq coords (send start :transformation coords))
 		 (send coords :put :l/r
 		       (cond
 			((= (send msg :leg) humanoid_nav_msgs::StepTarget::*left*) :lleg)
 			((= (send msg :leg) humanoid_nav_msgs::StepTarget::*right*) :rleg)))
-		 coords))
+		 coords
+		 ))
            (send res :footsteps))))
     ;; append first 1 or 2 step(s)
     path))
 
-;; (footstep-planning-armin (make-coords :pos (scale 1000 (float-vector 1.7 1.5 0)) :rpy (list pi/2 0 0)) (make-coords :pos (scale 1000 (float-vector 1.7 5.6 0)) :rpy (list pi/2 0 0)))
+;; (send *ri* :bdi_footstep (footstep-planning-armin (make-coords :pos (scale 1000 (float-vector 0.5 1.55 0)) :rpy (list 0 0 0)) (make-coords :pos (scale 1000 (float-vector 4.2 1.55 0)) :rpy (list 0 0 0))))
+
