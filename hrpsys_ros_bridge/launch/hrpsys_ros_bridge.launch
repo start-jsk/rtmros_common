@@ -81,7 +81,7 @@
   <rtconnect from="AutoBalancerServiceROSBridge.rtc:AutoBalancerService" to="abc.rtc:AutoBalancerService"  subscription_type="new"/>
   <rtconnect from="CollisionDetectorServiceROSBridge.rtc:CollisionDetectorService" to="co.rtc:CollisionDetectorService" subscription_type="new"/>
   <rtconnect from="StateHolderServiceROSBridge.rtc:StateHolderService" to="sh.rtc:StateHolderService"  subscription_type="new"/>
-  <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/>
+  <!-- <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/> -->
   <rtconnect from="SoftErrorLimiterServiceROSBridge.rtc:SoftErrorLimiterService" to="el.rtc:SoftErrorLimiterService"  subscription_type="new"/>
   <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
   <rtactivate component="HrpsysJointTrajectoryBridge0.rtc" />
