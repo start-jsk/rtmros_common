@@ -38,11 +38,11 @@ function compile-rtm-ros-robotics {
 
 set -x
 
-setup-ros
-apt-get-ros-package
-install-rtm-ros-robotics
 if ( [ "$TARGET" = "" ] ) then
     echo "compile-rtm-ros-robotics"
+    setup-ros
+    apt-get-ros-package
+    install-rtm-ros-robotics
     compile-rtm-ros-robotics
 else
     echo "compile-pkg $TARGET"
