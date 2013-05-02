@@ -36,9 +36,9 @@ function compile-rtm-ros-robotics {
     compile-pkg euscollada rtmros_common openhrp3 hrpsys_ros_bridge mrobot_ros_bridge RS003 openrtm_ros_bridge
 }
 
-#setup-ros
-#apt-get-ros-package
-#install-rtm-ros-robotics
+setup-ros
+apt-get-ros-package
+install-rtm-ros-robotics
 if ( [ "$TARGET" = "" ] ) then
     echo "compile-rtm-ros-robotics"
     compile-rtm-ros-robotics
