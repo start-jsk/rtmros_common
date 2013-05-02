@@ -7,6 +7,7 @@ from math import *
 
 from std_msgs.msg import String
 from geometry_msgs.msg import Pose
+from atlas_msgs.msg import AtlasSimInterfaceCommand
 
 def move(x, y, z, w=0):
     # Initialize the node
@@ -14,7 +15,7 @@ def move(x, y, z, w=0):
 
     # Setup the publishers
     mode = rospy.Publisher('/atlas/mode', String, None, False, True, None)
-    control_mode = rospy.Publisher('/atlas/atlas_sim_interface_command', String, None, False, True, None)
+    sim_interface = rospy.Publisher('/atlas/atlas_sim_interface_command', AtlasSimInterfaceCommand, None, False, True, None)
     set_pose= rospy.Publisher('/atlas/set_pose', Pose, None, False, True, None)
 
     while set_pose.get_num_connections() == 0:
@@ -31,16 +32,21 @@ def move(x, y, z, w=0):
     p.orientation.z = sin(w/2.0)
     p.orientation.w = cos(w/2.0)
 
+    com = AtlasSimInterfaceCommand()
+
     rospy.sleep(0.1)
     mode.publish("harnessed")
-    control_mode.publish("Freeze")
-    control_mode.publish("StandPrep")
+    com.behavior = com.FREEZE
+    sim_interface.publish(com)
+    com.behavior = com.STAND_PREP
+    sim_interface.publish(com)
     rospy.sleep(2.0)
     mode.publish("nominal")
     rospy.sleep(0.1)
     set_pose.publish(p)
     rospy.sleep(0.2)
-    control_mode.publish("Stand")
+    com.behavior = com.STAND
+    sim_interface.publish(com)
 
 if __name__ == '__main__':
     argvs = sys.argv
