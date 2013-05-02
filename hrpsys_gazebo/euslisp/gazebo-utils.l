@@ -65,6 +65,15 @@
 (defun load-mesh-file (fname &rest args)
   (let* ((ret (apply #'load-mesh-file-org fname args))
          (fname (send ret :filename)))
+    (when (substringp ".dae" fname)
+      (let ((scl (check-unit-dae fname)))
+        (pprint (list :fname fname :unit scl))
+        (unless (= scl 1.0)
+          (let ((mlst (ret . gl::mesh-list)))
+            (dolist (m mlst)
+              (let ((mat (cadr (assoc :vertices m))))
+                (scale scl (array-entity mat) (array-entity mat))))))))
+    ;;
     (when fname
       (send ret :load-texture-image
             (append (butlast (pathname-directory (truename (pathname fname))))
@@ -213,8 +222,16 @@
     ret
     ))
 
+(defun check-unit-dae (fname)
+  (let ((pf (piped-fork (format nil "python -c \"import xml.dom.minidom; import sys; doc = xml.dom.minidom.parse('~A'); uni_elem = doc.getElementsByTagName('unit'); uni_elem != [] and uni_elem[0].hasAttribute('meter') and [sys.stdout.write(uni_elem[0].getAttribute('meter'))] or [sys.stdout.write('1.0')]\"" fname))))
+    (prog1 (read pf)
+      (close pf))))
+
 #|
 (convert-world-to-eus "/usr/share/drcsim-2.5/worlds/qual_task_1.world")
+(convert-world-to-eus "/usr/share/drcsim-2.5/worlds/vrc_task_1.world")
 (read-material-to-list "/usr/share/gazebo-1.7/media/materials/scripts/gazebo.material")
 (read-material-to-list "/usr/share/drcsim-2.5/media/materials/scripts/drc_qual.material")
-|#
+
+drill should be Z_UP ???
+#|
