@@ -71,6 +71,7 @@
   <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="HrpsysSeqStateROSBridge0.rtc:rsangle" subscription_type="new"/>
   <rtconnect from="$(arg SIMULATOR_NAME).rtc:tau" to="HrpsysSeqStateROSBridge0.rtc:rstorque" subscription_type="new"/>
   <rtconnect from="sh.rtc:baseTformOut" to="HrpsysSeqStateROSBridge0.rtc:baseTform" subscription_type="new"/>
+  <rtconnect from="sh.rtc:qOut" to="HrpsysSeqStateROSBridge0.rtc:mcangle" subscription_type="new"/>
   <rtconnect from="kf.rtc:rpy" to="HrpsysSeqStateROSBridge0.rtc:baseRpy" subscription_type="new"/>
   <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
   <rtconnect from="HrpsysJointTrajectoryBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
