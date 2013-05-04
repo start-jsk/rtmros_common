@@ -34,7 +34,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   use_sim_time(false),
   joint_trajectory_server(nh, "fullbody_controller/joint_trajectory_action", false),
   follow_joint_trajectory_server(nh, "fullbody_controller/follow_joint_trajectory_action", false),
-  HrpsysSeqStateROSBridgeImpl(manager)
+  HrpsysSeqStateROSBridgeImpl(manager), follow_action_initialized(false)
 {
   // ros
   joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
@@ -160,6 +160,7 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
 
 void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal() {
   control_msgs::FollowJointTrajectoryGoalConstPtr goal = follow_joint_trajectory_server.acceptNewGoal();
+  follow_action_initialized = true;
   onJointTrajectory(goal->trajectory);
 }
 
@@ -418,7 +419,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       joint_controller_state_pub.publish(joint_controller_state);
     }
     if ( !follow_joint_trajectory_feedback.joint_names.empty() &&
-         !follow_joint_trajectory_feedback.actual.positions.empty() ) {
+         !follow_joint_trajectory_feedback.actual.positions.empty() &&
+         follow_action_initialized ) {
       follow_joint_trajectory_server.publishFeedback(follow_joint_trajectory_feedback);
     }
   } // end: m_mcangleIn

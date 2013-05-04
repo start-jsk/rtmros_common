@@ -64,6 +64,8 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   ros::Subscriber clock_sub;
   void clock_cb(const rosgraph_msgs::ClockPtr& str) {};
+
+  bool follow_action_initialized;
 };
 
 
