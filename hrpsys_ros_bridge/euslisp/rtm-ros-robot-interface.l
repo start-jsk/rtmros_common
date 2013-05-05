@@ -142,8 +142,8 @@
    (&optional base-coords (tm 0.1))
    (unless base-coords
      (setq base-coords (send robot :worldcoords)))
-   (send self :sequenceplayerservice_setbasepos :pos (scale 0.001 (send base-coords :pos)) :tm)
-   (send self :sequenceplayerservice_setbasepos :rpy (coerce (car (send base-coords :rpy-angle)) float-vector) :tm))
+   (send self :sequenceplayerservice_setbasepos :pos (scale 0.001 (send base-coords :pos)) :tm tm)
+   (send self :sequenceplayerservice_setbaserpy :rpy (coerce (car (send base-coords :rpy-angle)) float-vector) :tm tm))
   (:wait-interpolation-of-group
    (groupname)
    (send self :sequenceplayerservice_waitinterpolationofgroup :gname groupname))
