@@ -94,6 +94,7 @@ if __name__ == '__main__':
     wrd = doc.getElementsByTagName('world')
 
     if wrd != []:
+        wrd_nm = wrd[0].getAttribute('name')
         print "(list"
         for inc in wrd[0].getElementsByTagName('include'):
             pose = ''
@@ -123,6 +124,7 @@ if __name__ == '__main__':
         for mdl in wrd[0].getElementsByTagName('model'):
             nm = mdl.getAttribute('name')
             if nm:
+                nm = nm + '_%s'%wrd_nm
                 dirname = '/tmp/%s' % nm
                 if not os.access(dirname, os.F_OK):
                     os.makedirs(dirname)

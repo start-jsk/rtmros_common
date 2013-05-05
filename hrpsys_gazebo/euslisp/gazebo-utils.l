@@ -67,7 +67,7 @@
          (fname (send ret :filename)))
     (when (substringp ".dae" fname)
       (let ((scl (check-unit-dae fname)))
-        (pprint (list :fname fname :unit scl))
+        ;;(pprint (list :fname fname :unit scl))
         (unless (= scl 1.0)
           (let ((mlst (ret . gl::mesh-list)))
             (dolist (m mlst)
@@ -80,15 +80,39 @@
                     (list "materials" "textures"))))
     ret))
 
+(unless (fboundp 'read-image-file-org)
+  (setf (symbol-function 'read-image-file-org)
+        (symbol-function 'read-image-file)))
+
+(defun read-image-file (fname)
+  (let ((r (read-image-file-org fname)))
+    (unless r
+      (setq r (assimp-read-image-file fname)))
+    r))
+
 (defun make-gazebo-scene (lst)
   (let ((cas-links))
     (dolist (l lst)
       (let ((mdl (cadr (assoc :model l)))
-            (pose (cadr (assoc :pose l))))
+            (pose (cadr (assoc :pose l)))
+            (name (cadr (assoc :name l))))
         (let* ((dir (ros::resolve-ros-path mdl))
-               (fn (format nil "~A/model.sdf" dir)))
+               (fn (format nil "~A/model.sdf" dir))
+               (fn-config (format nil "~A/model.config" dir)))
+          (when (probe-file fn-config)
+            (let ((sdf-lst (sxml-find-element-by-tagname 'sdf (read-sxml fn-config)))
+                  nfn)
+              (dolist (sdfl sdf-lst)
+                (when (string= (cadr (assoc 'version (assoc '@ sdfl))) "1.3")
+                  (setq nfn (car (last sdfl)))))
+              (unless nfn ;; defualt sdf
+                (setq nfn (car (last (car sdf-lst)))))
+              (when (stringp nfn)
+                (setq nfn (format nil "~A/~A" dir nfn))
+                (when (probe-file nfn) (setq fn nfn)))
+              ))
           (when (probe-file fn)
-            ;; (pprint fn)
+            (warn ";; start converting model ~A~%" fn)
             (let (cds)
             (when pose
               (let ((pf (when pose (make-string-input-stream pose)))
@@ -99,22 +123,27 @@
                       (make-coords :pos (scale 1000.0 (coerce (subseq ps 0 3) float-vector))
                                    :rpy (let ((rpy (subseq ps 3)))
                                           (list (elt rpy 2) (elt rpy 1) (elt rpy 0)))))))
-            (push (sdf2eus fn) cas-links)
+            (cond
+             ((substringp ".urdf" fn)
+              (push (urdf2eus fn) cas-links))
+             (t (push (sdf2eus fn) cas-links)))
             (when cds (send (car cas-links) :transform cds))
             )))))
     ;; gather cas links
     cas-links))
 
+(defun parse-world-to-list (world-fname)
+  (eval (read
+         (piped-fork
+          (format nil "~A ~A" *parse-world-script* world-fname)))))
 (defun convert-world-to-eus (world-fname)
-  (let ((model-lst (eval (read
-                          (piped-fork
-                           (format nil "~A ~A" *parse-world-script* world-fname))))))
-    ;; (pprint model-lst)
+  (let ((model-lst (parse-world-to-list world-fname)))
+    (setq model-lst (delete-if #'(lambda (x) (substringp "atlas_sandia_hands" (cadr (assoc :model x)))) model-lst))
     (make-gazebo-scene model-lst)))
 
 (defun read-material-to-list (material-file)
   (let ((fp (piped-fork
-             (format nil "sed -e 's@}@)@g' ~A | sed -e 's@{@(@g' | sed -e 's/:/@/g'"
+             (format nil "sed -e 's/texture \\+\\(.*\\)/texture \"\\1\"/g' ~A | sed -e 's@}@)@g' | sed -e 's@{@(@g' | sed -e 's/:/@/g'"
                      material-file))))
     (let (elem ret tmp)
       (while (setq elem (read fp nil nil))
@@ -131,11 +160,12 @@
          (name (cadr (assoc 'name script)))
          uris)
     (block :read-uri
-      (let (uri)
-        (setq uri (cadr (assoc 'uri script)))
-        (unless uri (return-from :read-uri))
-        (push uri uris)
-        (setq script (delete uri script))))
+      (while t
+        (let (uri)
+          (setq uri (assoc 'uri script))
+          (unless uri (return-from :read-uri))
+          (push (cadr uri) uris)
+          (setq script (delete uri script)))))
     (let (material)
       (push (list :name name) material)
       (dolist (uri uris)
@@ -149,16 +179,26 @@
                (push (list :material tmp) material)
                (push (list :filename fname) material)))
             (:directory
-             (push (list :dirname fname) material)))))
+             (cond
+              ((substringp "scripts" fname)
+               (let ((m (find-if #'(lambda (x) (substringp ".material" x)) (directory fname))))
+                 (when m
+                   (setq m (format nil "~A/~A" fname m))
+                   (setq tmp (find-if #'(lambda (l) (member (read-from-string name) l))
+                                      (read-material-to-list m)))
+                   (when tmp
+                     (push (list :material tmp) material)
+                     (push (list :filename m) material)))))
+              (t (push (list :dirname fname) material))))
+            )))
       (setq material (append material (parse-gazebo-material material)))
-      ;;(pprint material)
+      (pprint material)
       (block :add-texture
         (let ((texfile (cadr (assoc :texture-file material))))
           ;;
           (when (probe-file texfile)
             (let ((img (read-image-file texfile)))
-              (dolist (f (send obj :faces))
-                (send obj :paste-texture-to-face f :image img)))
+              (add-texture-to-obj obj img))
             (return-from :add-texture))
           ;;
           (when texfile
@@ -170,8 +210,7 @@
               (setq gname (ros::resolve-ros-path gname))
               (when (probe-file gname)
                 (let ((img (read-image-file gname)))
-                  (dolist (f (send obj :faces))
-                    (send obj :paste-texture-to-face f :image img)))
+                  (add-texture-to-obj obj img))
                 (return-from :add-texture))
               ))
           ;;
@@ -183,6 +222,19 @@
           ))
       obj
       )))
+
+(defun add-texture-to-obj (obj img)
+  (cond
+   ((derivedp obj gl::glvertices)
+    (let ((ml (obj . gl::mesh-list)))
+      (dolist (m ml)
+        (let ((mt (cadr (assoc :material m))))
+          (unless (assoc mt :teximage)
+            (nconc mt (list (list :teximage img))))))))
+   (t
+    (dolist (f (send obj :faces))
+      (send obj :paste-texture-to-face f :image img)))
+   ))
 
 (defun assoc-read-value (alist key &optional (len 3))
   (let ((pos (position key alist))
@@ -223,11 +275,75 @@
     ))
 
 (defun check-unit-dae (fname)
+  ""
   (let ((pf (piped-fork (format nil "python -c \"import xml.dom.minidom; import sys; doc = xml.dom.minidom.parse('~A'); uni_elem = doc.getElementsByTagName('unit'); uni_elem != [] and uni_elem[0].hasAttribute('meter') and [sys.stdout.write(uni_elem[0].getAttribute('meter'))] or [sys.stdout.write('1.0')]\"" fname))))
     (prog1 (read pf)
       (close pf))))
 
+(defun make-heightmap-faces (img &key ((:scale scl) (float-vector 1 1 1))
+                                 (pos (float-vector 0 0 0))
+                                 (image-scale (float-vector 1 1)) (texture))
+  (let* ((w (send img :width))
+         (h (send img :height))
+         (buf (array-entity img))
+         (sclx (elt scl 0))
+         (scly (elt scl 1))
+         (sclz (elt scl 2))
+         (offx (elt pos 0))
+         (offy (elt pos 1))
+         (offz (elt pos 2))
+         (mat (make-matrix (* 2 (1- h) w) 3))
+         (tcoords (instantiate float-vector (* 2 (* 2 (1- h) w))))
+         (idx (instantiate integer-vector (* 6 (1- h) (- w 1))))
+         (cntr 0)
+         (ifw (/ 1.0 (float w)))
+         (ifh (/ 1.0 (float h)))
+         ret)
+    (dotimes (i (1- h))
+      (dotimes (j w)
+        (c-matrix-row mat cntr
+                      (float-vector
+                       (+ (* sclx j) offx)
+                       (+ (* scly i) offy)
+                       (+ (* sclz (/ (elt buf (+ (* i w) j)) 255.0)) offz)) t)
+        (setf (elt tcoords (* 2 cntr)) (* j ifw))
+        (setf (elt tcoords (1+ (* 2 cntr))) (* i ifh))
+        (incf cntr)
+        (c-matrix-row mat cntr
+                      (float-vector
+                       (+ (* sclx j) offx)
+                       (+ (* scly (1+ i)) offy)
+                       (+ (* sclz (/ (elt buf (+ (* (1+ i) w) j)) 255.0)) offz)) t)
+        (setf (elt tcoords (* 2 cntr)) (* j ifw))
+        (setf (elt tcoords (1+ (* 2 cntr))) (* (1+ i) ifh))
+        (incf cntr)
+        ))
+    (setq cntr 0)
+    (dotimes (i (1- h))
+      (dotimes (j (- w 1))
+        (let ((st (* 2 (+ (* w i) j))))
+          (setf (elt idx cntr) st) (incf cntr)
+          (setf (elt idx cntr) (+ st 1)) (incf cntr)
+          (setf (elt idx cntr) (+ st 2)) (incf cntr)
+
+          (setf (elt idx cntr) (+ st 3)) (incf cntr)
+          (setf (elt idx cntr) (+ st 2)) (incf cntr)
+          (setf (elt idx cntr) (+ st 1)) (incf cntr)
+          )))
+    (let (ret)
+      (when texture
+        (push (list :material (list (list :teximage texture))) ret))
+      (push (list :type :triangles) ret)
+      (push (list :vertices mat) ret)
+      (push (list :indices idx) ret)
+      (push (list :texcoords tcoords) ret)
+      (instance gl::glvertices :init (list ret)))
+    ))
 #|
+(setq teximg (read-image-file "/usr/share/gazebo-1.7/media//materials/textures/dirt_diffusespecular.png"))
+(setq img (read-image-file "/usr/share/drcsim-2.5/gazebo_models/environments/vrc_heightmap_1/materials/textures/heightmap.png"))
+(make-heightmap-faces img :scale #f(10 10 1000) :texture teximg)
+
 (convert-world-to-eus "/usr/share/drcsim-2.5/worlds/qual_task_1.world")
 (convert-world-to-eus "/usr/share/drcsim-2.5/worlds/vrc_task_1.world")
 (read-material-to-list "/usr/share/gazebo-1.7/media/materials/scripts/gazebo.material")
