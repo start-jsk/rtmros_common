@@ -33,7 +33,7 @@ function install-rtm-ros-robotics {
 }
 
 function compile-rtm-ros-robotics {
-    compile-pkg euscollada rtmros_common openhrp3 hrpsys_ros_bridge mrobot_ros_bridge RS003 openrtm_ros_bridge
+    compile-pkg euscollada openhrp3 hrpsys hrpsys_ros_bridge mrobot_ros_bridge RS003 openrtm_ros_bridge hrpsys_tutorials hrpsys_ros_bridge_tutorials
 }
 
 set -x
