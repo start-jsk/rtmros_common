@@ -136,22 +136,23 @@
    (send self :control-mode "StandPrep")
    (unix::usleep (* 2 1000 1000))
    (send self :atlas-mode "nominal")
-   (unix::usleep (* 100 1000))
+   (unix::usleep (* 10 1000))
    (ros::publish "atlas/set_pose" (ros::coords->tf-pose coords))
    (unix::usleep (* 200 1000))
    (send self :control-mode "Stand"))
   )
 
 (defun atlas-init
-  (&key (set-reset-pose nil))
+  (&key (set-reset-pose nil) (set-user-mode t))
   (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init)))
   (if (not (boundp '*atlas*)) (setq *atlas* (instance atlas-robot :init)))
   ;; parameter for bdi_control
   (setf (get *atlas* :footstep-parameter)
        '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
-  (send_atlas_control_mode "User")
   (send *ri* :set-soft-error-limit "all" 100) ;; disable SoftErrorLimiter
   (send *ri* :set-servo-error-limit "all" 0) ;; disable RobotHardware error limit
+  (when set-user-mode
+    (send_atlas_control_mode "User"))
   (when set-reset-pose
     (send *atlas* :reset-pose)
     ;; send reset pose to real robot
@@ -239,7 +240,7 @@
   (&optional (mode "Stand"))
   (let ((msg (instance std_msgs::String :init :data mode)))
     (ros::publish "atlas/control_mode" msg)
-    (warn ";; send_atlas_control_mode is deprecated! use (send *ri* :set-simulation-mode :mode :hogehoge) instead")))
+    (warn ";; send_atlas_control_mode is deprecated! use (send *ri* :set-simulation-mode :mode :hogehoge) instead~%")))
 
 ;; do not use in Qualification
 (defun send_atlas_mode
