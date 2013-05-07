@@ -26,10 +26,6 @@
            (instance ros::simple-action-client :init
                      "atlas/bdi_control" atlas_msgs::WalkDemoAction))
      (send bdi-action :wait-for-server 3)
-;     (send self :add-controller :larm-controller)
-;     (send self :add-controller :rarm-controller)
-;     (send self :add-controller :head-controller)
-;     (send self :add-controller :torso-controller)
      (setf (get robot :footstep-parameter)
            '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
      (setq walk-seq 0)
@@ -51,29 +47,7 @@
   (:control-mode (&optional (mode "Stand")) (send_atlas_control_mode mode))
   (:atlas-mode   (&optional (mode "nominal")) (send_atlas_mode mode))
   (:set-simulation-mode  (&key (effort 255) (sleep 0.5) (mode :user))
-   (let ((msg (instance atlas_msgs::AtlasSimInterfaceCommand :init))
-         (k-effort (instantiate string 28)))
-     (case mode
-       (:stand
-        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STAND*))
-       (:freeze
-        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*FREEZE*))
-       (:stand-prep
-        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STAND_PREP*))
-       (:walk
-        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*WALK*))
-       (:step
-        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STEP*))
-       (:manipulate
-        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*MANIPULATE*))
-       ((:user t)
-        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*USER*)))
-     (send msg :behavior mode)
-     (fill k-effort effort)
-     (send msg :k_effort k-effort)
-     (ros::publish "atlas/atlas_sim_interface_command" msg)
-     (when sleep (unix::usleep (round (* sleep 1000 1000))))
-     ))
+   (set-simulation-mode :effort effort :sleep sleep :mode mode))
   (:bdi_footstep
    (footstep-list &key (step-duration 0.63) (swing-height 0.3) &allow-other-keys)
    ;;(send_atlas_control_mode "Walk")
@@ -152,13 +126,14 @@
   (send *ri* :set-soft-error-limit "all" 100) ;; disable SoftErrorLimiter
   (send *ri* :set-servo-error-limit "all" 0) ;; disable RobotHardware error limit
   (when set-user-mode
-    (send_atlas_control_mode "User"))
+    (send *ri* :set-simulation-mode))
   (when set-reset-pose
     (send *atlas* :reset-pose)
     ;; send reset pose to real robot
     (send *ri* :angle-vector (send *atlas* :angle-vector) 3000)
     (send *ri* :wait-interpolation))
   )
+
 
 (defun atlas-tool-look ()
   (send *atlas* :head :neck-p :joint-angle 50)
@@ -206,9 +181,9 @@
   (unix:usleep 3)
   )
 
-(defun atlas-walk-pattern-gen
+
+(defun generate-atlas-walk-pattern
   (&key (no-gen nil) (fname nil))
-  ;; limit crotch-y range which are originally inf and -inf
   (let (pattern-list
         (fname (if fname fname
 		 (format nil "~A/atlas-walk-pattern"
@@ -226,15 +201,41 @@
     (send *ri* :loadPattern fname)
     ))
 
-(defun atlas-walk ()
+(defun atlas-walk-with-walk-pattern-gen ()
   (send_atlas_control_mode "Stand")
   (atlas-init :set-reset-pose nil)
   (objects (list *atlas*))
   (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
   (send *ri* :angle-vector (send *atlas* :angle-vector) 2000)
   (send_atlas_control_mode "User")
-  (atlas-walk-pattern-gen)
+  (generate-atlas-walk-pattern)
   )
+
+
+(defun set-simulation-mode (&key (effort 255) (sleep 0.5) (mode :user))
+  (let ((msg (instance atlas_msgs::AtlasSimInterfaceCommand :init))
+	(k-effort (instantiate string 28)))
+    (case mode
+      (:stand
+       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STAND*))
+      (:freeze
+       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*FREEZE*))
+      (:stand-prep
+       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STAND_PREP*))
+      (:walk
+       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*WALK*))
+      (:step
+       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STEP*))
+      (:manipulate
+       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*MANIPULATE*))
+      ((:user t)
+       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*USER*)))
+    (send msg :behavior mode)
+    (fill k-effort effort)
+    (send msg :k_effort k-effort)
+    (ros::publish "atlas/atlas_sim_interface_command" msg)
+    (when sleep (unix::usleep (round (* sleep 1000 1000))))
+    ))
 
 (defun send_atlas_control_mode
   (&optional (mode "Stand"))
