@@ -1,7 +1,11 @@
 <launch>
+  <arg name="EXE_HRPSYS" default="true" />
   <include file="$(find atlas_utils)/launch/vrc_task_3.launch" />
   <node pkg="hrpsys_gazebo" type="move_atlas.py"
   	name="move_atlas" args="-3 -4 2 0"/>
+  <group if="$(arg EXE_HRPSYS)">
+    <include file="$(find hrpsys_gazebo)/launch/atlas_hrpsys.launch" />
+  </group>
 </launch>
 
 
