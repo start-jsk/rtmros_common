@@ -90,4 +90,4 @@ if (_make_failed)
   message(FATAL_ERROR "Build of hrpsys failed")
 endif(_make_failed)
 
-#rosbuild_add_executable(atlas_laser_snapshotter src/atlas_laser_snapshotter.cpp)
+rosbuild_add_executable(atlas_laser_snapshotter src/atlas_laser_snapshotter.cpp)
