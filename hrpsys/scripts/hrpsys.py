@@ -41,12 +41,13 @@ class HrpsysConfigurator:
         out_port = self.el.port("q")
         if self.simulation_mode :
             connectPorts(out_port,  self.hgc.port("qIn"))
-            connectPorts(self.hgc.port("qOut"), [self.seq.port("qInit"), self.rh.port("qRef")])
+            connectPorts(self.hgc.port("qOut"), self.rh.port("qRef"))
         else :
-            connectPorts(out_port,  [self.seq.port("qInit"), self.rh.port("qRef")])
+            connectPorts(out_port,  self.rh.port("qRef"))
         #
         connectPorts(self.sh.port("basePosOut"), self.seq.port("basePosInit"))
         connectPorts(self.sh.port("baseRpyOut"), self.seq.port("baseRpyInit"))
+        connectPorts(self.sh.port("qOut"), self.seq.port("qInit"))
 
     def activateComps(self, rtcList):
         rtm.serializeComponents(rtcList)
