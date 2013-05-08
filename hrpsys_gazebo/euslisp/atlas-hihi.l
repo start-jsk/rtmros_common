@@ -7,7 +7,7 @@
 
 (atlas-init)
 (defvar *robot* *atlas*)
-(defvar *move-step-time* 1000)
+(defvar *move-step-time* 500)
 
 (setq
   *atlas-anima-endcoords*
@@ -422,30 +422,30 @@
   (&key
    (real-flag (and (boundp '*ri*) *ri*))
    (mirror? nil)
-   (target-keys
-    (if mirror?
-	'(:rleg :lleg :rarm :larm)
-      '(:lleg :rleg :larm :rarm)))
    (move #F(180 0 0))
    )
   (animal-init :back-centroid nil)
-  (move-step :rleg :real-flag real-flag :move move)
-  (move-step :lleg :real-flag real-flag :move move)
+  (mapcar
+   #'(lambda (key)
+       (move-step key :real-flag real-flag :move move))
+   (if mirror?
+       '(:rleg :lleg)
+     '(:lleg :rleg)))
   (send *robot* :larm :elbow-p :joint-angle 50)
   (send *robot* :rarm :elbow-p :joint-angle -50)
   (animal-fullbody :back-centroid t)
-  (move-step :rarm :real-flag real-flag :move move)
-  (move-step :larm :real-flag real-flag :move move)
+  (mapcar
+   #'(lambda (key)
+       (move-step key :real-flag real-flag :move move))
+   (if mirror?
+       '(:rarm :larm)
+     '(:larm :rarm)))
   )
 
 (defun demo-forward
   (&key
    (real-flag (and (boundp '*ri*) *ri*))
-   (mirror? nil)
-   (target-keys
-    (if mirror?
-	'(:rleg :lleg :rarm :larm)
-      '(:lleg :rleg :larm :rarm))))
+   (mirror? nil))
   (move-sequence
    :real-flag real-flag
    :mirror? nil
@@ -470,3 +470,8 @@
 
 (animal-init)
 (model2real_)
+
+
+(do-until-key
+ (demo-forward)
+ (unix:sleep 3))
