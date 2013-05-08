@@ -467,7 +467,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     if ( use_sim_time && clock_sub.getNumPublishers() == 1 ) { // if use sim_time and publisher==1, which means clock publisher is only this RosBridge
         base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
     }
-    br.sendTransform(tf::StampedTransform(base.inverse(), base_time, rootlink_name, "base_footprint"));
+    br.sendTransform(tf::StampedTransform(base.inverse(), base_time, "gyrometer", "imu_floor"));
   }
 
   // publish forces sonsors

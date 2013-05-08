@@ -134,6 +134,13 @@
    (if (find-method robot limb)
        (find-if #'(lambda (x) (member (send x :parent) (send robot limb)))
                 (send robot :force-sensors))))
+  (:state
+    (&rest args)
+    (case (car args)
+      (:imucoords
+        (send *tfl* :lookup-transform "/imu_floor" "/BODY" (ros::time)))
+      (t
+        (send-super* :state args))))
   )
 
 ;; SequencePlayerService
