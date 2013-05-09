@@ -17,7 +17,7 @@
   </node>
 
   <!-- use stereo camera -->
-  <include if="$(USE_STEREO)"
+  <include if="$(arg USE_STEREO)"
            file="$(find jsk_pcl_ros)/launch/pointcloud_screenpoint.launch" >
     <arg name="USE_VIEW" value="true" />
     <arg name="USE_DEPTH_CREATER" value="false" />
@@ -26,7 +26,7 @@
   </include>
 
   <!-- use tilt laser -->
-  <include unless="$(USE_STEREO)"
+  <include unless="$(arg USE_STEREO)"
            file="$(find jsk_pcl_ros)/launch/pointcloud_screenpoint.launch" >
     <arg name="USE_VIEW" value="true" />
     <arg name="USE_DEPTH_CREATER" value="true" />
