@@ -1,6 +1,7 @@
 <launch>
+  <arg name="MAP_FILE" default="$(find hrpsys_gazebo)/maps/stepping_map.yaml" />
   <node name="map_server" pkg="map_server" type="map_server"
-        args="$(find hrpsys_gazebo)/maps/stepping_map.yaml" />
+        args="$(arg MAP_FILE)" />
   <include file="$(find footstep_planner)/launch/rviz_footstep_planning.launch" />
   <node name="footstep_planner" pkg="footstep_planner" type="footstep_planner_node" >
     <rosparam file="$(find footstep_planner)/config/planning_params.yaml" command="load" />
