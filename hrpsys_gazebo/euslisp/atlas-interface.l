@@ -17,6 +17,8 @@
      (ros::advertise "atlas/control_mode" std_msgs::String 1)
      (ros::advertise "atlas/atlas_sim_interface_command"
                      atlas_msgs::AtlasSimInterfaceCommand 1)
+     (ros::subscribe "atlas/atlas_sim_interface_state"
+		     atlas_msgs::AtlasSimInterfaceState #'send self :sim-interface-state-cb)
      ;; do not use in Qualification
      (unless qualify
        (ros::advertise "atlas/mode" std_msgs::String 1)
@@ -29,6 +31,30 @@
      (setf (get robot :footstep-parameter)
            '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
      (setq walk-seq 0)
+     ))
+  (:sim-interface-state-cb
+   (msg)
+   (let* ((pos-est (send msg :pos_est))
+	  (pos (send pos-est :position))
+	  (foot-pos-est1 (car (send msg :foot_pos_est)))
+	  (foot-pos-est2 (cadr (send msg :foot_pos_est)))
+	  (yaw (+ (acos (send (send foot-pos-est1 :orientation) :w))
+		  (acos (send (send foot-pos-est2 :orientation) :w))))
+	  (cur-bhv (send msg :current_behavior)))
+     (send self :put :pose-on-gazebo (list (send pos :x) (send pos :y) (send pos :z) (rad2deg yaw)))
+     (send self :put :current-behavior cur-bhv)
+     ))
+  (:wait-for-start-bdi-walk
+   ()
+   (ros::spin-once)
+   (while (not (equal (send self :get :current-behavior) 4))
+     (ros::spin-once)
+     ))
+  (:wait-for-bdi-walk
+   ()
+   (ros::spin-once)
+   (while (equal (send self :get :current-behavior) 4)
+     (ros::spin-once)
      ))
   (:grasp
    (value &optional (arm :arms))
