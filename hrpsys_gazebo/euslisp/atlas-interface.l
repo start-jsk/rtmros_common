@@ -137,7 +137,7 @@
 
 (defun atlas-tool-look ()
   (send *atlas* :head :neck-p :joint-angle 50)
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 3000)
+  (send *ri* :angle-vector (send *atlas* :angle-vector) 2000)
   (send *ri* :wait-interpolation)
   )
 
@@ -161,20 +161,22 @@
   ;; (send *atlas* :legs :ankle-p :joint-angle -15)
   ;; (send *atlas* :move-centroid-on-foot :both '(:rleg :lleg :rarm :larm))
 
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 20000)
+  (send *ri* :angle-vector (send *atlas* :angle-vector) 5000)
   (send *ri* :wait-interpolation)
 
-  (send *atlas* :rarm :inverse-kinematics (make-coords :pos #f(370 -350 200)) :rotation-axis :z)
+  (send *atlas* :rarm :inverse-kinematics (make-coords :pos #f(410 -315 215)) :rotation-axis :z)
+;;  (send *atlas* :rarm :inverse-kinematics (make-coords :pos #f(370 -350 200)) :rotation-axis :z)
 ;;  (send *atlas* :move-centroid-on-foot :both '(:rleg :lleg :rarm :larm))
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 15000)
+  (send *ri* :angle-vector (send *atlas* :angle-vector) 5000)
   (send *ri* :wait-interpolation)
 
   (send *ri* :start-grasp :rarm)
   (unix:usleep 3)
 
-  (send *atlas* :rarm :inverse-kinematics (make-coords :pos #f(550 0 400)) :rotation-axis :z :use-torso t)
+  (send *atlas* :rarm :inverse-kinematics (make-coords :pos #f(565 15 400)) :rotation-axis :z :use-torso t)
+;;  (send *atlas* :rarm :inverse-kinematics (make-coords :pos #f(550 0 400)) :rotation-axis :z :use-torso t)
 ;;  (send *atlas* :move-centroid-on-foot :both '(:rleg :lleg :rarm :larm))
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 15000)
+  (send *ri* :angle-vector (send *atlas* :angle-vector) 5000)
   (send *ri* :wait-interpolation)
 
   (send *ri* :stop-grasp :rarm)
@@ -295,5 +297,5 @@
     ;; append first 1 or 2 step(s)
     path))
 
-;; (send *ri* :bdi_footstep (footstep-planning-armin (make-coords :pos (scale 1000 (float-vector 0.5 1.55 0)) :rpy (list 0 0 0)) (make-coords :pos (scale 1000 (float-vector 4.2 1.55 0)) :rpy (list 0 0 0))))
-
+;; (send *ri* :bdi_footstep (footstep-planning-armin (make-coords :pos (scale 1000 (float-vector 0.5 1.55 0)) :rpy (list 0 0 0)) (make-coords :pos (scale 1000 (float-vector 6.2 1.55 0)) :rpy (list 0 0 0))))
+;; (send *ri* :bdi_footstep (footstep-planning-armin (make-coords :pos (scale 1000 (float-vector 1 1 0)) :rpy (list 0 0 0)) (make-coords :pos (scale 1000 (float-vector 17.3 9 0)) :rpy (list 0 0 0))))
