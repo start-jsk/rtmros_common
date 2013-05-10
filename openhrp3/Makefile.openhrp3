@@ -4,6 +4,12 @@ SVN_URL     = https://openrtp.jp/svn/hrg/openhrp/3.1/trunk
 #SVN_REVISION = r@REVISION@
 SVN_PATCH = patch/OpenHRP2ModelFile.patch
 
+ifeq ($(shell rosversion -d),fuerte)
+   CHECKMD5=rosrun rosbuild download_checkmd5.py
+else
+   CHECKMD5=rosrun catkin download_checkmd5.py
+endif
+
 include $(shell rospack find mk)/svn_checkout.mk
 
 installed.openhrp3: $(SVN_DIR) patched
@@ -29,14 +35,14 @@ else
 endif
 lib/ext/j3dcore.jar:
 	if [ ! -f `rospack find openhrp3`/lib/ext/j3dcore.jar ] ; then \
-	   rosrun rosbuild download_checkmd5.py http://download.java.net/media/java3d/builds/release/1.5.2/$(J3D_FILE).zip build/$(J3D_FILE).zip ;\
+	   $(CHECKMD5) http://download.java.net/media/java3d/builds/release/1.5.2/$(J3D_FILE).zip build/$(J3D_FILE).zip ;\
 	   unzip -o build/$(J3D_FILE).zip -d build; \
 	   unzip -o build/$(J3D_FILE)/j3d-jre.zip -d `rospack find openhrp3`; \
 	fi
 
 java3declipse: build/java3declipse-20090302.zip
 build/java3declipse-20090302.zip:
-	rosrun rosbuild download_checkmd5.py  "http://downloads.sourceforge.net/project/java3d-eclipse/java3declipse%20plugin/20090302/java3declipse-20090302.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fjava3d-eclipse%2Ffiles%2F&ts=1307109053&use_mirror=jaist" $@ 764854845817a5aee403420e1a1a3f86
+	$(CHECKMD5)  "http://downloads.sourceforge.net/project/java3d-eclipse/java3declipse%20plugin/20090302/java3declipse-20090302.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fjava3d-eclipse%2Ffiles%2F&ts=1307109053&use_mirror=jaist" $@ 764854845817a5aee403420e1a1a3f86
 
 ## plugin archives
 plugin_archives: build/rtmtools_eclipse.zip build/grxui_eclipse.zip build/java3declipse-20090302.zip
@@ -44,7 +50,7 @@ plugin_archives: build/rtmtools_eclipse.zip build/grxui_eclipse.zip build/java3d
 ## rtm tools
 build/rtmtools100release_en.zip:
 	# download and unzip prtm tools
-	rosrun rosbuild download_checkmd5.py http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/rtmtools100release_en.zip build/rtmtools100release_en.zip e1051282f79dd8a2618ad993e92063ce
+	$(CHECKMD5) http://www.openrtm.org/pub/OpenRTM-aist/tools/1.0.0/rtmtools100release_en.zip build/rtmtools100release_en.zip e1051282f79dd8a2618ad993e92063ce
 
 eclipse/rtmtools:
 	mkdir -p eclipse/rtmtools
