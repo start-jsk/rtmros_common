@@ -126,7 +126,8 @@
        (send walk-goal :goal goal)
        (send bdi-action :send-goal walk-goal)
        )))
-  (:bdi-go-pos (x y &optional (theta 0) &key (r robot)) ;; x [m],  y[m], theta [deg]
+  (:bdi-go-pos (x y &optional (theta 0) &key (r robot) (step-duration 0.63) (swing-height 0.3))
+               ;; x [m],  y[m], theta [deg]
    (send self :bdi_footstep
          (send robot :go-pos-params->footstep-list (* x 1000) (* y 1000) theta)))
   (:teleport-to (coords)
@@ -158,6 +159,7 @@
     ;; send reset pose to real robot
     (send *ri* :angle-vector (send *atlas* :angle-vector) 3000)
     (send *ri* :wait-interpolation))
+  (setq *tfb* (instance ros::transform-broadcaster :init))
   )
 
 
@@ -322,6 +324,35 @@
            (send res :footsteps))))
     ;; append first 1 or 2 step(s)
     path))
-
 ;; (send *ri* :bdi_footstep (footstep-planning-armin (make-coords :pos (scale 1000 (float-vector 0.5 1.55 0)) :rpy (list 0 0 0)) (make-coords :pos (scale 1000 (float-vector 6.2 1.55 0)) :rpy (list 0 0 0))))
 ;; (send *ri* :bdi_footstep (footstep-planning-armin (make-coords :pos (scale 1000 (float-vector 1 1 0)) :rpy (list 0 0 0)) (make-coords :pos (scale 1000 (float-vector 17.3 9 0)) :rpy (list 0 0 0))))
+
+(defun start-tilt-laser (&optional (speed 1.2))
+  (one-shot-publish "/multisense_sl/set_spindle_speed" (instance std_msgs::Float64 :init :data speed)))
+
+(defun get-tilt-laser (&key (remove-nan))
+  (let ((msg (one-shot-subscribe "/full_cloud2" sensor_msgs::PointCloud2 :timeout 30000)))
+    (when msg
+      (make-eus-pointcloud-from-ros-msg msg :remove-nan remove-nan))))
+
+(defun publish-base-footprint (&optional (x 0) (y 0) (th 0)) ;; 425 1550 0
+  (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
+  (let (;;(cds (send (send *atlas* :pelvis :worldcoords)
+        ;;           :transformation (send *atlas* :foot-midcoords)))
+        (icds (send (send *atlas* :foot-midcoords)
+                   :transformation (send *atlas* :pelvis :worldcoords))))
+    ;;(send *tfb* :send-transform cds "/pelvis" "/base_footprint")
+    ;;(send *tfb* :send-transform cds "/odom" "/base_footprint")
+    (send *tfb* :send-transform icds "/base_footprint" "/odom")
+    (send *tfb* :send-transform (make-coords :pos (float-vector x y 0.0) :rpy (list th 0 0))
+          "/map" "/base_footprint")
+    ))
+
+(defun view-footsteps (&optional (x 0.0) (y 0.0) (th 0))
+  (publish-base-footprint x y th)
+  (let ((footsteps
+         (footstep-planning-armin (make-coords :pos (float-vector x y 0) :rpy (list th 0 0))
+                                  (make-coords :pos (float-vector 6250 1550 0)))))
+    (when (y-or-n-p "Can you apply these footsteps ? ")
+      (send *ri* :bdi_footstep footsteps))
+    ))
