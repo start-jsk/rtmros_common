@@ -6,7 +6,7 @@ SVN_PATCH = patch/OpenHRP2ModelFile.patch
 
 
 CHECKMD5=$(shell rospack find rosbuild)/bin/download_checkmd5.py
-ifeq ($(wilecard $(CHECKMD5)),) # when file is not exist
+ifeq ($(wildcard $(CHECKMD5)),) # when file is not exist
    CHECKMD5=rosrun catkin download_checkmd5.py
 endif
 
