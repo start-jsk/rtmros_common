@@ -1,0 +1,21 @@
+### installing footstep planner
+## roscd; rm -rf alufr-ros-pkg ## remove source install
+sudo apt-get install ros-fuerte-humanoid-navigation
+rosrun roseus generate-all-msg-srv.sh $(rospack depends footstep_planner)
+
+### installing laser
+roscd ## move to ~/ros/fuerte
+rosws set laser_assembler --git https://github.com/ros-perception/laser_assembler.git -v groovy-devel
+rosws set laser_filters --git https://github.com/YoheiKakiuchi/laser_filters.git -v groovy-devel
+rosws update laser_assembler laser_filters
+source ~/.bashrc
+rosmake laser_filters laser_assembler
+
+### installing eus_pcl
+roscd ## move to ~/ros/fuerte
+rosws set perception_pcl_unstable --git https://github.com/ros-perception/perception_pcl.git -v fuerte-unstable-devel
+rosws set eus-pcl-pkg --git https://github.com/YoheiKakiuchi/eus-pcl-pkg.git
+rosws update perception_pcl_unstable eus-pcl-pkg
+source ~/.bashrc
+roscd pcl17; rosmake
+roscd eus_pcl; rosmake
