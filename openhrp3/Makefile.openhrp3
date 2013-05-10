@@ -4,9 +4,9 @@ SVN_URL     = https://openrtp.jp/svn/hrg/openhrp/3.1/trunk
 #SVN_REVISION = r@REVISION@
 SVN_PATCH = patch/OpenHRP2ModelFile.patch
 
-ifeq ($(shell rosversion -d),fuerte)
-   CHECKMD5=rosrun rosbuild download_checkmd5.py
-else
+
+CHECKMD5=$(shell rospack find rosbuild)/bin/download_checkmd5.py
+ifeq ($(wilecard $(CHECKMD5)),) # when file is not exist
    CHECKMD5=rosrun catkin download_checkmd5.py
 endif
 
