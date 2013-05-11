@@ -96,6 +96,7 @@
                      *laser-pt*
                      (instance std_msgs::header :init :frame_id "/pelvis")
                      :color #f(0 1 1)))
+  (start-tilt-laser 0.0)
   (walking-on-stepping-block)
   )
 
@@ -108,6 +109,7 @@
         (moved nil))
     (publish-base-footprint x-pos y-pos th-pos)
     (ros::publish *points-marker-topicname* *laser-msg*)
+    (warn ";; input commands ...~%");
     (block :loop
       (while t
         (do-until-key
@@ -156,15 +158,28 @@
              (view-footsteps x-pos y-pos th-pos)
              )
             ((string= "z" str)
-             (setq x-pos 350.0
+             (setq x-pos 500.0
                    y-pos 1550.0
+                   th-pos 0.0)
+             )
+            ((string= "Z" str)
+             (setq x-pos 2050.0
+                   y-pos 2050.0
                    th-pos 0.0)
              )
             ((string= "a" str)
              (publish-base-footprint x-pos y-pos th-pos)
              (ros::publish *points-marker-topicname* *laser-msg*)
              (view-footsteps x-pos y-pos th-pos
-                             (make-coords :pos (float-vector 400 1550 0)))
+                             (make-coords :pos (float-vector 2050 2050 0)) ;; on 2nd block
+                             ;;(make-coords :pos (float-vector 2750 2050 0)) ;; on 3rd block
+                             )
+             )
+            ((string= "A" str)
+             (publish-base-footprint x-pos y-pos th-pos)
+             (ros::publish *points-marker-topicname* *laser-msg*)
+             (view-footsteps x-pos y-pos th-pos
+                             (make-coords :pos (float-vector 500 1550 0)))
              )
             ((string= "s" str)
              (start-tilt-laser 1.2)
@@ -174,6 +189,7 @@
                                 *laser-pt*
                                 (instance std_msgs::header :init :frame_id "/pelvis")
                                 :color #f(0 1 1)))
+             (start-tilt-laser 0.0)
              (setq moved t)
              )
             ((string= "q" str)
