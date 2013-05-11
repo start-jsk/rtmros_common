@@ -1,0 +1,9 @@
+<launch>
+  <include file="$(find hrpsys_gazebo)/launch/footstep_planner.launch" >
+    <arg name="MAP_FILE" value="$(find hrpsys_gazebo)/maps/stepping_map.yaml" />
+    <arg name="LAUNCH_RVIZ" value="false" />
+  </include>
+
+  <node name="rviz_stepping_block" pkg="rviz" type="rviz"
+        args="-d $(find hrpsys_gazebo)/config/atlas_laser.vcg" />
+</launch>
