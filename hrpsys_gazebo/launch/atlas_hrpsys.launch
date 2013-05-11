@@ -3,6 +3,8 @@
   <arg name="ROBOT_NAME" default="atlas" />
   <arg name="SIMULATOR_NAME" default="RobotHardware0" />
   <arg name="CONF_FILE" value="$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).conf" />
+  <arg name="USE_LASER" default="false" />
+
   <include file="$(find hrpsys)/launch/hrpsys.launch" >
     <arg name="PROJECT_FILE" value="$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).xml" />
     <arg name="MODEL_FILE" value="$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).dae" />
@@ -27,6 +29,10 @@
   <node name="rtmlaunch_hrpsys_gazebo_atlas_hrpsys_launch" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_gazebo)/launch/atlas_hrpsys.launch"/>
   <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/>
   <!-- END:openrtm connection -->
+
+  <!-- laser scanning -->
+  <include if="$(arg USE_LASER)"
+           file="$(find hrpsys_gazebo)/launch/atlas_laser.launch" />
 
   <!-- bdi_controller -->
   <node pkg="atlas_msgs" type="actionlib_server" name="walking_actionlib_server"/>

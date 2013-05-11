@@ -2,7 +2,7 @@
   <arg name="TASK_NO" default="1" />
   <arg name="USE_LASER" default="false" />
   <include file="$(find atlas_utils)/launch/qual_task_$(arg TASK_NO).launch" />
-  <include file="$(find hrpsys_gazebo)/launch/atlas_hrpsys.launch" />
-  <include if="$(arg USE_LASER)"
-           file="$(find hrpsys_gazebo)/launch/atlas_laser.launch" />
+  <include file="$(find hrpsys_gazebo)/launch/atlas_hrpsys.launch" >
+    <arg name="USE_LASER" value="$(arg USE_LASER)" />
+  </include>
 </launch>
