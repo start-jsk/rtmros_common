@@ -1,6 +1,14 @@
 (require :rtm-ros-robotics-interface "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
 (require :atlas "package://hrpsys_gazebo/models/atlas.l")
+(load "package://hrpsys_gazebo/euslisp/atlas-applications.l")
+
 (ros::load-ros-manifest "hrpsys_gazebo")
+
+;; load compiled messages
+(setq ros::*compile-message* t)
+(ros::roseus-add-msgs "visualization_msgs")
+(ros::roseus-add-msgs "sensor_msgs")
+(setq ros::*compile-message* nil)
 
 (ros::roseus "atlas_interface")
 
@@ -143,108 +151,9 @@
    (send self :control-mode "Stand"))
   )
 
-(defun atlas-init
-  (&key (set-reset-pose nil) (set-user-mode t))
-  (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init)))
-  (if (not (boundp '*atlas*)) (setq *atlas* (instance atlas-robot :init)))
-  ;; parameter for bdi_control
-  (setf (get *atlas* :footstep-parameter)
-       '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
-  (send *ri* :set-soft-error-limit "all" 100) ;; disable SoftErrorLimiter
-  (send *ri* :set-servo-error-limit "all" 0) ;; disable RobotHardware error limit
-  (when set-user-mode
-    (send *ri* :set-simulation-mode))
-  (when set-reset-pose
-    (send *atlas* :reset-pose)
-    ;; send reset pose to real robot
-    (send *ri* :angle-vector (send *atlas* :angle-vector) 3000)
-    (send *ri* :wait-interpolation))
-  (setq *tfb* (instance ros::transform-broadcaster :init))
-  )
-
-
-(defun atlas-tool-look ()
-  (send *atlas* :head :neck-p :joint-angle 50)
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 2000)
-  (send *ri* :wait-interpolation)
-  )
-
-(defun atlas-tool-grasp ()
-  (send *atlas* :larm :shoulder-r :joint-angle -50)
-  (send *atlas* :larm :shoulder-y :joint-angle  40)
-  (send *atlas* :larm :elbow-p    :joint-angle  90)
-  (send *atlas* :larm :elbow-y    :joint-angle  90)
-  (send *atlas* :larm :wrist-y    :joint-angle   0)
-  (send *atlas* :larm :wrist-p    :joint-angle -20)
-
-  (send *atlas* :rarm :shoulder-r :joint-angle  50)
-  (send *atlas* :rarm :shoulder-y :joint-angle  40)
-  (send *atlas* :rarm :elbow-p    :joint-angle -90)
-  (send *atlas* :rarm :elbow-y    :joint-angle  90)
-  (send *atlas* :rarm :wrist-y    :joint-angle   0)
-  (send *atlas* :rarm :wrist-p    :joint-angle -20)
-
-  ;; (send *atlas* :legs :knee-p :joint-angle 30)
-  ;; (send *atlas* :legs :crotch-p :joint-angle -15)
-  ;; (send *atlas* :legs :ankle-p :joint-angle -15)
-  ;; (send *atlas* :move-centroid-on-foot :both '(:rleg :lleg :rarm :larm))
-
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 5000)
-  (send *ri* :wait-interpolation)
-
-  (send *atlas* :rarm :inverse-kinematics (make-coords :pos #f(410 -315 215)) :rotation-axis :z)
-;;  (send *atlas* :rarm :inverse-kinematics (make-coords :pos #f(370 -350 200)) :rotation-axis :z)
-;;  (send *atlas* :move-centroid-on-foot :both '(:rleg :lleg :rarm :larm))
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 5000)
-  (send *ri* :wait-interpolation)
-
-  (send *ri* :start-grasp :rarm)
-  (unix:usleep 3)
-
-  (send *atlas* :rarm :inverse-kinematics (make-coords :pos #f(565 15 400)) :rotation-axis :z :use-torso t)
-;;  (send *atlas* :rarm :inverse-kinematics (make-coords :pos #f(550 0 400)) :rotation-axis :z :use-torso t)
-;;  (send *atlas* :move-centroid-on-foot :both '(:rleg :lleg :rarm :larm))
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 5000)
-  (send *ri* :wait-interpolation)
-
-  (send *ri* :stop-grasp :rarm)
-  (unix:usleep 3)
-  )
-
-
-(defun generate-atlas-walk-pattern
-  (&key (no-gen nil) (fname nil))
-  (let (pattern-list
-        (fname (if fname fname
-		 (format nil "~A/atlas-walk-pattern"
-			 (ros::resolve-ros-path "package://hrpsys_gazebo/build")))))
-    (unless no-gen
-      (format t ";; generate pattern~%")
-      (setq pattern-list
-	    (send *atlas* :calc-walk-pattern-from-footstep-list
-		  (send *atlas* :go-pos-params->footstep-list
-			500 150 45) ;; x[mm] y[mm] th[rad]
-		  :debug-view :no-message :dt 0.01))
-      (format t ";; dump pattern file~%")
-      (send *ri* :dump-seq-pattern-file pattern-list fname))
-    (format t ";; load pattern file~%")
-    (send *ri* :loadPattern fname)
-    ))
-
-(defun atlas-walk-with-walk-pattern-gen ()
-  (send_atlas_control_mode "Stand")
-  (atlas-init :set-reset-pose nil)
-  (objects (list *atlas*))
-  (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 2000)
-  (send_atlas_control_mode "User")
-  (generate-atlas-walk-pattern)
-  )
-
-
 (defun set-simulation-mode (&key (effort 255) (sleep 0.5) (mode :user))
   (let ((msg (instance atlas_msgs::AtlasSimInterfaceCommand :init))
-	(k-effort (instantiate string 28)))
+        (k-effort (instantiate string 28)))
     (case mode
       (:stand
        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STAND*))
@@ -279,6 +188,45 @@
   (let ((msg (instance std_msgs::String :init :data mode)))
     (ros::publish "atlas/mode" msg)))
 
+(defun start-tilt-laser (&optional (speed 1.2))
+  (one-shot-publish "/multisense_sl/set_spindle_speed" (instance std_msgs::Float64 :init :data speed)))
+
+(defun get-tilt-laser (&key (remove-nan))
+  (let ((msg (one-shot-subscribe "/full_cloud2" sensor_msgs::PointCloud2 :timeout 30000)))
+    (when msg
+      (make-eus-pointcloud-from-ros-msg msg :remove-nan remove-nan))))
+
+;;
+;; footstep
+;;
+(defun generate-atlas-walk-pattern
+  (&key (no-gen nil) (fname nil))
+  (let (pattern-list
+        (fname (if fname fname
+		 (format nil "~A/atlas-walk-pattern"
+			 (ros::resolve-ros-path "package://hrpsys_gazebo/build")))))
+    (unless no-gen
+      (format t ";; generate pattern~%")
+      (setq pattern-list
+	    (send *atlas* :calc-walk-pattern-from-footstep-list
+		  (send *atlas* :go-pos-params->footstep-list
+			500 150 45) ;; x[mm] y[mm] th[rad]
+		  :debug-view :no-message :dt 0.01))
+      (format t ";; dump pattern file~%")
+      (send *ri* :dump-seq-pattern-file pattern-list fname))
+    (format t ";; load pattern file~%")
+    (send *ri* :loadPattern fname)
+    ))
+
+(defun atlas-walk-with-walk-pattern-gen ()
+  (send_atlas_control_mode "Stand")
+  (atlas-init :set-reset-pose nil)
+  (objects (list *atlas*))
+  (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
+  (send *ri* :angle-vector (send *atlas* :angle-vector) 2000)
+  (send_atlas_control_mode "User")
+  (generate-atlas-walk-pattern)
+  )
 
 (defvar *footstep-planning-service* "/plan_footsteps")
 
@@ -327,32 +275,24 @@
 ;; (send *ri* :bdi_footstep (footstep-planning-armin (make-coords :pos (scale 1000 (float-vector 0.5 1.55 0)) :rpy (list 0 0 0)) (make-coords :pos (scale 1000 (float-vector 6.2 1.55 0)) :rpy (list 0 0 0))))
 ;; (send *ri* :bdi_footstep (footstep-planning-armin (make-coords :pos (scale 1000 (float-vector 1 1 0)) :rpy (list 0 0 0)) (make-coords :pos (scale 1000 (float-vector 17.3 9 0)) :rpy (list 0 0 0))))
 
-(defun start-tilt-laser (&optional (speed 1.2))
-  (one-shot-publish "/multisense_sl/set_spindle_speed" (instance std_msgs::Float64 :init :data speed)))
-
-(defun get-tilt-laser (&key (remove-nan))
-  (let ((msg (one-shot-subscribe "/full_cloud2" sensor_msgs::PointCloud2 :timeout 30000)))
-    (when msg
-      (make-eus-pointcloud-from-ros-msg msg :remove-nan remove-nan))))
-
-(defun publish-base-footprint (&optional (x 0) (y 0) (th 0)) ;; 425 1550 0
-  (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
-  (let (;;(cds (send (send *atlas* :pelvis :worldcoords)
-        ;;           :transformation (send *atlas* :foot-midcoords)))
-        (icds (send (send *atlas* :foot-midcoords)
-                   :transformation (send *atlas* :pelvis :worldcoords))))
-    ;;(send *tfb* :send-transform cds "/pelvis" "/base_footprint")
-    ;;(send *tfb* :send-transform cds "/odom" "/base_footprint")
-    (send *tfb* :send-transform icds "/base_footprint" "/odom")
-    (send *tfb* :send-transform (make-coords :pos (float-vector x y 0.0) :rpy (list th 0 0))
-          "/map" "/base_footprint")
-    ))
-
-(defun view-footsteps (&optional (x 0.0) (y 0.0) (th 0))
-  (publish-base-footprint x y th)
-  (let ((footsteps
-         (footstep-planning-armin (make-coords :pos (float-vector x y 0) :rpy (list th 0 0))
-                                  (make-coords :pos (float-vector 6250 1550 0)))))
-    (when (y-or-n-p "Can you apply these footsteps ? ")
-      (send *ri* :bdi_footstep footsteps))
-    ))
+(defun atlas-init
+  (&key (set-reset-pose nil) (set-user-mode t))
+  (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init)))
+  (if (not (boundp '*atlas*)) (setq *atlas* (instance atlas-robot :init)))
+  ;; parameter for bdi_control
+  (setf (get *atlas* :footstep-parameter)
+       '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
+  (send *ri* :set-soft-error-limit "all" 100) ;; disable SoftErrorLimiter
+  (send *ri* :set-servo-error-limit "all" 0) ;; disable RobotHardware error limit
+  (when set-user-mode
+    (send *ri* :set-simulation-mode))
+  (when set-reset-pose
+    (cond
+     ((keywordp set-reset-pose)
+      (send *atlas* set-reset-pose))
+     (t (send *atlas* :reset-pose)))
+    ;; send reset pose to real robot
+    (send *ri* :angle-vector (send *atlas* :angle-vector) 3000)
+    (send *ri* :wait-interpolation))
+  (setq *tfb* (instance ros::transform-broadcaster :init))
+  )
