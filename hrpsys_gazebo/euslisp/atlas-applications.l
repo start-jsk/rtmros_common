@@ -73,7 +73,8 @@
          (footstep-planning-armin (make-coords :pos (float-vector x y 0) :rpy (list th 0 0))
                                   dst)))
     (when (y-or-n-p "Can you apply these footsteps ? ")
-      (send *ri* :bdi_footstep footsteps :swing-height 0.31))
+      (send *ri* :bdi_footstep footsteps :swing-height 0.31)
+      t)
     ))
 
 (defun demo-stepping (&optional (init t) (teleport nil) (exec t))
@@ -96,7 +97,7 @@
                      *laser-pt*
                      (instance std_msgs::header :init :frame_id "/pelvis")
                      :color #f(0 1 1)))
-  (start-tilt-laser 0.0)
+  (start-tilt-laser 0.0) ;; stop tilting
   (walking-on-stepping-block)
   )
 
@@ -110,100 +111,125 @@
     (publish-base-footprint x-pos y-pos th-pos)
     (ros::publish *points-marker-topicname* *laser-msg*)
     (warn ";; input commands ...~%");
-    (block :loop
-      (while t
-        (do-until-key
-         (let ((str (read-line)))
-           ;;(pprint str)
-           (cond
-            ((string= "h" str)
-             (setq y-pos (+ y-pos pos-diff) moved t)
-             )
-            ((string= "j" str)
-             (setq x-pos (- x-pos pos-diff) moved t)
-             )
-            ((string= "k" str)
-             (setq x-pos (+ x-pos pos-diff) moved t)
-             )
-            ((string= "l" str)
-             (setq y-pos (- y-pos pos-diff) moved t)
-             )
-            ((string= "r" str)
-             (setq th-pos (- th-pos th-diff) moved t)
-             )
-            ((string= "R" str)
-             (setq th-pos (+ th-pos th-diff) moved t)
-             )
-            ((string= "+" str)
-             (setq pos-diff (* 2 pos-diff))
-             (setq th-diff (* 2 th-diff))
-             )
-            ((string= "-" str)
-             (setq pos-diff (* 0.5 pos-diff))
-             (setq th-diff (* 0.5 th-diff))
-             )
-            ((string= "=" str)
-             (setq pos-diff 5.0
-                   th-diff 0.01)
-             )
-            ((string= "u" str)
-             (setq moved t)
-             )
-            ((string= "w" str)
-             ;; wipe step..
-             )
-            ((string= "f" str)
-             (publish-base-footprint x-pos y-pos th-pos)
-             (ros::publish *points-marker-topicname* *laser-msg*)
-             (view-footsteps x-pos y-pos th-pos)
-             )
-            ((string= "z" str)
-             (setq x-pos 500.0
-                   y-pos 1550.0
-                   th-pos 0.0)
-             )
-            ((string= "Z" str)
-             (setq x-pos 2050.0
-                   y-pos 2050.0
-                   th-pos 0.0)
-             )
-            ((string= "a" str)
-             (publish-base-footprint x-pos y-pos th-pos)
-             (ros::publish *points-marker-topicname* *laser-msg*)
-             (view-footsteps x-pos y-pos th-pos
-                             (make-coords :pos (float-vector 2050 2050 0)) ;; on 2nd block
-                             ;;(make-coords :pos (float-vector 2750 2050 0)) ;; on 3rd block
-                             )
-             )
-            ((string= "A" str)
-             (publish-base-footprint x-pos y-pos th-pos)
-             (ros::publish *points-marker-topicname* *laser-msg*)
-             (view-footsteps x-pos y-pos th-pos
-                             (make-coords :pos (float-vector 500 1550 0)))
-             )
-            ((string= "s" str)
-             (start-tilt-laser 1.2)
-             (get-tilt-laser) ;; ignore first one
-             (setq *laser-pt* (get-tilt-laser))
-             (setq *laser-msg* (pointcloud->marker-msg
-                                *laser-pt*
-                                (instance std_msgs::header :init :frame_id "/pelvis")
-                                :color #f(0 1 1)))
-             (start-tilt-laser 0.0)
-             (setq moved t)
-             )
-            ((string= "q" str)
-             (return-from :loop)
-             ))
-           (cond
-            (moved
-             (setq moved nil)
-             (warn "~A ~A ~A~%" x-pos y-pos th-pos)
-             (publish-base-footprint x-pos y-pos th-pos)
-             (ros::publish *points-marker-topicname* *laser-msg*))
-            (t
-             (publish-base-footprint x-pos y-pos th-pos)
-             ))
-           )))
+    (while t
+      (do-until-key
+       (publish-base-footprint x-pos y-pos th-pos)
+       (unix::usleep (* 50 1000)))
+      (let ((str (read-line nil nil)))
+        (cond ;; selecting command
+         ((string= "h" str)
+          (setq y-pos (+ y-pos pos-diff) moved t)
+          )
+         ((string= "j" str)
+          (setq x-pos (- x-pos pos-diff) moved t)
+          )
+         ((string= "k" str)
+          (setq x-pos (+ x-pos pos-diff) moved t)
+          )
+         ((string= "l" str)
+          (setq y-pos (- y-pos pos-diff) moved t)
+          )
+         ((string= "r" str)
+          (setq th-pos (- th-pos th-diff) moved t)
+          )
+         ((string= "R" str)
+          (setq th-pos (+ th-pos th-diff) moved t)
+          )
+         ((string= "+" str)
+          (setq pos-diff (* 2 pos-diff))
+          (setq th-diff (* 2 th-diff))
+          (warn ";; trans: ~A, rotate: ~A~%" pos-diff th-diff)
+          )
+         ((string= "-" str)
+          (setq pos-diff (* 0.5 pos-diff))
+          (setq th-diff (* 0.5 th-diff))
+          (warn ";; trans: ~A, rotate: ~A~%" pos-diff th-diff)
+          )
+         ((string= "=" str)
+          (setq pos-diff 5.0
+                th-diff 0.01)
+          (warn ";; trans: ~A, rotate: ~A~%" pos-diff th-diff)
+          )
+         ((string= "z" str)
+          (setq x-pos 500.0
+                y-pos 1550.0
+                th-pos 0.0)
+          )
+         ((string= "Z" str)
+          (setq x-pos 2050.0
+                y-pos 2050.0
+                th-pos 0.0)
+          )
+         ((string= "u" str)
+          (setq moved t)
+          )
+         ((string= "w" str)
+          ;; wipe step..
+          )
+         ((string= "f" str) ;; footstep to goal
+          (publish-base-footprint x-pos y-pos th-pos)
+          (ros::publish *points-marker-topicname* *laser-msg*)
+          (view-footsteps x-pos y-pos th-pos)
+          )
+         ((string= "a" str) ;; footstep to 2nd block
+          (publish-base-footprint x-pos y-pos th-pos)
+          (ros::publish *points-marker-topicname* *laser-msg*)
+          (when (view-footsteps x-pos y-pos th-pos
+                                (make-coords :pos (float-vector 2050 2050 0)) ;; on 2nd block
+                                ;;(make-coords :pos (float-vector 2750 2050 0)) ;; on 3rd block
+                                )
+            (setq x-pos 2050.0
+                  y-pos 2050.0
+                  th-pos 0.0))
+          )
+         ((string= "A" str) ;; footstep to initial pose
+          (publish-base-footprint x-pos y-pos th-pos)
+          (ros::publish *points-marker-topicname* *laser-msg*)
+          (when (view-footsteps x-pos y-pos th-pos
+                                (make-coords :pos (float-vector 700 1550 0)))
+            (setq x-pos 700.0
+                  y-pos 1550.0
+                  th-pos 0.0))
+          )
+         ((string= "s" str) ;; update laser
+          (start-tilt-laser 1.2)
+          (get-tilt-laser) ;; ignore first one
+          (setq *laser-pt* (get-tilt-laser))
+          (setq *laser-msg* (pointcloud->marker-msg
+                             *laser-pt*
+                             (instance std_msgs::header :init :frame_id "/pelvis")
+                             :color #f(0 1 1)))
+          (start-tilt-laser 0.0)
+          (setq moved t)
+          )
+         ((string= "q" str)
+          (return)
+          ))
+        ;; check moved
+        (cond
+         (moved
+          (setq moved nil)
+          (warn "~A ~A ~A~%" x-pos y-pos th-pos)
+          (publish-base-footprint x-pos y-pos th-pos)
+          (ros::publish *points-marker-topicname* *laser-msg*))
+         (t
+          (publish-base-footprint x-pos y-pos th-pos)
+          ))
         ))
     ))
+
+#|
+(demo-stepping)
+hjkl 並行移動
+rR 回転（R逆回転R）
++- 移動と回転の量の調整
+=  移動と回転の量のリセット
+a  2番目のブロックまでfootstep
+f  ゴールまでfootstep
+A  初期位置までfootstep（初期位置がずれている場合）
+s  laserのアップデート（移動したあとは必須。。。）
+
+(demo-stepping nil t)
+ステップブロック前まで歩くのを省略できます。
+とするとテレポート（予選では使ってはいけないコマンド）して始めます。
+|#
