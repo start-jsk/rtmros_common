@@ -16,11 +16,12 @@ class HrpsysConfigurator:
 
     # public method
     def connectComps(self):
-        connectPorts(self.rh.port("q"), [self.sh.port("currentQIn"), self.co.port("qCurrent"), self.el.port("qCurrent"), self.ic.port("qCurrent")])
+        connectPorts(self.rh.port("q"), [self.sh.port("currentQIn"), self.co.port("qCurrent"), self.el.port("qCurrent"), self.vs.port("qCurrent"), self.tf.port("qCurrent"), self.ic.port("qCurrent")])
         #
         connectPorts(self.seq.port("qRef"), self.sh.port("qIn"))
         #
         connectPorts(self.rh.port("tau"), self.tf.port("tauIn"))
+        connectPorts(self.tf.port("tauOut"), self.vs.port("tauIn"))
         # currently use first acc and rate sensors for kf
         s_acc=filter(lambda s : s.type == 'Acceleration', self.getSensors(self.url))
         if (len(s_acc)>0) and self.rh.port(s_acc[0].name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
@@ -78,6 +79,10 @@ class HrpsysConfigurator:
         print self.configurator_name, "createComps -> KalmanFilter : ",self.kf
         self.kf_svc = narrow(self.kf.service("service0"), "KalmanFilterService")
 
+        self.ms.load("VirtualForceSensor");
+        self.vs = self.ms.create("VirtualForceSensor", "vs")
+        print self.configurator_name, "createComps -> VirtualForceSensor : ",self.vs
+
         self.ms.load("ImpedanceController");
         self.ic = self.ms.create("ImpedanceController", "ic")
         print self.configurator_name, "createComps -> ImpednanceController : ",self.ic
@@ -104,7 +109,7 @@ class HrpsysConfigurator:
 
     # public method to configure all RTCs to be activated on rtcd
     def getRTCList(self):
-        return [self.rh, self.seq, self.sh, self.tf, self.kf, self.ic, self.abc, self.co, self.el, self.log]
+        return [self.rh, self.seq, self.sh, self.tf, self.kf, self.vs, self.ic, self.abc, self.co, self.el, self.log]
 
     # public method to get bodyInfo
     def getBodyInfo(self, url):
