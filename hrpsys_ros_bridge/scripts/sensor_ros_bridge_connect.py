@@ -18,9 +18,9 @@ def connecSensorRosBridgePort(url, rh, bridge):
         else:
             continue
 
-def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name):
+def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name, managerhost):
     hcf.waitForModelLoader()
-    hcf.waitForRTCManagerAndRoboHardware(simulator_name)
+    hcf.waitForRTCManagerAndRoboHardware(simulator_name, managerhost)
     bridge = None
     while bridge == None :
         time.sleep(1);
@@ -30,9 +30,9 @@ def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name):
 
 if __name__ == '__main__':
     print program_name, "start"
-    hcf=HrpsysConfigurator()
+    hcf=HrpsysConfigurator(program_name)
     if len(sys.argv) > 3 :
-        initSensorRosBridgeConnection(sys.argv[1], sys.argv[2], sys.argv[3])
+        initSensorRosBridgeConnection(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
     else :
         print program_name, " requires url, simulator_name, rosbridge_name"
 
