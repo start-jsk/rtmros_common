@@ -118,23 +118,28 @@ class HrpsysConfigurator:
     def getSensors(self, url):
         return sum(map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, self.getBodyInfo(url)._get_links())), [])  # sum is for list flatten
 
-    def connectLoggerPort(self, sen_name):
-        if self.rh.port(sen_name) != None:
-            sen_type = rtm.dataTypeOfPort(self.rh.port(sen_name)).split("/")[1].split(":")[0]
-            print self.configurator_name, "  setupLogger : type =", sen_type, ",name = ", sen_name, ",port = ", self.rh.port(sen_name)
-            self.log_svc.add(sen_type, sen_name)
-            connectPorts(self.rh.port(sen_name), self.log.port(sen_name))
+    def connectLoggerPort(self, artc, sen_name, add_port = True):
+        if artc.port(sen_name) != None:
+            sen_type = rtm.dataTypeOfPort(artc.port(sen_name)).split("/")[1].split(":")[0]
+            print self.configurator_name, "  setupLogger : type =", sen_type, ",name = ", sen_name, ",port = ", artc.port(sen_name)
+            if add_port:
+                self.log_svc.add(sen_type, sen_name)
+            connectPorts(artc.port(sen_name), self.log.port(sen_name))
 
     # public method to configure default logger data ports
     def setupLogger(self, url=None):
         #
         for pn in ['q', 'tau']:
-            self.connectLoggerPort(pn)
+            self.connectLoggerPort(self.rh, pn)
         # sensor logger ports
         if url :
             print self.configurator_name, "sensor names for DataLogger"
             for sen in hcf.getSensors(url):
-                self.connectLoggerPort(sen.name)
+                self.connectLoggerPort(self.rh, sen.name)
+        #
+        self.connectLoggerPort(self.kf, 'rpy')
+        self.connectLoggerPort(self.seq, 'qRef')
+        self.connectLoggerPort(self.rh, 'emergencySignal', False)
 
     def waitForRTCManagerAndRoboHardware(self, robotname="Robot", managerhost=socket.gethostname()):
         self.ms = None
