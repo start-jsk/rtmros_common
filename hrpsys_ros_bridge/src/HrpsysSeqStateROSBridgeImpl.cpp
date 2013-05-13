@@ -111,8 +111,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     }
   }
 
-
-  coil::vstring virtual_force_sensor = coil::split(m_pManager->getConfig()["virtual_force_sensor"], ",");
+  coil::vstring virtual_force_sensor = coil::split(prop["virtual_force_sensor"], ",");
   int npforce = body->numSensors(hrp::Sensor::FORCE);
   int nvforce = virtual_force_sensor.size()/10;
   int nforce  = npforce + nvforce;
@@ -169,7 +168,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
 
     SensorInfo si;
     si.transform.setOrigin( tf::Vector3(tr[0], tr[1], tr[2]) );
-    si.transform.setRotation( tf::Quaternion(tr[3], tr[4], tr[5], tr[6]) );
+    Eigen::Quaternion<double> qtn(Eigen::AngleAxis<double>(tr[6], hrp::Vector3(tr[3],tr[4],tr[5])));
+    si.transform.setRotation( tf::Quaternion(qtn.x(), qtn.y(), qtn.z(), qtn.w()) );
     OpenHRP::LinkInfoSequence_var links = bodyinfo->links();
     for ( int k = 0; k < links->length(); k++ ) {
       if ( std::string(links[k].name) == target ) {
