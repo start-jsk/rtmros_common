@@ -276,11 +276,11 @@
               :name (string-downcase (send fs :name))
               :base-name (if base-name base-name "WAIST")
               :target-name (send (send (send fs :parent) :joint) :name) args)))
-    ((and (substringp ":v" (string-downcase limb))
+    ((and (substringp ":v" (format nil "~A" limb))
           (find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
      (let ((rlimb (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
        (send* self :set-impednace-controller-param
-              :name (format nil "~Cv~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor")))
+              :name (format nil "v~C~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor")))
               :base-name (send (send (send (send robot rlimb :root-link) :parent) :joint) :name)
               :target-name (send (send (send (send robot rlimb :end-coords) :parent) :joint) :name)
               args)))
