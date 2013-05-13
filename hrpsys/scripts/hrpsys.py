@@ -139,6 +139,8 @@ class HrpsysConfigurator:
         self.ms = None
         while self.ms == None :
             time.sleep(1);
+            if managerhost == "localhost":
+                managerhost = socket.gethostname()
             self.ms = rtm.findRTCmanager(managerhost)
             print self.configurator_name, "wait for RTCmanager : ",self.ms
 
