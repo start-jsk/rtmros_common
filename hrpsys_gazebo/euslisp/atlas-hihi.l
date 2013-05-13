@@ -1,4 +1,4 @@
-(require "package://hrpsys_gazebo/euslisp/atlas-interface.l")
+;;(require "package://hrpsys_gazebo/euslisp/atlas-interface.l")
 
 ;;------------ initalize
 
@@ -517,7 +517,6 @@
  )
 
 #|
-
 (setq *ri* (instance atlas-interface :init))
 
 (init-pose)
@@ -531,3 +530,4 @@
 (do-until-key
  (demo-forward)
  (unix:sleep 1))
+|#

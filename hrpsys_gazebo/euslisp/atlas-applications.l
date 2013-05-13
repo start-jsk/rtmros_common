@@ -77,6 +77,21 @@
       t)
     ))
 
+(defun get-laser-pointcloud (&optional (tilt-speed 1.2))
+  (start-tilt-laser tilt-speed)
+  (get-tilt-laser) ;; ignore first one
+  (setq *laser-pt* (get-tilt-laser))
+  ;;
+  (send *laser-pt* :filter
+        :key #'(lambda (p) (and (< (elt p 0) 8000.0) (< -7000 (elt p 1) 7000))))
+  ;;
+  (setq *laser-msg* (pointcloud->marker-msg
+                     *laser-pt*
+                     (instance std_msgs::header :init :frame_id "/pelvis")
+                     :color #f(0 1 1)))
+  (start-tilt-laser 0.0) ;; stop tilting
+  *laser-msg*)
+
 (defun demo-stepping (&optional (init t) (teleport nil) (exec t))
   (when init (atlas-init :set-user-mode nil))
   (setq *points-marker-topicname* "/points_marker")
@@ -90,16 +105,43 @@
     (do-until-key)
     (read-line))
 
-  (start-tilt-laser 1.2)
-  (get-tilt-laser) ;; ignore first one
-  (setq *laser-pt* (get-tilt-laser))
-  (setq *laser-msg* (pointcloud->marker-msg
-                     *laser-pt*
-                     (instance std_msgs::header :init :frame_id "/pelvis")
-                     :color #f(0 1 1)))
-  (start-tilt-laser 0.0) ;; stop tilting
+  (get-laser-pointcloud)
+
   (walking-on-stepping-block)
   )
+
+;;
+;; parameters
+;;
+(defvar *initial-x* 700.0)
+(defvar *initial-y* 1550.0)
+;;
+(defvar *mid0-destination-x* 1550.0)
+(defvar *mid0-destination-y* 1550.0)
+(defvar *mid0-destination-th* 0.0)
+;;
+;;(defvar *mid-destination-y* 2050.0)
+(defvar *mid-destination-x* 2120.0)
+;;(defvar *mid-destination-y* 2050.0)
+(defvar *mid-destination-y* 2075.0)
+(defvar *mid-destination-th* 0.0)
+;;
+(defvar *mid2-destination-x* 2750.0)
+(defvar *mid2-destination-y* 2100.0)
+(defvar *mid2-destination-th* 0.0)
+;;
+(defvar *mid3-destination-x* 3250.0)
+(defvar *mid3-destination-y* 1550.0)
+(defvar *mid3-destination-th* 0.0)
+;;
+(defvar *final-destination-x* 6250.0)
+(defvar *final-destination-y* 1550.0)
+(defvar *final-destination-th* 0.0)
+;; 1150
+;;              2050 (200) 2750
+;;    (150) 1550               3250 (150)
+;;                                       3650
+;;
 
 (defun walking-on-stepping-block (&optional (xx 500.0) (yy 1550.0) (th 0.0))
   (let ((x-pos xx)
@@ -110,7 +152,7 @@
         (moved nil))
     (publish-base-footprint x-pos y-pos th-pos)
     (ros::publish *points-marker-topicname* *laser-msg*)
-    (warn ";; input commands ...~%");
+    (warn ";; input commands ...~%");;
     (while t
       (do-until-key
        (publish-base-footprint x-pos y-pos th-pos)
@@ -151,13 +193,13 @@
           (warn ";; trans: ~A, rotate: ~A~%" pos-diff th-diff)
           )
          ((string= "z" str)
-          (setq x-pos 500.0
-                y-pos 1550.0
+          (setq x-pos *initial-x*
+                y-pos *initial-y*
                 th-pos 0.0)
           )
          ((string= "Z" str)
-          (setq x-pos 2050.0
-                y-pos 2050.0
+          (setq x-pos *mid-destination-x*
+                y-pos *mid-destination-y*
                 th-pos 0.0)
           )
          ((string= "u" str)
@@ -169,37 +211,45 @@
          ((string= "f" str) ;; footstep to goal
           (publish-base-footprint x-pos y-pos th-pos)
           (ros::publish *points-marker-topicname* *laser-msg*)
-          (view-footsteps x-pos y-pos th-pos)
+          (view-footsteps x-pos y-pos th-pos
+                          (make-coords :pos (float-vector *final-destination-x* *final-destination-y* 0)))
           )
-         ((string= "a" str) ;; footstep to 2nd block
-          (publish-base-footprint x-pos y-pos th-pos)
-          (ros::publish *points-marker-topicname* *laser-msg*)
-          (when (view-footsteps x-pos y-pos th-pos
-                                (make-coords :pos (float-vector 2050 2050 0)) ;; on 2nd block
-                                ;;(make-coords :pos (float-vector 2750 2050 0)) ;; on 3rd block
-                                )
-            (setq x-pos 2050.0
-                  y-pos 2050.0
-                  th-pos 0.0))
-          )
-         ((string= "A" str) ;; footstep to initial pose
-          (publish-base-footprint x-pos y-pos th-pos)
-          (ros::publish *points-marker-topicname* *laser-msg*)
-          (when (view-footsteps x-pos y-pos th-pos
-                                (make-coords :pos (float-vector 700 1550 0)))
-            (setq x-pos 700.0
-                  y-pos 1550.0
-                  th-pos 0.0))
+         ((or (string= "A" str) (string= "a0" str) (string= "a" str)
+              (string= "a1" str) (string= "a2" str) (string= "a3" str)) ;; footstep to each block
+          (let (ppx ppy tth)
+            (cond
+             ((string= "A" str)
+              (setq ppx *initial-x*
+                    ppy *initial-y*
+                    tth 0.0))
+             ((string= "a0" str)
+              (setq ppx *mid0-destination-x*
+                    ppy *mid0-destination-y*
+                    tth *mid0-destination-th*))
+             ((or (string= "a" str)
+                  (string= "a1" str))
+              (setq ppx *mid-destination-x*
+                    ppy *mid-destination-y*
+                    tth *mid-destination-th*))
+             ((string= "a2" str)
+              (setq ppx *mid2-destination-x*
+                    ppy *mid2-destination-y*
+                    tth *mid2-destination-th*))
+             ((string= "a3" str)
+              (setq ppx *mid3-destination-x*
+                    ppy *mid3-destination-y*
+                    tth *mid3-destination-th*)))
+            (publish-base-footprint x-pos y-pos th-pos)
+            (ros::publish *points-marker-topicname* *laser-msg*)
+            (when
+                (view-footsteps x-pos y-pos th-pos
+                                (make-coords :pos (float-vector ppx ppy tth)))
+              (setq x-pos ppx
+                    y-pos ppy
+                    th-pos tth)))
           )
          ((string= "s" str) ;; update laser
-          (start-tilt-laser 1.2)
-          (get-tilt-laser) ;; ignore first one
-          (setq *laser-pt* (get-tilt-laser))
-          (setq *laser-msg* (pointcloud->marker-msg
-                             *laser-pt*
-                             (instance std_msgs::header :init :frame_id "/pelvis")
-                             :color #f(0 1 1)))
-          (start-tilt-laser 0.0)
+          (get-laser-pointcloud)
           (setq moved t)
           )
          ((string= "q" str)
