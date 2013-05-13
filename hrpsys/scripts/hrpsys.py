@@ -118,25 +118,23 @@ class HrpsysConfigurator:
     def getSensors(self, url):
         return sum(map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, self.getBodyInfo(url)._get_links())), [])  # sum is for list flatten
 
+    def connectLoggerPort(self, sen_name):
+        if self.rh.port(sen_name) != None:
+            sen_type = rtm.dataTypeOfPort(self.rh.port(sen_name)).split("/")[1].split(":")[0]
+            print self.configurator_name, "  setupLogger : type =", sen_type, ",name = ", sen_name, ",port = ", self.rh.port(sen_name)
+            self.log_svc.add(sen_type, sen_name)
+            connectPorts(self.rh.port(sen_name), self.log.port(sen_name))
+
     # public method to configure default logger data ports
     def setupLogger(self, url=None):
         #
-        if self.rh.port("q") :
-            self.log_svc.add("TimedDoubleSeq", "q")
-            connectPorts(self.rh.port("q"), self.log.port("q"))
-
-        if self.rh.port("tau") :
-            self.log_svc.add("TimedDoubleSeq", "tau")
-            connectPorts(self.rh.port("tau"), self.log.port("tau"))
+        for pn in ['q', 'tau']:
+            self.connectLoggerPort(pn)
         # sensor logger ports
         if url :
             print self.configurator_name, "sensor names for DataLogger"
             for sen in hcf.getSensors(url):
-                if self.rh.port(sen.name) != None:
-                    sen_type = rtm.dataTypeOfPort(self.rh.port(sen.name)).split("/")[1].split(":")[0]
-                    print self.configurator_name, "  type =", sen_type, ",name = ", sen.name, ",port = ", self.rh.port(sen.name)
-                    self.log_svc.add(sen_type, sen.name)
-                    connectPorts(self.rh.port(sen.name), self.log.port(sen.name))
+                self.connectLoggerPort(sen.name)
 
     def waitForRTCManagerAndRoboHardware(self, robotname="Robot", managerhost=socket.gethostname()):
         self.ms = None
