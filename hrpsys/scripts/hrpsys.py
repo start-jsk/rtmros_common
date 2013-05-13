@@ -29,6 +29,9 @@ class HrpsysConfigurator:
         if (len(s_rate)>0) and self.rh.port(s_rate[0].name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
             connectPorts(self.rh.port(s_rate[0].name), self.kf.port("rate"))
         connectPorts(self.seq.port("accRef"), self.kf.port("accRef"))
+        # for rh
+        if self.rh.port("servoState") != None:
+            connectPorts(self.rh.port("servoState"), self.el.port("servoStateIn"))
         #
         connectPorts(self.seq.port("basePos"), self.sh.port("basePosIn"))
         connectPorts(self.seq.port("baseRpy"), self.sh.port("baseRpyIn"))
