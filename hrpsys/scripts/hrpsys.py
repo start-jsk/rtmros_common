@@ -118,11 +118,11 @@ class HrpsysConfigurator:
     def getSensors(self, url):
         return sum(map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, self.getBodyInfo(url)._get_links())), [])  # sum is for list flatten
 
-    def connectLoggerPort(self, artc, sen_name, add_port = True):
-        if artc.port(sen_name) != None:
+    def connectLoggerPort(self, artc, sen_name):
+        if rtm.findPort(artc.ref, sen_name) != None:
             sen_type = rtm.dataTypeOfPort(artc.port(sen_name)).split("/")[1].split(":")[0]
             print self.configurator_name, "  setupLogger : type =", sen_type, ",name = ", sen_name, ",port = ", artc.port(sen_name)
-            if add_port:
+            if rtm.findPort(self.log.ref, sen_name) == None:
                 self.log_svc.add(sen_type, sen_name)
             connectPorts(artc.port(sen_name), self.log.port(sen_name))
 
@@ -139,7 +139,7 @@ class HrpsysConfigurator:
         #
         self.connectLoggerPort(self.kf, 'rpy')
         self.connectLoggerPort(self.seq, 'qRef')
-        self.connectLoggerPort(self.rh, 'emergencySignal', False)
+        self.connectLoggerPort(self.rh, 'emergencySignal')
 
     def waitForRTCManagerAndRoboHardware(self, robotname="Robot", managerhost=socket.gethostname()):
         self.ms = None
