@@ -270,10 +270,11 @@
    (limb &rest args)
    (cond
     ((send self :get-force-sensor-from-limb-name limb)
-     (let ((fs (send self :get-force-sensor-from-limb-name limb)))
+     (let* ((fs (send self :get-force-sensor-from-limb-name limb))
+            (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
        (send* self :set-impednace-controller-param
               :name (string-downcase (send fs :name))
-              :base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)
+              :base-name (if base-name base-name "WAIST")
               :target-name (send (send (send fs :parent) :joint) :name) args)))
     ((and (substringp ":v" (string-downcase limb))
           (find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
