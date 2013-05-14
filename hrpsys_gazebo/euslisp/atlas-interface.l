@@ -295,6 +295,7 @@
     (send *ri* :angle-vector (send *atlas* :angle-vector) 3000)
     (send *ri* :wait-interpolation))
   (setq *tfb* (instance ros::transform-broadcaster :init))
+  *ri*
   )
 
 #| ;; step is not supported in qualification

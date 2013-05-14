@@ -35,6 +35,7 @@
 	(unix:system "pkill python")
 	(unix:system "pkill gzserver")
 	(unix:system "pkill rviz")
+	(unix:usleep (* 10 1000 1000))
 
 	(warn "[my-msg] start qual_task_1~%")
 
