@@ -9,7 +9,7 @@ from hrpsys import *
 
 program_name = '[sensor_ros_bridge_connect.py] '
 
-def connecSensorRosBridgePort(url, rh, bridge):
+def connecSensorRosBridgePort(url, rh, bridge, vs):
     for sen in hcf.getSensors(url):
         if sen.type in ['Acceleration', 'RateGyro', 'Force']:
             if rh.port(sen.name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
@@ -17,6 +17,10 @@ def connecSensorRosBridgePort(url, rh, bridge):
                 connectPorts(rh.port(sen.name), bridge.port(sen.name), "new")
         else:
             continue
+    if vs != None:
+        for vfp in filter(lambda x : str.find(x, 'v') >= 0 and str.find(x, 'sensor') >= 0, vs.ports.keys()):
+            print program_name, "connect ", vfp, vs.port(vfp), bridge.port(vfp)
+            connectPorts(vs.port(vfp), bridge.port(vfp))
 
 def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name, managerhost):
     hcf.waitForModelLoader()
@@ -26,7 +30,8 @@ def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name, managerho
         time.sleep(1);
         bridge = rtm.findRTC(rosbridge_name)
         print program_name, " wait for ", rosbridge_name, " : ",bridge
-    connecSensorRosBridgePort(url, hcf.rh, bridge)
+    vs=rtm.findRTC('vs')
+    connecSensorRosBridgePort(url, hcf.rh, bridge, vs)
 
 if __name__ == '__main__':
     print program_name, "start"
