@@ -57,7 +57,8 @@ class HrpsysConfigurator:
         for vfp in filter(lambda x : str.find(x, 'v') >= 0 and str.find(x, 'sensor') >= 0, self.vs.ports.keys()):
             connectPorts(self.vs.port(vfp), self.ic.port(vfp))
 
-    def activateComps(self, rtcList):
+    def activateComps(self):
+        rtcList = self.getRTCList()
         rtm.serializeComponents(rtcList)
         for r in rtcList:
             r.start()
@@ -143,7 +144,7 @@ class HrpsysConfigurator:
         # sensor logger ports
         if url :
             print self.configurator_name, "sensor names for DataLogger"
-            for sen in hcf.getSensors(url):
+            for sen in self.getSensors(url):
                 self.connectLoggerPort(self.rh, sen.name)
         #
         self.connectLoggerPort(self.kf, 'rpy')
@@ -208,16 +209,16 @@ class HrpsysConfigurator:
         print self.configurator_name, "creating components"
         self.createComps()
 
-        print self.configurator_name, "activating components"
-        self.activateComps(self.getRTCList())
-
         print self.configurator_name, "connecting components"
         self.connectComps()
 
-        print self.configurator_name, "initialized successfully"
+        print self.configurator_name, "activating components"
+        self.activateComps()
 
         self.setupLogger(url)
         print self.configurator_name, "setup logger done"
+
+        print self.configurator_name, "initialized successfully"
 
     def __init__(self, cname="[hrpsys.py] "):
         self.configurator_name = cname
