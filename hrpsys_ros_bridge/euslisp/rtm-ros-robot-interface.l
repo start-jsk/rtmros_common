@@ -222,7 +222,7 @@
 (defmethod rtm-ros-robot-interface
   (:set-servo-gain-percentage
    (name percentage)
-   (send self :robothardwareservice_setservogainpercentage name percentage))
+   (send self :robothardwareservice_setservogainpercentage :name name :percentage percentage))
   (:remove-force-sensor-offset () (send self :robothardwareservice_removeforcesensoroffset))
   (:set-servo-error-limit
     (name limit)
