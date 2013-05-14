@@ -241,7 +241,7 @@
   ;; set impedance controller param
   ;;   params other than user-defined params are used in current parameter in ImpedanceController RTC by using getImpedanceControllerParam
   ;;   original default parameters are defined in hrpsys-base/rtc/ImpedanceController/ImpedancControl.h
-  (:set-impednace-controller-param
+  (:set-impedance-controller-param
    (&key name base-name target-name
          M-p D-p K-p
          M-r D-r K-r
@@ -272,14 +272,14 @@
     ((send self :get-force-sensor-from-limb-name limb)
      (let* ((fs (send self :get-force-sensor-from-limb-name limb))
             (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
-       (send* self :set-impednace-controller-param
+       (send* self :set-impedance-controller-param
               :name (string-downcase (send fs :name))
               :base-name (if base-name base-name "WAIST")
               :target-name (send (send (send fs :parent) :joint) :name) args)))
     ((and (substringp ":v" (format nil "~A" limb))
           (find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
      (let ((rlimb (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
-       (send* self :set-impednace-controller-param
+       (send* self :set-impedance-controller-param
               :name (format nil "v~C~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor")))
               :base-name (send (send (send (send robot rlimb :root-link) :parent) :joint) :name)
               :target-name (send (send (send (send robot rlimb :end-coords) :parent) :joint) :name)
@@ -295,6 +295,11 @@
      (let ((fs (send self :get-force-sensor-from-limb-name limb)))
        (send self :impedancecontrollerservice_deleteimpedancecontroller
              :name (string-downcase (send fs :name)))))
+    ((and (substringp ":v" (format nil "~A" limb))
+          (find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
+     (let ((rlimb (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
+       (send self :impedancecontrollerservice_deleteimpedancecontroller
+	     :name (format nil "v~C~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor"))))))
     ((eq limb :legs) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rleg :lleg)))
     ((eq limb :arms) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rarm :larm)))
     (t ) ;; virtual force sensor is not supported in this file
