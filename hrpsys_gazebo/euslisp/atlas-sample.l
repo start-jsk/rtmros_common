@@ -12,7 +12,8 @@
   *かえるとび?
     -< (frog)  do-until-keyなので、enterおすまでジャンプしつづける
 |#
-(load "./atlas-interface.l")
+;;(require "package://hrpsys_gazebo/euslisp/atlas-interface.l")
+
 ;;
 (warn "(init)~%")
 (defun init
@@ -41,8 +42,8 @@
   for utility
 |#
 (defun send-pose
-  (&optional (s-time 3000))
-  (send *ri* :angle-vector (send *atlas* :angle-vector) s-time))
+  (&optional (tm 3000))
+  (send *ri* :angle-vector (send *atlas* :angle-vector) tm))
 (defun adapt
   ()
   (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
@@ -54,19 +55,20 @@
 
 ;;わざと転倒させる (前に傾く）
 (defun fall-down
-  (&key (run t) (s-time 3000))
+  (&key (run t) (tm 3000))
   (send *atlas* :reset-pose)
   (send *atlas* :torso-waist-p :joint-angle 40)
   (send *atlas* :lleg-ankle-p :joint-angle -20)
   (send *atlas* :rleg-ankle-p :joint-angle -20)
   (send *irtviewer* :draw-objects)
   (when run 
-    (send-pose s-time))
+    (send-pose tm))
   )
 
 ;;とりあえずeusから動くようにする (ひどい実装orz)
 (defun set-k-effort
   (&optional (k-effort 255))
+#|
   (let (com)
     (setq com "rostopic pub -1 /atlas/atlas_sim_interface_command atlas_msgs/AtlasSimInterfaceCommand '{behavior: 1, k_effort: [")
     (dotimes (i 27)
@@ -74,7 +76,10 @@
     (setq com (concatenate string com 
 			   (format nil "~a]}'" k-effort)))
     (unix:system com)
-    ))
+    )
+|#
+  (send *ri* :set-simulation-mode :mode :user :effort k-effort)
+  )
 
 #|
  起き上がり
@@ -84,7 +89,7 @@
 |#
 ;; 1. まっすぐにする
 (defun pose1
-  (&key (run t) (s-time 3000))
+  (&key (run t) (tm 3000))
   (send *atlas* :lleg :angle-vector #f(0 0 0 0 0 0))
   (send *atlas* :rleg :angle-vector #f(0 0 0 0 0 0))
   (send *atlas* :torso-waist-p :joint-angle 0)
@@ -97,13 +102,13 @@
   (send *atlas* :rleg-crotch-p :joint-angle 10)
 
   (send *irtviewer* :draw-objects)
-  (when run (send-pose s-time))
+  (when run (send-pose tm))
   )
 ;;  2. 足を曲げる、足首を地面と水平にする2
 ;;     腰を曲げる、腕を曲げる
 ;;    (土下座のイメージ)
 (defun pose2
-  (&key (run t) (s-time 3000))
+  (&key (run t) (tm 3000))
   ;;足を曲げる
   (send *atlas* :lleg-knee-p :joint-angle 140)   ;;140が可動域
   (send *atlas* :rleg-knee-p :joint-angle 140)
@@ -135,12 +140,12 @@
   (send *atlas* :rarm-elbow-y :joint-angle -20)
   ;;
   (send *irtviewer* :draw-objects)
-  (when run (send-pose s-time))
+  (when run (send-pose tm))
   )
 
 ;; 3. 手と腰を使ってシコ状態に遷移させる
 (defun pose3
-  (&key (run t) (s-time 5000))
+  (&key (run t) (tm 5000))
   (pose2 :run nil)
   ;;
   (send *atlas* :larm-elbow-p :joint-angle 20)
@@ -149,12 +154,12 @@
   (send *atlas* :torso-waist-p :joint-angle 50)
   ;;
   (send *irtviewer* :draw-objects)
-  (when run (send-pose s-time))
+  (when run (send-pose tm))
   )
 ;;
 ;; 4. 腰を元に戻し、足もあげていく
 (defun pose4-1
-  (&key (run nil) (s-time 30000))
+  (&key (run nil) (tm 30000))
   (pose2 :run nil)
   ;;
   (send *atlas* :larm-elbow-p :joint-angle 10)
@@ -183,12 +188,12 @@
 |#
   ;;
   (send *irtviewer* :draw-objects)
-  (when run (send-pose s-time))
+  (when run (send-pose tm))
   )
 
 ;; 4. 腰を元に戻し、足もあげていく (中間姿勢２：一度にゆっくりしたとしてもこけるっぽい, なんで？)
 (defun pose4-2
-  (&key (run nil) (s-time 30000))
+  (&key (run nil) (tm 30000))
   (pose4-1 :run nil)
   ;;
   (send *atlas* :larm-shoulder-y :joint-angle 0)
@@ -211,12 +216,12 @@
   (send *atlas* :rleg-ankle-r :joint-angle 20)
   ;;
   (send *irtviewer* :draw-objects)
-  (when run (send-pose s-time))
+  (when run (send-pose tm))
   )
 
 ;; 4. 腰を元に戻し、足もあげていく (中間姿勢3：一度にゆっくりしたとしてもこけるっぽい, なんで？)
 (defun pose4-3
-  (&key (run nil) (s-time 30000))
+  (&key (run nil) (tm 30000))
   (pose4-1 :run nil)
   ;;
   (send *atlas* :torso-waist-p :joint-angle -5)
@@ -238,22 +243,23 @@
   (send *atlas* :rleg-ankle-r :joint-angle 10)
   ;;
   (send *irtviewer* :draw-objects)
-  (when run (send-pose s-time))
+  (when run (send-pose tm))
   )
   
 ;; 4. 腰を元に戻し、足もあげていく　最終姿勢：pose4-4の姿勢は、walkの初期姿勢と同じ,この状態ならk-effortを0にしてもこけなくなる
 (defun pose4-4
-  (&key (run nil) (s-time 30000))
+  (&key (run nil) (tm 30000))
   (send *atlas* :angle-vector
 	#f(-0.000611 0.076327 0.002034 28.5397 114.638 -0.264813 -74.6804 17.1935 0.017428 -28.5384 114.637 0.268241 74.6782 17.1937 0.018326 29.5172 -3.85612 -14.613 4.16939 -13.4334 17.3866 29.2973 4.51093 -14.4278 -5.09418 -13.4808 -17.3512 -0.061066))
   ;;
   (send *irtviewer* :draw-objects)
-  (when run (send-pose s-time))
+  (when run (send-pose tm))
   )
 
 ;;
 (defun stand-up
-  (&key (recover t))   ;;recover = tの場合、最後のこけてしまっていたらやりなおす
+  (&key (recover t) (time-scale 1.0))   ;;recover = tの場合、最後のこけてしまっていたらやりなおす
+  (send *ri* :start-grasp)
   (tagbody
    :start
    ;;仰向けかうつ伏せかを判定し、仰向けならうつ伏せに移行
@@ -268,13 +274,13 @@
    (unix:sleep 2)
    ;;
    (print "set pose1")
-   (pose1 :s-time 15000)
+   (pose1 :tm (* time-scale 4000))
    (send *ri* :wait-interpolation)
    (print "set pose2")
-   (pose2 :s-time 15000)
+   (pose2 :tm (* time-scale 3000))
    (send *ri* :wait-interpolation)
    (print "set pose3")
-   (pose3)
+   (pose3 :tm (* time-scale 4000))
    (send *ri* :wait-interpolation)
    (warn "wait for totally landing, then push enter key~%")
    (let ((counter 0))
@@ -298,20 +304,20 @@
    ;;
    (unix:sleep 1)
    (print "set pose4-1")
-   (pose4-1 :s-time 20000 :run t)
+   (pose4-1 :tm (* time-scale 2000) :run t)
    (send *ri* :wait-interpolation)
    ;;
    (print "set pose4-2")
-   (pose4-2 :s-time 20000 :run t)
+   (pose4-2 :tm (* time-scale 2000) :run t)
    (send *ri* :wait-interpolation)
    ;;
    (print "set pose4-3")
-   (pose4-3 :s-time 20000 :run t)
+   (pose4-3 :tm (* time-scale 2000) :run t)
    (send *ri* :wait-interpolation)
    ;;
    ;;ここから怪しいがたまに成功する
    (print "set pose4-4(final pose)")
-   (pose4-4 :s-time 50000 :run t)
+   (pose4-4 :tm (* time-scale 4000) :run t)
    (send *ri* :wait-interpolation)
 #|
   (unix:sleep 1)
@@ -547,7 +553,7 @@
  4足歩行モード（蛙飛びが一番楽かな)
 |#
 (defun frog-pose1
-  (&key (run t) (s-time 3000))
+  (&key (run t) (tm 3000))
   (pose1 :run nil)
   ;;
 #|
@@ -568,12 +574,12 @@
   (send *atlas* :rarm-shoulder-r :joint-angle -20)
   (send *atlas* :lleg-ankle-p :joint-angle 20)
   (send *atlas* :rleg-ankle-p :joint-angle 20)
-  (when run (send-pose s-time))
+  (when run (send-pose tm))
   )
 
 ;;なるべく足部を地面に接触させるのがポイント
 (defun frog-pose2
-  (&key (run t) (s-time 3000))
+  (&key (run t) (tm 3000))
   (pose2 :run nil)
   ;;
   (send *atlas* :torso-waist-p :joint-angle 40)
@@ -582,7 +588,7 @@
   (send *atlas* :larm-elbow-p :joint-angle 120)
   (send *atlas* :rarm-elbow-p :joint-angle -120)
   
-  (when run (send-pose s-time))
+  (when run (send-pose tm))
   )
 
 (defun frog
@@ -593,8 +599,8 @@
    (send *ri* :wait-interpolation) 
    (unix:sleep 3) 
    ;;
-   ;;(frog-pose1 :s-time 500) 
-   (pose1 :s-time 2000)
+   ;;(frog-pose1 :tm 500) 
+   (pose1 :tm 2000)
    (send *ri* :wait-interpolation) 
    (unix:sleep 5))
   )
@@ -604,24 +610,42 @@
   起き上がりの際に使う
   *atlas_forcetorque* に力センサの値は格納される
 |#
-(defun check_feet_on_ground
-  ()
-  (let (lf-force rf-force (ret-flag nil))
-    (ros::spin-once)   ;;ROSのセンサtopicを更新
-    (setq lf-force (cdr (assoc :l_foot *atlas_forcetorque*)))  ;; #f(fx fy fz mx my mz)
-    (setq rf-force (cdr (assoc :r_foot *atlas_forcetorque*)))  ;; #f(fx fy fz mx my mz)
+(defun check_feet_on_ground (&optional (average-times 40))
+  (let ((lf-force (instantiate float-vector 6))
+        (rf-force (instantiate float-vector 6))
+        (ret-flag nil) (cntr 0))
+    (setq *atlas_forcetorque* nil)
+    (while (< cntr average-times)
+      (ros::spin-once)   ;;ROSのセンサtopicを更新
+      (when  *atlas_forcetorque*
+        (v+ (cdr (assoc :l_foot *atlas_forcetorque*)) lf-force lf-force)  ;; #f(fx fy fz mx my mz)
+        (v+ (cdr (assoc :r_foot *atlas_forcetorque*)) rf-force rf-force)  ;; #f(fx fy fz mx my mz)
+        (incf cntr)
+        (pprint (list lf-force rf-force))
+        (setq *atlas_forcetorque* nil))
+      )
+    (scale (/ 1.0 cntr) lf-force lf-force)
+    (scale (/ 1.0 cntr) rf-force rf-force)
+
     ;;
     ;;なお、atlasは、足首力センサは３成分のみ fz, mx, my
     ;;  両足で地面にたっている条件
     ;;    lfz, rfz > 300
     ;;    root( lmx*lmx +  lmy*lmy ) < 33
     ;;    root( rmx*rmx +  rmy*rmy ) < 33
-    (if (and (> (aref lf-force 2) 300)
-	     (> (aref rf-force 2) 300)
-	     (< (sqrt (+ (* (aref lf-force 3) (aref lf-force 3)) (* (aref lf-force 4) (aref lf-force 4)))) 33)
-	     (< (sqrt (+ (* (aref rf-force 3) (aref rf-force 3)) (* (aref rf-force 4) (aref rf-force 4)))) 33)
-	     )
-	(setq ret-flag t))
+    (pprint (list
+             (aref lf-force 2)
+             (aref rf-force 2)
+             (sqrt (+ (* (aref lf-force 3) (aref lf-force 3)) (* (aref lf-force 4) (aref lf-force 4))))
+             (sqrt (+ (* (aref rf-force 3) (aref rf-force 3)) (* (aref rf-force 4) (aref rf-force 4))))))
+    (if (or
+         (> (+ (aref lf-force 2) (aref rf-force 2)) 800)
+         (and (> (aref lf-force 2) 280)
+              (> (aref rf-force 2) 280)
+              (< (sqrt (+ (* (aref lf-force 3) (aref lf-force 3)) (* (aref lf-force 4) (aref lf-force 4)))) 33)
+              (< (sqrt (+ (* (aref rf-force 3) (aref rf-force 3)) (* (aref rf-force 4) (aref rf-force 4)))) 33)
+              ))
+        (setq ret-flag t))
     ret-flag))
 #|
   仰向け？うつ伏せ？
