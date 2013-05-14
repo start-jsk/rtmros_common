@@ -113,7 +113,7 @@
 ;;
 ;; parameters
 ;;
-(defvar *initial-x* 700.0)
+(defvar *initial-x* 850.0)
 (defvar *initial-y* 1550.0)
 ;;
 (defvar *mid0-destination-x* 1550.0)
@@ -143,7 +143,7 @@
 ;;                                       3650
 ;;
 
-(defun walking-on-stepping-block (&optional (xx 500.0) (yy 1550.0) (th 0.0))
+(defun walking-on-stepping-block (&optional (xx 400.0) (yy 1550.0) (th 0.0))
   (let ((x-pos xx)
         (y-pos yy)
         (th-pos th)

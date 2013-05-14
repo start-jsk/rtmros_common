@@ -5,5 +5,5 @@
   </include>
 
   <node name="first_walking" pkg="roseus" type="roseus"
-        args="&quot;(load \&quot;package://hrpsys_gazebo/euslisp/atlas-interface.l\&quot;)&quot; &quot;(progn (atlas-init :set-user-mode nil) (send *ri* :bdi_footstep (footstep-planning-armin (make-coords :pos (float-vector 1000 1000 0)) (make-coords :pos (float-vector 17750 9300 0)))))&quot;" />
+        args="&quot;(load \&quot;package://hrpsys_gazebo/euslisp/atlas-interface.l\&quot;)&quot; &quot;(progn (atlas-init :set-user-mode nil) (send *ri* :bdi_footstep (footstep-planning-armin (make-coords :pos (float-vector 1000 1000 0)) (make-coords :pos (float-vector 17650 9300 0)))))&quot;" />
 </launch>
