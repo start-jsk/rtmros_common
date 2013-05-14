@@ -52,6 +52,10 @@ class HrpsysConfigurator:
         connectPorts(self.sh.port("basePosOut"), self.seq.port("basePosInit"))
         connectPorts(self.sh.port("baseRpyOut"), self.seq.port("baseRpyInit"))
         connectPorts(self.sh.port("qOut"), self.seq.port("qInit"))
+        #
+        # virtual force sensor connection
+        for vfp in filter(lambda x : str.find(x, 'v') >= 0 and str.find(x, 'sensor') >= 0, self.vs.ports.keys()):
+            connectPorts(self.vs.port(vfp), self.ic.port(vfp))
 
     def activateComps(self, rtcList):
         rtm.serializeComponents(rtcList)
