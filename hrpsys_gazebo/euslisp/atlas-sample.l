@@ -60,6 +60,8 @@
   (send *atlas* :torso-waist-p :joint-angle 40)
   (send *atlas* :lleg-ankle-p :joint-angle -20)
   (send *atlas* :rleg-ankle-p :joint-angle -20)
+  (send *atlas* :larm :angle-vector (float-vector   90 17 0.0 -27 -93 0.0))
+  (send *atlas* :rarm :angle-vector (float-vector  -90 17 0.0  27 -93 0.0))
   (send *irtviewer* :draw-objects)
   (when run 
     (send-pose tm))

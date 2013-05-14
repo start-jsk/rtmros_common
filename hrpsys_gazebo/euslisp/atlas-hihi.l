@@ -64,7 +64,7 @@
 	    (cons
 	        k
 		   (let ((c (send (send *robot* :rleg :end-coords) :copy-worldcoords)))
-		          (send c :rotate (deg2rad -95) :y)
+		          (send c :rotate (deg2rad -85) :y)
 			       (send c :rotate
 				        (deg2rad
 					     (* (if (eq k :rleg) 1 -1) 40))
@@ -104,7 +104,7 @@
 ;; ---------- utility function
 
 (defun model2real
-  (&key (robot *robot*) (sleep-time 5000))
+  (&key (robot *robot*) (sleep-time 200))
   (send *ri* :angle-vector
 	(send *robot* :angle-vector) sleep-time)
   (if (find-method *ri* :hand-angle-vector)
@@ -378,13 +378,13 @@
 	(scale 0 (send *robot* :angle-vector)))
   (if (not back-centroid)
       (progn
-	(send *robot* :rarm :elbow-p :joint-angle -90)
-	(send *robot* :larm :elbow-p :joint-angle 90)))
-  (send *robot* :arms :shoulder-y :joint-angle -90)
+	(send *robot* :rarm :elbow-p :joint-angle -100)
+	(send *robot* :larm :elbow-p :joint-angle 100)))
+  (send *robot* :arms :shoulder-y :joint-angle -80)
   (send *robot* :rotate (deg2rad 45) :y)
-  (send *robot* :legs :ankle-p :joint-angle 90)
+  (send *robot* :legs :ankle-p :joint-angle 100)
   (send *robot* :torso :waist-p :joint-angle 70)
-  (send *robot* :legs :knee-p :joint-angle 90)
+  (send *robot* :legs :knee-p :joint-angle 100)
   (send *robot* :legs :crotch-p :joint-angle -60)
   (animal-fullbody
    :debug-view :no-message
@@ -504,11 +504,11 @@
   (move-sequence
    :real-flag real-flag
    :mirror? nil
-   :move #F(250 0 0))
+   :move #F(200 0 0))
   (move-sequence
    :real-flag real-flag
    :mirror? t
-   :move #F(250 0 0))
+   :move #F(200 0 0))
   )
 
 (format
