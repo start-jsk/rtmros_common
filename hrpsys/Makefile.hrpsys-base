@@ -13,7 +13,7 @@ installed: ${SVN_DIR} patched
 	-cd build/hrpsys-base && make install
 	#
 	# copy idl
-	mkdir -p $(CURDIR)/idl && cp $(CURDIR)/share/hrpsys/idl/* ./idl/
+	mkdir -p $(CURDIR)/idl && cp -u $(CURDIR)/share/hrpsys/idl/* ./idl/
 	touch installed
 
 build/robothardware_eclipse.zip: build/hrpsys-base/plugin/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3.1.0.jar
