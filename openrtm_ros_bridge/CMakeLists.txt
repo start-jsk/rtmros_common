@@ -13,7 +13,7 @@ include(${rtmbuild_PACKAGE_PATH}/cmake/rtmbuild.cmake)
 
 rosbuild_find_ros_package(openrtm)
 execute_process(COMMAND mkdir ${PROJECT_SOURCE_DIR}/idl)
-execute_process(COMMAND find ${openrtm_PACKAGE_PATH}/share/OpenRTM-aist/examples -name "*.idl" -exec cp {} ${PROJECT_SOURCE_DIR}/idl \; RESULT_VARIABLE _idl_copied)
+execute_process(COMMAND find ${openrtm_PACKAGE_PATH}/share/openrtm-1.1/example -name "*.idl" -exec cp {} ${PROJECT_SOURCE_DIR}/idl \; RESULT_VARIABLE _idl_copied)
 
 # rosbuild_init()
 rtmbuild_init()
