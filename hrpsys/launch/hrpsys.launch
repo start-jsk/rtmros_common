@@ -33,7 +33,9 @@
     <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
   </group>
 
-  <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" respawn="$(arg RESPAWN)" if="$(arg openrtm_openhrp_server_start)"/> <!-- loading dae files crushes model loader -->
+  <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader"
+        respawn="$(arg RESPAWN)" output="screen"
+        if="$(arg openrtm_openhrp_server_start)"/> <!-- loading dae files crushes model loader -->
 
   <node if="$(arg USE_RTCD)"
         name="hrpsys" pkg="openrtm" type="rtcd" output="$(arg OUTPUT)"
