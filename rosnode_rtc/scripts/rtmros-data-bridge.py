@@ -20,6 +20,8 @@ import rospy
 import rostopic
 import rosnode
 import socket
+import xmlrpclib
+import genpy
 
 # rtm modules
 import time
@@ -40,9 +42,9 @@ module_spec = ["implementation_id", "<implementation_id>",
 
 # ROS topic type utility functions
 def get_topicname_by_node(nodename):
-    master = rosnode.scriptutil.get_master()
+    master = xmlrpclib.ServerProxy(os.environ['ROS_MASTER_URI'])
     try:
-        state = rosnode._succeed(master.getSystemState(rosnode.ID))
+        state = rosnode._succeed(master.getSystemState(rospy.get_name()))
     except socket.error:
         raise ROSNodeIOException("Unable to communicate with master!")
     pubs = [t for t, l in state[0] if nodename in l]
@@ -222,8 +224,8 @@ class RtmRosDataIdl:
                     arg = var
                 else:
                     arg = [self.rtm2ros(da) for da in list(var)]
-            elif type(ovar) in [roslib.rostime.Time, roslib.rostime.Duration]:
-                arg = roslib.rostime.Time(var.sec, var.nsec)
+            elif type(ovar) in [genpy.rostime.Time, genpy.rostime.Duration]:
+                arg = genpy.rostime.Time(var.sec, var.nsec)
             else:
                 arg = self.rtm2ros(var)
             setattr(output, slot, arg)
@@ -242,7 +244,7 @@ class RtmRosDataIdl:
                     arg = var
                 else:
                     arg = [self.ros2rtm(da) for da in list(var)]
-            elif typ in [roslib.rostime.Time, roslib.rostime.Duration]:
+            elif typ in [genpy.rostime.Time, genpy.rostime.Duration]:
                 arg = RTC.Time(var.secs, var.nsecs)
             else:
                 arg = self.ros2rtm(var)
