@@ -12,7 +12,7 @@
   <arg unless="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless " />
   <arg     if="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless -realtime" />
   <arg name="openrtm_openhrp_server_start" default="true"/>
-  <arg name="START_NAME_SERVER" default="false" />
+  <arg name="START_NAME_SERVER" default="true" />
 
   <!-- END:openrtm setting -->
   <arg name="PROJECT_FILE" />
