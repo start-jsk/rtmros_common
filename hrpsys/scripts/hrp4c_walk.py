@@ -20,6 +20,8 @@ def loadPattern(basename, tm=1.0):
     print basename
     seq_svc.loadPattern(basename, tm)
     seq_svc.waitInterpolation()
+    
+    seq_svc.setJointAngle("R_SHOULDER_P", -3.0, 10)
 
 init()
 
