@@ -19,6 +19,9 @@ http://code.google.com/p/openhrp-aist-grx/
 
   <depend package="openhrp3" />
 
+  <!-- for robothardware_eclipse.zip -->
+  <depend package="hrpsys" />
+
   <!-- for rostest -->
   <depend package="jsk_tools" />
   <rosdep name="python-psutil" />
