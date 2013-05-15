@@ -17,6 +17,7 @@ static ros::NodeHandle* rosnode;
 static ros::Publisher pub_joint_commands_;
 static ros::Subscriber sub_atlas_state;
 static atlas_msgs::AtlasCommand jointcommands;
+static atlas_msgs::AtlasCommand initial_jointcommands;
 //static osrf_msgs::JointCommands jointcommands;
 static atlas_msgs::AtlasState js;
 static int init_sub_flag = FALSE;
@@ -453,12 +454,27 @@ int write_command_angles(const double *angles)
 
 int read_pgain(int id, double *gain)
 {
-    return FALSE;
+  std::cerr << ";;; read gain: " << id << " = " << *gain << std::endl;
+  if(JOINT_ID_MODEL2REAL(id) < 0) {
+    //
+  }else{
+    int iid = JOINT_ID_MODEL2REAL(id);
+    *(gain) = jointcommands.kp_position[iid] / initial_jointcommands.kp_position[iid];
+  }
+  return TRUE;
 }
 
 int write_pgain(int id, double gain)
 {
-    return FALSE;
+  std::cerr << ";;; write gain: " << id << " = " << gain << std::endl;
+  if(JOINT_ID_MODEL2REAL(id) < 0) {
+    //
+  }else{
+    int iid = JOINT_ID_MODEL2REAL(id);
+    jointcommands.kp_position[iid] =
+      gain * initial_jointcommands.kp_position[iid];
+  }
+  return TRUE;
 }
 
 int read_dgain(int id, double *gain)
@@ -777,6 +793,7 @@ int open_iob(void)
     clock_gettime(CLOCK_MONOTONIC, &g_ts);
     rg_ts = ros::Time::now();
 
+    initial_jointcommands = jointcommands;
     isInitialized = true;
     return TRUE;
 } 
