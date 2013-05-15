@@ -77,6 +77,37 @@
       t)
     ))
 
+(defun move-to-viewpose ()
+  (send *atlas* :angle-vector
+        (send *ri* :state :potentio-vector))
+  (send *ri* :angle-vector
+        (send *atlas* :angle-vector) 1200)
+  (send *ri* :wait-interpolation)
+  (send *ri* :set-simulation-mode :mode :user)
+  ;;
+  (send *atlas* :stand-pose)
+  (send *atlas* :head :neck-p :joint-angle 20)
+  ;;
+  (send *ri* :angle-vector
+        (send *atlas* :angle-vector) 2400)
+  (send *ri* :wait-interpolation)
+  (send *ri* :set-simulation-mode :mode :stand))
+
+(defun move-to-standpose ()
+  (send *atlas* :angle-vector
+        (send *ri* :state :potentio-vector))
+  (send *ri* :angle-vector
+        (send *atlas* :angle-vector) 1200)
+  (send *ri* :wait-interpolation)
+  (send *ri* :set-simulation-mode :mode :user)
+  ;;
+  (send *atlas* :stand-pose)
+  ;;
+  (send *ri* :angle-vector
+        (send *atlas* :angle-vector) 2400)
+  (send *ri* :wait-interpolation)
+  (send *ri* :set-simulation-mode :mode :stand))
+
 (defun get-laser-pointcloud (&optional (tilt-speed 1.2))
   (start-tilt-laser tilt-speed)
   (get-tilt-laser) ;; ignore first one
@@ -143,6 +174,7 @@
 ;;                                       3650
 ;;
 
+(setq *laser-msg* nil)
 (defun walking-on-stepping-block (&optional (xx 400.0) (yy 1550.0) (th 0.0))
   (let ((x-pos xx)
         (y-pos yy)
@@ -151,7 +183,8 @@
         (th-diff 0.01)
         (moved nil))
     (publish-base-footprint x-pos y-pos th-pos)
-    (ros::publish *points-marker-topicname* *laser-msg*)
+    (when *laser-msg*
+      (ros::publish *points-marker-topicname* *laser-msg*))
     (warn ";; input commands ...~%");;
     (while t
       (do-until-key
@@ -252,6 +285,12 @@
           (get-laser-pointcloud)
           (setq moved t)
           )
+         ((string= "v" str)
+          (move-to-viewpose)
+          )
+         ((string= "V" str)
+          (move-to-stand-pose)
+          )
          ((string= "q" str)
           (return)
           ))
@@ -261,7 +300,8 @@
           (setq moved nil)
           (warn "~A ~A ~A~%" x-pos y-pos th-pos)
           (publish-base-footprint x-pos y-pos th-pos)
-          (ros::publish *points-marker-topicname* *laser-msg*))
+          (when *laser-msg*
+            (ros::publish *points-marker-topicname* *laser-msg*)))
          (t
           (publish-base-footprint x-pos y-pos th-pos)
           ))
