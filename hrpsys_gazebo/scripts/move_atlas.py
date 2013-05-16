@@ -42,7 +42,7 @@ def move(x, y, z, w=0):
     sim_interface.publish(com)
     rospy.sleep(2.0)
     mode.publish("nominal")
-    rospy.sleep(0.01)
+    rospy.sleep(0.05)
     set_pose.publish(p)
     rospy.sleep(0.2)
     com.behavior = com.STAND
