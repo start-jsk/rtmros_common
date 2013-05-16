@@ -46,6 +46,7 @@
 (defun adapt ()
   (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
   (send *irtviewer* :draw-objects))
+
 (defun reset-pose ()
   (send *atlas* :reset-pose))
 
@@ -103,6 +104,23 @@
 ;;  2. 足を曲げる、足首を地面と水平にする2
 ;;     腰を曲げる、腕を曲げる
 ;;    (土下座のイメージ)
+(defun pre-pose2 (&key (run t) (tm 1000))
+  ;;(send *atlas* :lleg-knee-p :joint-angle 140)   ;;140が可動域
+  ;;(send *atlas* :rleg-knee-p :joint-angle 140)
+  (send *atlas* :lleg-ankle-p :joint-angle -20)  ;;-40が可動域
+  (send *atlas* :rleg-ankle-p :joint-angle -20)
+  (send *atlas* :lleg-ankle-r :joint-angle -10)
+  (send *atlas* :rleg-ankle-r :joint-angle 10)
+
+  ;;(send *atlas* :lleg-crotch-p :joint-angle -100)  ;;-100が可動域
+  ;;(send *atlas* :rleg-crotch-p :joint-angle -100)
+  ;;(send *atlas* :lleg-crotch-y :joint-angle 30)
+  ;;(send *atlas* :rleg-crotch-y :joint-angle -30)
+  (send *atlas* :rleg-crotch-r :joint-angle -10)
+  (send *atlas* :lleg-crotch-r :joint-angle 10)
+  (send *irtviewer* :draw-objects)
+  (when run (send-pose tm))
+  )
 (defun pose2 (&key (run t) (tm 3000))
   ;;足を曲げる
   (send *atlas* :lleg-knee-p :joint-angle 140)   ;;140が可動域
@@ -244,9 +262,10 @@
   )
 
 ;;
-(defun stand-up (&key (recover t) (time-scale 1.0))
+(defun stand-up (&key (recover t) (time-scale 1.0) (wait-times 40))
   ;;recover = tの場合、最後こけてしまっていたらやりなおす
-  (send *ri* :start-grasp)
+  ;;(send *ri* :start-grasp)
+  (send *ri* :stop-grasp)
   (tagbody
    :start
    ;;仰向けかうつ伏せかを判定し、仰向けならうつ伏せに移行
@@ -261,10 +280,12 @@
    (unix:sleep 2)
    ;;
    (print "set pose1")
-   (pose1 :tm (* time-scale 4000))
+   (pose1 :tm (* time-scale 2000))
    (send *ri* :wait-interpolation)
    (print "set pose2")
-   (pose2 :tm (* time-scale 3000))
+   (pre-pose2 :tm (* time-scale 1000))
+   (send *ri* :wait-interpolation)
+   (pose2 :tm (* time-scale 2400))
    (send *ri* :wait-interpolation)
    (print "set pose3")
    (pose3 :tm (* time-scale 4000))
@@ -275,10 +296,9 @@
      (while (not (setq foot-on-ground-flag (check_feet_on_ground)))  ;;地面に足がつくまで
        (if (not foot-on-ground-flag)
            (print "  not yet foot on ground, then please wait..."))
-
        (unix:sleep 1)
        (incf counter)
-       (when (> counter 20)
+       (when (> counter wait-times)
          (print "something wrong is occured! retry!")
          (pose1)
          (send *ri* :wait-interpolation)
@@ -617,7 +637,8 @@
              (sqrt (+ (* (aref lf-force 3) (aref lf-force 3)) (* (aref lf-force 4) (aref lf-force 4))))
              (sqrt (+ (* (aref rf-force 3) (aref rf-force 3)) (* (aref rf-force 4) (aref rf-force 4))))))
     (if (or
-         (> (+ (aref lf-force 2) (aref rf-force 2)) 800)
+         ;;(> (+ (aref lf-force 2) (aref rf-force 2)) 800)
+         nil
          (and (> (aref lf-force 2) 280)
               (> (aref rf-force 2) 280)
               (< (sqrt (+ (* (aref lf-force 3) (aref lf-force 3)) (* (aref lf-force 4) (aref lf-force 4)))) 33)
