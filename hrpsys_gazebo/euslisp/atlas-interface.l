@@ -143,10 +143,11 @@
   (:teleport-to (coords &optional (pose))
    (unix::usleep (* 100 1000))
    (send self :atlas-mode "harnessed")
-   (send self :control-mode "Freeze")
+   (send self :set-simulation-mode :mode :freeze)
    (cond
     ((and pose (float-vector-p pose))
-     (send self :angle-vector pose 2000)
+     (send robot :angle-vector pose)
+     (send self :angle-vector (send robot :angle-vector) 2000)
      (send *ri* :set-simulation-mode :mode :stand-prep))
     ((and pose (keywordp pose))
      (send robot pose)
@@ -160,7 +161,7 @@
    (unix::usleep (* 10 1000))
    (ros::publish "atlas/set_pose" (ros::coords->tf-pose coords))
    (unix::usleep (* 200 1000))
-   (send self :control-mode "Stand"))
+   (send self :set-simulation-mode :mode :stand))
   )
 
 (defun set-simulation-mode (&key (effort 255) (sleep 0.5) (mode :user))
@@ -386,5 +387,8 @@
 (let ((c (send lf :copy-worldcoords))) (setf (get c :l/r) :lleg) c)
 (let ((c (send rf :copy-worldcoords))) (setf (get c :l/r) :rleg) c)
 ))
-#f(0.0 0.0 0.0 28.5 114.5 0.0 -75.0 17.0 0.0 -28.5 114.5 0.0 75.0 17.0 0.0 27.7425 -1.58224 -12.3662 1.58233 -15.3763 -2.915109e-06 27.7425 1.58224 -12.3662 -1.58233 -15.3763 -2.915109e-06 0.0)
+#f(0.0 0.0 0.0 28.5 114.5 0.0 -75.0 17.0 0.0 -28.5 114.5 0.0 75.0 17.0 0.0 27.7425 -1.58224 -12.3662 1.58233 -15.3763 -2.915109e-06 27.7425 1.58224 -12.3662 -1.58233 -15.3763 -2.915109e-060 .0)
+;; teleport to vehicle seat
+(send *ri* :teleport-to (make-coords :pos (float-vector -80 300 1150)) #f(0.0 0.0 0.0 75.0 140.0 0.0 -85.0 -25.0 0.0 -75.0 90.0 0.0 75.0 -15.0 0.0 90.0 0.0 -90.0 0.0 -15.5 25.0 90.0 0.0 -90.0 0.0 -15.5 -25.0 0.0))
+;;#f(0.0 0.0 0.0 75.0 120.0 0.0 -75.0 -15.0 0.0 -75.0 90.0 0.0 75.0 -15.0 0.0 90.0 0.0 -90.0 0.0 -15.5 25.0 90.0 0.0 -90.0 0.0 -15.5 -25.0 0.0))
 |#
