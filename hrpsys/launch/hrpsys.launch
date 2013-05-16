@@ -12,7 +12,6 @@
   <arg unless="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless " />
   <arg     if="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless -realtime" />
   <arg name="openrtm_openhrp_server_start" default="true"/>
-  <arg name="START_NAME_SERVER" default="true" />
 
   <!-- END:openrtm setting -->
   <arg name="PROJECT_FILE" />
@@ -26,8 +25,8 @@
   <env name="LANG" value="C" />
   <env name="ORBgiopMaxMsgSize" value="2147483648" />
 
-  <node if="$(arg START_NAME_SERVER)"
-        name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
+  <!-- <node if="$(arg START_NAME_SERVER)" -->
+  <!--       name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" /> -->
 
   <group if="$(arg KILL_SERVERS)">
     <node name="hrpsys_kill_all" pkg="openhrp3" type="openhrp-shutdown-servers" />
