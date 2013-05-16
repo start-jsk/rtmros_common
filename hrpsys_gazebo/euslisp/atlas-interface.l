@@ -84,12 +84,13 @@
   (:set-simulation-mode  (&key (effort 255) (sleep 0.5) (mode :user))
    (set-simulation-mode :effort effort :sleep sleep :mode mode))
   (:bdi_footstep
-   (footstep-list &key (step-duration 0.63) (swing-height 0.3) &allow-other-keys)
-   ;;(send_atlas_control_mode "Walk")
-   (let* ((fstep (car footstep-list))
-          (offset (copy-object (send fstep :worldpos))))
-     (setf (elt offset 1) 0.0)
-     (scale -1.0 offset offset)
+   (footstep-list &key (step-duration 0.63) (swing-height 0.3)
+                  (foot-offset) &allow-other-keys)
+   (let* ((fstep (car footstep-list)))
+     (unless foot-offset
+       (setq foot-offset (copy-object (send fstep :worldpos))))
+     (setf (elt foot-offset 1) 0.0)
+     (scale -1.0 foot-offset foot-offset)
      (let ((walk-goal (send bdi-action :make-goal-instance))
            (goal (instance atlas_msgs::WalkDemoGoal :init))
            ;;(step-params  (instance atlas_msgs::AtlasBehaviorStepParams :init))
@@ -106,7 +107,7 @@
                               :foot_index (if (eq (get ffstep :l/r) :rleg) 1 0) ;; :lleg -> 0 / :rleg -> 1
                               :duration 0
                               :swing_height 0)))
-         (send ffstep :translate offset :world)
+         (send ffstep :translate foot-offset :world)
          (send step :pose (ros::coords->tf-pose ffstep))
          (push step steps)
          (incf step-idx))
@@ -117,7 +118,7 @@
                                :foot_index (if (eq (get fstep :l/r) :rleg) 1 0) ;; :lleg -> 0 / :rleg -> 1
                                :duration step-duration
                                :swing_height swing-height)))
-           (send fstep :translate offset :world)
+           (send fstep :translate foot-offset :world)
            (send step :pose (ros::coords->tf-pose fstep))
            (push step steps)
            (incf step-idx)
@@ -137,12 +138,23 @@
   (:bdi-go-pos (x y &optional (theta 0) &key (r robot) (step-duration 0.63) (swing-height 0.3))
                ;; x [m],  y[m], theta [deg]
    (send self :bdi_footstep
-         (send robot :go-pos-params->footstep-list (* x 1000) (* y 1000) theta)))
-  (:teleport-to (coords)
+         (send robot :go-pos-params->footstep-list (* x 1000) (* y 1000) theta)
+         :step-duration step-duration :swing-height swing-height))
+  (:teleport-to (coords &optional (pose))
    (unix::usleep (* 100 1000))
    (send self :atlas-mode "harnessed")
    (send self :control-mode "Freeze")
-   (send self :control-mode "StandPrep")
+   (cond
+    ((and pose (float-vector-p pose))
+     (send self :angle-vector pose 2000)
+     (send *ri* :set-simulation-mode :mode :stand-prep))
+    ((and pose (keywordp pose))
+     (send robot pose)
+     (send self :angle-vector (send robot :angle-vector) 2000)
+     (send *ri* :set-simulation-mode :mode :stand-prep))
+    (t
+     (send self :control-mode "StandPrep")
+     ))
    (unix::usleep (* 2 1000 1000))
    (send self :atlas-mode "nominal")
    (unix::usleep (* 10 1000))
@@ -195,6 +207,18 @@
   (let ((msg (one-shot-subscribe "/full_cloud2" sensor_msgs::PointCloud2 :timeout 30000)))
     (when msg
       (make-eus-pointcloud-from-ros-msg msg :remove-nan remove-nan))))
+
+(defun get-pos-estimation (&key (timeout 1000))
+  (let ((msg (one-shot-subscribe "/atlas/atlas_sim_interface_state"
+                                 atlas_msgs::AtlasSimInterfaceState :timeout timeout)))
+    (list
+     (list :pos
+           (ros::tf-point->pos (send msg :pos_est :position)))
+     (list :lfoot
+           (ros::tf-pose->coords (car (send msg :foot_pos_est))))
+     (list :rfoot
+           (ros::tf-pose->coords (cadr (send msg :foot_pos_est))))
+     )))
 
 ;;
 ;; footstep
@@ -336,4 +360,31 @@
     (send walk-goal :goal goal)
     (send bdi-action :send-goal walk-goal)
     ))
+
+;;
+;;; setting for stand-up
+(send *ri* :set-servo-gain-percentage "back_lbz" 1000.0)
+(send *ri* :set-servo-gain-percentage "back_mby" 200.0)
+(send *ri* :set-servo-gain-percentage "back_ubx" 200.0)
+;;
+
+(dolist (n (send-all (flatten (send *atlas* :arms :joint-list)) :name)) (send *ri* :set-servo-gain-percentage n 100.0))
+(dolist (n (send-all (flatten (send *atlas* :torso :joint-list)) :name)) (send *ri* :set-servo-gain-percentage n 100.0))
+(dolist (n (send-all (flatten (send *atlas* :legs :joint-list)) :name)) (send *ri* :set-servo-gain-percentage n 100.0))
+(progn (send *ri* :set-servo-gain-percentage "r_leg_uhz" 1000.0) (send *ri* :set-servo-gain-percentage "l_leg_uhz" 1000.0))
+(send *ri* :set-servo-gain-percentage "back_lbz" 1000.0)
+
+(setq lst (get-pos-estimation))
+(setq rf (send (send (cadr (assoc :rfoot lst)) :copy-worldcoords) :translate (v- (cadr (assoc :pos lst))) :world))
+(setq lf (send (send (cadr (assoc :lfoot lst)) :copy-worldcoords) :translate (v- (cadr (assoc :pos lst))) :world))
+(setf (elt (send lf :worldpos) 2) 0)
+(setf (elt (send rf :worldpos) 2) 0)
+(setq ff
+(list
+(let ((c (send lf :copy-worldcoords))) (setf (get c :l/r) :lleg) c)
+(let ((c (send rf :copy-worldcoords))) (setf (get c :l/r) :rleg) c)
+(let ((c (send lf :copy-worldcoords))) (setf (get c :l/r) :lleg) c)
+(let ((c (send rf :copy-worldcoords))) (setf (get c :l/r) :rleg) c)
+))
+#f(0.0 0.0 0.0 28.5 114.5 0.0 -75.0 17.0 0.0 -28.5 114.5 0.0 75.0 17.0 0.0 27.7425 -1.58224 -12.3662 1.58233 -15.3763 -2.915109e-06 27.7425 1.58224 -12.3662 -1.58233 -15.3763 -2.915109e-06 0.0)
 |#
