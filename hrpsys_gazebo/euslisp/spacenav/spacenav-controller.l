@@ -1,0 +1,116 @@
+(require "../atlas-interface.l")
+(require "../atlas-hihi.l") ;; for simple-fullbody and model2real
+
+(ros::roseus "spacenav_controller")
+(ros::roseus-add-msgs "sensor_msgs")
+
+(defvar *spacenav-controller-centroid*
+  (copy-seq (send *robot* :centroid)))
+(defvar *spacenav-controller-rpy*
+  (coerce (car (rpy-angle (send *robot* :rarm :end-coords :worldrot)))
+	  float-vector))
+
+(defvar *ik-target* :rarm)
+
+(defun spacenav-controller-callback
+  (msg)
+  (describe msg)
+  (if (> (aref (send msg :buttons) 0) 0.1)
+      ;; implement here
+      ;; atlas grasp rhand
+      )
+  (if (> (aref (send msg :buttons) 1) 0.1)
+      ;; implement here
+      ;; atlas grasp lhand
+      )
+  (let
+      ((newcoords
+	(let ((move
+	       (scale
+		50
+		(coerce
+		 (subseq (send msg :axes) 0 3)
+		 float-vector)))
+	      (rpy
+	       (reverse
+		(scale
+		 0.25
+		 (coerce
+		  (subseq (send msg :axes) 3 6)
+		  float-vector)))))
+	  (make-coords
+	   :pos
+	   (v+
+	    (send *robot* *ik-target* :end-coords :worldpos)
+	    (if (> (norm move) 50)
+		(scale 50 (normalize-vector move))
+	      move))
+	   :rpy
+	   (setq
+	    *spacenav-controller-rpy*
+	    (v+
+	     *spacenav-controller-rpy*
+	     (if (> (norm rpy) 0.25)
+		 (scale 0.25 (normalize-vector rpy))
+	       rpy)))))))
+    (simple-fullbody
+     :robot *robot*
+     :target
+     (mapcar
+      #'(lambda (k)
+	  (if (eq k *ik-target*)
+	      (list (cons :target k)
+		    (cons :coords newcoords))
+	    (list (cons :target k))))
+      '(:rarm :larm :rleg :lleg))
+     :balence-leg nil
+     :debug-view :no-message
+     :stop 10
+     :revert-if-fail nil
+     :centroid-thre 30
+     :target-centroid-pos *spacenav-controller-centroid*))
+  (if (and (boundp '*irtviewer*) *irtviewer*)
+      (progn
+	(send *irtviewer* :draw-objects)
+	(x::window-main-one)))
+  (send *ri* :angle-vector
+	(send *robot* :angle-vector)
+	100)
+  (send *ri* :wait-interpolation)
+  )
+
+(ros::subscribe
+ "/spacenav/joy"
+ sensor_msgs::Joy
+ #'spacenav-controller-callback)
+
+(defun controller-start
+  nil
+;  (send *robot* :angle-vector
+;	(send *ri* :potentio-vector))
+  (if (find-method *ri* :hand-state)
+      (progn
+	(send *robot* :rarm :hand :angle-vector
+	      (subseq (send *ri* :hand-state :potentio-vector) 0 6))
+	(send *robot* :larm :hand :angle-vector
+	      (subseq (send *ri* :hand-state :potentio-vector) 6 12))))
+  (setq *spacenav-controller-centroid* (copy-seq (send *robot* :centroid)))
+  (setq *spacenav-controller-rpy*
+	(coerce
+	 (car
+	  (rpy-angle (send *robot* *ik-target* :end-coords :worldrot)))
+	 float-vector))
+  (model2real :sleep-time 1000)
+  (send *ri* :wait-interpolation)
+  (do-until-key
+   (ros::spin-once)
+   (ros::sleep))
+  )
+
+(format t
+	(concatenate
+	 string
+	 "[usage]"
+	 "  " "this requires two shell.~%"
+	 "  " "first sh spacenav.sh~%"
+	 "  " "second roseus spacenav-controller.l and call controller-start~%"))
