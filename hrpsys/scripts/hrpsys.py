@@ -170,6 +170,7 @@ class HrpsysConfigurator:
             if self.rh:
                 self.rh_svc = narrow(self.rh.service("service0"), "RobotHardwareService")
                 self.ep_svc = narrow(self.rh.ec, "ExecutionProfileService")
+                self.simulation_mode = False
             else:
                 self.rh = rtm.findRTC(robotname)
                 self.hgc = findRTC("HGcontroller0")
