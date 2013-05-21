@@ -319,9 +319,113 @@
     ;; send reset pose to real robot
     (send *ri* :angle-vector (send *atlas* :angle-vector) 3000)
     (send *ri* :wait-interpolation))
+  (imu-init)                  ;;subscribe /atlus/imu
+  (forcetorque-init)          ;;subscribe /atlus_msg/ForceTorqueSensor
   (setq *tfb* (instance ros::transform-broadcaster :init))
   *ri*
   )
+#|
+  for utility
+|#
+(defun send-pose (&optional (tm 3000))
+  (send *ri* :angle-vector (send *atlas* :angle-vector) tm))
+(defun adapt-pose ()
+  (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
+  (send *irtviewer* :draw-objects))
+(defun reset-pose ()
+  (send *atlas* :reset-pose))
+
+#|
+  ROS-API経由でatlasのセンサ情報を取得
+  /atlas/imu/orientation x,y,z,wで読める
+|#
+(defun imu-init ()
+  (ros::subscribe "/atlas/imu" sensor_msgs::Imu #'get_imu_quaternion 1))
+
+(defun get-imu-data (&optional (timeout 1000))
+  (setq *atlas_rpy* nil)
+  (ros::spin-once)
+  (unless *atlas_rpy*
+    (let ((endtm (ros::time+ (ros::time-now) (ros::time (/ timeout 1000.0)))))
+      (while (null *atlas_rpy*)
+        (ros::spin-once)
+        (if (< (send (ros::time- endtm (ros::time-now)) :toSec) 0.0)
+            (return))
+        )))
+  *atlas_rpy*
+  )
+
+(defvar *atlas_rpy* nil)
+;;ros:spin-onceすれば値が更新される
+(defun get_imu_quaternion (msg)
+  (let* ((q (send msg :orientation)))
+    ;;(print imu-orientation)
+    (setq *atlas_rpy*
+          (mapcar
+           #'rad2deg
+           (car (rpy-angle (quaternion2matrix
+                            (float-vector (send q :w)
+                                          (send q :x)
+                                          (send q :y)
+                                          (send q :z)))))))
+    ))
+
+(defun forcetorque-init ()
+  (ros::subscribe "/atlas/force_torque_sensors"
+                  atlas_msgs::ForceTorqueSensors #'get_forcetorque_sensors 1))
+
+(defun get-forcetorque-data (&optional (timeout 1000))
+  (setq *atlas_forcetorque* nil)
+  (ros::spin-once)
+  (unless *atlas_forcetorque*
+    (let ((endtm (ros::time+ (ros::time-now) (ros::time (/ timeout 1000.0)))))
+      (while (null *atlas_forcetorque*)
+        (ros::spin-once)
+        (if (< (send (ros::time- endtm (ros::time-now)) :toSec) 0.0)
+            (return))
+        )))
+  *atlas_forcetorque*
+  )
+
+(defvar *atlas_forcetorque* nil)
+(defun get_forcetorque_sensors (msg)
+  (let* ((lf (send msg :l_foot))
+     (rf (send msg :r_foot))
+     (la (send msg :l_hand))
+     (ra (send msg :r_hand))
+     (ret))
+
+    (setq *atlas_forcetorque*
+      (list
+       (cons :l_foot
+         (float-vector (send lf :force :x)
+                   (send lf :force :y)
+                   (send lf :force :z)
+                   (send lf :torque :x)
+                   (send lf :torque :y)
+                   (send lf :torque :z)))
+       (cons :r_foot
+         (float-vector (send rf :force :x)
+                   (send rf :force :y)
+                   (send rf :force :z)
+                   (send rf :torque :x)
+                   (send rf :torque :y)
+                   (send rf :torque :z)))
+       (cons :l_hand
+         (float-vector (send la :force :x)
+                   (send la :force :y)
+                   (send la :force :z)
+                   (send la :torque :x)
+                   (send la :torque :y)
+                   (send la :torque :z)))
+       (cons :r_hand
+         (float-vector (send ra :force :x)
+                   (send ra :force :y)
+                   (send ra :force :z)
+                   (send ra :torque :x)
+                   (send ra :torque :y)
+                   (send ra :torque :z)))
+       ))))
 
 #| ;; step is not supported in qualification
 (defun publish-step (cds)
@@ -361,34 +465,4 @@
     (send walk-goal :goal goal)
     (send bdi-action :send-goal walk-goal)
     ))
-
-;;
-;;; setting for stand-up
-(send *ri* :set-servo-gain-percentage "back_lbz" 1000.0)
-(send *ri* :set-servo-gain-percentage "back_mby" 200.0)
-(send *ri* :set-servo-gain-percentage "back_ubx" 200.0)
-;;
-
-(dolist (n (send-all (flatten (send *atlas* :arms :joint-list)) :name)) (send *ri* :set-servo-gain-percentage n 100.0))
-(dolist (n (send-all (flatten (send *atlas* :torso :joint-list)) :name)) (send *ri* :set-servo-gain-percentage n 100.0))
-(dolist (n (send-all (flatten (send *atlas* :legs :joint-list)) :name)) (send *ri* :set-servo-gain-percentage n 100.0))
-(progn (send *ri* :set-servo-gain-percentage "r_leg_uhz" 1000.0) (send *ri* :set-servo-gain-percentage "l_leg_uhz" 1000.0))
-(send *ri* :set-servo-gain-percentage "back_lbz" 1000.0)
-
-(setq lst (get-pos-estimation))
-(setq rf (send (send (cadr (assoc :rfoot lst)) :copy-worldcoords) :translate (v- (cadr (assoc :pos lst))) :world))
-(setq lf (send (send (cadr (assoc :lfoot lst)) :copy-worldcoords) :translate (v- (cadr (assoc :pos lst))) :world))
-(setf (elt (send lf :worldpos) 2) 0)
-(setf (elt (send rf :worldpos) 2) 0)
-(setq ff
-(list
-(let ((c (send lf :copy-worldcoords))) (setf (get c :l/r) :lleg) c)
-(let ((c (send rf :copy-worldcoords))) (setf (get c :l/r) :rleg) c)
-(let ((c (send lf :copy-worldcoords))) (setf (get c :l/r) :lleg) c)
-(let ((c (send rf :copy-worldcoords))) (setf (get c :l/r) :rleg) c)
-))
-#f(0.0 0.0 0.0 28.5 114.5 0.0 -75.0 17.0 0.0 -28.5 114.5 0.0 75.0 17.0 0.0 27.7425 -1.58224 -12.3662 1.58233 -15.3763 -2.915109e-06 27.7425 1.58224 -12.3662 -1.58233 -15.3763 -2.915109e-060 .0)
-;; teleport to vehicle seat
-(send *ri* :teleport-to (make-coords :pos (float-vector -80 300 1150)) #f(0.0 0.0 0.0 75.0 140.0 0.0 -85.0 -25.0 0.0 -75.0 90.0 0.0 75.0 -15.0 0.0 90.0 0.0 -90.0 0.0 -15.5 25.0 90.0 0.0 -90.0 0.0 -15.5 -25.0 0.0))
-;;#f(0.0 0.0 0.0 75.0 120.0 0.0 -75.0 -15.0 0.0 -75.0 90.0 0.0 75.0 -15.0 0.0 90.0 0.0 -90.0 0.0 -15.5 25.0 90.0 0.0 -90.0 0.0 -15.5 -25.0 0.0))
 |#

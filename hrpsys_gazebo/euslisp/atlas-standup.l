@@ -28,27 +28,24 @@
     (atlas-init :set-reset-pose nil))
    (t
     (atlas-init :set-reset-pose nil)
-    (adapt)
+    (adapt-pose)
     ))
   (send *ri* :angle-vector (send *atlas* :angle-vector))
   (set-k-effort)
   ;;(setq r *atlas*)
-  ;;
-  (imu-init)                  ;;subscribe /atlus/imu
-  (forcetorque-init)          ;;subscribe /atlus_msg/ForceTorqueSensor
+
+  ;;(imu-init)                  ;;subscribe /atlus/imu
+  ;;(forcetorque-init)          ;;subscribe /atlus_msg/ForceTorqueSensor
+  (gain-setting-for-standup)
+
   (objects (list *atlas*))
   )
-#|
-  for utility
-|#
-(defun send-pose (&optional (tm 3000))
-  (send *ri* :angle-vector (send *atlas* :angle-vector) tm))
-(defun adapt ()
-  (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
-  (send *irtviewer* :draw-objects))
 
-(defun reset-pose ()
-  (send *atlas* :reset-pose))
+(defun gain-setting-for-standup ()
+  ;;; setting for stand-up
+  (send *ri* :set-servo-gain-percentage "back_lbz" 1000.0)
+  (send *ri* :set-servo-gain-percentage "back_mby" 200.0)
+  (send *ri* :set-servo-gain-percentage "back_ubx" 200.0))
 
 ;;わざと転倒させる (前に傾く）
 (defun fall-down
@@ -485,71 +482,6 @@
 
   (pose1)
   )
-
-#|
-  ROS-API経由でatlasのセンサ情報を取得
-  /atlas/imu/orientation x,y,z,wで読める
-|#
-(defun imu-init ()
-  (ros::subscribe "/atlas/imu" sensor_msgs::Imu #'get_imu_quaternion 1))
-
-(defvar *atlas_rpy* nil)
-;;ros:spin-onceすれば値が更新される
-(defun get_imu_quaternion (msg)
-  (let* ((q (send msg :orientation)))
-    ;;(print imu-orientation)
-    (setq *atlas_rpy*
-          (mapcar
-           #'rad2deg
-           (car (rpy-angle (quaternion2matrix
-                            (float-vector (send q :w)
-                                          (send q :x)
-                                          (send q :y)
-                                          (send q :z)))))))
-    ))
-
-(defun forcetorque-init ()
-  (ros::subscribe "/atlas/force_torque_sensors" atlas_msgs::ForceTorqueSensors #'get_forcetorque_sensors 1))
-
-(defvar *atlas_forcetorque* nil)
-(defun get_forcetorque_sensors (msg)
-  (let* ((lf (send msg :l_foot))
-     (rf (send msg :r_foot))
-     (la (send msg :l_hand))
-     (ra (send msg :r_hand))
-     (ret))
-
-    (setq *atlas_forcetorque*
-      (list
-       (cons :l_foot
-         (float-vector (send lf :force :x)
-                   (send lf :force :y)
-                   (send lf :force :z)
-                   (send lf :torque :x)
-                   (send lf :torque :y)
-                   (send lf :torque :z)))
-       (cons :r_foot
-         (float-vector (send rf :force :x)
-                   (send rf :force :y)
-                   (send rf :force :z)
-                   (send rf :torque :x)
-                   (send rf :torque :y)
-                   (send rf :torque :z)))
-       (cons :l_hand
-         (float-vector (send la :force :x)
-                   (send la :force :y)
-                   (send la :force :z)
-                   (send la :torque :x)
-                   (send la :torque :y)
-                   (send la :torque :z)))
-       (cons :r_hand
-         (float-vector (send ra :force :x)
-                   (send ra :force :y)
-                   (send ra :force :z)
-                   (send ra :torque :x)
-                   (send ra :torque :y)
-                   (send ra :torque :z)))
-       ))))
 
 #|
  4足歩行モード（蛙飛びが一番楽かな)
