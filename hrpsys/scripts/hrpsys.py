@@ -162,19 +162,12 @@ class HrpsysConfigurator:
 
         self.rh = None
         timeout_count = 0;
-        self.simulation_mode = False
         # wait for simulator or RobotHardware setup which sometime takes a long time
         while self.rh == None and timeout_count < 3: # <- time out limit
             time.sleep(1);
             self.rh = rtm.findRTC("RobotHardware0")
-            if self.rh:
-                self.rh_svc = narrow(self.rh.service("service0"), "RobotHardwareService")
-                self.ep_svc = narrow(self.rh.ec, "ExecutionProfileService")
-                self.simulation_mode = False
-            else:
+            if not self.rh:
                 self.rh = rtm.findRTC(robotname)
-                self.hgc = findRTC("HGcontroller0")
-                self.simulation_mode = True
             print self.configurator_name, "wait for Simulator or RobotHardware : ",self.rh, "(timeout ", timeout_count, " < 3)"
             timeout_count += 1
 
@@ -185,6 +178,16 @@ class HrpsysConfigurator:
             return
 
         print self.configurator_name, "findComps -> RobotHardware : ",self.rh
+
+        # distinguish real robot from simulation by using "servoState" port
+        if rtm.findPort(self.rh.ref, "servoState") == None:
+            self.hgc = findRTC("HGcontroller0")
+            self.simulation_mode = True
+        else:
+            self.simulation_mode = False
+#           self.rh_svc = narrow(self.rh.service("service0"), "RobotHardwareService")
+#           self.ep_svc = narrow(self.rh.ec, "ExecutionProfileService")
+
         print self.configurator_name, "simulation_mode : ", self.simulation_mode
 
     def findModelLoader(self):
