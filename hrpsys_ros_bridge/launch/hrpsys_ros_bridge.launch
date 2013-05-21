@@ -1,9 +1,8 @@
 <launch>
-  <arg name="ROBOT_NAME" default=""/>
   <arg name="MODEL_FILE" />
   <arg name="COLLADA_FILE" />
   <arg name="CONF_FILE_ARG" default="" />
-  <arg name="SIMULATOR_NAME" default="$(arg ROBOT_NAME)(Robot)0"/>
+  <arg name="SIMULATOR_NAME" default="RobotHardware0"/> <!-- please set $(arg ROBOT_NAME)(Robot) for simulation -->
   <arg name="INSTALL_ROBOT_DESCRIPTION" default="true" />
   <!--
       roslaunch hrpsys_ros_bridge sample.launch nameserver:=192.168.1.1
