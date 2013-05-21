@@ -4,7 +4,7 @@
             file="$(find hrpsys_ros_bridge_tutorials)/models/HIRONX_controller_config.yaml" />
 
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
-    <arg name="ROBOT_NAME" value="HiroNX" />
+    <arg name="SIMULATOR_NAME" value="HiroNX(Robot)0" />
     <arg name="MODEL_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae" />
     <arg name="COLLADA_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae" />
   </include>

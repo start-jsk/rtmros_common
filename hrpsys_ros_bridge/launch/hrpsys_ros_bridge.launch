@@ -1,5 +1,5 @@
 <launch>
-  <arg name="ROBOT_NAME" />
+  <arg name="ROBOT_NAME" default=""/>
   <arg name="MODEL_FILE" />
   <arg name="COLLADA_FILE" />
   <arg name="CONF_FILE_ARG" default="" />
@@ -65,7 +65,6 @@
   <node pkg="hrpsys_ros_bridge" name="sensor_ros_bridge_connect" type="sensor_ros_bridge_connect.py"
         args="$(arg MODEL_FILE) $(arg SIMULATOR_NAME) HrpsysSeqStateROSBridge0 $(arg nameserver) -ORBInitRef NameService=corbaloc:iiop:$(arg nameserver):2809/NameService" output="$(arg OUTPUT)"/>
   <!-- BEGIN:openrtm connection -->
-  <env name="ROBOT_NAME" value="$(arg ROBOT_NAME)" />
   <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
   <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch"/>
   <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="HrpsysSeqStateROSBridge0.rtc:rsangle" subscription_type="new"/>
@@ -75,7 +74,7 @@
   <rtconnect from="kf.rtc:rpy" to="HrpsysSeqStateROSBridge0.rtc:baseRpy" subscription_type="new"/>
   <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
   <rtconnect from="HrpsysJointTrajectoryBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
-  <!-- <rtconnect from="$(arg ROBOT_NAME)(Robot)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" /> -->
+  <!-- <rtconnect from="$(arg SIMULATOR_NAME)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" /> -->
   <rtconnect from="DataLoggerServiceROSBridge.rtc:DataLoggerService" to="log.rtc:DataLoggerService" subscription_type="new"/>
   <rtconnect from="SequencePlayerServiceROSBridge.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
   <rtconnect from="ImpedanceControllerServiceROSBridge.rtc:ImpedanceControllerService" to="ic.rtc:ImpedanceControllerService"  subscription_type="new"/>

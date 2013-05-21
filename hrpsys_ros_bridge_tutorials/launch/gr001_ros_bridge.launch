@@ -1,6 +1,6 @@
 <launch>
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
-    <arg name="ROBOT_NAME" value="GR001" />
+    <arg name="SIMULATOR_NAME" value="GR001(Robot)0" />
     <arg name="MODEL_FILE" value="$(find choreonoid)/share/choreonoid-1.1/models/GR001/GR001.wrl" />
     <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/GR001.dae" />
   </include>

@@ -56,8 +56,6 @@ def rtconnect(nameserver, tags):
     for tag in tags:
         source_path = nameserver+"/"+tag.attributes.get("from").value
         dest_path   = nameserver+"/"+tag.attributes.get("to").value
-        source_path = re.sub("\$\(arg ROBOT_NAME\)",robotname,source_path);
-        dest_path = re.sub("\$\(arg ROBOT_NAME\)",robotname,dest_path);
         source_path = re.sub("\$\(arg SIMULATOR_NAME\)",simulator,source_path);
         dest_path = re.sub("\$\(arg SIMULATOR_NAME\)",simulator,dest_path);
         print "connect from %s to %s"%(source_path,dest_path)
@@ -131,7 +129,7 @@ def rtactivate(nameserver, tags):
     return 0
 
 def main():
-    global robotname,simulator
+    global simulator
     usage = '''Usage: %prog [launchfile]'''
     if len(sys.argv) <= 1:
         print >>sys.stderr, usage
@@ -145,9 +143,8 @@ def main():
         return 1
 
     nameserver = os.getenv("RTCTREE_NAMESERVERS","localhost")
-    robotname = os.getenv("ROBOT_NAME","")
     simulator = os.getenv("SIMULATOR_NAME","Simulator")
-    print "[rtmlaunch]",robotname
+    print "[rtmlaunch]", simulator
     while 1:
         print "[rtmlaunch] check connection/activation"
         rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
