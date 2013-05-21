@@ -100,7 +100,6 @@
           :link-list link-list :move-target move-target
           :rotation-axis (list nil t t) :thre '(5 1 1)
           :look-at-target t
-          :cog-gain 2.5 :stop 200 :centroid-thre 20
           :debug-view t))
   (send *ri* :angle-vector (send *hrp4c* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
