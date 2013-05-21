@@ -108,20 +108,25 @@
   (send *ri* :wait-interpolation)
   (send *ri* :set-simulation-mode :mode :stand))
 
-(defun get-laser-pointcloud (&optional (tilt-speed 1.2))
+(defun get-laser-pointcloud (&key (tilt-speed 1.2) (crop t))
   (start-tilt-laser tilt-speed)
   (get-tilt-laser) ;; ignore first one
   (setq *laser-pt* (get-tilt-laser))
-  ;;
-  (send *laser-pt* :filter
-        :key #'(lambda (p) (and (< (elt p 0) 8000.0) (< -7000 (elt p 1) 7000))))
-  ;;
-  (setq *laser-msg* (pointcloud->marker-msg
-                     *laser-pt*
-                     (instance std_msgs::header :init :frame_id "/pelvis")
-                     :color #f(0 1 1)))
   (start-tilt-laser 0.0) ;; stop tilting
-  *laser-msg*)
+  ;;
+  (cond
+   (crop
+    (send *laser-pt* :filter
+          :key #'(lambda (p) (and (< (elt p 0) 8000.0) (< -7000 (elt p 1) 7000))))
+    (setq *laser-msg* (pointcloud->marker-msg
+                       *laser-pt*
+                       (instance std_msgs::header :init :frame_id "/pelvis")
+                       :color #f(0 1 1)))
+    *laser-msg*)
+   (t
+    *laser-pt*
+    ))
+  )
 
 (defun demo-stepping (&optional (init t) (teleport nil) (exec t))
   (when init (atlas-init :set-user-mode nil))
