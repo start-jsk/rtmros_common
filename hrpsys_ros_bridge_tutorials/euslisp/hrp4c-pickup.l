@@ -57,7 +57,7 @@
     ))
 
 (defun hrp4c-walk ()
-  (send *ri* :setAutoBalancerParam :move-base-gain 0.9)
+  (send *ri* :set-auto-balancer-param :move-base-gain 0.9)
   (send *ri* :start-auto-balancer)
   (send *ri* :go-pos 2 0 0)
   (send *ri* :stop-auto-balancer)
