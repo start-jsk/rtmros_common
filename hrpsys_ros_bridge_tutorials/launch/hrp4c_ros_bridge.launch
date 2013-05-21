@@ -6,6 +6,7 @@
     <arg name="ROBOT_NAME" value="HRP4C" />
     <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP4C/HRP4Cmain.wrl" />
     <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/HRP4C.dae" />
+    <arg name="CONF_FILE_ARG" value="-o example.HrpsysSeqStateROSBridge.config_file:$(find hrpsys_ros_bridge_tutorials)/models/HRP4C.conf" />
   </include>
 
   <node name="hrp4c_rviz" pkg="rviz" type="rviz" respawn="true"
