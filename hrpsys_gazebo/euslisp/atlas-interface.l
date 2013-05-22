@@ -27,7 +27,7 @@
      (ros::advertise "atlas/atlas_sim_interface_command"
                      atlas_msgs::AtlasSimInterfaceCommand 1)
      (ros::subscribe "atlas/atlas_sim_interface_state"
-		     atlas_msgs::AtlasSimInterfaceState #'send self :sim-interface-state-cb)
+                     atlas_msgs::AtlasSimInterfaceState #'send self :sim-interface-state-cb)
      ;; do not use in Qualification
      (unless qualify
        (ros::advertise "atlas/mode" std_msgs::String 1)
@@ -41,26 +41,28 @@
            '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
      (setq walk-seq 0)
      ))
-  (:sim-interface-state-cb
-   (msg)
+  (:sim-interface-state-cb (msg)
    (let* ((pos-est (send msg :pos_est))
-	  (pos (send pos-est :position))
-	  (foot-pos-est1 (car (send msg :foot_pos_est)))
-	  (foot-pos-est2 (cadr (send msg :foot_pos_est)))
-	  (yaw (+ (acos (send (send foot-pos-est1 :orientation) :w))
-		  (acos (send (send foot-pos-est2 :orientation) :w))))
-	  (cur-bhv (send msg :current_behavior)))
-     (send self :put :pose-on-gazebo (list (send pos :x) (send pos :y) (send pos :z) (rad2deg yaw)))
+          (pos (send pos-est :position))
+          (foot-pos-est1 (car (send msg :foot_pos_est)))
+          (foot-pos-est2 (cadr (send msg :foot_pos_est)))
+          (yaw (+ (acos (send (send foot-pos-est1 :orientation) :w))
+                  (acos (send (send foot-pos-est2 :orientation) :w))))
+          (cur-bhv (send msg :current_behavior)))
+     (send self :put :pos-on-gazebo
+           (scale 1000 (float-vector (send pos :x) (send pos :y) (send pos :z))))
+     (send self :put :rotate-on-gazebo (rad2deg yaw))
+     (send self :put :foot-estimation
+           (list (ros::tf-pose->coords foot-pos-est1)
+                 (ros::tf-pose->coords foot-pos-est2)))
      (send self :put :current-behavior cur-bhv)
      ))
-  (:wait-for-start-bdi-walk
-   ()
+  (:wait-for-start-bdi-walk ()
    (ros::spin-once)
    (while (not (equal (send self :get :current-behavior) 4))
      (ros::spin-once)
      ))
-  (:wait-for-bdi-walk
-   ()
+  (:wait-for-bdi-walk ()
    (ros::spin-once)
    (while (equal (send self :get :current-behavior) 4)
      (ros::spin-once)
@@ -135,6 +137,28 @@
        (send walk-goal :goal goal)
        (send bdi-action :send-goal walk-goal)
        )))
+  (:bdi_step_static (cds &key (l/r :lleg))
+   (let ((walk-goal (send bdi-action :make-goal-instance))
+         (goal (instance atlas_msgs::WalkDemoGoal :init))
+         (k-effort (instantiate string 28)))
+    (send goal :behavior atlas_msgs::WalkDemoGoal::*STEP*)
+    ;;(send goal :step_params :use_demo_walk t)
+    (send goal :step_params :desired_step :step_index 1)
+    (send goal :step_params :desired_step :foot_index
+          (case l/r (:lleg 0) (t 1)))  ;; :lleg -> 0 / :rleg -> 1
+    (send goal :step_params :desired_step :duration 0.63) ;; not used??
+    (send goal :step_params :desired_step :swing_height 0.3) ;; not used??
+    (send goal :step_params :desired_step :pose (ros::coords->tf-pose cds))
+
+    (fill k-effort 0)
+    (send goal :k_effort k-effort)
+    (send walk-goal :header :seq 1)
+    (send walk-goal :header :stamp (ros::time-now))
+    (send goal :header :stamp (send walk-goal :header :stamp))
+    (send walk-goal :goal_id :stamp (send walk-goal :header :stamp))
+    (send walk-goal :goal goal)
+    (send bdi-action :send-goal walk-goal)
+    ))
   (:bdi-go-pos (x y &optional (theta 0) &key (r robot) (step-duration 0.63) (swing-height 0.3))
                ;; x [m],  y[m], theta [deg]
    (send self :bdi_footstep
@@ -427,42 +451,4 @@
                    (send ra :torque :z)))
        ))))
 
-#| ;; step is not supported in qualification
-(defun publish-step (cds)
-  (let ((msg (instance atlas_msgs::AtlasSimInterfaceCommand :init))
-        (k-effort (instantiate string 28)))
-    (send msg :behavior atlas_msgs::AtlasSimInterfaceCommand::*STEP*)
-    ;;(send msg :step_params :use_demo_walk t)
-    (send msg :step_params :desired_step :step_index 0)
-    (send msg :step_params :desired_step :foot_index 0)  ;; :lleg -> 0 / :rleg -> 1
-    (send msg :step_params :desired_step :duration 0.63)
-    (send msg :step_params :desired_step :swing_height 0.3)
-    (send msg :step_params :desired_step :pose (ros::coords->tf-pose cds))
-    (fill k-effort 0)
-    (send msg :k_effort k-effort)
-    (send msg :header :stamp (ros::time+ (ros::time-now) (ros::time 1.0)))
-    (ros::publish "atlas/atlas_sim_interface_command" msg)
-    ))
-(defun publish-step (cds &optional (baction bdi-action))
-  (let ((walk-goal (send bdi-action :make-goal-instance))
-        (goal (instance atlas_msgs::WalkDemoGoal :init))
-        (k-effort (instantiate string 28)))
-
-    (send goal :behavior atlas_msgs::WalkDemoGoal::*STEP*)
-    ;;(send goal :step_params :use_demo_walk t)
-    (send goal :step_params :desired_step :step_index 1)
-    (send goal :step_params :desired_step :foot_index 0)  ;; :lleg -> 0 / :rleg -> 1
-    (send goal :step_params :desired_step :duration 0.63)
-    (send goal :step_params :desired_step :swing_height 0.3)
-    (send goal :step_params :desired_step :pose (ros::coords->tf-pose cds))
-
-    (fill k-effort 0)
-    (send goal :k_effort k-effort)
-    (send walk-goal :header :seq 1)
-    (send walk-goal :header :stamp (ros::time-now))
-    (send goal :header :stamp (send walk-goal :header :stamp))
-    (send walk-goal :goal_id :stamp (send walk-goal :header :stamp))
-    (send walk-goal :goal goal)
-    (send bdi-action :send-goal walk-goal)
-    ))
-|#
+;;(send *ri* :set-simulation-mode :mode :stand :effort 0)
