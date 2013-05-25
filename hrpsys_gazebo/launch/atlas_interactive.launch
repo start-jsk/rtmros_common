@@ -1,0 +1,45 @@
+<launch>
+  <arg name="server_name" default="fullbody_interactive" />
+  <arg name="LAUNCH_RVIZ" default="false" />
+
+  <node pkg="interactive_marker_interface"
+        type="interactive_marker_interface_fullbody"
+        name="$(arg server_name)"
+        output="screen" >
+    <param name="left_arm_frame"  value="/l_hand" />
+    <param name="right_arm_frame" value="/r_hand" />
+    <param name="base_frame" value="/pelvis" />
+    <param name="left_leg_frame"  value="/l_foot" />
+    <param name="right_leg_frame" value="/r_foot" />
+    <param name="waist_frame" value="/utorso" />
+    <param name="fix_marker" value="false" />
+  </node>
+
+  <node pkg="roseus" type="roseus" name="im_robot_interface"
+        args="$(find hrpsys_gazebo)/euslisp/atlas-interactive-marker.l"
+        output="screen" >
+    <remap from="pose_a_left"
+           to="$(arg server_name)/pose_a_left" />
+    <remap from="pose_a_right"
+           to="$(arg server_name)/pose_a_right" />
+    <remap from="pose_a_both"
+           to="$(arg server_name)/pose_a_both" />
+    <remap from="pose_l_left"
+           to="$(arg server_name)/pose_l_left" />
+    <remap from="pose_l_right"
+           to="$(arg server_name)/pose_l_right" />
+    <remap from="pose_l_both"
+           to="$(arg server_name)/pose_l_both" />
+    <remap from="pose_waist"
+           to="$(arg server_name)/pose_waist" />
+    <remap from="set_pose"
+           to="$(arg server_name)/set_pose" />
+    <remap from="reset_pose"
+           to="$(arg server_name)/reset_pose" />
+  </node>
+
+  <node if="$(arg LAUNCH_RVIZ)"
+        pkg="rviz" type="rviz" name="rviz"
+        args="-d $(find hrpsys_gazebo_jsk)/HRP4R/rviz_HRP4R_fullbody.vcg"/>
+
+</launch>
