@@ -329,6 +329,14 @@
        (send* self :_set-forcemoment-offset-param
               (string-downcase (send fs :name)) args)))))
   (:get-forcemoment-offset-param (name) (send (send self :impedancecontrollerservice_getforcemomentoffsetparam :name name) :i_param))
+  (:load-forcemoment-offset-param
+   (fname)
+   (mapcar #'(lambda (x)
+               (send* self :set-forcemoment-offset-param x))
+           (with-open-file
+            (f fname :direction :input)
+            (read f nil nil)))
+   )
   )
 
 ;; AutoBalancerService
