@@ -39,7 +39,7 @@
   (:tmp-force-moment-vector
    (f/m &optional (limb))
    (if limb
-       (subseq (cdr (assoc limb robot-state))
+       (subseq (cdr (assoc (send (send self :get-force-sensor-from-limb-name limb) :name) robot-state))
                (if (eq f/m :force) 0 3)
                (if (eq f/m :force) 3 6))
      (mapcar #'(lambda (x)
