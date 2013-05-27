@@ -12,8 +12,9 @@
   ;; robot depending part
   (atlas-init)
   (send *atlas* :reset-pose)
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 5000) ;; go to initial pose
-  (send *ri* :set-interpolation-mode ":linear") ;; prevent hrp4r to interplorate invalid qRef
+  (send *atlas* :angle-vector
+        (send *ri* :state :reference-vector))
+  (send *ri* :set-interpolation-mode ":linear")
   (setq *using-robot* *atlas*)
   (setq larm-tip-link :l_hand)
   (setq rarm-tip-link :r_hand)
@@ -29,6 +30,46 @@
   ;; (send *atlas* :fix-leg-to-coords (make-coords))
   (send *ri* :angle-vector (send *atlas* :angle-vector) 5000)
   )
+
+;; over write functions
+(defun _command-func-stop_robot (res_msg)
+  (setq *current-mode* :stop)
+  (ros::ros-info ";;; stop func ;;;")
+  (let ((mkcds (make-coords))
+        (mkframe "/pelvis")
+        (av (send *using-robot* :angle-vector))
+        markers)
+    (send *using-robot* :angle-vector
+          (send *ri* :state :potentio-vector))
+    (case *current-limb*
+      ;;(:rleg )
+      ;;(:lleg )
+      (:rarm
+       (send mkcds :transform (send *using-robot* rarm-tip-link :worldcoords))
+       (setq markers
+             (list (mesh->marker-msg
+                    (make-coords)
+                    "package://hrpsys_gazebo/models/sandia_right.dae"
+                    (instance std_msgs::Header :init :frame_id "/right_palm")
+                    :color (float-vector 0 0 1)
+                    :alpha 0.6
+                    ))))
+      (:larm
+       (send mkcds :transform (send *using-robot* larm-tip-link :worldcoords))
+       (setq markers
+             (list (mesh->marker-msg
+                    (make-coords)
+                    "package://hrpsys_gazebo/models/sandia_left.dae"
+                    (instance std_msgs::Header :init :frame_id "/left_palm")
+                    :color (float-vector 0 0 1)
+                    :alpha 0.6
+                    ))))
+      )
+    (when mkframe
+      (ros::ros-info "set-marker-pose")
+      (set-marker-pose mkcds :frame mkframe :markers markers))
+    (send *using-robot* :angle-vector av)
+    ))
 
 ;; execute main program
 (load "package://interactive_marker_interface/euslisp/interactive-marker-fullbody.l")
