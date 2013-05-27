@@ -53,6 +53,8 @@ class HrpsysConfigurator:
         connectPorts(self.sh.port("baseRpyOut"), self.seq.port("baseRpyInit"))
         connectPorts(self.sh.port("qOut"), self.seq.port("qInit"))
         #
+        for sen in filter(lambda x : x.type == "Force", self.getSensors(self.url)):
+            connectPorts(self.rh.port(sen.name), self.ic.port(sen.name))
         # virtual force sensor connection
         for vfp in filter(lambda x : str.find(x, 'v') >= 0 and str.find(x, 'sensor') >= 0, self.vs.ports.keys()):
             connectPorts(self.vs.port(vfp), self.ic.port(vfp))
