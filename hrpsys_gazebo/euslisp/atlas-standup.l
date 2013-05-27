@@ -45,7 +45,14 @@
   ;;; setting for stand-up
   (send *ri* :set-servo-gain-percentage "back_lbz" 1000.0)
   (send *ri* :set-servo-gain-percentage "back_mby" 200.0)
-  (send *ri* :set-servo-gain-percentage "back_ubx" 200.0))
+  (send *ri* :set-servo-gain-percentage "back_ubx" 200.0)
+  (dolist (j (flatten (send *atlas* :arms :joint-list)))
+    (send *ri* :set-servo-gain-percentage (send j :name) 150.0))
+  (dolist (j (flatten (send *atlas* :legs :joint-list)))
+    (send *ri* :set-servo-gain-percentage (send j :name) 100.0))
+  (send *ri* :set-servo-gain-percentage "l_leg_uhz" 1000.0)
+  (send *ri* :set-servo-gain-percentage "r_leg_uhz" 1000.0)
+  )
 
 ;;わざと転倒させる (前に傾く）
 (defun fall-down
@@ -162,12 +169,15 @@
   ;;(send *atlas* :torso-waist-p :joint-angle 70)
   (send *atlas* :torso-waist-p :joint-angle 50)
   ;;
+  (send *atlas* :larm :shoulder-r :joint-angle -55)
+  (send *atlas* :rarm :shoulder-r :joint-angle 55)
+  ;;
   (send *irtviewer* :draw-objects)
   (when run (send-pose tm))
   )
 ;;
 ;; 4. 腰を元に戻し、足もあげていく
-(defun pose4-1 (&key (run nil) (tm 30000))
+(defun pose4-1 (&key (run nil) (tm 4000))
   (pose2 :run nil)
   ;;
   (send *atlas* :larm-elbow-p :joint-angle 10)
@@ -200,7 +210,7 @@
   )
 
 ;; 4. 腰を元に戻し、足もあげていく (中間姿勢２：一度にゆっくりしたとしてもこけるっぽい, なんで？)
-(defun pose4-2 (&key (run nil) (tm 30000))
+(defun pose4-2 (&key (run nil) (tm 4000))
   (pose4-1 :run nil)
   ;;
   (send *atlas* :larm-shoulder-y :joint-angle 0)
@@ -225,7 +235,7 @@
   )
 
 ;; 4. 腰を元に戻し、足もあげていく (中間姿勢3：一度にゆっくりしたとしてもこけるっぽい, なんで？)
-(defun pose4-3 (&key (run nil) (tm 30000))
+(defun pose4-3 (&key (run nil) (tm 4000))
   (pose4-1 :run nil)
   ;;
   (send *atlas* :torso-waist-p :joint-angle -5)
@@ -250,7 +260,7 @@
   )
 
 ;; 4. 腰を元に戻し、足もあげていく　最終姿勢：pose4-4の姿勢は、walkの初期姿勢と同じ,この状態ならk-effortを0にしてもこけなくなる
-(defun pose4-4 (&key (run nil) (tm 30000))
+(defun pose4-4 (&key (run nil) (tm 4000))
   (send *atlas* :angle-vector
         #f(-0.000611 0.076327 0.002034 28.5397 114.638 -0.264813 -74.6804 17.1935 0.017428 -28.5384 114.637 0.268241 74.6782 17.1937 0.018326 29.5172 -3.85612 -14.613 4.16939 -13.4334 17.3866 29.2973 4.51093 -14.4278 -5.09418 -13.4808 -17.3512 -0.061066))
   ;;
@@ -568,14 +578,12 @@
              (aref rf-force 2)
              (sqrt (+ (* (aref lf-force 3) (aref lf-force 3)) (* (aref lf-force 4) (aref lf-force 4))))
              (sqrt (+ (* (aref rf-force 3) (aref rf-force 3)) (* (aref rf-force 4) (aref rf-force 4))))))
-    (if (or
-         ;;(> (+ (aref lf-force 2) (aref rf-force 2)) 800)
-         nil
-         (and (> (aref lf-force 2) 280)
-              (> (aref rf-force 2) 280)
-              (< (sqrt (+ (* (aref lf-force 3) (aref lf-force 3)) (* (aref lf-force 4) (aref lf-force 4)))) 33)
-              (< (sqrt (+ (* (aref rf-force 3) (aref rf-force 3)) (* (aref rf-force 4) (aref rf-force 4)))) 33)
-              ))
+    (if (and (or (and (> (aref lf-force 2) 270)
+                      (> (aref rf-force 2) 270))
+                 (> (+ (aref lf-force 2) (aref rf-force 2)) 700))
+             (< (sqrt (+ (* (aref lf-force 3) (aref lf-force 3)) (* (aref lf-force 4) (aref lf-force 4)))) 33)
+             (< (sqrt (+ (* (aref rf-force 3) (aref rf-force 3)) (* (aref rf-force 4) (aref rf-force 4)))) 33)
+             )
         (setq ret-flag t))
     ret-flag))
 #|
