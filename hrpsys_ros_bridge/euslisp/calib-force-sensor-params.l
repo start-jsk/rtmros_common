@@ -99,11 +99,12 @@
       ret)))
 
 ;; example
-(defun make-default-ForceCalibPoses (robot)
+(defun make-default-ForceCalibPoses
+  (robot &key (pose-method :reset-manip-pose))
   (let ((pav (send robot :angle-vector))
         (pc (send robot :copy-worldcoords))
         poses)
-    (send robot :reset-manip-pose)
+    (send robot pose-method)
     (push (send robot :angle-vector) poses)
     (let ((ps (list -50 0 50))
           (ys (list -50 0 50)))
