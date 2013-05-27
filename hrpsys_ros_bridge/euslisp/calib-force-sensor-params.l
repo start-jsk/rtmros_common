@@ -33,103 +33,91 @@
       (warn ";; avg moment error ~A[Nm]~%" (/ (norm (v- mv (transform R-mat ret))) N))
       ret)))
 
-(defun makeForceCalibPoses ()
-  (let (poses)
-    (send *sr* :reset-pose)
-    (send *sr* :arms :elbow-p :joint-angle -90)
+(defun forceCalib-for-limbs
+  (robot
+   &key (base-time 1000)
+        (limbs '(:rarm :larm))
+        (poses (makeForceCalibPoses))
+        (fname))
+  (let ((pc (send robot :copy-worldcoords))
+        (pav (send robot :angle-vector))
+        rot-list force-list moment-list)
+    (if *viewer* (send (send *viewer* :get :pickviewer) :draw-objects))
+    (send robot :angle-vector (car poses))
+    (send *ri* :angle-vector (send robot :angle-vector) (* base-time 5))
+    (send *ri* :wait-interpolation)
+    (dolist (apose poses)
+      (send robot :angle-vector apose)
+      (if *viewer* (send (send *viewer* :get :pickviewer) :draw-objects))
+      (send *ri* :angle-vector (send robot :angle-vector) (* base-time 2.5))
+      (send *ri* :wait-interpolation)
+      (unix:usleep base-time)
+      ;;
+      (send *ri* :state)
+      (push (mapcar #'(lambda (x) (list x (send *ri* :force-vector x))) limbs) force-list)
+      (push (mapcar #'(lambda (x) (list x (send *ri* :moment-vector x))) limbs) moment-list)
+      (send robot :angle-vector (send *ri* :potentio-vector))
+      (send robot :fix-leg-to-coords (make-coords)) ;; temp
+      (if *viewer* (send (send *viewer* :get :pickviewer) :draw-objects))
+      (push
+       (flatten
+        (mapcar #'(lambda (a)
+                    (list a (copy-object (send (send robot :force-sensor (send (send *ri* :get-force-sensor-from-limb-name a) :name)) :worldrot))))
+                limbs))
+       rot-list)
+      )
+    (send robot :angle-vector pav)
+    (send robot :newcoords pc)
+    (if *viewer* (send (send *viewer* :get :pickviewer) :draw-objects))
+    (let* ((estimated-f-values
+            (mapcar #'(lambda (a)
+                        (calc-mass-force-offset-from-forces
+                         (mapcar #'(lambda (x) (cadr (memq a x))) rot-list)
+                         (mapcar #'(lambda (x) (cadr (assoc a x))) force-list)
+                         ))
+                    limbs))
+           (estimated-m-values
+            (mapcar #'(lambda (a em)
+                        (calc-com-moment-offset-from-moments
+                         (mapcar #'(lambda (x) (cadr (memq a x))) rot-list)
+                         (mapcar #'(lambda (x) (cadr (assoc a x))) moment-list)
+                         (elt em 3)))
+                    limbs estimated-f-values))
+           (ret (mapcar #'(lambda (ll ff mm)
+                            (list ll
+                                  :force-offset (subseq ff 0 3)
+                                  :moment-offset (subseq mm 0 3)
+                                  :link-offset-mass (elt ff 3)
+                                  :link-offset-centroid (subseq mm 3 6)))
+                        limbs
+                        estimated-f-values
+                        estimated-m-values)))
+      (mapcar #'(lambda (l)
+                  (format t ";; ~A ~%" l))
+              ret)
+      (if fname (dump-structure fname ret))
+      ret)))
+
+;; example
+(defun make-default-ForceCalibPoses (robot)
+  (let ((pav (send robot :angle-vector))
+        (pc (send robot :copy-worldcoords))
+        poses)
+    (send robot :reset-manip-pose)
+    (push (send robot :angle-vector) poses)
     (let ((ps (list -50 0 50))
           (ys (list -50 0 50)))
       (dolist (lp ps)
-        (send *sr* :arms :wrist-p :joint-angle lp)
+        (send robot :arms :wrist-p :joint-angle lp)
         (dolist (ly ys)
-          (send *sr* :arms :wrist-y :joint-angle ly)
-          (send (send *viewer* :get :pickviewer) :draw-objects)
-          (unless nil;;(send *hrp2* :self-collision-check)
-            (push (send *sr* :angle-vector) poses))
+          (send robot :arms :wrist-y :joint-angle ly)
+          (if *viewer* (send (send *viewer* :get :pickviewer) :draw-objects))
+          (unless nil;;(send robot :self-collision-check)
+            (push (send robot :angle-vector) poses))
           )
         ))
-    poses))
+    (send robot :angle-vector pav)
+    (send robot :newcoords pc)
+    (reverse poses)))
 
-(defun forceCalib-for-limbs
-  (&key(base-time 1000)
-       (limbs '(:rarm :larm))
-       (poses (reverse (makeForceCalibPoses)))
-       (fname))
-  (let* (states rot-list force-list moment-list)
-    (send *sr* :reset-pose)
-    (send *sr* :arms :elbow-p :joint-angle -90)
-    (send (send *viewer* :get :pickviewer) :draw-objects)
-    ;;
-    (send *ri* :angle-vector (send *sr* :angle-vector) (* base-time 5))
-    (send *ri* :wait-interpolation)
-    ;; キャリブ姿勢のセンサ値を収集
-    (dolist (apose poses)
-      (send *sr* :angle-vector apose)
-      (send (send *viewer* :get :pickviewer) :draw-objects)
-      (send *ri* :angle-vector (send *sr* :angle-vector) (* base-time 2.5))
-      (send *ri* :wait-interpolation)
-      ;;(unix:sleep 1)
-      ;;
-      (let ((pc (send *sr* :copy-worldcoords))
-            (pav (send *sr* :angle-vector)))
-	;;(push (send *ri* :state) states)
-        (send *ri* :state)
-        (push (mapcar #'(lambda (x) (list x (send *ri* :force-vector x))) limbs) force-list)
-        (push (mapcar #'(lambda (x) (list x (send *ri* :moment-vector x))) limbs) moment-list)
-        (send *sr* :angle-vector (send *ri* :potentio-vector))
-        (send *sr* :fix-leg-to-coords (make-coords)) ;; temp
-	;;(send *sr* :angle-vector (send (car states) :potentio-vector))
-        ;; (unless (some #'(lambda (x) (= 0 (length x))) (send *sr* :legs :links)) ;; legged robot
-        ;;   (send *sr* :newcoords (send (car states) :worldcoords-from-rpy-vector *sr*)))
-        (send (send *viewer* :get :pickviewer) :draw-objects)
-	(push
-	 (flatten
-	  (mapcar #'(lambda (a)
-		      (list a (copy-object (send (send *sr* :force-sensor (send (send *ri* :get-force-sensor-from-limb-name a) :name)) :worldrot))))
-		  limbs))
-	 rot-list)
-	;;(send *sr* :state pstate)
-        (send *sr* :angle-vector pav)
-        (send *sr* :newcoords pc)
-        ))
-    ;;(send *sr* :reset-manip-pose)
-    (send *sr* :reset-pose)
-    (send *sr* :arms :elbow-p :joint-angle -90)
-    ;; (unless (some #'(lambda (x) (= 0 (length x))) (send *sr* :legs :links)) ;; legged robot
-    ;;   (send *sr* :fix-leg-to-coords (make-coords) '(:rleg :lleg))
-    ;;   ;;(move-centroid-on-foot-on-end-coords-for-forcecalib)
-    ;;   )
-    (send (send *viewer* :get :pickviewer) :draw-objects)
-    (send *ri* :angle-vector (send *sr* :angle-vector) (* base-time 5))
-    (send *ri* :wait-interpolation)
-    (print force-list)
-    (let* ((estimated-f-values
-	    (mapcar #'(lambda (a)
-			(calc-mass-force-offset-from-forces
-			 (mapcar #'(lambda (x) (cadr (memq a x))) rot-list)
-                         (mapcar #'(lambda (x) (cadr (assoc a x))) force-list)
-			 ))
-		    limbs))
-	   (estimated-m-values
-	    (mapcar #'(lambda (a em)
-			(calc-com-moment-offset-from-moments
-			 (mapcar #'(lambda (x) (cadr (memq a x))) rot-list)
-                         (mapcar #'(lambda (x) (cadr (assoc a x))) moment-list)
-			 (elt em 3)))
-		    limbs estimated-f-values)))
-      (print estimated-f-values)
-      (print estimated-m-values)
-      ;;(send *ri* :debugp t)
-      ;;(list estimated-f-values estimated-m-values)
-      (dump-structure
-       fname
-       (mapcar #'(lambda (ll ff mm)
-                   (list ll
-                         :force-offset (subseq ff 0 3)
-                         :moment-offset (subseq mm 0 3)
-                         :link-offset-mass (elt ff 3)
-                         :link-offset-centroid (subseq mm 3 6)))
-               limbs
-               estimated-f-values
-               estimated-m-values))
-      )))
+
