@@ -339,6 +339,60 @@
       (push (list :texcoords tcoords) ret)
       (instance gl::glvertices :init (list ret)))
     ))
+;; making meshes of hand
+;;(load "package://eusurdf/euslisp/eusurdf.l")
+;;(setq ll (read-csg-bodies (dump-csg-bodies (cdr (send (car (urdf2eus "sandia_left.urdf")) :bodies)))))
+;;(setq gv (convert-gl-vertices-bodies ll))
+;;(send gv :rotate -pi/2 :x)
+;;(send gv :translate #f(0 0 -500))
+;;(send gv :reset-offset-from-parent)
+;;(store-glvertices "sandia_left.dae" gv :scale 0.001)
+(defun dump-csg-bodies (ll)
+  (let (ret)
+    (dolist (l ll)
+      (let ((csg-cf (send l :csg)))
+        (let ((cb (assoc :cube csg-cf)))
+          (when (or (and cb
+                         (or (> (elt (cdr cb) 0) 5.1)
+                             (> (elt (cdr cb) 1) 5.1)
+                             (> (elt (cdr cb) 2) 5.1)))
+                    (null cb))
+            (push
+             (list (cons :csg csg-cf)
+                   (cons :coords (send l :copy-worldcoords))) ret)))))
+    ret))
+
+(defun parse-csg (cf)
+  (let ((bx (cdr (assoc :cube cf)))
+        (cl (cdr (assoc :cylinder cf)))
+        (tv (cadr (assoc :translate-vertices cf)))
+        bd)
+    (cond
+     (bx (setq bd (apply #'make-cube bx)))
+     (cl (setq bd (apply #'make-cylinder (subseq cl 0 2)))))
+    (when tv
+      (send bd :translate-vertices tv))
+    bd
+    ))
+
+(defun read-csg-bodies (ret)
+  (mapcar #'(lambda (l)
+              (let ((cds (cdr (assoc :coords l)))
+                    (csg-cf (cdr (assoc :csg l)))
+                    bd)
+                (setq bd (parse-csg csg-cf))
+                (when cds (send bd :transform cds))
+                bd)) ret))
+
+(defun convert-gl-vertices-bodies (bds) ;; fix origin
+  (let ((gv
+         (mapcar #'(lambda (l)
+                     (let ((glv (make-glvertices-from-faces (send l :faces))))
+                       ;;(send glv :transform (send l :worldcoords))
+                       glv)) bds)))
+    (send (car gv) :append-glvertices (cdr gv))
+    ))
+
 #|
 (setq teximg (read-image-file "/usr/share/gazebo-1.7/media//materials/textures/dirt_diffusespecular.png"))
 (setq img (read-image-file "/usr/share/drcsim-2.5/gazebo_models/environments/vrc_heightmap_1/materials/textures/heightmap.png"))
