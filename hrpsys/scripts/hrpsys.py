@@ -42,7 +42,8 @@ class HrpsysConfigurator:
         #
         connectPorts(self.sh.port("qOut"),  self.ic.port("qRef"))
         connectPorts(self.ic.port("q"), self.abc.port("qRef"))
-        connectPorts(self.abc.port("q"),  self.co.port("qRef"))
+        connectPorts(self.abc.port("q"),  self.st.port("qRef"))
+        connectPorts(self.st.port("q"),  self.co.port("qRef"))
         connectPorts(self.co.port("q"),  self.el.port("qRef"))
         out_port = self.el.port("q")
         if self.simulation_mode :
@@ -115,8 +116,7 @@ class HrpsysConfigurator:
 
     # public method to configure all RTCs to be activated on rtcd
     def getRTCList(self):
-#        return [self.rh, self.seq, self.sh, self.tf, self.kf, self.vs, self.ic, self.abc, self.st, self.co, self.el, self.log]
-        return [self.rh, self.seq, self.sh, self.tf, self.kf, self.vs, self.ic, self.abc, self.co, self.el, self.log]
+        return [self.rh, self.seq, self.sh, self.tf, self.kf, self.vs, self.ic, self.abc, self.st, self.co, self.el, self.log]
 
     # public method to get bodyInfo
     def getBodyInfo(self, url):
