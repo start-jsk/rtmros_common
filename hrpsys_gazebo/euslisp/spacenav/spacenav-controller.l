@@ -11,31 +11,38 @@
 	  float-vector))
 
 (defvar *ik-target* :rarm)
-(defvar *ik-mode* :fullbody)
+(defvar *ik-mode* nil)
+(defvar *ik-rotation-axis* nil)
+
+(mapcar
+  #'(lambda (j)
+      (send j :min-angle -1000)
+      (send j :max-angle 1000))
+ (send *robot* :joint-list))
 
 (defun spacenav-controller-callback
   (msg)
   (describe msg)
   (if (> (aref (send msg :buttons) 0) 0.1)
       ;; implement here
-      (send *ci* :start-grasp)
+      (send *ri* :start-grasp)
     )
   (if (> (aref (send msg :buttons) 1) 0.1)
       ;; implement here
-      (send *ci* :stop-grasp)
+      (send *ri* :stop-grasp)
     )
   (let
       ((newcoords
 	(let ((move
 	       (scale
-		50
+		30
 		(coerce
 		 (subseq (send msg :axes) 0 3)
 		 float-vector)))
 	      (rpy
 	       (reverse
 		(scale
-		 0.25
+		 0.15
 		 (coerce
 		  (subseq (send msg :axes) 3 6)
 		  float-vector)))))
@@ -43,16 +50,16 @@
 	   :pos
 	   (v+
 	    (send *robot* *ik-target* :end-coords :worldpos)
-	    (if (> (norm move) 50)
-		(scale 50 (normalize-vector move))
+	    (if (> (norm move) 30)
+		(scale 30 (normalize-vector move))
 	      move))
 	   :rpy
 	   (setq
 	    *spacenav-controller-rpy*
 	    (v+
 	     *spacenav-controller-rpy*
-	     (if (> (norm rpy) 0.25)
-		 (scale 0.25 (normalize-vector rpy))
+	     (if (> (norm rpy) 0.15)
+		 (scale 0.15 (normalize-vector rpy))
 	       rpy)))))))
     (if (eq *ik-target* :fullbody)
 	(simple-fullbody
@@ -72,14 +79,16 @@
 	 :centroid-thre 30
 	 :target-centroid-pos *spacenav-controller-centroid*)
       (send *robot* *ik-target* :inverse-kinematics
-	    newcoords)))
+	    newcoords
+	    :rotation-axis *ik-rotation-axis*
+	    )))
   (if (and (boundp '*irtviewer*) *irtviewer*)
       (progn
 	(send *irtviewer* :draw-objects)
 	(x::window-main-one)))
   (send *ri* :angle-vector
 	(send *robot* :angle-vector)
-	100)
+	50)
   (send *ri* :wait-interpolation)
   )
 
