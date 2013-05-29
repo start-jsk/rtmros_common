@@ -71,13 +71,10 @@ class HrpsysConfigurator:
         self.ms.load("SequencePlayer")
         self.seq = self.ms.create("SequencePlayer", "seq")
         print self.configurator_name, "createComps -> SequencePlayer : ",self.seq
-        self.seq_svc = narrow(self.seq.service("service0"), "SequencePlayerService")
 
         self.ms.load("StateHolder");
         self.sh = self.ms.create("StateHolder", "sh")
         print self.configurator_name, "createComps -> StateHolder : ",self.sh
-        self.sh_svc = narrow(self.sh.service("service0"), "StateHolderService");
-        self.tk_svc = narrow(self.sh.service("service1"), "TimeKeeperService")
 
         self.ms.load("TorqueFilter");
         self.tf = self.ms.create("TorqueFilter", "tf")
@@ -86,7 +83,6 @@ class HrpsysConfigurator:
         self.ms.load("KalmanFilter");
         self.kf = self.ms.create("KalmanFilter", "kf")
         print self.configurator_name, "createComps -> KalmanFilter : ",self.kf
-        self.kf_svc = narrow(self.kf.service("service0"), "KalmanFilterService")
 
         self.ms.load("VirtualForceSensor");
         self.vs = self.ms.create("VirtualForceSensor", "vs")
@@ -95,17 +91,14 @@ class HrpsysConfigurator:
         self.ms.load("ImpedanceController");
         self.ic = self.ms.create("ImpedanceController", "ic")
         print self.configurator_name, "createComps -> ImpednanceController : ",self.ic
-        self.ic_svc = narrow(self.ic.service("service0"), "ImpedanceControllerService");
 
         self.ms.load("AutoBalancer");
         self.abc = self.ms.create("AutoBalancer", "abc")
         print self.configurator_name, "createComps -> AutoBalancerController : ",self.abc
-        self.abc_svc = narrow(self.abc.service("service0"), "AutoBalancerService");
 
         self.ms.load("CollisionDetector");
         self.co = self.ms.create("CollisionDetector", "co")
         print self.configurator_name, "createComps -> CollisionDetector : ",self.co
-        self.co_svc = narrow(self.co.service("service0"), "CollisionDetectorService");
 
         self.ms.load("SoftErrorLimiter");
         self.el = self.ms.create("SoftErrorLimiter", "el")
@@ -114,7 +107,6 @@ class HrpsysConfigurator:
         self.ms.load("DataLogger");
         self.log = self.ms.create("DataLogger", "log")
         print self.configurator_name, "createComps -> DataLogger : ",self.log
-        self.log_svc = narrow(self.log.service("service0"), "DataLoggerService");
 
     # public method to configure all RTCs to be activated on rtcd
     def getRTCList(self):
