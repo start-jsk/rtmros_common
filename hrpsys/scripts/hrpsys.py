@@ -96,6 +96,10 @@ class HrpsysConfigurator:
         self.abc = self.ms.create("AutoBalancer", "abc")
         print self.configurator_name, "createComps -> AutoBalancerController : ",self.abc
 
+        self.ms.load("Stabilizer");
+        self.st = self.ms.create("Stabilizer", "st")
+        print self.configurator_name, "createComps -> StabilizerController : ",self.st
+
         self.ms.load("CollisionDetector");
         self.co = self.ms.create("CollisionDetector", "co")
         print self.configurator_name, "createComps -> CollisionDetector : ",self.co
@@ -107,9 +111,11 @@ class HrpsysConfigurator:
         self.ms.load("DataLogger");
         self.log = self.ms.create("DataLogger", "log")
         print self.configurator_name, "createComps -> DataLogger : ",self.log
+        self.log_svc = narrow(self.log.service("service0"), "DataLoggerService");
 
     # public method to configure all RTCs to be activated on rtcd
     def getRTCList(self):
+#        return [self.rh, self.seq, self.sh, self.tf, self.kf, self.vs, self.ic, self.abc, self.st, self.co, self.el, self.log]
         return [self.rh, self.seq, self.sh, self.tf, self.kf, self.vs, self.ic, self.abc, self.co, self.el, self.log]
 
     # public method to get bodyInfo
