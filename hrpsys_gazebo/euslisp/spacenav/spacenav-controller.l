@@ -11,18 +11,19 @@
 	  float-vector))
 
 (defvar *ik-target* :rarm)
+(defvar *ik-mode* :fullbody)
 
 (defun spacenav-controller-callback
   (msg)
   (describe msg)
   (if (> (aref (send msg :buttons) 0) 0.1)
       ;; implement here
-      ;; atlas grasp rhand
-      )
+      (send *ci* :start-grasp)
+    )
   (if (> (aref (send msg :buttons) 1) 0.1)
       ;; implement here
-      ;; atlas grasp lhand
-      )
+      (send *ci* :stop-grasp)
+    )
   (let
       ((newcoords
 	(let ((move
@@ -53,22 +54,25 @@
 	     (if (> (norm rpy) 0.25)
 		 (scale 0.25 (normalize-vector rpy))
 	       rpy)))))))
-    (simple-fullbody
-     :robot *robot*
-     :target
-     (mapcar
-      #'(lambda (k)
-	  (if (eq k *ik-target*)
-	      (list (cons :target k)
-		    (cons :coords newcoords))
-	    (list (cons :target k))))
-      '(:rarm :larm :rleg :lleg))
-     :balence-leg nil
-     :debug-view :no-message
-     :stop 10
-     :revert-if-fail nil
-     :centroid-thre 30
-     :target-centroid-pos *spacenav-controller-centroid*))
+    (if (eq *ik-target* :fullbody)
+	(simple-fullbody
+	 :robot *robot*
+	 :target
+	 (mapcar
+	  #'(lambda (k)
+	      (if (eq k *ik-target*)
+		  (list (cons :target k)
+			(cons :coords newcoords))
+		(list (cons :target k))))
+	  '(:rarm :larm :rleg :lleg))
+	 :balence-leg nil
+	 :debug-view :no-message
+	 :stop 10
+	 :revert-if-fail nil
+	 :centroid-thre 30
+	 :target-centroid-pos *spacenav-controller-centroid*)
+      (send *robot* *ik-target* :inverse-kinematics
+	    newcoords)))
   (if (and (boundp '*irtviewer*) *irtviewer*)
       (progn
 	(send *irtviewer* :draw-objects)
