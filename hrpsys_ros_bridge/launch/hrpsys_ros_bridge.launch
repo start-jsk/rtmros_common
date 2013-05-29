@@ -47,6 +47,8 @@
         output="screen" args ="$(arg openrtm_args)" />
   <node pkg="hrpsys" name="SoftErrorLimiterServiceROSBridge" type="SoftErrorLimiterServiceROSBridgeComp"
         output="screen" args ="$(arg openrtm_args)" />
+  <node pkg="hrpsys" name="StabilizerServiceROSBridge" type="StabilizerServiceROSBridgeComp"
+        output="screen" args ="$(arg openrtm_args)" />
 
   <group if="$(arg INSTALL_ROBOT_DESCRIPTION)" >
     <param name="robot_description" textfile="$(arg COLLADA_FILE)" />
@@ -80,6 +82,7 @@
   <rtconnect from="AutoBalancerServiceROSBridge.rtc:AutoBalancerService" to="abc.rtc:AutoBalancerService"  subscription_type="new"/>
   <rtconnect from="CollisionDetectorServiceROSBridge.rtc:CollisionDetectorService" to="co.rtc:CollisionDetectorService" subscription_type="new"/>
   <rtconnect from="StateHolderServiceROSBridge.rtc:StateHolderService" to="sh.rtc:StateHolderService"  subscription_type="new"/>
+  <rtconnect from="StabilizerServiceROSBridge.rtc:StabilizerService" to="st.rtc:StabilizerService"  subscription_type="new"/>
   <!-- <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/> -->
   <rtconnect from="SoftErrorLimiterServiceROSBridge.rtc:SoftErrorLimiterService" to="el.rtc:SoftErrorLimiterService"  subscription_type="new"/>
   <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
@@ -93,6 +96,7 @@
   <rtactivate component="StateHolderServiceROSBridge.rtc" />
   <rtactivate component="RobotHardwareServiceROSBridge.rtc" />
   <rtactivate component="SoftErrorLimiterServiceROSBridge.rtc" />
+  <rtactivate component="StabilizerServiceROSBridge.rtc" />
   <!-- END:openrtm connection -->
 </launch>
 
