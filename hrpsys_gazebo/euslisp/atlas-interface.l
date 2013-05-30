@@ -28,6 +28,8 @@
                      atlas_msgs::AtlasSimInterfaceCommand 1)
      (ros::subscribe "atlas/atlas_sim_interface_state"
                      atlas_msgs::AtlasSimInterfaceState #'send self :sim-interface-state-cb)
+     (ros::subscribe "pointcloud_screenpoint_nodelet/output_point"
+		     geometry_msgs::PointStamped #'send self :point-stamped-cb)
      ;; do not use in Qualification
      (unless qualify
        (ros::advertise "atlas/mode" std_msgs::String 1)
@@ -41,7 +43,8 @@
            '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
      (setq walk-seq 0)
      ))
-  (:sim-interface-state-cb (msg)
+  (:sim-interface-state-cb
+   (msg)
    (let* ((pos-est (send msg :pos_est))
           (pos (send pos-est :position))
           (foot-pos-est1 (car (send msg :foot_pos_est)))
@@ -56,6 +59,16 @@
            (list (ros::tf-pose->coords foot-pos-est1)
                  (ros::tf-pose->coords foot-pos-est2)))
      (send self :put :current-behavior cur-bhv)
+     ))
+  (:point-stamped-cb
+   (msg)
+   (let* ((frame-id (send (send msg :header) :frame_id))
+	  (point (send msg :point))
+	  (frame (read-from-string (format nil ":~a" (string-left-trim "/" frame-id))))
+	  (pos (scale 1000 (float-vector (send point :x) (send point :y) (send point :z)))))
+     (send *atlas* :angle-vector (send self :state :potentio-vector))
+     (send self :put :point
+	   (send (send *atlas* :worldcoords) :inverse-transform-vector (send (send (send *atlas* frame) :copy-worldcoords) :transform-vector pos)))
      ))
   (:wait-for-start-bdi-walk ()
    (ros::spin-once)
@@ -164,28 +177,29 @@
    (send self :bdi_footstep
          (send robot :go-pos-params->footstep-list (* x 1000) (* y 1000) theta)
          :step-duration step-duration :swing-height swing-height))
-  (:teleport-to (coords &optional (pose))
+  (:teleport-to (&optional (coords) (pose))
    (unix::usleep (* 100 1000))
    (send self :atlas-mode "harnessed")
-   (send self :set-simulation-mode :mode :freeze)
+   (send self :set-simulation-mode :mode :freeze :effort 0)
    (cond
     ((and pose (float-vector-p pose))
      (send robot :angle-vector pose)
      (send self :angle-vector (send robot :angle-vector) 2000)
-     (send *ri* :set-simulation-mode :mode :stand-prep))
+     (send *ri* :set-simulation-mode :mode :stand-prep :effort 0))
     ((and pose (keywordp pose))
      (send robot pose)
      (send self :angle-vector (send robot :angle-vector) 2000)
-     (send *ri* :set-simulation-mode :mode :stand-prep))
+     (send *ri* :set-simulation-mode :mode :stand-prep :effort 0))
     (t
      (send self :control-mode "StandPrep")
      ))
    (unix::usleep (* 2 1000 1000))
    (send self :atlas-mode "nominal")
    (unix::usleep (* 10 1000))
-   (ros::publish "atlas/set_pose" (ros::coords->tf-pose coords))
+   (when coords
+     (ros::publish "atlas/set_pose" (ros::coords->tf-pose coords)))
    (unix::usleep (* 200 1000))
-   (send self :set-simulation-mode :mode :stand))
+   (send self :set-simulation-mode :mode :stand :effort 0))
   )
 
 (defun set-simulation-mode (&key (effort 255) (sleep 0.5) (mode :user))
@@ -339,7 +353,8 @@
     (cond
      ((keywordp set-reset-pose)
       (send *atlas* set-reset-pose))
-     (t (send *atlas* :reset-pose)))
+     (t (send *atlas* :reset-pose)
+	(send *atlas* :move-centroid-on-foot :both '(:lleg :rleg))))
     ;; send reset pose to real robot
     (send *ri* :angle-vector (send *atlas* :angle-vector) 3000)
     (send *ri* :wait-interpolation))
