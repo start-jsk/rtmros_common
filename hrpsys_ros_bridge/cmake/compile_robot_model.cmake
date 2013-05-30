@@ -75,11 +75,11 @@ macro(compile_collada_model daefile)
 
   if(EXISTS ${_yamlfile})
     add_custom_command(OUTPUT ${_lispfile}
-      COMMAND rosrun euscollada collada2eus ${daefile} ${_yamlfile} ${_lispfile}
+      COMMAND rosrun euscollada collada2eus ${daefile} ${_yamlfile} ${_lispfile} ${ARGV1}
       DEPENDS ${daefile})
   else(EXISTS ${_yamlfile})
     add_custom_command(OUTPUT ${_lispfile}
-      COMMAND rosrun euscollada collada2eus ${daefile} ${_lispfile} || echo 'ok'
+      COMMAND rosrun euscollada collada2eus ${daefile} ${_lispfile} ${ARGV1} || echo 'ok'
       DEPENDS ${daefile})
   endif(EXISTS ${_yamlfile})
   add_custom_command(OUTPUT ${_xmlfile}
