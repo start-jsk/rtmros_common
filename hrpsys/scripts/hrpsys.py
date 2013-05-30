@@ -68,50 +68,36 @@ class HrpsysConfigurator:
         for r in rtcList:
             r.start()
 
+    def createComp(self, compName, instanceName):
+        self.ms.load(compName)
+        comp = self.ms.create(compName, instanceName)
+        print self.configurator_name, "create Comp -> ", compName, " : ", comp
+        if comp == None:
+            raise RuntimeError("Cannot create component: " + compName)
+        return comp
+
     def createComps(self):
-        self.ms.load("SequencePlayer")
-        self.seq = self.ms.create("SequencePlayer", "seq")
-        print self.configurator_name, "createComps -> SequencePlayer : ",self.seq
+        self.seq = self.createComp("SequencePlayer", "seq")
 
-        self.ms.load("StateHolder");
-        self.sh = self.ms.create("StateHolder", "sh")
-        print self.configurator_name, "createComps -> StateHolder : ",self.sh
+        self.sh = self.createComp("StateHolder", "sh")
 
-        self.ms.load("TorqueFilter");
-        self.tf = self.ms.create("TorqueFilter", "tf")
-        print self.configurator_name, "createComps -> TorqueFilter : ",self.tf
+        self.tf = self.createComp("TorqueFilter", "tf")
 
-        self.ms.load("KalmanFilter");
-        self.kf = self.ms.create("KalmanFilter", "kf")
-        print self.configurator_name, "createComps -> KalmanFilter : ",self.kf
+        self.kf = self.createComp("KalmanFilter", "kf")
 
-        self.ms.load("VirtualForceSensor");
-        self.vs = self.ms.create("VirtualForceSensor", "vs")
-        print self.configurator_name, "createComps -> VirtualForceSensor : ",self.vs
+        self.vs = self.createComp("VirtualForceSensor", "vs")
 
-        self.ms.load("ImpedanceController");
-        self.ic = self.ms.create("ImpedanceController", "ic")
-        print self.configurator_name, "createComps -> ImpednanceController : ",self.ic
+        self.ic = self.createComp("ImpedanceController", "ic")
 
-        self.ms.load("AutoBalancer");
-        self.abc = self.ms.create("AutoBalancer", "abc")
-        print self.configurator_name, "createComps -> AutoBalancerController : ",self.abc
+        self.abc = self.createComp("AutoBalancer", "abc")
 
-        self.ms.load("Stabilizer");
-        self.st = self.ms.create("Stabilizer", "st")
-        print self.configurator_name, "createComps -> StabilizerController : ",self.st
+        self.st = self.createComp("Stabilizer", "st")
 
-        self.ms.load("CollisionDetector");
-        self.co = self.ms.create("CollisionDetector", "co")
-        print self.configurator_name, "createComps -> CollisionDetector : ",self.co
+        self.co = self.createComp("CollisionDetector", "co")
 
-        self.ms.load("SoftErrorLimiter");
-        self.el = self.ms.create("SoftErrorLimiter", "el")
-        print self.configurator_name, "createComps -> SoftErrorLimiter : ",self.el
+        self.el = self.createComp("SoftErrorLimiter", "el")
 
-        self.ms.load("DataLogger");
-        self.log = self.ms.create("DataLogger", "log")
-        print self.configurator_name, "createComps -> DataLogger : ",self.log
+        self.log = self.createComp("DataLogger", "log")
         self.log_svc = narrow(self.log.service("service0"), "DataLoggerService");
 
     # public method to configure all RTCs to be activated on rtcd
