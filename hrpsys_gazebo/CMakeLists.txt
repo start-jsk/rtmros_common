@@ -46,7 +46,7 @@ add_custom_command(
   DEPENDS ${atlas_urdf}
 )
 
-compile_collada_model(${atlas_dae})
+compile_collada_model(${atlas_dae} "--without-technique-limit")
 ## ALL
 list(GET compile_robots 0 compile_robot)
 list(REMOVE_AT compile_robots 0)
