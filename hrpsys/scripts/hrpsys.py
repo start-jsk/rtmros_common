@@ -55,6 +55,13 @@ class HrpsysConfigurator:
         connectPorts(self.sh.port("basePosOut"), self.seq.port("basePosInit"))
         connectPorts(self.sh.port("baseRpyOut"), self.seq.port("baseRpyInit"))
         connectPorts(self.sh.port("qOut"), self.seq.port("qInit"))
+        # for st
+        #connectPorts(self.rh.port("lfsensor"), self.st.port("forceL"))
+        #connectPorts(self.rh.port("rfsensor"), self.st.port("forceR"))
+        #connectPorts(self.kf.port("rpy"), self.st.port("rpy"))
+        #connectPorts(self.abc.port("zmpRef"), self.st.port("zmpRef"))
+        #connectPorts(self.abc.port("baseRpy"), self.st.port("baseRpyIn"))
+        #connectPorts(self.abc.port("basePos"), self.st.port("basePosIn"))
         #
         for sen in filter(lambda x : x.type == "Force", self.getSensors(self.url)):
             connectPorts(self.rh.port(sen.name), self.ic.port(sen.name))
