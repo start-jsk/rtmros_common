@@ -16,14 +16,26 @@ class HrpsysConfigurator:
 
     # public method
     def connectComps(self):
+        # connection for actual joint angles
         connectPorts(self.rh.port("q"), [self.sh.port("currentQIn"), self.co.port("qCurrent"), self.el.port("qCurrent"), self.vs.port("qCurrent"), self.tf.port("qCurrent"), self.ic.port("qCurrent")])
-        #
+        # connection for reference joint angles
+        tmp_contollers = [self.ic, self.abc, self.st, self.co, self.el]
+        connectPorts(self.sh.port("qOut"),  tmp_contollers[0].port("qRef"))
+        for i in range(len(tmp_contollers)-1):
+            connectPorts(tmp_contollers[i].port("q"), tmp_contollers[i+1].port("qRef"))
+        if self.simulation_mode :
+            connectPorts(tmp_contollers[-1].port("q"),  self.hgc.port("qIn"))
+            connectPorts(self.hgc.port("qOut"), self.rh.port("qRef"))
+        else :
+            connectPorts(tmp_contollers[-1].port("q"),  self.rh.port("qRef"))
         connectPorts(self.seq.port("qRef"), self.sh.port("qIn"))
-        #
+        # connection for actual torques
         if rtm.findPort(self.rh.ref, "tau") != None:
             connectPorts(self.rh.port("tau"), self.tf.port("tauIn"))
         connectPorts(self.tf.port("tauOut"), self.vs.port("tauIn"))
-        # currently use first acc and rate sensors for kf
+
+        # connection for kf
+        #   currently use first acc and rate sensors for kf
         s_acc=filter(lambda s : s.type == 'Acceleration', self.getSensors(self.url))
         if (len(s_acc)>0) and self.rh.port(s_acc[0].name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
             connectPorts(self.rh.port(s_acc[0].name), self.kf.port('acc'))
@@ -31,41 +43,33 @@ class HrpsysConfigurator:
         if (len(s_rate)>0) and self.rh.port(s_rate[0].name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
             connectPorts(self.rh.port(s_rate[0].name), self.kf.port("rate"))
         connectPorts(self.seq.port("accRef"), self.kf.port("accRef"))
-#        connectPorts(self.kf.port("rpy"), self.ic.port("rpy"))
-        # for rh
+        #connectPorts(self.kf.port("rpy"), self.ic.port("rpy"))
+
+        # connection for rh
         if self.rh.port("servoState") != None:
             connectPorts(self.rh.port("servoState"), self.el.port("servoStateIn"))
-        #
+
+        # connection for sh
         connectPorts(self.seq.port("basePos"), self.sh.port("basePosIn"))
         connectPorts(self.seq.port("baseRpy"), self.sh.port("baseRpyIn"))
         connectPorts(self.seq.port("zmpRef"),  self.sh.port("zmpIn"))
-        #
-        connectPorts(self.sh.port("qOut"),  self.ic.port("qRef"))
-        connectPorts(self.ic.port("q"), self.abc.port("qRef"))
-        connectPorts(self.abc.port("q"),  self.st.port("qRef"))
-        connectPorts(self.st.port("q"),  self.co.port("qRef"))
-        connectPorts(self.co.port("q"),  self.el.port("qRef"))
-        out_port = self.el.port("q")
-        if self.simulation_mode :
-            connectPorts(out_port,  self.hgc.port("qIn"))
-            connectPorts(self.hgc.port("qOut"), self.rh.port("qRef"))
-        else :
-            connectPorts(out_port,  self.rh.port("qRef"))
-        #
         connectPorts(self.sh.port("basePosOut"), self.seq.port("basePosInit"))
         connectPorts(self.sh.port("baseRpyOut"), self.seq.port("baseRpyInit"))
         connectPorts(self.sh.port("qOut"), self.seq.port("qInit"))
-        # for st
+
+        # connection for st
         #connectPorts(self.rh.port("lfsensor"), self.st.port("forceL"))
         #connectPorts(self.rh.port("rfsensor"), self.st.port("forceR"))
         #connectPorts(self.kf.port("rpy"), self.st.port("rpy"))
         #connectPorts(self.abc.port("zmpRef"), self.st.port("zmpRef"))
         #connectPorts(self.abc.port("baseRpy"), self.st.port("baseRpyIn"))
         #connectPorts(self.abc.port("basePos"), self.st.port("basePosIn"))
-        #
+
+        # connection for ic
+        #  actual force sensors
         for sen in filter(lambda x : x.type == "Force", self.getSensors(self.url)):
             connectPorts(self.rh.port(sen.name), self.ic.port(sen.name))
-        # virtual force sensor connection
+        #  virtual force sensors
         for vfp in filter(lambda x : str.find(x, 'v') >= 0 and str.find(x, 'sensor') >= 0, self.vs.ports.keys()):
             connectPorts(self.vs.port(vfp), self.ic.port(vfp))
 
