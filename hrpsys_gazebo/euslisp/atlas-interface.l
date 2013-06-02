@@ -59,6 +59,7 @@
            (list (ros::tf-pose->coords foot-pos-est1)
                  (ros::tf-pose->coords foot-pos-est2)))
      (send self :put :current-behavior cur-bhv)
+     (send self :put :k-effort (send msg :k_effort))
      ))
   (:point-stamped-cb
    (msg)
@@ -204,7 +205,7 @@
 
 (defun set-simulation-mode (&key (effort 255) (sleep 0.5) (mode :user))
   (let ((msg (instance atlas_msgs::AtlasSimInterfaceCommand :init))
-        (k-effort (instantiate string 28)))
+        (k-effort (instantiate string (length (send *atlas* :joint-list)))))
     (case mode
       (:stand
        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STAND*))
@@ -221,7 +222,12 @@
       ((:user t)
        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*USER*)))
     (send msg :behavior mode)
-    (fill k-effort effort)
+    (cond ((not effort)
+	   (ros::spin-once)
+	   (setq k-effort (send *ri* :get :k-effort)))
+	  ((consp effort)
+	   (setq k-effort (concatenate string effort)))
+	  (t (fill k-effort effort)))
     (send msg :k_effort k-effort)
     (ros::publish "atlas/atlas_sim_interface_command" msg)
     (when sleep (unix::usleep (round (* sleep 1000 1000))))
