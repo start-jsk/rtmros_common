@@ -11,6 +11,20 @@
 (ros::roseus-add-msgs "geometry_msgs")
 (setq ros::*compile-message* nil)
 
+;; mask vectors / reference atlas_msgs::AtlasState
+(defconstant *torso-mask-vector*
+  (float-vector 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
+(defconstant *head-mask-vector*
+  (float-vector 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
+(defconstant *lleg-mask-vector*
+  (float-vector 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
+(defconstant *rleg-mask-vector*
+  (float-vector 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0))
+(defconstant *larm-mask-vector*
+  (float-vector 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0))
+(defconstant *rarm-mask-vector*
+  (float-vector 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1))
+
 (ros::roseus "atlas_interface")
 
 (defclass atlas-interface
@@ -97,8 +111,35 @@
   (:stop-grasp  (&optional (arm :arms)) (send self :grasp 0 arm))
   (:control-mode (&optional (mode "Stand")) (send_atlas_control_mode mode))
   (:atlas-mode   (&optional (mode "nominal")) (send_atlas_mode mode))
-  (:set-simulation-mode  (&key (effort 255) (sleep 0.5) (mode :user))
-   (set-simulation-mode :effort effort :sleep sleep :mode mode))
+  (:set-simulation-mode
+   (&key (effort 255) (sleep 0.5) (mode :user) (effort-mask))
+   (let ((msg (instance atlas_msgs::AtlasSimInterfaceCommand :init))
+         (k-effort (instantiate string 28)))
+     (case mode
+       (:stand
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STAND*))
+       (:freeze
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*FREEZE*))
+       (:stand-prep
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STAND_PREP*))
+       (:walk
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*WALK*))
+       (:step
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STEP*))
+       (:manipulate
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*MANIPULATE*))
+       ((:user t)
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*USER*)))
+     (send msg :behavior mode)
+     (fill k-effort effort)
+     (when effort-mask
+       (setq k-effort
+             (map string #'(lambda (val msk) (round (* val msk))) k-effort effort-mask)))
+     (send msg :k_effort k-effort)
+     (ros::publish "atlas/atlas_sim_interface_command" msg)
+     (when sleep (unix::usleep (round (* sleep 1000 1000))))
+     mode
+     ))
   (:bdi_footstep
    (footstep-list &key (step-duration 0.63) (swing-height 0.3)
                   (foot-offset) &allow-other-keys)
@@ -202,7 +243,7 @@
    (unix::usleep (* 200 1000))
    (send self :set-simulation-mode :mode :stand :effort 0))
   )
-
+#|
 (defun set-simulation-mode (&key (effort 255) (sleep 0.5) (mode :user))
   (let ((msg (instance atlas_msgs::AtlasSimInterfaceCommand :init))
         (k-effort (instantiate string (length (send *atlas* :joint-list)))))
@@ -232,7 +273,7 @@
     (ros::publish "atlas/atlas_sim_interface_command" msg)
     (when sleep (unix::usleep (round (* sleep 1000 1000))))
     ))
-
+|#
 (defun send_atlas_control_mode
   (&optional (mode "Stand"))
   (let ((msg (instance std_msgs::String :init :data mode)))
@@ -471,5 +512,3 @@
                    (send ra :torque :y)
                    (send ra :torque :z)))
        ))))
-
-;;(send *ri* :set-simulation-mode :mode :stand :effort 0)
