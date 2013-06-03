@@ -1,0 +1,30 @@
+##
+## - collada_joint_name : euslisp_joint_name (start with :)
+##
+
+larm:
+  - right_f0_j0 : larm-shoudler-r
+  - right_f0_j1 : larm-shoudler-p
+  - right_f0_j2 : larm-shoudler-y
+rarm:
+  - right_f1_j0 : rarm-shoudler-r
+  - right_f1_j1 : rarm-shoudler-p
+  - right_f1_j2 : rarm-shoudler-y
+lleg:
+  - right_f2_j0 : lleg-crotch-r
+  - right_f2_j1 : lleg-crotch-p
+  - right_f2_j2 : lleg-crotch-y
+rleg:
+  - right_f3_j0 : rleg-crotch-r
+  - right_f3_j1 : rleg-crotch-p
+  - right_f3_j2 : rleg-crotch-y
+
+##
+## end-coords
+##
+
+##
+## reset-pose
+##
+angle-vector:
+  reset-pose : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] 
