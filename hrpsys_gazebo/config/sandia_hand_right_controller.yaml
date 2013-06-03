@@ -1,0 +1,68 @@
+sandia_hand_right_controller:
+  type: "robot_mechanism_controllers/JointTrajectoryActionController"
+  joints:
+    - right_f0_j0
+    - right_f0_j1
+    - right_f0_j2
+    - right_f1_j0
+    - right_f1_j1
+    - right_f1_j2
+    - right_f2_j0
+    - right_f2_j1
+    - right_f2_j2
+    - right_f3_j0
+    - right_f3_j1
+    - right_f3_j2 
+  gains:
+    right_f0_j0 : {p: 1.0, d: 0, i: 0, i_clamp: 0}
+    right_f0_j1 : {p: 1.0, d: 0, i: 0, i_clamp: 0}
+    right_f0_j2 : {p: 1.0, d: 0, i: 0, i_clamp: 0}
+    right_f1_j0 : {p: 1.0, d: 0, i: 0, i_clamp: 0}
+    right_f1_j1 : {p: 1.0, d: 0, i: 0, i_clamp: 0}
+    right_f1_j2 : {p: 1.0, d: 0, i: 0, i_clamp: 0}
+    right_f2_j0 : {p: 1.0, d: 0, i: 0, i_clamp: 0}
+    right_f2_j1 : {p: 1.0, d: 0, i: 0, i_clamp: 0}
+    right_f2_j2 : {p: 1.0, d: 0, i: 0, i_clamp: 0}
+    right_f3_j0 : {p: 1.0, d: 0, i: 0, i_clamp: 0}
+    right_f3_j1 : {p: 1.0, d: 0, i: 0, i_clamp: 0}
+    right_f3_j2 : {p: 1.0, d: 0, i: 0, i_clamp: 0}
+  joint_trajectory_action_node:
+    joints:
+      - right_f0_j0
+      - right_f0_j1
+      - right_f0_j2
+      - right_f1_j0
+      - right_f1_j1
+      - right_f1_j2
+      - right_f2_j0
+      - right_f2_j1
+      - right_f2_j2
+      - right_f3_j0
+      - right_f3_j1
+      - right_f3_j2 
+    constraints:
+      goal_time: 0.6
+      right_f0_j0:
+        goal: 0.02
+      right_f0_j1:
+        goal: 0.02
+      right_f0_j2:
+        goal: 0.02
+      right_f1_j0:
+        goal: 0.02
+      right_f1_j1:
+        goal: 0.02
+      right_f1_j2:
+        goal: 0.02
+      right_f2_j0:
+        goal: 0.02
+      right_f2_j1:
+        goal:0.02
+      right_f2_j2:
+        goal: 0.02
+      right_f3_j0:
+        goal: 0.02
+      right_f3_j1:
+        goal: 0.02
+      right_f3_j2:
+        goal: 0.02
