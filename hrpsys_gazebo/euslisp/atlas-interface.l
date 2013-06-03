@@ -131,7 +131,11 @@
        ((:user t)
         (setq mode atlas_msgs::AtlasSimInterfaceCommand::*USER*)))
      (send msg :behavior mode)
-     (fill k-effort effort)
+     (cond ((not effort) ;; when effort is nil, not overwrite k-effort
+	    (ros::spin-once) (setq k-effort (send self :get :k-effort)))
+	   ((consp effort)
+	    (setq k-effort (concatenate string effort)))
+	   (t (fill k-effort effort)))
      (when effort-mask
        (setq k-effort
              (map string #'(lambda (val msk) (round (* val msk))) k-effort effort-mask)))
