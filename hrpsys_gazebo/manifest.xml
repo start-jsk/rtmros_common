@@ -20,6 +20,8 @@
   <depend package="hrpsys_ros_bridge"/>
 
   <depend package="laser_assembler" />
+
+  <depend package="pr2_controller_manager" />
 </package>
 
 
