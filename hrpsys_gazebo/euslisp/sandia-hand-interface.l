@@ -1,23 +1,31 @@
-(require :robot-interface "package://pr2eus/euslisp/robot-interface.l")
-(require :sandia_hand_left "package://hrpsys_gazebo/models/sandia_hand_left.l")
+(require :robot-interface "package://pr2eus/robot-interface.l")
+(require :sandia_hand_left  "package://hrpsys_gazebo/models/sandia_hand_left.l")
+(require :sandia_hand_right "package://hrpsys_gazebo/models/sandia_hand_right.l")
+
+(ros::roseus-add-srvs "roseus")
 
 (defclass sandia-hand-interface
   :super robot-interface
-  :slots (l/r))
+  :slots (l/r service-name))
+
 (defmethod sandia-hand-interface
   (:init (&optional (l/r_ :larm) (g "hand_group"))
-   (setq l/r l/r_)
-   (let ((gname))
-     (when g
-       (case l/r
-         (:larm
-          (setq gname (format nil "left_~A" g)))
-         (:rarm
-          (setq gname (format nil "right_~A" g)))))
+   (let (gname lrobot)
+     (setq l/r l/r_)
+     (case l/r
+       (:larm
+        (setq service-name "/sandia_hand_left/controller_manager/query")
+        (if g (setq gname (format nil "left_~A" g)))
+        (setq lrobot (sandia_hand_left)))
+       (:rarm
+        (setq service-name "/sandia_hand_right/controller_manager/query")
+        (if g (setq gname (format nil "right_~A" g)))
+        (setq lrobot (sandia_hand_right))
+        ))
      (cond
-      (gname (send-super :init :robot  :groupname gname))
-      (t (send-super :init :robot r))))
-   self)
+      (gname (send-super :init :robot lrobot :groupname gname))
+      (t (send-super :init :robot lrobot)))
+     self))
   (:left-default-controller ()
    (list
     (list
@@ -25,7 +33,7 @@
      (cons :controller-state "/sandia_hand_left/sandia_hand_left_controller/state")
      (cons :action-type pr2_controllers_msgs::JointTrajectoryAction)
      (cons :joint-names (mapcar #'(lambda (n) (if (symbolp n) (symbol-name n) n)) (send-all (send robot :joint-list) :name))))))
-  (:right-ult-controller ()
+  (:right-default-controller ()
    (list
     (list
      (cons :controller-action "/sandia_hand_left/sandia_hand_left_controller/joint_trajectory_action")
@@ -35,7 +43,28 @@
   (:default-controller ()
    (case l/r
      (:larm
-      (send self :left-defualt-controller))
+      (send self :left-default-controller))
      (:rarm
-      (send self :right-defualt-controller))))
+      (send self :right-default-controller))))
+  (:wait-interpolation
+   (&rest args)
+   (let ((req (instance roseus::stringstringrequest :init :str "stop"))
+         ret)
+     (prog1
+         (send-super* :wait-interpolation args)
+       (ros::service-call service-name req))
+     ))
+  (:angle-vector
+   (&rest args)
+   (let ((req (instance roseus::stringstringrequest :init :str "start"))
+         ret)
+     (setq ret (ros::service-call service-name req))
+     (unix::nano-sleep (* 100 1000)) ;; 100 ms
+     (send-super* :angle-vector args)
+     ))
+  (:send_query (&optional (str "stop"))
+   (let ((req (instance roseus::stringstringrequest :init :str str))
+         ret)
+     (setq ret (ros::service-call service-name req))
+     ret))
   )
