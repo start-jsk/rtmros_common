@@ -1,5 +1,7 @@
 (require :rtm-ros-robotics-interface "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
 (require :atlas "package://hrpsys_gazebo/models/atlas.l")
+(require :sandia_hand_left  "package://hrpsys_gazebo/models/sandia_hand_left.l")
+(require :sandia_hand_right "package://hrpsys_gazebo/models/sandia_hand_right.l")
 (load "package://hrpsys_gazebo/euslisp/atlas-applications.l")
 
 (ros::load-ros-manifest "hrpsys_gazebo")
