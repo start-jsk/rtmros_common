@@ -96,3 +96,5 @@ if (EXISTS ${laser_assembler_PACKAGE_PATH}/srv_gen/cpp/include/laser_assembler/A
 else()
   message("*** WARNING *** : Use groovy version of laser_assmbler to use atlas_laser_snapshotter")
 endif()
+
+rosbuild_add_executable(hand_controller src/hand_controller.cpp)
