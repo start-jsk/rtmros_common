@@ -9,102 +9,18 @@
 
 class HandController {
 public:
-#if 0
-  HandController() : nh_() {
-    hw_ = new pr2_hardware_interface::HardwareInterface();
-    hw_->addActuator(new pr2_hardware_interface::Actuator("left_f0_j0_motor"));
-    hw_->addActuator(new pr2_hardware_interface::Actuator("left_f0_j1_motor"));
-    hw_->addActuator(new pr2_hardware_interface::Actuator("left_f0_j2_motor"));
-    hw_->addActuator(new pr2_hardware_interface::Actuator("left_f1_j0_motor"));
-    hw_->addActuator(new pr2_hardware_interface::Actuator("left_f1_j1_motor"));
-    hw_->addActuator(new pr2_hardware_interface::Actuator("left_f1_j2_motor"));
-    hw_->addActuator(new pr2_hardware_interface::Actuator("left_f2_j0_motor"));
-    hw_->addActuator(new pr2_hardware_interface::Actuator("left_f2_j1_motor"));
-    hw_->addActuator(new pr2_hardware_interface::Actuator("left_f2_j2_motor"));
-    hw_->addActuator(new pr2_hardware_interface::Actuator("left_f3_j0_motor"));
-    hw_->addActuator(new pr2_hardware_interface::Actuator("left_f3_j1_motor"));
-    hw_->addActuator(new pr2_hardware_interface::Actuator("left_f3_j2_motor"));
-    hw_->current_time_ = ros::Time::now();
-
-    // Create controller manager
-    cm_ = boost::shared_ptr<pr2_controller_manager::ControllerManager>
-      (new pr2_controller_manager::ControllerManager(hw_, nh_));
-
-    TiXmlElement *root;
-    TiXmlElement *root_element;
-
-    // Load robot description
-    TiXmlDocument xml_doc;
-
-    ros::NodeHandle pnh("~");
-    std::string robot_desc;
-    if (pnh.getParam("robot_description", robot_desc)) {
-      xml_doc.Parse(robot_desc.c_str());
-    }  else {
-      ROS_FATAL("Could not load the xml from parameter server");
-      throw "end";
-    }
-
-    root_element = xml_doc.RootElement();
-    root = xml_doc.FirstChildElement("robot");
-
-    if (!root || !root_element) {
-      ROS_FATAL("Could not parse the xml / %s", robot_desc.c_str());
-      throw "end";
-    }
-
-    // Initialize the controller manager from robot description
-    if (!cm_->initXml(root)) {
-      ROS_FATAL("Could not initialize the controller manager");
-      throw "end";
-    } else {
-      ROS_INFO("success to initialize the controller manager");
-    }
-
-    for (std::vector<pr2_mechanism_model::Transmission*>::iterator
-           it = cm_->model_.transmissions_.begin();
-         it != cm_->model_.transmissions_.end();
-         ++it) { // *** js and ac must be consistent
-      ROS_INFO_STREAM("jn: " << (*it)->joint_names_[0]
-                      << " / an: " << (*it)->actuator_names_[0]);
-      pr2_mechanism_model::JointState *js = cm_->state_->getJointState((*it)->joint_names_[0]);
-      pr2_hardware_interface::Actuator *ac = hw_->getActuator((*it)->actuator_names_[0]);
-      if(!!ac) { ac->state_.is_enabled_ = true; }
-    }
-
-    cm_->state_->getJointState("left_f0_j0")->calibrated_ = true;
-    cm_->state_->getJointState("left_f0_j1")->calibrated_ = true;
-    cm_->state_->getJointState("left_f0_j2")->calibrated_ = true;
-    cm_->state_->getJointState("left_f1_j0")->calibrated_ = true;
-    cm_->state_->getJointState("left_f1_j1")->calibrated_ = true;
-    cm_->state_->getJointState("left_f1_j2")->calibrated_ = true;
-    cm_->state_->getJointState("left_f2_j0")->calibrated_ = true;
-    cm_->state_->getJointState("left_f2_j1")->calibrated_ = true;
-    cm_->state_->getJointState("left_f2_j2")->calibrated_ = true;
-    cm_->state_->getJointState("left_f3_j0")->calibrated_ = true;
-    cm_->state_->getJointState("left_f3_j1")->calibrated_ = true;
-    cm_->state_->getJointState("left_f3_j2")->calibrated_ = true;
-
-    pub_ = nh_.advertise< osrf_msgs::JointCommands > ("commands", 1);
-    srv_ = nh_.advertiseService ("query", &HandController::service_cb, this);
-    // startSubscribe();
-
-    spinner_thread_ =
-      boost::thread (boost::bind (&HandController::ManagerThread, this));
-  }
-#endif
-
-  HandController() : nh_() {
+  HandController() : nh_(), auto_start_(false) {
     hw_ = new pr2_hardware_interface::HardwareInterface();
     hw_->current_time_ = ros::Time::now();
 
+    ros::NodeHandle pnh("~");
+    pnh.getParam("auto_start", auto_start_);
+
     TiXmlElement *root;
     TiXmlElement *root_element;
-
     // Load robot description
     TiXmlDocument xml_doc;
 
-    ros::NodeHandle pnh("~");
     std::string robot_desc;
     if (pnh.getParam("robot_description", robot_desc)) {
       xml_doc.Parse(robot_desc.c_str());
@@ -162,14 +78,16 @@ public:
         jointactuator ja;
         ja.js = (void *)js;
         ja.ac = (void *)ac;
-        jointactuator_map.insert
+        jointactuator_map_.insert
           (std::map< std::string, jointactuator >::value_type ((*it)->joint_names_[0], ja));
       }
     }
 
     pub_ = nh_.advertise< osrf_msgs::JointCommands > ("commands", 1);
-    srv_ = nh_.advertiseService ("query", &HandController::service_cb, this);
-    startSubscribe();
+    srv_ = pnh.advertiseService ("query", &HandController::service_cb, this);
+    if (auto_start_) {
+      startSubscribe();
+    }
 
     spinner_thread_ =
       boost::thread (boost::bind (&HandController::ManagerThread, this));
@@ -180,7 +98,7 @@ public:
   }
 
   void startSubscribe() {
-    sub_ = nh_.subscribe("joint_states", 100, &HandController::jointCallback, this);
+    sub_ = nh_.subscribe("in_joint_states", 100, &HandController::jointCallback, this);
   }
 
   bool service_cb (roseus::StringString::Request &req,
@@ -205,10 +123,11 @@ public:
   }
 
   void jointCallback(const sensor_msgs::JointStateConstPtr& simjs) {
+    ROS_DEBUG("callback");
     hw_->current_time_ = simjs->header.stamp;
 
     for(size_t i = 0; i < simjs->name.size(); i++) {
-      jointactuator ja = jointactuator_map[simjs->name[i]];
+      jointactuator ja = jointactuator_map_[simjs->name[i]];
       //pr2_mechanism_model::JointState *js = (pr2_mechanism_model::JointState *)ja.js;
       pr2_hardware_interface::Actuator *ac = (pr2_hardware_interface::Actuator *)ja.ac;
 
@@ -257,8 +176,8 @@ public:
     joint_com.i_effort_min.resize(joint_com.name.size());// 0
     joint_com.i_effort_max.resize(joint_com.name.size());// 0
 
-    for(size_t i = 0; i < simjs->name.size(); i++) {
-      jointactuator ja = jointactuator_map[simjs->name[i]];
+    for(size_t i = 0; i < joint_com.name.size(); i++) {
+      jointactuator ja = jointactuator_map_[joint_com.name[i]];
       pr2_mechanism_model::JointState *js = (pr2_mechanism_model::JointState *)ja.js;
       pr2_hardware_interface::Actuator *ac = (pr2_hardware_interface::Actuator *)ja.ac;
 
@@ -298,7 +217,9 @@ protected:
   ros::ServiceServer srv_;
 
   // osrf_msgs::JointCommands joint_com_;
-  std::map <std::string, jointactuator> jointactuator_map; // name -> js,ac pointer
+  std::map <std::string, jointactuator> jointactuator_map_; // name -> js,ac pointer
+
+  bool auto_start_;
 private:
 };
 
