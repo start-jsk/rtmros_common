@@ -1,0 +1,16 @@
+<launch>
+  <node ns="sandia_hand_left"
+        pkg="hrpsys_gazebo" type="hand_controller" name="controller_manager"
+        output="screen" >
+    <param name="robot_description" textfile="$(find hrpsys_gazebo)/models/sandia_hand_left.urdf" />
+    <remap from="commands" to="/sandia_hands/l_hand/joint_commands" />
+    <remap from="joint_states" to="/sandia_hands/l_hand/joint_states" />
+  </node>
+
+  <node ns="sandia_hand_left"
+        pkg="pr2_controller_manager" type="spawner" name="spawner"
+        args="sandia_hand_left_controller" output="screen" >
+  </node>
+  <rosparam ns="sandia_hand_left"
+            file="$(find hrpsys_gazebo)/config/hand_controller.yaml" command="load" />
+</launch>
