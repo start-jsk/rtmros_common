@@ -1,7 +1,5 @@
 (require :rtm-ros-robotics-interface "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
-(require :atlas "package://hrpsys_gazebo/models/atlas.l")
-(require :sandia_hand_left  "package://hrpsys_gazebo/models/sandia_hand_left.l")
-(require :sandia_hand_right "package://hrpsys_gazebo/models/sandia_hand_right.l")
+(load "package://hrpsys_gazebo/euslisp/atlas-model.l")
 (load "package://hrpsys_gazebo/euslisp/atlas-applications.l")
 
 (ros::load-ros-manifest "hrpsys_gazebo")
@@ -394,7 +392,7 @@
 (defun atlas-init
   (&key (set-reset-pose nil) (set-user-mode t))
   (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init)))
-  (if (not (boundp '*atlas*)) (setq *atlas* (instance atlas-robot :init)))
+  (if (not (boundp '*atlas*)) (setq *atlas* (atlas-with-hand)))
   ;; parameter for bdi_control
   (setf (get *atlas* :footstep-parameter)
        '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
