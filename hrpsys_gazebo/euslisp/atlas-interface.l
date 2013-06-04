@@ -246,38 +246,27 @@
      (ros::publish "atlas/set_pose" (ros::coords->tf-pose coords)))
    (unix::usleep (* 200 1000))
    (send self :set-simulation-mode :mode :stand :effort 0))
+  ;;(:hand-move-joint
+  ;;(arm av &optional (tm 1000))
+  ;;)
+  (:hand (arm &rest args)
+   (let (hr ret)
+     (case arm
+       (:larm
+        (setq hr (get self :lhand-controller))
+        (setq ret (forward-message-to hr args)))
+       (:rarm
+        (setq hr (get self :rhand-controller))
+        (setq ret (forward-message-to hr args)))
+       (:both
+        (setq hr (get self :lhand-controller))
+        (push (forward-message-to hr args) ret)
+        (setq hr (get self :rhand-controller))
+        (push (forward-message-to hr args) ret))
+       )
+     ret))
   )
-#|
-(defun set-simulation-mode (&key (effort 255) (sleep 0.5) (mode :user))
-  (let ((msg (instance atlas_msgs::AtlasSimInterfaceCommand :init))
-        (k-effort (instantiate string (length (send *atlas* :joint-list)))))
-    (case mode
-      (:stand
-       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STAND*))
-      (:freeze
-       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*FREEZE*))
-      (:stand-prep
-       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STAND_PREP*))
-      (:walk
-       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*WALK*))
-      (:step
-       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STEP*))
-      (:manipulate
-       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*MANIPULATE*))
-      ((:user t)
-       (setq mode atlas_msgs::AtlasSimInterfaceCommand::*USER*)))
-    (send msg :behavior mode)
-    (cond ((not effort)
-	   (ros::spin-once)
-	   (setq k-effort (send *ri* :get :k-effort)))
-	  ((consp effort)
-	   (setq k-effort (concatenate string effort)))
-	  (t (fill k-effort effort)))
-    (send msg :k_effort k-effort)
-    (ros::publish "atlas/atlas_sim_interface_command" msg)
-    (when sleep (unix::usleep (round (* sleep 1000 1000))))
-    ))
-|#
+
 (defun send_atlas_control_mode
   (&optional (mode "Stand"))
   (let ((msg (instance std_msgs::String :init :data mode)))
@@ -390,8 +379,8 @@
 ;; (send *ri* :bdi_footstep (footstep-planning-armin (make-coords :pos (scale 1000 (float-vector 1 1 0)) :rpy (list 0 0 0)) (make-coords :pos (scale 1000 (float-vector 17.3 9 0)) :rpy (list 0 0 0))))
 
 (defun atlas-init
-  (&key (set-reset-pose nil) (set-user-mode t))
-  (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init)))
+  (&key (set-reset-pose nil) (set-user-mode t) (with-hand t))
+  (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init :use-tf2 t)))
   (if (not (boundp '*atlas*)) (setq *atlas* (atlas-with-hand)))
   ;; parameter for bdi_control
   (setf (get *atlas* :footstep-parameter)
@@ -412,6 +401,11 @@
   (imu-init)                  ;;subscribe /atlus/imu
   (forcetorque-init)          ;;subscribe /atlus_msg/ForceTorqueSensor
   (setq *tfb* (instance ros::transform-broadcaster :init))
+  (when with-hand
+    (setf (get *ri* :lhand-controller)
+          (instance sandia-hand-controller :init :larm))
+    (setf (get *ri* :rhand-controller)
+          (instance sandia-hand-controller :init :rarm)))
   *ri*
   )
 #|

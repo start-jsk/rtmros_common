@@ -116,7 +116,7 @@ public:
         return true;
       }
     } else if (req.str == "query") {
-
+      // return start or stop
     }
     res.str = "unknown_command";
     return false;
