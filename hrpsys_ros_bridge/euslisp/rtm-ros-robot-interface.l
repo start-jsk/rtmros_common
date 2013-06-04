@@ -348,8 +348,8 @@
                           (let ((target2foot (send (send (send robot limb :end-coords) :parent) :transformation (send robot limb :end-coords))))
                             (instance hrpsys::openhrp_autobalancerservice_autobalancerlimbparam
                                       :init :name (format nil "~A" limb)
-                                      :target_name (send (send (send robot limb :end-coords) :parent) :joint :name)
-                                      :base_name (if (send (send (send robot limb :root-link) :parent) :joint) (send (send (send robot limb :root-link) :parent) :joint :name) "WAIST")
+                                      ;;:target_name (send (send (send robot limb :end-coords) :parent) :joint :name)
+                                      ;;:base_name (if (send (send (send robot limb :root-link) :parent) :joint) (send (send (send robot limb :root-link) :parent) :joint :name) "WAIST")
                                       :target2foot_offset_pos (scale 1e-3 (send target2foot :worldpos))
                                       :target2foot_offset_rot (matrix2quaternion (send target2foot :worldrot)))))
                       limbs)))
@@ -401,7 +401,14 @@
    (let* ((current-param (send self :get-auto-balancer-param))
           (param (instance hrpsys::Openhrp_AutoBalancerService_AutoBalancerParam
                            :init
-                           :default_zmp_offsets (if default-zmp-offsets default-zmp-offsets (send current-param :default_zmp_offsets))
+                           :default_zmp_offsets
+                           (if default-zmp-offsets
+                               (let ((dzo (copy-object (send current-param :default_zmp_offsets))))
+                                 (setq (dzo . ros::_data)
+                                       (apply #'concatenate float-vector (mapcar #'(lambda (x) (scale 1e-3 x))
+                                                                                 default-zmp-offsets)))
+                                 dzo)
+                             (send current-param :default_zmp_offsets))
                            :move_base_gain (if move-base-gain move-base-gain (send current-param :move_base_gain)))))
      (send self :autobalancerservice_setautobalancerparam :i_param param)))
   (:eus-footstep->abc-footstep
