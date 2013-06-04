@@ -163,7 +163,7 @@
         (setq mode atlas_msgs::AtlasSimInterfaceCommand::*USER*)))
      (send msg :behavior mode)
      (cond ((not effort) ;; when effort is nil, not overwrite k-effort
-	    (setq k-effort (send self :get-k-effort)))
+	    (ros::spin-once) (setq k-effort (send self :get :k-effort)))
 	   ((consp effort)
 	    (setq k-effort (concatenate string effort)))
 	   (t (fill k-effort effort)))
