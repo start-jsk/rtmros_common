@@ -428,3 +428,24 @@
     )
   )
 
+;; StabilizerService
+(defmethod rtm-ros-robot-interface
+  (:set-st-param
+   (&key k-tpcc-p k-tpcc-x k-brot-p k-brot-tc)
+   (let ((ip (instance hrpsys::openhrp_stabilizerservice_stparam
+                       :init
+                       :k_tpcc_x k-tpcc-x
+                       :k_tpcc_p k-tpcc-p
+		       :k_brot_p k-brot-p
+		       :k_brot_tc k-brot-tc
+                       )))
+     (send self :stabilizerservice_setparameter :i_param ip)))
+  (:start-st
+   ()
+   (send self :stabilizerservice_startstabilizer)
+   )
+  (:stop-st
+   ()
+   (send self :stabilizerservice_stopstabilizer)
+   )
+  )
