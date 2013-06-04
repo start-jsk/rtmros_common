@@ -2,6 +2,42 @@
 ;;
 ;; for grasping tool
 ;;
+
+(defun get-point (&key (wait t))
+  (ros::spin-once)
+  (if wait
+      (progn
+	(send *ri* :put :point nil)
+	(while (not (send *ri* :get :point))
+	  (ros::spin-once)))
+    (unless (send *ri* :get :point)
+      (return-from get-point)))
+  (make-coords :pos (send (send *atlas* :worldcoords) :transform-vector (send *ri* :get :point))))
+
+(defun get-pipe (&key (draw nil))
+  (let* ((p1 (get-point))
+	 (p2 (get-point))
+	 (vy (send (send *atlas* :worldcoords) :rotate-vector (float-vector 1 0 0)))
+	 (vz (normalize-vector (v- (send p1 :pos) (send p2 :pos))))
+	 (vx (v* vy vz))
+	 (pos (midpoint 0.5 (send p1 :pos) (send p2 :pos)))
+	 ret)
+    (setq ret (make-coords :pos pos :rot (transpose (make-matrix 3 3 (list vx vy vz)))))
+    (when draw
+      (send p1 :draw-on :flush t :size 200 :width 5)
+      (send p2 :draw-on :flush t :size 200 :width 5)
+      (send ret :draw-on :flush t :size 200 :width 5 :color #f(1 0 0)))
+    ret))
+
+(defun reach-point (&key (real t) (arm :larm))
+  (send *atlas* arm :inverse-kinematics (get-point) :rotation-axis nil)
+  (when real (model2real)))
+
+(defun reach-pipe (&key (real t) (arm :larm))
+  (send *atlas* arm :inverse-kinematics (get-pipe :draw t) :translation-axis t :rotation-axis :z :rthre (/ pi 4) :debug-view nil)
+  (draw-end-coords arm)
+  (when real (model2real)))
+
 (defun atlas-tool-look ()
   (send *atlas* :head :neck-p :joint-angle 50)
   (send *ri* :angle-vector (send *atlas* :angle-vector) 2000)

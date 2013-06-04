@@ -111,6 +111,36 @@
   (:stop-grasp  (&optional (arm :arms)) (send self :grasp 0 arm))
   (:control-mode (&optional (mode "Stand")) (send_atlas_control_mode mode))
   (:atlas-mode   (&optional (mode "nominal")) (send_atlas_mode mode))
+  (:get-control-mode
+   ()
+   (ros::spin-once)
+   (let* ((cb (send self :get :current-behavior))
+	  ret)
+     (cond 
+      ((equal cb atlas_msgs::AtlasSimInterfaceCommand::*STAND*) (setq ret :stand))
+      ((equal cb atlas_msgs::AtlasSimInterfaceCommand::*FREEZE*) (setq ret :freeze))
+      ((equal cb atlas_msgs::AtlasSimInterfaceCommand::*STAND_PREP*) (setq ret :stand-prep))
+      ((equal cb atlas_msgs::AtlasSimInterfaceCommand::*WALK*) (setq ret :walk))
+      ((equal cb atlas_msgs::AtlasSimInterfaceCommand::*STEP*) (setq ret :step))
+      ((equal cb atlas_msgs::AtlasSimInterfaceCommand::*MANIPULATE*) (setq ret :manipulate))
+      ((equal cb atlas_msgs::AtlasSimInterfaceCommand::*USER*) (setq ret :user))
+      (t (setq ret :error)))
+     ret))
+  (:get-k-effort
+   ()
+   (ros::spin-once)
+   (concatenate cons (send self :get :k-effort)))
+  (:set-k-effort 
+   (&optional (e 0) (limb :all))
+   (cond ((equal limb :all) (send self :set-simulation-mode :mode (send self :get-control-mode) :effort e))
+	 ((equal limb :arms) (send self :set-k-effort e :larm) (send self :set-k-effort e :rarm))
+	 ((equal limb :legs) (send self :set-k-effort e :lleg) (send self :set-k-effort e :rleg))
+	 (t 
+	  (let* ((idx (case limb (:torso '(0 3)) (:head '(3 4)) (:lleg '(4 10)) (:rleg '(10 16)) (:larm '(16 22)) (:rarm '(22 28))))
+		 (tmp-effort (send self :get-k-effort)))
+	    (dotimes (i (- (elt idx 1) (elt idx 0)))
+	      (setf (elt tmp-effort (+ (elt idx 0) i)) e))
+	    (send self :set-simulation-mode :mode (send self :get-mode) :effort tmp-effort)))))
   (:set-simulation-mode
    (&key (effort 255) (sleep 0.5) (mode :user) (effort-mask))
    (let ((msg (instance atlas_msgs::AtlasSimInterfaceCommand :init))
@@ -132,7 +162,7 @@
         (setq mode atlas_msgs::AtlasSimInterfaceCommand::*USER*)))
      (send msg :behavior mode)
      (cond ((not effort) ;; when effort is nil, not overwrite k-effort
-	    (ros::spin-once) (setq k-effort (send self :get :k-effort)))
+	    (setq k-effort (send self :get-k-effort)))
 	   ((consp effort)
 	    (setq k-effort (concatenate string effort)))
 	   (t (fill k-effort effort)))
