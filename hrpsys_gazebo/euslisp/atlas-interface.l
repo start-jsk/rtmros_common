@@ -1,6 +1,7 @@
 (require :rtm-ros-robotics-interface "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
 (load "package://hrpsys_gazebo/euslisp/atlas-model.l")
 (load "package://hrpsys_gazebo/euslisp/atlas-applications.l")
+(load "package://hrpsys_gazebo/euslisp/sandia-hand-interface.l")
 
 (ros::load-ros-manifest "hrpsys_gazebo")
 
@@ -140,7 +141,7 @@
 		 (tmp-effort (send self :get-k-effort)))
 	    (dotimes (i (- (elt idx 1) (elt idx 0)))
 	      (setf (elt tmp-effort (+ (elt idx 0) i)) e))
-	    (send self :set-simulation-mode :mode (send self :get-mode) :effort tmp-effort)))))
+	    (send self :set-simulation-mode :mode (send self :get-control-mode) :effort tmp-effort)))))
   (:set-simulation-mode
    (&key (effort 255) (sleep 0.5) (mode :user) (effort-mask))
    (let ((msg (instance atlas_msgs::AtlasSimInterfaceCommand :init))
@@ -410,7 +411,8 @@
 
 (defun atlas-init
   (&key (set-reset-pose nil) (set-user-mode t) (with-hand t))
-  (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init :use-tf2 t)))
+  (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init)))
+  ;; (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init :use-tf2 t)))
   (if (not (boundp '*atlas*)) (setq *atlas* (atlas-with-hand)))
   ;; parameter for bdi_control
   (setf (get *atlas* :footstep-parameter)
@@ -433,9 +435,9 @@
   (setq *tfb* (instance ros::transform-broadcaster :init))
   (when with-hand
     (setf (get *ri* :lhand-controller)
-          (instance sandia-hand-controller :init :larm))
+          (instance sandia-hand-interface :init :larm))
     (setf (get *ri* :rhand-controller)
-          (instance sandia-hand-controller :init :rarm)))
+          (instance sandia-hand-interface :init :rarm)))
   *ri*
   )
 #|
