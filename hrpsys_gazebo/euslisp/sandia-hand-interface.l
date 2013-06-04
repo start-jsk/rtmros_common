@@ -10,7 +10,7 @@
 
 (defmethod sandia-hand-interface
   (:init (&optional (l/r_ :larm) (g "hand_group"))
-   (let (gname lrobot)
+   (let (gname lrobot topic)
      (setq l/r l/r_)
      (case l/r
        (:larm
