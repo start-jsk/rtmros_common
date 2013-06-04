@@ -16,15 +16,19 @@
        (:larm
         (setq service-name "/sandia_hand_left/controller_manager/query")
         (if g (setq gname (format nil "left_~A" g)))
-        (setq lrobot (sandia_hand_left)))
+        (setq lrobot (sandia_hand_left))
+        (setq topic "/sandia_hand_left/joint_states"))
        (:rarm
         (setq service-name "/sandia_hand_right/controller_manager/query")
         (if g (setq gname (format nil "right_~A" g)))
         (setq lrobot (sandia_hand_right))
+        (setq topic "/sandia_hand_right/joint_states")
         ))
      (cond
-      (gname (send-super :init :robot lrobot :groupname gname))
-      (t (send-super :init :robot lrobot)))
+      (gname (send-super :init :use-tf2 t :joint-state-topic topic
+                         :robot lrobot :groupname gname))
+      (t (send-super :init :use-tf2 t :joint-state-topic topic
+                     :robot lrobot)))
      self))
   (:left-default-controller ()
    (list
@@ -36,8 +40,8 @@
   (:right-default-controller ()
    (list
     (list
-     (cons :controller-action "/sandia_hand_left/sandia_hand_left_controller/joint_trajectory_action")
-     (cons :controller-state "/sandia_hand_left/sandia_hand_left_controller/state")
+     (cons :controller-action "/sandia_hand_right/sandia_hand_right_controller/joint_trajectory_action")
+     (cons :controller-state "/sandia_hand_right/sandia_hand_right_controller/state")
      (cons :action-type pr2_controllers_msgs::JointTrajectoryAction)
      (cons :joint-names (mapcar #'(lambda (n) (if (symbolp n) (symbol-name n) n)) (send-all (send robot :joint-list) :name))))))
   (:default-controller ()
@@ -59,7 +63,7 @@
    (let ((req (instance roseus::stringstringrequest :init :str "start"))
          ret)
      (setq ret (ros::service-call service-name req))
-     (unix::nano-sleep (* 100 1000)) ;; 100 ms
+     (unix::usleep (* 100 1000)) ;; 100 ms
      (send-super* :angle-vector args)
      ))
   (:send_query (&optional (str "stop"))
