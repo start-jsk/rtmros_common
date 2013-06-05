@@ -194,7 +194,9 @@
            ;;(k-effort (instantiate integer-vector 28))
            (k-effort (instantiate string 28))
            steps (step-idx 0))
-       (fill k-effort 0)
+       ;; (fill k-effort 0)
+       (ros::spin-once)
+       (setq k-effort (send self :get :k-effort))
        ;; add first step ???
        (let* ((ffstep (copy-object (car footstep-list)))
               (step (instance atlas_msgs::AtlasBehaviorStepData
@@ -243,7 +245,9 @@
     (send goal :step_params :desired_step :swing_height 0.3) ;; not used??
     (send goal :step_params :desired_step :pose (ros::coords->tf-pose cds))
 
-    (fill k-effort 0)
+    ;; (fill k-effort 0)
+    (ros::spin-once)
+    (setq k-effort (send self :get :k-effort))
     (send goal :k_effort k-effort)
     (send walk-goal :header :seq 1)
     (send walk-goal :header :stamp (ros::time-now))
