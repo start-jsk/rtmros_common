@@ -102,4 +102,5 @@ else()
   message("*** WARNING *** : Use groovy version of laser_assmbler to use atlas_laser_snapshotter")
 endif()
 
+include_directories(${roseus_PACKAGE_PATH}/build/devel/include)
 rosbuild_add_executable(hand_controller src/hand_controller.cpp)
