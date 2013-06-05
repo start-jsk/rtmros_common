@@ -128,9 +128,12 @@
       (t (setq ret :error)))
      ret))
   (:get-k-effort
-   ()
+   (&optional limb)
    (ros::spin-once)
-   (concatenate cons (send self :get :k-effort)))
+   (if limb
+       (apply #'subseq (concatenate cons (send self :get :k-effort))
+	      (case limb (:torso '(0 3)) (:head '(3 4)) (:lleg '(4 10)) (:rleg '(10 16)) (:larm '(16 22)) (:rarm '(22 28))))
+     (concatenate cons (send self :get :k-effort))))
   (:set-k-effort 
    (&optional (e 0) (limb :all))
    (cond ((equal limb :all) (send self :set-simulation-mode :mode (send self :get-control-mode) :effort e))
