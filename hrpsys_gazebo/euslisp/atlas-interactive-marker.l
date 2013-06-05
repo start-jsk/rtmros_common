@@ -1,6 +1,6 @@
 #!/usr/bin/env roseus
 
-(load "/home/jskuser/prog/euslib/irteus_proposals/motion-lib-proposal.l")
+(load "euslib/irteus_proposals/motion-lib-proposal.l")
 ;; (setq *cycle* 30) ;; Hz
 
 (setq *cycle* 30) ;; Hz
