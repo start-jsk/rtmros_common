@@ -572,6 +572,9 @@ int read_gyro_sensor(int id, double *rates)
       + 0.01 + gyro_offset[id][1]; // 0.01 = initial offset
     rates[2] = js.angular_velocity.z
       + 0.01 + gyro_offset[id][2]; // 0.01 = initial offset
+  } else {
+    // tempolary values when sensor is not ready.
+    rates[0] = rates[1] = rates[2] = 0.0;
   }
 
   return TRUE;
@@ -592,6 +595,10 @@ int read_accelerometer(int id, double *accels)
       + 0.01 + accel_offset[id][1]; // 0.01 = initial offset
     accels[2] = js.linear_acceleration.z
       + 0.01 + accel_offset[id][2]; // 0.01 = initial offset
+  } else {
+    // tempolary values when sensor is not ready.
+    accels[0] = accels[1] = 0.0;
+    accels[2] = 9.8;
   }
 
   return TRUE;
