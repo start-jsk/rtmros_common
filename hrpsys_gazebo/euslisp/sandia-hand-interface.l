@@ -6,7 +6,7 @@
 
 (defclass sandia-hand-interface
   :super robot-interface
-  :slots (l/r service-name))
+  :slots (l/r service-name command-topic))
 
 (defmethod sandia-hand-interface
   (:init (&optional (l/r_ :larm) (g "hand_group"))
@@ -17,13 +17,16 @@
         (setq service-name "/sandia_hand_left/controller_manager/query")
         (if g (setq gname (format nil "left_~A" g)))
         (setq lrobot (sandia_hand_left))
+        (setq command-topic "/sandia_hands/l_hand/joint_commands")
         (setq topic "/sandia_hand_left/joint_states"))
        (:rarm
         (setq service-name "/sandia_hand_right/controller_manager/query")
         (if g (setq gname (format nil "right_~A" g)))
         (setq lrobot (sandia_hand_right))
+        (setq command-topic "/sandia_hands/r_hand/joint_commands")
         (setq topic "/sandia_hand_right/joint_states")
         ))
+     (ros::advertise command-topic osrf_msgs::JointCOmmands)
      (cond
       (gname (send-super :init :use-tf2 t :joint-state-topic topic
                          :robot lrobot :groupname gname))
@@ -71,4 +74,19 @@
          ret)
      (setq ret (ros::service-call service-name req))
      ret))
+  (:send-command (&key (pgain) (dgain) (angle-vector)
+   (let ((msg (instance osrf_msgs::JointCommands :init))
+         (jlst (send robot :joint-list)))
+     ;;(send msg :header :stamp (ros::time-now))
+     (send msg :name (mapcar #'(lambda (j) (send j :name)) jlst))
+     (when angle-vector
+       (send msg :position angle-vector))
+     (when pgain
+       (send msg :kp_position (instantiate float-vector (length jlst)))
+       (fill (send msg :kp_position) pgain))
+     (when dgain
+       (send msg :kd_position (instantiate float-vector (length jlst)))
+       (fill (send msg :kd_position) dgain))
+     (ros::publish command-topic msg)
+     ))
   )

@@ -304,6 +304,25 @@
        )
      ret))
   )
+;;
+(defmethod atlas-robot
+  (:hand (arm &rest args)
+   (let (hr ret)
+     (case arm
+       (:larm
+        (setq hr (get self :lhand-model))
+        (setq ret (forward-message-to hr args)))
+       (:rarm
+        (setq hr (get self :rhand-model))
+        (setq ret (forward-message-to hr args)))
+       (:both
+        (setq hr (get self :lhand-model))
+        (push (forward-message-to hr args) ret)
+        (setq hr (get self :rhand-model))
+        (push (forward-message-to hr args) ret))
+       )
+     ret))
+  )
 
 (defun send_atlas_control_mode
   (&optional (mode "Stand"))
@@ -433,7 +452,7 @@
      ((keywordp set-reset-pose)
       (send *atlas* set-reset-pose))
      (t (send *atlas* :reset-pose)
-	(send *atlas* :move-centroid-on-foot :both '(:lleg :rleg))))
+        (send *atlas* :move-centroid-on-foot :both '(:lleg :rleg))))
     ;; send reset pose to real robot
     (send *ri* :angle-vector (send *atlas* :angle-vector) 3000)
     (send *ri* :wait-interpolation))
