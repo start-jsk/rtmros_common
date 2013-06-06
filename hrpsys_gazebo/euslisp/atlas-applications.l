@@ -34,7 +34,7 @@
   (when real (model2real)))
 
 (defun reach-pipe (&key (real t) (arm :larm))
-  (send *atlas* arm :inverse-kinematics (get-pipe :draw t) :translation-axis t :rotation-axis :z :rthre (/ pi 4) :debug-view nil)
+  (send *atlas* arm :inverse-kinematics (get-pipe :draw t) :translation-axis t :rotation-axis :z :rthre (/ pi 10) :debug-view nil)
   (draw-end-coords arm)
   (when real (model2real)))
 

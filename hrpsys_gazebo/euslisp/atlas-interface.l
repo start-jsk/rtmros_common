@@ -261,21 +261,21 @@
    (send self :bdi_footstep
          (send robot :go-pos-params->footstep-list (* x 1000) (* y 1000) theta)
          :step-duration step-duration :swing-height swing-height))
-  (:teleport-to (&optional (coords) (pose))
+  (:teleport-to (&optional coords pose &key keep-effort)
    (unix::usleep (* 100 1000))
    (send self :atlas-mode "harnessed")
-   (send self :set-simulation-mode :mode :freeze :effort 0)
+   (send self :set-simulation-mode :mode :freeze :effort (if keep-effort nil 0))
    (cond
     ((and pose (float-vector-p pose))
      (send robot :angle-vector pose)
      (send self :angle-vector (send robot :angle-vector) 2000)
-     (send *ri* :set-simulation-mode :mode :stand-prep :effort 0))
+     (send *ri* :set-simulation-mode :mode :stand-prep :effort (if keep-effort nil 0)))
     ((and pose (keywordp pose))
      (send robot pose)
      (send self :angle-vector (send robot :angle-vector) 2000)
-     (send *ri* :set-simulation-mode :mode :stand-prep :effort 0))
+     (send *ri* :set-simulation-mode :mode :stand-prep :effort (if keep-effort nil 0)))
     (t
-     (send self :control-mode "StandPrep")
+     (send *ri* :set-simulation-mode :mode :stand-prep :effort (if keep-effort nil 0))
      ))
    (unix::usleep (* 2 1000 1000))
    (send self :atlas-mode "nominal")
@@ -283,7 +283,7 @@
    (when coords
      (ros::publish "atlas/set_pose" (ros::coords->tf-pose coords)))
    (unix::usleep (* 200 1000))
-   (send self :set-simulation-mode :mode :stand :effort 0))
+   (send self :set-simulation-mode :mode :stand :effort (if keep-effort nil 0)))
   ;;(:hand-move-joint
   ;;(arm av &optional (tm 1000))
   ;;)
