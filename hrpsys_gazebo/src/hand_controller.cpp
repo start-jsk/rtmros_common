@@ -167,6 +167,7 @@ public:
     osrf_msgs::JointCommands joint_com;
     joint_com.name = simjs->name; //??
     joint_com.position.resize(joint_com.name.size());
+#if 0
     joint_com.velocity.resize(joint_com.name.size()); // 0
     joint_com.effort.resize(joint_com.name.size());   // 0
     joint_com.kp_position.resize(joint_com.name.size());
@@ -175,13 +176,23 @@ public:
     joint_com.kp_velocity.resize(joint_com.name.size()); // 0
     joint_com.i_effort_min.resize(joint_com.name.size());// 0
     joint_com.i_effort_max.resize(joint_com.name.size());// 0
-
+#else
+    joint_com.velocity.resize(0);
+    joint_com.effort.resize(0);
+    joint_com.kp_position.resize(0);
+    joint_com.kd_position.resize(0);
+    joint_com.ki_position.resize(0);
+    joint_com.kp_velocity.resize(0);
+    joint_com.i_effort_min.resize(0);
+    joint_com.i_effort_max.resize(0);
+#endif
     for(size_t i = 0; i < joint_com.name.size(); i++) {
       jointactuator ja = jointactuator_map_[joint_com.name[i]];
       pr2_mechanism_model::JointState *js = (pr2_mechanism_model::JointState *)ja.js;
       pr2_hardware_interface::Actuator *ac = (pr2_hardware_interface::Actuator *)ja.ac;
 
       joint_com.position[i] = js->position_ + ac->command_.effort_; // joint Desired
+#if 0
       joint_com.velocity[i] = 0.0;   // 0
       joint_com.effort[i]   = 0.0;   // 0
       joint_com.kp_position[i] = 21.0;  // joint P gain
@@ -190,6 +201,7 @@ public:
       joint_com.kp_velocity[i] = 0.0; // 0
       joint_com.i_effort_min[i] = 0.0;// 0
       joint_com.i_effort_max[i] = 0.0;// 0
+#endif
     }
     pub_.publish(joint_com);
   }
