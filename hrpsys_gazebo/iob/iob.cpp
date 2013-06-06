@@ -494,65 +494,18 @@ int read_force_sensor(int id, double *forces)
   //     forces[i] = ((double)random()-RAND_MAX/2)/(RAND_MAX/2)*2 
   //         + 2 + force_offset[id][i]; // 2 = initial offset
   // }
+  std::vector<geometry_msgs::Wrench*> fsensors;
+  fsensors.push_back(&(js.l_hand));
+  fsensors.push_back(&(js.r_hand));
+  fsensors.push_back(&(js.l_foot));
+  fsensors.push_back(&(js.r_foot));
   if(init_sub_flag){
-    switch(id){
-    case 0:
-      forces[0] = js.l_foot.force.x
-	+ 2 + force_offset[id][0]; // 2 = initial offset
-      forces[1] = js.l_foot.force.y
-	+ 2 + force_offset[id][1]; // 2 = initial offset
-      forces[2] = js.l_foot.force.z
-	+ 2 + force_offset[id][2]; // 2 = initial offset
-      forces[3] = js.l_foot.torque.x
-	+ 2 + force_offset[id][3]; // 2 = initial offset
-      forces[4] = js.l_foot.torque.y
-	+ 2 + force_offset[id][4]; // 2 = initial offset
-      forces[5] = js.l_foot.torque.z
-	+ 2 + force_offset[id][5]; // 2 = initial offset
-      break;
-    case 1:
-      forces[0] = js.r_foot.force.x
-	+ 2 + force_offset[id][0]; // 2 = initial offset
-      forces[1] = js.r_foot.force.y
-	+ 2 + force_offset[id][1]; // 2 = initial offset
-      forces[2] = js.r_foot.force.z
-	+ 2 + force_offset[id][2]; // 2 = initial offset
-      forces[3] = js.r_foot.torque.x
-	+ 2 + force_offset[id][3]; // 2 = initial offset
-      forces[4] = js.r_foot.torque.y
-	+ 2 + force_offset[id][4]; // 2 = initial offset
-      forces[5] = js.r_foot.torque.z
-	+ 2 + force_offset[id][5]; // 2 = initial offset
-      break;
-    case 2:
-      forces[0] = js.l_hand.force.x
-	+ 2 + force_offset[id][0]; // 2 = initial offset
-      forces[1] = js.l_hand.force.y
-	+ 2 + force_offset[id][1]; // 2 = initial offset
-      forces[2] = js.l_hand.force.z
-	+ 2 + force_offset[id][2]; // 2 = initial offset
-      forces[3] = js.l_hand.torque.x
-	+ 2 + force_offset[id][3]; // 2 = initial offset
-      forces[4] = js.l_hand.torque.y
-	+ 2 + force_offset[id][4]; // 2 = initial offset
-      forces[5] = js.l_hand.torque.z
-	+ 2 + force_offset[id][5]; // 2 = initial offset
-      break;
-    case 3:
-      forces[0] = js.r_hand.force.x
-	+ 2 + force_offset[id][0]; // 2 = initial offset
-      forces[1] = js.r_hand.force.y
-	+ 2 + force_offset[id][1]; // 2 = initial offset
-      forces[2] = js.r_hand.force.z
-	+ 2 + force_offset[id][2]; // 2 = initial offset
-      forces[3] = js.r_hand.torque.x
-	+ 2 + force_offset[id][3]; // 2 = initial offset
-      forces[4] = js.r_hand.torque.y
-	+ 2 + force_offset[id][4]; // 2 = initial offset
-      forces[5] = js.r_hand.torque.z
-	+ 2 + force_offset[id][5]; // 2 = initial offset
-      break;
-    }
+    forces[0] = fsensors[id]->force.x + force_offset[id][0];
+    forces[1] = fsensors[id]->force.y + force_offset[id][1];
+    forces[2] = fsensors[id]->force.z + force_offset[id][2];
+    forces[3] = fsensors[id]->torque.x + force_offset[id][3];
+    forces[4] = fsensors[id]->torque.y + force_offset[id][4];
+    forces[5] = fsensors[id]->torque.z + force_offset[id][5];
   }
 
   return TRUE;
