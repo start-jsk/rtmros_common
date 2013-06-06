@@ -58,12 +58,13 @@ class HrpsysConfigurator:
         connectPorts(self.sh.port("qOut"), self.seq.port("qInit"))
 
         # connection for st
-        #connectPorts(self.rh.port("lfsensor"), self.st.port("forceL"))
-        #connectPorts(self.rh.port("rfsensor"), self.st.port("forceR"))
-        #connectPorts(self.kf.port("rpy"), self.st.port("rpy"))
-        #connectPorts(self.abc.port("zmpRef"), self.st.port("zmpRef"))
-        #connectPorts(self.abc.port("baseRpy"), self.st.port("baseRpyIn"))
-        #connectPorts(self.abc.port("basePos"), self.st.port("basePosIn"))
+        if rtm.findPort(self.rh.ref, "lfsensor") and rtm.findPort(self.rh.ref, "rfsensor"):
+            connectPorts(self.rh.port("lfsensor"), self.st.port("forceL"))
+            connectPorts(self.rh.port("rfsensor"), self.st.port("forceR"))
+            connectPorts(self.kf.port("rpy"), self.st.port("rpy"))
+            connectPorts(self.abc.port("zmpRef"), self.st.port("zmpRef"))
+            connectPorts(self.abc.port("baseRpy"), self.st.port("baseRpyIn"))
+            connectPorts(self.abc.port("basePos"), self.st.port("basePosIn"))
 
         # connection for ic
         #  actual force sensors
