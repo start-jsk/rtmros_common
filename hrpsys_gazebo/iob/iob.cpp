@@ -742,6 +742,7 @@ int open_iob(void)
         jointcommands.effort[i]       = 0;
         jointcommands.kp_velocity[i]  = 0;
     }
+    jointcommands.desired_controller_period_ms = static_cast<unsigned int>(g_period_ns * 1e-6);
     //
     //pub_joint_commands_ = rosnode->advertise<osrf_msgs::JointCommands>("/atlas/joint_commands", 1, true);
     pub_joint_commands_ = rosnode->advertise <atlas_msgs::AtlasCommand> ("/atlas/atlas_command", 1, true);
