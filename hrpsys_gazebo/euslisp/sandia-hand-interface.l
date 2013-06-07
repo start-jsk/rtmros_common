@@ -2,7 +2,10 @@
 (require :sandia_hand_left  "package://hrpsys_gazebo/models/sandia_hand_left.l")
 (require :sandia_hand_right "package://hrpsys_gazebo/models/sandia_hand_right.l")
 
+(setq ros::*compile-message* t)
+(ros::roseus-add-msgs "osrf_msgs")
 (ros::roseus-add-srvs "roseus")
+(setq ros::*compile-message* nil)
 
 (defclass sandia-hand-interface
   :super robot-interface
