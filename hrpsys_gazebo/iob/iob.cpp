@@ -447,6 +447,7 @@ int write_command_angles(const double *angles)
     for (int i=0; i<NUM_OF_REAL_JOINT; i++){
       jointcommands.position[i] = command[JOINT_ID_REAL2MODEL(i)];
       jointcommands.velocity[i] = (command[JOINT_ID_REAL2MODEL(i)] - prev_command[JOINT_ID_REAL2MODEL(i)]) / (g_period_ns * 1e-9);
+      //jointcommands.kp_velocity[i] = 100;
     }
 
     pub_joint_commands_.publish(jointcommands);
