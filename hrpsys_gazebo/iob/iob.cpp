@@ -23,6 +23,7 @@ static atlas_msgs::AtlasState js;
 static int init_sub_flag = FALSE;
 
 static std::vector<double> command;
+static std::vector<double> prev_command;
 static std::vector<std::vector<double> > forces;
 static std::vector<std::vector<double> > gyros;
 static std::vector<std::vector<double> > accelerometers;
@@ -124,10 +125,11 @@ int number_of_attitude_sensors()
 int set_number_of_joints(int num)
 {
     command.resize(num);
+    prev_command.resize(num);
     power.resize(num);
     servo.resize(num);
     for (int i=0; i<num; i++){
-        command[i] = power[i] = servo[i] = 0;
+        command[i] = power[i] = servo[i] = prev_command[i] = 0;
     }
     return TRUE;
 }
@@ -407,6 +409,7 @@ int read_command_angles(double *angles)
 int write_command_angles(const double *angles)
 {
     for (int i=0; i<number_of_joints(); i++){
+        prev_command[i] = command[i];
         command[i] = angles[i];
     }
 
@@ -443,6 +446,7 @@ int write_command_angles(const double *angles)
 
     for (int i=0; i<NUM_OF_REAL_JOINT; i++){
       jointcommands.position[i] = command[JOINT_ID_REAL2MODEL(i)];
+      //jointcommands.velocity[i] = (command[JOINT_ID_REAL2MODEL(i)] - prev_command[JOINT_ID_REAL2MODEL(i)]) / (g_period_ns * 1e-9);
     }
 
     pub_joint_commands_.publish(jointcommands);
@@ -454,7 +458,7 @@ int write_command_angles(const double *angles)
 
 int read_pgain(int id, double *gain)
 {
-  std::cerr << ";;; read gain: " << id << " = " << *gain << std::endl;
+  std::cerr << ";;; read pgain: " << id << " = " << *gain << std::endl;
   if(JOINT_ID_MODEL2REAL(id) < 0) {
     //
   }else{
@@ -466,7 +470,7 @@ int read_pgain(int id, double *gain)
 
 int write_pgain(int id, double gain)
 {
-  std::cerr << ";;; write gain: " << id << " = " << gain << std::endl;
+  std::cerr << ";;; write pgain: " << id << " = " << gain << std::endl;
   if(JOINT_ID_MODEL2REAL(id) < 0) {
     //
   }else{
@@ -479,12 +483,27 @@ int write_pgain(int id, double gain)
 
 int read_dgain(int id, double *gain)
 {
-    return FALSE;
+  std::cerr << ";;; read dgain: " << id << " = " << *gain << std::endl;
+  if(JOINT_ID_MODEL2REAL(id) < 0) {
+    //
+  }else{
+    int iid = JOINT_ID_MODEL2REAL(id);
+    *(gain) = jointcommands.kd_position[iid] / initial_jointcommands.kd_position[iid];
+  }
+  return TRUE;
 }
 
 int write_dgain(int id, double gain)
 {
-    return FALSE;
+  std::cerr << ";;; write dgain: " << id << " = " << gain << std::endl;
+  if(JOINT_ID_MODEL2REAL(id) < 0) {
+    //
+  }else{
+    int iid = JOINT_ID_MODEL2REAL(id);
+    jointcommands.kd_position[iid] =
+      gain * initial_jointcommands.kd_position[iid];
+  }
+  return TRUE;
 }
 
 int read_force_sensor(int id, double *forces)
