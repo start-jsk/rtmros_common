@@ -964,7 +964,7 @@ int wait_for_iob_signal()
     ros::Time rnow = ros::Time::now();
     ros::Duration rdt = rg_ts - rnow;
     if ((rg_ts - rnow).toSec() <= 0) {
-      fprintf(stderr, "iob::overrun (%d[ms])\n", (rnow - rg_ts).toSec()*1000);
+      fprintf(stderr, "iob::overrun (%f[ms])\n", (rnow - rg_ts).toSec()*1000);
       do {
         ros::Duration tm = ros::Duration(0, g_period_ns);
         rg_ts += tm;
