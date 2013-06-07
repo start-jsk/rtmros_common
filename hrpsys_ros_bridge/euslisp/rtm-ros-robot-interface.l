@@ -388,12 +388,13 @@
    ()
    (send (send self :autobalancerservice_getgaitgeneratorparam) :i_param))
   (:set-gait-generator-param
-   (&key default-step-time default-step-height stride-parameter)
+   (&key default-step-time default-step-height default-double-support-ratio stride-parameter)
    (let* ((current-param (send self :get-gait-generator-param))
           (param (instance hrpsys::Openhrp_AutoBalancerService_GaitGeneratorParam
                            :init
                            :default_step_time (if default-step-time default-step-time (send current-param :default_step_time))
                            :default_step_height (if default-step-height default-step-height (send current-param :default_step_height))
+                           :default_double_support_ratio (if default-double-support-ratio default-double-support-ratio (send current-param :default_double_support_ratio))
                            :stride_parameter (if stride-parameter stride-parameter (send current-param :stride_parameter)))))
      (send self :autobalancerservice_setgaitgeneratorparam :i_param param)))
   (:set-auto-balancer-param
