@@ -2,7 +2,7 @@ INSTALL_DIR = $(CURDIR)
 SVN_DIR     = build/OpenHRP-3
 SVN_URL     = https://openrtp.jp/svn/hrg/openhrp/3.1/trunk
 #SVN_REVISION = -r@REVISION@
-SVN_PATCH = patch/OpenHRP2ModelFile.patch
+SVN_PATCH = patch/OpenHRP2ModelFile.patch patch/ColladaWriter_inertia.patch
 
 
 CHECKMD5=$(shell rospack find rosbuild)/bin/download_checkmd5.py

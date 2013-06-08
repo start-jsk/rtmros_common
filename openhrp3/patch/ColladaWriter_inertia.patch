@@ -1,0 +1,17 @@
+Index: server/ModelLoader/ColladaWriter.h
+===================================================================
+--- server/ModelLoader/ColladaWriter.h	(リビジョン 2604)
++++ server/ModelLoader/ColladaWriter.h	(作業コピー)
+@@ -721,8 +721,10 @@
+             evec.resize(3,3);
+             eval.resize(3);
+             hrp::calcEigenVectors(inertia,evec,eval);
+-            if (det(evec) < 0.0) /* fix for right-handed coordinates */
+-                evec(0,2) *= -1.0; evec(1,2) *= -1.0; evec(2,2) *= -1.0;
++            if (det(evec) < 0.0) {/* fix for right-handed coordinates */
++                // hrp::calcEigenVectors return row majored matrix??
++                evec(2,0) *= -1.0; evec(2,1) *= -1.0; evec(2,2) *= -1.0;
++            }
+             DblArray12 tinertiaframe;
+             for(int j = 0; j < 3; ++j) {
+                 tinertiaframe[4*0+j] = evec(0,j);
