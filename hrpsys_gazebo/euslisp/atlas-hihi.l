@@ -1,5 +1,5 @@
 ;;(require "package://hrpsys_gazebo/euslisp/atlas-interface.l")
-(require "atlas-interface.l")
+;(require "atlas-interface.l") ; (progn (require "atlas-interface.l") (atlas-init) (setq *robot* *atlas*) (objects *robot*))
 
 ;;------------ initalize
 
@@ -11,22 +11,14 @@
    nil
    (send (send self :child-link) :worldpos)))
 
-(defvar *gazebo-flag* t)
+(defvar *gazebo-flag* nil)
 (if *gazebo-flag*
-    (atlas-init)
+    (progn
+      (require "atlas-interface.l")
+      (atlas-init))
   (setq *atlas* (instance atlas-robot :init)))
 (defvar *robot* *atlas*)
 (defvar *move-step-time* 1000)
-
-;; tmp
-(mapcar
- #'(lambda (j min max)
-     (send j :min-angle min)
-     (send j :max-angle max))
- (send *robot* :joint-list)
- '(-35.0 -68.7549 -45.31 0.0 0.0 -24.981 -79.9998 -112.5 -90.0117 -135.0 0.0 -90.0117 -100.0 -112.5 -90.0117 0.0 -24.981 -100.268 -26.929 -39.9925 -18.3346 0.0 -24.981 -99.9811 -28.3614 -39.9925 -65.3172 -35.0)
- '(35.0 73.3386 45.31 135.0 180.0 90.0117 100.0 112.5 90.0117 0.0 180.0 24.981 79.9998 112.5 90.0117 140.375 24.981 30.023 28.3614 39.9925 65.3172 140.375 24.981 30.023 26.929 39.9925 18.3346 65.0))
-;;
 
 (setq
  *atlas-anima-endcoords*
@@ -62,39 +54,39 @@
      '(:rarm :larm))
     (mapcar
      #'(lambda (k)
-	 (cons
-	  k
-	  (let ((c (send (send *robot* :rleg :end-coords) :copy-worldcoords)))
-	    (send c :rotate (deg2rad -85) :y)
-	    (send c :rotate
-		  (deg2rad
-		   (* (if (eq k :rleg) 1 -1) 25))
-		  :x)
-	    (make-cascoords
-	     :pos (scale 0.5 (v+ (send *robot* k :knee-p :worldpos)
-				 (send *robot* k :ankle-p :worldpos)))
-	     :rot (send c :worldrot)
-	     :name (read-from-string (format nil "~A-animal-endcoords" k))
-	     :parent (send *robot* k :knee-p :child-link))))
-	 )
+    	 (cons
+    	  k
+    	  (let ((c (send (send *robot* :rleg :end-coords) :copy-worldcoords)))
+    	    (send c :rotate (deg2rad -85) :y)
+    	    (send c :rotate
+    		  (deg2rad
+    		   (* (if (eq k :rleg) 1 -1) 25))
+    		  :x)
+    	    (make-cascoords
+    	     :pos (scale 0.5 (v+ (send *robot* k :knee-p :worldpos)
+    				 (send *robot* k :ankle-p :worldpos)))
+    	     :rot (send c :worldrot)
+    	     :name (read-from-string (format nil "~A-animal-endcoords" k))
+    	     :parent (send *robot* k :knee-p :child-link))))
+    	 )
      '(:rleg :lleg))
     (mapcar
      #'(lambda (k)
-	 (cons
-	  (read-from-string (format nil "~A-2" k))
-	  (let ((c (send (send *robot* :rleg :end-coords) :copy-worldcoords)))
-	    (send c :rotate (deg2rad -90) :y)
-	    (send c :rotate
-		  (deg2rad
-		   (* (if (eq k :rleg) 1 -1) 25))
-		  :x)
-	    (make-cascoords
-	     :pos (v+ (scale 0.3 (send *robot* k :knee-p :worldpos))
-		      (scale 0.7 (send *robot* k :ankle-p :worldpos)))
-	     :rot (send c :worldrot)
-	     :name (read-from-string (format nil "~A-animal-endcoords" k))
-	     :parent (send *robot* k :knee-p :child-link))))
-	 )
+    	 (cons
+    	  (read-from-string (format nil "~A-2" k))
+    	  (let ((c (send (send *robot* :rleg :end-coords) :copy-worldcoords)))
+    	    (send c :rotate (deg2rad -90) :y)
+    	    (send c :rotate
+    		  (deg2rad
+    		   (* (if (eq k :rleg) 1 -1) 25))
+    		  :x)
+    	    (make-cascoords
+    	     :pos (v+ (scale 0.3 (send *robot* k :knee-p :worldpos))
+    		      (scale 0.7 (send *robot* k :ankle-p :worldpos)))
+    	     :rot (send c :worldrot)
+    	     :name (read-from-string (format nil "~A-animal-endcoords" k))
+    	     :parent (send *robot* k :knee-p :child-link))))
+    	 )
      '(:rleg :lleg))
     )))
 
@@ -331,6 +323,7 @@
    (rotation-axis :z)
    (translation-axis t)
    (back-centroid nil)
+   (stop 30)
    (target-keys
     (remove (read-from-string
 	     (format nil "~A~A" move-target
@@ -338,12 +331,17 @@
 	    (if back-centroid
 		(list :rarm-2 :rleg-2 :larm-2 :lleg-2)
 	      (list :rarm :rleg :larm :lleg))))
+   (move (mapcar #'(lambda (hoge) #F(0 0 0)) target-keys))
    (debug-view :no-message)
    (centroid-thre (* (length target-keys) 10))
    (target-cascoords
     (mapcar
      #'(lambda (k) (cdr (assoc k *atlas-anima-endcoords*)))
-     target-keys)))
+     target-keys))
+   (target-centroid-pos (scale
+			 (/ 1.0 (length target-cascoords))
+			 (reduce #'v+ (send-all target-cascoords :worldpos))))
+   )
   (if (atom rotation-axis)
       (setq rotation-axis
 	    (make-list
@@ -359,26 +357,27 @@
    (append
     move-option
     (mapcar
-     #'(lambda (cascoords trans rotate)
+     #'(lambda (cascoords trans rotate move)
 	 (list (cons :target cascoords)
 	       (cons :coords (make-coords
-			      :pos (float-vector
-				    (aref (send cascoords :worldpos) 0)
-				    (aref (send cascoords :worldpos) 1)
-				    0)))
+			      :pos
+			      (v+
+			       (or move #F(0 0 0))
+			       (float-vector
+				(aref (send cascoords :worldpos) 0)
+				(aref (send cascoords :worldpos) 1)
+				0))))
 					;(make-coords))
 	       (cons :rotation-axis rotate)
 	       (cons :translation-axis trans)))
-     target-cascoords translation-axis rotation-axis))
+     target-cascoords translation-axis rotation-axis move))
    :balance-leg nil
-   :target-centroid-pos
-   (scale
-    (/ 1.0 (length target-cascoords))
-    (reduce #'v+ (send-all target-cascoords :worldpos)))
+   :target-centroid-pos target-centroid-pos
    :debug-view debug-view
    :centroid-thre centroid-thre
    :revert-if-fail nil
 ;   :stop 100
+   :stop stop
    :cog-gain 0.1
    ))
 
@@ -586,4 +585,14 @@
 (do-until-key
  (demo-forward)
  (unix:sleep 1))
+
+(send *ri* :teleport-to (make-coords :pos #f(0 -23000 980) :rpy (list pi/2 0 0)))
+
+export ROS_MASTER_URI=http://133.11.216.38:11311
+
+(progn
+  (send *robot* :angle-vector (send *ri* :state :potentio-vector))
+  (send *robot* :head :neck-p :joint-angle 30)
+  )
+
 |#
