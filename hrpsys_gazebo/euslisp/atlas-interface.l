@@ -315,13 +315,13 @@
          (k-tpcc-x #f(5 5))
          (k-brot-p #f(0.4 0.4))
          (k-brot-tc #f(0.1 0.1)))
-   (send self :set-st-param :k-tpcc-p k-tpcc-p :k-tpcc-x k-tpcc-x :k-brot-p k-brot-p :k-brot-tc k-brot-tc)
+   (send-super :set-st-param :k-tpcc-p k-tpcc-p :k-tpcc-x k-tpcc-x :k-brot-p k-brot-p :k-brot-tc k-brot-tc)
    )
   (:set-gait-generator-param
    (&key (default-step-height 0.1)
          (default-step-time 1.0)
          (default-double-support-ratio 0.2))
-   (send self :set-gait-generator-param
+   (send-super :set-gait-generator-param
          :default-double-support-ratio default-double-support-ratio
          :default-step-time default-step-time
          :default-step-height default-step-height)
