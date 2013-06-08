@@ -77,7 +77,7 @@
          ret)
      (setq ret (ros::service-call service-name req))
      ret))
-  (:send-command (&key (pgain) (dgain) (angle-vector)
+  (:send-command (&key (pgain) (dgain) (angle-vector))
    (let ((msg (instance osrf_msgs::JointCommands :init))
          (jlst (send robot :joint-list)))
      ;;(send msg :header :stamp (ros::time-now))
