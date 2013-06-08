@@ -57,6 +57,7 @@
      (setf (get robot :footstep-parameter)
            '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
      (setq walk-seq 0)
+     (send self :set-recommended-walk-params)
      ))
   (:sim-interface-state-cb
    (msg)
@@ -306,25 +307,18 @@
   ;; hrpsys-base walk param
   (:set-recommended-walk-params
    ()
-   (send self :set-auto-balancer-param :default-zmp-offsets (list (float-vector 30 0 0) (float-vector 30 0 0)))
-   (send self :set-st-param)
-   (send self :set-gait-generator-param)
-   )
-  (:set-st-param
-   (&key (k-tpcc-p #f(2.5 2.5))
-         (k-tpcc-x #f(5 5))
-         (k-brot-p #f(0.4 0.4))
-         (k-brot-tc #f(0.1 0.1)))
-   (send-super :set-st-param :k-tpcc-p k-tpcc-p :k-tpcc-x k-tpcc-x :k-brot-p k-brot-p :k-brot-tc k-brot-tc)
-   )
-  (:set-gait-generator-param
-   (&key (default-step-height 0.1)
-         (default-step-time 1.0)
-         (default-double-support-ratio 0.2))
-   (send-super :set-gait-generator-param
-         :default-double-support-ratio default-double-support-ratio
-         :default-step-time default-step-time
-         :default-step-height default-step-height)
+   (send self :set-auto-balancer-param
+         :default-zmp-offsets (list (float-vector 30 0 0) (float-vector 30 0 0)))
+   (send self :set-st-param
+         :k-tpcc-p #f(2.5 2.5)
+         :k-tpcc-x #f(5 5)
+         :k-brot-p #f(0.4 0.4)
+         :k-brot-tc #f(0.1 0.1))
+   (send self :set-gait-generator-param
+         :default-double-support-ratio 0.2
+         :default-step-time 1.0
+         :default-step-height 0.1
+         :stride-parameter #f(0.25 0.05 10))
    )
   )
 ;;
