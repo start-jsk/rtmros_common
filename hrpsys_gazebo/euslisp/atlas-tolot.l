@@ -26,7 +26,7 @@
 	    (send c :rotate (deg2rad 90) :z)
 	    (make-cascoords
 	     :pos
-             (v+ #F(0 0 200)
+             (v+ #F(0 0 0)
                  (scale 0.5 (v+ (send *robot* k :elbow-p :worldpos)
                                 (send *robot* k :wrist-p :worldpos))))
              :rot (send c :worldrot)
@@ -42,7 +42,7 @@
 	    (send c :translate #F(0 0 -200))
 	    (make-cascoords
 	     :pos
-             (v+ #F(0 0 200) (send *robot* k :wrist-p :worldpos))
+             (v+ #F(0 0 0) (send *robot* k :wrist-p :worldpos))
 	     :rot (send c :worldrot)
 	     :name (read-from-string (format nil "~A-animal-endcoords" k))
 	     :parent (send *robot* k :wrist-p :child-link)))))
@@ -80,7 +80,7 @@
   (&key (reverse? t))
   (send *robot* :angle-vector
         (if reverse?
-            #f(0.014154 -7.41296 -0.046456 102.582 102.764 0.0 -10.7649 112.317 0.0 -102.584 102.779 0.0 10.7607 112.318 0.0 97.2171 4.35861 1.60349 18.5765 1.51782 0.877606 97.2227 -4.35668 1.6055 -18.5021 1.51206 -0.891119 0.0)
+            #f(-0.003048 6.09591 -0.053802 105.109 97.2697 0.0 -26.5584 105.814 0.0 -105.089 97.0922 0.0 26.6117 105.805 0.0 99.6314 1.06171 2.72941 17.1759 -4.57762 -1.29622 99.6322 -0.980218 2.75578 -17.0183 -4.58332 1.34451 0.0)
             #f(0.001401 56.8709 -0.202539 1.1684 0.356907 63.5659 -1.32546 -80.0405 -30.2631 -1.12992 0.247962 -63.5615 1.33342 -80.0307 -30.2753 122.056 -23.8269 -96.4418 -11.2025 -43.3635 63.8859 122.091 23.8112 -96.2276 11.2151 -43.6532 -63.9565 0.084544)))
   (send *robot* :fix-leg-to-coords (make-coords))
   (send *irtviewer* :draw-objects)
@@ -110,90 +110,114 @@
       (while (send *tolot-hash* :get :running)
 	(tolot-step :reverse? reverse?)))))
 
+(defun bin-wark
+  (&key
+   (reverse? t)
+   (sleep 100)
+   (target-keys
+    '(:rarm :larm :rleg :lleg))
+   (scale (vector (list 0.4 0 0 1)
+                  (list 0 0.4 1 0)))
+   (height
+    (vector
+     (list #F(0 0 130) #F(0 0 0) #F(0 0 0) #F(0 0 30))
+     (list #F(0 0 0) #F(0 0 130) #F(0 0 30) #F(0 0 0))))
+   (revert? t)
+   (callback #'(lambda (id) nil))
+   (target-centroid-pos #(nil nil))
+   buf)
+  (labels ((inner
+            (id)
+            (tolot-init :reverse? reverse?)
+            (if (and (aref (send *tolot-hash* :get :dict) id)
+                     (not buf))
+                (send *robot* :angle-vector
+                      (aref (send *tolot-hash* :get :dict) id))
+              (progn
+                (format t "gen-dict ~A~%" id)
+                (animal-fullbody
+                 :end-coords
+                 (append
+                  (if reverse?
+                      nil
+                    (mapcar #'(lambda (k) (cons k (send *robot* k :end-coords)))
+                            '(:rarm :larm)))
+                  *atlas-tolot-endcoords*)
+                 :target-keys target-keys
+                 :stop 30
+                 :revert? revert?
+                 :target-centroid-pos (aref target-centroid-pos id)
+                 :move
+                 (mapcar
+                  #'(lambda (a v)
+                      (v+ v
+                          (scale a (aref (send *tolot-hash* :get :direction) id))))
+                  (aref scale id)
+                  (aref height id)
+                  ))
+                (funcall callback id)
+                (setf (aref (send *tolot-hash* :get :dict) id)
+                      (send *robot* :angle-vector))))
+            (model2real_ sleep)))
+    (if (not (eq
+            (send *tolot-hash* :get :direction)
+            (send *tolot-hash* :get :prev-direction)))
+        (progn
+          (print 'new-direction)
+          (setq buf 'new)
+          (send *tolot-hash* :enter :dict #(nil nil))
+          (send *tolot-hash* :enter :prev-direction
+                (send *tolot-hash* :get :direction))))
+    (inner 0)
+    (inner 1)))
+
 (defun tolot-step
   (&key
    (reverse? t)
-   buf)
-  (tolot-init :reverse? reverse?)
-  (if (not (eq
-	    (send *tolot-hash* :get :direction)
-	    (send *tolot-hash* :get :prev-direction)))
-      (progn
-	(print 'new-direction)
-	(setq buf 'new)
-	(send *tolot-hash* :enter :dict #(nil nil))
-	(send *tolot-hash* :enter :prev-direction
-	      (send *tolot-hash* :get :direction))))
-  (if (and (aref (send *tolot-hash* :get :dict) 0)
-	   (not buf))
-      (send *robot* :angle-vector
-	    (aref (send *tolot-hash* :get :dict) 0))
-    (progn
-      (print 'gen-dict1)
-      (animal-fullbody
-       :end-coords
-       (append
-        (if reverse?
-            nil
-          (mapcar #'(lambda (k) (cons k (send *robot* k :end-coords)))
-                  '(:rarm :larm)))
-        *atlas-tolot-endcoords*)
-       :target-keys
-       '(:rarm :larm :rleg :lleg)
-;       :move-option
-;       (list (list (cons :target :torso)
-;                   (cons :move (send *tolot-hash* :get :direction))))
-       :stop 30
-       :revert? t
-       :target-centroid-pos nil
-       :move
-       (mapcar
-	#'(lambda (a v)
-            (v+ v (scale a (aref (send *tolot-hash* :get :direction) 0))))
-        (list 0.4 0 0 1)
-	(list #F(0 0 130) #F(0 0 0) #F(0 0 0) #F(0 0 30))))
-      (setf (aref (send *tolot-hash* :get :dict) 0)
-	    (send *robot* :angle-vector))))
-  (model2real_ 100)
-  (tolot-init :reverse? reverse?)
-  (if (and (aref (send *tolot-hash* :get :dict) 1)
-	   (not buf))
-      (send *robot* :angle-vector
-	    (aref (send *tolot-hash* :get :dict) 1))
-    (progn
-      (print 'gen-dict2)
-      (animal-fullbody
-       :end-coords
-       (append
-        (if reverse?
-            nil
-          (mapcar #'(lambda (k) (cons k (send *robot* k :end-coords)))
-                  '(:rarm :larm)))
-        *atlas-tolot-endcoords*)
-       :target-keys
-       '(:rarm :larm :rleg :lleg)
-       :stop 30
-;       :move-option
-;       (list (list (cons :target :torso)
-;                   (cons :move (send *tolot-hash* :get :direction))))
-       :revert? t
-       :target-centroid-pos nil
-       :move
-       (mapcar
-	#'(lambda (a v)
-            (v+ v (scale a (aref (send *tolot-hash* :get :direction) 1))))
-        (list 0 0.4 1 0)
-	(list #F(0 0 0) #F(0 0 130) #F(0 0 30) #F(0 0 0))))
-      (setf (aref (send *tolot-hash* :get :dict) 1)
-	    (send *robot* :angle-vector))))
-  (model2real_ 100))
+   (sleep 100))
+  (bin-wark :reverse? reverse? :sleep sleep))
 
 (defun rotate-tolot
   (&optional (reverse? nil))
   (send *tolot-hash* :enter :direction
         (if reverse?
-            #(#F(70 150 0) #F(-70 150 0))
-          #(#F(-70 -150 0) #F(70 -150 0)))))
+            #(#F(100 150 0) #F(-100 150 0))
+          #(#f(-30.0 -70.0 0.0) #f(30.0 -70.0 0.0)))))
+;          #(#F(-70 -150 0) #F(70 -150 0)))))
+
+(defun gallop-step
+  (&key
+   (reverse? t)
+   (sleep 100)
+   )
+  (bin-wark
+   :reverse? reverse?
+   :sleep sleep
+   :target-keys
+   '(:rarm :larm :rleg :lleg)
+;   :target-centroid-pos
+;   (vector (scale 0.5 (v+ (send *robot* :rarm :end-coords :worldpos)
+;                          (send *robot* :larm :end-coords :worldpos)))
+;           (scale 0.5 (v+ (send *robot* :rarm :end-coords :worldpos)
+;                          (send *robot* :larm :end-coords :worldpos))))
+   :revert? nil
+;   :callback nil
+   :scale (vector (list 0.3 0.3 0 0)
+                  (list 0 0 1 1))
+   :height
+   (vector
+    (list #F(0 0 300) #F(0 0 300) #F(0 0 0) #F(0 0 0))
+    (list #F(0 0 0) #F(0 0 0) #F(0 0 100) #F(0 0 100)))))
+
+
+(defun boyonboyon-step ;; aho
+  nil
+  (tolot-init :reverse? nil)
+  (model2real_ 100)
+  (unix:sleep 2)
+  (send *robot* :angle-vector (scale 0 (send *robot* :angle-vector)))
+  (model2real_ 10)
+  (unix:sleep 1))
 
 (format t
 	(concatenate
@@ -212,10 +236,10 @@ roseus
 (load "murooka.l")
 (my-init)
 (load "atlas-tolot.l")
-(tolot-init)
+(tolot-init :reverse? nil)
 (set-user)
 (model2real)
-(do-until-key (tolot-step))
+(do-until-key (tolot-step :reverse? nil))
 
 (send *tolot-hash* :enter :direction #(#F(100 0 0) #F(100 0 0)))
 (do-until-key (tolot-step :reverse? nil))
@@ -249,7 +273,13 @@ roseus
 (send *robot* :rarm :shoulder-r :joint-angle 50)
 (animal-fullbody :back-centroid t :translation-axis :xy)
 
+(send *robot* :torso :waist-p :joint-angle 90)
+(send *robot* :legs :knee-p :joint-angle 80)
+(send *robot* :legs :ankle-p :joint-angle 100)
+(animal-fullbody :back-centroid t :translation-axis :xy)
+
 (tolot-init :reverse? nil)
+
 
 
 ;; mae mawari
@@ -293,7 +323,6 @@ roseus
              (send *robot* :larm :end-coords :worldpos))))
  :revert? nil
  :stop 100
- :cog-gain 1
  :translation-axis :xy
  :rotation-axis :z)
 
@@ -305,6 +334,7 @@ roseus
       #'(lambda (j) (send j :joint-angle 0))
       (send *robot* k :joint-list)))
  '(:rarm :larm))
+
 
 (tolot-init :reverse? t)
 
@@ -324,3 +354,29 @@ roseus
             (send *robot* :lleg :end-coords :worldpos)))
  :translation-axis :xy
  :rotation-axis :z)
+
+
+
+
+
+(send *robot* :angle-vector #f(-1.19203 72.7803 -1.77639 40.1134 0.0 79.5125 -31.1455 -73.4036 -73.689 -40.1843 0.0 -79.3719 30.9617 -73.2118 -73.4664 111.365 -24.981 -82.8293 -17.0763 -50.2821 62.6786 111.371 24.981 -82.6903 17.055 -50.4708 -62.6916 0.084544))
+(model2real_ 500)
+(send *robot* :angle-vector (scale 0 (send *robot* :angle-vector)))
+(model2real :sleep-time 10)
+(tolot-init :reverse? nil)
+(unix:usleep (* 1000 30))
+(model2real :sleep-time 100)
+
+
+(progn (do-until-key (tolot-step :reverse? nil)) (send *robot* :angle-vector (scale 0 (send *robot* :angle-vector))) (send *robot* :torso :waist-p :joint-angle 0) (model2real_ 500))
+
+(send *robot* :arms :shoulder-r :joint-angle)
+(send *robot* :rarm :shoulder-r :joint-angle -90)
+(send *robot* :larm :shoulder-r :joint-angle 90)
+
+(send *robot* :arms :shoulder-y :joint-angle 15)
+(send *robot* :rarm :shoulder-r :joint-angle -80)
+(send *robot* :larm :shoulder-r :joint-angle 80)
+
+
+
