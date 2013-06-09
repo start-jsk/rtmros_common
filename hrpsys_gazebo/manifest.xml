@@ -22,6 +22,8 @@
   <depend package="laser_assembler" />
 
   <depend package="pr2_controller_manager" />
+
+  <depend package="collada_urdf_jsk_patch" />
 </package>
 
 
