@@ -18,7 +18,7 @@
       (atlas-init))
   (setq *atlas* (instance atlas-robot :init)))
 (defvar *robot* *atlas*)
-(defvar *move-step-time* 1000)
+(defvar *move-step-time* 100)
 
 (setq
  *atlas-anima-endcoords*
@@ -33,11 +33,10 @@
 	  (let ((c (send (send *robot* :rleg :end-coords) :copy-worldcoords)))
 	    (send c :rotate (deg2rad 90) :z)
 	    (make-cascoords
-	     :pos (scale 0.5 (v+ (send *robot* k :elbow-p :worldpos)
-				 (send *robot* k :wrist-p :worldpos)))
-	     :rot (send c :worldrot)
+	     :pos (copy-seq (send *robot* k :wrist-p :worldpos))
+	     :rot (copy-object (send c :worldrot))
 	     :name (read-from-string (format nil "~A-animal-endcoords" k))
-	     :parent (send *robot* k :elbow-p :child-link)))))
+	     :parent (send *robot* k :wrist-p :child-link)))))
      '(:rarm :larm))
     (mapcar
      #'(lambda (k)
@@ -47,8 +46,8 @@
 	    (send c :rotate (deg2rad 90) :z)
 	    (send c :translate #F(0 0 -200))
 	    (make-cascoords
-	     :pos (send *robot* k :wrist-p :worldpos)
-	     :rot (send c :worldrot)
+	     :pos (copy-seq (send *robot* k :wrist-p :worldpos))
+	     :rot (copy-object (send c :worldrot))
 	     :name (read-from-string (format nil "~A-animal-endcoords" k))
 	     :parent (send *robot* k :wrist-p :child-link)))))
      '(:rarm :larm))
@@ -60,12 +59,12 @@
     	    (send c :rotate (deg2rad -85) :y)
     	    (send c :rotate
     		  (deg2rad
-    		   (* (if (eq k :rleg) 1 -1) 25))
+    		   (* (if (eq k :rleg) 1 -1) 20))
     		  :x)
     	    (make-cascoords
     	     :pos (scale 0.5 (v+ (send *robot* k :knee-p :worldpos)
     				 (send *robot* k :ankle-p :worldpos)))
-    	     :rot (send c :worldrot)
+    	     :rot (copy-object (send c :worldrot))
     	     :name (read-from-string (format nil "~A-animal-endcoords" k))
     	     :parent (send *robot* k :knee-p :child-link))))
     	 )
@@ -78,12 +77,12 @@
     	    (send c :rotate (deg2rad -90) :y)
     	    (send c :rotate
     		  (deg2rad
-    		   (* (if (eq k :rleg) 1 -1) 25))
+    		   (* (if (eq k :rleg) 1 -1) 20))
     		  :x)
     	    (make-cascoords
     	     :pos (v+ (scale 0.3 (send *robot* k :knee-p :worldpos))
     		      (scale 0.7 (send *robot* k :ankle-p :worldpos)))
-    	     :rot (send c :worldrot)
+    	     :rot (copy-object (send c :worldrot))
     	     :name (read-from-string (format nil "~A-animal-endcoords" k))
     	     :parent (send *robot* k :knee-p :child-link))))
     	 )
@@ -97,7 +96,7 @@
 ;; ---------- utility function
 
 (defun model2real
-  (&key (robot *robot*) (sleep-time 200))
+  (&key (robot *robot*) (sleep-time *move-step-time*))
   (send *ri* :angle-vector
 	(send *robot* :angle-vector) sleep-time)
   (if (find-method *ri* :hand-angle-vector)
@@ -110,9 +109,11 @@
   (&optional (sl *move-step-time*))
   (send *irtviewer* :draw-objects)
   (if
-      *ri*
+      (boundp '*ri*)
       (progn (model2real :sleep-time sl) (send *ri* :wait-interpolation))
-    (unix:usleep (* sl 1000))))
+    (unix:usleep (* sl 1000))
+    ))
+
 
 (defun simple-fullbody
   (&rest
@@ -125,6 +126,7 @@
    (balance-leg :both)
    (target nil) ;; ( ((:target . :rleg) (:move . #f(0 0 0)) (:translation-axis . :x)) ...
    &allow-other-keys)
+;  (print args)
   (let* ((rest-arg
 	  (labels ((itter (obj key)
 			  (cond
@@ -324,6 +326,7 @@
    (translation-axis t)
    (back-centroid nil)
    (stop 30)
+   (revert? nil)
    (target-keys
     (remove (read-from-string
 	     (format nil "~A~A" move-target
@@ -334,9 +337,10 @@
    (move (mapcar #'(lambda (hoge) #F(0 0 0)) target-keys))
    (debug-view :no-message)
    (centroid-thre (* (length target-keys) 10))
+   (end-coords *atlas-anima-endcoords*)
    (target-cascoords
     (mapcar
-     #'(lambda (k) (cdr (assoc k *atlas-anima-endcoords*)))
+     #'(lambda (k) (cdr (assoc k end-coords)))
      target-keys))
    (target-centroid-pos (scale
 			 (/ 1.0 (length target-cascoords))
@@ -360,14 +364,13 @@
      #'(lambda (cascoords trans rotate move)
 	 (list (cons :target cascoords)
 	       (cons :coords (make-coords
-			      :pos
-			      (v+
-			       (or move #F(0 0 0))
-			       (float-vector
-				(aref (send cascoords :worldpos) 0)
-				(aref (send cascoords :worldpos) 1)
-				0))))
-					;(make-coords))
+	        	      :pos
+                              (v+
+                               (or move #F(0 0 0))
+                               (map float-vector
+                                    #'*
+                                    #F(1 1 0)
+                                    (send cascoords :worldpos)))))
 	       (cons :rotation-axis rotate)
 	       (cons :translation-axis trans)))
      target-cascoords translation-axis rotation-axis move))
@@ -375,8 +378,7 @@
    :target-centroid-pos target-centroid-pos
    :debug-view debug-view
    :centroid-thre centroid-thre
-   :revert-if-fail nil
-;   :stop 100
+   :revert-if-fail revert?
    :stop stop
    :cog-gain 0.1
    ))
@@ -397,13 +399,14 @@
   (send *robot* :torso :waist-p :joint-angle 70)
   (send *robot* :legs :knee-p :joint-angle 100)
   (send *robot* :legs :crotch-p :joint-angle -60)
+  (send *robot* :rleg :crotch-y :joint-angle -20)
+  (send *robot* :lleg :crotch-y :joint-angle 20)
+  (send *robot* :larm :elbow-p :joint-angle 90)
+  (send *robot* :rarm :elbow-p :joint-angle -90)
   (animal-fullbody
-   :debug-view :no-message
-   :back-centroid back-centroid
-   :translation-axis :xy
-   :rotation-axis :z)
-  (send *irtviewer* :look-all)
-  )
+   :back-centroid back-centroid)
+  (animal-fullbody
+   :back-centroid back-centroid))
 
 (defun move-step
   (key
@@ -595,4 +598,13 @@ export ROS_MASTER_URI=http://133.11.216.38:11311
   (send *robot* :head :neck-p :joint-angle 30)
   )
 
-|#
+
+
+(animal-fullbody
+ :end-coords
+ (append
+  (mapcar #'(lambda (k) (cons k (send *robot* k :end-coords)))
+          '(:rleg :lleg))
+  *atlas-anima-endcoords*)
+ :translation-axis :xy
+ :rotation-axis :z)
