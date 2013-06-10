@@ -459,12 +459,13 @@ int write_command_angles(const double *angles)
 
 int read_pgain(int id, double *gain)
 {
-  std::cerr << ";;; read pgain: " << id << " = " << *gain << std::endl;
   if(JOINT_ID_MODEL2REAL(id) < 0) {
     //
+    std::cerr << ";;; read gain: " << id << " failed." << std::endl;
   }else{
     int iid = JOINT_ID_MODEL2REAL(id);
     *(gain) = jointcommands.kp_position[iid] / initial_jointcommands.kp_position[iid];
+    std::cerr << ";;; read gain: " << id << " = " << *gain << std::endl;
   }
   return TRUE;
 }
