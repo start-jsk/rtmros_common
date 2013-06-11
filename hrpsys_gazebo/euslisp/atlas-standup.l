@@ -667,12 +667,12 @@
   (send *ri* :wait-interpolation)
   )
 
-(defun stand-up2 (&key (time-scale 1.0) (wait-times 40))
-  (send *ri* :stop-grasp)
+(defun stand-up2 (&key (time-scale 1.0) (wait-times 40) (jump t))
+  (send *ri* :start-grasp)
   (tagbody
    :start
    ;;仰向けかうつ伏せかを判定し、仰向けならうつ伏せに移行
-   (atlas-set-servo-gain-by-torque-limit 5)
+   (atlas-set-servo-gain-by-torque-limit 1)
    (cond
     ((eq :aomuke (check_utubuse_or_not))
      (print "detect aomuke situation, do rolling-over")
@@ -693,18 +693,47 @@
    (send *ri* :wait-interpolation)
    (print "set pose3")
    (pose3 :tm (* time-scale 4000))
+   (atlas-set-servo-gain-by-torque-limit 0.01)
    (send *ri* :wait-interpolation)
-
-   (atlas-set-servo-gain-by-torque-limit 1)
    (unix:sleep 5)
-   (atlas-set-servo-gain-by-torque-limit 5)
+   (atlas-set-servo-gain-by-torque-limit 1)
    (unix:sleep 1)
+
+   (send *atlas* :larm :angle-vector #f(41.1796 119.496 6.70627 -63.7998 67.5002 -0.054577))
+   (send *ri* :angle-vector (send *atlas* :angle-vector) (* time-scale 3000))
+   (send *ri* :wait-interpolation)
    (send *atlas* :angle-vector #f(-0.355849 49.9885 -0.129764 41.1796 119.496 6.70627 -63.7998 67.5002 -0.054577 -54.0 120.0 -9.51683 29.5998 -92.2502 -0.030691 140.375 -24.981 -100.046 28.3614 -39.6945 30.1193 140.375 24.981 -99.9811 -28.3614 -39.7298 -29.8737 -0.438736))
    (send *ri* :angle-vector (send *atlas* :angle-vector) (* time-scale 10000))
    (send *ri* :wait-interpolation)
    (unix:sleep 1)
+
    (send *atlas* :reset-pose)
+   (send *atlas* :lleg :angle-vector #f(123.714 0 -71.9519 0 -51.5662 0))
+   (send *atlas* :rleg :angle-vector #f(123.714 0 -71.9519 0 -51.5662 0))
+   (send *ri* :angle-vector (send *atlas* :angle-vector) (* time-scale 10000))
+   (send *ri* :wait-interpolation)
+   ;;股が開いているのでなんとかして閉じたい
+
+   ;;ジャンプして足が離れた瞬間にとじる
+   (when jump
+     (let ((prev-pose (send *atlas* :angle-vector)))
+       (atlas-set-servo-gain-by-torque-limit 0.1)
+       (send *atlas* :lleg :inverse-kinematics (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(0 0 -30) :world) :rotation-axis t :debug-view :no-message)
+       (send *atlas* :rleg :inverse-kinematics (send (send *atlas* :rleg :end-coords :copy-worldcoords) :translate #f(0 0 -30) :world) :rotation-axis t :debug-view :no-message)
+       (send *ri* :angle-vector (send *atlas* :angle-vector) (* time-scale 100))
+       (send *ri* :wait-interpolation)
+       (send *ri* :angle-vector prev-pose (* time-scale 100))
+       (send *ri* :wait-interpolation)
+       (atlas-set-servo-gain-by-torque-limit 1)
+     ))
+
+   (send *atlas* :reset-pose)
+   (send *atlas* :lleg :inverse-kinematics (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(0 0 70) :world) :rotation-axis t :debug-view :no-message)
+   (send *atlas* :rleg :inverse-kinematics (send (send *atlas* :rleg :end-coords :copy-worldcoords) :translate #f(0 0 70) :world) :rotation-axis t :debug-view :no-message)
+   (send *atlas* :move-centroid-on-foot :both '(:lleg :rleg))
+
    (send *ri* :angle-vector (send *atlas* :angle-vector) 10000)
    (send *ri* :wait-interpolation)
+   (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
    ))
 
