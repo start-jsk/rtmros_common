@@ -1,11 +1,14 @@
 <launch>
   <arg name="USE_STEREO" default="false" />
+  <arg name="FIXED_FRAME" default="/pelvis" />
+  <arg name="CAMERA" default="/multisense_sl/camera/left" />
+
   <node pkg="laser_assembler" type="laser_scan_assembler"
         name="laser_scan_assembler_node"
         output="screen" >
     <remap from="scan" to="/multisense_sl/laser/scan"/>
     <remap from="cloud_filtered" to="/tilt_scan_shadow2_filtered"/>
-    <param name="fixed_frame" type="string" value="/pelvis"/>
+    <param name="fixed_frame" type="string" value="$(arg FIXED_FRAME)"/>
     <rosparam command="load" file="$(find hrpsys_gazebo)/config/atlas_laser_filter.yaml" />
   </node>
 
@@ -30,7 +33,7 @@
            file="$(find jsk_pcl_ros)/launch/pointcloud_screenpoint.launch" >
     <arg name="USE_VIEW" value="true" />
     <arg name="USE_DEPTH_CREATER" value="true" />
-    <arg name="image"  value="/multisense_sl/camera/left" />
+    <arg name="image"  value="$(arg CAMERA)" />
     <arg name="points" value="/full_cloud2" />
   </include>
 </launch>
