@@ -118,7 +118,7 @@
    (ros::spin-once)
    (let* ((cb (send self :get :current-behavior))
 	  ret)
-     (cond 
+     (cond
       ((equal cb atlas_msgs::AtlasSimInterfaceCommand::*STAND*) (setq ret :stand))
       ((equal cb atlas_msgs::AtlasSimInterfaceCommand::*FREEZE*) (setq ret :freeze))
       ((equal cb atlas_msgs::AtlasSimInterfaceCommand::*STAND_PREP*) (setq ret :stand-prep))
@@ -135,12 +135,12 @@
        (apply #'subseq (concatenate cons (send self :get :k-effort))
 	      (case limb (:torso '(0 3)) (:head '(3 4)) (:lleg '(4 10)) (:rleg '(10 16)) (:larm '(16 22)) (:rarm '(22 28))))
      (concatenate cons (send self :get :k-effort))))
-  (:set-k-effort 
+  (:set-k-effort
    (&optional (e 0) (limb :all))
    (cond ((equal limb :all) (send self :set-simulation-mode :mode (send self :get-control-mode) :effort e))
 	 ((equal limb :arms) (send self :set-k-effort e :larm) (send self :set-k-effort e :rarm))
 	 ((equal limb :legs) (send self :set-k-effort e :lleg) (send self :set-k-effort e :rleg))
-	 (t 
+	 (t
 	  (let* ((idx (case limb (:torso '(0 3)) (:head '(3 4)) (:lleg '(4 10)) (:rleg '(10 16)) (:larm '(16 22)) (:rarm '(22 28))))
 		 (tmp-effort (send self :get-k-effort)))
 	    (dotimes (i (- (elt idx 1) (elt idx 0)))
@@ -585,3 +585,37 @@
                    (send ra :torque :y)
                    (send ra :torque :z)))
        ))))
+
+;; degで指定した角度でリミットトルクが出るようにゲインを設定
+(defun atlas-set-servo-gain-by-torque-limit
+  (&optional (deg 1))
+  (send *ri* :set-servo-gain-percentage "back_lbz"  (/ 35528  deg))
+  (send *ri* :set-servo-gain-percentage "back_mby"  (/ 296    deg))
+  (send *ri* :set-servo-gain-percentage "back_ubx"  (/ 272    deg))
+  (send *ri* :set-servo-gain-percentage "neck_ay"   (/ 1432   deg))
+  (send *ri* :set-servo-gain-percentage "l_leg_uhz" (/ 126051 deg))
+  (send *ri* :set-servo-gain-percentage "l_leg_mhx" (/ 10313  deg))
+  (send *ri* :set-servo-gain-percentage "l_leg_lhy" (/ 745    deg))
+  (send *ri* :set-servo-gain-percentage "l_leg_kny" (/ 1261   deg))
+  (send *ri* :set-servo-gain-percentage "l_leg_uay" (/ 1401   deg))
+  (send *ri* :set-servo-gain-percentage "l_leg_lax" (/ 1719   deg))
+  (send *ri* :set-servo-gain-percentage "r_leg_uhz" (/ 126051 deg))
+  (send *ri* :set-servo-gain-percentage "r_leg_mhx" (/ 10313  deg))
+  (send *ri* :set-servo-gain-percentage "r_leg_lhy" (/ 745    deg))
+  (send *ri* :set-servo-gain-percentage "r_leg_kny" (/ 1261   deg))
+  (send *ri* :set-servo-gain-percentage "r_leg_uay" (/ 1401   deg))
+  (send *ri* :set-servo-gain-percentage "r_leg_lax" (/ 1719   deg))
+  (send *ri* :set-servo-gain-percentage "l_arm_usy" (/ 607    deg))
+  (send *ri* :set-servo-gain-percentage "l_arm_shx" (/ 974    deg))
+  (send *ri* :set-servo-gain-percentage "l_arm_ely" (/ 3266   deg))
+  (send *ri* :set-servo-gain-percentage "l_arm_elx" (/ 3266   deg))
+  (send *ri* :set-servo-gain-percentage "l_arm_uwy" (/ 13063  deg))
+  (send *ri* :set-servo-gain-percentage "l_arm_mwx" (/ 3438   deg))
+  (send *ri* :set-servo-gain-percentage "r_arm_usy" (/ 607    deg))
+  (send *ri* :set-servo-gain-percentage "r_arm_shx" (/ 974    deg))
+  (send *ri* :set-servo-gain-percentage "r_arm_ely" (/ 3266   deg))
+  (send *ri* :set-servo-gain-percentage "r_arm_elx" (/ 3266   deg))
+  (send *ri* :set-servo-gain-percentage "r_arm_uwy" (/ 13063  deg))
+  (send *ri* :set-servo-gain-percentage "r_arm_mwx" (/ 3438   deg))
+  )
+
