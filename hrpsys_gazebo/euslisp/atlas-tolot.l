@@ -8,9 +8,16 @@
 ;(require "/home/noda/prog/euslib/demo/s-noda/atlas/movable-viewer.l")
 ;(require "/home/noda/prog/euslib/demo/s-noda/util/spline.l")
 
+(defvar *move-step-time* 100)
+
 (defun real2model
   nil
   (send *robot* :angle-vector (send *ri* :state :potentio-vector)))
+
+(defun model2real
+  (&key (time *move-step-time*) (sleep-time time) (wait nil))
+  (send *ri* :angle-vector (send *robot* :angle-vector) sleep-time)
+  (when wait (send *ri* :wait-interpolation)))
 
 (setq
  *atlas-tolot-endcoords*
@@ -181,13 +188,14 @@
   (&optional (reverse? nil))
   (send *tolot-hash* :enter :direction
         (if reverse?
-            #(#F(100 150 0) #F(-100 150 0))
-          #(#f(-30.0 -70.0 0.0) #f(30.0 -70.0 0.0)))))
+            (copy-seq #(#F(-200 -200 0) #F(200 -200 0)))
+          (copy-seq #(#f(-30.0 -70.0 0.0) #f(30.0 -70.0 0.0))))))
 ;          #(#F(-70 -150 0) #F(70 -150 0)))))
 
 (defun gallop-step
   (&key
    (reverse? t)
+   (rotate nil)
    (sleep 100)
    )
   (bin-wark
@@ -201,7 +209,14 @@
 ;           (scale 0.5 (v+ (send *robot* :rarm :end-coords :worldpos)
 ;                          (send *robot* :larm :end-coords :worldpos))))
    :revert? nil
-;   :callback nil
+   :callback
+   #'(lambda (id)
+       (if rotate
+           (send *robot* :torso :waist-r :joint-angle rotate))
+       (if (and reverse? (eq id 0))
+           (progn
+             (send *robot* :larm :shoulder-r :joint-angle 60)
+             (send *robot* :rarm :shoulder-r :joint-angle -60))))
    :scale (vector (list 0.3 0.3 0 0)
                   (list 0 0 1 1))
    :height
@@ -218,6 +233,8 @@
   (send *robot* :angle-vector (scale 0 (send *robot* :angle-vector)))
   (model2real_ 10)
   (unix:sleep 1))
+
+
 
 (format t
 	(concatenate
@@ -246,14 +263,6 @@ roseus
 
 (send *tolot-hash* :enter :direction #(#F(50 100 0) #F(0 0 0)))
 
-(simple-fullbody
- :target
- (list (list (cons :target :rarm))
-       (list (cons :target :larm)))
- :balance-leg :both
- :revert-if-fail nil
- :debug-view :no-message)
-
 ;; ushimawari
 
 (tolot-init)
@@ -279,8 +288,6 @@ roseus
 (animal-fullbody :back-centroid t :translation-axis :xy)
 
 (tolot-init :reverse? nil)
-
-
 
 ;; mae mawari
 
@@ -308,7 +315,6 @@ roseus
  :translation-axis :xy
  :rotation-axis :z)
 
-
 (animal-fullbody
  :end-coords
  (append
@@ -326,8 +332,6 @@ roseus
  :translation-axis :xy
  :rotation-axis :z)
 
-
-
 (mapcar
  #'(lambda (k)
      (mapcar
@@ -335,48 +339,72 @@ roseus
       (send *robot* k :joint-list)))
  '(:rarm :larm))
 
-
 (tolot-init :reverse? t)
 
 
+(do-until-key
+ (tolot-init :reverse? nil)
+ (model2real_ 500)
+ (unix:sleep 1)
+ ;;
+ (send *robot* :angle-vector
+       #f(0.0 50.0 0.0 20.0 0.0 0.0 -55.0 -80.0 0.0 -20.0 0.0 0.0 55.0 -80.0 0.0 140.0 -24.981 -100.0 28.3614 -40.0 30.0 140.0 24.981 -99.9811 -28.3614 -40.0 -30.0 0.0))
+ (send *robot* :fix-leg-to-coords (make-coords))
+ (model2real_ 400)
+; (unix:sleep 2)
+ ;;
+ (tolot-init :reverse? nil)
+ (send *robot* :torso :waist-p :joint-angle 0)
+ (send-all (flatten (send *robot* :legs :joint-list)) :joint-angle 0)
+ (send-all (flatten (send *robot* :arms :joint-list)) :joint-angle 0)
+ (send *robot* :legs :ankle-p :joint-angle -40)
+ (send *robot* :fix-leg-to-coords (make-coords))
+ (send *irtviewer* :draw-objects)
+; (send *robot* :angle-vector (scale 0 (send *robot* :angle-vector))) (send *robot* :torso :waist-p :joint-angle 0)
+ (model2real_ 100)
+; (unix:sleep 1)
+ )
+
+ (send *robot* :angle-vector
+       #f(-0.355849 49.9885 -0.129764 41.1796 119.496 6.70627 -63.7998 67.5002 -0.054577 -54.0 120.0 -9.51683 29.5998 -92.2502 -0.030691 140.375 -24.981 -100.046 28.3614 -39.6945 30.1193 140.375 24.981 -99.9811 -28.3614 -39.7298 -29.8737 -0.438736))
+ (model2real_ 5000)
+ ;;
 
 
-;;
-(animal-fullbody
- :end-coords
- (append
-  (mapcar #'(lambda (k) (cons k (send *robot*  k :end-coords)))
-          '(:rarm :larm))
-  *atlas-tolot-endcoords*)
+(tolot-init :reverse? nil)
+(send *robot* :torso :waist-p :joint-angle 0)
+(send-all (flatten (send *robot* :legs :joint-list)) :joint-angle 0)
+(send *irtviewer* :draw-objects)
+
+(tolot-init :reverse? nil)
+(simple-fullbody
+ :target
+ (mapcar
+  #'(lambda (k)
+      (list (cons :target k)
+            (cons :coords (make-coords))
+            (cons :translation-axis :xy)
+            (cons :rotation-axis nil)))
+  '(:rarm :larm))
+ :balance-leg :both
  :target-centroid-pos
  (scale 0.5
         (v+ (send *robot* :rleg :end-coords :worldpos)
             (send *robot* :lleg :end-coords :worldpos)))
- :translation-axis :xy
- :rotation-axis :z)
+ :centroid-thre 100
+ :debug-view :no-message
+ :stop 100)
 
+(progn (rotate-tolot t) (do-until-key (gallop-step :reverse? t)))
 
+(tolot-init)
+(model2real_ 300)
+(unix:sleep 1)
+; for
+(progn (send *tolot-hash* :enter :direction #(#f(-100 0 0) #f(-500 0 0))) (do-until-key (gallop-step :reverse? t :sleep 100)))
 
+; right
+(progn (send *tolot-hash* :enter :direction #(#f(-0 -0 0) #f(-500 -50 0))) (do-until-key (gallop-step :reverse? t :rotate -30 :sleep 100)))
 
-
-(send *robot* :angle-vector #f(-1.19203 72.7803 -1.77639 40.1134 0.0 79.5125 -31.1455 -73.4036 -73.689 -40.1843 0.0 -79.3719 30.9617 -73.2118 -73.4664 111.365 -24.981 -82.8293 -17.0763 -50.2821 62.6786 111.371 24.981 -82.6903 17.055 -50.4708 -62.6916 0.084544))
-(model2real_ 500)
-(send *robot* :angle-vector (scale 0 (send *robot* :angle-vector)))
-(model2real :sleep-time 10)
-(tolot-init :reverse? nil)
-(unix:usleep (* 1000 30))
-(model2real :sleep-time 100)
-
-
-(progn (do-until-key (tolot-step :reverse? nil)) (send *robot* :angle-vector (scale 0 (send *robot* :angle-vector))) (send *robot* :torso :waist-p :joint-angle 0) (model2real_ 500))
-
-(send *robot* :arms :shoulder-r :joint-angle)
-(send *robot* :rarm :shoulder-r :joint-angle -90)
-(send *robot* :larm :shoulder-r :joint-angle 90)
-
-(send *robot* :arms :shoulder-y :joint-angle 15)
-(send *robot* :rarm :shoulder-r :joint-angle -80)
-(send *robot* :larm :shoulder-r :joint-angle 80)
-
-
-
+;; left
+(progn (send *tolot-hash* :enter :direction #(#f(-0 -0 0) #f(-500 50 0))) (do-until-key (gallop-step :reverse? t :rotate 30 :sleep 100)))
