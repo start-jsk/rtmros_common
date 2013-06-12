@@ -478,7 +478,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute " << m_rsforceName[i] << " size = " << m_rsforce[i].data.length() );
 	if ( m_rsforce[i].data.length() >= 6 ) {
 	  geometry_msgs::WrenchStamped fsensor;
-	  fsensor.header.stamp = ros::Time(m_rsforce[i].tm.sec, m_rsforce[i].tm.nsec);
+	  if ( use_sim_time && clock_sub.getNumPublishers() == 1 ) { // if use sim_time and publisher==1, which means clock publisher is only this RosBridge
+	    fsensor.header.stamp = ros::Time(m_rsforce[i].tm.sec, m_rsforce[i].tm.nsec);
+	  }else{
+	    fsensor.header.stamp = tm_on_execute;
+	  }
 	  fsensor.header.frame_id = m_rsforceName[i];
 	  fsensor.wrench.force.x = m_rsforce[i].data[0];
 	  fsensor.wrench.force.y = m_rsforce[i].data[1];
