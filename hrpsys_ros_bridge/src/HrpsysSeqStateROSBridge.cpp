@@ -325,17 +325,19 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
     while ( it != body->joints().end() ) {
       hrp::Link* j = ((hrp::Link*)*it);
-      ROS_DEBUG_STREAM(j->name << " - " << j->q);
-      joint_state.name.push_back(j->name);
-      joint_state.position.push_back(j->q);
-      joint_controller_state.joint_names.push_back(j->name);
-      joint_controller_state.actual.positions.push_back(j->q);
-      //joint_state.velocity
-      //joint_state.effort
-      follow_joint_trajectory_feedback.joint_names.push_back(j->name);
-      follow_joint_trajectory_feedback.desired.positions.push_back(j->q);
-      follow_joint_trajectory_feedback.actual.positions.push_back(j->q);
-      follow_joint_trajectory_feedback.error.positions.push_back(0);
+      if (j->parent != NULL) {
+        ROS_DEBUG_STREAM(j->name << " - " << j->q);
+        joint_state.name.push_back(j->name);
+        joint_state.position.push_back(j->q);
+        joint_controller_state.joint_names.push_back(j->name);
+        joint_controller_state.actual.positions.push_back(j->q);
+        //joint_state.velocity
+        //joint_state.effort
+        follow_joint_trajectory_feedback.joint_names.push_back(j->name);
+        follow_joint_trajectory_feedback.desired.positions.push_back(j->q);
+        follow_joint_trajectory_feedback.actual.positions.push_back(j->q);
+        follow_joint_trajectory_feedback.error.positions.push_back(0);
+      }
       ++it;
     }
     joint_state.velocity.resize(joint_state.name.size());
