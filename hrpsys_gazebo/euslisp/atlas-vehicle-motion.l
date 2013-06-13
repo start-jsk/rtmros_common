@@ -5,7 +5,7 @@
 ;; \brief   atlas車乗り込み動作
 ;;
 
-(load "euslib/demo/murooka/atlas/atlas-my-utils.l")
+(load "package://hrpsys_gazebo/euslisp/atlas-interface.l")
 
 
 ;; vehicle
@@ -28,14 +28,14 @@
 
 
 (defun get-in-vehicle-side-teleport
-  (&key (real nil) (wait nil) (only-teleport nil))
+  (&key (real nil) (wait nil) (only-teleport nil) (teleport t))
 
   (warning-message 4 "[get-in] call (my-init)~%")
   (my-init :real real)
   (make-vehicle)
   (send *irtviewer* :draw-objects)
 
-  (when real
+  (when (and real teleport)
     (warning-message 4 "[get-in] call (telep-start)~%")
     (my-init :real real)
     (telep-start))
@@ -60,7 +60,8 @@
 
   (warning-message 4 "[get-in] call :teleport~%")
   (when wait (my-wait))
-  (when real (send *ri* :teleport-to (send (send *vehicle-side-pos* :copy-worldcoords) :translate #f(0 0 950) :world) nil :keep-effort t))
+  (when (and real teleport) 
+    (send *ri* :teleport-to (send (send *vehicle-side-pos* :copy-worldcoords) :translate #f(0 0 950) :world) nil :keep-effort t))
   (send *atlas* :fix-leg-to-coords *vehicle-side-pos* '(:lleg :rleg))
   (send *irtviewer* :draw-objects)
 
@@ -258,7 +259,7 @@
   (warning-message 4 "[get-in] lift left leg on ground~%")
   (when wait (my-wait))
   (let* ((tc (list nil
-		   (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(0 -125 50) :world)
+		   (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(0 -125 75) :world)
 		   nil
 		   (send (send (send *atlas* :worldcoords) :copy-worldcoords) :translate #f(0 300 0) :world))))
     (with-move-target-link-list
@@ -274,14 +275,14 @@
 	   :target-centroid-pos (send (send (send (send *atlas* :foot-midcoords) :copy-worldcoords) :translate #f(-30 -20 0)) :pos)
 	   :centroid-thre 200)))
   (send *irtviewer* :draw-objects)
-  (when real (model2real :wait t :time 1000))
+  (when real (model2real :wait t :time 2000))
   (setq *last-atlas-worldcoords* (send (send *atlas* :worldcoords) :copy-worldcoords))
   (setq *last-atlas-av* (send *atlas* :angle-vector))
 
   (warning-message 4 "[get-in] take down left leg on ground~%")
   (when wait (my-wait))
   (let* ((tc (list nil
-		   (make-coords :pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(0 -125 -50) :world) :worldpos))
+		   (make-coords :pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(0 -125 -75) :world) :worldpos))
 		   nil
 		   (send (send (send *atlas* :worldcoords) :copy-worldcoords) :translate #f(0 300 0) :world))))
     (with-move-target-link-list
@@ -297,7 +298,7 @@
 	   :target-centroid-pos (send (send (send (send *atlas* :foot-midcoords) :copy-worldcoords) :translate #f(-30 -20 0)) :pos)
 	   :centroid-thre 200)))
   (send *irtviewer* :draw-objects)
-  (when real (model2real :wait t :time 1000))
+  (when real (model2real :wait t :time 2000))
   (setq *last-atlas-worldcoords* (send (send *atlas* :worldcoords) :copy-worldcoords))
   (setq *last-atlas-av* (send *atlas* :angle-vector))
   )
@@ -402,7 +403,7 @@
     (let* ((tc (list nil
 		     nil
 		     nil
-		     (send (send pipe-coords :copy-worldcoords) :translate #f(-200 -300 100) :local))))
+		     (send (send pipe-coords :copy-worldcoords) :translate #f(-100 -300 100) :local))))
       (with-move-target-link-list
        (mt ll *atlas* '(:rleg :lleg :rarm :larm))
        (send *atlas* :fullbody-inverse-kinematics
@@ -578,9 +579,9 @@
 
 
 (defun get-in-vehicle-side
-  (&key (real nil) (wait nil) (only-teleport nil))
+  (&key (real nil) (wait nil) (only-teleport nil) (teleport t))
 
-  (get-in-vehicle-side-teleport :real real :wait wait)
+  (get-in-vehicle-side-teleport :real real :wait wait :teleport teleport)
 
   (when only-teleport (return-from get-in-vehicle-side nil))
 

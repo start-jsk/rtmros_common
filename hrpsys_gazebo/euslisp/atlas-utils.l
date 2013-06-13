@@ -15,7 +15,6 @@
     (send (send (send (send *atlas* :rarm :end-coords)
 		      :rotate (deg2rad 20) :x) :translate #f(0 0 -30) :local) :translate #f(0 20 0) :local))
   (when real
-    ;; (set-kp 10000.0)
     (atlas-set-servo-gain-by-torque-limit 1.0)
     (set-hand-kp 100.0))
   (setq *robot* *atlas*)
