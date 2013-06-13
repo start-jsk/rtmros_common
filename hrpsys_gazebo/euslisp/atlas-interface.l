@@ -2,6 +2,7 @@
 (load "package://hrpsys_gazebo/euslisp/atlas-model.l")
 (load "package://hrpsys_gazebo/euslisp/atlas-applications.l")
 (load "package://hrpsys_gazebo/euslisp/sandia-hand-interface.l")
+(load "package://hrpsys_gazebo/euslisp/atlas-utils.l")
 
 (ros::load-ros-manifest "hrpsys_gazebo")
 
