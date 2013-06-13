@@ -181,8 +181,20 @@
 (defun tolot-step
   (&key
    (reverse? t)
-   (sleep 100))
-  (bin-wark :reverse? reverse? :sleep sleep))
+   (sleep 100)
+   (rotate 0))
+  (bin-wark
+   :reverse? reverse?
+   :sleep sleep
+   :callback
+   #'(lambda (id)
+       (if rotate
+           (send *robot* :torso :waist-r :joint-angle rotate))
+       (if (and reverse? (eq id 0))
+           (progn
+             (send *robot* :larm :shoulder-r :joint-angle 30)
+             (send *robot* :rarm :shoulder-r :joint-angle -30))))
+   ))
 
 (defun rotate-tolot
   (&optional (reverse? nil))
@@ -224,6 +236,40 @@
     (list #F(0 0 300) #F(0 0 300) #F(0 0 0) #F(0 0 0))
     (list #F(0 0 0) #F(0 0 0) #F(0 0 100) #F(0 0 100)))))
 
+(defun side-gallop-step
+  (&key
+   (reverse? t)
+   (rotate nil)
+   (sleep 100)
+   (mirror nil)
+   )
+  (bin-wark
+   :reverse? reverse?
+   :sleep sleep
+   :target-keys
+   (if mirror
+       '(:larm :rarm :lleg :rleg)
+     '(:rarm :larm :rleg :lleg))
+;   :target-centroid-pos
+;   (vector (scale 0.5 (v+ (send *robot* :rarm :end-coords :worldpos)
+;                          (send *robot* :larm :end-coords :worldpos)))
+;           (scale 0.5 (v+ (send *robot* :rarm :end-coords :worldpos)
+;                          (send *robot* :larm :end-coords :worldpos))))
+   :revert? nil
+   :callback
+   #'(lambda (id)
+       (if rotate
+           (send *robot* :torso :waist-r :joint-angle rotate))
+       (if (and reverse? (eq id 0))
+           (progn
+             (send *robot* :larm :shoulder-r :joint-angle 60)
+             (send *robot* :rarm :shoulder-r :joint-angle -60))))
+   :scale (vector (list 0.3 0.3 0 0)
+                  (list 0 0 1 1))
+   :height
+   (vector
+    (list #F(0 0 300) #F(0 0 0) #F(0 0 100) #F(0 0 0))
+    (list #F(0 0 0) #F(0 0 300) #F(0 0 0) #F(0 0 100)))))
 
 (defun boyonboyon-step ;; aho
   nil
@@ -253,10 +299,10 @@ roseus
 (load "murooka.l")
 (my-init)
 (load "atlas-tolot.l")
-(tolot-init :reverse? nil)
+(tolot-init :reverse? t)
 (set-user)
 (model2real)
-(do-until-key (tolot-step :reverse? nil))
+(do-until-key (tolot-step :reverse? t))
 
 (send *tolot-hash* :enter :direction #(#F(100 0 0) #F(100 0 0)))
 (do-until-key (tolot-step :reverse? nil))
@@ -316,11 +362,7 @@ roseus
  :rotation-axis :z)
 
 (animal-fullbody
- :end-coords
- (append
-  (mapcar #'(lambda (k) (cons k (send *robot*  k :end-coords)))
-          '(:rarm :larm))
-  *atlas-tolot-endcoords*)
+ :end-coords *atlas-tolot-endcoords*
  :target-centroid-pos
  (v+
   #F(0 0 0)
@@ -328,7 +370,7 @@ roseus
          (v+ (send *robot* :rarm :end-coords :worldpos)
              (send *robot* :larm :end-coords :worldpos))))
  :revert? nil
- :stop 100
+ :stop 10
  :translation-axis :xy
  :rotation-axis :z)
 
@@ -408,3 +450,27 @@ roseus
 
 ;; left
 (progn (send *tolot-hash* :enter :direction #(#f(-0 -0 0) #f(-500 50 0))) (do-until-key (gallop-step :reverse? t :rotate 30 :sleep 100)))
+
+;; right2
+(progn (send *tolot-hash* :enter :direction #(#F(200 200 0) #F(-350 100 0)))
+       (do-until-key (tolot-step :reverse? t :rotate 60)))
+
+; left2
+(progn (send *tolot-hash* :enter :direction #(#F(350 100 0) #F(-200 200 0)))
+       (do-until-key (tolot-step :reverse? t :rotate -60)))
+
+(progn (send *tolot-hash* :enter :direction #(#F(100 100 0) #F(0 0 0)))
+       (do-until-key (side-gallop-step :reverse? t :rotate -60)))
+
+; right
+(progn (send *tolot-hash* :enter :direction #(#F(-400 -200 0) #F(-100 0 0)))
+       (do-until-key (side-gallop-step :reverse? t :rotate 0 :mirror t)))
+
+; left
+(progn (send *tolot-hash* :enter :direction #(#F(-400 200 0) #F(-100 0 0)))
+       (do-until-key (side-gallop-step :reverse? t :rotate 0)))
+
+
+; utubuse
+p = -90
+
