@@ -1,19 +1,8 @@
 (ros::roseus "samplerobot_walk")
 (load "package://hrpsys_ros_bridge_tutorials/euslisp/samplerobot-interface.l")
 
-(defun cmd-vel-cb (msg)
-  (send *ri* :go-velocity
-        (send (send msg :linear) :x)
-        (send (send msg :linear) :y)
-        (send (send msg :angular) :z))
-  )
-
 (samplerobot-init)
 (objects (list *sr*))
-(ros::subscribe
-  "/cmd_vel"
-  geometry_msgs::Twist
-  #'cmd-vel-cb)
 
 (defun samplerobot-walk
   ()
@@ -29,15 +18,9 @@
   (send *sr* :reset-pose)
   (send *ri* :angle-vector (send *sr* :angle-vector) 3000)
   (send *ri* :wait-interpolation)
-  (send *ri* :go-velocity 0 0 0)
   (print ";; Press Enter to Stop")
   (ros::rate 10)
-  (do-until-key
-   (send *ri* :go-velocity 0 0 0)
-   (ros::spin-once)
-   (ros::sleep)
-   )
-  (send *ri* :go-stop)
+  (send *ri* :cmd-vel-mode)
   )
 (warn ";; (samplerobot-walk2) ;; example to specify target velocity ;; please use \"teleop_pr2_keyboard\" terminal~%")
 
