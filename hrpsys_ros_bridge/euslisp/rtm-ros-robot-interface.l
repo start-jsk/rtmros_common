@@ -420,29 +420,30 @@
              :leg (print (format nil "~A" (if (find-method f :l/r) (send f :l/r) (send f :get :l/r)))))
    )
   (:cmd-vel-cb
-   (msg)
+   (msg &key (vel-x-ratio 1.0) (vel-y-ratio 1.0) (vel-th-ratio 1.0))
    (send self :go-velocity
-         (send (send msg :linear) :x)
-         (send (send msg :linear) :y)
-         (send (send msg :angular) :z))
+	 (* vel-x-ratio (send (send msg :linear) :x))
+         (* vel-y-ratio (send (send msg :linear) :y))
+         (* vel-th-ratio (send (send msg :angular) :z)))
    )
   (:cmd-vel-mode
    ()
-   (send self :go-velocity 0 0 0)
    (send self :start-cmd-vel-mode)
    (do-until-key
-    (ros::sleep)
+    (send self :go-velocity 0 0 0)
     (ros::spin-once)
+    (ros::sleep)
     )
    (send self :stop-cmd-vel-mode)
-   (send self :go-stop)
    )
   (:start-cmd-vel-mode
    ()
    (ros::subscribe "cmd_vel" geometry_msgs::Twist #'send self :cmd-vel-cb)
+   (send self :go-velocity 0 0 0)
    )
   (:stop-cmd-vel-mode
    ()
+   (send self :go-stop)
    (ros::unsubscribe "cmd_vel")
    )
   )
