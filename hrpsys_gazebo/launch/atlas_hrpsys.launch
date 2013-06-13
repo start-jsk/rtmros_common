@@ -41,4 +41,7 @@
 
   <!-- bdi_controller -->
   <node pkg="atlas_msgs" type="actionlib_server" name="walking_actionlib_server"/>
+
+  <!-- tf for sensors -->
+  <include file="$(find hrpsys_gazebo)/launch/atlas_sensor_tf.launch" />
 </launch>
