@@ -62,21 +62,21 @@ static int joint_id_model2real(int id)
 #ifdef __APPLE__
 typedef int clockid_t;
 #define CLOCK_MONOTONIC 0
-#include <mach/mach_time.h>  
+#include <mach/mach_time.h>
 int clock_gettime(clockid_t clk_id, struct timespec *tp)
 {
     if (clk_id != CLOCK_MONOTONIC) return -1;
 
     uint64_t clk;
-    clk = mach_absolute_time();  
+    clk = mach_absolute_time();
 
-    static mach_timebase_info_data_t info = {0,0};  
-    if (info.denom == 0) mach_timebase_info(&info);  
-  
-    uint64_t elapsednano = clk * (info.numer / info.denom);  
-  
-    tp->tv_sec = elapsednano * 1e-9;  
-    tp->tv_nsec = elapsednano - (tp->tv_sec * 1e9);  
+    static mach_timebase_info_data_t info = {0,0};
+    if (info.denom == 0) mach_timebase_info(&info);
+
+    uint64_t elapsednano = clk * (info.numer / info.denom);
+
+    tp->tv_sec = elapsednano * 1e-9;
+    tp->tv_nsec = elapsednano - (tp->tv_sec * 1e9);
     return 0;
 }
 
@@ -86,11 +86,11 @@ int clock_nanosleep(clockid_t clk_id, int flags, struct timespec *tp,
 {
     if (clk_id != CLOCK_MONOTONIC || flags != TIMER_ABSTIME) return -1;
 
-    static mach_timebase_info_data_t info = {0,0};  
-    if (info.denom == 0) mach_timebase_info(&info);  
-  
+    static mach_timebase_info_data_t info = {0,0};
+    if (info.denom == 0) mach_timebase_info(&info);
+
     uint64_t clk = (tp->tv_sec*1e9 + tp->tv_nsec)/(info.numer/info.denom);
-    
+
     mach_wait_until(clk);
     return 0;
 }
@@ -225,7 +225,7 @@ int read_servo_alarm(int id, int *a)
     *a = 0;
     return TRUE;
 }
-    
+
 int read_control_mode(int id, joint_control_mode *s)
 {
     CHECK_JOINT_ID(id);
@@ -355,7 +355,7 @@ int read_actual_angles(double *angles)
 int read_actual_torques(double *torques)
 {
   // return FALSE;
-  
+
   if(init_sub_flag) {
     for(int i=0; i<number_of_joints(); i++){
       if(JOINT_ID_MODEL2REAL(i) < 0) {
@@ -447,7 +447,7 @@ int write_command_angles(const double *angles)
     for (int i=0; i<NUM_OF_REAL_JOINT; i++){
       jointcommands.position[i] = command[JOINT_ID_REAL2MODEL(i)];
       jointcommands.velocity[i] = (command[JOINT_ID_REAL2MODEL(i)] - prev_command[JOINT_ID_REAL2MODEL(i)]) / (g_period_ns * 1e-9);
-      //jointcommands.kp_velocity[i] = 100;
+      jointcommands.kp_velocity[i] = 100;
     }
 
     pub_joint_commands_.publish(jointcommands);
@@ -512,7 +512,7 @@ int read_force_sensor(int id, double *forces)
 {
   CHECK_FORCE_SENSOR_ID(id);
   // for (int i=0; i<6; i++){
-  //     forces[i] = ((double)random()-RAND_MAX/2)/(RAND_MAX/2)*2 
+  //     forces[i] = ((double)random()-RAND_MAX/2)/(RAND_MAX/2)*2
   //         + 2 + force_offset[id][i]; // 2 = initial offset
   // }
   std::vector<geometry_msgs::Wrench*> fsensors;
@@ -559,7 +559,7 @@ int read_accelerometer(int id, double *accels)
   CHECK_ACCELEROMETER_ID(id);
   // for (int i=0; i<3; i++){
   //     double randv = ((double)random()-RAND_MAX/2)/(RAND_MAX/2)*0.01;
-  //     accels[i] = (i == 2 ? (9.8+randv) : randv) 
+  //     accels[i] = (i == 2 ? (9.8+randv) : randv)
   //         + 0.01 + accel_offset[id][i]; // 0.01 = initial offset
   // }
   if(init_sub_flag){
@@ -778,7 +778,7 @@ int open_iob(void)
     initial_jointcommands = jointcommands;
     isInitialized = true;
     return TRUE;
-} 
+}
 
 int close_iob(void)
 {
