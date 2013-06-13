@@ -194,11 +194,13 @@
 
 
 ;; imu
-(defun move-robot-with-imu
+(defun move-robot-with-imu (&key (loop-p nil))
   (if loop-p
       (do-until-key
+       (real2model)
        (send *atlas* :newcoords (make-coords :rpy (mapcar #'deg2rad (get-imu-data))))
        (send *irtviewer* :draw-objects)
+       (x::window-main-one)
        (unix::usleep (* 10 1000)))
     (send *atlas* :newcoords (make-coords :rpy (mapcar #'deg2rad (get-imu-data))))
     ))
