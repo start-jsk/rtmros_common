@@ -1,3 +1,5 @@
+;; hrpsysを立ち上げている状態で
+
 roscd hrpsys_gazebo/euslisp
 roseus atlas-vehicle-motion.l 
 
@@ -16,7 +18,7 @@ roseus atlas-vehicle-motion.l
 (grasp :arm :rarm :real t)
 (ungrasp :arm :larm :real t)
 
-;; walk
+;; 歩行
 (send *ri* :start-st)
 (send *ri* :cmd-vel-mode)
 
@@ -26,9 +28,10 @@ rosrun pr2_teleop teleop_pr2_keyboard
 
 ;; 車の真横まで移動したら(send *ri* :cmd-vel-mode)のターミナルでEnter押すと抜ける
 
-;; prepare for getting in vehicle
+;; 曲げていた膝を伸ばす
 (send *atlas* :legs :move-end-pos #f(0 0 -70) :world)
 (model2real)
+(send *ri* :stop-st)
 
-;; get in vehicle
+;; 車乗り込み動作
 (get-in-vehicle-side :real t :wait nil :teleport nil)
