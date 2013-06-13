@@ -31,7 +31,7 @@
 
 (defclass atlas-interface
   :super rtm-ros-robot-interface
-  :slots (l_hand_grasp_pub r_hand_grasp_pub bdi-action walk-seq))
+  :slots (l_hand_grasp_pub r_hand_grasp_pub bdi-action walk-seq vel-x-ratio vel-y-ratio vel-th-ratio))
 (defmethod atlas-interface
   (:init (&optional (qualify nil))
    (prog1 (send-super :init :robot atlas-robot)
@@ -59,6 +59,7 @@
            '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
      (setq walk-seq 0)
      (send self :set-recommended-walk-params)
+     (setq vel-x-ratio 1.0 vel-y-ratio 1.0 vel-th-ratio 15.0)
      ))
   (:sim-interface-state-cb
    (msg)
@@ -319,7 +320,20 @@
          :default-double-support-ratio 0.2
          :default-step-time 1.0
          :default-step-height 0.1
-         :stride-parameter #f(0.25 0.05 10))
+         ;;:stride-parameter #f(0.25 0.05 10)
+	 :stride-parameter #f(0.25 0.05 30)
+	 )
+   )
+  (:set-vel-param
+   (xx yy th)
+   (setq vel-x-ratio xx vel-y-ratio yy vel-th-ratio th))
+  (:cmd-vel-cb
+   (msg)
+   (send-super :cmd-vel-cb
+	       msg
+	       :vel-x-ratio vel-x-ratio
+	       :vel-y-ratio vel-y-ratio
+	       :vel-th-ratio vel-th-ratio)
    )
   )
 ;;
