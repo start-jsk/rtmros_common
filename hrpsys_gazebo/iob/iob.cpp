@@ -543,18 +543,21 @@ int read_gyro_sensor(int id, double *rates)
   if(init_sub_flag){
     
     // use atlas orientation
-    // Eigen::Quaternion<double> q(js.orientation.w,
-    // 				js.orientation.x,
-    // 				js.orientation.y,
-    // 				js.orientation.z);
-    // hrp::Vector3 rpy = hrp::rpyFromRot(q.toRotationMatrix());
+    Eigen::Quaternion<double> q(js.orientation.w,
+                                js.orientation.x,
+                                js.orientation.y,
+                                js.orientation.z);
+    hrp::Vector3 rpy = hrp::rpyFromRot(q.toRotationMatrix());
+    rates[0] = rpy[0];
+    rates[1] = rpy[1];
+    rates[2] = rpy[2];
 
-    rates[0] = js.angular_velocity.x
-      + 0.01 + gyro_offset[id][0]; // 0.01 = initial offset
-    rates[1] = js.angular_velocity.y
-      + 0.01 + gyro_offset[id][1]; // 0.01 = initial offset
-    rates[2] = js.angular_velocity.z
-      + 0.01 + gyro_offset[id][2]; // 0.01 = initial offset
+    // rates[0] = js.angular_velocity.x
+    //   + 0.01 + gyro_offset[id][0]; // 0.01 = initial offset
+    // rates[1] = js.angular_velocity.y
+    //   + 0.01 + gyro_offset[id][1]; // 0.01 = initial offset
+    // rates[2] = js.angular_velocity.z
+    //   + 0.01 + gyro_offset[id][2]; // 0.01 = initial offset
   } else {
     // tempolary values when sensor is not ready.
     rates[0] = rates[1] = rates[2] = 0.0;
