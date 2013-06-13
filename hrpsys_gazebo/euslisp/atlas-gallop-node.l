@@ -116,22 +116,35 @@
   nil
   (do-until-key
    (send *robot* :newcoords (make-coords :rpy (mapcar #'deg2rad (get-imu-data))))
-   (send *irtviewer* :draw-objects)
+   (send *irtviewer* :draw-objects :flush nil)
+   (send (make-coords) :draw-on :flush t :color #F(1 0 0) :size 500)
    (setq
     *compus*
-    (round
-     (rad2deg (acos (v. (transform (send *robot* :worldrot) *goal*) *goal*)))))
+    (let ((buf (transform (send *robot* :worldrot) #F(0 0 1))))
+      (* (if (minusp (aref (v* buf *goal*) 2))
+             -1
+           1)
+         (rad2deg (acos (/ (v. buf *goal*) (norm buf)))))))
    (setq *utsubuse*
-	 (if (minusp (nth 1 (get-imu-data)))
+	 (if (plusp (nth 1 (get-imu-data)))
 	     (setq *utsubuse* (+ *utsubuse* 1))
 	   (setq *utsubuse* 0)))
+   (format t "~A ~A~%" *utsubuse* *compus*)
    (cond
     ((> *utsubuse* 5)
      (play :negaeri)
      (play :stop))
-    ((> *compus* 30) (play :right))
-    ((< *compus* -30) (play :left))
+;    ((> (abs *compus*) 90) (play :right))
+    ((> *compus* 15) (play :left))
+    ((< *compus* -15) (play :right))
     (t (play :forward))))
   )
 
 #|
+
+(do-until-key
+ (send *robot* :newcoords (make-coords :rpy (mapcar #'deg2rad (get-imu-data))))
+ (send *irtviewer* :draw-objects)
+ (print (round
+         (rad2deg (acos (v. (transform (send *robot* :worldrot) *goal*) *goal*)))))
+ (unix:sleep 1))
