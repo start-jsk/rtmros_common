@@ -419,6 +419,32 @@
              :rot (matrix2quaternion (send f :worldrot))
              :leg (print (format nil "~A" (if (find-method f :l/r) (send f :l/r) (send f :get :l/r)))))
    )
+  (:cmd-vel-cb
+   (msg)
+   (send self :go-velocity
+         (send (send msg :linear) :x)
+         (send (send msg :linear) :y)
+         (send (send msg :angular) :z))
+   )
+  (:cmd-vel-mode
+   ()
+   (send self :go-velocity 0 0 0)
+   (send self :start-cmd-vel-mode)
+   (do-until-key
+    (ros::sleep)
+    (ros::spin-once)
+    )
+   (send self :stop-cmd-vel-mode)
+   (send self :go-stop)
+   )
+  (:start-cmd-vel-mode
+   ()
+   (ros::subscribe "cmd_vel" geometry_msgs::Twist #'send self :cmd-vel-cb)
+   )
+  (:stop-cmd-vel-mode
+   ()
+   (ros::unsubscribe "cmd_vel")
+   )
   )
 
 ;; SoftErrorLimiterService
