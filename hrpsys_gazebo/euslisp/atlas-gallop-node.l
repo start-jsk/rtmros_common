@@ -102,9 +102,36 @@
                 std_msgs::string
                 #'gallop-callback)
 
-(do-until-key
- (play *gallop-mode*)
- (ros::spin-once))
-#|
+(defun command-subscriber
+  nil
+  (do-until-key
+   (play *gallop-mode*)
+   (ros::spin-once)))
 
-(instance std_msgs::String :init :data "stop")
+(defvar *goal* #f(0 1 0))
+(defvar *compus* 0)
+(defvar *utsubuse* 0)
+
+(defun auto-controller
+  nil
+  (do-until-key
+   (send *robot* :newcoords (make-coords :rpy (mapcar #'deg2rad (get-imu-data))))
+   (send *irtviewer* :draw-objects)
+   (setq
+    *compus*
+    (round
+     (rad2deg (acos (v. (transform (send *robot* :worldrot) *goal*) *goal*)))))
+   (setq *utsubuse*
+	 (if (minusp (nth 1 (get-imu-data)))
+	     (setq *utsubuse* (+ *utsubuse* 1))
+	   (setq *utsubuse* 0)))
+   (cond
+    ((> *utsubuse* 5)
+     (play :negaeri)
+     (play :stop))
+    ((> *compus* 30) (play :right))
+    ((< *compus* -30) (play :left))
+    (t (play :forward))))
+  )
+
+#|
