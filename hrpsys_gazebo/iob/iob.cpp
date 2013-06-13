@@ -12,6 +12,7 @@
 #include <sensor_msgs/Imu.h>
 #include <atlas_msgs/AtlasState.h>
 #include <atlas_msgs/AtlasCommand.h>
+#include <tf/LinearMath/Quaternion.h>
 
 static ros::NodeHandle* rosnode;
 static ros::Publisher pub_joint_commands_;
@@ -540,6 +541,18 @@ int read_gyro_sensor(int id, double *rates)
   //         + 0.01 + gyro_offset[id][i]; // 0.01 = initial offset
   // }
   if(init_sub_flag){
+      /*
+      // use atlas orientation
+      tf::Quaternion q(
+              js.orientation.x,
+              js.orientation.y,
+              js.orientation.z,
+              js.orientation.w);
+      tf::Vector3 v = q.getAxis();
+      rates[0] = v.x();
+      rates[1] = v.y();
+      rates[2] = v.z();
+      */
     rates[0] = js.angular_velocity.x
       + 0.01 + gyro_offset[id][0]; // 0.01 = initial offset
     rates[1] = js.angular_velocity.y

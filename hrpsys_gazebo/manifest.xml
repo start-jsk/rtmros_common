@@ -24,6 +24,7 @@
   <depend package="pr2_controller_manager" />
 
   <depend package="collada_urdf_jsk_patch" />
+  <depend package="tf" />
 </package>
 
 
