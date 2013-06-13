@@ -278,7 +278,7 @@
     (t
      (send *ri* :set-simulation-mode :mode :stand-prep :effort (if keep-effort nil 0))
      ))
-   (unix::usleep (* 2 1000 1000))
+   (unix::usleep (* 3 1000 1000))
    (send self :atlas-mode "nominal")
    (unix::usleep (* 10 1000))
    (when coords
