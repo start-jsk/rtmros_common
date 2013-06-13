@@ -25,6 +25,7 @@ roseus atlas-vehicle-motion.l
 ;; 別ターミナルで
 rosrun pr2_teleop teleop_pr2_keyboard
 ;; を立ち上げて操縦
+;; 模様のある地面と道路の境目を踏まないように，その直前で歩幅を広くする必要があるらしい
 
 ;; 車の真横まで移動したら(send *ri* :cmd-vel-mode)のターミナルでEnter押すと抜ける
 
@@ -35,3 +36,15 @@ rosrun pr2_teleop teleop_pr2_keyboard
 
 ;; 車乗り込み動作
 (get-in-vehicle-side :real t :wait nil :teleport nil)
+
+
+
+
+;; 以下参考 ;;
+
+;; 車の横に瞬間移動
+(get-in-vehicle-side-teleport :real t)
+
+;; 車の横に瞬間移動ありの乗り込み
+(get-in-vehicle-side :real t)
+
