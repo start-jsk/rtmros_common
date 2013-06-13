@@ -978,17 +978,15 @@ int wait_for_iob_signal()
 #endif
 #if 1
     // use ROS Time
-    ros::Time::sleepUntil(rg_ts);
-    {
-      ros::Duration tm = ros::Duration(0, g_period_ns);
-      rg_ts += tm;
-    }
-    ros::Time rnow = ros::Time::now();
-    ros::Duration rdt = rg_ts - rnow;
+    //ros::Time::sleepUntil(rg_ts);
+    ros::Time rnow;
+    ros::Duration tm = ros::Duration(0, g_period_ns);
+    while ((rnow = ros::Time::now()) < rg_ts);
+
+    rg_ts += tm;
     if ((rg_ts - rnow).toSec() <= 0) {
       fprintf(stderr, "iob::overrun (%f[ms])\n", (rnow - rg_ts).toSec()*1000);
       do {
-        ros::Duration tm = ros::Duration(0, g_period_ns);
         rg_ts += tm;
       } while ((rg_ts - rnow).toSec() <= 0);
     }
