@@ -508,7 +508,7 @@
     (let ((endtm (ros::time+ (ros::time-now) (ros::time (/ timeout 1000.0)))))
       (while (null *atlas_rpy*)
         (ros::spin-once)
-        (if (< (send (ros::time- endtm (ros::time-now)) :toSec) 0.0)
+        (if (< (send (ros::time- endtm (ros::time-now)) :to-sec) 0.0)
             (return))
         )))
   *atlas_rpy*
@@ -540,7 +540,7 @@
     (let ((endtm (ros::time+ (ros::time-now) (ros::time (/ timeout 1000.0)))))
       (while (null *atlas_forcetorque*)
         (ros::spin-once)
-        (if (< (send (ros::time- endtm (ros::time-now)) :toSec) 0.0)
+        (if (< (send (ros::time- endtm (ros::time-now)) :to-sec) 0.0)
             (return))
         )))
   *atlas_forcetorque*
