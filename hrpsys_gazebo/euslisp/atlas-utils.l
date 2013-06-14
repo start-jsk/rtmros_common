@@ -221,6 +221,35 @@
 
 ;; joint
 (defmethod atlas-robot
+  (:calc-target-centroid-pos-for-one-leg
+   (fix-leg &optional (offset))
+   (send (send self fix-leg :end-coords) :transform-vector offset))
+  (:calc-target-centroid-pos
+   (centroid-leg fix-legs
+		 &optional (mid 0.5)
+		           (offsets
+			    (mapcar
+			     #'(lambda (x)
+				 (float-vector 30 0 0))
+			     (make-list (length fix-legs)))))
+   (if (eq centroid-leg :both)
+       (apply
+	#'midpoint mid
+	(mapcar
+	 #'(lambda (tmp-leg tmp-of)
+	     (send self :calc-target-centroid-pos-for-one-leg tmp-leg tmp-of))
+	 fix-legs offsets))
+     (send self :calc-target-centroid-pos-for-one-leg centroid-leg (car offsets))))
+  (:walk-pose
+   ()
+   (send self :reset-pose)
+   (send self :fix-leg-to-coords (make-coords))
+   (send self :legs :move-end-pos #f(0 0 70) :world)
+   (send self :fix-leg-to-coords (make-coords))
+   (send self :move-centroid-on-foot
+	 :both '(:rleg :lleg)
+	 :target-centroid-pos (send self :calc-target-centroid-pos :both '(:rleg :lleg)))
+   )
   (:get-jl
    (limb)
    (cadr (assoc limb *atlas-joint-list*)))
