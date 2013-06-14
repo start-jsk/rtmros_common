@@ -84,10 +84,10 @@
 (send *atlas* :hand :larm :angle-vector #f(0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 20.0))
 (progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
 
-(send *atlas* :hand :rarm :open-pose2)
+(send *atlas* :hand :larm :grasp-pose)
 (progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
 
-(send *atlas* :hand :larm :grasp-pose)
+(send *atlas* :hand :rarm :open-pose2)
 (progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
 
 (send *atlas* :rarm :inverse-kinematics
@@ -148,6 +148,62 @@
 (progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
 )
 #|
+
+;;
+(send *atlas* :hand :larm :reset-pose)
+(progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+
+(send *atlas* :fix-leg-to-coords (make-coords))
+(send *atlas* :larm :inverse-kinematics
+  	(send (send (make-coords :pos #f(450 200 1050) :rpy (list 0 0 pi/2)) :rotate pi/2 :y :world) :rotate (deg2rad 0) :x)
+  	:debug-view :no-message :thre 10 :stop 200 :rotation-axis :z)
+(progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+
+(send *atlas* :hand :larm :angle-vector #f(0.0 30.0 0.0 0.0 30.0 0.0 0.0 30.0 0.0 0.0 90.0 0.0))
+(progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+
+(send *atlas* :move-centroid-on-foot
+  	:both '(:rleg :lleg :larm)
+  	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg) 0.2))
+(progn (model2real :time 1500) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+
+(send *atlas* :lleg :move-end-pos #f(0 0 20) :world)
+(progn (model2real :time 700) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+(send *atlas* :lleg :move-end-pos #f(0 100 0) :world)
+(progn (model2real :time 700) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+(send *atlas* :lleg :move-end-pos #f(0 0 -20) :world)
+(progn (model2real :time 700) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+
+(send *atlas* :move-centroid-on-foot
+  	:both '(:rleg :lleg :larm)
+  	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg) ))
+(progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+
+(send *atlas* :larm :inverse-kinematics
+  	(send (send (make-coords :pos #f(450 300 1050) :rpy (list 0 0 pi/2)) :rotate pi/2 :y :world) :rotate (deg2rad 0) :x)
+  	:debug-view :no-message :thre 10 :stop 200 :rotation-axis :z)
+(send *atlas* :torso :waist-r :joint-angle 0)
+(progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+
+(send *atlas* :move-centroid-on-foot
+  	:both '(:rleg :lleg :larm)
+  	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg) 0.8))
+(progn (model2real :time 1500) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+
+(send *atlas* :rleg :move-end-pos #f(0 0 20) :world)
+(progn (model2real :time 700) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+(send *atlas* :rleg :move-end-pos #f(0 100 0) :world)
+(progn (model2real :time 700) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+(send *atlas* :rleg :move-end-pos #f(0 0 -20) :world)
+(progn (model2real :time 700) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+(send *atlas* :move-centroid-on-foot
+  	:both '(:rleg :lleg :larm)
+  	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
+(progn (model2real :time 1500) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+
+
+
+;;
 
 (send *atlas* :torso :waist-y :joint-angle 10)
 (send *atlas* :move-centroid-on-foot
