@@ -314,7 +314,8 @@
    (send self :set-st-param
          :k-tpcc-p #f(2.5 2.5)
          :k-tpcc-x #f(5 5)
-         :k-brot-p #f(0.4 0.4)
+         ;;:k-brot-p #f(0.4 0.4)
+	 :k-brot-p #f(5 5)
          :k-brot-tc #f(0.1 0.1))
    (send self :set-gait-generator-param
          :default-double-support-ratio 0.2

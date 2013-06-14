@@ -11,11 +11,11 @@
 (defvar *irtviewer* (instance dummy-viewer :init))
 
 
-(require "murooka.l")
-(my-init)
+;;(require "murooka.l")
+;;(my-init)
 
-(require "atlas-tolot.l")
-(require "atlas-standup.l")
+(require "package://hrpsys_gazebo/euslisp/atlas-tolot.l")
+(require "package://hrpsys_gazebo/euslisp/atlas-standup.l")
 (tolot-init :reverse? t)
 (set-user)
 (model2real)
