@@ -48,3 +48,18 @@ rosrun pr2_teleop teleop_pr2_keyboard
 ;; 車の横に瞬間移動ありの乗り込み
 (get-in-vehicle-side :real t)
 
+
+;; IMUを見てhrpsys-walkで回転角度を合わせるのを追加した
+;; 以下で車の右隣まで歩く
+;スタートした直後(bdiモードのまま)
+(set-imu-data-offset)
+;ここで(set-user) (reset-pose)などする
+(rotate-with-imu 0)
+(send *ri* :go-pos 7 0 0)
+(send *ri* :go-pos 0 0 90)
+(rotate-with-imu 90)
+(send *ri* :go-pos 10 0 0)
+(send *ri* :go-pos 0 0 90)
+(rotate-with-imu 180)
+(send *ri* :go-pos 4.5 0 0)
+

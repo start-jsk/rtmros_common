@@ -218,6 +218,29 @@
     (send *atlas* :newcoords (make-coords :rpy (get-hrpsys-imu-rpy)))
     ))
 
+(defun set-imu-data-offset ()
+  (setq *imu-data-offset* (get-imu-data))
+  )
+
+(defun get-imu-data-with-offset ()
+  (mapcar #'- (get-imu-data) *imu-data-offset*))
+
+(defun rotate-with-imu (zdeg)
+  (let ((diff (- zdeg (elt (get-imu-data-with-offset) 0))))
+    (cond
+      ((< 180 diff)
+       (setq diff (- diff 360))
+       )
+      ((> -180 diff)
+       (setq diff (+ diff 360))
+       )
+      )
+    (if (< 1 (abs diff))
+      (progn
+        (print diff)
+        (send *ri* :go-pos 0 0 diff)
+        ))
+    ))
 
 ;; joint
 (defmethod atlas-robot
