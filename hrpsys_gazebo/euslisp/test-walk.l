@@ -6,7 +6,7 @@
   (set-user)
   (set-kp 4000)
   (send *atlas* :walk-pose)
-  (model2real :wait t)
+  (model2real :wait t :time 5000)
   (send *ri* :start-st)
   (send *ri* :cmd-vel-mode)
   (send *ri* :stop-st)
