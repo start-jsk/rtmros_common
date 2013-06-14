@@ -438,13 +438,17 @@
    )
   (:start-cmd-vel-mode
    ()
+   (print ";; start cmd-vel mode")
    (ros::subscribe "cmd_vel" geometry_msgs::Twist #'send self :cmd-vel-cb)
    (send self :go-velocity 0 0 0)
+   (print ";; start cmd-vel mode done.")
    )
   (:stop-cmd-vel-mode
    ()
+   (print ";; stop cmd-vel mode")
    (send self :go-stop)
    (ros::unsubscribe "cmd_vel")
+   (print ";; stop cmd-vel mode done.")
    )
   )
 
