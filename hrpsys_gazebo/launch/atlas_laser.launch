@@ -1,7 +1,5 @@
 <launch>
-  <arg name="USE_STEREO" default="false" />
   <arg name="FIXED_FRAME" default="/pelvis" />
-  <arg name="CAMERA" default="/multisense_sl/camera/left" />
 
   <node pkg="laser_assembler" type="laser_scan_assembler"
         name="laser_scan_assembler_node"
@@ -18,22 +16,4 @@
     <remap from="joint_states" to="/multisense_sl/joint_states" />
     <!-- publish /full_cloud2 -->
   </node>
-
-  <!-- use stereo camera -->
-  <include if="$(arg USE_STEREO)"
-           file="$(find jsk_pcl_ros)/launch/pointcloud_screenpoint.launch" >
-    <arg name="USE_VIEW" value="true" />
-    <arg name="USE_DEPTH_CREATER" value="false" />
-    <arg name="image"  value="/multisense_sl/camera/left" />
-    <arg name="points" value="/multisense_sl/camera/points2" />
-  </include>
-
-  <!-- use tilt laser -->
-  <include unless="$(arg USE_STEREO)"
-           file="$(find jsk_pcl_ros)/launch/pointcloud_screenpoint.launch" >
-    <arg name="USE_VIEW" value="true" />
-    <arg name="USE_DEPTH_CREATER" value="true" />
-    <arg name="image"  value="$(arg CAMERA)" />
-    <arg name="points" value="/full_cloud2" />
-  </include>
 </launch>

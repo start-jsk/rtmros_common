@@ -3,7 +3,8 @@
   <arg name="ROBOT_NAME" default="atlas" />
   <arg name="SIMULATOR_NAME" default="RobotHardware0" />
   <arg name="CONF_FILE" value="$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).conf" />
-  <arg name="USE_LASER" default="false" />
+  <arg name="USE_LASER" default="true" />
+  <arg name="USE_SCREENPOINT" default="false" />
   <arg name="USE_HAND"  default="true" />
 
   <include file="$(find hrpsys)/launch/hrpsys.launch" >
@@ -34,6 +35,10 @@
   <!-- laser scanning -->
   <include if="$(arg USE_LASER)"
            file="$(find hrpsys_gazebo)/launch/atlas_laser.launch" />
+
+  <!-- laser scanning -->
+  <include if="$(arg USE_SCREENPOINT)"
+           file="$(find hrpsys_gazebo)/launch/atlas_screenpoint.launch" />
 
   <!-- hand controller -->
   <include if="$(arg USE_HAND)"
