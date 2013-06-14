@@ -12,7 +12,7 @@
 
 
 ;;(require "murooka.l")
-;;(my-init)
+(my-init)
 
 (require "package://hrpsys_gazebo/euslisp/atlas-tolot.l")
 (require "package://hrpsys_gazebo/euslisp/atlas-standup.l")
