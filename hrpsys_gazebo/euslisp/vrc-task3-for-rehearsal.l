@@ -1,3 +1,5 @@
+
+
 (send *ri* :teleport-to (make-coords :pos #f(-2700 -4200 1000)))
 (progn (real2model) (model2real :wait t :time 10) (set-user) (set-kp 4000))
 
@@ -28,10 +30,10 @@
 (send *atlas* :hand :rarm :angle-vector #f(0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 40.0 0.0 50.0 20.0))
 (set-hand-kp 1)
 (progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
-(set-hand-kp 200)
+(dotimes (i 5) (set-hand-kp (* (+ i 1) 40)) (unix:sleep 1))
 
 (send *atlas* :rarm :inverse-kinematics
-      (send (make-coords :pos #f(400 -450 1150) :rpy (list 0 0 -pi/2)) :rotate pi/2 :y :world)
+      (send (make-coords :pos #f(400 -450 1250) :rpy (list 0 0 -pi/2)) :rotate pi/2 :y :world)
       :debug-view :no-message :thre 5 :stop 200 :rotation-axis :z)
 (send *atlas* :move-centroid-on-foot
 	 :both '(:rleg :lleg :rarm)
