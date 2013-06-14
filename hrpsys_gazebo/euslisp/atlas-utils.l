@@ -32,10 +32,10 @@
 ;; (send *ri* :hand :larm :send_query "start")
 ;; (send *ri* :hand :larm :send_query "stop")
 
-(defun hand-model2real (&key (arm :both) (wait nil))
+(defun hand-model2real (&key (arm :both) (wait nil) (time 3000))
   (cond
    ((equal arm :both) (hand-model2real :arm :larm :wait wait) (hand-model2real :arm :rarm :wait wait))
-   (t (set-real-hand-av (get-model-hand-av arm) arm)
+   (t (set-real-hand-av (get-model-hand-av arm) arm time)
       (when wait (send *ri* :hand arm :wait-interpolation)))))
 
 (defun hand-real2model (&key (arm :both))
@@ -43,8 +43,8 @@
    ((equal arm :both) (hand-real2model :arm :larm) (hand-real2model :arm :rarm))
    (t (set-model-hand-av (get-real-hand-av arm) arm))))
 
-(defun set-real-hand-av (av &optional (arm :both))
-  (send *ri* :hand arm :angle-vector av))
+(defun set-real-hand-av (av &optional (arm :both) (time 3000))
+  (send *ri* :hand arm :angle-vector av time))
 
 (defun get-real-hand-av (&optional (arm :both))
   (send *ri* :hand arm :state :potentio-vector))
