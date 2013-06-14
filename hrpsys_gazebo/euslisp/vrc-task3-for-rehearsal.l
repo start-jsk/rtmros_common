@@ -45,4 +45,11 @@
       (send (make-coords :pos #f(400 -400 1300) :rpy (list 0 0 -pi/2)) :rotate pi/2 :y :world)
       :debug-view :no-message :thre 5 :stop 200 :rotation-axis :z)
 
+(send *atlas* :rarm :inverse-kinematics
+      (send (make-coords :pos #f(500 200 1300) :rpy (list 0 0 -pi/2)) :rotate pi/2 :y :world)
+      :debug-view :no-message :thre 5 :stop 200 :rotation-axis nil)
+(send *atlas* :move-centroid-on-foot
+	 :both '(:rleg :lleg :rarm)
+	 :target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
+
 (send *atlas* :rarm :move-end-pos #f(0 0 -100) :world :debug-view :no-message :thre 5)
