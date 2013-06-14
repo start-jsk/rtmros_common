@@ -10,7 +10,7 @@
 #
 
 
-source ~/ros/fuerte/setup.bash
+source ~/ros/${ROS_DISTRO}/setup.bash
 
 export ROS_PACKAGE_PATH_ORG=$ROS_PACKAGE_PATH
 source /usr/share/drcsim/setup.sh
