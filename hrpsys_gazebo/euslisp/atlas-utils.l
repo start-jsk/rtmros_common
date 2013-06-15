@@ -112,6 +112,22 @@
 		   (send-all (send *atlas* limb :joint-list) :name)))
 	(send *ri* :set-servo-gain-percentage j kp)))))
 
+(defun set-high-gain (&optional (limb :all))
+  (warning-message 1 "[altas-utils] set-high-gain ~a~%" limb)
+  (atlas-set-servo-gain-by-torque-limit 1.0 limb))
+
+(defun set-middle-gain (&optional (limb :all))
+  (warning-message 1 "[altas-utils] set-middle-gain ~a~%" limb)
+  (atlas-set-servo-gain-by-torque-limit 5.0 limb))
+
+(defun set-low-gain (&optional (limb :all))
+  (warning-message 1 "[altas-utils] set-low-gain ~a~%" limb)
+  (atlas-set-servo-gain-by-torque-limit 20.0 limb))
+
+(defun set-zero-gain (&optional (limb :all))
+  (warning-message 1 "[altas-utils] set-zero-gain ~a~%" limb)
+  (atlas-set-servo-gain-by-torque-limit 1000.0 limb))
+
 (defun manip ()
   (warning-message 1 "[altas-utils] set mode and effort for manipulation~%")
   (set-user nil)
