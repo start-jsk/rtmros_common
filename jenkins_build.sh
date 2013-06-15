@@ -30,7 +30,8 @@ wget 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosbuild?format=raw' -
 
 function install-rtm-ros-robotics {
     wget 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosinstall?format=raw' -O /tmp/jsk.rosinstall.$$
-    install-pkg /tmp/jsk.rosinstall.$$ http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall
+    wget http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall -O /tmp/rtm-ros-robotics.rosinstall.$$
+    install-pkg /tmp/jsk.rosinstall.$$ /tmp/rtm-ros-robotics.rosinstall.$$
 }
 
 function compile-rtm-ros-robotics {
