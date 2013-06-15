@@ -1,21 +1,11 @@
-;
-
-;; (defclass dummy-viewer
-;;   :super object
-;;   :slots nil)
-;; (defmethod dummy-viewer
-;;   (:init (&rest args) nil)
-;;   (:draw-objects (&rest args) nil))
-;; (defun objects (&rest args) nil)
-
-;(defvar *irtviewer* (instance dummy-viewer :init))
 
 
-;;(require "murooka.l")
+(require "package://hrpsys_gazebo/euslisp/atlas-interface.l")
 (my-init)
 
 (require "package://hrpsys_gazebo/euslisp/atlas-tolot.l")
 (require "package://hrpsys_gazebo/euslisp/atlas-standup.l")
+(require "package://hrpsys_gazebo/euslisp/atlas-wall-detector.l")
 (tolot-init :reverse? t)
 (set-user)
 (model2real)
@@ -157,7 +147,7 @@
 (defun atitude-update
   (&optional (goal (send *auto-controller-hash* :get :goal)))
   (send *robot* :newcoords (make-coords :rpy (mapcar #'deg2rad (get-imu-data))))
-  (send *irtviewer* :draw-objects :flush nil)
+  (send *irtviewer* :draw-objects)
 ;  (send (make-coords) :draw-on :flush t :color #F(1 0 0) :size 500)
   (send *auto-controller-hash*
 	:enter
@@ -229,6 +219,18 @@
 ;;        vector))
 ;; (send *auto-controller-hash* :enter :index 0)
 
+(defun rotate-with-orient
+  (orient
+   &optional (max 30))
+  (while (and (> (decf max) 0)
+              (progn
+                (atitude-update orient)
+                (> (abs (send *auto-controller-hash* :get :compus))
+                   30)))
+    (if (plusp (send *auto-controller-hash* :get :compus))
+        (play :qrot)
+      (play :prot))))
+
 (defun forward-controller
   (&optional
    (offset 0)
@@ -245,12 +247,39 @@
    ((< compus -15) (play :right))
    (t (play :forward))))
 
-
 (defun auto-controller
   nil
+  (rotate-with-orient
+   (send *auto-controller-hash* :get :goal))
   (do-until-key
    (atitude-update)
    (forward-controller)))
+
+(defun wall-controller
+  (&optional (rot 60) (buf))
+  (do-until-key
+   (setq
+    buf
+    (car
+     (sort
+      (mapcar
+       #'(lambda (r)
+           (rotate-with-orient
+            (transform
+             (rotation-matrix (deg2rad r) :z)
+             (send *auto-controller-hash* :get :goal)))
+           (list
+            (cons :rot r)
+            (cons :dist (wall-distance))
+            ))
+       (list (* -1 rot) 0 rot))
+      #'(lambda (a b)
+          (> (cdr (assoc :dist a))
+             (cdr (assoc :dist b))))
+      )))
+   (rotation-matrix (send *auto-controller-hash* :get :goal))
+   (dotimes (i 10)
+     (forward-controller (cdr (assoc :rot buf))))))
 
 #|
 
@@ -260,3 +289,39 @@
  (print (round
          (rad2deg (acos (v. (transform (send *robot* :worldrot) *goal*) *goal*)))))
  (unix:sleep 1))
+
+
+(setq pt (get-tilt-laser))
+(atitude-update)
+(send pt :transform (send *robot* :worldcoords))
+(send pt :convert-to-world)
+(objects (list *robot* pt))
+
+(setq
+ a
+ (remove-if
+  #'(lambda (p)
+      (or (< (cdr (assoc :size p)) 10)
+          (> (abs (cdr (assoc :average p))) 30)))
+  (cluster (send pt :point-list) :thre 5)))
+
+(mapcar
+ #'(lambda (p)
+     (cons
+      (cons
+       :distance
+       (/
+        (apply #'+
+               (mapcar #'norm (cdr (assoc :data p))))
+        (cdr (assoc :size p))))
+      p))
+ a)
+
+(mapcar
+ #'(lambda (a)
+     (mapcar
+      #'(lambda (d)
+          (send d :draw-on :flush t :color #F(1 0 0) :width 50))
+      (cdr (assoc :data a)))
+     (read-line))
+ a)

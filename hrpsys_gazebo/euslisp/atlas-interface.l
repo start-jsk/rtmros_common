@@ -375,7 +375,12 @@
 (defun get-tilt-laser (&key (remove-nan))
   (let ((msg (one-shot-subscribe "/full_cloud2" sensor_msgs::PointCloud2 :timeout 30000)))
     (when msg
-      (make-eus-pointcloud-from-ros-msg msg :remove-nan remove-nan))))
+      (let ((ret (make-eus-pointcloud-from-ros-msg msg :remove-nan remove-nan)))
+        (setf (get ret :frame_id) (send msg :header :frame_id))
+        (setf (get ret :stamp) (send msg :header :stamp))
+        (setf (get ret :point_step) (send msg :point_step))
+        ret
+        ))))
 
 (defun get-pos-estimation (&key (timeout 1000))
   (let ((msg (one-shot-subscribe "/atlas/atlas_sim_interface_state"
