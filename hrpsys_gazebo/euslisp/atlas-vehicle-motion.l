@@ -14,6 +14,9 @@
     (setq *drcv* 
 	  (with-open-file 
 	   (f (format nil "~a/~a" (unix:getenv "HOME") "ros/fuerte/rtm-ros-robotics/rtmros_common/hrpsys_gazebo/models/drc-vehicle.l")) (read f))))
+  ;; upper-front-pipe
+  (send *drcv* :add-handle
+	(make-cascoords :pos #f(340 0 1920) :rpy (list 0 0 -pi/2) :name :upper-front-pipe))
   ;; upper-left-pipe
   (send *drcv* :add-handle
 	(make-cascoords :pos #f(140 575 1900) :rot (transpose (make-matrix 3 3 (list #f(0 0 -1) #f(0 -1 0) #f(-1 0 0)))) :name :upper-left-pipe))
@@ -59,7 +62,7 @@
 
   (warning-message 2 "[vhc-init] start (all-demo-task1)~%")
 
-  (init-for-task1 :real real :wait wait)
+  (init-for-task1 :real real :wait wait :auto auto-walk-and-telep)
 
   (unless no-walk-and-telep
     (walk-for-task1 :real real :wait wait :auto auto-walk-and-telep))
