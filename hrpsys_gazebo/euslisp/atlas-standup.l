@@ -15,7 +15,6 @@
 ;;(require "package://hrpsys_gazebo/euslisp/atlas-interface.l")
 
 ;;
-(warn "(init)~%")
 (defun init
   (&key (fall nil))
   (if (not (boundp '*atlas*)) (setq *atlas* (instance atlas-robot :init)))
@@ -605,66 +604,105 @@
 
 ;;;;;
 
-(defun negaeri ;;どちらの向きから実行しても裏返る
+;;安全のためエイリアスする
+(warn "(stand-up)~%")
+(defun stand-up ()
+  (warn ";call (stand-up2)~%")
+  (stand-up2))
+
+(defun negaeri-from-aomuke
   ()
+  (send *atlas* :angle-vector (fill (send *atlas* :angle-vector) 0))
+  (send *atlas* :larm-shoulder-y :joint-angle -90)
+  (send *atlas* :rarm-shoulder-y :joint-angle 90)
+  (send *atlas* :torso-waist-y :joint-angle -35)
+  (send *atlas* :rleg-crotch-p :joint-angle -90)
+  (send *atlas* :lleg-crotch-p :joint-angle -90)
+  (send *ri* :angle-vector (send *atlas* :angle-vector) 5000)
+  (send *ri* :wait-interpolation)
+
+  (send *atlas* :larm-shoulder-r :joint-angle 90)
+  (send *atlas* :larm-shoulder-y :joint-angle -50)
+  (send *atlas* :torso-waist-y :joint-angle 35)
+  (send *atlas* :rarm-shoulder-r :joint-angle 60)
+  (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
+  (send *ri* :wait-interpolation)
+
+  (send *atlas* :larm-shoulder-r :joint-angle -50)
+  (send *atlas* :larm-shoulder-y :joint-angle 90)
+  (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
+  (send *ri* :wait-interpolation)
+
+  (send *atlas* :rarm-shoulder-r :joint-angle 30)
+  (send *atlas* :rarm-shoulder-y :joint-angle -90)
+  (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
+  (send *ri* :wait-interpolation)
+
+  (send *atlas* :rleg-crotch-p :joint-angle 0)
+  (send *atlas* :lleg-crotch-p :joint-angle 0)
+  (send *atlas* :torso-waist-y :joint-angle 0)
+  (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
+  (send *ri* :wait-interpolation)
+
   (send *atlas* :angle-vector (fill (send *atlas* :angle-vector) 0))
   (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
   (send *ri* :wait-interpolation)
+  )
 
-  (send *atlas* :larm-elbow-y :joint-angle 60)
-  (send *atlas* :larm-elbow-p :joint-angle 90)
-  (send *atlas* :larm-shoulder-r :joint-angle 50)
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
-  (send *ri* :wait-interpolation)
-
-  (send *atlas* :larm-shoulder-y :joint-angle -70)
-  (send *atlas* :torso-waist-y :joint-angle -35)
-  (send *atlas* :rarm-shoulder-y :joint-angle 0)
-  (send *atlas* :rarm-shoulder-r :joint-angle -30)
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
-  (send *ri* :wait-interpolation)
-
-  (send *atlas* :rarm-elbow-p :joint-angle -90)
-  (send *atlas* :rarm-elbow-y :joint-angle 180)
+(defun negaeri-from-utubuse
+  ()
+  (send *atlas* :angle-vector (fill (send *atlas* :angle-vector) 0))
+  (send *atlas* :larm-shoulder-y :joint-angle -90)
   (send *atlas* :rarm-shoulder-y :joint-angle 90)
-  (send *atlas* :rarm-shoulder-r :joint-angle -70)
+  (send *atlas* :torso-waist-y :joint-angle -35)
   (send *atlas* :rleg-crotch-p :joint-angle -90)
   (send *atlas* :lleg-crotch-p :joint-angle -90)
+  (send *ri* :angle-vector (send *atlas* :angle-vector) 5000)
+  (send *ri* :wait-interpolation)
+
+  (send *atlas* :rarm-shoulder-r :joint-angle -90)
+  (send *atlas* :rarm-shoulder-y :joint-angle 50)
+  (send *atlas* :larm-shoulder-r :joint-angle -60)
   (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
   (send *ri* :wait-interpolation)
 
-  (send *atlas* :larm-shoulder-y :joint-angle -110)
-  (send *atlas* :larm-shoulder-r :joint-angle 40)
-  (send *atlas* :rarm-shoulder-r :joint-angle 30)
-  (send *atlas* :rarm-shoulder-y :joint-angle 110)
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
-  (send *ri* :wait-interpolation)
-
-  (send *atlas* :torso-waist-y :joint-angle 35)
-  (send *atlas* :larm-shoulder-r :joint-angle -30)
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
-  (send *ri* :wait-interpolation)
-
-  (send *atlas* :larm-elbow-p :joint-angle 0)
-  (send *atlas* :larm-shoulder-r :joint-angle 50)
-  (send *atlas* :rarm-elbow-p :joint-angle 0)
-  (send *atlas* :rarm-shoulder-r :joint-angle -50)
-  (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
-  (send *ri* :wait-interpolation)
-
-  (send *atlas* :larm-shoulder-y :joint-angle 90)
+  (send *atlas* :rarm-shoulder-r :joint-angle 50)
   (send *atlas* :rarm-shoulder-y :joint-angle -90)
   (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
   (send *ri* :wait-interpolation)
 
   (send *atlas* :larm-shoulder-r :joint-angle -30)
-  (send *atlas* :rarm-shoulder-r :joint-angle 30)
+  (send *atlas* :larm-shoulder-y :joint-angle 90)
+  (send *atlas* :torso-waist-y :joint-angle -35)
+  (send *atlas* :rleg-crotch-p :joint-angle 0)
+  (send *atlas* :lleg-crotch-p :joint-angle 0)
   (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
   (send *ri* :wait-interpolation)
 
   (send *atlas* :angle-vector (fill (send *atlas* :angle-vector) 0))
   (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
   (send *ri* :wait-interpolation)
+  )
+
+(warn "(negaeri)~%")
+(defun negaeri ;;どちらの向きから実行しても裏返る
+  ()
+  (if (< 10 (distance (fill (send *atlas* :angle-vector) 0) (send *atlas* :angle-vector)))
+    (progn
+      (warn ";set zero-pose to detect aomuke or utubuse~%")
+      (send *atlas* :angle-vector (fill (send *atlas* :angle-vector) 0))
+      (send *ri* :angle-vector (send *atlas* :angle-vector) 5000)
+      (send *ri* :wait-interpolation)))
+  (cond
+    ((eq :aomuke (check_utubuse_or_not))
+     (warn ";aomuke detected~%")
+     (negaeri-from-aomuke))
+    ((eq :utubuse (check_utubuse_or_not))
+     (warn ";utubuse detected~%")
+     (negaeri-from-utubuse))
+    (t
+      (warn ";state unknown! use (negaeri-from-aomuke) or (negaeri-from-utubuse)~%"))
+    )
   )
 
 (defun stand-up2 (&key (time-scale 1.0) (wait-times 40) (jump t))
@@ -675,23 +713,23 @@
    (atlas-set-servo-gain-by-torque-limit 1)
    (cond
     ((eq :aomuke (check_utubuse_or_not))
-     (print "detect aomuke situation, do rolling-over")
-     (negaeri)
+     (print ";detect aomuke situation, do rolling-over")
+     (negaeri-from-aomuke)
      )
     (t
-     (print "set k-effort 255")
+     (print ";set k-effort 255")
      (set-k-effort 255)))
    (unix:sleep 2)
    ;;
-   (print "set pose1")
+   (print ";set pose1")
    (pose1 :tm (* time-scale 2000))
    (send *ri* :wait-interpolation)
-   (print "set pose2")
+   (print ";set pose2")
    (pre-pose2 :tm (* time-scale 1000))
    (send *ri* :wait-interpolation)
    (pose2 :tm (* time-scale 2400))
    (send *ri* :wait-interpolation)
-   (print "set pose3")
+   (print ";set pose3")
    (pose3 :tm (* time-scale 4000))
    (atlas-set-servo-gain-by-torque-limit 0.01)
    (send *ri* :wait-interpolation)
@@ -703,14 +741,14 @@
    (send *ri* :angle-vector (send *atlas* :angle-vector) (* time-scale 3000))
    (send *ri* :wait-interpolation)
    (send *atlas* :angle-vector #f(-0.355849 49.9885 -0.129764 41.1796 119.496 6.70627 -63.7998 67.5002 -0.054577 -54.0 120.0 -9.51683 29.5998 -92.2502 -0.030691 140.375 -24.981 -100.046 28.3614 -39.6945 30.1193 140.375 24.981 -99.9811 -28.3614 -39.7298 -29.8737 -0.438736))
-   (send *ri* :angle-vector (send *atlas* :angle-vector) (* time-scale 10000))
+   (send *ri* :angle-vector (send *atlas* :angle-vector) (* time-scale 5000))
    (send *ri* :wait-interpolation)
    (unix:sleep 1)
 
    (send *atlas* :reset-pose)
    (send *atlas* :lleg :angle-vector #f(123.714 0 -71.9519 0 -51.5662 0))
    (send *atlas* :rleg :angle-vector #f(123.714 0 -71.9519 0 -51.5662 0))
-   (send *ri* :angle-vector (send *atlas* :angle-vector) (* time-scale 10000))
+   (send *ri* :angle-vector (send *atlas* :angle-vector) (* time-scale 5000))
    (send *ri* :wait-interpolation)
    ;;股が開いているのでなんとかして閉じたい
 
@@ -718,8 +756,8 @@
    (when jump
      (let ((prev-pose (send *atlas* :angle-vector)))
        (atlas-set-servo-gain-by-torque-limit 0.1)
-       (send *atlas* :lleg :inverse-kinematics (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(0 0 -30) :world) :rotation-axis t :debug-view :no-message)
-       (send *atlas* :rleg :inverse-kinematics (send (send *atlas* :rleg :end-coords :copy-worldcoords) :translate #f(0 0 -30) :world) :rotation-axis t :debug-view :no-message)
+       (send *atlas* :lleg :inverse-kinematics (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(0 0 -50) :world) :rotation-axis t :debug-view :no-message)
+       (send *atlas* :rleg :inverse-kinematics (send (send *atlas* :rleg :end-coords :copy-worldcoords) :translate #f(0 0 -50) :world) :rotation-axis t :debug-view :no-message)
        (send *ri* :angle-vector (send *atlas* :angle-vector) (* time-scale 100))
        (send *ri* :wait-interpolation)
        (send *ri* :angle-vector prev-pose (* time-scale 100))
