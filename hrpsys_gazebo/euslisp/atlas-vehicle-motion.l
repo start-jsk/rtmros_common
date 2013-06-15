@@ -6,6 +6,7 @@
 ;;
 
 (load "package://hrpsys_gazebo/euslisp/atlas-interface.l")
+(load "package://hrpsys_gazebo/euslisp/atlas-vehicle-motion-utils.l")
 
 
 ;; setting
@@ -16,7 +17,9 @@
 	   (f (format nil "~a/~a" (unix:getenv "HOME") "ros/fuerte/rtm-ros-robotics/rtmros_common/hrpsys_gazebo/models/drc-vehicle.l")) (read f))))
   ;; upper-front-pipe
   (send *drcv* :add-handle
-	(make-cascoords :pos #f(340 0 1920) :rpy (list 0 0 -pi/2) :name :upper-front-pipe))
+	(make-cascoords :pos #f(320 150 1920) :rpy (list 0 0 -pi/2) :name :upper-front-pipe))
+  ;; (send *drcv* :add-handle
+  ;; 	(make-cascoords :pos #f(320 0 1920) :rpy (list 0 0 -pi/2) :name :upper-front-pipe))
   ;; upper-left-pipe
   (send *drcv* :add-handle
 	(make-cascoords :pos #f(140 575 1900) :rot (transpose (make-matrix 3 3 (list #f(0 0 -1) #f(0 -1 0) #f(-1 0 0)))) :name :upper-left-pipe))
@@ -30,6 +33,8 @@
 
 (setq *vehicle-start-pos* (make-coords :pos #f(-10000 2000 0) :rpy (list -pi/2 0 0)))
 (setq *vehicle-side-pos* (make-coords :pos #f(175 950 0) :rpy (list 0 0 0)))
+
+(setq *lr-reverse* nil)
 
 ;; move
 ;;;; (stand-up) on starting point [cheating!!]
@@ -89,6 +94,45 @@
 
 ;; vehicle motion [get-in]
 (load "package://hrpsys_gazebo/euslisp/atlas-vehicle-motion-get-in.l")
+
+
+(defun telep-side
+  (&key (real nil) (wait nil) (init nil) (telep t))
+
+  (when init
+    (warning-message 2 "[vhc-get-in] call (my-init)~%")
+    (my-init :real real)
+    (send *irtviewer* :draw-objects))
+
+  (when (and real telep)
+    (warning-message 2 "[vhc-get-in] call (telep-start) and (stand-up-start)~%")
+    (my-init :real real)
+    (telep-start)
+    (stand-up-start))
+
+  (when real
+    (warning-message 2 "[vhc-get-in] call (manip)~%")
+    (when wait (my-wait))
+    (manip)
+    (send *irtviewer* :draw-objects))
+
+  (warning-message 2 "[vhc-get-in] call :teleport~%")
+  (when wait (my-wait))
+  (when (and real telep) 
+    (let* ((telep-coords (send *vehicle-side-pos* :copy-worldcoords))
+	   (telep-pos (send telep-coords :worldpos))
+	   (telep-rpy (car (rpy-angle (send telep-coords :rot)))))
+      (when *lr-reverse*
+	(setq telep-coords (make-coords :pos (float-vector (elt telep-pos 0) (- (elt telep-pos 1)) (elt telep-pos 2))
+					:rpy (list (- (elt telep-rpy 0)) (elt telep-rpy 1) (- (elt telep-rpy 2)))))
+	(send telep-coords :translate #f(-70 10 0) :local)
+	(send telep-coords :rotate -pi/2 :z))
+      (send *ri* :teleport-to (send (send telep-coords :copy-worldcoords) :translate #f(0 0 950) :world) nil :keep-effort t)))
+  (send *atlas* :fix-leg-to-coords telep-coords '(:lleg :rleg))
+  (send *irtviewer* :draw-objects)
+
+  (make-vehicle)
+  )
 
 
 
