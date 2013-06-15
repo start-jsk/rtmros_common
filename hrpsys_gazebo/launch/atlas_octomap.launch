@@ -1,0 +1,43 @@
+<launch>
+  <arg name="FIXED_FRAME" default="/pelvis" />  <!-- /imu_floor -->
+  <arg name="USE_FILTER" defalunt="true" />
+  <arg name="TARGET_FRAME" default="/head_hokuyo_frame" />
+  <arg name="CLOUD_IN" default="/full_cloud2" />
+
+  <node if="$(arg USE_FILTER)"
+        pkg="laser_filters" type="scan_to_cloud_filter_chain"
+        name="scan_cloud_filter_node"
+        output="screen" >
+    <remap from="scan" to="/multisense_sl/laser/scan"/>
+    <remap from="cloud_filtered" to="~cloud_filtered"/>
+    <param name="target_frame" value="$(arg TARGET_FRAME)" />
+    <rosparam command="load" file="$(find hrpsys_gazebo)/config/atlas_scan_to_cloud.yaml" />
+  </node>
+
+  <node if="$(arg USE_FILTER)"
+        pkg="octomap_server" type="octomap_server_node" name="octomap_filter_server">
+    <remap from="cloud_in" to="scan_cloud_filter_node/cloud_filtered" />
+
+    <param name="resolution" value="0.05" />
+    <param name="sensor_model/max_range" value="30.0" />
+    <param name="frame_id" value="$(arg FIXED_FRAME)" />
+    <!-- for filter ground -->
+    <param name="filter_ground" value="false" />
+  </node>
+
+  <node unless="$(arg USE_FILTER)"
+        pkg="octomap_server" type="octomap_server_node" name="octomap_full_server">
+    <remap from="cloud_in" to="$(arg CLOUD_IN)" />
+
+    <param name="resolution" value="0.05" />
+    <param name="sensor_model/max_range" value="30.0" />
+    <param name="frame_id" value="$(arg FIXED_FRAME)" />
+
+    <!-- for filter ground -->
+    <param name="filter_ground" value="true" />
+    <param name="base_frame_id" value="/imu_floor" />
+    <param name="ground_filter/distance" value="0.04" />
+    <param name="ground_filter/angle"    value="0.15" />
+    <param name="ground_filter/plane_distance" value="0.07" />
+  </node>
+</launch>

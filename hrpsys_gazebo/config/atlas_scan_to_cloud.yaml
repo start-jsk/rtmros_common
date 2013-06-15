@@ -1,0 +1,15 @@
+#### laser_filters/scan_to_cloud_filter_chain
+scan_filter_chain:
+ - name: through
+   type: laser_filters/LaserScanRangeFilter
+   params: 
+     lower_threshold: 0.7
+     upper_threshold: 29.5
+ - name: shadows
+   type: laser_filters/ScanShadowsFilter
+   params:
+     min_angle: 6
+     max_angle: 174
+     neighbors: 6
+     window: 1
+#cloud_filter_chain:
