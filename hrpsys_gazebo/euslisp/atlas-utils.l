@@ -73,39 +73,47 @@
 
 ;; sim mode
 (defun set-user (&optional (e 255))
+  (warning-message 1 "[altas-utils] set user-mode~%")
   (send *ri* :set-simulation-mode :mode :user :effort e))
 
 (defun set-stand (&optional (e 0))
+  (warning-message 1 "[altas-utils] set stand-mode~%")
   (send *ri* :set-simulation-mode :mode :stand :effort e))
 
 (defun set-manip (&optional (e 255))
+  (warning-message 1 "[altas-utils] set manip-mode~%")
   (send *ri* :set-simulation-mode :mode :manipulate :effort e))
 
 (defun set-walk (&optional (e 0))
+  (warning-message 1 "[altas-utils] set walk-mode~%")
   (send *ri* :set-simulation-mode :mode :walk :effort e))
 
 (defun set-step (&optional (e 0))
+  (warning-message 1 "[altas-utils] set step-mode~%")
   (send *ri* :set-simulation-mode :mode :step :effort e))
 
 (defun get-mode ()
   (send *ri* :get-control-mode))
 
 (defun set-effort (&optional (e 0) (limb :all))
+  (warning-message 1 "[altas-utils] set effort <~a> <~a>~%" e limb)
   (send *ri* :set-k-effort e limb))
 
 (defun get-effort (&optional limb)
   (send *ri* :get-k-effort limb))
 
 (defun set-kp 
-  (&optional (kp 100.0) limb)
+  (&optional (kp 100.0) (limb :all))
+  (warning-message 1 "[altas-utils] set kp <~a> <~a>~%" kp limb)
   (cond
    ((equal limb :arms) (set-kp kp :larm) (set-kp kp :rarm))
    ((equal limb :legs) (set-kp kp :lleg) (set-kp kp :rleg))
-   (t (dolist (j (if limb (send-all (send *atlas* limb :joint-list) :name)
-		   (send-all (send *atlas* :joint-list) :name)))
+   (t (dolist (j (if (equal limb :all) (send-all (send *atlas* :joint-list) :name)
+		   (send-all (send *atlas* limb :joint-list) :name)))
 	(send *ri* :set-servo-gain-percentage j kp)))))
 
 (defun manip ()
+  (warning-message 1 "[altas-utils] set mode and effort for manipulation~%")
   (set-user nil)
   (set-effort 0 :legs)
   (set-effort 255 :torso)
@@ -115,15 +123,19 @@
 
 ;; mode
 (defun set-pinned ()
+  (warning-message 1 "[altas-utils] [cheating!!] set pinned~%")
   (send *ri* :atlas-mode "pinned"))
 
 (defun set-pinned-wg ()
+  (warning-message 1 "[altas-utils] [cheating!!] set pinned-with-gravity~%")
   (send *ri* :atlas-mode "pinned_with_gravity"))
 
 (defun set-nominal ()
+  (warning-message 1 "[altas-utils] [cheating!!] set nominal~%")
   (send *ri* :atlas-mode "nominal"))
 
 (defun set-feet ()
+  (warning-message 1 "[altas-utils] [cheating!!] set feet~%")
   (send *ri* :atlas-mode "feet"))
 
 
@@ -319,25 +331,14 @@
      (send (car bodies) :assoc h))
    ))
 
-(defun make-vehicle ()
-  (unless (boundp '*drcv*)
-    (setq *drcv* 
-	  (with-open-file 
-	   (f (format nil "~a/~a" (unix:getenv "HOME") "ros/fuerte/rtm-ros-robotics/rtmros_common/hrpsys_gazebo/models/drc-vehicle.l")) (read f))))
-  (send *drcv* :add-handle
-	(make-cascoords :pos #f(140 575 1900) :rot (transpose (make-matrix 3 3 (list #f(0 0 -1) #f(0 -1 0) #f(-1 0 0)))) :name :upper-left-pipe))
-  (send *drcv* :add-handle
-	(make-cascoords :pos #f(500 600 1500) :rpy (list pi (* pi 0.125) 0) :name :front-left-pipe))
-  (if (boundp '*irtviewer*)
-      (objects (union (send *irtviewer* :objects) (list *drcv*)))
-    (objects (list *drcv*))))
-
 
 ;; wait
 (defun my-wait ()
   (warn ";; waiting~%")
   (read-line))
 
+
+;; hand pose
 (dolist (ahand '(sandia_hand_left-robot sandia_hand_right-robot))
   (let ((hand-pose-def-macros 
 	 `(defmethod ,ahand
