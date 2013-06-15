@@ -9,22 +9,29 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/hrpsys_gazebo</url>
 
+  <!-- JSK(ros-rtm) system -->
   <depend package="roseus"/>
   <depend package="pr2eus"/>
+  <depend package="hrpsys_ros_bridge"/>
 
+  <!-- atlas gazebo -->
   <depend package="atlas_utils"/>
   <depend package="atlas_msgs" />
   <depend package="sandia_hand_msgs"/>
   <depend package="osrf_msgs" />
 
-  <depend package="hrpsys_ros_bridge"/>
-
-  <depend package="laser_assembler" />
-
   <depend package="pr2_controller_manager" />
-
   <depend package="collada_urdf_jsk_patch" />
   <depend package="tf" />
+
+  <!-- laser assemble -->
+  <depend package="laser_assembler" />
+
+  <!-- screenpoint -->
+  <depend package="image_view2" />
+  <depend package="jsk_pcl_ros" />
+  <depend package="resized_imagetransport" />
+
+  <!-- octomap -->
+  <depend package="octomap_server" />
 </package>
-
-
