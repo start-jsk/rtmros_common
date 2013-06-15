@@ -122,7 +122,7 @@
 
 (defun set-low-gain (&optional (limb :all))
   (warning-message 1 "[altas-utils] set-low-gain ~a~%" limb)
-  (atlas-set-servo-gain-by-torque-limit 20.0 limb))
+  (atlas-set-servo-gain-by-torque-limit 30.0 limb))
 
 (defun set-zero-gain (&optional (limb :all))
   (warning-message 1 "[altas-utils] set-zero-gain ~a~%" limb)
@@ -202,6 +202,10 @@
 
 (defun move-centroid ()
   (send *atlas* :move-centroid-on-foot :both '(:lleg :rleg)))
+
+(defun save-last ()
+  (setq *last-atlas-worldcoords* (send (send *atlas* :worldcoords) :copy-worldcoords))
+  (setq *last-atlas-av* (send *atlas* :angle-vector)))
 
 (defun set-last ()
   (send *atlas* :angle-vector *last-atlas-av*)
