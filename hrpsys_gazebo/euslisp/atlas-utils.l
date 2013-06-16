@@ -1,4 +1,6 @@
 ;; init
+(setq *lr-reverse* nil)
+
 (defun my-init
   (&key (real t) (set-reset-pose t))
   (if real
@@ -44,9 +46,11 @@
    (t (set-model-hand-av (get-real-hand-av arm) arm))))
 
 (defun set-real-hand-av (av &optional (arm :both) (time 3000))
+  (when *lr-reverse* (case arm (:larm (setq arm :rarm)) (:rarm (setq arm :larm))))
   (send *ri* :hand arm :angle-vector av time))
 
 (defun get-real-hand-av (&optional (arm :both))
+  (when *lr-reverse* (case arm (:larm (setq arm :rarm)) (:rarm (setq arm :larm))))
   (send *ri* :hand arm :state :potentio-vector))
 
 (defun set-model-hand-av (av &optional (arm :both))
@@ -56,6 +60,7 @@
   (send *atlas* :hand arm :angle-vector))
 
 (defun set-hand-kp (kp &optional (arm :both))
+  (when *lr-reverse* (case arm (:larm (setq arm :rarm)) (:rarm (setq arm :larm))))
   (send *ri* :hand arm :send-command :pgain kp))
 
 (defun grasp (&key (arm :both) (real nil))
@@ -97,6 +102,8 @@
 
 (defun set-effort (&optional (e 0) (limb :all))
   (warning-message 1 "[altas-utils] set effort <~a> <~a>~%" e limb)
+  (when *lr-reverse*
+    (case limb (:larm (setq limb :rarm)) (:rarm (setq limb :larm)) (:lleg (setq limb :rleg)) (:rleg (setq limb :lleg))))
   (send *ri* :set-k-effort e limb))
 
 (defun get-effort (&optional limb)
@@ -105,6 +112,8 @@
 (defun set-kp 
   (&optional (kp 100.0) (limb :all))
   (warning-message 1 "[altas-utils] set kp <~a> <~a>~%" kp limb)
+  (when *lr-reverse*
+    (case limb (:larm (setq limb :rarm)) (:rarm (setq limb :larm)) (:lleg (setq limb :rleg)) (:rleg (setq limb :lleg))))
   (cond
    ((equal limb :arms) (set-kp kp :larm) (set-kp kp :rarm))
    ((equal limb :legs) (set-kp kp :lleg) (set-kp kp :rleg))
@@ -114,18 +123,26 @@
 
 (defun set-high-gain (&optional (limb :all))
   (warning-message 1 "[altas-utils] set-high-gain ~a~%" limb)
+  (when *lr-reverse*
+    (case limb (:larm (setq limb :rarm)) (:rarm (setq limb :larm)) (:lleg (setq limb :rleg)) (:rleg (setq limb :lleg))))
   (atlas-set-servo-gain-by-torque-limit 1.0 limb))
 
 (defun set-middle-gain (&optional (limb :all))
   (warning-message 1 "[altas-utils] set-middle-gain ~a~%" limb)
-  (atlas-set-servo-gain-by-torque-limit 5.0 limb))
+  (when *lr-reverse*
+    (case limb (:larm (setq limb :rarm)) (:rarm (setq limb :larm)) (:lleg (setq limb :rleg)) (:rleg (setq limb :lleg))))
+  (atlas-set-servo-gain-by-torque-limit 7.5 limb))
 
 (defun set-low-gain (&optional (limb :all))
   (warning-message 1 "[altas-utils] set-low-gain ~a~%" limb)
+  (when *lr-reverse*
+    (case limb (:larm (setq limb :rarm)) (:rarm (setq limb :larm)) (:lleg (setq limb :rleg)) (:rleg (setq limb :lleg))))
   (atlas-set-servo-gain-by-torque-limit 30.0 limb))
 
 (defun set-zero-gain (&optional (limb :all))
   (warning-message 1 "[altas-utils] set-zero-gain ~a~%" limb)
+  (when *lr-reverse*
+    (case limb (:larm (setq limb :rarm)) (:rarm (setq limb :larm)) (:lleg (setq limb :rleg)) (:rleg (setq limb :lleg))))
   (atlas-set-servo-gain-by-torque-limit 1000.0 limb))
 
 (defun manip ()
@@ -154,13 +171,19 @@
   (warning-message 1 "[altas-utils] [cheating!!] set feet~%")
   (send *ri* :atlas-mode "feet"))
 
+(defun set-harnessed ()
+  (warning-message 1 "[altas-utils] [cheating!!] set harnessed~%")
+  (send *ri* :atlas-mode "harnessed"))
 
 ;; angle vector
 (defun real2model ()
-  (send *atlas* :angle-vector (send *ri* :state :potentio-vector)))
+  (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
+  (when *lr-reverse* (mirror-angle-vector)))
 
-(defun model2real (&key (time 2000) (wait nil))
+(defun model2real (&key (time 1500) (wait nil))
+  (when *lr-reverse* (mirror-angle-vector))
   (send *ri* :angle-vector (send *atlas* :angle-vector) time)
+  (when *lr-reverse* (mirror-angle-vector))
   (when wait (send *ri* :wait-interpolation)))
 
 (defun reset-pose (&key (real nil))
@@ -173,6 +196,23 @@
 
 
 ;; angle vector util
+(defun mirror-angle-vector
+  ()
+  (let* ((larm-av (send *atlas* :larm :angle-vector))
+	 (rarm-av (send *atlas* :rarm :angle-vector))
+	 (lleg-av (send *atlas* :lleg :angle-vector))
+	 (rleg-av (send *atlas* :rleg :angle-vector))
+	 (torso-av (send *atlas* :torso :angle-vector))
+	 (arm-convert-v (float-vector -1 1 -1 -1 1 1))
+	 (leg-convert-v (float-vector 1 -1 1 -1 1 -1))
+	 (torso-convert-v (float-vector -1 1 -1)))
+    (send *atlas* :rarm :angle-vector (map float-vector #'* arm-convert-v larm-av))
+    (send *atlas* :larm :angle-vector (map float-vector #'* arm-convert-v rarm-av))
+    (send *atlas* :rleg :angle-vector (map float-vector #'* leg-convert-v lleg-av))
+    (send *atlas* :lleg :angle-vector (map float-vector #'* leg-convert-v rleg-av))
+    (send *atlas* :torso :angle-vector (map float-vector #'* torso-convert-v torso-av))
+    ))
+
 (defun mirror-angle-vector-from
   (from)
   (let ((av (send *atlas* from :angle-vector))
