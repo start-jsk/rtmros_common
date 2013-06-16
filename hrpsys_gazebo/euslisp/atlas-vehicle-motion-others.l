@@ -11,11 +11,15 @@
 ;; vehicle motion [init]
 
 (defun init-for-task1
-  (&key (real nil) (wait nil))
+  (&key (real nil) (wait nil) (auto nil))
 
   (warning-message 2 "[vhc-init] start (init-for-task1)~%")
 
   (my-init :real real)
+
+  (when auto
+    (send *ri* :teleport-to (make-coords :pos (v+ (send *vehicle-start-pos* :worldpos) #f(0 -3500 950)) :rpy (list -pi/2 0 0))))
+
   (when real
     (real2model)
     (model2real :time 100)
@@ -85,7 +89,8 @@
   (when real
     (send *ri* :start-st)
     (warning-message 2 "[vhc-walk] start :go-pos~%")
-    (send *ri* :go-pos 5.5 0 0)
+    (send *ri* :go-pos 1.0 0 0)
+    ;; (send *ri* :go-pos 5.5 0 0)
     (warning-message 2 "[vhc-walk] finish :go-pos~%")
     )
 

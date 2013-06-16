@@ -30,7 +30,7 @@
   (let* ((fz (get-axis-force limb (float-vector 0 0 1))))
     (if (> fz 200)
 	(set-middle-gain limb) (set-zero-gain limb))
-    (unix::usleep (* 6 1000 1000))    
+    (unix::usleep (* 2 1000 1000))    
     (real2model)
     (model2real :wait t)
     (send *irtviewer* :draw-objects)

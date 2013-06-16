@@ -34,7 +34,6 @@
 (setq *vehicle-start-pos* (make-coords :pos #f(-10000 2000 0) :rpy (list -pi/2 0 0)))
 (setq *vehicle-side-pos* (make-coords :pos #f(175 950 0) :rpy (list 0 0 0)))
 
-(setq *lr-reverse* nil)
 
 ;; move
 ;;;; (stand-up) on starting point [cheating!!]
@@ -64,6 +63,9 @@
 ;; vehicle motion [all]
 (defun all-demo-task1
   (&key (real nil) (wait nil) (auto-walk-and-telep nil) (no-walk-and-telep nil))
+
+  (warning-message 2 "[vhc-init] lr-reverse mode !!!~%")
+  (setq *lr-reverse* t)
 
   (warning-message 2 "[vhc-init] start (all-demo-task1)~%")
 
