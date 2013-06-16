@@ -20,11 +20,13 @@
 
   (lift-rleg-in-get-in-for-task1 :real real :wait wait)
 
-  (grasp-larm-in-get-in-for-task1 :real real :wait wait)
+  (lift-whole-body-in-get-in-for-task1 :real real :wait t)
 
-  (grasp-rarm-2-in-get-in-for-task1 :real real :wait wait)
+  ;; (grasp-larm-in-get-in-for-task1 :real real :wait wait)
 
-  (lift-lleg-in-get-in-for-task1 :real real :wait wait)
+  ;; (grasp-rarm-2-in-get-in-for-task1 :real real :wait wait)
+
+  ;; (lift-lleg-in-get-in-for-task1 :real real :wait wait)
 
   (warning-message 2 "[vhc-get-in] finish (get-in-for-task1)~%")
   )
@@ -323,7 +325,7 @@
 	   :rotation-axis '(t t t nil)
 	   :thre '(5 5 10 10)
 	   :rthre (list (deg2rad 1) (deg2rad 1) (deg2rad 2) (deg2rad 2))
-	   :target-centroid-pos (send (send (send (send *atlas* :foot-midcoords) :copy-worldcoords) :translate #f(0 -60 0)) :pos)
+	   :target-centroid-pos (send (send (send (send *atlas* :foot-midcoords) :copy-worldcoords) :translate #f(-10 -30 0)) :pos)
 	   :centroid-thre 500)))
   (send *irtviewer* :draw-objects)
   (when real (model2real :wait t :time 2000))
@@ -350,7 +352,7 @@
 	   :rotation-axis '(t t t nil)
 	   :thre '(5 5 10 10)
 	   :rthre (list (deg2rad 1) (deg2rad 1) (deg2rad 2) (deg2rad 2))
-	   :target-centroid-pos (send (send (send (send *atlas* :foot-midcoords) :copy-worldcoords) :translate #f(0 -60 0)) :pos)
+	   :target-centroid-pos (send (send (send (send *atlas* :foot-midcoords) :copy-worldcoords) :translate #f(-10 -30 0)) :pos)
 	   :centroid-thre 500)))
   (send *irtviewer* :draw-objects)
   (when real (model2real :wait t :time 2000))
@@ -455,6 +457,34 @@
 
   (warning-message 2 "[vhc-get-in] finish (lift-rleg-in-get-in-for-task1) [get-in phase2]~%")
   )
+
+(defun lift-whole-body-in-get-in-for-task1
+  (&key (real nil) (wait nil))
+
+  (warning-message 2 "[vhc-get-in] start (lift-whole-body-in-get-in-for-task1) [get-in phase-final]~%")
+
+  (warning-message 2 "[vhc-get-in] set middle-gain :lleg and :larm in lift whole body [get-in phase-final]~%")
+  (when wait (my-wait))
+  (set-middle-gain :lleg)
+  (set-middle-gain :larm)
+
+  (warning-message 2 "[vhc-get-in] angle-vector1 in lift whole body [get-in phase-final]~%")
+  (when wait (my-wait))
+  (send *atlas* :larm :inverse-kinematics (send (send (send *atlas* :larm :end-coords) :copy-worldcoords) :translate #f(600 -500 1000) :world) :revert-if-fail nil)
+  (send *atlas* :lleg :inverse-kinematics (send (send (send *atlas* :lleg :end-coords) :copy-worldcoords) :translate #f(500 -100 300) :world) :revert-if-fail nil)
+  (send *atlas* :rarm :inverse-kinematics (send (send (send *atlas* :rarm :end-coords) :copy-worldcoords) :translate #f(0 100 -300) :world) :revert-if-fail nil)
+  (send *atlas* :rleg :inverse-kinematics (send (send (send *atlas* :rleg :end-coords) :copy-worldcoords) :translate #f(0 100 -300) :world) :revert-if-fail nil)
+  (when real (model2real :wait t))
+
+  (warning-message 2 "[vhc-get-in] angle-vector2 in lift whole body [get-in phase-final]~%")
+  (when wait (my-wait))
+  (send *atlas* :rarm :inverse-kinematics (send (send (send *atlas* :rarm :end-coords) :copy-worldcoords) :translate #f(100 1000 -300) :world) :revert-if-fail nil)
+  (send *atlas* :rleg :inverse-kinematics (send (send (send *atlas* :rleg :end-coords) :copy-worldcoords) :translate #f(0 1000 -300) :world) :revert-if-fail nil)
+  (when real (model2real :wait t))
+
+  (warning-message 2 "[vhc-get-in] finish (lift-whole-body-in-get-in-for-task1) [get-in phase-final]~%")
+  )
+
 
 (defun grasp-larm-in-get-in-for-task1
   (&key (real nil) (wait nil))

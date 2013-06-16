@@ -57,7 +57,7 @@
   (send *atlas* :angle-vector #f(0.0 0.0 0.0 23.5 114.5 0.0 -75.0 17.0 0.0 -135.0 129.6 -71.6129 79.9998 60.7501 0.0 61.5619 -1.79235 -35.568 1.79235 -25.994 0.012938 61.5446 1.91967 -35.5619 -1.91967 -25.9828 0.01294 0.0))
   (fix-leg)
   (send *atlas* :move-centroid-on-foot :both '(:rleg :lleg)
-	:target-centroid-pos (v+ (float-vector 30 0 0) (apply #'midpoint 0.5 (send-all (send *atlas* :legs :end-coords :parent) :worldpos))))
+	:target-centroid-pos (v+ (float-vector 50 0 0) (apply #'midpoint 0.5 (send-all (send *atlas* :legs :end-coords :parent) :worldpos))))
   (grasp :arm :rarm :real real)
   (ungrasp :arm :larm :real real)
   (when real (model2real :wait t))
