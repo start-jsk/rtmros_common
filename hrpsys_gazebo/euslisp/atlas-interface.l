@@ -512,8 +512,8 @@
 (defun adapt-pose ()
   (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
   (send *irtviewer* :draw-objects))
-(defun reset-pose ()
-  (send *atlas* :reset-pose))
+;; (defun reset-pose ()
+;;   (send *atlas* :reset-pose))
 
 #|
   ROS-API経由でatlasのセンサ情報を取得
