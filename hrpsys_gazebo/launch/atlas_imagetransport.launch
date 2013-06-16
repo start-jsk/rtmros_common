@@ -21,7 +21,7 @@
     <node pkg="resized_imagetransport" type="image_resizer" name="head_resized"
           output="screen" >
       <remap from="camera" to="/multisense_sl/camera/left" />
-      <remap from="image_type" to="$(arg THROTTLE_IMAGE_TYPE)" />
+      <remap from="image_type" to="$(arg THROTTLE_IMAGE_TYPE)_throttle" />
       <param name="resize_scale_x" value="$(arg THROTTLE_RESIZE_RATE)" />
       <param name="resize_scale_y" value="$(arg THROTTLE_RESIZE_RATE)" />
       <param name="use_snapshot" value="false" />
@@ -29,7 +29,7 @@
     <node pkg="resized_imagetransport" type="image_resizer" name="lhand_resized"
           output="screen" >
       <remap from="camera" to="/sandia_hands/l_hand/camera/left" />
-      <remap from="image_type" to="$(arg THROTTLE_IMAGE_TYPE)" />
+      <remap from="image_type" to="$(arg THROTTLE_IMAGE_TYPE)_throttle" />
       <param name="resize_scale_x" value="$(arg THROTTLE_RESIZE_RATE)" />
       <param name="resize_scale_y" value="$(arg THROTTLE_RESIZE_RATE)" />
       <param name="use_snapshot" value="false" />
@@ -37,7 +37,7 @@
     <node pkg="resized_imagetransport" type="image_resizer" name="rhand_resized"
           output="screen" >
       <remap from="camera" to="/sandia_hands/r_hand/camera/left" />
-      <remap from="image_type" to="$(arg THROTTLE_IMAGE_TYPE)" />
+      <remap from="image_type" to="$(arg THROTTLE_IMAGE_TYPE)_throttle" />
       <param name="resize_scale_x" value="$(arg THROTTLE_RESIZE_RATE)" />
       <param name="resize_scale_y" value="$(arg THROTTLE_RESIZE_RATE)" />
       <param name="use_snapshot" value="false" />
