@@ -5,13 +5,12 @@
   <arg name="CLOUD_IN" default="/full_cloud2" />
 
   <!-- start tilting -->
-  <node if="$(arg USE_TILT_LASER)"
-        name="start_tilt_laser_node"
+  <group if="$(arg USE_TILT_LASER)">
+  <node name="start_tilt_laser_node"
         type="start-laser.py" pkg="hrpsys_gazebo"
         output="screen" args="1.1424"/> <!-- 2pi / 5.5 sec -->
 
-  <node if="$(arg USE_TILT_LASER)"
-        pkg="laser_filters" type="scan_to_cloud_filter_chain"
+  <node pkg="laser_filters" type="scan_to_cloud_filter_chain"
         name="scan_cloud_filter_node"
         output="screen" >
     <remap from="scan" to="/multisense_sl/laser/scan"/>
@@ -20,8 +19,7 @@
     <rosparam command="load" file="$(find hrpsys_gazebo)/config/atlas_scan_to_cloud.yaml" />
   </node>
 
-  <node if="$(arg USE_TILT_LASER)"
-        pkg="octomap_server" type="octomap_server_node" name="octomap_filter_server">
+  <node pkg="octomap_server" type="octomap_server_node" name="octomap_filter_server">
     <remap from="cloud_in" to="scan_cloud_filter_node/cloud_filtered" />
 
     <param name="resolution" value="0.05" />
@@ -30,6 +28,7 @@
     <!-- for filter ground -->
     <param name="filter_ground" value="false" />
   </node>
+  </group>
 
   <node unless="$(arg USE_TILT_LASER)"
         pkg="octomap_server" type="octomap_server_node" name="octomap_full_server">
