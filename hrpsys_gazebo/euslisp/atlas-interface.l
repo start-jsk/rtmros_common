@@ -26,6 +26,8 @@
   (float-vector 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0))
 (defconstant *rarm-mask-vector*
   (float-vector 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1))
+(defconstant *manip-mask-vector*
+  (float-vector 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1))
 
 (ros::roseus "atlas_interface")
 
@@ -99,6 +101,16 @@
    (while (equal (send self :get :current-behavior) 4)
      (ros::spin-once)
      ))
+  (:wait-for-start-behavior (&optional (behav 4))
+   (ros::spin-once)
+   (while (not (equal (send self :get :current-behavior) behav))
+     (ros::spin-once)
+     ))
+  (:wait-for-finish-behavior (&optional (behav 4))
+   (ros::spin-once)
+   (while (equal (send self :get :current-behavior) behav)
+     (ros::spin-once)
+     ))
   (:grasp
    (value &optional (arm :arms))
    (let ((msg (instance sandia_hand_msgs::SimpleGrasp :init :name "cylindrical" :closed_amount value)))
@@ -149,7 +161,8 @@
 	      (setf (elt tmp-effort (+ (elt idx 0) i)) e))
 	    (send self :set-simulation-mode :mode (send self :get-control-mode) :effort tmp-effort)))))
   (:set-simulation-mode
-   (&key (effort 255) (sleep 0.5) (mode :user) (effort-mask))
+   (&rest args &key (effort 255) (sleep 0.5) (mode :user) (effort-mask)
+          &allow-other-keys)
    (let ((msg (instance atlas_msgs::AtlasSimInterfaceCommand :init))
          (k-effort (instantiate string 28)))
      (case mode
@@ -164,15 +177,31 @@
        (:step
         (setq mode atlas_msgs::AtlasSimInterfaceCommand::*STEP*))
        (:manipulate
-        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*MANIPULATE*))
+        (setq mode atlas_msgs::AtlasSimInterfaceCommand::*MANIPULATE*)
+        (let ((p_des (position :use_desired args))
+              (p_height (position :pelvis_height args))
+              (p_yaw (position :pelvis_yaw args))
+              (p_lat (position :pelvis_lat args)))
+          (when p_des
+            (send msg :manipulate_params :use_desired t))
+          (when p_height
+            (send msg :manipulate_params :desired :pelvis_height
+                  (elt args (1+ p_height))))
+          (when p_yaw
+            (send msg :manipulate_params :desired :pelvis_yaw
+                  (elt args (1+ p_yaw))))
+          (when p_lat
+            (send msg :manipulate_params :desired :pelvis_lat
+                  (elt args (1+ p_lat)))))
+        )
        ((:user t)
         (setq mode atlas_msgs::AtlasSimInterfaceCommand::*USER*)))
      (send msg :behavior mode)
      (cond ((not effort) ;; when effort is nil, not overwrite k-effort
-	    (ros::spin-once) (setq k-effort (send self :get :k-effort)))
-	   ((consp effort)
-	    (setq k-effort (concatenate string effort)))
-	   (t (fill k-effort effort)))
+            (ros::spin-once) (setq k-effort (send self :get :k-effort)))
+           ((consp effort)
+            (setq k-effort (concatenate string effort)))
+           (t (fill k-effort effort)))
      (when effort-mask
        (setq k-effort
              (map string #'(lambda (val msk) (round (* val msk))) k-effort effort-mask)))

@@ -426,3 +426,43 @@
     ;;(pprint (macroexpand hand-pose-def-macros))
     (eval hand-pose-def-macros)
     ))
+
+(defun static-transition-to-stand ()
+  (send *ri* :set-simulation-mode :mode :stand :effort 0)
+  (send *ri* :bdi_step_static
+        (make-coords :pos (float-vector 0 235 0) :rpy (list 0.15 0 0))
+        :l/r :lleg)
+  (send *ri* :wait-for-start-behavior 6)
+  (send *ri* :wait-for-finish-behavior 6)
+  (send *ri* :bdi_step_static
+        (make-coords :pos (float-vector 0 -235 0) :rpy (list -0.15 0 0))
+        :l/r :rleg)
+  (send *ri* :wait-for-start-behavior 6)
+  (send *ri* :wait-for-finish-behavior 6)
+  )
+
+(defun interpolated-mode-change (&key (e-start 0) (e-end 255) (mode :stand)
+                                  (mask) ((:time tm) 3000))
+  (let ((step (/ tm (float (abs (- e-end e-start))))))
+    (dotimes (i (abs (- e-end e-start)))
+      (warn ";; effort = ~d~%"
+            (if (> e-end e-start) (+ e-start i 1) (- e-start i 1)))
+      (send *ri* :set-simulation-mode :mode mode
+            :effort (if (> e-end e-start) (+ e-start i 1) (- e-start i 1))
+            :sleep (/ step 1000.0)
+            :effort-mask mask)
+      )
+    ))
+;;(interpolated-mode-change :e-start 0 :e-end 20 :mode :user :time 6000)
+;;(interpolated-mode-change :e-start 20 :e-end 100 :mode :user :time 6000)
+;;(interpolated-mode-change :e-start 20 :e-end 255 :mode :user :time 6000)
+
+(defun manipulation-mode (&key (height 0.8) (yaw 0.0) (lat 0.0))
+  ;; move to stand mode
+  (interpolated-mode-change :e-start 255 :e-end 100 :mode :stand :time 6000)
+  (interpolated-mode-change :e-start 100 :e-end 24 :mode :stand :time 6000)
+  (interpolated-mode-change :e-start 24  :e-end 0 :mode :stand :time 6000)
+  (send *ri* :set-simulation-mode :mode :manipulate
+        :effort 255 :effort-mask *manip-mask-vector*
+        :use_desired t
+        :pelvis_height height :pelvis_yaw yaw :pelvis_lat lat))
