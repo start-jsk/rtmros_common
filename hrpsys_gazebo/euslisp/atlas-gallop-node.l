@@ -71,7 +71,7 @@
 
 (defun negaeri-once
   nil
-  (negaeri)
+  (negaeri-from-utubuse)
   (setq *gallop-mode* :stop))
 
 (defvar *gallop-dict*
@@ -158,7 +158,7 @@
   (send *auto-controller-hash*
 	:enter
 	:utsubuse
-	(if (plusp (nth 1 (get-imu-data)))
+	(if (plusp (- (nth 1 (get-imu-data)) 45))
 	    (+ (send *auto-controller-hash* :get :utsubuse) 1)
 	  0))
   (publish-compus
@@ -228,9 +228,13 @@
                 (atitude-update orient)
                 (> (abs (send *auto-controller-hash* :get :compus))
                    thre)))
-    (if (plusp (send *auto-controller-hash* :get :compus))
-        (play :qrot)
-      (play :prot))
+    (cond
+     ((> (send *auto-controller-hash* :get :utsubuse) 5)
+      (play :negaeri)
+      (play :stop))
+     ((plusp (send *auto-controller-hash* :get :compus))
+      (play :qrot))
+     (t (play :prot)))
     )
   (> max 0)
 ;  (dotimes (i 5)
@@ -244,11 +248,11 @@
    (offset 0)
    (compus (+ offset (send *auto-controller-hash* :get :compus))))
   (cond
-   ((or (> (send *auto-controller-hash* :get :utsubuse) 5)
-        nil)
-;	(> *mode-dup* 50))
+   ((> (send *auto-controller-hash* :get :utsubuse) 5)
+                                        ;	)
     (play :negaeri)
     (play :stop))
+   ((> *mode-dup* 50) (dotimes (i 5) (play :right)))
    ((> compus 50) (play :qrot))
    ((< compus -50) (play :prot))
    ((> compus 15) (play :left))
@@ -323,11 +327,41 @@
                  (wall-potential :pc-coords nil)))))
          (rotate-with-orient buf)
          (setq *forward-offset*
-               (* (if (minusp (aref (v* buf goal) 2)) -1 1)
+               (* (if (minusp (aref (v* buf goal) 2)) 1 -1)
                   (rad2deg (acos (v. buf goal)))))
                                         ;(atitude-update)
          (dotimes (i 8)
            (forward-controller *forward-offset*)))))
+  )
+
+(defun async-wall-controller
+  (&key
+   (goal (send *auto-controller-hash* :get :goal))
+   buf)
+  (setq *forward-offset* 0)
+  (setq *point-cloud* nil)
+  (rotate-with-orient goal)
+  (do-until-key
+   (atitude-update)
+   (if *point-cloud*
+       (progn
+         (setq
+          buf
+          (normalize-vector
+           (v+
+            goal
+            (map float-vector
+                 #'*
+                 #f(0.05 0.005 0)
+                 (wall-potential
+                  :point-cloud *point-cloud*
+                  :pc-coords nil
+                  :min-height 1500)))))
+         (setq *forward-offset*
+               (* (if (minusp (aref (v* buf goal) 2)) 1 -1)
+                  (rad2deg (acos (v. buf goal)))))
+         (setq *point-cloud* nil)))
+   (forward-controller *forward-offset*))
   )
 
 

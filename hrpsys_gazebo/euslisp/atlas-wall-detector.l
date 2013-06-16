@@ -284,6 +284,7 @@
    (point-cloud (get-pc-sync))
    (pc-coords (make-coords))
    (len (length (send point-cloud :point-list)))
+   (min-height 1000)
    )
   (if pc-coords
       (progn
@@ -294,18 +295,20 @@
     (/ (* 1e+6) (length (send point-cloud :point-list)))
     (reduce
      #'v+
-     (mapcar
-      #'(lambda (p)
-;          (if (boundp '*irtviewer*)
-;              (send p :draw-on :flush t :color #F(1 0 0) :width 500))
-          (scale (/ -1.0 (expt (norm p) 2)) p))
-      (subseq
-       (sort
-        (remove-if
-         #'(lambda (v) (minusp (- (aref v 2) 1000)))
-         (send point-cloud :point-list))
-        #'(lambda (a b) (< (norm a) (norm b))))
-       0 (/ len 5)))))))
+     (append
+      (list #F(0 0 0) #f(0 0 0))
+      (mapcar
+       #'(lambda (p)
+;           (if (boundp '*irtviewer*)
+;               (send p :draw-on :flush t :color #F(1 0 0) :width 500))
+           (scale (/ -1.0 (expt (norm p) 2)) p))
+       (subseq
+        (sort
+         (remove-if
+          #'(lambda (v) (minusp (- (aref v 2) min-height)))
+          (send point-cloud :point-list))
+         #'(lambda (a b) (< (norm a) (norm b))))
+        0 (/ len 100))))))))
 
 (defun orient-cluster
   (&key
