@@ -16,4 +16,9 @@
     <remap from="joint_states" to="/multisense_sl/joint_states" />
     <!-- publish /full_cloud2 -->
   </node>
+
+  <!-- start tilting -->
+  <node name="start_tilt_laser_node"
+        type="start-laser.py" pkg="hrpsys_gazebo"
+        output="screen" args="1.1424"/> <!-- 2pi / 5.5 sec -->
 </launch>
