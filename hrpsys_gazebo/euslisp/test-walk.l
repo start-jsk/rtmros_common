@@ -4,7 +4,12 @@
   (real2model)
   (model2real :wait t :time 10)
   (set-user)
-  (set-kp 4000)
+  ;;(set-kp 4000)
+  (atlas-set-servo-gain-by-torque-limit 1.0 :legs)
+  (atlas-set-servo-gain-by-torque-limit 2.0 :torso)
+  (atlas-set-servo-gain-by-torque-limit 4.0 :arms)
+  (atlas-set-servo-gain-by-torque-limit 5.0 :head)
+
   (send *atlas* :walk-pose)
   (model2real :wait t :time 5000)
   (send *ri* :start-st)
