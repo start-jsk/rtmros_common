@@ -1,6 +1,6 @@
 <launch>
   <arg name="FIXED_FRAME" default="/pelvis" />  <!-- /imu_floor -->
-  <arg name="USE_TILT_LASER" defalunt="true" />
+  <arg name="USE_TILT_LASER" default="true" />
   <arg name="TARGET_FRAME" default="/head_hokuyo_frame" />
   <arg name="CLOUD_IN" default="/full_cloud2" />
 
@@ -40,9 +40,9 @@
 
     <!-- for filter ground -->
     <param name="filter_ground" value="true" />
-    <param name="base_frame_id" value="/imu_floor" />
-    <param name="ground_filter/distance" value="0.04" />
-    <param name="ground_filter/angle"    value="0.15" />
-    <param name="ground_filter/plane_distance" value="0.07" />
+    <param name="base_frame_id" value="/l_foot" /> <!-- imu_floor is not floor -->
+    <param name="ground_filter/distance" value="0.06" />
+    <param name="ground_filter/angle"    value="0.12" />
+    <param name="ground_filter/plane_distance" value="0.12" />
   </node>
 </launch>
