@@ -34,8 +34,8 @@
         pkg="octomap_server" type="octomap_server_node" name="octomap_full_server">
     <remap from="cloud_in" to="$(arg CLOUD_IN)" />
 
-    <param name="resolution" value="0.05" />
-    <param name="sensor_model/max_range" value="30.0" />
+    <param name="resolution" value="0.25" />
+    <param name="sensor_model/max_range" value="10.0" />
     <param name="frame_id" value="$(arg FIXED_FRAME)" />
 
     <!-- for filter ground -->
