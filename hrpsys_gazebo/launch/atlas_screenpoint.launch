@@ -18,6 +18,7 @@
            file="$(find jsk_pcl_ros)/launch/pointcloud_screenpoint.launch" >
     <arg name="USE_VIEW" value="$(arg USE_VIEW)" />
     <arg name="USE_DEPTH_CREATER" value="true" />
+    <arg name="USE_REGISTERED_DEPTH" value="true" />
     <arg name="image"  value="$(arg CAMERA)" />
     <arg name="points" value="/full_cloud2" />
   </include>
