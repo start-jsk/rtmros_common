@@ -142,7 +142,7 @@
     (ros::sleep))
   *point-cloud*)
 
-(defun cluster
+(defun cluster ;; core dump with large data
   (vlist
    &key
    (forward #f(0 0 1))
@@ -218,7 +218,6 @@
    (pc (get-pc-sync))
    (pc-coords (make-coords)))
   (let (plist buf)
-    (send *robot* :newcoords (make-coords :rpy (mapcar #'deg2rad (get-imu-data))))
     (send pc :transform pc-coords)
     (send pc :convert-to-world)
 ;    (objects (list *robot* pt))
@@ -282,33 +281,101 @@
 
 (defun wall-potential
   (&key
-   (sampling 100)
    (point-cloud (get-pc-sync))
-   (plist (remove-if
-           #'(lambda (v) (minusp (- (aref v 2) 1000)))
-           (send point-cloud :point-list)))
-   (cnt 0)
-   (len (length plist))
-   (step (/ len (+ 1 sampling)))
    (pc-coords (make-coords))
-   (init (progn
-           (send point-cloud :transform pc-coords)
-           (send point-cloud :convert-to-world)))
+   (len (length (send point-cloud :point-list)))
    )
-  (if (minusp sampling)
-      #F(0 0 0)
-      (v+
-       (scale
-        (/ -1.0 (norm (nth cnt plist)))
-        (nth cnt plist))
-       (wall-potential
-        :sampling sampling
-        :point-cloud point-cloud
-        :plist plist
-        :cnt (mod (+ cnt step) len)
-        :step step
-        :pc-coords pc-coords
-        :init nil))))
+  (if pc-coords
+      (progn
+        (send point-cloud :transform pc-coords)
+        (send point-cloud :convert-to-world)))
+  (print
+   (scale
+    (/ (* 1e+6) (length (send point-cloud :point-list)))
+    (reduce
+     #'v+
+     (mapcar
+      #'(lambda (p)
+;          (if (boundp '*irtviewer*)
+;              (send p :draw-on :flush t :color #F(1 0 0) :width 500))
+          (scale (/ -1.0 (expt (norm p) 2)) p))
+      (subseq
+       (sort
+        (remove-if
+         #'(lambda (v) (minusp (- (aref v 2) 1000)))
+         (send point-cloud :point-list))
+        #'(lambda (a b) (< (norm a) (norm b))))
+       0 (/ len 5)))))))
+
+(defun orient-cluster
+  (&key
+   (pc (get-pc-sync))
+   (pc-coords nil)
+   (remove-func #'(lambda (p) (minusp (- (aref p 2) 1000))))
+   (orient-step 30)
+   (forward #f(1 0 0))
+   (eval-func
+    #'(lambda (p)
+        (* (if (minusp (aref (v* forward p) 2)) -1 1)
+           (rad2deg
+            (acos (v. (normalize-vector (map float-vector #'* #F(1 1 0) p))
+                      forward))))))
+   (ret (instantiate vector (floor (/ 360 orient-step))))
+   )
+  (if pc-coords
+      (progn
+        (send pc :transform pc-coords)
+        (send pc :convert-to-world)))
+  (mapcar
+   #'(lambda (p)
+       (let* ((deg (funcall eval-func p))
+              (flat (floor (/ (mod (+ deg 180) 360) orient-step))))
+         (push p (aref ret flat))))
+   (remove-if remove-func (send pc :point-list)))
+  ret)
+
+(defun orient-cluster-meta
+  (&key
+   (pc (get-pc-sync))
+   (pc-coords nil)
+   (remove-func #'(lambda (p) (minusp (- (aref p 2) 1000))))
+   (orient-step 30)
+   (forward #f(1 0 0))
+   (eval-func
+    #'(lambda (p)
+        (* (if (minusp (aref (v* forward p) 2)) -1 1)
+           (rad2deg
+            (acos (v. (normalize-vector (map float-vector #'* #F(1 1 0) p))
+                      forward))))))
+   (ret (orient-cluster
+         :pc pc :pc-coords pc-coords :remove-func remove-func
+         :orient-step orient-step :forward forward :eval-func eval-func))
+   (index -1)
+   )
+  (map
+   cons
+   #'(lambda (d)
+       (let* ((len (length d))
+              (ave (scale (/ 1.0 len)
+                          (reduce #'v+
+                                  (append
+                                   (list #F(0 0 0) #F(0 0 0))
+                                   d)))))
+         (list
+          (cons :deg (- (* (incf index) orient-step) 180))
+          (cons :size len)
+          (cons :average ave)
+          (cons :coveriance
+                (* (/ 1.0 len)
+                   (sqrt
+                    (apply #'+
+                           (append
+                            (list 0 0)
+                            (mapcar
+                             #'(lambda (v)
+                                 (expt (norm (v- v ave)) 2))
+                             d)))))))))
+   ret))
 
 (ros::roseus-add-msgs "sensor_msgs")
 (ros::subscribe "/full_cloud2"
