@@ -6,6 +6,7 @@
 ;;
 
 
+;; force
 
 (defun get-axis-force
   (&optional (limb :larm) (axis (float-vector 0 0 1)))
@@ -63,3 +64,29 @@
        (return))
      (send *irtviewer* :draw-objects)
      (model2real :time ik-time :wait t))))
+
+
+;; torque
+
+(defun init-torque-control
+  ()
+  (ros::roseus-add-msgs "atlas_msgs")
+  (ros::advertise "/atlas/atlas_command" atlas_msgs::AtlasCommand 1))
+
+(defun set-model-torque
+  (&optional (scale-num 1))
+  (let ((effort-vec (instantiate float-vector 28))
+	(msg (instance atlas_msgs::AtlasCommand :init)))
+    (mapcar #'(lambda (j e)
+		(setf (elt effort-vec (eval (read-from-string (format nil "atlas_msgs::AtlasState::*~a*" j)))) e))
+	    (send-all (send *atlas* :joint-list) :name) (concatenate cons (send *atlas* :torque-vector)))
+    (send msg :effort (scale scale-num effort-vec))
+    (ros::publish "/atlas/atlas_command" msg)))
+
+(defun set-zero-torque
+  ()
+  (let ((effort-vec
+	 (instantiate float-vector 28))
+	(msg (instance atlas_msgs::AtlasCommand :init)))
+    (send msg :effort effort-vec)
+    (ros::publish "/atlas/atlas_command" msg)))

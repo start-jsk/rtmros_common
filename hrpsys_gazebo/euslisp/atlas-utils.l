@@ -34,7 +34,7 @@
 ;; (send *ri* :hand :larm :send_query "start")
 ;; (send *ri* :hand :larm :send_query "stop")
 
-(defun hand-model2real (&key (arm :both) (wait nil) (time 3000))
+(defun hand-model2real (&key (arm :both) (wait nil) (time 1000))
   (cond
    ((equal arm :both) (hand-model2real :arm :larm :wait wait) (hand-model2real :arm :rarm :wait wait))
    (t (set-real-hand-av (get-model-hand-av arm) arm time)
@@ -45,7 +45,7 @@
    ((equal arm :both) (hand-real2model :arm :larm) (hand-real2model :arm :rarm))
    (t (set-model-hand-av (get-real-hand-av arm) arm))))
 
-(defun set-real-hand-av (av &optional (arm :both) (time 3000))
+(defun set-real-hand-av (av &optional (arm :both) (time 1000))
   (when *lr-reverse* (case arm (:larm (setq arm :rarm)) (:rarm (setq arm :larm))))
   (send *ri* :hand arm :angle-vector av time))
 
@@ -65,13 +65,16 @@
 
 (defun grasp (&key (arm :both) (real nil))
   (set-model-hand-av #f(0 90 90 0 90 90 0 90 90 0 20 90) arm)
-  ;; (send *ri* :start-grasp (if (equal arm :both) :arms arm))
+  (when real (hand-model2real))
+  )
+
+(defun pregrasp (&key (arm :both) (real nil))
+  (set-model-hand-av #f(0 50 0 0 50 0 0 50 0 0 0 0) arm)
   (when real (hand-model2real))
   )
 
 (defun ungrasp (&key (arm :both) (real nil))
   (set-model-hand-av #f(0 0 0 0 0 0 0 0 0 0 0 0) arm)
-  ;; (send *ri* :stop-grasp (if (equal arm :both) :arms arm))
   (when real (hand-model2real))
   )
 

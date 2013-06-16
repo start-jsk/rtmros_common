@@ -181,7 +181,7 @@
     (when wait (my-wait))
     (grasp :arm :rarm :real real)
     (send *irtviewer* :draw-objects)
-    (when real (unix::usleep (* 10 1000 1000)))
+    (when real (unix::usleep (* 3 1000 1000)))
 
     (when real
       (warning-message 2 "[vhc-get-in] adapt angle-vector in grasp rarm [get-in phase1]~%")
@@ -520,6 +520,12 @@
     (when real (model2real :time 4000 :wait t))
     (save-last)
 
+    (warning-message 2 "[vhc-get-in] pregrasp larm in grasp larm [get-in phase3]~%")
+    (when wait (my-wait))
+    (pregrasp :arm :larm :real real)
+    (send *irtviewer* :draw-objects)
+    (when real (unix::usleep (* 3 1000 1000)))
+
     (if nil
     ;; (if real
 	(progn
@@ -563,10 +569,10 @@
     (when wait (my-wait))
     (grasp :arm :larm :real real)
     (send *irtviewer* :draw-objects)
-    (when real (unix::usleep (* 5 1000 1000)))
+    (when real (unix::usleep (* 2 1000 1000)))
     (ungrasp :arm :rarm :real real)
     (send *irtviewer* :draw-objects)
-    (when real (unix::usleep (* 5 1000 1000)))
+    (when real (unix::usleep (* 2 1000 1000)))
 
     (when real
       (warning-message 2 "[vhc-get-in] adapt angle-vector in grasp larm [get-in phase3]~%")
@@ -636,6 +642,12 @@
     (when real (model2real :time 4000 :wait t))
     (save-last)
 
+    (warning-message 2 "[vhc-get-in] pregrasp rarm in grasp rarm 2 [get-in phase4]~%")
+    (when wait (my-wait))
+    (pregrasp :arm :rarm :real real)
+    (send *irtviewer* :draw-objects)
+    (when real (unix::usleep (* 3 1000 1000)))
+
     (if nil
     ;; (if real
 	(progn
@@ -679,7 +691,7 @@
     (when wait (my-wait))
     (grasp :arm :rarm :real real)
     (send *irtviewer* :draw-objects)
-    (when real (unix::usleep (* 10 1000 1000)))
+    (when real (unix::usleep (* 3 1000 1000)))
 
     (when real
       (warning-message 2 "[vhc-get-in] adapt angle-vector in grasp rarm 2 [get-in phase4]~%")
@@ -698,7 +710,7 @@
     (when wait (my-wait))
     (ungrasp :arm :larm :real real)
     (send *irtviewer* :draw-objects)
-    (when real (unix::usleep (* 5 1000 1000)))
+    (when real (unix::usleep (* 3 1000 1000)))
     )
 
   (warning-message 2 "[vhc-get-in] finish (grasp-rarm-2-in-get-in-for-task1) [get-in phase4]~%")
