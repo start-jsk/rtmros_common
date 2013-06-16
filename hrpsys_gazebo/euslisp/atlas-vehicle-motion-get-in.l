@@ -20,12 +20,12 @@
 
   (lift-rleg-in-get-in-for-task1 :real real :wait wait)
 
-  (lift-whole-body-in-get-in-for-task1 :real real :wait t)
+  (lift-whole-body-in-get-in-for-task1 :real real :wait wait)
+
+  (move-to-seat-in-get-in-for-task1 :real real :wait wait)
 
   ;; (grasp-larm-in-get-in-for-task1 :real real :wait wait)
-
   ;; (grasp-rarm-2-in-get-in-for-task1 :real real :wait wait)
-
   ;; (lift-lleg-in-get-in-for-task1 :real real :wait wait)
 
   (warning-message 2 "[vhc-get-in] finish (get-in-for-task1)~%")
@@ -150,7 +150,7 @@
     (when real (model2real :wait t))
 
     (if nil
-    ;; (if real
+        ;; (if real
 	(progn
 	  (warning-message 2 "[vhc-get-in] reach until touch in grasp rarm [get-in phase1]~%")
 	  (when wait (my-wait))
@@ -234,7 +234,7 @@
 	   :rotation-axis '(t t t nil)
 	   :thre '(5 5 10 10)
 	   :rthre (list (deg2rad 1) (deg2rad 1) (deg2rad 2) (deg2rad 2))
-	   :target-centroid-pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(-30 0 0)) :pos)
+	   :target-centroid-pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(-10 0 0)) :pos)
 	   :centroid-thre 500)))
   (send *irtviewer* :draw-objects)
   (when real (model2real :wait t))
@@ -263,7 +263,7 @@
 	   :rotation-axis '(t t t nil)
 	   :thre '(5 5 10 10)
 	   :rthre (list (deg2rad 1) (deg2rad 1) (deg2rad 2) (deg2rad 2))
-	   :target-centroid-pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(-30 0 0)) :pos)
+	   :target-centroid-pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(-10 0 0)) :pos)
 	   :centroid-thre 500)))
   (send *irtviewer* :draw-objects)
   (when real (model2real :wait t :time 1000))
@@ -290,7 +290,7 @@
 	   :rotation-axis '(t t t nil)
 	   :thre '(5 5 10 10)
 	   :rthre (list (deg2rad 1) (deg2rad 1) (deg2rad 2) (deg2rad 2))
-	   :target-centroid-pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(-30 0 0)) :pos)
+	   :target-centroid-pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(-10 0 0)) :pos)
 	   :centroid-thre 500)))
   (send *irtviewer* :draw-objects)
   (when real (model2real :wait t))
@@ -458,12 +458,12 @@
   (warning-message 2 "[vhc-get-in] finish (lift-rleg-in-get-in-for-task1) [get-in phase2]~%")
   )
 
-(defun lift-whole-body-in-get-in-for-task1
+(defun lift-whole-body-in-get-in-for-task1w
   (&key (real nil) (wait nil))
 
   (warning-message 2 "[vhc-get-in] start (lift-whole-body-in-get-in-for-task1) [get-in phase-final]~%")
 
-  (warning-message 2 "[vhc-get-in] set middle-gain :lleg and :larm in lift whole body [get-in phase-final]~%")
+  (warning-message 2 "[vhc-get-in] set zero-gain :lleg and middle-gain :larm in lift whole body [get-in phase-final]~%")
   (when wait (my-wait))
   (set-middle-gain :lleg)
   (set-middle-gain :larm)
@@ -471,19 +471,63 @@
   (warning-message 2 "[vhc-get-in] angle-vector1 in lift whole body [get-in phase-final]~%")
   (when wait (my-wait))
   (send *atlas* :larm :inverse-kinematics (send (send (send *atlas* :larm :end-coords) :copy-worldcoords) :translate #f(600 -500 1000) :world) :revert-if-fail nil)
-  (send *atlas* :lleg :inverse-kinematics (send (send (send *atlas* :lleg :end-coords) :copy-worldcoords) :translate #f(500 -100 300) :world) :revert-if-fail nil)
-  (send *atlas* :rarm :inverse-kinematics (send (send (send *atlas* :rarm :end-coords) :copy-worldcoords) :translate #f(0 100 -300) :world) :revert-if-fail nil)
-  (send *atlas* :rleg :inverse-kinematics (send (send (send *atlas* :rleg :end-coords) :copy-worldcoords) :translate #f(0 100 -300) :world) :revert-if-fail nil)
+  (send *atlas* :lleg :inverse-kinematics (send (send (send *atlas* :lleg :end-coords) :copy-worldcoords) :translate #f(0 200 500) :world) :revert-if-fail nil)
+  (send *atlas* :rarm :inverse-kinematics (send (send (send *atlas* :rarm :end-coords) :copy-worldcoords) :translate #f(0 150 -300) :world) :revert-if-fail nil)
+  (send *atlas* :rleg :inverse-kinematics (send (send (send *atlas* :rleg :end-coords) :copy-worldcoords) :translate #f(0 150 -300) :world) :revert-if-fail nil)
+  (send *irtviewer* :draw-objects)
   (when real (model2real :wait t))
 
   (warning-message 2 "[vhc-get-in] angle-vector2 in lift whole body [get-in phase-final]~%")
   (when wait (my-wait))
-  (send *atlas* :rarm :inverse-kinematics (send (send (send *atlas* :rarm :end-coords) :copy-worldcoords) :translate #f(100 1000 -300) :world) :revert-if-fail nil)
-  (send *atlas* :rleg :inverse-kinematics (send (send (send *atlas* :rleg :end-coords) :copy-worldcoords) :translate #f(0 1000 -300) :world) :revert-if-fail nil)
+  (send *atlas* :lleg :inverse-kinematics (send (send (send *atlas* :lleg :end-coords) :copy-worldcoords) :translate #f(0 -100 100) :world) :revert-if-fail nil)
+  (send *atlas* :rarm :inverse-kinematics (send (send (send *atlas* :rarm :end-coords) :copy-worldcoords) :translate #f(300 1000 -300) :world) :revert-if-fail nil)
+  (send *atlas* :rleg :inverse-kinematics (send (send (send *atlas* :rleg :end-coords) :copy-worldcoords) :translate #f(200 1000 -300) :world) :revert-if-fail nil)
+  (send *irtviewer* :draw-objects)
+  (when real (model2real :wait t))
+
+  (warning-message 2 "[vhc-get-in] angle-vector3 in lift whole body [get-in phase-final]~%")
+  (when wait (my-wait))
+  ;; (send *atlas* :lleg :inverse-kinematics (send (send (send *atlas* :lleg :end-coords) :copy-worldcoords) :translate #f(500 0 0) :world) :revert-if-fail nil)
+  ;; (send *atlas* :rarm :inverse-kinematics (send (send (send *atlas* :rarm :end-coords) :copy-worldcoords) :translate #f(500 0 0) :world) :revert-if-fail nil)
+  ;; (send *atlas* :rleg :inverse-kinematics (send (send (send *atlas* :rleg :end-coords) :copy-worldcoords) :translate #f(500 0 0) :world) :revert-if-fail nil)
+  (send *atlas* :lleg :inverse-kinematics (send (send (send *atlas* :lleg :end-coords) :copy-worldcoords) :translate #f(500 0 50) :world) :revert-if-fail nil)
+  (send *atlas* :rarm :inverse-kinematics (send (send (send *atlas* :rarm :end-coords) :copy-worldcoords) :translate #f(500 0 50) :world) :revert-if-fail nil)
+  (send *atlas* :rleg :inverse-kinematics (send (send (send *atlas* :rleg :end-coords) :copy-worldcoords) :translate #f(500 0 50) :world) :revert-if-fail nil)
+  (send *irtviewer* :draw-objects)
   (when real (model2real :wait t))
 
   (warning-message 2 "[vhc-get-in] finish (lift-whole-body-in-get-in-for-task1) [get-in phase-final]~%")
   )
+
+
+(defun move-to-seat-in-get-in-for-task1
+  (&key (real nil) (wait nil))
+
+  (warning-message 2 "[vhc-get-in] start (move-to-seat-in-get-in-for-task1) [move-to]~%")
+
+  (warning-message 2 "[vhc-get-in] loop boyon-boyon in move to seat [move-to]~%")
+  (when wait (my-wait))
+  (do-until-key
+   (send *atlas* :legs :knee-p :joint-angle 90)
+   (send *atlas* :legs :crotch-p :joint-angle 90)
+   (send *atlas* :torso :waist-r :joint-angle 40)
+   (send *irtviewer* :draw-objects)
+   (when real (model2real :time 200 :wait t))
+   (send *atlas* :legs :knee-p :joint-angle 90)
+   (send *atlas* :legs :crotch-p :joint-angle 90)
+   (send *atlas* :torso :waist-r :joint-angle 40)
+   (send *irtviewer* :draw-objects)
+   (when real (model2real :time 200 :wait t)))
+
+  (warning-message 2 "[vhc-get-in] finish (move-to-seat-in-get-in-for-task1) [move-to]~%"))
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; not used new !!!
+
 
 
 (defun grasp-larm-in-get-in-for-task1
@@ -557,7 +601,7 @@
     (when real (unix::usleep (* 3 1000 1000)))
 
     (if nil
-    ;; (if real
+        ;; (if real
 	(progn
 	  (warning-message 2 "[vhc-get-in] reach until touch in grasp larm [get-in phase3]~%")
 	  (when wait (my-wait))
@@ -679,7 +723,7 @@
     (when real (unix::usleep (* 3 1000 1000)))
 
     (if nil
-    ;; (if real
+        ;; (if real
 	(progn
 	  (warning-message 2 "[vhc-get-in] reach until touch in grasp rarm 2 [get-in phase4]~%")
 	  (when wait (my-wait))
@@ -921,7 +965,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; not used !!!
+;; not used old !!!
 
 (defun get-in-vehicle-side
   (&key (real nil) (wait nil) (only-teleport nil) (teleport t))
