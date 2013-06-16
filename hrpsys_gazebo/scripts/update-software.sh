@@ -20,6 +20,9 @@ export ROS_PACKAGE_PATH=`echo $(echo $ROS_PACKAGE_PATH | sed -e "s/:/\n/g" | awk
 sudo apt-get update
 sudo apt-get install drcsim gazebo
 
+roscd roseus/..
+svn up
+
 roscd hrpsys/..
 svn up
 
@@ -33,10 +36,10 @@ roscd hrpsys_ros_bridge
 make
 
 roscd hrpsys_gazebo
-make
+rosmake
+
 if [ `grep gyro ./models/atlas.dae | wc -l` -eq 0 ]; then
 	mv ./models/atlas.dae ./models/atlas.dae.bak
 	./scripts/add_sensor_to_collada.py ./models/atlas.dae.bak > ./models/atlas.dae
 	make
 fi
-
