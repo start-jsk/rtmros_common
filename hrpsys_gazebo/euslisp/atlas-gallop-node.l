@@ -81,6 +81,7 @@
 (defvar *neck-angle* -40)
 (defvar *prev-mode* :stop)
 (defvar *mode-dup* 0)
+(defvar *command-cnt* 0)
 
 (defun play
   (key)
@@ -118,35 +119,14 @@
     (if (eq buf :forward)
         (setq *forward-offset* (* -1 (send *auto-controller-hash* :get :compus))))
     (setq *gallop-mode* buf)
+    (setq *command-cnt* 5)
     ))
-
-(ros::roseus-add-msgs "std_msgs")
-(ros::subscribe "/atlas_gallop_controller/command"
-                std_msgs::string
-                #'gallop-callback)
-
-(ros::advertise "atlas_gallop_controller/compus"
-		std_msgs::string)
-
-(defvar *pub-compus* 0)
-(defun publish-compus
-  (compus utsubuse step)
-  (let ((now
-	 (*
-	  (if (zerop utsubuse) 1 -1)
-	  (* step (/ (+ 180 (round compus)) step)))))
-    (if (not (eq now *pub-compus*))
-	(ros::publish
-	 "atlas_gallop_controller/compus"
-	 (instance std_msgs::string :init :data
-		   (format nil "~A"
-			   (setq *pub-compus* now)))))))
 
 (defun atitude-update
   (&optional (goal (send *auto-controller-hash* :get :goal)))
-  (send *robot* :newcoords (make-coords :rpy (mapcar #'deg2rad (get-imu-data))))
+  (send *robot* :newcoords
+	(make-coords :rpy (mapcar #'deg2rad *atlas_rpy*)))
   (send *irtviewer* :draw-objects)
-;  (send (make-coords) :draw-on :flush t :color #F(1 0 0) :size 500)
   (send *auto-controller-hash*
 	:enter
 	:compus
@@ -158,33 +138,45 @@
   (send *auto-controller-hash*
 	:enter
 	:utsubuse
-	(if (plusp (- (nth 1 (get-imu-data)) 45))
+	(if (plusp (- (nth 1 *atlas_rpy*) 45))
 	    (+ (send *auto-controller-hash* :get :utsubuse) 1)
 	  0))
   (publish-compus
    (send *auto-controller-hash* :get :compus)
    (send *auto-controller-hash* :get :utsubuse)
    10)
-  ;; (let ((index (send *auto-controller-hash* :get :index))
-  ;;       (size (send *auto-controller-hash* :get :ring-buf-size)))
-  ;;   (setf
-  ;;    (aref (send *auto-controller-hash* :get :position) index)
-  ;;    (cadr (assoc :pos (get-pos-estimation))))
-  ;;   (send
-  ;;    *auto-controller-hash*
-  ;;    :enter
-  ;;    :velocity
-  ;;    (v-
-  ;;     (aref (send *auto-controller-hash* :get :position) index)
-  ;;     (aref (send *auto-controller-hash* :get :position)
-  ;;           (mod (+ (- index 1) size) size))))
-  ;;   (send *auto-controller-hash*
-  ;;         :enter
-  ;;         :index
-  ;;         (mod (+ 1 index) size)))
   (format t "fall:~A compus:~A~%"
 	  (send *auto-controller-hash* :get :utsubuse)
 	  (send *auto-controller-hash* :get :compus)))
+
+
+(ros::roseus-add-msgs "std_msgs")
+(ros::subscribe "/atlas_gallop_controller/command"
+                std_msgs::string
+                #'gallop-callback)
+
+(ros::advertise "atlas_gallop_controller/compus"
+		std_msgs::string)
+
+
+(defvar *pub-compus* 0)
+(defvar *prev-pub-time* (send (ros::time) :now))
+(defun publish-compus
+  (compus utsubuse step)
+  (let ((now
+	 (*
+	  (if (zerop utsubuse) 1 -1)
+	  (* step (/ (+ 180 (round compus)) step))))
+	(tm (send (ros::time) :now)))
+    (if (and (not (eq now *pub-compus*))
+	     (> (send (ros::time- tm *prev-pub-time*) :to-sec) 1))
+	(progn
+	  (ros::publish
+	   "atlas_gallop_controller/compus"
+	   (instance std_msgs::string :init :data
+		     (format nil "~A"
+			     (setq *pub-compus* now))))
+	  (setq *prev-pub-time* tm)))))
 
 (defvar *forward-offset* 0)
 (defun command-subscriber
@@ -225,6 +217,8 @@
    (thre 30))
   (while (and (> (decf max) 0)
               (progn
+		(ros::spin-once)
+		(ros::sleep)
                 (atitude-update orient)
                 (> (abs (send *auto-controller-hash* :get :compus))
                    thre)))
@@ -264,12 +258,16 @@
   (rotate-with-orient
    (send *auto-controller-hash* :get :goal))
   (do-until-key
+   (ros::spin-once)
+   (ros::sleep)
    (atitude-update)
    (forward-controller)))
 
 (defvar *laser-data*)
 (defun point-cloud-callback
   (msg)
+  (ros::spin-once)
+  (ros::sleep)
   (atitude-update)
   (let* ((buf (orient-cluster-meta
                :pc *point-cloud*
@@ -315,6 +313,8 @@
        (progn
          (tolot-init)
          (model2real_)
+	 (ros::spin-once)
+	 (ros::sleep)
          (atitude-update)
          (setq
           buf
@@ -342,6 +342,8 @@
   (setq *point-cloud* nil)
   (rotate-with-orient goal)
   (do-until-key
+   (ros::spin-once)
+   (ros::sleep)
    (atitude-update)
    (if *point-cloud*
        (progn
