@@ -21,3 +21,29 @@
     (setq (*atlas* . bodies) atbd)
     )
   *atlas*)
+
+;; hand pose
+(dolist (ahand '(sandia_hand_left-robot sandia_hand_right-robot))
+  (let ((hand-pose-def-macros
+         `(defmethod ,ahand
+            (:open-pose
+             ()
+             (send self :angle-vector #f(0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 90.0 0.0 0.0))
+             )
+            (:open-pose2
+             ()
+             (send self :angle-vector #f(0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 -90.0 0.0))
+             )
+            (:hook-pose
+             ()
+             (send self :angle-vector #f(0.0 20.0 20.0 0.0 20.0 20.0 0.0 20.0 20.0 0.0 0.0 30.0))
+             )
+            (:grasp-pose
+             ()
+             (send self :angle-vector #f(0.0 90.0 90.0 0.0 90.0 90.0 0.0 90.0 90.0 0.0 50.0 50.0))
+             )
+            )
+         ))
+    ;;(pprint (macroexpand hand-pose-def-macros))
+    (eval hand-pose-def-macros)
+    ))
