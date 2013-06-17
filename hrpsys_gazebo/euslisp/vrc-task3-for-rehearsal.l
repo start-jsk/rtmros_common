@@ -233,11 +233,47 @@
 
 (defun test-ik1
   (target-coords &key (rotation-axis :z) (init-pose nil) (thre 10))
-  (when init-pose
-    (send *atlas* :reset-manip-pose :base-down t)
-    (send *atlas* :rarm :angle-vector #f(-56.6679 67.8617 -23.1484 22.3583 -47.8993 28.1287))
-    (send *atlas* :torso :waist-y :joint-angle 35)
-    (move-base-rot 15))
+  (let ((pav (send *atlas* :angle-vector))
+	(prc (send *atlas* :copy-worldcoords))
+	(ret t))
+
+    (when init-pose
+      (send *atlas* :reset-manip-pose :base-down t)
+      (send *atlas* :rarm :angle-vector #f(-56.6679 67.8617 -23.1484 22.3583 -47.8993 28.1287))
+      (send *atlas* :torso :waist-y :joint-angle 35)
+      (move-base-rot 15))
+
+    (with-assoc-move-target
+     (mt :move-target (send (send (send *atlas* :larm :end-coords :copy-worldcoords) :rotate (deg2rad -30) :x) :translate (float-vector 60 80 100))
+	 :parent-link (send *atlas* :larm :end-coords :parent))
+     (let* ((ll (send *atlas* :link-list (send (car mt) :parent)))
+	    (wei (fill (instantiate float-vector (send *atlas* :calc-target-joint-dimension ll)) 1.0)))
+       (dolist (idx (mapcar #'(lambda (j) (position j (send-all (send *atlas* :link-list (send *atlas* :larm :end-coords :parent)) :joint))) (send *atlas* :torso :joint-list)))
+	 (setf (elt wei idx) 0.05))
+       (setq ret
+	     (and ret
+		  (send *atlas* :inverse-kinematics
+			target-coords
+			:link-list ll
+			:move-target (car mt)
+			:weight wei
+			:debug-view :no-message :thre thre :stop 200 :rotation-axis rotation-axis)))))
+    (setq ret
+	  (and ret
+	       (send *atlas* :move-centroid-on-foot
+		     :both '(:rleg :lleg :larm)
+		     :target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg))
+		     :centroid-thre 40)))
+    (unless ret
+      (send *atlas* :angle-vector pav)
+      (send *atlas* :newcoords prc))
+    ))
+
+(defun mate-hose-by-larm-1 ()
+  (send *atlas* :reset-manip-pose :base-down t)
+  (send *atlas* :rarm :angle-vector #f(-56.6679 67.8617 -23.1484 22.3583 -47.8993 28.1287))
+  (send *atlas* :torso :waist-y :joint-angle 35)
+  (move-base-rot 15)
   (with-assoc-move-target
    (mt :move-target (send (send (send *atlas* :larm :end-coords :copy-worldcoords) :rotate (deg2rad -30) :x) :translate (float-vector 60 80 100))
        :parent-link (send *atlas* :larm :end-coords :parent))
@@ -246,31 +282,7 @@
      (dolist (idx (mapcar #'(lambda (j) (position j (send-all (send *atlas* :link-list (send *atlas* :larm :end-coords :parent)) :joint))) (send *atlas* :torso :joint-list)))
        (setf (elt wei idx) 0.05))
      (send *atlas* :inverse-kinematics
-	   target-coords
-	   :link-list ll
-	   :move-target (car mt)
-	   :weight wei
-	   :debug-view :no-message :thre thre :stop 200 :rotation-axis rotation-axis)))
-  (send *atlas* :move-centroid-on-foot
-	:both '(:rleg :lleg :larm)
-	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg))
-	:centroid-thre 40)
-  )
-
-(defun mate-hose-by-larm-1 ()
-  (send *atlas* :reset-manip-pose :base-down t)
-  (send *atlas* :rarm :angle-vector #f(-56.6679 67.8617 -23.1484 22.3583 -47.8993 28.1287))
-  (send *atlas* :torso :waist-y :joint-angle 35)
-  (move-base-rot 15)
-  (with-assoc-move-target
-   (mt :move-target (send (send (send *atlas* :larm :end-coords :copy-worldcoords) :rotate (deg2rad -30) :x) :translate (float-vector 0 80 100))
-       :parent-link (send *atlas* :larm :end-coords :parent))
-   (let* ((ll (send *atlas* :link-list (send (car mt) :parent)))
-	  (wei (fill (instantiate float-vector (send *atlas* :calc-target-joint-dimension ll)) 1.0)))
-     (dolist (idx (mapcar #'(lambda (j) (position j (send-all (send *atlas* :link-list (send *atlas* :larm :end-coords :parent)) :joint))) (send *atlas* :torso :joint-list)))
-       (setf (elt wei idx) 0.05))
-     (send *atlas* :inverse-kinematics
-	   (send (make-coords :pos #f(200 600 1100) :rpy (list 0 0 -pi/2)) :rotate (deg2rad 0) :z :world)
+	   (send (make-coords :pos #f(200 600 1200) :rpy (list 0 0 -pi/2)) :rotate (deg2rad 0) :z :world)
 	   :link-list ll
 	   :move-target (car mt)
 	   :weight wei
@@ -293,18 +305,100 @@
   (let ((ang0 -30) (ang1 15))
     (send *atlas* :hand :larm :open-pose2)
     (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
-    (test-ik1 (send (send *ikc* :copy-worldcoords) :translate (float-vector -20 0 -40) :world) :init-pose t :rotation-axis t)
-    (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
-    (test-ik1 (send (send (send *ikc* :copy-worldcoords) :translate (float-vector -20 0 -40) :world) :rotate (deg2rad ang0) :z) :init-pose t :rotation-axis t)
-    (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+    (test-ik1 (send (send *ikc* :copy-worldcoords) :translate (float-vector 0 0 -30) :world) :init-pose t :rotation-axis t)
+    (progn (model2real :time 1000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+    (test-ik1 (send (send (send *ikc* :copy-worldcoords) :translate (float-vector 0 0 -30) :world) :rotate (deg2rad ang0) :z) :init-pose t :rotation-axis t)
+    (progn (model2real :time 1000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
 (test-ik1 (send (send (send *ikc* :copy-worldcoords) :translate (float-vector 0 0 0) :world) :rotate (deg2rad ang0) :z) :init-pose t :rotation-axis t)
-    (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+    (progn (model2real :time 1000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
     (send *atlas* :hand :larm :angle-vector #f(0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 70.0))
     (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
     (test-ik1 (send (send *ikc* :copy-worldcoords) :rotate (deg2rad ang1) :z) :init-pose t :rotation-axis t)
     (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
     )
-  
+
+  (send *atlas* :reset-manip-pose :base-down t)
+  (send *atlas* :torso :waist-y :joint-angle 20)
+  (move-base-rot 15)
+  (with-assoc-move-target
+   (mt :move-target (send (send (send *atlas* :larm :end-coords :copy-worldcoords) :rotate (deg2rad -30) :x) :translate (float-vector 60 80 100))
+       :parent-link (send *atlas* :larm :end-coords :parent))
+   (let* ((ll (send *atlas* :link-list (send (car mt) :parent)))
+	  (wei (fill (instantiate float-vector (send *atlas* :calc-target-joint-dimension ll)) 1.0)))
+     (dolist (idx (mapcar #'(lambda (j) (position j (send-all (send *atlas* :link-list (send *atlas* :larm :end-coords :parent)) :joint))) (send *atlas* :torso :joint-list)))
+       (setf (elt wei idx) 0.05))
+     (send *atlas* :inverse-kinematics
+	   (send (make-coords :pos #f(500 100 1200) :rpy (list 0 0 pi/2)) :rotate (deg2rad 0) :z :world)
+	   :link-list ll
+	   :move-target (car mt)
+	   :weight wei
+	   :debug-view :no-message :thre 10 :stop 200 :rotation-axis :z)))
+  (send *atlas* :move-centroid-on-foot
+	:both '(:rleg :lleg :larm)
+	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg))
+	:centroid-thre 40)
+
+  (let ()
+    (send *atlas* :hand :larm :open-pose2)
+    (progn (model2real :time 2000) (hand-model2real :time 2000) (send *ri* :wait-interpolation))
+    (test-ik1 (send (send *ikc* :copy-worldcoords) :translate (float-vector 0 0 40) :world) :init-pose t :rotation-axis t)
+    (progn (model2real :time 1000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+    (do ((ang 10 (+ ang 30))) ((< 50 ang))
+      (test-ik1 (send (send (send *ikc* :copy-worldcoords) :translate (float-vector 0 0 40) :world) :rotate (deg2rad ang) :z) :init-pose t :rotation-axis t)
+      (progn (model2real :time 1000) (hand-model2real :time 1000) (send *ri* :wait-interpolation)))
+    (test-ik1 (send (send (send *ikc* :copy-worldcoords) :translate (float-vector 0 -50 -30) :world) :rotate (deg2rad 50) :z) :init-pose t :rotation-axis t)
+    (progn (model2real :time 1000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+    (send *atlas* :hand :larm :angle-vector #f(0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 70.0))
+    (progn (model2real :time 2000) (hand-model2real :time 2000) (send *ri* :wait-interpolation))
+    (do ((ang 50 (+ ang -10))) ((< ang -30))
+      (test-ik1 (send (send (send *ikc* :copy-worldcoords) :translate (float-vector 0 -50 -30) :world) :rotate (deg2rad ang) :z) :init-pose t :rotation-axis t)
+      (progn (model2real :time 1000) (hand-model2real :time 1000) (send *ri* :wait-interpolation)))
+    )
+
+  (send *atlas* :reset-manip-pose :base-down t)
+  (send *atlas* :rarm :move-end-pos #f(0 100 0) :world :debug-view :no-message :rotation-axis :z)
+  (send *atlas* :larm :move-end-pos #f(0 -100 0) :world :debug-view :no-message :rotation-axis :z)
+  (send *atlas* :head :neck-p :joint-angle 50)
+  (send *atlas* :move-centroid-on-foot
+	:both '(:rleg :lleg)
+	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg))
+	:centroid-thre 40)
+
+(dolist (vv (list #f(0 0 -70) #f(0 50 0) #f(0 0 70) #f(0 -50 0)))
+  (send *atlas* :rarm :move-end-pos vv :world :debug-view :no-message :rotation-axis :z)
+  (progn (model2real :time 2000) (hand-model2real :time 2000) (send *ri* :wait-interpolation)))
+
+(progn
+(send *atlas* :rarm :move-end-pos #f(0 30 0) :world :debug-view :no-message :rotation-axis :z)
+(send *atlas* :larm :move-end-pos #f(0 -30 0) :world :debug-view :no-message :rotation-axis :z)
+(send *atlas* :head :neck-p :joint-angle 50)
+(send *atlas* :move-centroid-on-foot
+	:both '(:rleg :lleg :rarm :larm)
+	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg))
+	:centroid-thre 40))
+
+(let ((ac (rot-handle 15)))
+  (send *atlas* :rarm :inverse-kinematics (car ac) :debug-view :no-message :rotation-axis :z)
+  (send *atlas* :larm :inverse-kinematics (cadr ac) :debug-view :no-message :rotation-axis :z)
+  (send *atlas* :head :neck-p :joint-angle 50)
+  (send *atlas* :move-centroid-on-foot
+	:both '(:rleg :lleg :rarm :larm)
+	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg))
+	:centroid-thre 40))
+
+(dotimes (i 3) (let ((ac (rot-handle 10)))
+  (send *atlas* :rarm :inverse-kinematics (car ac) :debug-view :no-message :rotation-axis :z)
+  (send *atlas* :larm :inverse-kinematics (cadr ac) :debug-view :no-message :rotation-axis :z)
+  (send *atlas* :head :neck-p :joint-angle 50)
+  (send *atlas* :move-centroid-on-foot
+	:both '(:rleg :lleg :rarm :larm)
+	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg))
+	:centroid-thre 40)
+  (progn (model2real :time 2000) (hand-model2real :time 2000) (send *ri* :wait-interpolation))
+  ))
+;;
+
+
   (with-assoc-move-target
    (mt :move-target (send (send (send *atlas* :larm :end-coords :copy-worldcoords) :rotate (deg2rad -30) :x) :translate (float-vector 0 80 100))
        :parent-link (send *atlas* :larm :end-coords :parent))
@@ -320,10 +414,21 @@
   (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
   )
 
+(defun rot-handle (ang)
+  (let* ((arms '(:rarm :larm))
+	 (ac (mapcar #'(lambda (a) (make-cascoords :coords (send *atlas* a :end-coords :copy-worldcoords))) arms))
+	 (cen-c (make-cascoords :pos (send (apply #'midcoords 0.5 ac) :worldpos))))
+    (send cen-c :assoc (car ac))
+    (send cen-c :assoc (cadr ac))
+    (send cen-c :rotate (deg2rad ang) :x)
+    (print ac)
+    ))
+
 (defun do-all-for-hose
   ()
   (send *ri* :teleport-to (make-coords :pos #f(-2700 -4100 1000)))
   (progn (real2model) (model2real :wait t :time 10) (set-user) (set-kp 4000))
+  (unix:sleep 2)
   (init-pose-for-hose)
   (reach-and-pickup-hose)
   (grasp-hose-by-larm)
@@ -332,6 +437,17 @@
 ;;(do-all-for-hose)
  
 #|
+
+
+  (with-assoc-move-target
+   (mt :move-target (send (send (send *atlas* :rarm :end-coords :copy-worldcoords) :rotate (deg2rad 30) :x) :translate (float-vector 60 -80 100))
+       :parent-link (send *atlas* :rarm :end-coords :parent))
+     (send *atlas* :rarm :inverse-kinematics
+           (send (send (send (send *atlas* :larm :end-coords :copy-worldcoords) :rotate (deg2rad -30) :x) :translate (float-vector 60 80 100)) :translate (float-vector 0 0 0))
+	   :move-target (car mt)
+	   :debug-view :no-message :thre 10 :stop 200 :rotation-axis :z))
+
+
 (send *atlas* :hand :larm :grasp-pose)
 (send *ri* :start-impedance
       :larm :force-gain #f(0 0 0)
