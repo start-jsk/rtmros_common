@@ -436,30 +436,29 @@
 ;;(interpolated-mode-change :e-start 20 :e-end 255 :mode :user :time 6000)
 
 (defun manipulation-mode (&key (height 0.8) (yaw 0.0) (lat 0.0))
-  (real2model)
-  ;; mask upper body
-  (let ((av (send *atlas* :angle-vector))
-        tmpl tmpr)
-    (send *atlas* :stand-pose)
-    (setq tmpl (send *atlas* :lleg :angle-vector))
-    (setq tmpr (send *atlas* :rleg :angle-vector))
-    (send *atlas* :angle-vector av)
-    (send *atlas* :lleg :angle-vector tmpl)
-    (send *atlas* :rleg :angle-vector tmpr)
+  (ros::spin-once)
+  (unless (eq (get-mode) :manipulate)
+    (real2model)
+    ;; mask upper body
+    (let ((av (send *atlas* :angle-vector))
+          tmpl tmpr)
+      (send *atlas* :stand-pose)
+      (setq tmpl (send *atlas* :lleg :angle-vector))
+      (setq tmpr (send *atlas* :rleg :angle-vector))
+      (send *atlas* :angle-vector av)
+      (send *atlas* :lleg :angle-vector tmpl)
+      (send *atlas* :rleg :angle-vector tmpr)
+      )
+    (model2real :wait t :time 5000)
+    (send *ri* :set-simulation-mode :mode :stand
+          :effort 255 :effort-mask *manip-mask-vector*)
+    (unix::usleep (* 6 1000 1000)) ;; wait 6 sec
     )
-  (model2real :wait t :time 5000)
-
-  (send *ri* :set-simulation-mode :mode :stand
-        :effort 255 :effort-mask *manip-mask-vector*)
-
-  (unix::usleep (* 6 1000 1000)) ;; wait 6 sec
-
   (send *ri* :set-simulation-mode :mode :manipulate
         :effort 255 :effort-mask *manip-mask-vector*
         :use_desired t
         :pelvis_height height :pelvis_yaw yaw :pelvis_lat lat)
-  t
-  )
+  t)
 
 (defun manip-to-stand-mode (&optional (pose-clear nil))
   (send *ri* :set-simulation-mode :mode :manipulate
@@ -469,7 +468,6 @@
   (unix::usleep (* 6 1000 1000)) ;; wait 6 sec
   (send *ri* :set-simulation-mode :mode :stand
         :effort 255 :effort-mask *manip-mask-vector*)
-
   (when pose-clear
     (send *atlas* :stand-pose)
     (model2real :wait t :time 5000)
