@@ -14,6 +14,9 @@
     (set-user))
 
   ;; (send *atlas* :legs :move-end-pos #f(0 0 70) :world)
+  (send *atlas* :head :neck-p :joint-angle 50)
+  (fix-leg)
+  (move-centroid)
 
   ;; 足だけwalk-poseにする
   (let ((prev-av (send *atlas* :angle-vector))
@@ -62,6 +65,22 @@
       (:stand (set-stand))
       (:manip (set-manip))
       (:my-manip (manip))))
-  t
-  )
+  t)
+
+(defun walk-clickpos
+  ()
+
+  (let* ((robot-coords (send (send *atlas* :foot-midcoords) :copy-worldcoords))
+         (clicked-coords (get-point))
+         (walk-pos
+          (scale 0.001 (send (send robot-coords
+                                   :transformation clicked-coords) :worldpos))))
+    (warn "[walk-clickpos] x: ~a~%" (elt walk-pos 0))
+    (send *ri* :go-pos (elt walk-pos 0) 0 0)))
+
+(defun walk-turn
+  (&key (theta 90) (lr :left))
+
+  (setq theta (if (equal lr :left) (abs theta) (- (abs theta))))
+  (send *ri* :go-pos 0 0 theta))
 
