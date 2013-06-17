@@ -34,4 +34,7 @@
 
   <!-- octomap -->
   <depend package="octomap_server" />
+
+  <!-- -->
+  <depend package="footstep_planner" />
 </package>
