@@ -78,7 +78,7 @@
 
   (drive-for-task1 :real real :wait t :telep nil)
 
-  (warning-message 2 "[vhc-init] finish(all-demo-task1)~%")
+  (warning-message 2 "[vhc-init] finish (all-demo-task1)~%")
   )
 
 

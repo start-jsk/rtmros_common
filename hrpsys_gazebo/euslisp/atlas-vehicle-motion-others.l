@@ -104,7 +104,7 @@
 
   (fix-leg)
   (send *atlas* :legs :move-end-pos #f(0 0 -70) :world)
-  (when real 
+  (when real
     (model2real :wait t)
     (send *ri* :stop-st))
 
