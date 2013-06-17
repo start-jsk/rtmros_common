@@ -3,8 +3,11 @@
 
 ;;
 (setq *floor-z* (+ -842.0 100.0))
-(setq p0 (with-open-file (f "atlas_vh_pos.l") (read f)))
-(setq *raw-org-points* (cadr p0))
+
+(setq *pp0* (with-open-file (f (ros::resolve-ros-path "package://hrpsys_gazebo/euslisp/atlas_vh_pos.l"))
+                            (read f)))
+
+(setq *raw-org-points* (cadr *pp0*))
 (setq *floor-z* (+ -842.0 100.0))
 (setq *org-points* (send *raw-org-points*
                          :filter :key #'(lambda (p) (and (> 0.0 (elt p 1) -3000.0)
