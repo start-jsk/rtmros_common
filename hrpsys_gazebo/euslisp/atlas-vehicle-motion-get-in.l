@@ -90,6 +90,11 @@
 
   (warning-message 2 "[vhc-get-in] start (grasp-rarm-in-get-in-for-task1) [get-in phase1]~%")
 
+  (when real
+    (warning-message 2 "[vhc-get-in] set high-gain :all in grasp rarm [get-in phase1]~%")
+    (when wait (my-wait))
+    (set-high-gain))
+
   (let* ((pipe-coords
 	  (send (send (send *drcv* :handle :name :upper-left-pipe) :copy-worldcoords) :translate #f(0 0 0) :local)))
 
