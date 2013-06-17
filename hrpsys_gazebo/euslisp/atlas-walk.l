@@ -14,8 +14,18 @@
     (set-user))
 
   ;; (send *atlas* :legs :move-end-pos #f(0 0 70) :world)
-  (send *atlas* :rleg :move-end-pos #f(0 50 70) :world)
-  (send *atlas* :lleg :move-end-pos #f(0 -50 70) :world)
+
+  ;; 足だけwalk-poseにする
+  (let ((prev-av (send *atlas* :angle-vector))
+        lleg-av rleg-av)
+    (send *atlas* :walk-pose)
+    (setq lleg-av (send *atlas* :lleg :angle-vector))
+    (setq rleg-av (send *atlas* :rleg :angle-vector))
+    (send *atlas* :angle-vector prev-av)
+    (send *atlas* :lleg :angle-vector lleg-av)
+    (send *atlas* :rleg :angle-vector rleg-av)
+    (send *atlas* :move-centroid-on-foot :both '(:lleg :rleg))
+    )
 
   (when real
     (atlas-set-servo-gain-by-torque-limit 0.01 :legs)
@@ -54,7 +64,4 @@
       (:my-manip (manip))))
   t
   )
-
-
-
 
