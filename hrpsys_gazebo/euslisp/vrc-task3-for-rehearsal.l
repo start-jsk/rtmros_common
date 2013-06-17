@@ -1,4 +1,29 @@
-(progn (load "atlas-interface.l")(atlas-init :set-reset-pose nil :set-user-mode nil))
+(progn
+  (load "package://hrpsys_gazebo/euslisp/atlas-interface.l")
+  (unless (and x::*display* (> x::*display* 0))
+    (load "package://hrpsys_gazebo/euslisp/no-display"))
+  (atlas-init :set-reset-pose nil :set-user-mode nil)
+  (send *ri* :hand :rarm :wait-interpolation)
+  (send *ri* :hand :larm :wait-interpolation)
+  (unless (boundp '*completion-score*)
+    (defparameter *completion_score* 0))
+  )
+
+;; overwrite
+;; (defun hand-model2real (&key (arm :both) (wait t) (time 1000))
+;;   (cond
+;;    ((equal arm :both) (hand-model2real :arm :larm :wait wait) (hand-model2real :arm :rarm :wait wait))
+;;    (t (set-real-hand-av (get-model-hand-av arm) arm time)
+;;       (when wait (send *ri* :hand arm :wait-interpolation)))))
+
+(defun score-callback-for-task3
+  (msg)
+  (print (send msg :completion_score))
+  (print (defparameter *completion-score* (send msg :completion_score))))
+
+(ros::subscribe "/vrc_score"
+                atlas_msgs::vrcscore
+                #'score-callback-for-task3)
 
 (defun init-pose-for-hose ()
   (objects (list *atlas*))
@@ -18,6 +43,7 @@
 	(send (make-coords :pos (float-vector hose-grasp-x-pos -550 1300) :rpy (list 0 0 -pi/2)) :rotate pi/2 :y :world)
 	:debug-view :no-message :thre 5 :stop 200
 	:rotation-axis :z)
+  (send *atlas* :head :neck-p :joint-angle 50)
   (send *atlas* :move-centroid-on-foot
 	:both '(:rleg :lleg :rarm)
 	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
@@ -27,6 +53,7 @@
 	(send (make-coords :pos (float-vector hose-grasp-x-pos hose-grasp-y-pos 1300) :rpy (list 0 0 -pi/2)) :rotate pi/2 :y :world)
 	:debug-view :no-message :thre 5 :stop 200
 	:rotation-axis :z)
+  (send *atlas* :head :neck-p :joint-angle 50)
   (send *atlas* :move-centroid-on-foot
 	:both '(:rleg :lleg :rarm)
 	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
@@ -35,6 +62,7 @@
   (send *atlas* :rarm :inverse-kinematics
 	(send (make-coords :pos (float-vector hose-grasp-x-pos hose-grasp-y-pos 1100) :rpy (list 0 0 -pi/2)) :rotate pi/2 :y :world)
 	:debug-view :no-message :thre 5 :stop 200 :rotation-axis :z)
+  (send *atlas* :head :neck-p :joint-angle 50)
   (send *atlas* :move-centroid-on-foot
 	:both '(:rleg :lleg :rarm)
 	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
@@ -48,6 +76,7 @@
   (send *atlas* :rarm :inverse-kinematics
 	(send (make-coords :pos (float-vector hose-grasp-x-pos hose-grasp-y-pos 1250) :rpy (list 0 0 -pi/2)) :rotate pi/2 :y :world)
 	:debug-view :no-message :thre 5 :stop 200 :rotation-axis :z)
+  (send *atlas* :head :neck-p :joint-angle 50)
   (send *atlas* :move-centroid-on-foot
 	:both '(:rleg :lleg :rarm)
 	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
@@ -143,6 +172,7 @@
   (send *atlas* :rarm :inverse-kinematics
   	(send (send (make-coords :pos #f(500 -400 1200) :rpy (list 0 0 pi/2)) :rotate pi/2 :y :world) :rotate (deg2rad 30) :x)
   	:debug-view :no-message :thre 10 :stop 200 :rotation-axis :z)
+  (send *atlas* :head :neck-p :joint-angle 50)
   (progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
 
   ;; (send *atlas* :rarm :inverse-kinematics
@@ -152,11 +182,13 @@
   (send *atlas* :rarm :inverse-kinematics
   	(send (send (make-coords :pos #f(500 -100 1200) :rpy (list 0 0 pi/2)) :rotate pi/2 :y :world) :rotate (deg2rad 30) :x)
   	:debug-view :no-message :thre 10 :stop 200 :rotation-axis :z)
+  (send *atlas* :head :neck-p :joint-angle 50)
   (progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
 
   (send *atlas* :larm :inverse-kinematics
   	(send (send (make-coords :pos #f(500 0 1300) :rpy (list 0 0 pi/2)) :rotate pi/2 :y :world) :rotate (deg2rad 30) :x)
   	:debug-view :no-message :thre 10 :stop 200 :rotation-axis :z) 
+  (send *atlas* :head :neck-p :joint-angle 50)
   (progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
   
   (send *atlas* :hand :rarm :angle-vector #f(0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 40.0 0.0 50.0 20.0))
@@ -254,6 +286,8 @@
   (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
 
   (setq *ikc* (send (send *atlas* :get :larm-hand-coords-for-hose) :copy-worldcoords))
+  ;;(move-hose-end-from-ikc (float-vector 0 0 0) 0)
+  ;;(move-hose-end-from-ikc (float-vector -100 70 300) 0)
   (move-hose-end-from-ikc (float-vector 0 0 0) 0)
   )
 
@@ -297,7 +331,7 @@
     ))
 
 ;; (move-hose-end-from-ikc (float-vector 0 0 0) 0)
-;; (progn (move-hose-end-from-ikc (float-vector 0 0 0) 0) (unix:sleep 2) (snapshot-image :rarm) (snapshot-image :head) (send (send *atlas* :force-sensor :lhsensor) :rotate-vector (send *ri* :force-vector :larm)))
+;; (progn (move-hose-end-from-ikc (float-vector 0 0 0) 0) (unix:sleep 2) (print (send (send *atlas* :force-sensor :lhsensor) :rotate-vector (send *ri* :force-vector :larm))) (print (send (send *atlas* :force-sensor :lhsensor) :rotate-vector (send *ri* :moment-vector :larm))) (unix:sleep 2) (snapshot-image :rarm) (snapshot-image :head) (progn (dotimes (i 10) (ros::spin-once)) *completion-score*))
 (defun move-hose-end-from-ikc
   (&optional (dif-pos (float-vector 0 0 0)) (zang 0) (rotation-axis t))
   (test-ik1 (send (send (send *ikc* :copy-worldcoords) :translate dif-pos :world) :rotate (deg2rad zang) :z :world)
@@ -308,26 +342,30 @@
 
 (defun release-hose-end ()
   (setq *ikc* (send (send *atlas* :get :larm-hand-coords-for-hose) :copy-worldcoords))
+  (let ((ret t)
+	(ang 10))
+    (while ret
+      (setq ret (test-ik1 (send (send *ikc* :copy-worldcoords) :rotate (deg2rad ang) :z)
+			  :init-pose t :rotation-axis t :thre 2.5))
+      (setq ang (+ ang 10))
+      (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))))
   (send *atlas* :hand :larm :open-pose2)
   (progn (model2real :time 1000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
   (move-hose-end-from-ikc (float-vector -100 0 -100) 0 :z)
   (send *atlas* :hand :larm :angle-vector #f(0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 70.0))
   (progn (model2real :time 1000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
   (snapshot-image :all)
-  (unless (y-or-n-p ";; continue?") (return-from release-hose-end nil))
   (move-hose-end-from-ikc (float-vector -100 -100 -50) 0 nil)
   (snapshot-image :all)
-  (unless (y-or-n-p ";; continue?") (return-from release-hose-end nil))
   (move-hose-end-from-ikc (float-vector -200 -200 -50) 0 nil)
   (snapshot-image :all)
-  (unless (y-or-n-p ";; continue?") (return-from release-hose-end nil))
   (send *atlas* :rarm :angle-vector #f(-135.0 67.8617 -23.1484 70.0 0.0 -30.0))
   (send *atlas* :larm :angle-vector #f(135.0 67.8617 23.1484 -70.0 0.0 -30.0))
   (send *atlas* :move-centroid-on-foot
 	:both '(:rleg :lleg)
 	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg))
 	:centroid-thre 40)
-  (progn (model2real :time 10000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+  (progn (model2real :time 5000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
   (snapshot-image :all)
   (send *atlas* :reset-manip-pose :base-down t)
   (send *atlas* :rarm :angle-vector #f(-135.0 67.8617 -23.1484 70.0 0.0 -30.0))
@@ -340,6 +378,12 @@
   (progn (model2real :time 5000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
   (send *atlas* :hand :larm :open-pose2)
   (progn (model2real :time 1000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+  )
+
+(defun go-pos2 ()
+  (send *ri* :start-auto-balancer)
+  (send *ri* :start-st)
+  (send *ri* :go-pos -0.2 0 0)
   )
 
 ;; (progn (prepare-for-rotate-hose #f(500 100 1400)) (unix:sleep 1) (snapshot-image :larm))
@@ -489,10 +533,14 @@
   ()
   (send *ri* :teleport-to (make-coords :pos #f(-2700 -4100 1000)))
   (progn (real2model) (model2real :wait t :time 10) (set-user) (set-kp 4000))
-  (unix:sleep 2)
+  (unix:sleep 10)
   (setup-hand-coords-for-hose)
   (init-pose-for-hose)
+  (unix:sleep 2)
   (reach-and-pickup-hose)
+  (unix:sleep 2)
+  (twist-torso)
+  (unix:sleep 2)
   (grasp-hose-by-larm)
   (mate-hose-by-larm-0)
   )
