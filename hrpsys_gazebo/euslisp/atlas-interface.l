@@ -3,6 +3,7 @@
 (load "package://hrpsys_gazebo/euslisp/atlas-applications.l")
 (load "package://hrpsys_gazebo/euslisp/sandia-hand-interface.l")
 (load "package://hrpsys_gazebo/euslisp/atlas-utils.l")
+(load "package://hrpsys_gazebo/euslisp/atlas-walk.l")
 
 (ros::load-ros-manifest "hrpsys_gazebo")
 
