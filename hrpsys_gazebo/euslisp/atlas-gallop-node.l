@@ -331,6 +331,9 @@
                   (rad2deg (acos (v. buf goal)))))
                                         ;(atitude-update)
          (dotimes (i 8)
+           (ros::spin-once)
+           (ros::sleep)
+           (atitude-update)
            (forward-controller *forward-offset*)))))
   )
 

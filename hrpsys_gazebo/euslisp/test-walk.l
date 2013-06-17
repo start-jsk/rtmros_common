@@ -16,4 +16,3 @@
   (send *ri* :cmd-vel-mode)
   (send *ri* :stop-st)
   )
-

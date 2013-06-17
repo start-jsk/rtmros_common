@@ -22,13 +22,12 @@
   (format strm "~A~%" com))
 
 (defun com (com &optional (timeout 10.0) (strm *fork-stream*))
-  (while (readablep)
-    (read-line nil nil)) ;; flush stream
+  ;;(while (rd-p)  (read-line nil nil)) ;; flush stream
   (format strm "(wobj ~A)~%" com)
   (do-until-key
    (unless (> timeout 0)
-     (return-from command :timeout))
-   (when (readablep strm 0.1)
-     (return-from command (read strm)))
+     (return-from com :timeout))
+   (when (rd-p strm 0.1)
+     (return-from com (read strm)))
    (decf timeout 0.1))
   :break)

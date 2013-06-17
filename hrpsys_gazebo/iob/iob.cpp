@@ -37,7 +37,7 @@ static std::vector<int> servo;
 static bool isLocked = false;
 static int frame = 0;
 static timespec g_ts;
-static long g_period_ns=5000000;
+static long g_period_ns=1000000;
 static ros::Time rg_ts;
 
 #define CHECK_JOINT_ID(id) if ((id) < 0 || (id) >= number_of_joints()) return E_ID
@@ -466,14 +466,14 @@ int read_pgain(int id, double *gain)
   }else{
     int iid = JOINT_ID_MODEL2REAL(id);
     *(gain) = jointcommands.kp_position[iid] / initial_jointcommands.kp_position[iid];
-    std::cerr << ";;; read gain: " << id << " = " << *gain << std::endl;
+    //std::cerr << ";;; read gain: " << id << " = " << *gain << std::endl;
   }
   return TRUE;
 }
 
 int write_pgain(int id, double gain)
 {
-  std::cerr << ";;; write pgain: " << id << " = " << gain << std::endl;
+  //std::cerr << ";;; write pgain: " << id << " = " << gain << std::endl;
   if(JOINT_ID_MODEL2REAL(id) < 0) {
     //
   }else{
@@ -486,7 +486,7 @@ int write_pgain(int id, double gain)
 
 int read_dgain(int id, double *gain)
 {
-  std::cerr << ";;; read dgain: " << id << " = " << *gain << std::endl;
+  //std::cerr << ";;; read dgain: " << id << " = " << *gain << std::endl;
   if(JOINT_ID_MODEL2REAL(id) < 0) {
     //
   }else{
@@ -498,7 +498,7 @@ int read_dgain(int id, double *gain)
 
 int write_dgain(int id, double gain)
 {
-  std::cerr << ";;; write dgain: " << id << " = " << gain << std::endl;
+  //std::cerr << ";;; write dgain: " << id << " = " << gain << std::endl;
   if(JOINT_ID_MODEL2REAL(id) < 0) {
     //
   }else{
@@ -990,6 +990,16 @@ int wait_for_iob_signal()
 #endif
 #if 1
     // use ROS Time
+    //ros::Time::sleepUntil(rg_ts);
+    // while (ros::Time::now() < rg_ts);
+
+    // {
+    //   ros::Duration tm = ros::Duration(0, g_period_ns);
+    //   rg_ts += tm;
+    // }
+    // ros::Time rnow = ros::Time::now();
+    // ros::Duration rdt = rg_ts - rnow;
+
     //ros::Time::sleepUntil(rg_ts);
     ros::Time rnow;
     ros::Duration tm = ros::Duration(0, g_period_ns);
