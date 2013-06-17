@@ -2,7 +2,13 @@
 (setq *lr-reverse* nil)
 
 (defun my-init
-  (&key (real t) (set-reset-pose t))
+  (&key (real t)
+	(set-reset-pose t)
+	(servo-gain
+	 (list (cons :legs 1.0)
+	       (cons :torso 2.0)
+	       (cons :arms 4.0)
+	       (cons :head 5.0))))
   (if real
       (unless (boundp '*atlas-init-called*)
         (setq *atlas-init-called* t)
@@ -18,10 +24,15 @@
                       :rotate (deg2rad 20) :x) :translate #f(0 0 -30) :local) :translate #f(0 20 0) :local))
   (when real
     ;;(atlas-set-servo-gain-by-torque-limit 1.0)
-    (atlas-set-servo-gain-by-torque-limit 1.0 :legs)
-    (atlas-set-servo-gain-by-torque-limit 2.0 :torso)
-    (atlas-set-servo-gain-by-torque-limit 4.0 :arms)
-    (atlas-set-servo-gain-by-torque-limit 5.0 :head)
+    ;(atlas-set-servo-gain-by-torque-limit 1.0 :legs)
+    ;(atlas-set-servo-gain-by-torque-limit 2.0 :torso)
+    ;(atlas-set-servo-gain-by-torque-limit 4.0 :arms)
+    ;(atlas-set-servo-gain-by-torque-limit 5.0 :head)
+    (mapcar
+     #'(lambda (k)
+	 (atlas-set-servo-gain-by-torque-limit
+	  (cdr k) (car k)))
+     servo-gain)
     (set-hand-kp 100.0))
   (setq *robot* *atlas*)
   (objects (list *atlas*))

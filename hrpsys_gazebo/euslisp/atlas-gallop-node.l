@@ -1,6 +1,11 @@
 
 (require "package://hrpsys_gazebo/euslisp/atlas-interface.l")
-(my-init)
+(my-init
+ :servo-gain
+ (list (cons :legs 1.0)
+       (cons :torso 2.0)
+       (cons :arms 4.0)
+       (cons :head 5.0)))
 
 (require "package://hrpsys_gazebo/euslisp/atlas-tolot.l")
 (require "package://hrpsys_gazebo/euslisp/atlas-standup.l")
