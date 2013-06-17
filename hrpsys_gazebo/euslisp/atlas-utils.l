@@ -400,33 +400,6 @@
   (warn ";; waiting~%")
   (read-line))
 
-
-;; hand pose
-(dolist (ahand '(sandia_hand_left-robot sandia_hand_right-robot))
-  (let ((hand-pose-def-macros 
-	 `(defmethod ,ahand
-	    (:open-pose
-	     ()
-	     (send self :angle-vector #f(0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 90.0 0.0 0.0))
-	     )
-	    (:open-pose2
-	     ()
-	     (send self :angle-vector #f(0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 -90.0 0.0))
-	     )
-	    (:hook-pose
-	     ()
-	     (send self :angle-vector #f(0.0 20.0 20.0 0.0 20.0 20.0 0.0 20.0 20.0 0.0 0.0 30.0))
-	     )
-	    (:grasp-pose
-	     ()
-	     (send self :angle-vector #f(0.0 90.0 90.0 0.0 90.0 90.0 0.0 90.0 90.0 0.0 50.0 50.0))
-	     )
-	    )
-	 ))
-    ;;(pprint (macroexpand hand-pose-def-macros))
-    (eval hand-pose-def-macros)
-    ))
-
 (defun static-transition-to-stand ()
   (send *ri* :set-simulation-mode :mode :stand :effort 0)
   (send *ri* :bdi_step_static
@@ -466,3 +439,28 @@
         :effort 255 :effort-mask *manip-mask-vector*
         :use_desired t
         :pelvis_height height :pelvis_yaw yaw :pelvis_lat lat))
+
+;; clear octomap
+(defun clear-octomap ()
+  (let ((req (instance std_srvs::EmptyRequest :init)))
+    (ros::service-call "/octomap_full_server/reset" req)))
+
+;; get-octomap
+(defun get-octomap (&optional (wait t) (clear t) (remove-nan))
+  (when clear (clear-octomap))
+  (when wait (get-tilt-laser))
+  ;; (get-tilt-laser)
+  (let ((msg (one-shot-subscribe "/octomap_point_cloud_centers"
+                                 sensor_msgs::PointCloud2 :timeout 30000)))
+    (when msg
+      (let ((ret (make-eus-pointcloud-from-ros-msg msg :remove-nan remove-nan)))
+        (setf (get ret :frame_id) (send msg :header :frame_id))
+        (setf (get ret :stamp) (send msg :header :stamp))
+        (setf (get ret :point_step) (send msg :point_step))
+        ret
+        ))))
+
+;; get-full-cloud
+(defun get-full-cloud (&optional (wait t))
+  (when wait (get-tilt-laser))
+  (get-tilt-laser))
