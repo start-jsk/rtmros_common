@@ -178,14 +178,37 @@
     (inner 0)
     (inner 1)))
 
+;; (defun tolot-step
+;;   (&key
+;;    (reverse? t)
+;;    (sleep 100)
+;;    (rotate 0))
+;;   (bin-wark
+;;    :reverse? reverse?
+;;    :sleep sleep
+;;    :callback
+;;    #'(lambda (id)
+;;        (if rotate
+;;            (send *robot* :torso :waist-r :joint-angle rotate))
+;;        (if (and reverse? (eq id 0))
+;;            (progn
+;;              (send *robot* :larm :shoulder-r :joint-angle 30)
+;;              (send *robot* :rarm :shoulder-r :joint-angle -30))))
+;;    ))
+
 (defun tolot-step
   (&key
    (reverse? t)
    (sleep 100)
+   (mirror? nil)
    (rotate 0))
   (bin-wark
    :reverse? reverse?
    :sleep sleep
+   :target-keys
+   (if mirror?
+       '(:larm :rarm :lleg :rleg)
+     '(:rarm :larm :rleg :lleg))
    :callback
    #'(lambda (id)
        (if rotate
@@ -194,7 +217,14 @@
            (progn
              (send *robot* :larm :shoulder-r :joint-angle 30)
              (send *robot* :rarm :shoulder-r :joint-angle -30))))
-   ))
+   :scale (vector (list 0.3 0 0 1)
+                  (list 0 0.3 1 0))
+   :height
+   (vector
+    (list #F(0 0 300) #F(0 0 0) #F(0 0 0) #F(0 0 100))
+    (list #F(0 0 0) #F(0 0 300) #F(0 0 100) #F(0 0 0)))
+   )
+  )
 
 (defun rotate-tolot
   (&optional (reverse? nil))
@@ -305,7 +335,7 @@ roseus
 (do-until-key (tolot-step :reverse? t))
 
 (send *tolot-hash* :enter :direction #(#F(100 0 0) #F(100 0 0)))
-(do-until-key (tolot-step :reverse? nil))
+(do-until-key (tolot-step :reverse? t))
 
 (send *tolot-hash* :enter :direction #(#F(50 100 0) #F(0 0 0)))
 
