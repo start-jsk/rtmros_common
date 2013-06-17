@@ -29,6 +29,8 @@
   (float-vector 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1))
 (defconstant *manip-mask-vector*
   (float-vector 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1))
+(defconstant *stand-mask-vector*
+  (float-vector 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0))
 
 (ros::roseus "atlas_interface")
 

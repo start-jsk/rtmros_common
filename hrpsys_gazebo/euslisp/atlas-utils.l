@@ -432,14 +432,27 @@
 ;;(interpolated-mode-change :e-start 20 :e-end 255 :mode :user :time 6000)
 
 (defun manipulation-mode (&key (height 0.8) (yaw 0.0) (lat 0.0))
-  ;; move to stand mode
-  (interpolated-mode-change :e-start 255 :e-end 100 :mode :stand :time 6000)
-  (interpolated-mode-change :e-start 100 :e-end 24 :mode :stand :time 6000)
-  (interpolated-mode-change :e-start 24  :e-end 0 :mode :stand :time 6000)
+  (real2model)
+  (let ((av (send *atlas* :angle-vector))
+        tmp)
+    (send *atlas* :stand-pose)
+    (setq tmp
+          (v+
+           (map float-vector #'(lambda (x y) (* x y)) av *manip-mask-vector*)
+           (map float-vector #'(lambda (x y) (* x y)) (send *atlas* :angle-vector) *stand-mask-vector*)))
+    (send *atlas* :angle-vector tmp))
+  (model2real :wait t :time 5000)
+
+  (send *atlas* :set-simulation-mode :stand
+        :effort 255 :effort-mask *manip-mask-vector*)
+
+  (unix::usleep (* 6 1000 1000)) ;; wait 6 sec
+
   (send *ri* :set-simulation-mode :mode :manipulate
         :effort 255 :effort-mask *manip-mask-vector*
         :use_desired t
-        :pelvis_height height :pelvis_yaw yaw :pelvis_lat lat))
+        :pelvis_height height :pelvis_yaw yaw :pelvis_lat lat)
+  )
 
 ;; clear octomap
 (defun clear-octomap ()
