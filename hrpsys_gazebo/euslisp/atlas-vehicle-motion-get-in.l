@@ -2,7 +2,7 @@
 ;; \file    atlas-vehicle-motion-get-in.l
 ;; \author  Murooka Masaki
 ;; \date    2013/06/15
-;; \brief   vrc_task_1関連 その他の行動要素関数
+;; \brief   vrc_task_1関連 車乗り込み行動要素関数
 ;;
 
 
@@ -21,8 +21,6 @@
   (lift-rleg-in-get-in-for-task1 :real real :wait wait)
 
   (lift-whole-body-in-get-in-for-task1 :real real :wait wait)
-
-  (move-to-seat-in-get-in-for-task1 :real real :wait t)
 
   ;; (grasp-larm-in-get-in-for-task1 :real real :wait wait)
   ;; (grasp-rarm-2-in-get-in-for-task1 :real real :wait wait)
@@ -90,7 +88,7 @@
 (defun grasp-rarm-in-get-in-for-task1
   (&key (real nil) (wait nil))
 
-  (warning-message 2 "[vhc-get-in] start (grasp-rarm-in-get-in-for-task1) in grasp rarm [get-in phase1]~%")
+  (warning-message 2 "[vhc-get-in] start (grasp-rarm-in-get-in-for-task1) [get-in phase1]~%")
 
   (let* ((pipe-coords
 	  (send (send (send *drcv* :handle :name :upper-left-pipe) :copy-worldcoords) :translate #f(0 0 0) :local)))
@@ -501,30 +499,6 @@
 
   (warning-message 2 "[vhc-get-in] finish (lift-whole-body-in-get-in-for-task1) [get-in phase-final]~%")
   )
-
-
-(defun move-to-seat-in-get-in-for-task1
-  (&key (real nil) (wait nil))
-
-  (warning-message 2 "[vhc-get-in] start (move-to-seat-in-get-in-for-task1) [move-to]~%")
-
-  (warning-message 2 "[vhc-get-in] loop boyon-boyon in move to seat [move-to]~%")
-  (when wait (my-wait))
-  (do-until-key
-   (send *atlas* :legs :knee-p :joint-angle 90)
-   (send *atlas* :legs :crotch-p :joint-angle 90)
-   (send *atlas* :torso :waist-r :joint-angle 40)
-   (send *irtviewer* :draw-objects)
-   (when real (model2real :time 200 :wait t))
-   (send *atlas* :legs :knee-p :joint-angle 90)
-   (send *atlas* :legs :crotch-p :joint-angle 90)
-   (send *atlas* :torso :waist-r :joint-angle 40)
-   (send *irtviewer* :draw-objects)
-   (when real (model2real :time 200 :wait t)))
-
-  (warning-message 2 "[vhc-get-in] finish (move-to-seat-in-get-in-for-task1) [move-to]~%"))
-
-
 
 
 

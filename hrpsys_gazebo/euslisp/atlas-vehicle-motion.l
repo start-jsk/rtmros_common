@@ -60,7 +60,7 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; vehicle motion [all]
+;; all vehicle motion
 (defun all-demo-task1
   (&key (real nil) (wait nil) (auto-walk-and-telep nil) (no-walk-and-telep nil))
 
@@ -75,6 +75,8 @@
     (walk-for-task1 :real real :wait wait :auto auto-walk-and-telep))
 
   (get-in-for-task1 :real real :wait wait :telep (or auto-walk-and-telep no-walk-and-telep))
+
+  (drive-for-task1 :real real :wait t :telep nil)
 
   (warning-message 2 "[vhc-init] finish(all-demo-task1)~%")
   )
@@ -98,42 +100,10 @@
 (load "package://hrpsys_gazebo/euslisp/atlas-vehicle-motion-get-in.l")
 
 
-(defun telep-side
-  (&key (real nil) (wait nil) (init nil) (telep t))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  (when init
-    (warning-message 2 "[vhc-get-in] call (my-init)~%")
-    (my-init :real real)
-    (send *irtviewer* :draw-objects))
-
-  (when (and real telep)
-    (warning-message 2 "[vhc-get-in] call (telep-start) and (stand-up-start)~%")
-    (my-init :real real)
-    (telep-start)
-    (stand-up-start))
-
-  (when real
-    (warning-message 2 "[vhc-get-in] call (manip)~%")
-    (when wait (my-wait))
-    (manip)
-    (send *irtviewer* :draw-objects))
-
-  (warning-message 2 "[vhc-get-in] call :teleport~%")
-  (when wait (my-wait))
-  (when (and real telep) 
-    (let* ((telep-coords (send *vehicle-side-pos* :copy-worldcoords))
-	   (telep-pos (send telep-coords :worldpos))
-	   (telep-rpy (car (rpy-angle (send telep-coords :rot)))))
-      (setq telep-coords (make-coords :pos (float-vector (elt telep-pos 0) (- (elt telep-pos 1)) (elt telep-pos 2))
-				      :rpy (list (- (elt telep-rpy 0)) (elt telep-rpy 1) (- (elt telep-rpy 2)))))
-      (send telep-coords :translate #f(-70 10 0) :local)
-      (send telep-coords :rotate -pi/2 :z)
-      (send *ri* :teleport-to (send (send telep-coords :copy-worldcoords) :translate #f(0 0 950) :world) nil :keep-effort t)
-      (send *atlas* :fix-leg-to-coords telep-coords '(:lleg :rleg))))
-  (send *irtviewer* :draw-objects)
-
-  (make-vehicle)
-  )
+;; vehicle motion [drive]
+(load "package://hrpsys_gazebo/euslisp/atlas-vehicle-motion-drive.l")
 
 
 
@@ -146,4 +116,3 @@
   (warn ";; demo : no walk and telep in side of vehicle~%")
   (warn "  (all-demo-task1 :real t :wait nil :no-walk-and-telep t)~%")
   )
-
