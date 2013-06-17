@@ -154,14 +154,32 @@
 	  (send *auto-controller-hash* :get :utsubuse)
 	  (send *auto-controller-hash* :get :compus)))
 
+(defvar *damage-count* nil)
+(defun score-callback
+  (msg)
+  (cond
+   ((null *damage-count*)
+    (setq *damage-count* (send msg :falls)))
+   ((not (eq (send msg :falls) *damage-count*))
+    (setq *damage-count* (send msg :falls))
+    (ros::publish
+     "atlas_gallop_controller/damage"
+     (instance std_msgs::empty :init)))))
 
 (ros::roseus-add-msgs "std_msgs")
 (ros::subscribe "/atlas_gallop_controller/command"
                 std_msgs::string
                 #'gallop-callback)
 
+(ros::roseus-add-msgs "atlas_msgs")
+(ros::subscribe "/vrc_score"
+                atlas_msgs::vrcscore
+                #'score-callback)
+
 (ros::advertise "atlas_gallop_controller/compus"
 		std_msgs::string)
+(ros::advertise "atlas_gallop_controller/damage"
+		std_msgs::empty)
 
 
 (defvar *pub-compus* 0)
