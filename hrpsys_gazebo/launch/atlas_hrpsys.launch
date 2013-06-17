@@ -7,7 +7,8 @@
   <arg name="USE_SCREENPOINT" default="true" />
   <arg name="USE_VIEW" default="false" />
   <arg name="USE_HAND"  default="true" />
-  <arg name="USE_IMAGE_TRANSPORT" default="false" />
+  <arg name="USE_IMAGE_TRANSPORT" default="true" />
+  <arg name="USE_OCTOMAP" default="true" />
 
   <include file="$(find hrpsys)/launch/hrpsys.launch" >
     <arg name="PROJECT_FILE" value="$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).xml" />
@@ -47,6 +48,12 @@
   <!-- image transport -->
   <include if="$(arg USE_IMAGE_TRANSPORT)"
            file="$(find hrpsys_gazebo)/launch/atlas_imagetransport.launch" />
+
+  <!-- octomap -->
+  <include if="$(arg USE_OCTOMAP)"
+           file="$(find hrpsys_gazebo)/launch/atlas_octomap.launch" >
+    <arg name="USE_TILT_LASER" value="false" />
+  </include>
 
   <!-- hand controller -->
   <include if="$(arg USE_HAND)"
