@@ -18,6 +18,7 @@
   (send *ri* :start-st)
   (when vel-mode
     (send *ri* :cmd-vel-mode))
+  t
   )
 
 
@@ -33,6 +34,7 @@
     (:stand (set-stand))
     (:manip (set-manip))
     (:my-manip (manip)))
+  t
   )
 
 
