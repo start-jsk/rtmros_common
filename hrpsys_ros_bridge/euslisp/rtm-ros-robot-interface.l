@@ -363,7 +363,25 @@
    (send self :go-pos-no-wait xx yy th)
    (send self :wait-foot-steps)
    (send self :stop-auto-balancer))
-  (:set-foot-steps-no-wait (fs) (send self :setFootSteps fs))
+  (:get-foot-step-param
+   ()
+   (send (send self :autobalancerservice_getfootstepparam) :i_param)
+   )
+  (:set-foot-steps-no-wait
+   (fs)
+   (let ((init-coords
+          (midcoords 0.5
+                     (send self :abc-footstep->eus-footstep (send (send self :get-foot-step-param) :rleg_coords))
+                     (send self :abc-footstep->eus-footstep (send (send *ri* :get-foot-step-param) :lleg_coords)))))
+     (send self :autobalancerservice_setfootsteps
+           :fs
+           (mapcar #'(lambda (f)
+                       (let ((lf (send (send init-coords :copy-worldcoords)
+                                       :transform f)))
+                         (send lf :put :l/r (send f :get :l/r))
+                         (send self :eus-footstep->abc-footstep lf)))
+                   fs))
+     ))
   (:set-foot-steps
    (fs)
    (send self :start-auto-balancer)
@@ -412,6 +430,11 @@
                              (send current-param :default_zmp_offsets))
                            :move_base_gain (if move-base-gain move-base-gain (send current-param :move_base_gain)))))
      (send self :autobalancerservice_setautobalancerparam :i_param param)))
+  (:abc-footstep->eus-footstep
+   (f)
+   (make-coords :pos (scale 1e3 (send f :pos))
+                :rot (quaternion2matrix (send f :rot)))
+   )
   (:eus-footstep->abc-footstep
    (f)
    (instance hrpsys::openhrp_autobalancerservice_footstep :init
