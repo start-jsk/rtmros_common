@@ -520,3 +520,6 @@
 (defun get-full-cloud (&optional (wait t))
   (when wait (get-tilt-laser))
   (get-tilt-laser))
+
+;; (send pt :filter :key #'(lambda (p) (and (> 700 (elt p 0) -700) (> 1400 (elt p 1) 400) (> 700 (elt p 2) -300))) :create t)
+;; (pcl::downsample pt 25.0 25.0 25.0)

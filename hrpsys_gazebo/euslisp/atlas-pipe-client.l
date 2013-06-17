@@ -31,3 +31,11 @@
      (return-from com (read strm)))
    (decf timeout 0.1))
   :break)
+
+;;;; walking to task position
+;; (com "(init-task)")
+;; (com "(walk-clickpos)")
+;; (com "(walk-turn :theta 30)")
+;;
+;;;; walking to task position
+;; (com

@@ -4,3 +4,11 @@
 
 (defun wobj (obj) ;; write object to standard-output
   (dump-structure *standard-output* obj))
+
+(defun init-task ()
+  (my-init)
+  (start-walk)
+  t
+  )
+
+;; walk-clickpos
