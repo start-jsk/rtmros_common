@@ -1,5 +1,5 @@
 (progn (load "atlas-interface.l")(atlas-init :set-reset-pose nil :set-user-mode nil))
-(send *ri* :teleport-to (make-coords :pos #f(-2700 -4200 1000)))
+(send *ri* :teleport-to (make-coords :pos #f(-2700 -4100 1000)))
 (progn (real2model) (model2real :wait t :time 10) (set-user) (set-kp 4000))
 
 
@@ -14,9 +14,18 @@
 
 (defun reach-and-pickup-hose
   (&key (hose-grasp-x-pos 400)
-	(hose-grasp-y-pos -550))
+	(hose-grasp-y-pos -650))
   (send *atlas* :reset-manip-pose :base-down t)
   ;;(send *atlas* :larm :angle-vector #f(30.0 90.0 0.0 -79.9998 15.0 0.0))
+  (send *atlas* :rarm :inverse-kinematics
+	(send (make-coords :pos (float-vector hose-grasp-x-pos -550 1300) :rpy (list 0 0 -pi/2)) :rotate pi/2 :y :world)
+	:debug-view :no-message :thre 5 :stop 200
+	:rotation-axis :z)
+  (send *atlas* :move-centroid-on-foot
+	:both '(:rleg :lleg :rarm)
+	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
+  (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+
   (send *atlas* :rarm :inverse-kinematics
 	(send (make-coords :pos (float-vector hose-grasp-x-pos hose-grasp-y-pos 1300) :rpy (list 0 0 -pi/2)) :rotate pi/2 :y :world)
 	:debug-view :no-message :thre 5 :stop 200
@@ -24,7 +33,7 @@
   (send *atlas* :move-centroid-on-foot
 	:both '(:rleg :lleg :rarm)
 	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
-  (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+  (progn (model2real :time 1000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
 
   (send *atlas* :rarm :inverse-kinematics
 	(send (make-coords :pos (float-vector hose-grasp-x-pos hose-grasp-y-pos 1100) :rpy (list 0 0 -pi/2)) :rotate pi/2 :y :world)
@@ -155,6 +164,56 @@
   (progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
   )
 
+(defun move-base-rot (ang)
+  (let* ((prc (send *atlas* :copy-worldcoords))
+	 (pav (send *atlas* :angle-vector))
+	 (lc (mapcar #'(lambda (ll) (send *atlas* ll :end-coords :copy-worldcoords)) '(:rleg :lleg))))
+    (send *atlas* :rotate (deg2rad ang) :z :world)
+    (let ((ret
+	   (mapcar #'(lambda (ll c)
+		       (send *atlas* ll :inverse-kinematics c))
+		   '(:rleg :lleg) lc)))
+      (if (every #'identity ret)
+	  (send *atlas* :angle-vector)
+	(progn
+	  (send *atlas* :newcoords prc)
+	  (send *atlas* :angle-vector pav)
+	  nil)
+	)
+      )))
+
+(defun mate-hose-by-larm ()
+  (send *atlas* :reset-manip-pose :base-down t)
+  (send *atlas* :rarm :angle-vector #f(-56.6679 67.8617 -23.1484 22.3583 -47.8993 28.1287))
+  (send *atlas* :torso :waist-y :joint-angle 35)
+  (move-base-rot 10)
+  (send *atlas* :move-centroid-on-foot
+  	:both '(:rleg :lleg)
+  	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
+  (progn (model2real :time 4000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+
+  (send *atlas* :larm :inverse-kinematics
+  	(send (send (make-coords :pos #f(300 400 1500) :rpy (list 0 0 -pi/2)) :rotate 0 :y :world) :rotate (deg2rad 30) :x)
+  	:debug-view :no-message :thre 10 :stop 200 :rotation-axis nil)
+  (send *atlas* :move-centroid-on-foot
+  	:both '(:rleg :lleg)
+  	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
+  (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+
+  (with-assoc-move-target
+   (mt :move-target (send (send (send *atlas* :larm :end-coords :copy-worldcoords) :rotate (deg2rad -30) :x) :translate (float-vector 0 80 100))
+       :parent-link (send *atlas* :larm :end-coords :parent))
+   (send *atlas* :inverse-kinematics
+	 (send (make-coords :pos #f(150 650 1200) :rpy (list 0 0 -pi/2)) :rotate (deg2rad 10) :z :world)
+	 :link-list (send *atlas* :link-list (send (car mt) :parent))
+	 :move-target (car mt)
+	 :debug-view :no-message :thre 10 :stop 200 :rotation-axis :z))
+  (send *atlas* :move-centroid-on-foot
+  	:both '(:rleg :lleg :larm)
+  	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg))
+	:centroid-thre 40)
+  (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+  )
 
 (defun do-all-for-hose
   ()
