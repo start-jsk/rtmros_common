@@ -265,13 +265,13 @@
        (send walk-goal :goal goal)
        (send bdi-action :send-goal walk-goal)
        )))
-  (:bdi_step_static (cds &key (l/r :lleg))
+  (:bdi_step_static (cds &key (l/r :lleg) ((:index idx) 0))
    (let ((walk-goal (send bdi-action :make-goal-instance))
          (goal (instance atlas_msgs::WalkDemoGoal :init))
          (k-effort (instantiate string 28)))
     (send goal :behavior atlas_msgs::WalkDemoGoal::*STEP*)
     ;;(send goal :step_params :use_demo_walk t)
-    (send goal :step_params :desired_step :step_index 1)
+    (send goal :step_params :desired_step :step_index idx)
     (send goal :step_params :desired_step :foot_index
           (case l/r (:lleg 0) (t 1)))  ;; :lleg -> 0 / :rleg -> 1
     (send goal :step_params :desired_step :duration 0.63) ;; not used??
