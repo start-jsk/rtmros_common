@@ -7,12 +7,38 @@
 (defun gallop-standby
   nil
   (my-init
+   :set-reset-pose nil
    :servo-gain
    (list (cons :all 13.0)))
   (setq *robot* *atlas*)
+  (objects *robot*)
+  (if (or (not (boundp '*irtviewer*))
+          *irtviewer*)
+      (progn
+        (require "package://hrpsys_gazebo/euslisp/no-display.l")
+        (make-irtviewer)))
   (tolot-init :reverse? t)
   (set-user)
-  (model2real_ 3000))
+  (model2real_ 3000)
+  (ros::roseus-add-msgs "std_msgs")
+  (ros::subscribe "/atlas_gallop_controller/command"
+                  std_msgs::string
+                  #'gallop-callback)
+  (ros::subscribe "/vrc/bytes/remaining/downlink"
+                  std_msgs::string
+                  #'remain-callback)
+  (ros::subscribe "/vrc/bytes/remaining/uplink"
+                  std_msgs::string
+                  #'remain-callback)
+  (ros::roseus-add-msgs "atlas_msgs")
+  (ros::subscribe "/vrc_score"
+                  atlas_msgs::vrcscore
+                  #'score-callback)
+  (ros::advertise "atlas_gallop_controller/compus"
+                  std_msgs::string)
+  (ros::advertise "atlas_gallop_controller/damage"
+                  std_msgs::empty)
+  )
 
 (defun gen-dict
   nil
@@ -166,6 +192,9 @@
 
 (defun atitude-update
   (&optional (goal (send *auto-controller-hash* :get :goal)))
+  (if (or (not (boundp '*atlas_rpy*))
+          (null *atlas_rpy*))
+      (setq *atlas_rpy* '(0 0 0)))
   (send *robot* :newcoords
 	(make-coords :rpy (mapcar #'deg2rad *atlas_rpy*)))
   (send *irtviewer* :draw-objects)
@@ -217,28 +246,6 @@
       (rotate-with-orient (send *auto-controller-hash* :get :goal))
       (setq *gallop-mode* :auto))
      )))
-
-(ros::roseus-add-msgs "std_msgs")
-(ros::subscribe "/atlas_gallop_controller/command"
-                std_msgs::string
-                #'gallop-callback)
-(ros::subscribe "/vrc/bytes/remaining/downlink"
-                std_msgs::string
-                #'remain-callback)
-(ros::subscribe "/vrc/bytes/remaining/uplink"
-                std_msgs::string
-                #'remain-callback)
-
-(ros::roseus-add-msgs "atlas_msgs")
-(ros::subscribe "/vrc_score"
-                atlas_msgs::vrcscore
-                #'score-callback)
-
-(ros::advertise "atlas_gallop_controller/compus"
-		std_msgs::string)
-(ros::advertise "atlas_gallop_controller/damage"
-		std_msgs::empty)
-
 
 (defvar *pub-compus* 0)
 (defvar *prev-pub-time* (send (ros::time) :now))
@@ -441,7 +448,7 @@
 (defun async-wall-controller-step
   nil
   (if *point-cloud*
-      (progn
+      (let ((goal (send *auto-controller-hash* :get :goal)))
 	(setq
 	 buf
 	 (normalize-vector
