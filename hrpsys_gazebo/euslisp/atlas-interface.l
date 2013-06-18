@@ -700,3 +700,10 @@
     (send *ri* :angle-vector (send *atlas* :angle-vector) 1000)
     (send *ri* :wait-interpolation)
     (send *ri* :stop-auto-balancer)))
+
+(defun reset-bdi-controller ()
+  (let ((req (instance atlas_msgs::ResetControlsRequest :init)))
+    (send req :reset_bdi_controller t)
+    (send req :reload_pid_from_ros t)
+    (ros::service-call "/atlas/reset_controls" req)
+    ))
