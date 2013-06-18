@@ -4,6 +4,11 @@
 (require "package://hrpsys_gazebo/euslisp/atlas-standup.l")
 (require "package://hrpsys_gazebo/euslisp/atlas-wall-detector.l")
 
+(ros::advertise "atlas_gallop_controller/compus"
+                std_msgs::string)
+(ros::advertise "atlas_gallop_controller/damage"
+                std_msgs::empty)
+
 (defun gallop-standby
   nil
   (my-init
@@ -22,10 +27,6 @@
   (set-user)
   (model2real_ 3000)
   (ros::roseus-add-msgs "std_msgs")
-  (ros::advertise "atlas_gallop_controller/compus"
-                  std_msgs::string)
-  (ros::advertise "atlas_gallop_controller/damage"
-                  std_msgs::empty)
   (ros::subscribe "/atlas_gallop_controller/command"
                   std_msgs::string
                   #'gallop-callback)
