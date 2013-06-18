@@ -16,7 +16,7 @@
     (progn
       (require "atlas-interface.l")
       (atlas-init))
-  (setq *atlas* (instance atlas-robot :init)))
+  (defvar *atlas* (instance atlas-robot :init)))
 (defvar *robot* *atlas*)
 (defvar *move-step-time* 100)
 
