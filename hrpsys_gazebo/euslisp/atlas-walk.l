@@ -168,6 +168,21 @@
   (move-centroid)
   (model2real :wait t))
 
+(defun snapshot-hand
+  ()
+
+  (let ((prev-angle (send *atlas* :rarm :angle-vector)))
+    (send *atlas* :rarm :shoulder-r :joint-angle 20)
+    (send *atlas* :rarm :shoulder-y :joint-angle 30)
+    (send *atlas* :rarm :elbow-p :joint-angle -90)
+    (send *atlas* :rarm :elbow-y :joint-angle 110)
+    (send *atlas* :rarm :wrist-y :joint-angle -20)
+    (model2real :wait t)
+    (unix::system "rosservice call /rhand_snap/snapshot")
+    (unix::system "rosservice call /lhand_snap/snapshot")
+    (send *atlas* :rarm :angle-vector prev-angle)
+    (model2real :wait t)))
+
 ;; (progn
 ;;   (start-walk)
 ;;   (turn 90)
