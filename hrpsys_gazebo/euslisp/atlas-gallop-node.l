@@ -137,12 +137,13 @@
 
 (defun gallop-callback
   (msg)
-  (describe msg)
+;  (describe msg)
   (let ((buf
          (cdr
           (find-if #'(lambda (a) (eq (aref (send msg :data) 0)
                                      (car a)))
                    (list
+		    (cons #\a :auto)
                     (cons #\q :qrot)
                     (cons #\p :prot)
                     (cons #\n :negaeri)
@@ -153,6 +154,11 @@
                     (cons #\l :left))))))
     (if (find buf '(:forward :tolot))
         (setq *forward-offset* (* -1 (send *auto-controller-hash* :get :compus))))
+    (if (find buf '(:auto))
+	(progn
+	  (setq *forward-offset* 0)
+	  (setq *point-cloud* nil)
+	  (rotate-with-orient (send *auto-controller-hash* :get :goal))))
     (setq *gallop-mode* buf)
     (setq *command-cnt* 5)
     ))
@@ -196,10 +202,31 @@
      "atlas_gallop_controller/damage"
      (instance std_msgs::empty :init)))))
 
+(defvar *auto-started* nil)
+(defun remain-callback
+  (msg)
+  (let ((buf (read-from-string (send msg :data))))
+    (cond
+     (*auto-started* nil)
+     ((and (numberp buf) (<= buf 0))
+      (setq *auto-started* t)
+      (setq *gallop-mode* nil)
+      (setq *forward-offset* 0)
+      (setq *point-cloud* nil)
+      (rotate-with-orient (send *auto-controller-hash* :get :goal))
+      (setq *gallop-mode* :auto))
+     )))
+
 (ros::roseus-add-msgs "std_msgs")
 (ros::subscribe "/atlas_gallop_controller/command"
                 std_msgs::string
                 #'gallop-callback)
+(ros::subscribe "/vrc/bytes/remaining/downlink"
+                std_msgs::string
+                #'remain-callback)
+(ros::subscribe "/vrc/bytes/remaining/uplink"
+                std_msgs::string
+                #'remain-callback)
 
 (ros::roseus-add-msgs "atlas_msgs")
 (ros::subscribe "/vrc_score"
@@ -247,6 +274,7 @@
      (:left (play :qrot))
      (:qrot (play :qrot))
      (:stop (play :stop))
+     (:auto (async-wall-controller-step))
      (:negaeri (negaeri-once)))
    (ros::spin-once)
    (ros::sleep)
@@ -409,6 +437,28 @@
            (forward-controller *forward-offset*)))))
   )
 
+(defun async-wall-controller-step
+  nil
+  (if *point-cloud*
+      (progn
+	(setq
+	 buf
+	 (normalize-vector
+	  (v+
+	   goal
+	   (map float-vector
+		#'*
+		#f(0.05 0.005 0)
+		(wall-potential
+		 :point-cloud *point-cloud*
+		 :pc-coords nil
+		 :min-height 1500)))))
+	(setq *forward-offset*
+	      (* (if (minusp (aref (v* buf goal) 2)) 1 -1)
+		 (rad2deg (acos (v. buf goal)))))
+	(setq *point-cloud* nil)))
+  (forward-controller *forward-offset*))
+
 (defun async-wall-controller
   (&key
    (goal (send *auto-controller-hash* :get :goal))
@@ -420,26 +470,8 @@
    (ros::spin-once)
    (ros::sleep)
    (atitude-update)
-   (if *point-cloud*
-       (progn
-         (setq
-          buf
-          (normalize-vector
-           (v+
-            goal
-            (map float-vector
-                 #'*
-                 #f(0.05 0.005 0)
-                 (wall-potential
-                  :point-cloud *point-cloud*
-                  :pc-coords nil
-                  :min-height 1500)))))
-         (setq *forward-offset*
-               (* (if (minusp (aref (v* buf goal) 2)) 1 -1)
-                  (rad2deg (acos (v. buf goal)))))
-         (setq *point-cloud* nil)))
-   (forward-controller *forward-offset*))
-  )
+   (async-wall-controller-step)
+   ))
 
 
 #|
