@@ -17,7 +17,7 @@
 
 (setq *org-points2* (with-open-file (f (ros::resolve-ros-path "package://hrpsys_gazebo/euslisp/car-right-side.l"))
                             (read f)))
-(send *org-points* :point-color #f(1 1 0))
+(send *org-points2* :point-color #f(1 1 0))
 
 ;; pelvis relative coords
 (setq *point-a* (float-vector 230.0 -650.0 380.0))
@@ -71,7 +71,10 @@
       (send pre-cds :transform cds :world)
       pre-cds
       )))
-
+;;
+;; origin points -> x = 350, y = 300
+;;
+;;
 (defun calc-transform-pelvis2 (in-points pointa pointb
                                         &optional (midp *point-mid2*)
                                         (orgpt *org-points2*))
@@ -87,7 +90,7 @@
     (setq trans (v- midp point-mid))
 
     (setq pre-cds (make-coords :pos trans))
-
+    (pprint pre-cds)
     (setq max_x (+ (elt point-mid 0) 1150))
     (setq min_x (- max_x 2400))
     (setq min_y (- (elt point-mid 1) 700))
@@ -102,6 +105,39 @@
            (send points :transform-points pre-cds :create t))
           cds)
       (setq  cds (pcl::registration-raw npoints orgpt pcl::*REGIST_GICP*))
+      (pprint cds)
       (send pre-cds :transform cds :world)
       pre-cds
+      )))
+
+(defun get-diff-vehicle-pos
+  (&key (waist-y-angle 35) (neck-p-angle 30))
+
+  (set-high-gain)
+  (unix::usleep (* 5 1000 1000))
+  (setq *lr-reverse* nil)
+
+  (real2model)
+
+  (send *atlas* :torso :waist-y :joint-angle waist-y-angle)
+  (send *atlas* :head :neck-p :joint-angle neck-p-angle)
+  (model2real :time 5000 :wait t)
+
+  (let* (points p1 p2)
+    (setq points (progn (get-tilt-laser) (get-tilt-laser)))
+    (warn ";; click p1~%")
+    (my-wait)
+    (setq p1 (progn (ros::spin-once) (send *ri* :get :point)))
+    (warn ";; click p2~%")
+    (my-wait)
+    (setq p2 (progn (ros::spin-once) (send *ri* :get :point)))
+    (let* ((res-coords (calc-transform-pelvis2 points p1 p2))
+           (res-x (elt (send res-coords :worldpos) 0))
+           (res-y (elt (send res-coords :worldpos) 1))
+           (dest-x 350)
+           (dest-y 300)
+           (diff-x (- dest-x res-x))
+           (diff-y (- dest-y res-y)))
+      (warn "diff-x: ~a diff-y:~a~%" diff-x diff-y)
+      (list diff-x diff-y)
       )))
