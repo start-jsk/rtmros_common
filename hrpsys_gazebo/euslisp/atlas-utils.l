@@ -159,9 +159,16 @@
     (case limb (:larm (setq limb :rarm)) (:rarm (setq limb :larm)) (:lleg (setq limb :rleg)) (:rleg (setq limb :lleg))))
   (atlas-set-servo-gain-by-torque-limit 1000.0 limb))
 
-(defun manip ()
+(defun manip (&key (smooth nil))
   (warning-message 1 "[altas-utils] set mode and effort for manipulation~%")
-  (set-user nil)
+  (set-stand nil)
+
+  (when smooth
+    ;; (set-effort 0 :torso)
+    ;; (set-middle-gain :legs)
+    (let ((start-effort (car (get-effort :lleg))))
+      (dotimes (i 20)
+        (set-effort (* (/ (- 20 i) 20.0) start-effort) :legs))))
   (set-effort 0 :legs)
   (set-effort 255 :torso)
   (set-effort 255 :arms)

@@ -10,11 +10,14 @@
 
 ;; vehicle motion [get-in]
 (defun get-in-for-task1
-  (&key (real nil) (wait nil) (telep nil))
+  (&key (real nil) (wait nil) (telep nil) (after-walk nil))
 
   (warning-message 2 "[vhc-get-in] start (get-in-for-task1)~%")
 
-  (telep-in-get-in-for-task1 :real real :wait wait :telep telep)
+  (make-vehicle)
+
+  (unless after-walk
+    (telep-in-get-in-for-task1 :real real :wait wait :telep telep))
 
   (grasp-rarm-in-get-in-for-task1 :real real :wait wait)
 

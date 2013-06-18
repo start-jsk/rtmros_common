@@ -1,8 +1,8 @@
 (defun start-walk
   (&key (real t) (vel-mode nil) (before-get-in-vehicle nil))
 
-  (let (prev-av lleg-av rleg-av
-		prev-leg-width dest-leg-width (thre-leg-width 30) (set-high-gain-p nil))
+  (let (prev-av lleg-av rleg-av)
+
     (when real
       (real2model)
       (model2real :wait t :time 10)
@@ -13,22 +13,18 @@
       (set-user))
 
     (setq prev-av (send *atlas* :angle-vector))
-    (fix-leg)
-    (setq prev-leg-width (abs (elt (apply #'v- (send-all (send *atlas* :legs :end-coords) :worldpos)) 1)))
 
     (when before-get-in-vehicle
       (send *atlas* :angle-vector
 	    #f(0.0 0.0 0.0 23.5 114.5 0.0 -75.0 17.0 0.0 -135.0 129.6 -71.6129 79.9998 60.7501 0.0 61.5619 -1.79235 -35.568 1.79235 -25.994 0.012938 61.5446 1.91967 -35.5619 -1.91967 -25.9828 0.01294 0.0))
+
+      (setq prev-av (send *atlas* :angle-vector))
       (grasp :arm :rarm :real real)
       (ungrasp :arm :larm :real real)
       )
 
     ;; 足だけwalk-poseにする
     (send *atlas* :walk-pose)
-    (setq dest-leg-width (abs (elt (apply #'v- (send-all (send *atlas* :legs :end-coords) :worldpos)) 1)))
-
-    (when (> (abs (- prev-leg-width dest-leg-width)) thre-leg-width)
-      (setq set-high-gain-p t))
 
     (setq lleg-av (send *atlas* :lleg :angle-vector))
     (setq rleg-av (send *atlas* :rleg :angle-vector))
@@ -37,10 +33,7 @@
     (send *atlas* :rleg :angle-vector rleg-av)
     (send *atlas* :head :neck-p :joint-angle 50)
     (fix-leg)
-    (cond (before-get-in-vehicle
-	   (send *atlas* :move-centroid-on-foot :both '(:rleg :lleg)
-		 :target-centroid-pos (v+ (float-vector 50 0 0) (apply #'midpoint 0.5 (send-all (send *atlas* :legs :end-coords :parent) :worldpos)))))
-	  (t (move-centroid)))
+    (move-centroid)
 
     (when real
       (model2real :wait t :time 5000)
@@ -52,9 +45,9 @@
           (warn ";; legs end-coords difference = ~A ;set legs to very-high-gain~%" (check-foot-distance))
           (atlas-set-servo-gain-by-torque-limit 0.01 :legs)
           (while (and (< 0 timeout) (< max-distance (check-foot-distance)))
-                 (warn ";; legs end-coords difference = ~A~%" (check-foot-distance))
-                 (unix::usleep (* 500 1000))
-                 (decf timeout))
+            (warn ";; legs end-coords difference = ~A~%" (check-foot-distance))
+            (unix::usleep (* 500 1000))
+            (decf timeout))
           (atlas-set-servo-gain-by-torque-limit 1.0 :legs)
           (model2real :wait t :time 5000) ; wait 5s in sim time
           ))
@@ -81,15 +74,15 @@
 (defun finish-walk
   (&key (real t) (mode :user))
 
-  (when real
-    (when (or (equal mode :stand) (equal mode :manip) (equal mode :my-manip))
-      (modify-leg-stride #f(0 50 0)))
-    (send *ri* :stop-auto-balancer)
-    (send *ri* :stop-st))
-  (when (or (equal mode :stand) (equal mode :manip) (equal mode :my-manip))
-    ;; 足だけbdi-stand-poseにする
-    (let ((prev-av (send *atlas* :angle-vector))
-          lleg-av rleg-av)
+  (let ((prev-av (send *atlas* :angle-vector))
+        lleg-av rleg-av)
+    (when real
+      (when (or (equal mode :stand) (equal mode :manip) (equal mode :my-manip) (equal mode :user-change-pose))
+        (modify-leg-stride #f(0 63.5 0)))
+      (send *ri* :stop-auto-balancer)
+      (send *ri* :stop-st))
+    (when (or (equal mode :stand) (equal mode :manip) (equal mode :my-manip) (equal mode :user-change-pose))
+      ;; 足だけbdi-stand-poseにする
       (send *atlas* :bdi-stand-pose)
       (setq lleg-av (send *atlas* :lleg :angle-vector))
       (setq rleg-av (send *atlas* :rleg :angle-vector))
@@ -97,15 +90,17 @@
       (send *atlas* :lleg :angle-vector lleg-av)
       (send *atlas* :rleg :angle-vector rleg-av)
       (fix-leg)
-      (move-centroid))
-    (when real (model2real :wait t :time 5000)))
+      (move-centroid)
+      (when real (model2real :wait t :time 5000)))
 
-  (when real
-    (case mode
-      (:stand (set-stand))
-      (:manip (set-manip))
-      (:my-manip (manip))))
-  t)
+    (when real
+      (case mode
+        (:stand (reset-bdi-controller) (set-stand))
+        (:manip (reset-bdi-controller) (set-manip))
+        (:my-manip (reset-bdi-controller) (manip))
+        ;;(:my-manip (manip :smooth t))
+        ))
+    t))
 
 (defun walk-clickpos
   ()
@@ -172,4 +167,13 @@
   (fix-leg)
   (move-centroid)
   (model2real :wait t))
+
+;; (progn
+;;   (start-walk)
+;;   (turn 90)
+;;   (finish-walk)
+;;   (start-walk :before-get-in-vehicle t)
+;;   (walk 0.5)
+;;   (finish-walk :mode :my-manip)
+;;   (get-in-for-task1 :real t))
 

@@ -11,6 +11,27 @@
 (load "package://hrpsys_gazebo/euslisp/atlas-vehicle-motion-utils.l")
 (load "package://hrpsys_gazebo/euslisp/atlas-interface.l")
 
+;; (progn
+;;   (my-init :real t)
+
+;;   (setq *lr-reverse* t)
+;;   (start-walk)
+;;   (turn 90)
+;;   (finish-walk)
+
+;;   (setq *lr-reverse* t)
+;;   (start-walk :before-get-in-vehicle t)
+;;   (walk 0.5)
+;;   (finish-walk :mode :manip)
+;;   ;; (finish-walk :mode :user-change-pose)
+
+;;   (setq *lr-reverse* t)
+;;   (get-in-for-task1 :real t :after-walk t))
+
+
+;; (get-diff-vehicle-pos)
+
+
 
 ;; setting
 (defun make-vehicle ()
@@ -43,6 +64,9 @@
 (defun stand-up-start ()
   (warning-message 1 "[vhc] [cheating!!] called (stand-up-start)~%")
   (send *ri* :teleport-to (make-coords :pos (v+ (send *vehicle-start-pos* :worldpos) #f(0 0 950)) :rpy (list -pi/2 0 0))))
+(defun stand-up-road ()
+  (warning-message 1 "[vhc] [cheating!!] called (stand-up-start)~%")
+  (send *ri* :teleport-to (make-coords :pos (v+ (send *vehicle-side-pos* :worldpos) #f(2000 0 950)) :rpy (list 0 0 0))))
 
 ;;;; only teleport to starting point (not set harnessed) [cheating!!]
 (defun telep-start ()
