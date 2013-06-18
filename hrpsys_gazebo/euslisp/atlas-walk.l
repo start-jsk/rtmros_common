@@ -4,19 +4,11 @@
   (when real
     (real2model)
     (model2real :wait t :time 10)
-
     (atlas-set-servo-gain-by-torque-limit 1.0 :legs)
     (atlas-set-servo-gain-by-torque-limit 2.0 :torso)
     (atlas-set-servo-gain-by-torque-limit 4.0 :arms)
     (atlas-set-servo-gain-by-torque-limit 5.0 :head)
-    (unix::usleep (* 5 1000 1000))
-
     (set-user))
-
-  ;; (send *atlas* :legs :move-end-pos #f(0 0 70) :world)
-  (send *atlas* :head :neck-p :joint-angle 50)
-  (fix-leg)
-  (move-centroid)
 
   ;; 足だけwalk-poseにする
   (let ((prev-av (send *atlas* :angle-vector))
@@ -27,15 +19,12 @@
     (send *atlas* :angle-vector prev-av)
     (send *atlas* :lleg :angle-vector lleg-av)
     (send *atlas* :rleg :angle-vector rleg-av)
-    (send *atlas* :move-centroid-on-foot :both '(:lleg :rleg))
-    )
+    (send *atlas* :head :neck-p :joint-angle 50)
+    (fix-leg)
+    (move-centroid))
 
   (when real
-    (atlas-set-servo-gain-by-torque-limit 0.01 :legs)
-    (unix::usleep (* 5 1000 1000))
     (model2real :wait t :time 10000)
-    (atlas-set-servo-gain-by-torque-limit 1.0 :legs)
-    (unix::usleep (* 5 1000 1000))
     (send *ri* :start-st)
     (when vel-mode
       (warning-message 1 " rosrun pr2_teleop teleop_pr2_keyboard~%")
@@ -44,21 +33,26 @@
   t)
 
 (defun finish-walk
-  (&key (real t) (mode :my-manip))
+  (&key (real t) (mode :user))
 
   (when real
+    (when (or (equal mode :stand) (equal mode :manip) (equal mode :my-manip))
+      (modify-leg-stride #f(0 50 0)))
     (send *ri* :stop-auto-balancer)
     (send *ri* :stop-st))
   (when (or (equal mode :stand) (equal mode :manip) (equal mode :my-manip))
-    ;; (send *atlas* :legs :move-end-pos #f(0 0 -70) :world)
-    (send *atlas* :rleg :move-end-pos #f(0 -50 -70) :world)
-    (send *atlas* :lleg :move-end-pos #f(0 50 -70) :world)
-    (when real
-      (atlas-set-servo-gain-by-torque-limit 0.01 :legs)
-      (unix::usleep (* 5 1000 1000))
-      (model2real :wait t :time 5000)
-      (atlas-set-servo-gain-by-torque-limit 1.0 :legs)
-      (unix::usleep (* 5 1000 1000))))
+    ;; 足だけbdi-stand-poseにする
+    (let ((prev-av (send *atlas* :angle-vector))
+          lleg-av rleg-av)
+      (send *atlas* :bdi-stand-pose)
+      (setq lleg-av (send *atlas* :lleg :angle-vector))
+      (setq rleg-av (send *atlas* :rleg :angle-vector))
+      (send *atlas* :angle-vector prev-av)
+      (send *atlas* :lleg :angle-vector lleg-av)
+      (send *atlas* :rleg :angle-vector rleg-av)
+      (fix-leg)
+      (move-centroid))
+    (when real (model2real :wait t :time 5000)))
 
   (when real
     (case mode
@@ -83,4 +77,5 @@
 
   (setq theta (if (equal lr :left) (abs theta) (- (abs theta))))
   (send *ri* :go-pos 0 0 theta))
+
 
