@@ -21,21 +21,57 @@
 (defun command-raw (com &optional (strm *fork-stream*))
   (format strm "~A~%" com))
 
-(defun com (com &optional (timeout 10.0) (strm *fork-stream*))
-  ;;(while (rd-p)  (read-line nil nil)) ;; flush stream
-  (format strm "(wobj ~A)~%" com)
+(defun com (com-str &optional (timeout 10.0) (strm *fork-stream*))
+  (print 'com)
+  (while (rd-p)  (read-line nil nil)) ;; flush stream
+  (print 'finishread)
+  (format strm "(wobj ~A)~%" com-str)
   (do-until-key
    (unless (> timeout 0)
      (return-from com :timeout))
    (when (rd-p strm 0.1)
+     (print 'read)
      (return-from com (read strm)))
    (decf timeout 0.1))
   :break)
 
-;;;; walking to task position
-;; (com "(init-task)")
-;; (com "(walk-clickpos)")
-;; (com "(walk-turn :theta 30)")
-;;
-;;;; walking to task position
-;; (com
+(defun com2 (com-str &optional (timeout 10.0) (strm *fork-stream*))
+  (while (rd-p)  (read-line nil nil)) ;; flush stream
+  (format strm "(calc-size ~A)~%" com-str)
+  (do-until-key
+   (unless (> timeout 0)
+     (return-from com2 :timeout))
+   (when (rd-p strm 0.1)
+     (return-from com2 (read strm)))
+   (decf timeout 0.1))
+  :break)
+
+(defun com-large (com-str &optional (timeout 10.0) (strm *fork-stream*))
+  (let ((size (com2 com-str)))
+    (cond
+     ((numberp size)
+      (when (y-or-n-p (format nil ";; Can you get object with size ~D.  " size))
+        (format strm "(get-prev)~%")
+        (do-until-key
+         (unless (> timeout 0)
+           (return-from com-large :timeout))
+         (when (rd-p strm 0.1)
+           (return-from com-large (read strm)))
+         (decf timeout 0.1)))
+      :break)
+     (t size))))
+
+(defun simple-init ()
+  (com "(simple-init)"))
+
+(defun get-angle ()
+  (com "(send *ri* :state :potentio-vector)"))
+
+(defun get-click-point ()
+  (com "(get-point)"))
+
+(defun get-map-cloud ()
+  (com-large "(get-octomap)"))
+
+(defun get-cloud ()
+  (com-large "(let ((pt (get-full-cloud))) (send pt :filter :key #'(lambda (p) (< (norm p) 6000))) (pcl::downsample pt 33.0 33.0 33.0))"))

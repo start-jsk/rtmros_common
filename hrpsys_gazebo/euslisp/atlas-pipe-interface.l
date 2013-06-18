@@ -5,10 +5,29 @@
 (defun wobj (obj) ;; write object to standard-output
   (dump-structure *standard-output* obj))
 
+(defun simple-init ()
+  (atlas-init :set-reset-pose nil
+              :set-user-mode nil
+              :unset-limit nil)
+  t)
+
 (defun init-task ()
   (my-init)
   (start-walk)
   t
   )
 
-;; walk-clickpos
+(defun calc-size (obj)
+  (setq *prev-obj* obj)
+  (let ((str-strm (make-string-output-stream)))
+    (dump-structure str-strm obj)
+    (setq *prev-strm* str-strm)
+    (send str-strm :count)))
+
+(defun get-prev ()
+  (when *prev-strm*
+    (prog1
+        (format *standard-output* "~A" (get-output-stream-string *prev-strm*))
+      (setq *prev-strm* nil
+            *prev-obj* nil))
+    ))
