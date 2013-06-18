@@ -525,3 +525,52 @@
 
 ;; (send pt :filter :key #'(lambda (p) (and (> 700 (elt p 0) -700) (> 1400 (elt p 1) 400) (> 700 (elt p 2) -300))) :create t)
 ;; (pcl::downsample pt 25.0 25.0 25.0)
+
+
+(defun safety-fall-down nil
+  ;; (let* ((tc (list (send (send *atlas* :rleg :end-coords :copy-worldcoords) :translate #f(0 0 450) :world)
+  ;; 		   (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(0 0 450) :world)
+  ;; 		   nil
+  ;; 		   nil)))
+  ;;   (with-move-target-link-list
+  ;;    (mt ll *atlas* '(:rleg :lleg :rarm :larm))
+  ;;    (send *atlas* :fullbody-inverse-kinematics
+  ;; 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
+  ;; 	   :link-list ll :move-target mt
+  ;; 	   :collision-avoidance-link-pair nil
+  ;; 	   :stop 1000
+  ;; 	   :translation-axis '(t t t t)
+  ;; 	   :rotation-axis '(t t t t)
+  ;; 	   :thre '(5 5 10 10)
+  ;; 	   :rthre (list (deg2rad 2) (deg2rad 2) (deg2rad 2) (deg2rad 2))
+  ;; 	   :target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:larm :lleg))
+  ;; 	   :centroid-thre 500))
+  ;;   )
+
+  (send *atlas* :angle-vector #f(33.5356 46.4636 14.0039 64.2606 95.3945 -24.981 -79.9998 -25.5105 15.0798 -23.0551 150.466 -40.8152 62.3277 6.39616 -79.6342 133.101 2.05166 -69.9106 -0.370845 -51.5662 13.6866 133.288 5.99313 -72.0902 -10.4833 -50.4458 -16.8264 -35.0))
+  (progn (model2real :time 5000)(send *ri* :wait-interpolation))
+
+  ;; (send *atlas* :larm :inverse-kinematics
+  ;; 	(make-coords :pos #f(-100 400 -250))
+  ;; 	:debug-view t :thre 10 :stop 200 :rotation-axis nil)
+
+  ;; (send *atlas* :rarm :inverse-kinematics
+  ;; 	(make-coords :pos #f(50 -200 -250))
+  ;; 	:debug-view t :thre 10 :stop 200 :rotation-axis nil)
+
+  ;; (send *atlas* :move-centroid-on-foot
+  ;; 	:both '(:rleg :lleg )
+  ;; 	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg))
+  ;; 	:centroid-thre 40)
+
+  (send *atlas* :angle-vector #f(33.5356 46.4636 14.0039 64.2606 95.3945 -24.981 -79.9998 -25.5105 15.0798 -26.4997 154.671 -17.5356 69.7715 -18.2152 -72.1545 133.003 -5.39242 -77.1493 6.91985 -44.144 14.013 134.584 -4.13608 -76.1416 -0.52805 -47.872 -16.8734 -35.0))
+  (progn (model2real :time 3000) (send *ri* :wait-interpolation))
+
+  ;;(send *atlas* :rleg :knee-p :joint-angle 141)
+  ;;(send *atlas* :lleg :knee-p :joint-angle 141)
+  ;;(send *atlas* :rleg :ankle-p :joint-angle -20)
+  ;;(send *atlas* :lleg :ankle-p :joint-angle -20)
+
+  (send *atlas* :angle-vector #f(33.5356 46.4636 14.0039 64.2606 95.3945 -24.981 -79.9998 -25.5105 15.0798 -26.4997 154.671 -17.5356 69.7715 -18.2152 -72.1545 140.375 -5.39242 -77.1493 6.91985 -20.0 14.013 140.375 -4.13608 -76.1416 -0.52805 -20.0 -16.8734 -35.0))
+  (progn (model2real :time 5000) (send *ri* :wait-interpolation))
+)
