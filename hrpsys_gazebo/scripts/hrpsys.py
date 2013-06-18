@@ -14,6 +14,20 @@ class ATLASHrpsysConfigurator(HrpsysConfigurator):
         if (len(s_rate)>0) and self.rh.port(s_rate[0].name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
             disconnectPorts(self.rh.port(s_rate[0].name), self.kf.port("rate"))
             connectPorts(self.rh.port(s_rate[0].name), self.kf.port("rpyIn"))
+        # delete co
+        disconnectPorts(self.rh.port("q"), self.co.port("qCurrent"))
+        disconnectPorts(self.st.port("q"), self.co.port("qRef"))
+        disconnectPorts(self.co.port("q"), self.el.port("qRef"))
+        connectPorts(self.st.port("q"), self.el.port("qRef"))
+
+#    # delete co
+#    def getRTCList(self):
+#        return [self.rh, self.seq, self.sh, self.tf, self.kf, self.vs, self.ic, self.abc, self.st, self.el, self.log]
+
+#    def activateComps(self):
+#        HrpsysConfigurator.activateComps(self)
+#        # stop co
+#        self.co.stop()
 
     def init(self, robotname="Robot", url=""):
         HrpsysConfigurator.init(self, robotname, url)
