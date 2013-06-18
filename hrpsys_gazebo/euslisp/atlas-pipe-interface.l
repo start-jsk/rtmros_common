@@ -22,12 +22,17 @@
   (let ((str-strm (make-string-output-stream)))
     (dump-structure str-strm obj)
     (setq *prev-strm* str-strm)
-    (send str-strm :count)))
+    (print (send str-strm :count))
+    ))
 
 (defun get-prev ()
   (when *prev-strm*
     (prog1
-        (format *standard-output* "~A" (get-output-stream-string *prev-strm*))
+        (format *standard-output* "~A~%" (get-output-stream-string *prev-strm*))
       (setq *prev-strm* nil
             *prev-obj* nil))
     ))
+
+(defun prev-size ()
+  (when *prev-strm*
+    (print (send *prev-strm* :count))))
