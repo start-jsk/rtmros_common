@@ -1,4 +1,7 @@
 ;;(setq *fork-stream* (piped-fork "ssh" "leus@133.11.216.144" "roseus \"~/ros/fuerte/rtm-ros-robotics/rtmros_common/hrpsys_gazebo/euslisp/atlas-pipe-interface.l\""))
+;;(load "package://hrpsys_gazebo/euslisp/atlas-interface.l")
+
+(make-irtviewer) ;; irtviewer blocked after connection ....
 
 (defun connect-atlas (&optional (host "fc2")
                                 (com "roseus \"~/ros/fuerte/rtm-ros-robotics/rtmros_common/hrpsys_gazebo/euslisp/atlas-pipe-interface.l\""))
@@ -21,44 +24,66 @@
 (defun command-raw (com &optional (strm *fork-stream*))
   (format strm "~A~%" com))
 
-(defun com (com-str &optional (timeout 10.0) (strm *fork-stream*))
-  (print 'com)
-  (while (rd-p)  (read-line nil nil)) ;; flush stream
-  (print 'finishread)
-  (format strm "(wobj ~A)~%" com-str)
-  (do-until-key
-   (unless (> timeout 0)
-     (return-from com :timeout))
-   (when (rd-p strm 0.1)
-     (print 'read)
-     (return-from com (read strm)))
-   (decf timeout 0.1))
-  :break)
+(defun com (com-str &optional (timeout 10.0) (strm *fork-stream*) (return-size))
+  ;;(print 'com)
+  (while (rd-p) (read-line strm nil nil)) ;; flush stream
+  ;;(print 'finishread)
+  (if return-size
+      (format strm "(calc-size ~A)~%" com-str)
+    (format strm "(wobj ~A)~%" com-str))
+  (let ((last :timeout) read-one)
+    (do-until-key
+     (unless (> timeout 0) (return-from com last))
+     (cond
+      ((rd-p strm 0.1)
+       (setq read-one t)
+       (setq last (read strm)))
+      (read-one
+       (return-from com last)))
+     (decf timeout 0.1))
+    :break))
 
-(defun com2 (com-str &optional (timeout 10.0) (strm *fork-stream*))
-  (while (rd-p)  (read-line nil nil)) ;; flush stream
-  (format strm "(calc-size ~A)~%" com-str)
-  (do-until-key
-   (unless (> timeout 0)
-     (return-from com2 :timeout))
-   (when (rd-p strm 0.1)
-     (return-from com2 (read strm)))
-   (decf timeout 0.1))
-  :break)
+(defun com-size (com-str &optional (timeout 10.0) (strm *fork-stream*))
+  (com com-str timeout strm t))
 
 (defun com-large (com-str &optional (timeout 10.0) (strm *fork-stream*))
-  (let ((size (com2 com-str)))
+  (let ((size (com-size com-str timeout strm)))
     (cond
      ((numberp size)
       (when (y-or-n-p (format nil ";; Can you get object with size ~D.  " size))
         (format strm "(get-prev)~%")
-        (do-until-key
-         (unless (> timeout 0)
-           (return-from com-large :timeout))
-         (when (rd-p strm 0.1)
-           (return-from com-large (read strm)))
-         (decf timeout 0.1)))
-      :break)
+        (let ((last :timeout) read-one)
+          (do-until-key
+           (unless (> timeout 0) (return-from com-large last))
+           (cond
+            ((rd-p strm 0.1)
+             (setq read-one t)
+             (setq last (read strm)))
+            (read-one
+             (return-from com-large last)))
+           (decf timeout 0.1))
+          :break)))
+     ((null size) :no-size)
+     (t size))))
+
+(defun com-large (com-str &optional (timeout 10.0) (strm *fork-stream*))
+  (let ((size (com-size com-str timeout strm)))
+    (cond
+     ((numberp size)
+      (when (y-or-n-p (format nil ";; Can you get object with size ~D.  " size))
+        (com "(get-prev)")
+        ))
+     ((null size) :no-size)
+     (t size))))
+
+(defun retry-large (com-str &optional (timeout 10.0) (strm *fork-stream*))
+  (let ((size (com "(prev-size)" timeout strm)))
+    (cond
+     ((numberp size)
+      (when (y-or-n-p (format nil ";; Can you get object with size ~D.  " size))
+        (com "(get-prev)")
+        ))
+     ((null size) :no-size)
      (t size))))
 
 (defun simple-init ()
@@ -67,11 +92,16 @@
 (defun get-angle ()
   (com "(send *ri* :state :potentio-vector)"))
 
+(defun get-imu ()
+  (com "(send *ri* :state :imucoords)"))
+
 (defun get-click-point ()
   (com "(get-point)"))
 
 (defun get-map-cloud ()
-  (com-large "(get-octomap)"))
+  (com-large "(get-octomap)" 180))
 
-(defun get-cloud ()
-  (com-large "(let ((pt (get-full-cloud))) (send pt :filter :key #'(lambda (p) (< (norm p) 6000))) (pcl::downsample pt 33.0 33.0 33.0))"))
+(defun get-cloud (&key (size 40.0) (round 2000.0))
+  (com-large
+   (format nil "(let ((pt (get-full-cloud))) (send pt :filter :key #'(lambda (p) (< (norm p) ~f))) (pcl::downsample pt ~f ~f ~f))"
+           round size size size) 360))
