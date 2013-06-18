@@ -11,12 +11,12 @@
    nil
    (send (send self :child-link) :worldpos)))
 
-(defvar *gazebo-flag* nil)
-(if *gazebo-flag*
-    (progn
-      (require "atlas-interface.l")
-      (atlas-init))
-  (defvar *atlas* (instance atlas-robot :init)))
+;; (defvar *gazebo-flag* nil)
+;; (if *gazebo-flag*
+;;     (progn
+;;       (require "atlas-interface.l")
+;;       (atlas-init))
+(defvar *atlas* (atlas-with-hand)) ;(instance atlas-robot :init)))
 (defvar *robot* *atlas*)
 (defvar *move-step-time* 100)
 
@@ -107,7 +107,8 @@
 
 (defun model2real_
   (&optional (sl *move-step-time*))
-  (send *irtviewer* :draw-objects)
+  (if (and (boundp '*irtviewer*) *irtviewer*)
+      (send *irtviewer* :draw-objects))
   (if
       (boundp '*ri*)
       (progn (model2real :sleep-time sl) (send *ri* :wait-interpolation))
@@ -428,7 +429,8 @@
 	  (cons :move #F(0 0 0))
 	  (cons :translation-axis #f(0 0 1))
 	  (cons :rotation-axis :z))))
-  (send *irtviewer* :look-all)
+  (if (and (boundp '*irtviewer*) *irtviewer*)
+      (send *irtviewer* :look-all))
   (push (send *robot* :angle-vector) buf)
   (if real-flag (model2real_)); (read-line))
   (animal-fullbody
@@ -443,7 +445,8 @@
 	  (cons :move #F(0 0 100))
 	  (cons :translation-axis #f(0 0 1))
 	  (cons :rotation-axis :z))))
-  (send *irtviewer* :look-all)
+  (if (and (boundp '*irtviewer*) *irtviewer*)
+      (send *irtviewer* :look-all))
   (push (send *robot* :angle-vector) buf)
   (if real-flag (model2real_)); (read-line))
   (animal-fullbody
@@ -463,7 +466,8 @@
 					;  (cons :move #F(150 0 0))
 					;  (cons :translation-axis #F(1 0 0))
 					;  (cons :rotation-axis :z))))
-  (send *irtviewer* :look-all)
+  (if (and (boundp '*irtviewer*) *irtviewer*)
+      (send *irtviewer* :look-all))
   (push (send *robot* :angle-vector) buf)
   (if real-flag (model2real_)); (read-line))
   (animal-fullbody
@@ -478,7 +482,8 @@
 	  (cons :move #F(0 0 -100))
 	  (cons :translation-axis #f(0 0 1))
 	  (cons :rotation-axis :z))))
-  (send *irtviewer* :look-all)
+  (if (and (boundp '*irtviewer*) *irtviewer*)
+      (send *irtviewer* :look-all))
   (animal-fullbody :back-centroid back-centroid)
   (push (send *robot* :angle-vector) buf)
   (if real-flag (model2real_)); (read-line))

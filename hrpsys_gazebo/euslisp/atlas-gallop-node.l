@@ -9,11 +9,12 @@
   (my-init
    :set-reset-pose nil
    :servo-gain
-   (list (cons :all 13.0)))
+   (list (cons :all 15.0))
+   )
   (setq *robot* *atlas*)
   (objects *robot*)
   (if (or (not (boundp '*irtviewer*))
-          *irtviewer*)
+          (null *irtviewer*))
       (progn
         (require "package://hrpsys_gazebo/euslisp/no-display.l")
         (make-irtviewer)))
@@ -21,6 +22,10 @@
   (set-user)
   (model2real_ 3000)
   (ros::roseus-add-msgs "std_msgs")
+  (ros::advertise "atlas_gallop_controller/compus"
+                  std_msgs::string)
+  (ros::advertise "atlas_gallop_controller/damage"
+                  std_msgs::empty)
   (ros::subscribe "/atlas_gallop_controller/command"
                   std_msgs::string
                   #'gallop-callback)
@@ -34,10 +39,6 @@
   (ros::subscribe "/vrc_score"
                   atlas_msgs::vrcscore
                   #'score-callback)
-  (ros::advertise "atlas_gallop_controller/compus"
-                  std_msgs::string)
-  (ros::advertise "atlas_gallop_controller/damage"
-                  std_msgs::empty)
   )
 
 (defun gen-dict
@@ -197,7 +198,8 @@
       (setq *atlas_rpy* '(0 0 0)))
   (send *robot* :newcoords
 	(make-coords :rpy (mapcar #'deg2rad *atlas_rpy*)))
-  (send *irtviewer* :draw-objects)
+  (if (and (boundp '*irtviewer*) *irtviewer*)
+      (send *irtviewer* :draw-objects))
   (send *auto-controller-hash*
 	:enter
 	:compus
@@ -270,6 +272,7 @@
 (defun command-subscriber
   nil
   (do-until-key
+   (print *gallop-mode*)
    (case *gallop-mode*
      (:forward
       (forward-controller *forward-offset*)
@@ -282,7 +285,9 @@
      (:left (play :qrot))
      (:qrot (play :qrot))
      (:stop (play :stop))
-     (:auto (async-wall-controller-step))
+     (:auto
+      (async-wall-controller-step)
+      (setq *gallop-mode* :auto))
      (:negaeri (negaeri-once)))
    (ros::spin-once)
    (ros::sleep)
