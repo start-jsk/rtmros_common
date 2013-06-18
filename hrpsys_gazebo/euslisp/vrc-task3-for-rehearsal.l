@@ -423,8 +423,9 @@
   (progn (model2real :time tm) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
   )
 
+;; (send *ikc* :translate (float-vector 0 0 -30))
 (defun rotate-hose (&key (init-ikc t))
-  (if init-ik (setq *ikc* (send (send *atlas* :get :larm-hand-coords-for-hose) :copy-worldcoords)))
+  (if init-ikc (setq *ikc* (send (send *atlas* :get :larm-hand-coords-for-hose) :copy-worldcoords)))
   (let ((ret t))
     (while ret
       (send *atlas* :hand :larm :open-pose2)
@@ -502,17 +503,13 @@
     (send *atlas* :put :larm-hand-coords-for-hose lc)
     )))
 
-(defun walk-init ()
+(defun init-vrc-task3 ()
   (load "package://hrpsys_gazebo/euslisp/atlas-interface.l")
   (atlas-init :set-reset-pose nil :set-user-mode nil)
   (real2model)
   (model2real :wait t :time 10)
   (set-user)
   (set-kp 4000)
-  ;;(atlas-set-servo-gain-by-torque-limit 1.0 :legs)
-  ;;(atlas-set-servo-gain-by-torque-limit 2.0 :torso)
-  ;;(atlas-set-servo-gain-by-torque-limit 4.0 :arms)
-  ;;(atlas-set-servo-gain-by-torque-limit 5.0 :head)
   (send *ri* :set-st-param
 	:k-tpcc-p #f(2.5 2.5)
 	:k-tpcc-x #f(5 5)
@@ -520,29 +517,50 @@
 	:k-brot-tc #f(0.1 0.1))
   (send *atlas* :walk-pose)
   (model2real :wait t :time 5000)
-  ;;(send *ri* :go-velocity 0 0 0)
+  (setup-hand-coords-for-hose)
+  )
+(warn ";; (init-vrc-task3) ~%")
+
+(defun move-to-table ()
+  (init-pose-for-hose)
+  ;;(send *ri* :teleport-to (make-coords :pos #f(-2700 -4100 1000)))
+  ;;(send *ri* :teleport-to (make-coords :pos #f(-3200 -4000 1000))) ;; far
+  ;;(progn (real2model) (model2real :wait t :time 10) (set-user) (set-kp 4000))
+  ;;(unix:sleep 10)
+  (let ((ret t))
+    (while ret
+      (warn ";; point on image_view~%")
+      (let ((gp (get-point)))
+	(when gp
+	  (let* ((goal-pos-from-get-point
+		  (send gp :transform-vector #f(-541.243 97.2492 -1028.51)))
+		 (dif (scale 1e-3
+			 (send (apply #'midcoords 0.5 (send *atlas* :legs :end-coords :copy-worldcoords))
+			       :inverse-transform-vector goal-pos-from-get-point))))
+	    ;;(warn ";; go pos diff ~A ~%" (scale 1e3 dif))
+	    (warn ";; go pos diff ~A ~%" (scale 1e3 dif))
+	    (setq dif (v+ dif (scale 1e-3 (float-vector 30 20 0))))
+	(if (y-or-n-p ";; go pos ?~%")
+	    (progn
+	      (send *ri* :start-auto-balancer)
+	      (send *ri* :start-st)
+	      (send* *ri* :go-pos (concatenate cons (subseq dif 0 2) (list 0)))
+	      (send *ri* :stop-st))
+	  (setq ret nil)))))))
   )
 
-(defun do-all-for-hose
+(defun pickup-hose
   ()
-  (send *ri* :teleport-to (make-coords :pos #f(-2700 -4100 1000)))
-  ;;(send *ri* :teleport-to (make-coords :pos #f(-3200 -4000 1000))) ;; far
-  (progn (real2model) (model2real :wait t :time 10) (set-user) (set-kp 4000))
-  (unix:sleep 10)
-  (setup-hand-coords-for-hose)
-  (init-pose-for-hose)
-  (unix:sleep 2)
   (reach-and-pickup-hose)
   (unix:sleep 2)
   ;;(twist-torso)
-  (unix:sleep 2)
+  ;;(unix:sleep 2)
   (grasp-hose-by-larm)
   (mate-hose-by-larm-0)
   )
 
 (defun usage ()
   )
-;;(do-all-for-hose)
  
 #|
 
