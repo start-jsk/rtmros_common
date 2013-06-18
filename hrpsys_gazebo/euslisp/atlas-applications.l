@@ -3,13 +3,17 @@
 ;; for grasping tool
 ;;
 
-(defun get-point (&key (wait t))
+(defun get-point (&key (wait t) (timeout 15.0))
   (ros::spin-once)
   (if wait
       (progn
-	(send *ri* :put :point nil)
-	(while (not (send *ri* :get :point))
-	  (ros::spin-once)))
+        (send *ri* :put :point nil)
+        (while (not (send *ri* :get :point))
+          (unix::usleep (* 100 1000))
+          (decf timeout 0.1)
+          (if (< timeout 0.0)
+              (return-from get-point))
+          (ros::spin-once)))
     (unless (send *ri* :get :point)
       (return-from get-point)))
   (make-coords :pos (send (send *atlas* :worldcoords) :transform-vector (send *ri* :get :point))))

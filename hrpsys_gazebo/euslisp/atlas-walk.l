@@ -67,16 +67,16 @@
       (:my-manip (manip))))
   t)
 
-(defun walk-clickpos
-  ()
-
+(defun walk-clickpos ()
   (let* ((robot-coords (send (send *atlas* :foot-midcoords) :copy-worldcoords))
          (clicked-coords (get-point))
          (walk-pos
-          (scale 0.001 (send (send robot-coords
-                                   :transformation clicked-coords) :worldpos))))
-    (warn "[walk-clickpos] x: ~a~%" (elt walk-pos 0))
-    (send *ri* :go-pos (elt walk-pos 0) 0 0)))
+          (when clicked-coords
+            (scale 0.001 (send (send robot-coords
+                                     :transformation clicked-coords) :worldpos)))))
+    (when walk-pos
+      (warn "[walk-clickpos] x: ~a~%" (elt walk-pos 0))
+      (send *ri* :go-pos (elt walk-pos 0) 0 0))))
 
 (defun walk-turn
   (&key (theta 90) (lr :left))
