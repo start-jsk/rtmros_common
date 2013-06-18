@@ -19,6 +19,10 @@
                             (read f)))
 (send *org-points2* :point-color #f(1 1 0))
 
+(setq *org-points3* (with-open-file (f (ros::resolve-ros-path "package://hrpsys_gazebo/euslisp/car-seat.l"))
+                            (read f)))
+(send *org-points3* :point-color #f(0 1 1))
+
 ;; pelvis relative coords
 (setq *point-a* (float-vector 230.0 -650.0 380.0))
 (setq *point-b* (float-vector 480.0 -360.0 150.0))
@@ -29,6 +33,11 @@
 (setq *point-d* (float-vector 700.0 1200.0 200.0))
 (setq *point-mid2* (scale 0.5 (v+ *point-c* *point-d*)))
 (setq *direction2* (normalize-vector (v- *point-c* *point-d*)))
+
+(setq *point-e* (float-vector 686.092 -161.981 -17.234))
+(setq *point-f* (float-vector 646.214 274.355 59.81))
+(setq *point-mid3* (scale 0.5 (v+ *point-e* *point-f*)))
+(setq *direction3* (normalize-vector (v- *point-e* *point-f*)))
 
 ;;(setq pa #f(855.0 -1420.0 380.0))  ;; center of handle
 ;;(setq pb #f(1135.0 -1110.0 180.0)) ;; left side of dashboard
@@ -95,6 +104,44 @@
     (setq min_x (- max_x 2400))
     (setq min_y (- (elt point-mid 1) 700))
     (setq max_y (+ min_y 2000))
+
+    (setq points (send in-points :filter :key
+                       #'(lambda (p) (and (> max_x (elt p 0) min_x)
+                                          (> max_y (elt p 1) min_y)
+                                          (> 1000 (elt p 2) floorz)))
+                       :create t))
+    (let ((npoints
+           (send points :transform-points pre-cds :create t))
+          cds)
+      (setq  cds (pcl::registration-raw npoints orgpt pcl::*REGIST_GICP*))
+      (pprint cds)
+      (send pre-cds :transform cds :world)
+      pre-cds
+      )))
+;;
+;; for sitting seat
+;; -> 100.0 300.0 -1060.0
+(defun calc-transform-pelvis3 (in-points pointa pointb
+                                        &optional (midp *point-mid3*)
+                                        (orgpt *org-points3*))
+  (send *atlas* :reset-coords)
+  (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
+  (let ((midcds (send *atlas* :foot-midcoords))
+        (point-mid (scale 0.5 (v+ pointa pointb)))
+        (direction (normalize-vector (v- pointa pointb)))
+        floorz points
+        min_x max_x
+        min_y max_y
+        pre-cds trans rot)
+    (setq floorz (+ 100 (elt (send midcds :worldpos) 2)))
+    (setq trans (v- midp point-mid))
+
+    (setq pre-cds (make-coords :pos trans))
+    (pprint pre-cds)
+    (setq max_x (+ (elt point-mid 0) 1150))
+    (setq min_x (- max_x 1350))
+    (setq min_y (- (elt point-mid 1) 1200))
+    (setq max_y (+ min_y 2400))
 
     (setq points (send in-points :filter :key
                        #'(lambda (p) (and (> max_x (elt p 0) min_x)
