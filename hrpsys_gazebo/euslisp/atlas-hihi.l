@@ -89,9 +89,9 @@
      '(:rleg :lleg))
     )))
 
-(if (not (boundp '*irtviewer*)) (make-irtviewer))
-(send *irtviewer* :objects (list *robot*))
-(send *irtviewer* :look-all)
+;(if (not (boundp '*irtviewer*)) (make-irtviewer))
+;(send *irtviewer* :objects (list *robot*))
+;(send *irtviewer* :look-all)
 
 ;; ---------- utility function
 

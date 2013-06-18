@@ -1,7 +1,7 @@
 
 (require "package://hrpsys_gazebo/euslisp/atlas-model.l")
-(defvar *robot* (instance atlas-robot :init))
-(if (not (boundp '*irtviewer*)) (objects *robot*))
+;(defvar *robot* (instance atlas-robot :init))
+;(if (not (boundp '*irtviewer*)) (objects *robot*))
 
 ;(require "/home/noda/ros/fuerte/jsk-ros-pkg-unreleased/jsk_rosmake_libs/euslib/demo/s-noda/atlas/robot-pose.l")
 (require "atlas-hihi.l")

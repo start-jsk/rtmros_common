@@ -1,17 +1,18 @@
 
 (require "package://hrpsys_gazebo/euslisp/atlas-interface.l")
-(my-init
- :servo-gain
- (list (cons :all 13.0)))
-
-(defvar *robot* *atlas*)
-
 (require "package://hrpsys_gazebo/euslisp/atlas-tolot.l")
 (require "package://hrpsys_gazebo/euslisp/atlas-standup.l")
 (require "package://hrpsys_gazebo/euslisp/atlas-wall-detector.l")
-(tolot-init :reverse? t)
-(set-user)
-(model2real)
+
+(defun gallop-standby
+  nil
+  (my-init
+   :servo-gain
+   (list (cons :all 13.0)))
+  (setq *robot* *atlas*)
+  (tolot-init :reverse? t)
+  (set-user)
+  (model2real_ 3000))
 
 (defun gen-dict
   nil
