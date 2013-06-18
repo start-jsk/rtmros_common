@@ -43,17 +43,40 @@
 	  (t (move-centroid)))
 
     (when real
-      (atlas-set-servo-gain-by-torque-limit 0.01 :legs)
-      (unix::usleep (* 5 1000 1000))
-      (model2real :wait t :time 10000)
-      (atlas-set-servo-gain-by-torque-limit 1.0 :legs)
-      (unix::usleep (* 5 1000 1000))
+      (model2real :wait t :time 5000)
+      (let ((prev-av (send *atlas* :angle-vector))
+            (max-distance 10.0)
+            (timeout 10)
+            )
+        (when (< max-distance (check-foot-distance))
+          (warn ";; legs end-coords difference = ~A ;set legs to very-high-gain~%" (check-foot-distance))
+          (atlas-set-servo-gain-by-torque-limit 0.01 :legs)
+          (while (and (< 0 timeout) (< max-distance (check-foot-distance)))
+                 (warn ";; legs end-coords difference = ~A~%" (check-foot-distance))
+                 (unix::usleep (* 500 1000))
+                 (decf timeout))
+          (atlas-set-servo-gain-by-torque-limit 1.0 :legs)
+          (model2real :wait t :time 5000) ; wait 5s in sim time
+          ))
       (send *ri* :start-st)
       (when vel-mode
 	(warning-message 1 " rosrun pr2_teleop teleop_pr2_keyboard~%")
 	(send *ri* :cmd-vel-mode))
       ))
   t)
+
+(defun check-foot-distance ()
+  (let ((model-av (send *atlas* :angle-vector))
+        model-diff real-diff)
+    (setq model-diff
+          (distance (send *atlas* :lleg :end-coords :worldpos)
+                    (send *atlas* :rleg :end-coords :worldpos)))
+    (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
+    (setq real-diff
+          (distance (send *atlas* :lleg :end-coords :worldpos)
+                    (send *atlas* :rleg :end-coords :worldpos)))
+    (send *atlas* :angle-vector model-av)
+    (abs (- model-diff real-diff))))
 
 (defun finish-walk
   (&key (real t) (mode :user))
@@ -133,9 +156,9 @@
 (defun move-neck-p
   (&optional (rel-angle 10) &key (zero nil))
 
-  (cond 
+  (cond
    (zero (send *atlas* :head :neck-p :joint-angle 50))
-   (t (send *atlas* :head :neck-p :joint-angle rel-angle :relative t)))  
+   (t (send *atlas* :head :neck-p :joint-angle rel-angle :relative t)))
   (fix-leg)
   (move-centroid)
   (model2real :wait t))
@@ -143,7 +166,7 @@
 (defun move-waist-y
   (&optional (rel-angle 10) &key (zero nil))
 
-  (cond 
+  (cond
    (zero (send *atlas* :torso :waist-y :joint-angle 0))
    (t (send *atlas* :torso :waist-y :joint-angle rel-angle :relative t)))
   (fix-leg)
