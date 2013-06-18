@@ -94,22 +94,19 @@
      (send self :put :point
 	   (send (send *atlas* :worldcoords) :inverse-transform-vector (send (send (send *atlas* frame) :copy-worldcoords) :transform-vector pos)))
      ))
-  (:wait-for-start-bdi-walk ()
-   (ros::spin-once)
-   (while (not (equal (send self :get :current-behavior) 4))
-     (ros::spin-once)
-     ))
+  (:wait-for-start-bdi-walk (&optional (timeout 5.0))
+   (send self :wait-for-start-behavior 4 timeout))
   (:wait-for-bdi-walk ()
+   (send self :wait-for-finish-behavior 4 timeout))
+  (:wait-for-start-behavior (&optional (behav 5) (timeout 5.0))
    (ros::spin-once)
-   (while (equal (send self :get :current-behavior) 4)
+   (while (and (not (equal (send self :get :current-behavior) behav))
+               (> timeout 0.0))
      (ros::spin-once)
+     (unix::usleep (* 100 1000))
+     (decf timeout 0.1)
      ))
-  (:wait-for-start-behavior (&optional (behav 4))
-   (ros::spin-once)
-   (while (not (equal (send self :get :current-behavior) behav))
-     (ros::spin-once)
-     ))
-  (:wait-for-finish-behavior (&optional (behav 4))
+  (:wait-for-finish-behavior (&optional (behav 5))
    (ros::spin-once)
    (while (equal (send self :get :current-behavior) behav)
      (ros::spin-once)
@@ -707,3 +704,22 @@
     (send req :reload_pid_from_ros t)
     (ros::service-call "/atlas/reset_controls" req)
     ))
+
+(defun static-step (&key (l/r :rleg) (step 300)) ;; should be stand-pose
+  (reset-bdi-controller)
+  (unix::usleep (* 500 1000))
+  (send *ri* :set-simulation-mode :mode :stand :effort 0)
+  (unix::usleep (* 1000 1000))
+  (case l/r
+   (:rleg
+    (send *ri* :bdi_step_static (make-coords :pos (float-vector step -140 0)) :l/r :rleg :index 0))
+   (:lleg
+    (send *ri* :bdi_step_static (make-coords :pos (float-vector step 140 0)) :l/r :lleg :index 0)))
+  (send *ri* :wait-for-start-behavior 5)
+  (send *ri* :wait-for-finish-behavior 5)
+  (case l/r
+   (:rleg
+    (send *ri* :bdi_step_static (make-coords :pos (float-vector (/ step 2) 140 0)) :l/r :lleg :index 1))
+   (:lleg
+    (send *ri* :bdi_step_static (make-coords :pos (float-vector (/ step 2) -140 0)) :l/r :rleg :index 1)))
+  )
