@@ -23,11 +23,6 @@
     (send (send (send (send *atlas* :rarm :end-coords)
                       :rotate (deg2rad 20) :x) :translate #f(0 0 -30) :local) :translate #f(0 20 0) :local))
   (when real
-    ;;(atlas-set-servo-gain-by-torque-limit 1.0)
-    ;(atlas-set-servo-gain-by-torque-limit 1.0 :legs)
-    ;(atlas-set-servo-gain-by-torque-limit 2.0 :torso)
-    ;(atlas-set-servo-gain-by-torque-limit 4.0 :arms)
-    ;(atlas-set-servo-gain-by-torque-limit 5.0 :head)
     (mapcar
      #'(lambda (k)
 	 (atlas-set-servo-gain-by-torque-limit

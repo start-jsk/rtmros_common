@@ -6,8 +6,10 @@
 ;;
 
 (load "package://hrpsys_gazebo/euslisp/atlas-interface.l")
-(load "package://hrpsys_gazebo/euslisp/atlas-vehicle-motion-utils.l")
+(load "package://hrpsys_gazebo/euslisp/atlas-standup.l")
 (load "package://hrpsys_gazebo/euslisp/atlas-calc-position.l")
+(load "package://hrpsys_gazebo/euslisp/atlas-vehicle-motion-utils.l")
+(load "package://hrpsys_gazebo/euslisp/atlas-interface.l")
 
 
 ;; setting

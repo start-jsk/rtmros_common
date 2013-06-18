@@ -271,7 +271,8 @@
 (defun stand-up (&key (recover t) (time-scale 1.0) (wait-times 40))
   ;;recover = tの場合、最後こけてしまっていたらやりなおす
   ;;(send *ri* :start-grasp)
-  (send *ri* :stop-grasp)
+  (ungrasp :real t)
+  ;;(send *ri* :stop-grasp)
   (tagbody
    :start
    ;;仰向けかうつ伏せかを判定し、仰向けならうつ伏せに移行
@@ -706,7 +707,8 @@
   )
 
 (defun stand-up2 (&key (time-scale 1.0) (wait-times 40) (jump t))
-  (send *ri* :start-grasp)
+  (grasp :real t)
+  ;;(send *ri* :start-grasp)
   (tagbody
    :start
    ;;仰向けかうつ伏せかを判定し、仰向けならうつ伏せに移行
