@@ -15,6 +15,7 @@
   (warning-message 2 "[vhc-get-in] start (get-in-for-task1)~%")
 
   (make-vehicle)
+  (setq *lr-reverse* t)
 
   (unless after-walk
     (telep-in-get-in-for-task1 :real real :wait wait :telep telep))
@@ -38,6 +39,7 @@
   (warning-message 2 "[vhc-get-in] start (telep-in-get-in-for-task1)~%")
 
   (make-vehicle)
+  (setq *lr-reverse* t)
 
   (when init
     (warning-message 2 "[vhc-get-in] call (my-init)~%")
@@ -155,8 +157,8 @@
     (send *irtviewer* :draw-objects)
     (when real (model2real :wait t))
 
-    (if nil
-        ;; (if real
+    ;; (if nil
+    (if real
 	(progn
 	  (warning-message 2 "[vhc-get-in] reach until touch in grasp rarm [get-in phase1]~%")
 	  (when wait (my-wait))
@@ -235,7 +237,7 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 1000	   
+           :revert-if-fail nil 	   :stop 1000	   
 	   :translation-axis '(t t t nil)
 	   :rotation-axis '(t t t nil)
 	   :thre '(5 5 10 10)
@@ -264,7 +266,7 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 1000	   
+           :revert-if-fail nil 	   :stop 1000	   
 	   :translation-axis '(t t t nil)
 	   :rotation-axis '(t t t nil)
 	   :thre '(5 5 10 10)
@@ -291,7 +293,7 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 1000	   
+           :revert-if-fail nil 	   :stop 1000	   
 	   :translation-axis '(t t t nil)
 	   :rotation-axis '(t t t nil)
 	   :thre '(5 5 10 10)
@@ -326,12 +328,12 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 1000	   
+           :revert-if-fail nil 	   :stop 1000	   
 	   :translation-axis '(t t t nil)
 	   :rotation-axis '(t t t nil)
 	   :thre '(5 5 10 10)
 	   :rthre (list (deg2rad 1) (deg2rad 1) (deg2rad 2) (deg2rad 2))
-	   :target-centroid-pos (send (send (send (send *atlas* :foot-midcoords) :copy-worldcoords) :translate #f(-10 -30 0)) :pos)
+	   :target-centroid-pos (send (send (send (send *atlas* :foot-midcoords) :copy-worldcoords) :translate #f(20 -20 0)) :pos)
 	   :centroid-thre 500)))
   (send *irtviewer* :draw-objects)
   (when real (model2real :wait t :time 2000))
@@ -353,12 +355,12 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 1000	   
+           :revert-if-fail nil 	   :stop 1000	   
 	   :translation-axis '(t t t nil)
 	   :rotation-axis '(t t t nil)
 	   :thre '(5 5 10 10)
 	   :rthre (list (deg2rad 1) (deg2rad 1) (deg2rad 2) (deg2rad 2))
-	   :target-centroid-pos (send (send (send (send *atlas* :foot-midcoords) :copy-worldcoords) :translate #f(-10 -30 0)) :pos)
+	   :target-centroid-pos (send (send (send (send *atlas* :foot-midcoords) :copy-worldcoords) :translate #f(20 -20 0)) :pos)
 	   :centroid-thre 500)))
   (send *irtviewer* :draw-objects)
   (when real (model2real :wait t :time 2000))
@@ -388,12 +390,12 @@
   	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
   	   :link-list ll :move-target mt
   	   :collision-avoidance-link-pair nil
-	   :stop 1000  	   
+           :revert-if-fail nil 	   :stop 1000  	   
 	   :translation-axis '(t t t nil)
   	   :rotation-axis '(t t t nil)
 	   :thre '(5 5 10 10)
 	   :rthre (list (deg2rad 1) (deg2rad 1) (deg2rad 2) (deg2rad 2))
-	   :target-centroid-pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(0 0 0)) :pos)
+	   :target-centroid-pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(20 0 0)) :pos)
   	   :centroid-thre 500)))
   (when real (model2real :wait t))
   (send *irtviewer* :draw-objects)
@@ -411,12 +413,12 @@
   	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
   	   :link-list ll :move-target mt
   	   :collision-avoidance-link-pair nil
-	   :stop 1000  	   
+           :revert-if-fail nil 	   :stop 1000  	   
 	   :translation-axis '(t t t nil)
   	   :rotation-axis '(t t t nil)
 	   :thre '(5 5 10 10)
 	   :rthre (list (deg2rad 1) (deg2rad 1) (deg2rad 2) (deg2rad 2))
-	   :target-centroid-pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(0 0 0)) :pos)
+	   :target-centroid-pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(20 0 0)) :pos)
   	   :centroid-thre 500)))
   (when real (model2real :wait t))
   (send *irtviewer* :draw-objects)
@@ -438,12 +440,12 @@
   	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
   	   :link-list ll :move-target mt
   	   :collision-avoidance-link-pair nil
-	   :stop 1000  	   
+           :revert-if-fail nil 	   :stop 1000  	   
 	   :translation-axis '(t t t nil)
   	   :rotation-axis '(t t t nil)
 	   :thre '(5 5 10 10)
 	   :rthre (list (deg2rad 1) (deg2rad 1) (deg2rad 2) (deg2rad 2))
-	   :target-centroid-pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(0 0 0)) :pos)
+	   :target-centroid-pos (send (send (send *atlas* :lleg :end-coords :copy-worldcoords) :translate #f(20 0 0)) :pos)
   	   :centroid-thre 500)))
   (when real (model2real :wait t))
   (send *irtviewer* :draw-objects)
@@ -803,7 +805,7 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 100
+           :revert-if-fail nil 	   :stop 100
 	   :translation-axis '(t nil t nil)
 	   :rotation-axis '(t nil t nil)
 	   :thre '(100 100 100 100)
@@ -832,7 +834,7 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 100
+           :revert-if-fail nil 	   :stop 100
 	   :translation-axis '(t nil t nil)
 	   :rotation-axis '(t nil t nil)
 	   :thre '(100 100 100 100)
@@ -861,7 +863,7 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 100
+           :revert-if-fail nil 	   :stop 100
 	   :translation-axis '(t nil t nil)
 	   :rotation-axis '(t nil t nil)
 	   :thre '(100 100 100 100)
@@ -896,7 +898,7 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 100
+           :revert-if-fail nil 	   :stop 100
 	   :translation-axis '(t nil t nil)
 	   :rotation-axis '(t nil t nil)
 	   :thre '(100 100 100 100)
@@ -925,7 +927,7 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 100
+           :revert-if-fail nil 	   :stop 100
 	   :translation-axis '(t nil t nil)
 	   :rotation-axis '(t nil t nil)
 	   :thre '(100 100 100 100)
@@ -1072,7 +1074,7 @@
   	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
   	   :link-list ll :move-target mt
   	   :collision-avoidance-link-pair nil
-	   :stop 1000  	   
+           :revert-if-fail nil 	   :stop 1000  	   
 	   :translation-axis '(t t nil t)
   	   :rotation-axis '(t t nil t)
 	   :thre '(5 5 10 10)
@@ -1093,7 +1095,7 @@
   	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
   	   :link-list ll :move-target mt
   	   :collision-avoidance-link-pair nil
-	   :stop 1000  	   
+           :revert-if-fail nil 	   :stop 1000  	   
 	   :translation-axis '(t t nil t)
   	   :rotation-axis '(t t nil t)
 	   :thre '(5 5 10 10)
@@ -1114,7 +1116,7 @@
   	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
   	   :link-list ll :move-target mt
   	   :collision-avoidance-link-pair nil
-	   :stop 1000  	   
+           :revert-if-fail nil 	   :stop 1000  	   
 	   :translation-axis '(t t nil t)
   	   :rotation-axis '(t t nil t)
 	   :thre '(5 5 10 10)
@@ -1141,7 +1143,7 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 1000	   
+           :revert-if-fail nil 	   :stop 1000	   
 	   :translation-axis '(t t t t)
 	   :rotation-axis '(t :z t t)
 	   :thre '(5 5 10 10)
@@ -1164,7 +1166,7 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 1000	   
+           :revert-if-fail nil 	   :stop 1000	   
 	   :translation-axis '(t t t t)
 	   :rotation-axis '(t :z t t)
 	   :thre '(5 5 10 10)
@@ -1187,7 +1189,7 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 1000	   
+           :revert-if-fail nil 	   :stop 1000	   
 	   :translation-axis '(t t t t)
 	   :rotation-axis '(t :z t t)
 	   :thre '(5 5 10 10)
@@ -1210,7 +1212,7 @@
 	   (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
 	   :link-list ll :move-target mt
 	   :collision-avoidance-link-pair nil
-	   :stop 1000	   
+           :revert-if-fail nil 	   :stop 1000	   
 	   :translation-axis '(t t t t)
 	   :rotation-axis '(t :z t t)
 	   :thre '(5 5 10 10)

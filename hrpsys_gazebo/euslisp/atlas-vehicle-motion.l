@@ -88,6 +88,23 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; all vehicle motion
+
+(defun lr-rev
+  ()
+
+  (setq *lr-reverse* t))
+
+
+(defun init-task1
+  ()
+
+  (load "no-display.l")
+  (make-irtviewer)
+
+  (my-init :real t)
+  (lr-rev)
+  (setq *imu-data-offset* (list 0 0 0)))
+
 (defun all-demo-task1
   (&key (real nil) (wait nil) (auto-walk-and-telep nil) (no-walk-and-telep nil))
 

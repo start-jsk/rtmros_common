@@ -181,7 +181,7 @@
       (let* ((res-coords (calc-transform-pelvis2 points p1 p2))
              (res-x (elt (send res-coords :worldpos) 0))
              (res-y (elt (send res-coords :worldpos) 1))
-             (dest-x (- 350 75))
+             (dest-x (- 350 150 90))
              (dest-y 300)
              (diff-x (- dest-x res-x))
              (diff-y (- dest-y res-y)))

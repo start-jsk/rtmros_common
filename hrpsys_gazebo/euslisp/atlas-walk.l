@@ -15,6 +15,7 @@
     (setq prev-av (send *atlas* :angle-vector))
 
     (when before-get-in-vehicle
+      (setq *lr-reverse* t)
       (send *atlas* :angle-vector
 	    #f(0.0 0.0 0.0 23.5 114.5 0.0 -75.0 17.0 0.0 -135.0 129.6 -71.6129 79.9998 60.7501 0.0 61.5619 -1.79235 -35.568 1.79235 -25.994 0.012938 61.5446 1.91967 -35.5619 -1.91967 -25.9828 0.01294 0.0))
 
@@ -57,6 +58,9 @@
 	(send *ri* :cmd-vel-mode))
       ))
   t)
+
+(defun start-walk2 ()
+  (start-walk :before-get-in-vehicle t))
 
 (defun check-foot-distance ()
   (let ((model-av (send *atlas* :angle-vector))
@@ -101,6 +105,9 @@
         ;;(:my-manip (manip :smooth t))
         ))
     t))
+
+(defun finish-walk2 ()
+  (finish-walk :mode :my-manip))
 
 (defun walk-clickpos
   ()
@@ -148,25 +155,30 @@
   ;; (unless (y-or-n-p) (return-from turn))
   (send *ri* :go-pos 0 0 theta))
 
-(defun move-neck-p
+(defun go-pos
+  (x y theta)
+
+  (send *ri* :go-pos x y theta))
+
+(defun move-neck
   (&optional (rel-angle 10) &key (zero nil))
 
-  (cond
-   (zero (send *atlas* :head :neck-p :joint-angle 50))
-   (t (send *atlas* :head :neck-p :joint-angle rel-angle :relative t)))
+  (cond rel-angle
+        (:zero (send *atlas* :head :neck-p :joint-angle 50))
+        (t (send *atlas* :head :neck-p :joint-angle rel-angle :relative t)))
   (fix-leg)
   (move-centroid)
-  (model2real :wait t))
+  (model2real :wait t :time 4000))
 
-(defun move-waist-y
+(defun move-waist
   (&optional (rel-angle 10) &key (zero nil))
 
-  (cond
-   (zero (send *atlas* :torso :waist-y :joint-angle 0))
-   (t (send *atlas* :torso :waist-y :joint-angle rel-angle :relative t)))
+  (case rel-angle
+    (:zero (send *atlas* :torso :waist-y :joint-angle 0))
+    (t (send *atlas* :torso :waist-y :joint-angle rel-angle :relative t)))
   (fix-leg)
   (move-centroid)
-  (model2real :wait t))
+  (model2real :wait t :time 4000))
 
 (defun snapshot-hand
   ()
@@ -177,11 +189,41 @@
     (send *atlas* :rarm :elbow-p :joint-angle -90)
     (send *atlas* :rarm :elbow-y :joint-angle 110)
     (send *atlas* :rarm :wrist-y :joint-angle -20)
-    (model2real :wait t)
+    (fix-leg)
+    (move-centroid)
+    (model2real :wait t :time 4000)
     (unix::system "rosservice call /rhand_snap/snapshot")
     (unix::system "rosservice call /lhand_snap/snapshot")
     (send *atlas* :rarm :angle-vector prev-angle)
-    (model2real :wait t)))
+    (model2real :wait t :time 4000)))
+
+(defun walk-over-edge
+  ()
+
+  (finish-walk)
+
+  (send *atlas* :angle-vector
+        #f(0.0 0.0 0.0 23.5 114.5 0.0 -75.0 17.0 0.0 -23.5 114.5 0.0 75.0 17.0 0.0 102.266 -2.30694 -59.397 2.30694 -42.6426 0.025311 102.252 2.46955 -59.3977 -2.46955 -42.6279 0.025303 0.0))
+  (model2real :wait t :time 5000)
+
+  ;; (send *atlas* :angle-vector
+  ;;       #f(0.0 61.9711 0.0 55.2 110.4 22.166 26.2001 -47.2501 0.0 -55.2 110.4 -22.166 -26.2001 -47.2501 0.0 102.266 -2.30694 -59.397 2.30694 -42.6426 0.025311 102.252 2.46955 -59.3977 -2.46955 -42.6279 0.025303 0.0))
+  (send *atlas* :angle-vector
+        #f(0.0 29.2896 0.0 55.2 110.4 22.166 26.2001 -47.2501 0.0 -55.2 110.4 -22.166 -26.2001 -47.2501 0.0 102.266 -2.30694 -59.397 2.30694 -42.6426 0.025311 102.252 2.46955 -59.3977 -2.46955 -42.6279 0.025303 0.0))
+  (model2real :wait t :time 5000)
+
+  (send *atlas* :angle-vector
+        #f(0.0 29.2896 0.0 23.5 110.4 0.0 -6.19986 -47.2501 0.0 -23.5 110.4 0.0 6.19986 -47.2501 0.0 102.266 -2.30694 -59.397 2.30694 -42.6426 0.025311 102.252 2.46955 -59.3977 -2.46955 -42.6279 0.025303 0.0))
+  (model2real :wait t :time 5000)
+
+  ;; (send *atlas* :angle-vector
+  ;;       #f(0.0 -36.0734 0.0 75.6 110.4 44.0146 -61.9998 20.25 0.0 -75.6 110.4 -44.0146 61.9998 20.25 0.0 38.4 -2.30694 -59.397 2.30694 -42.6426 0.025311 38.4 2.30694 -59.397 -2.30694 -42.6426 -0.025311 0.0))
+  (send *atlas* :angle-vector
+        #f(0.0 22.1849 0.0 75.6 110.4 38.265 -61.9998 20.25 0.0 -75.6 110.4 -38.265 61.9998 20.25 0.0 38.4 -2.30694 -59.397 2.30694 -42.6426 0.025311 38.4 2.30694 -59.397 -2.30694 -42.6426 -0.025311 0.0))
+  (model2real :wait t :time 3000)
+
+  (stand-up2)
+  )
 
 ;; (progn
 ;;   (start-walk)

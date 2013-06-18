@@ -41,12 +41,12 @@
   (do-until-key
    (send *atlas* :legs :knee-p :joint-angle 0)
    (send *atlas* :legs :crotch-p :joint-angle 0)
-   (send *atlas* :torso :waist-r :joint-angle -40)
+   (send *atlas* :torso :waist-r :joint-angle 40)
    (send *irtviewer* :draw-objects)
    (when real (model2real :time 200 :wait t))
    (send *atlas* :legs :knee-p :joint-angle 90)
    (send *atlas* :legs :crotch-p :joint-angle 90)
-   (send *atlas* :torso :waist-r :joint-angle 40)
+   (send *atlas* :torso :waist-r :joint-angle -40)
    (send *irtviewer* :draw-objects)
    (when real (model2real :time 200 :wait t)))
 
