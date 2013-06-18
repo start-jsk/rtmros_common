@@ -201,7 +201,7 @@
   (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
   (when *lr-reverse* (mirror-angle-vector)))
 
-(defun model2real (&key (time 1500) (wait nil))
+(defun model2real (&key (sleep-time 1500) (time sleep-time) (wait nil))
   (when *lr-reverse* (mirror-angle-vector))
   (send *ri* :angle-vector (send *atlas* :angle-vector) time)
   (when *lr-reverse* (mirror-angle-vector))
