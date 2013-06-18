@@ -97,7 +97,7 @@
       (case mode
         (:stand (reset-bdi-controller) (set-stand))
         (:manip (reset-bdi-controller) (set-manip))
-        (:my-manip (reset-bdi-controller) (manip))
+        (:my-manip (real2model) (model2real :wait t) (reset-bdi-controller) (manip))
         ;;(:my-manip (manip :smooth t))
         ))
     t))
