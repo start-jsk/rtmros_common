@@ -506,15 +506,17 @@
 ;; (send *ri* :bdi_footstep (footstep-planning-armin (make-coords :pos (scale 1000 (float-vector 1 1 0)) :rpy (list 0 0 0)) (make-coords :pos (scale 1000 (float-vector 17.3 9 0)) :rpy (list 0 0 0))))
 
 (defun atlas-init
-  (&key (set-reset-pose nil) (set-user-mode t) (with-hand t))
+  (&key (set-reset-pose nil) (set-user-mode t) (unset-limit t) (with-hand t))
   (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init)))
   ;; (if (not (boundp '*ri*)) (setq *ri* (instance atlas-interface :init :use-tf2 t)))
   (if (not (boundp '*atlas*)) (setq *atlas* (atlas-with-hand)))
   ;; parameter for bdi_control
   (setf (get *atlas* :footstep-parameter)
        '(:default-half-offset #f(0.0 100.0 0.0) :forward-offset-length 180.0 :outside-offset-length 85.0 :rotate-rad 40.0))
-  (send *ri* :set-soft-error-limit "all" 100) ;; disable SoftErrorLimiter
-  (send *ri* :set-servo-error-limit "all" 0) ;; disable RobotHardware error limit
+  (when unset-limit
+    (send *ri* :set-soft-error-limit "all" 100) ;; disable SoftErrorLimiter
+    (send *ri* :set-servo-error-limit "all" 0) ;; disable RobotHardware error limit
+    )
   (when set-user-mode
     (send *ri* :set-simulation-mode))
   (when set-reset-pose
