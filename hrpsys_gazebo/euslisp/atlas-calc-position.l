@@ -120,7 +120,9 @@
       )))
 ;;
 ;; for sitting seat
-;; -> 100.0 300.0 -1060.0
+;; -> 110.0 300.0 -1020.0
+;; (setq car (load-mesh-file "/home/lyouhei/.gazebo/models/polaris_ranger_ev/meshes/polaris.dae" :scale 25.4))
+;;
 (defun calc-transform-pelvis3 (in-points pointa pointb
                                         &optional (midp *point-mid3*)
                                         (orgpt *org-points3*))
