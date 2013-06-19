@@ -488,10 +488,10 @@
    ))
 
 
-(warn
- (format nil "~A~A"
-         "[USAGE] (progn (gallop-standby) (command-subscriber))"
-         "wget http://www.jsk.t.u-tokyo.ac.jp/~s-noda/AtlasGallopController.jar ; java -jar AtlasGallopController $ROS_IP $ROS_MASTER_URI"))
+(format t
+ "~A~%~A~%"
+ "[USAGE] (progn (gallop-standby) (command-subscriber))"
+ "wget http://www.jsk.t.u-tokyo.ac.jp/~s-noda/AtlasGallopController.jar ; java -jar AtlasGallopController $ROS_IP $ROS_MASTER_URI")
 
 #|
 
