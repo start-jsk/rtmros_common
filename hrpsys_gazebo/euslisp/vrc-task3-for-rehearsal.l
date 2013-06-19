@@ -22,27 +22,6 @@
              (setq *error-output* ,tmp-stdout)
              ,ret))))))
 
-(progn
-  (null-output (load "package://hrpsys_gazebo/euslisp/atlas-interface.l"))
-  (unless (and x::*display* (> x::*display* 0))
-    (load "package://hrpsys_gazebo/euslisp/no-display"))
-  (null-output (atlas-init :set-reset-pose nil :set-user-mode nil))
-  (send *ri* :hand :rarm :wait-interpolation)
-  (send *ri* :hand :larm :wait-interpolation)
-  (unless (boundp '*completion-score*)
-    (defparameter *completion_score* 0))
-  )
-
-(defun score-callback-for-task3
-  (msg)
-  (format t ";; score = ~A~%" (send msg :completion_score))
-  (defparameter *completion-score* (send msg :completion_score))
-  )
-
-(ros::subscribe "/vrc_score"
-                atlas_msgs::vrcscore
-                #'score-callback-for-task3)
-
 (defun init-pose-for-hose ()
   (objects (list *atlas*))
   (send *atlas* :reset-manip-pose :base-down t)
@@ -64,14 +43,14 @@
   (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
   )
 
-(defun get-hose-point ()
+(defun get-point2 (&optional (itr 4))
   (let ((ret nil))
-    (dotimes (i 4)
+    (dotimes (i itr)
       (let ((pp (send (get-point) :worldpos)))
 	(format t ";; ~A~%" pp)
 	(if (y-or-n-p ";; ok?") (push pp ret))))
     (if (> (length ret) 0)
-	(setq *target-hose-pos* (scale (/ 1.0 (length ret)) (reduce #'v+ ret :initial-value #f( 0 0 0)))))
+	(scale (/ 1.0 (length ret)) (reduce #'v+ ret :initial-value #f( 0 0 0))))
     ))
 
 (defun reach-and-pickup-hose
@@ -383,7 +362,8 @@
   (progn (model2real :time 1000) (hand-model2real :time 1000 ) (send *ri* :wait-interpolation))
   ;;
   ;;
-  (move-hose-end-from-ikc (float-vector -100 0 -100) 0 :z)
+  ;;(move-hose-end-from-ikc (float-vector -100 0 -100) 0 :z)
+  (move-hose-end-from-ikc (float-vector -70 0 -70) 0 :z)
   (send *atlas* :hand :larm :angle-vector #f(0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 70.0))
   (progn (model2real :time 1000) (hand-model2real :time 1000 ) (send *ri* :wait-interpolation))
   (move-hose-end-from-ikc (float-vector -100 -100 -50) 0 nil)
@@ -420,17 +400,15 @@
   )
 
 (defun go-pos2 ()
-  (send *ri* :start-auto-balancer)
-  (send *ri* :start-st)
-  (send *ri* :go-pos -0.2 0 0)
-  (send *ri* :stop-st)
+  (start-gp)
+  (gp3 -0.2 0 0)
   (tack-arm-pose :arm :larm)
   (progn (model2real :time 5000) (hand-model2real :time 1000 ) (send *ri* :wait-interpolation))
-  (send *ri* :start-auto-balancer)
-  (send *ri* :start-st)
-  ;;(send *ri* :go-pos 0 0 45)
-  ;;(send *ri* :go-pos 0.3 0 0)
-  ;;(send *ri* :go-pos 0.1 0 0)
+  (gp3 0 0 45)
+  (gp3 0.2 0 0)
+  (gp3 0.2 0 0)
+  (stop-gp)
+  (snapshot-image :all)
   )
 
 ;; (prepare-for-rotate-hose #f(500 100 1400) 0 5000 :z nil)
@@ -649,17 +627,41 @@
   (warn ";; (move-to-table) ~%")
   (warn ";; (move-to-table :init-pose nil) ~%")
   (warn ";; (look-at-hose) ~%")
-  (warn ";; (get-hose-point) ~%")
+  (warn ";; (setq *target-hose-pos* (get-point2 4)) ~%")
   (warn ";; (pickup-hose) ~%")
   (warn ";; (reach-and-pickup-hose) ~%")
+  (warn ";; (release-hose-end) ~%")
   (warn ";; (snapshot-image :all) ~%")
   (warn ";; (snapshot-image :head) ~%")
   (warn ";; (snapshot-image :rarm) ~%")
   (warn ";; (snapshot-image :larm) ~%")
-  (warn ";; (gp2 0 0 0) ~%")
+  (warn ";; (gp3 0 0 0) ~%")
   (warn ";; (move-hose-end-from-ikc (float-vector 0 0 0) 0 t nil) ~%")
   )
 (usage)
+
+(progn
+  (null-output (load "package://hrpsys_gazebo/euslisp/atlas-interface.l"))
+  (unless (and x::*display* (> x::*display* 0))
+    (load "package://hrpsys_gazebo/euslisp/no-display"))
+  (unless (boundp '*ri*)
+    (null-output (atlas-init :set-reset-pose nil :set-user-mode nil))
+    (send *ri* :hand :rarm :wait-interpolation)
+    (send *ri* :hand :larm :wait-interpolation)
+    (init-vrc-task3))
+  (unless (boundp '*completion-score*)
+    (defparameter *completion_score* 0))
+  )
+
+(defun score-callback-for-task3
+  (msg)
+  (format t ";; score = ~A~%" (send msg :completion_score))
+  (defparameter *completion-score* (send msg :completion_score))
+  )
+
+(ros::subscribe "/vrc_score"
+                atlas_msgs::vrcscore
+                #'score-callback-for-task3)
  
 #|
 (defun rot-handle (ang)
