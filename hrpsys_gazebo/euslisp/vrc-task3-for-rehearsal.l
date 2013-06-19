@@ -386,11 +386,11 @@
   (move-hose-end-from-ikc (float-vector -100 0 -100) 0 :z)
   (send *atlas* :hand :larm :angle-vector #f(0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 70.0))
   (progn (model2real :time 1000) (hand-model2real :time 1000 ) (send *ri* :wait-interpolation))
-  (snapshot-image :all)
+  ;;(snapshot-image :all)
   (move-hose-end-from-ikc (float-vector -100 -100 -50) 0 nil)
-  (snapshot-image :all)
+  ;;(snapshot-image :all)
   (move-hose-end-from-ikc (float-vector -200 -200 -50) 0 nil)
-  (snapshot-image :all)
+  ;;(snapshot-image :all)
   (send *atlas* :rarm :angle-vector #f(-135.0 67.8617 -23.1484 70.0 0.0 -30.0))
   (send *atlas* :larm :angle-vector #f(135.0 67.8617 23.1484 -70.0 0.0 -30.0))
   (send *atlas* :move-centroid-on-foot
@@ -398,7 +398,7 @@
 	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg))
 	:centroid-thre 40)
   (progn (model2real :time 5000) (hand-model2real :time 1000 ) (send *ri* :wait-interpolation))
-  (snapshot-image :all)
+  ;;(snapshot-image :all)
   (tack-arm-pose)
   (progn (model2real :time 5000) (hand-model2real :time 1000 ) (send *ri* :wait-interpolation))
   (send *atlas* :hand :larm :open-pose2)
@@ -437,14 +437,17 @@
   ;;(send *ri* :go-pos 0.1 0 0)
   )
 
-;; (progn (prepare-for-rotate-hose #f(500 100 1400) 0 5000) (unix:sleep 1) (snapshot-image :larm))
+;; (prepare-for-rotate-hose #f(500 100 1400) 0 5000 :z nil)
 ;; last height = 1220
 (defun prepare-for-rotate-hose
-  (&optional (pos #f(500 100 1300)) (zang 0) (tm 5000) (rotation-axis :z))
+  (&optional (pos #f(500 100 1300)) (zang 0) (tm 5000) (rotation-axis :z) (use-snapshot-image nil))
   (test-ik1 
    (send (make-coords :pos pos :rpy (list 0 0 pi/2)) :rotate (deg2rad zang) :z :world)
    :rotation-axis rotation-axis)
   (progn (model2real :time tm) (hand-model2real :time 1000 ) (send *ri* :wait-interpolation))
+  (when use-snapshot-image
+    (unix:sleep 1)
+    (snapshot-image :larm))
   )
 
 ;; (send *ikc* :translate (float-vector 0 0 -30))
