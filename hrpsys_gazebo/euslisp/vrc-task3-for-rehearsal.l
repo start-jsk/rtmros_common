@@ -446,8 +446,11 @@
 	    (progn
 	      (send *ri* :start-auto-balancer)
 	      (send *ri* :start-st)
-	      (send* *ri* :go-pos (concatenate cons (subseq dif 0 2) (list 0)))
-	      (send *ri* :stop-st))
+	      ;;(send* *ri* :go-pos (concatenate cons (subseq dif 0 2) (list 0)))
+	      (send* *ri* :go-pos-no-wait (concatenate cons (subseq dif 0 2) (list 0)))
+	      (send *ri* :wait-foot-steps)
+	      (send *ri* :stop-st)
+	      (send *ri* :stop-auto-balancer))
 	  (setq ret nil))))))) 
  ;; (let ((ret t))
   ;;   (while ret
