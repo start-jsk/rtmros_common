@@ -7,7 +7,7 @@
 (ros::advertise "atlas_gallop_controller/compus"
                 std_msgs::string)
 (ros::advertise "atlas_gallop_controller/point"
-                std_msgs::bool)
+                std_msgs::string)
 
 (defun gallop-standby
   nil
@@ -231,14 +231,19 @@
     (setq *vrc-score* (copy-object msg)))
    ((not (eq (send *vrc-score* :falls)
 	     (send msg :falls)))
+    (print 'fall)
     (ros::publish
      "atlas_gallop_controller/point"
-     (instance std_msgs::bool :init :data nil)))
-   ((not (eq (send *vrc-score* :completion_score)
-	     (send msg :completion_score)))
+     (instance std_msgs::string :init :data "f")))
+   ((or
+     (not (eq (send *vrc-score* :completion_score)
+              (send msg :completion_score)))
+     (and (stringp (send msg :message))
+          (plusp (length (send msg :message)))))
+    (print 'score)
     (ros::publish
      "atlas_gallop_controller/point"
-     (instance std_msgs::bool :init :data t))))
+     (instance std_msgs::string :init :data "s"))))
   (setq *vrc-score* (copy-object msg)))
 
 (defvar *auto-started* nil)
