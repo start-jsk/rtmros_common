@@ -551,7 +551,8 @@
    (send *robot* :angle-vector (scale 0 (send *robot* :angle-vector)))
    (send *robot* :larm :shoulder-r :joint-angle 90)
    (send *robot* :rarm :shoulder-r :joint-angle -90)
-   (send *irtviewer* :draw-objects)
+   (if (and (boundp '*irtviewer*) *irtviewer*)
+       (send *irtviewer* :draw-objects))
    (model2real :sleep-time 10)
    (unix:usleep (round (/ (* 10 1000) sim-rate)))
 

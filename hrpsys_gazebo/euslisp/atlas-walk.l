@@ -163,7 +163,7 @@
 (defun move-neck
   (&optional (rel-angle 10) &key (zero nil))
 
-  (cond rel-angle
+  (case rel-angle
         (:zero (send *atlas* :head :neck-p :joint-angle 50))
         (t (send *atlas* :head :neck-p :joint-angle rel-angle :relative t)))
   (fix-leg)
