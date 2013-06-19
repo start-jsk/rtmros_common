@@ -164,6 +164,7 @@
 (defun move-neck
   (&optional (rel-angle 10) &key (zero nil))
 
+  (real2model)
   (case rel-angle
         (:zero (send *atlas* :head :neck-p :joint-angle 50))
         (t (send *atlas* :head :neck-p :joint-angle rel-angle :relative t)))
@@ -174,6 +175,7 @@
 (defun move-waist
   (&optional (rel-angle 10) &key (zero nil))
 
+  (real2model)
   (case rel-angle
     (:zero (send *atlas* :torso :waist-y :joint-angle 0))
     (t (send *atlas* :torso :waist-y :joint-angle rel-angle :relative t)))
