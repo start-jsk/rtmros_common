@@ -56,7 +56,8 @@
 
 (defun reach-and-pickup-hose
   (&key (hose-grasp-x-pos 400)
-	(hose-grasp-y-pos -650))
+	(hose-grasp-y-pos -650)
+	(x-off 0) (y-off 0))
   (send *atlas* :reset-manip-pose :base-down t)
   ;;(send *atlas* :larm :angle-vector #f(30.0 90.0 0.0 -79.9998 15.0 0.0))
   (send *atlas* :rarm :inverse-kinematics
@@ -437,7 +438,15 @@
 	     :name :larm-hand-coords-for-hose)))
     (send (send *atlas* :larm :end-coords :parent) :assoc lc)
     (send *atlas* :put :larm-hand-coords-for-hose lc)
-    )))
+    ))
+  (unless (send *atlas* :get :rarm-hand-coords-for-hose)
+    (let ((lc (make-cascoords
+	       :coords (send (send (send *atlas* :rarm :end-coords :copy-worldcoords) :rotate (deg2rad 40) :x) :translate (float-vector 60 -80 120))
+	       :name :rarm-hand-coords-for-hose)))
+      (send (send *atlas* :rarm :end-coords :parent) :assoc lc)
+      (send *atlas* :put :rarm-hand-coords-for-hose lc)
+      ))
+  )
 
 (defun init-vrc-task3 ()
   (null-output (load "package://hrpsys_gazebo/euslisp/atlas-interface.l"))
