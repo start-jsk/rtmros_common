@@ -1,8 +1,32 @@
+(defmacro null-output (&rest bodies)
+  `(with-all-output->file "/dev/null" ,@bodies))
+
+;; with-all-output->file : (with-all-output->file "filename" (form1) (form2) .. )
+(defmacro with-all-output->file (fname &rest bodies)
+  (let ((tmp-stdout (gensym))
+        (tmp-stderr (gensym))
+        (null-port (gensym))
+        (ret (gensym)))
+    `(progn
+       (let ((,tmp-stdout *standard-output*)
+             (,tmp-stderr *error-output*)
+             (,ret nil))
+         (unwind-protect
+             (with-open-file (,null-port ,fname :direction :output)
+               (setq *standard-output* ,null-port)
+               (setq *error-output* ,null-port)
+               (setq ,ret (progn ,@bodies))
+               )
+           (progn
+             (setq *standard-output* ,tmp-stdout)
+             (setq *error-output* ,tmp-stdout)
+             ,ret))))))
+
 (progn
-  (load "package://hrpsys_gazebo/euslisp/atlas-interface.l")
+  (null-output (load "package://hrpsys_gazebo/euslisp/atlas-interface.l"))
   (unless (and x::*display* (> x::*display* 0))
     (load "package://hrpsys_gazebo/euslisp/no-display"))
-  (atlas-init :set-reset-pose nil :set-user-mode nil)
+  (null-output (atlas-init :set-reset-pose nil :set-user-mode nil))
   (send *ri* :hand :rarm :wait-interpolation)
   (send *ri* :hand :larm :wait-interpolation)
   (unless (boundp '*completion-score*)
@@ -11,8 +35,10 @@
 
 (defun score-callback-for-task3
   (msg)
-  (print (send msg :completion_score))
-  (print (defparameter *completion-score* (send msg :completion_score))))
+  ;;(print (send msg :completion_score))
+  ;;(print )
+  (defparameter *completion-score* (send msg :completion_score))
+  )
 
 (ros::subscribe "/vrc_score"
                 atlas_msgs::vrcscore
@@ -79,6 +105,7 @@
 	:both '(:rleg :lleg :rarm)
 	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
   (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+  (format t ";; completion = ~A~%" (progn (dotimes (i 10) (ros::spin-once)) *completion-score*))
   )
 
 (defun grasp-hose-by-larm ()
@@ -240,15 +267,23 @@
       )
     ))
 
-;; (move-hose-end-from-ikc (float-vector 0 0 0) 0)
-;; (progn (move-hose-end-from-ikc (float-vector 0 0 0) 0) (unix:sleep 2) (print (send (send *atlas* :force-sensor :lhsensor) :rotate-vector (send *ri* :force-vector :larm))) (print (send (send *atlas* :force-sensor :lhsensor) :rotate-vector (send *ri* :moment-vector :larm))) (unix:sleep 2) (snapshot-image :rarm) (snapshot-image :head) (progn (dotimes (i 10) (ros::spin-once)) *completion-score*))
+;; (move-hose-end-from-ikc (float-vector 0 0 0) 0 t nil)
 (defun move-hose-end-from-ikc
-  (&optional (dif-pos (float-vector 0 0 0)) (zang 0) (rotation-axis t))
+  (&optional (dif-pos (float-vector 0 0 0)) (zang 0) (rotation-axis t) (check nil))
   (test-ik1 (send (send (send *ikc* :copy-worldcoords) :translate dif-pos :world) :rotate (deg2rad zang) :z :world)
 	    :init-pose t :rotation-axis rotation-axis :thre 2.5)
   (send *atlas* :rarm :wrist-y :joint-angle -30)
   (progn (model2real :time 1000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
-  )
+  (when check
+    (unix:sleep 2)
+    (format t ";; force ~A, moment ~A~%"
+	    (send (send *atlas* :force-sensor :lhsensor) :rotate-vector (send *ri* :force-vector :larm))
+	    (send (send *atlas* :force-sensor :lhsensor) :rotate-vector (send *ri* :moment-vector :larm)))
+    (unix:sleep 2)
+    (snapshot-image :rarm)
+    (snapshot-image :head)
+    (format t ";; completion = ~A~%" (progn (dotimes (i 10) (ros::spin-once)) *completion-score*))
+    ))
 
 (defun release-hose-end ()
   (setq *ikc* (send (send *atlas* :get :larm-hand-coords-for-hose) :copy-worldcoords))
@@ -405,8 +440,8 @@
     )))
 
 (defun init-vrc-task3 ()
-  (load "package://hrpsys_gazebo/euslisp/atlas-interface.l")
-  (atlas-init :set-reset-pose nil :set-user-mode nil)
+  (null-output (load "package://hrpsys_gazebo/euslisp/atlas-interface.l"))
+  (null-output (atlas-init :set-reset-pose nil :set-user-mode nil))
   (real2model)
   (model2real :wait t :time 10)
   (set-user)
@@ -472,6 +507,16 @@
   ;; 	  (setq ret nil)))))))
   )
 
+(defun gp2 (xx yy th &optional (use-snapshot-image t))
+  (send *ri* :start-auto-balancer)
+  (send *ri* :start-st)
+  (send *ri* :go-pos-no-wait xx yy th)
+  (send *ri* :wait-foot-steps)
+  (send *ri* :stop-st)
+  (send *ri* :stop-auto-balancer)
+  (if use-snapshot-image (snapshot-image :head))
+  )
+
 (defun pickup-hose
   ()
   (reach-and-pickup-hose)
@@ -493,6 +538,8 @@
   (warn ";; (snapshot-image :head) ~%")
   (warn ";; (snapshot-image :rarm) ~%")
   (warn ";; (snapshot-image :larm) ~%")
+  (warn ";; (gp2 0 0 0) ~%")
+  (warn ";; (move-hose-end-from-ikc (float-vector 0 0 0) 0 t nil) ~%")
   )
 (usage)
  
