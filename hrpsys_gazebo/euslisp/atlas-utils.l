@@ -80,7 +80,7 @@
   )
 
 (defun pregrasp (&key (arm :both) (real nil))
-  (set-model-hand-av #f(0 50 0 0 50 0 0 50 0 0 0 0) arm)
+  (set-model-hand-av #f(0 70 0 0 70 0 0 70 0 0 0 0) arm)
   (when real (hand-model2real))
   )
 
@@ -206,6 +206,28 @@
   (send *ri* :angle-vector (send *atlas* :angle-vector) time)
   (when *lr-reverse* (mirror-angle-vector))
   (when wait (send *ri* :wait-interpolation)))
+
+(defun model2real-with-rand-vib (&key (sleep-time 1500) (time sleep-time) (wait nil))
+  (model2real :sleep-time time :wait wait))
+  ;; (when *lr-reverse* (mirror-angle-vector))
+  ;; (let* ((prev-av (send *ri* :state :potentio-vector))
+  ;;        (dest-av (send *atlas* :angle-vector))
+  ;;        (ik-time 100)
+  ;;        (ik-num (/ time ik-time))
+  ;;        (rand-angle 0.0) rand-av)
+  ;;   (dotimes (i ik-num)
+  ;;     (setq rand-av
+  ;;           (concatenate float-vector
+  ;;                        (mapcar #'(lambda (x) (- x (/ rand-angle 2)))
+  ;;                                (mapcar #'random (list rand-angle rand-angle rand-angle rand-angle rand-angle rand-angle)))))
+  ;;     (send *atlas* :angle-vector (midpoint (/ (+ i 0.0) ik-num) prev-av dest-av))
+  ;;     (send *atlas* :lleg :angle-vector (v+ (send *atlas* :lleg :angle-vector) rand-av))
+  ;;     (send *ri* :angle-vector (send *atlas* :angle-vector) ik-time)
+  ;;     (send *ri* :wait-interpolation))
+  ;;   (send *atlas* :angle-vector dest-av)
+  ;;   (send *ri* :angle-vector (send *atlas* :angle-vector) ik-time))
+  ;; (when *lr-reverse* (mirror-angle-vector))
+  ;; (when wait (send *ri* :wait-interpolation)))
 
 (defun reset-pose (&key (real nil))
   (send *atlas* :stand-pose)

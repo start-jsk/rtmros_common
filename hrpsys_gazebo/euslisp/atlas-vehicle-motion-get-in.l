@@ -166,8 +166,8 @@
 	   :rarm
 	   (v- (send pipe-coords :worldpos)
 	       (send (send (send pipe-coords :copy-worldcoords)
-			   :transform (make-coords :pos #f(58 104 30) :rpy '(0 0 0))) :worldpos))
-	   50)
+			   :transform (make-coords :pos #f(58 104 0) :rpy '(0 0 0))) :worldpos))
+	   75)
 	  (save-last))
       (progn
 	(warning-message 2 "[vhc-get-in] angle-vector4 in grasp rarm [get-in phase1]~%")
@@ -181,6 +181,24 @@
 	(move-centroid)
 	(send *irtviewer* :draw-objects)
 	(when real (model2real :wait t))))
+
+    (warning-message 2 "[vhc-get-in] pregrasp rarm in grasp rarm [get-in phase1]~%")
+    (when wait (my-wait))
+    (pregrasp :arm :rarm :real real)
+    (send *irtviewer* :draw-objects)
+    (when real (unix::usleep (* 3 1000 1000)))
+
+    (when real
+      (progn
+        (warning-message 2 "[vhc-get-in] reach until touch 2 in grasp rarm [get-in phase1]~%")
+        (when wait (my-wait))
+        (reach-until-touch
+         :rarm
+         (v- (send pipe-coords :worldpos)
+             (send (send (send pipe-coords :copy-worldcoords)
+                         :transform (make-coords :pos #f(0 -1 2) :rpy '(0 0 0)) :world) :worldpos))
+         100)
+        (save-last)))
 
     (when real
       (warning-message 2 "[vhc-get-in] set middle-gain :rarm in grasp rarm [get-in phase1]~%")

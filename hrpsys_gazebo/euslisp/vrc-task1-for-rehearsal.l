@@ -30,8 +30,8 @@ roseus atlas-vehicle-motion.l
 
 ;; [5]  walk with first pose of getting-in-vehicle 
 (start-walk2)
-;;  (walk-clickpos)
-;;  (turn-clickpos)
+;; (walk-clickpos)
+;; (turn-clickpos)
 ;; (walk 0)
 ;; (turn 0)
 ;; (go-pos x y theta)

@@ -31,7 +31,8 @@
   (let* ((fz (get-axis-force limb (float-vector 0 0 1))))
     (if (> fz 200)
 	(set-middle-gain limb) (set-zero-gain limb))
-    (unix::usleep (* 5 1000 1000))    
+    ;; (unix::usleep (* 5 1000 1000))
+    (unix::usleep (* 3 1000 1000))
     (real2model)
     (model2real :wait t)
     (send *irtviewer* :draw-objects)
@@ -40,7 +41,7 @@
 
 (defun reach-until-touch
   (&optional (limb :larm) (axis (float-vector 0 0 1)) ;; axis is moving direction
-	     (fthre 100) (dx 10) (ik-time 200))
+	     (fthre 100) (dx 5) (ik-time 200))
 
   (do-until-key
    (let* ((f (get-axis-force limb (v- axis))))
