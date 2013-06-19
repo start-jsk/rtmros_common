@@ -249,7 +249,7 @@
 (defvar *auto-started* nil)
 (defun remain-callback
   (msg)
-  (let ((buf (read-from-string (send msg :data))))
+  (let ((buf (if (and msg (send msg :data)) (read-from-string (send msg :data)))))
     (cond
      (*auto-started* nil)
      ((and (numberp buf) (<= buf 0))
