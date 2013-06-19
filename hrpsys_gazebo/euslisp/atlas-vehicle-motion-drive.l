@@ -59,17 +59,26 @@
 #|
 (setq *lr-reverse* nil)
 (real2model)
-(send *atlas* :newcoords (make-coords :rpy (mapcar #'deg2rad (get-imu-data))))
-;;(move-robot-with-imu)
-
+;; (send *atlas* :newcoords (make-coords :rpy (mapcar #'deg2rad (get-imu-data))))
 (model2real)
+(set-default-gain)
 
-(set-stand)
-(reset-bdi-controller)
+;;(set-stand)
+;;(reset-bdi-controller)
 ;;(send *ri* :set-simulation-mode :mode :user :effort 255)
 
+(let ((av (send *atlas* :larm :angle-vector)))
+  (set-seat-pose)
+  (send *atlas* :larm :angle-vector av))
+(model2real :time 6000)
+
 (setq pt (get-full-cloud))
-(setq qq (send pt :filter :key #'(lambda (p) (< (norm p) 1000)) :create t))
+(setq qq (send pt :filter :key #'(lambda (p) (and (< (norm p) 1000) (> (elt p 0) 0) (> (elt p 1) -100))) :create t))
+
+(pcl::downsample qq 25.0 25.0 25.0)
+
+(send *atlas* :reset-coords)
+(objects (list qq *atlas*))
 
 (send *atlas* :hand :larm :grasp-pose)
 (send *atlas* :hand :rarm :grasp-pose)
