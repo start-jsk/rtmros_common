@@ -48,23 +48,43 @@
      (warning-message 6 "[reach-until-touch] f: ~a / ~a  limb: ~a  axis: ~a~%" f fthre limb axis)
      (if (> f fthre) (return))
      (unless
-	 (let* ((tc (list (send (send (send *atlas* limb :end-coords) :copy-worldcoords) :translate (scale dx (normalize-vector axis)) :world)
-			  nil
-			  nil
-			  nil)))
-	   (with-move-target-link-list
-	    (mt ll *atlas* (append (list limb) (remove limb '(:rleg :lleg :rarm :larm))))
-	    (send *atlas* :fullbody-inverse-kinematics
-		  (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
-		  :link-list ll :move-target mt
-		  :collision-avoidance-link-pair nil
-		  :translation-axis '(t t t t)
-		  :rotation-axis '(t t t t)
-		  :centroid-thre 500)))
+	 (send *atlas* limb :inverse-kinematics
+	       pipe-coords
+	       :target-centroid-pos (send (send (send *atlas* limb :end-coords) :copy-worldcoords) :translate (scale dx (normalize-vector axis)) :world)
+	       :centroid-thre 500)
        (warning-message 1 "[reach-until-touch] ik failed~%")
        (return))
+     (fix-leg-vehicle-side)
+     (move-centroid)
      (send *irtviewer* :draw-objects)
      (model2real :time ik-time :wait t))))
+
+;; (defun reach-until-touch
+;;   (&optional (limb :larm) (axis (float-vector 0 0 1)) ;; axis is moving direction
+;; 	     (fthre 100) (dx 5) (ik-time 200))
+
+;;   (do-until-key
+;;    (let* ((f (get-axis-force limb (v- axis))))
+;;      (warning-message 6 "[reach-until-touch] f: ~a / ~a  limb: ~a  axis: ~a~%" f fthre limb axis)
+;;      (if (> f fthre) (return))
+;;      (unless
+;; 	 (let* ((tc (list (send (send (send *atlas* limb :end-coords) :copy-worldcoords) :translate (scale dx (normalize-vector axis)) :world)
+;; 			  nil
+;; 			  nil
+;; 			  nil)))
+;; 	   (with-move-target-link-list
+;; 	    (mt ll *atlas* (append (list limb) (remove limb '(:rleg :lleg :rarm :larm))))
+;; 	    (send *atlas* :fullbody-inverse-kinematics
+;; 		  (mapcar #'(lambda (c m) (if c c (send m :copy-worldcoords))) tc mt)
+;; 		  :link-list ll :move-target mt
+;; 		  :collision-avoidance-link-pair nil
+;; 		  :translation-axis '(t t t t)
+;; 		  :rotation-axis '(t t t t)
+;; 		  :centroid-thre 500)))
+;;        (warning-message 1 "[reach-until-touch] ik failed~%")
+;;        (return))
+;;      (send *irtviewer* :draw-objects)
+;;      (model2real :time ik-time :wait t))))
 
 
 ;; torque
