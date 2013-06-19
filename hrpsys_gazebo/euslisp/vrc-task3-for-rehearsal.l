@@ -541,6 +541,11 @@
 
 (defun move-to-table (&key (init-pose t))
   (if init-pose (init-pose-for-hose))
+  (send *ri* :set-st-param
+	:k-tpcc-p #f(1.5 1.5)
+	:k-tpcc-x #f(5.0 5.0)
+	:k-brot-p #f(0.05 0.05)
+	:k-brot-tc #f(0.1 0.1))
   ;;(send *ri* :teleport-to (make-coords :pos #f(-2700 -4100 1000)))
   ;;(send *ri* :teleport-to (make-coords :pos #f(-3200 -4000 1000))) ;; far
   ;;(progn (real2model) (model2real :wait t :time 10) (set-user) (set-kp 4000))
@@ -577,6 +582,11 @@
 	      ;;(send *ri* :stop-auto-balancer)
 	      )
 	  (setq ret nil))))))) 
+  (send *ri* :set-st-param
+	:k-tpcc-p #f(2.5 2.5)
+	:k-tpcc-x #f(5 5)
+	:k-brot-p #f(0.1 0.1)
+	:k-brot-tc #f(0.1 0.1))
  ;; (let ((ret t))
   ;;   (while ret
   ;;     (warn ";; point on image_view~%")
