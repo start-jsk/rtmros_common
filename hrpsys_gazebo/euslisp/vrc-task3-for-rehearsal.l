@@ -579,6 +579,11 @@
 	:k-tpcc-x #f(5 5)
 	:k-brot-p #f(0.1 0.1)
 	:k-brot-tc #f(0.1 0.1))
+  (send *ri* :set-gait-generator-param
+         :default-double-support-ratio 0.2
+         :default-step-time 1.0
+         :default-step-height 0.1
+	 :stride-parameter #f(0.20 0.05 20))
   (send *atlas* :walk-pose)
   (model2real :wait t :time 5000)
   (setup-hand-coords-for-hose)
