@@ -28,7 +28,7 @@
 	 (atlas-set-servo-gain-by-torque-limit
 	  (cdr k) (car k)))
      servo-gain)
-    (set-hand-kp 100.0))
+    (set-hand-kp 50.0))
   (setq *robot* *atlas*)
   (objects (list *atlas*))
   t)
