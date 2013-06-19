@@ -6,8 +6,8 @@
 
 (ros::advertise "atlas_gallop_controller/compus"
                 std_msgs::string)
-(ros::advertise "atlas_gallop_controller/damage"
-                std_msgs::empty)
+(ros::advertise "atlas_gallop_controller/point"
+                std_msgs::bool)
 
 (defun gallop-standby
   nil
@@ -223,17 +223,23 @@
 	  (send *auto-controller-hash* :get :utsubuse)
 	  (send *auto-controller-hash* :get :compus)))
 
-(defvar *damage-count* nil)
+(defvar *vrc-score* nil)
 (defun score-callback
   (msg)
   (cond
-   ((null *damage-count*)
-    (setq *damage-count* (send msg :falls)))
-   ((not (eq (send msg :falls) *damage-count*))
-    (setq *damage-count* (send msg :falls))
+   ((null *vrc-score*)
+    (setq *vrc-score* (copy-object msg)))
+   ((not (eq (send *vrc-score* :falls)
+	     (send msg :falls)))
     (ros::publish
-     "atlas_gallop_controller/damage"
-     (instance std_msgs::empty :init)))))
+     "atlas_gallop_controller/point"
+     (instance std_msgs::bool :init :data nil)))
+   ((not (eq (send *vrc-score* :completion_score)
+	     (send msg :completion_score)))
+    (ros::publish
+     "atlas_gallop_controller/point"
+     (instance std_msgs::bool :init :data t))))
+  (setq *vrc-score* (copy-object msg)))
 
 (defvar *auto-started* nil)
 (defun remain-callback
