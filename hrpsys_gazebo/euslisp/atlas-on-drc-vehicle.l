@@ -1,6 +1,7 @@
 (load "package://hrpsys_gazebo/euslisp/atlas-interface.l")
 (load "package://hrpsys_gazebo/euslisp/atlas-applications.l")
 (load "package://hrpsys_gazebo/euslisp/atlas-vehicle-motion.l")
+(load "package://hrpsys_gazebo/euslisp/atlas-vehicle-motion-drive.l")
 (load "package://hrpsys_gazebo/euslisp/atlas-utils.l")
 
 ;; (unless (boundp '*drcv*)
@@ -11,7 +12,7 @@
 ;;        (read f)))
 ;;   )
 
-;; demo : no walk and telep in side of vehicle murooka
+;; no walk and telep in side of vehicle by murooka
 ;;  (all-demo-task1 :real t :wait nil :no-walk-and-telep t)
 
 (ros::advertise "/drc_world/robot_enter_car" geometry_msgs::Pose 1)
@@ -124,6 +125,19 @@
   (when real
     (model2real)
     )
+  )
+
+(defun move-to-sit-seat-pose
+  (&key (real nil))
+  (real2model)
+  (let ((av (send *atlas* :larm :angle-vector)))
+    (set-seat-pose)
+    (send *atlas* :larm :angle-vector av))
+  (set-middle-gain :legs)
+  (when real
+    (model2real)
+    )
+  (ungrasp :arm :larm :real real)
   )
 
 (defun murooka-end-pose
