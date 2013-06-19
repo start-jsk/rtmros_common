@@ -50,7 +50,7 @@
   (send *atlas* :head :neck-p :joint-angle 50)
   ;;(send *atlas* :larm :angle-vector #f(30.0 90.0 0.0 -79.9998 15.0 0.0))
   (send *atlas* :hand :rarm :open-pose2)
-  (progn (model2real) (hand-model2real :time 1000 :wait t) (send *ri* :wait-interpolation))
+  (progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
   )
 
 (defun look-at-hose ()
@@ -61,7 +61,7 @@
   (send *atlas* :move-centroid-on-foot
 	:both '(:rleg :lleg)
 	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
-  (progn (model2real :time 2000) (hand-model2real :time 1000 :wait t) (send *ri* :wait-interpolation))
+  (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
   )
 
 (defun get-hose-point ()
@@ -576,13 +576,14 @@
 	    (warn ";; go pos diff ~A ~%" (scale 1e3 dif))
 	(if (y-or-n-p ";; go pos ?~%")
 	    (progn
-	      (send *ri* :start-auto-balancer)
+	      ;;(send *ri* :start-auto-balancer)
 	      (send *ri* :start-st)
 	      ;;(send* *ri* :go-pos (concatenate cons (subseq dif 0 2) (list 0)))
 	      (send* *ri* :go-pos-no-wait (concatenate cons (subseq dif 0 2) (list 0)))
 	      (send *ri* :wait-foot-steps)
 	      (send *ri* :stop-st)
-	      (send *ri* :stop-auto-balancer))
+	      ;;(send *ri* :stop-auto-balancer)
+	      )
 	  (setq ret nil))))))) 
  ;; (let ((ret t))
   ;;   (while ret
