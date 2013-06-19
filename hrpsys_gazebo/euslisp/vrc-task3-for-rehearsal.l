@@ -27,6 +27,7 @@
   (send *atlas* :hand :rarm :open-pose2)
   (progn (model2real) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
   )
+(warn ";; (init-pose-for-hose) ~%")
 
 (defun reach-and-pickup-hose
   (&key (hose-grasp-x-pos 400)
@@ -51,8 +52,9 @@
   (send *atlas* :move-centroid-on-foot
 	:both '(:rleg :lleg :rarm)
 	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
-  (snapshot-image :rarm)
   (progn (model2real :time 1000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+  (snapshot-image :rarm)
+  (unless (y-or-n-p ";; continue?~%") (return-from reach-and-pickup-hose nil))
 
   (send *atlas* :rarm :inverse-kinematics
 	(send (make-coords :pos (float-vector hose-grasp-x-pos hose-grasp-y-pos 1100) :rpy (list 0 0 -pi/2)) :rotate pi/2 :y :world)
@@ -61,8 +63,9 @@
   (send *atlas* :move-centroid-on-foot
 	:both '(:rleg :lleg :rarm)
 	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
-  (snapshot-image :rarm)
   (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
+  (snapshot-image :rarm)
+  (unless (y-or-n-p ";; continue?~%") (return-from reach-and-pickup-hose nil))
 
   (send *atlas* :hand :rarm :angle-vector #f(0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 40.0 0.0 50.0 20.0))
   (set-hand-kp 1)
@@ -78,6 +81,7 @@
 	:target-centroid-pos (send *atlas* :calc-target-centroid-pos :both '(:rleg :lleg)))
   (progn (model2real :time 2000) (hand-model2real :time 1000) (send *ri* :wait-interpolation))
   )
+(warn ";; (reach-and-pickup-hose) ~%")
 
 (defun grasp-hose-by-larm ()
   (send *atlas* :rarm :inverse-kinematics
@@ -420,8 +424,8 @@
   )
 (warn ";; (init-vrc-task3) ~%")
 
-(defun move-to-table ()
-  (init-pose-for-hose)
+(defun move-to-table (&key (init-pose t))
+  (if init-pose (init-pose-for-hose))
   ;;(send *ri* :teleport-to (make-coords :pos #f(-2700 -4100 1000)))
   ;;(send *ri* :teleport-to (make-coords :pos #f(-3200 -4000 1000))) ;; far
   ;;(progn (real2model) (model2real :wait t :time 10) (set-user) (set-kp 4000))
@@ -432,21 +436,41 @@
       (let ((gp (get-point)))
 	(when gp
 	  (let* ((goal-pos-from-get-point
-		  (send gp :transform-vector #f(-541.243 97.2492 -1028.51)))
+		  (send gp :transform-vector (v+ #F(0 0 0) #f(-541.243 97.2492 -1028.51))))
 		 (dif (scale 1e-3
 			 (send (apply #'midcoords 0.5 (send *atlas* :legs :end-coords :copy-worldcoords))
 			       :inverse-transform-vector goal-pos-from-get-point))))
 	    ;;(warn ";; go pos diff ~A ~%" (scale 1e3 dif))
 	    (warn ";; go pos diff ~A ~%" (scale 1e3 dif))
-	    (setq dif (v+ dif (scale 1e-3 (float-vector 30 20 0))))
 	(if (y-or-n-p ";; go pos ?~%")
 	    (progn
 	      (send *ri* :start-auto-balancer)
 	      (send *ri* :start-st)
 	      (send* *ri* :go-pos (concatenate cons (subseq dif 0 2) (list 0)))
 	      (send *ri* :stop-st))
-	  (setq ret nil)))))))
+	  (setq ret nil))))))) 
+ ;; (let ((ret t))
+  ;;   (while ret
+  ;;     (warn ";; point on image_view~%")
+  ;;     (let ((gp (get-point)))
+  ;; 	(when gp
+  ;; 	  (let* ((goal-pos-from-get-point
+  ;; 		  (send gp :transform-vector #f(-541.243 97.2492 -1028.51)))
+  ;; 		 (dif (scale 1e-3
+  ;; 			 (send (apply #'midcoords 0.5 (send *atlas* :legs :end-coords :copy-worldcoords))
+  ;; 			       :inverse-transform-vector goal-pos-from-get-point))))
+  ;; 	    ;;(warn ";; go pos diff ~A ~%" (scale 1e3 dif))
+  ;; 	    (warn ";; go pos diff ~A ~%" (scale 1e3 dif))
+  ;; 	    (setq dif (v+ dif (scale 1e-3 (float-vector 30 20 0))))
+  ;; 	(if (y-or-n-p ";; go pos ?~%")
+  ;; 	    (progn
+  ;; 	      (send *ri* :start-auto-balancer)
+  ;; 	      (send *ri* :start-st)
+  ;; 	      (send* *ri* :go-pos (concatenate cons (subseq dif 0 2) (list 0)))
+  ;; 	      (send *ri* :stop-st))
+  ;; 	  (setq ret nil)))))))
   )
+(warn ";; (move-to-table) ~%")
 
 (defun pickup-hose
   ()
@@ -457,6 +481,7 @@
   (grasp-hose-by-larm)
   (mate-hose-by-larm-0)
   )
+(warn ";; (pickup-hose) ~%")
 
 (defun usage ()
   )
