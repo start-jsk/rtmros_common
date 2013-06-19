@@ -3,16 +3,19 @@
   <arg name="IMAGE_TYPE" default="image_rect" />
   <arg name="RESIZE_RATE" default="0.25" />
   <arg name="COMPRESS_TYPE" default="compressed" />
+  <arg name="THROTTLE" default="_throttle" />
 
   <node ns="$(arg CAMERA)"
         name="screenpoint_view" pkg="image_view2" type="image_view2"
         output="screen" >
-    <remap from="image" to="$(arg IMAGE_TYPE)_throttle" />
-    <remap from="$(arg CAMERA)/$(arg IMAGE_TYPE)_throttle/screenpoint" to="/pointcloud_screenpoint_nodelet/point" />
+    <remap from="image" to="$(arg IMAGE_TYPE)$(arg THROTTLE)" />
+    <remap from="$(arg CAMERA)/$(arg IMAGE_TYPE)$(arg THROTTLE)/screenpoint"
+           to="/pointcloud_screenpoint_nodelet/point" />
     <remap from="/tf" to="/tf_dummy" />
     <param name="autosize" value="false" />
     <param name="image_transport" value="$(arg COMPRESS_TYPE)" />
     <param name="resize_scale_x" value="$(arg RESIZE_RATE)" />
     <param name="resize_scale_y" value="$(arg RESIZE_RATE)" />
   </node>
+
 </launch>
