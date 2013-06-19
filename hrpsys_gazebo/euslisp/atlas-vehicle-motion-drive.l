@@ -69,7 +69,8 @@
 
 (send *atlas* :angle-vector #f(6.34609 -44.1048 15.2562 48.2583 19.4723 89.5129 -79.7713 -85.3878 11.0342 -44.243 0.0 24.981 79.5049 -5.34668 76.0922 30.3127 5.32417 -38.7813 -26.929 2.94764 27.8039 97.4379 11.949 -98.8007 -16.7553 -1.76944 -13.4926 -35.0))
 
-(move-world #f(0 -100 150) :larm)
+(move-world #f(0 -100 50) :larm)
+(send *atlas* :torso :waist-y :joint-angle 20)
 
 (send *atlas* :rarm :angle-vector #f(-100.0 120.0 0.0 80.0 40.0 0.0))
 (send *atlas* :rarm :angle-vector #f(-100.0 60.0 0.0 80 -60.0 0.0))
@@ -80,7 +81,6 @@
   (set-seat-pose)
   (send *atlas* :larm :angle-vector av))
 (model2real :time 6000)
-
 
 (setq pt (get-full-cloud))
 (setq qq (send pt :filter :key #'(lambda (p) (and (< (norm p) 1000) (> (elt p 0) 0) (> (elt p 1) -100))) :create t))
