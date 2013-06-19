@@ -68,7 +68,8 @@
     (setq model-diff
           (distance (send *atlas* :lleg :end-coords :worldpos)
                     (send *atlas* :rleg :end-coords :worldpos)))
-    (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
+    ;; (send *atlas* :angle-vector (send *ri* :state :potentio-vector))
+    (real2model)
     (setq real-diff
           (distance (send *atlas* :lleg :end-coords :worldpos)
                     (send *atlas* :rleg :end-coords :worldpos)))
