@@ -3,7 +3,7 @@
 
 (make-irtviewer) ;; irtviewer blocked after connection ....
 
-(defun connect-atlas (&optional (host "fc2")
+(defun connect-atlas (&optional (host "fc1")
                                 (com "roseus \"~/ros/fuerte/rtm-ros-robotics/rtmros_common/hrpsys_gazebo/euslisp/atlas-pipe-interface.l\""))
   (setq *fork-stream* (piped-fork "ssh" host com)))
 
@@ -92,8 +92,17 @@
 (defun get-angle ()
   (com "(send *ri* :state :potentio-vector)"))
 
+(defun get-model ()
+  (com "(send *atlas* :angle-vector)"))
+(defun get-lhand ()
+  (com "(send *atlas* :hand :larm :angle-vector)"))
+(defun get-rhand ()
+  (com "(send *atlas* :hand :rarm :angle-vector)"))
+
 (defun get-imu ()
   (com "(send *ri* :state :imucoords)"))
+(defun get-imu2 ()
+  (com "(get-imu-data)"))
 
 (defun get-click-point ()
   (com "(get-point)"))
@@ -105,3 +114,7 @@
   (com-large
    (format nil "(let ((pt (get-full-cloud))) (send pt :filter :key #'(lambda (p) (< (norm p) ~f))) (pcl::downsample pt ~f ~f ~f))"
            round size size size) 360))
+
+(defun get-v-view ()
+  (com-large
+   "(let ((pt (get-full-cloud)) qq) (setq qq (send pt :filter :key #'(lambda (p) (and (< (norm p) 1000) (> (elt p 0) 0) (> (elt p 1) -100))) :create t)) (pcl::downsample qq 25.0 25.0 25.0))"))
