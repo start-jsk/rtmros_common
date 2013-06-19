@@ -268,13 +268,13 @@
 
   (warning-message 2 "[vhc-get-in] turn right leg in yaw direction in lift rleg [get-in phase2]~%")
   (when wait (my-wait))
-  (send (send *atlas* :rleg :crotch-y) :joint-angle -40)
+  (send (send *atlas* :rleg :crotch-y) :joint-angle -35)
   (send *irtviewer* :draw-objects)
   (when real (model2real :wait t :time 1000))
 
   (warning-message 2 "[vhc-get-in] move right leg in vehicle in lift rleg [get-in phase2]~%")
   (when wait (my-wait))
-  (let* ((tc (list (send (send *atlas* :rleg :end-coords :copy-worldcoords) :translate #f(125 -60 25) :local)
+  (let* ((tc (list (send (send *atlas* :rleg :end-coords :copy-worldcoords) :translate #f(150 -60 25) :local)
 		   nil
 		   nil
 		   (send (send (send *atlas* :worldcoords) :copy-worldcoords) :translate #f(0 300 0) :world))))
@@ -421,7 +421,7 @@
 
   (warning-message 2 "[vhc-get-in] move right leg in vehicle in lift rleg [get-in phase2]~%")
   (when wait (my-wait))
-  (let* ((tc (list (send (send *atlas* :rleg :end-coords :copy-worldcoords) :translate #f(100 -175 25) :local)
+  (let* ((tc (list (send (send *atlas* :rleg :end-coords :copy-worldcoords) :translate #f(100 -125 25) :local)
 		   nil
 		   nil
 		   (send (send (send *atlas* :worldcoords) :copy-worldcoords) :translate #f(0 300 0) :world))))
