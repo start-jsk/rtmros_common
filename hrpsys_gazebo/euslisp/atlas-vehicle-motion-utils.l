@@ -49,8 +49,7 @@
      (if (> f fthre) (return))
      (unless
 	 (send *atlas* limb :inverse-kinematics
-	       pipe-coords
-	       :target-centroid-pos (send (send (send *atlas* limb :end-coords) :copy-worldcoords) :translate (scale dx (normalize-vector axis)) :world)
+	       (send (send (send *atlas* limb :end-coords) :copy-worldcoords) :translate (scale dx (normalize-vector axis)) :world)
 	       :centroid-thre 500)
        (warning-message 1 "[reach-until-touch] ik failed~%")
        (return))
