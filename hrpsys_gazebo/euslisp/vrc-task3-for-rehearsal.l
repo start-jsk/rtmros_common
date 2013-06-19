@@ -375,8 +375,10 @@
   (move-hose-end-from-ikc (float-vector -70 0 -70) 0 0 :z)
   (send *atlas* :hand :larm :angle-vector #f(0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 40.0 0.0 90.0 70.0))
   (progn (model2real :time 1000) (hand-model2real :time 1000 ) (send *ri* :wait-interpolation))
+  (y-or-n-p ";; move1?~%")
   (move-hose-end-from-ikc (float-vector -100 -100 -50) 0 0 nil)
   (move-hose-end-from-ikc (float-vector -200 -200 -50) 0 0 nil)
+  (y-or-n-p ";; move2?~%")
   (send *atlas* :rarm :angle-vector #f(-135.0 67.8617 -23.1484 70.0 0.0 -30.0))
   (send *atlas* :larm :angle-vector #f(135.0 67.8617 23.1484 -70.0 0.0 -30.0))
   (send *atlas* :move-centroid-on-foot
