@@ -1,6 +1,8 @@
 ;;(setq *fork-stream* (piped-fork "ssh" "leus@133.11.216.144" "roseus \"~/ros/fuerte/rtm-ros-robotics/rtmros_common/hrpsys_gazebo/euslisp/atlas-pipe-interface.l\""))
 ;;(load "package://hrpsys_gazebo/euslisp/atlas-interface.l")
 
+(load "package://hrpsys_gazebo/euslisp/atlas-model.l")
+(atlas-with-hand)
 (make-irtviewer) ;; irtviewer blocked after connection ....
 
 (defun connect-atlas (&optional (host "fc1")
@@ -117,4 +119,15 @@
 
 (defun get-v-view ()
   (com-large
-   "(let ((pt (get-full-cloud)) qq) (setq qq (send pt :filter :key #'(lambda (p) (and (< (norm p) 1000) (> (elt p 0) 0) (> (elt p 1) -100))) :create t)) (pcl::downsample qq 25.0 25.0 25.0))"))
+   "(let ((pt (get-full-cloud)) qq) (setq qq (send pt :filter :key #'(lambda (p) (and (< (norm p) 1000) (> (elt p 0) 0) (> (elt p 1) -100))) :create t)) (pcl::downsample qq 25.0 25.0 25.0))" 360))
+
+(defun psize ()
+  (com "(prev-size)"))
+(defun getp ()
+  (com "(get-prev)"))
+
+(defun move-world (vec &optional (limb :larm))
+  (let ((cds (send *atlas* limb :end-coords :copy-worldcoords)))
+    (send cds :translate vec :world)
+    (send *atlas* limb :inverse-kinematics cds :rotation-axis nil)
+    ))
