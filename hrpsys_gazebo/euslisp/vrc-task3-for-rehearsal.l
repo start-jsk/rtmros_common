@@ -606,6 +606,7 @@
          :default-step-height 0.1
 	 :stride-parameter #f(0.20 0.05 20))
   (send *atlas* :walk-pose)
+  (send *atlas* :head :neck-p :joint-angle 40)
   (model2real :wait t :time 5000)
   (setup-hand-coords-for-hose)
   )
