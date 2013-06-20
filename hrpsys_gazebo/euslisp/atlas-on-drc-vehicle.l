@@ -14,7 +14,6 @@
 
 ;; no walk and telep in side of vehicle by murooka
 ;;  (all-demo-task1 :real t :wait nil :no-walk-and-telep t)
-
 (ros::advertise "/drc_world/robot_enter_car" geometry_msgs::Pose 1)
 
 (defun init-atlas-drive-car
@@ -130,14 +129,35 @@
 (defun move-to-sit-seat-pose
   (&key (real nil))
   (real2model)
+  ;; (set-high-gain :arms)
+  ;; insert lleg
+  (send *atlas* :lleg-knee-p :joint-angle 140)
+  (send *atlas* :lleg-crotch-y :joint-angle -10)
+  (when real
+    (model2real :wait t)
+    (warn "waiting...") (read-line)
+    )
+  (send *atlas* :lleg :angle-vector
+        #f(7.61529 -18.242 -23.3566 26.929 17.3499 -18.3346))
+  (set-high-gain :legs)
+  (when real
+    (model2real :wait t)
+    (warn "waiting...") (read-line)
+    )
+  ;; preserve larm 
   (let ((av (send *atlas* :larm :angle-vector)))
     (set-seat-pose)
     (send *atlas* :larm :angle-vector av))
-  (set-middle-gain :legs)
+  (set-default-gain)
   (when real
-    (model2real)
+    (model2real :wait t)
     )
+  (warn "waiting...") (read-line)
   (ungrasp :arm :larm :real real)
+  (set-seat-pose)
+  (when real
+    (model2real :wait t)
+    )
   )
 
 (defun murooka-end-pose
