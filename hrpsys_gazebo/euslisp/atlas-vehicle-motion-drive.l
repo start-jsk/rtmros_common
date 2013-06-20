@@ -59,8 +59,16 @@
 #|
 (setq *lr-reverse* nil)
 (real2model)
+(model2real :time 1000 :wait t)
+(set-default-gain)
+(unix::usleep (* 2 1000 1000))
+(send *atlas* :angle-vector #f(6.34609 -44.1048 15.2562 48.2583 19.4723 89.5129 -79.7713 -85.3878 11.0342 -44.243 0.0 24.981 79.5049 -5.34668 76.0922 30.3127 5.32417 -38.7813 -26.929 2.94764 27.8039 97.4379 11.949 -98.8007 -16.7553 -1.76944 -13.4926 -35.0))
+(model2real :time 6000)
 ;; (send *atlas* :newcoords (make-coords :rpy (mapcar #'deg2rad (get-imu-data))))
-(model2real)
+
+(setq *lr-reverse* nil)
+(real2model)
+(model2real :time 1000 :wait t)
 (set-default-gain)
 
 ;;(set-stand)
@@ -69,7 +77,7 @@
 
 (send *atlas* :angle-vector #f(6.34609 -44.1048 15.2562 48.2583 19.4723 89.5129 -79.7713 -85.3878 11.0342 -44.243 0.0 24.981 79.5049 -5.34668 76.0922 30.3127 5.32417 -38.7813 -26.929 2.94764 27.8039 97.4379 11.949 -98.8007 -16.7553 -1.76944 -13.4926 -35.0))
 
-(move-world #f(0 -100 50) :larm)
+(move-world #f(0 -100 0) :larm)
 (send *atlas* :torso :waist-y :joint-angle 20)
 
 (send *atlas* :rarm :angle-vector #f(-100.0 120.0 0.0 80.0 40.0 0.0))
@@ -78,9 +86,16 @@
 (model2real :time 2000)
 
 (let ((av (send *atlas* :larm :angle-vector)))
+  (set-seat-pose 0 70)
+  (send *atlas* :larm :angle-vector av))
+(model2real :time 6000)
+
+(let ((av (send *atlas* :larm :angle-vector)))
   (set-seat-pose)
   (send *atlas* :larm :angle-vector av))
 (model2real :time 6000)
+
+(set-seat-pose)
 
 (setq pt (get-full-cloud))
 (setq qq (send pt :filter :key #'(lambda (p) (and (< (norm p) 1000) (> (elt p 0) 0) (> (elt p 1) -100))) :create t))
@@ -90,17 +105,18 @@
 (send *atlas* :reset-coords)
 (objects (list qq *atlas*))
 
-(send *atlas* :hand :larm :grasp-pose)
-(send *atlas* :hand :rarm :grasp-pose)
-(hand-model2real)
-
 (send *atlas* :hand :larm :open-pose)
 (send *atlas* :hand :rarm :open-pose)
 (hand-model2real)
 
+(send *atlas* :hand :larm :grasp-pose)
+(send *atlas* :hand :rarm :grasp-pose)
+(hand-model2real)
+
+(move-world #f(-100 0 40) :larm)
+
 (send *atlas* :lleg :crotch-y :joint-angle 20)
 (model2real :time 2000)
-
 (send *atlas* :lleg :ankle-p :joint-angle 25)
 (model2real :time 2000)
 |#
