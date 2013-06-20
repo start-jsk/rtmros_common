@@ -1,6 +1,13 @@
 ;; roseus atlas-vehicle-motion.l
+(defun t1l5-all
+  ()
+  (t1l5-1)
+  (t1l5-2)
+  (t1l5-3)
+  (t1l5-4)
+  )
 
-(defun task1func-1
+(defun t1l5-1
   ()
   (init-task1)
   (start-walk)
@@ -8,31 +15,50 @@
   (walk 1)
   )
 
-(defun task1func-2
+(defun t1l5-2
   ()
-  (walk 6)
+  (rotate-with-imu 0)
+  (walk 2)
+  (rotate-with-imu 0)
+  (walk 2)
+  (rotate-with-imu 0)
+  (walk 2)
   (rotate-with-imu 90)
-  (walk 8)
+  (rotate-with-imu 90)
+  (walk 2)
+  (rotate-with-imu 90)
+  (walk 2)
+  (rotate-with-imu 90)
+  (walk 2)
+  (rotate-with-imu 90)
+  (walk 2)
+  (rotate-with-imu 180)
   (rotate-with-imu 180)
   (walk 3)
   (rotate-with-imu 90)
+  (rotate-with-imu 90)
   (walk 2.5)
-  (rotate-with-imu 180)
   (finish-walk)
   )
 
-(defun task1func-3
+(defun t1l5-3
   ()
   (start-walk2)
+  (rotate-with-imu 180)
+  (rotate-with-imu 180)
   (walk 0.5)
   (rotate-with-imu 90)
-  (go-pos 0 0.55 0)
   (rotate-with-imu 90)
-  (walk -0.325)
+  (go-pos 0 0.55 0)
+  ;;(go-pos 0 0.45 0)
+  (rotate-with-imu 90)
+  (rotate-with-imu 90)
+  ;; (walk -0.325)
+  (walk -0.7)
   (rotate-with-imu 90)
 )
 
-(defun task1func-4
+(defun t1l5-4
   ()
   (finish-walk2)
   (lr-rev)

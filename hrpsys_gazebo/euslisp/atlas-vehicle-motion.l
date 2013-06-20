@@ -10,6 +10,7 @@
 (load "package://hrpsys_gazebo/euslisp/atlas-calc-position.l")
 (load "package://hrpsys_gazebo/euslisp/atlas-vehicle-motion-utils.l")
 (load "package://hrpsys_gazebo/euslisp/atlas-interface.l")
+(load "package://hrpsys_gazebo/euslisp/t1l5.l")
 
 ;; (progn
 ;;   (my-init :real t)
