@@ -643,8 +643,10 @@
 	      (send *ri* :start-st)
 	      (send *ri* :go-pos-no-wait (elt dif 0) 0 0)
 	      (send *ri* :wait-foot-steps)
+	      (unix:usleep 100000)
 	      (send *ri* :go-pos-no-wait 0 (elt dif 1) 0)
 	      (send *ri* :wait-foot-steps)
+	      (unix:usleep 100000)
 	      (print ";; enter rot value")
 	      (let ((rotv (read-from-string (read-line))))
 		(when (y-or-n-p ";; rot?~%")
@@ -684,12 +686,14 @@
 (defun gp1 (xx yy th &optional (use-snapshot-image t))
   (send *ri* :go-pos-no-wait xx yy th)
   (send *ri* :wait-foot-steps)
+  (unix:usleep 100000)
   (if use-snapshot-image (snapshot-image :head))
   )
 
 (defun gp3 (xx yy th)
   (send *ri* :go-pos-no-wait xx yy th)
   (send *ri* :wait-foot-steps)
+  (unix:usleep 100000)
   )
 
 (defun start-gp 
