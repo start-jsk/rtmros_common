@@ -99,7 +99,7 @@
 (defun init-task1
   ()
 
-  (load "no-display.l")
+  (load "package://hrpsys_gazebo/euslisp/no-display.l")
   (make-irtviewer)
 
   (my-init :real t)
