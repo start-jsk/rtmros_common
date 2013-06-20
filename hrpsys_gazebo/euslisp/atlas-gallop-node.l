@@ -167,30 +167,53 @@
 (defun gallop-callback
   (msg)
 ;  (describe msg)
-  (let ((buf
-         (cdr
-          (find-if #'(lambda (a) (eq (aref (send msg :data) 0)
-                                     (car a)))
-                   (list
-		    (cons #\a :auto)
-                    (cons #\q :qrot)
-                    (cons #\p :prot)
-                    (cons #\n :negaeri)
-                    (cons #\f :forward)
-                    (cons #\t :tolot)
-                    (cons #\s :stop)
-                    (cons #\r :right)
-                    (cons #\l :left))))))
-    (if (find buf '(:forward :tolot))
-        (setq *forward-offset* (* -1 (send *auto-controller-hash* :get :compus))))
-    (if (find buf '(:auto))
-	(progn
-	  (setq *forward-offset* 0)
-	  (setq *point-cloud* nil)
-	  (rotate-with-orient (send *auto-controller-hash* :get :goal))))
-    (setq *gallop-mode* buf)
-    (setq *command-cnt* 5)
-    ))
+  (cond
+   ((or (null (send msg :data))
+	(not (plusp (length (send msg :data)))))
+    )
+   ((find (aref (send msg :data) 0) (list #\h #\y #\o))
+    (case (aref (send msg :data) 0)
+	  (#\h
+	   (print 'hard-mode)
+	   (atlas-set-servo-gain-by-torque-limit 1.0))
+	  (#\y
+	   (print 'soft-mode)
+	   (atlas-set-servo-gain-by-torque-limit 15.0))
+	  (#\o
+	   (if (> (length (send msg :data)) 3)
+	       (let ((ori
+		      (read-from-string
+		       (format nil "#f(~A)"
+			       (subseq (send msg :data) 2)))))
+		 (format t "set goal ~A~%" ori)
+		 (if (= (length ori) 3)
+		     (send *auto-controller-hash* :enter :goal ori)
+		   (print 'wrong-orient)))))))
+   (t
+    (let ((buf
+	   (cdr
+	    (find-if #'(lambda (a) (eq (aref (send msg :data) 0)
+				       (car a)))
+		     (list
+		      (cons #\a :auto)
+		      (cons #\q :qrot)
+		      (cons #\p :prot)
+		      (cons #\n :negaeri)
+		      (cons #\f :forward)
+		      (cons #\t :tolot)
+		      (cons #\s :stop)
+		      (cons #\r :right)
+		      (cons #\l :left))))))
+      (if (find buf '(:forward :tolot))
+	  (setq *forward-offset* (* -1 (send *auto-controller-hash* :get :compus))))
+      (if (find buf '(:auto))
+	  (progn
+	    (setq *forward-offset* 0)
+	    (setq *point-cloud* nil)
+	    (rotate-with-orient (send *auto-controller-hash* :get :goal))))
+      (setq *gallop-mode* buf)
+      (setq *command-cnt* 5)
+      ))))
 
 (defun atitude-update
   (&optional (goal (send *auto-controller-hash* :get :goal)))
