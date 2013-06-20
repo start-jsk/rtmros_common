@@ -50,6 +50,7 @@
      (unless
 	 (send *atlas* limb :inverse-kinematics
 	       (send (send (send *atlas* limb :end-coords) :copy-worldcoords) :translate (scale dx (normalize-vector axis)) :world)
+               :revert-if-fail nil
 	       :centroid-thre 500)
        (warning-message 1 "[reach-until-touch] ik failed~%")
        (return))
