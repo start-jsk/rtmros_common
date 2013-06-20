@@ -783,6 +783,19 @@
                 #'score-callback-for-task3)
  
 #|
+;; go pos candidate
+(gp1 2.5 0 0)
+(gp1 3.5 0 0)
+(gp1 0 0 100)
+(gp1 8 0 0)
+(gp1 0 0 100)
+(gp1 6 0 0)
+(gp1 0 0 -90)
+(gp1 2 0 0)
+(gp1 0 0 -70)
+(gp1 1.5 0 0)
+
+;;
 (defun rot-handle (ang)
   (let* ((arms '(:rarm :larm))
 	 (ac (mapcar #'(lambda (a) (make-cascoords :coords (send *atlas* a :end-coords :copy-worldcoords))) arms))
