@@ -748,6 +748,7 @@
   (warn ";; (grasp-hand :arm :larm)~%")
   (warn ";; (send *ikc* :translate #f(0 0 -30)) ~%")
   (warn ";; (rotate-hose) ~%")
+  (warn ";; (progn (open-hand-for-hose-rotate) (prepare-for-rotate-hose #f(480 -50 1300) -37 3000 :z t t) (prepare-for-rotate-hose2 30 0 0 2000 :z t)) ~%")
   (warn ";; (prepare-for-rotate-valve #f(0 0 0)) ~%")
   (warn ";; (rotate-valve) ~%")
   (warn ";; (tack-arm-pose :arm :larm) ~%")
