@@ -20,6 +20,6 @@
     <arg name="USE_DEPTH_CREATER" value="true" />
     <arg name="USE_REGISTERED_DEPTH" value="true" />
     <arg name="image"  value="$(arg CAMERA)" />
-    <arg name="points" value="/full_cloud2" />
+    <arg name="points" value="$(arg POINTS_TOPIC)" />
   </include>
 </launch>
