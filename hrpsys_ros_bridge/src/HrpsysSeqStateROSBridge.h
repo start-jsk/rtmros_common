@@ -52,7 +52,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> joint_trajectory_server;
   actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> follow_joint_trajectory_server;
   ros::ServiceServer sendmsg_srv;
-  bool interpolationp, use_sim_time;
+  bool interpolationp, use_sim_time, use_hrpsys_time;
 
   tf::TransformBroadcaster br;
 
