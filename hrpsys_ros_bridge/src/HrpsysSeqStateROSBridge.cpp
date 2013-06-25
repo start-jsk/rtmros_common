@@ -486,7 +486,15 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     if ( use_sim_time && use_hrpsys_time ) {
         base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
     }
-    br.sendTransform(tf::StampedTransform(base.inverse(), base_time, "gyrometer", "imu_floor"));
+    tf::Transform inv = base.inverse();
+    tf::Matrix3x3 m = inv.getBasis();
+    bool not_nan = true;
+    for (int i = 0; i < 3; ++i) {
+        if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
+            not_nan = false;
+    }
+    if (not_nan)
+        br.sendTransform(tf::StampedTransform(inv, base_time, "gyrometer", "imu_floor"));
   }
 
   // publish forces sonsors
