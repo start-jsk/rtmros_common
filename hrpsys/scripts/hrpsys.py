@@ -17,10 +17,10 @@ class HrpsysConfigurator:
     # public method
     def connectComps(self):
         # connection for actual joint angles
-        connectPorts(self.rh.port("q"), [self.sh.port("currentQIn"), self.co.port("qCurrent"), self.el.port("qCurrent"), self.vs.port("qCurrent"), self.tf.port("qCurrent"), self.ic.port("qCurrent")])
+        connectPorts(self.rh.port("q"), [self.sh.port("currentQIn"), self.fk.port("q"), self.co.port("qCurrent"), self.el.port("qCurrent"), self.vs.port("qCurrent"), self.tf.port("qCurrent"), self.ic.port("qCurrent")])
         # connection for reference joint angles
         tmp_contollers = [self.ic, self.abc, self.st, self.co, self.el]
-        connectPorts(self.sh.port("qOut"),  tmp_contollers[0].port("qRef"))
+        connectPorts(self.sh.port("qOut"),  [self.fk.port("qRef"), tmp_contollers[0].port("qRef")])
         for i in range(len(tmp_contollers)-1):
             connectPorts(tmp_contollers[i].port("q"), tmp_contollers[i+1].port("qRef"))
         if self.simulation_mode :
@@ -53,8 +53,8 @@ class HrpsysConfigurator:
         connectPorts(self.seq.port("basePos"), self.sh.port("basePosIn"))
         connectPorts(self.seq.port("baseRpy"), self.sh.port("baseRpyIn"))
         connectPorts(self.seq.port("zmpRef"),  self.sh.port("zmpIn"))
-        connectPorts(self.sh.port("basePosOut"), self.seq.port("basePosInit"))
-        connectPorts(self.sh.port("baseRpyOut"), self.seq.port("baseRpyInit"))
+        connectPorts(self.sh.port("basePosOut"), [self.seq.port("basePosInit"), self.fk.port("basePosRef")])
+        connectPorts(self.sh.port("baseRpyOut"), [self.seq.port("baseRpyInit"), self.fk.port("baseRpyRef")])
         connectPorts(self.sh.port("qOut"), self.seq.port("qInit"))
 
         # connection for st
@@ -93,6 +93,8 @@ class HrpsysConfigurator:
 
         self.sh = self.createComp("StateHolder", "sh")
 
+        self.fk = self.createComp("ForwardKinematics", "fk")
+
         self.tf = self.createComp("TorqueFilter", "tf")
 
         self.kf = self.createComp("KalmanFilter", "kf")
@@ -114,7 +116,7 @@ class HrpsysConfigurator:
 
     # public method to configure all RTCs to be activated on rtcd
     def getRTCList(self):
-        return [self.rh, self.seq, self.sh, self.tf, self.kf, self.vs, self.ic, self.abc, self.st, self.co, self.el, self.log]
+        return [self.rh, self.seq, self.sh, self.fk, self.tf, self.kf, self.vs, self.ic, self.abc, self.st, self.co, self.el, self.log]
 
     # public method to get bodyInfo
     def getBodyInfo(self, url):
