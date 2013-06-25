@@ -487,7 +487,12 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
     }
     tf::Transform inv = base.inverse();
-    tf::Matrix3x3 m = inv.getBasis();
+#if ROS_VERSION_MINIMUM(1,8,0)
+    tf::Matrix3x3 m;
+#else
+    btMatrix3x3 m; // for electric
+#endif
+    m = inv.getBasis();
     bool not_nan = true;
     for (int i = 0; i < 3; ++i) {
         if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
