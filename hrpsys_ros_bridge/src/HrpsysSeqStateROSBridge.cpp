@@ -53,9 +53,9 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   if ( use_sim_time ) {
       int num = clock_sub.getNumPublishers();
       clock_pub = nh.advertise<rosgraph_msgs::Clock>("/clock", 5);
-      ros::Time rnow = ros::Time::now();
+      ros::WallTime rnow = ros::WallTime::now();
       while (clock_sub.getNumPublishers() != num) {
-        if ((ros::Time::now() - rnow).toSec() > 15.0) { // timeout 15 sec
+        if ((ros::WallTime::now() - rnow).toSec() > 15.0) { // timeout 15 sec
           break;
         }
         ros::WallDuration wtm(0, 1000000);
@@ -63,11 +63,11 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
       }
       ROS_DEBUG("wating for num of clock subscribers = %d", clock_sub.getNumPublishers());
       if(clock_sub.getNumPublishers() == 1) { // if use sim_time and publisher==1, which means clock publisher is only this RosBridge
-          clock_sub.shutdown();
-          clock_pub.shutdown();
           ROS_WARN("[HrpsysSeqStateROSBridge] use_hrpsys_time");
           use_hrpsys_time = true;
       } else {
+        clock_sub.shutdown();
+        clock_pub.shutdown();
         ROS_WARN("[HrpsysSeqStateROSBridge] use_sim_time");
       }
   }
@@ -238,7 +238,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_servoStateIn.isNew () ) {
     try {
       m_servoStateIn.read();
-      if ( use_sim_time && use_hrpsys_time ) {
+      if ( use_hrpsys_time ) {
           mot_states.header.stamp = ros::Time(m_servoState.tm.sec, m_servoState.tm.nsec);
       } else{
           mot_states.header.stamp = tm_on_execute;
@@ -300,7 +300,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_rsangleIn.isNew () ) {
     sensor_msgs::JointState joint_state;
     // convert openrtm time to ros time
-    if ( use_sim_time && use_hrpsys_time ) {
+    if ( use_hrpsys_time ) {
         joint_state.header.stamp = ros::Time(m_rsangle.tm.sec, m_rsangle.tm.nsec);
     }else{
         joint_state.header.stamp = tm_on_execute;
@@ -316,7 +316,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
     //
-    if ( use_sim_time && use_hrpsys_time ) {
+    if ( use_hrpsys_time ) {
         rosgraph_msgs::Clock clock_msg;
         clock_msg.clock = ros::Time(m_rsangle.tm.sec,m_rsangle.tm.nsec);
         clock_pub.publish(clock_msg);
@@ -457,7 +457,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
     // odom publish
     ros::Time base_time = tm_on_execute;
-    if ( use_sim_time && use_hrpsys_time ) {
+    if ( use_hrpsys_time ) {
         base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
     }
     br.sendTransform(tf::StampedTransform(base, base_time, "odom", rootlink_name));
@@ -483,7 +483,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
     // publish base_footprint calculated from IMU
     ros::Time base_time = tm_on_execute;
-    if ( use_sim_time && use_hrpsys_time ) {
+    if ( use_hrpsys_time ) {
         base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
     }
     tf::Transform inv = base.inverse();
@@ -510,7 +510,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute " << m_rsforceName[i] << " size = " << m_rsforce[i].data.length() );
 	if ( m_rsforce[i].data.length() >= 6 ) {
 	  geometry_msgs::WrenchStamped fsensor;
-	  if ( use_sim_time && use_hrpsys_time ) {
+	  if ( use_hrpsys_time ) {
 	    fsensor.header.stamp = ros::Time(m_rsforce[i].tm.sec, m_rsforce[i].tm.nsec);
 	  }else{
 	    fsensor.header.stamp = tm_on_execute;
