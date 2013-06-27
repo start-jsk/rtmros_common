@@ -4,6 +4,7 @@
   <arg name="CONF_FILE_ARG" default="" />
   <arg name="SIMULATOR_NAME" default="RobotHardware0"/> <!-- please set $(arg ROBOT_NAME)(Robot) for simulation -->
   <arg name="INSTALL_ROBOT_DESCRIPTION" default="true" />
+
   <!--
       roslaunch hrpsys_ros_bridge sample.launch nameserver:=192.168.1.1
   -->
@@ -34,7 +35,6 @@
         output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
   <node pkg="hrpsys" name="ImpedanceControllerServiceROSBridge" type="ImpedanceControllerServiceROSBridgeComp"
         output="screen" args ="$(arg openrtm_args)" />
-  <!-- -o "exec_cxt.periodic.type:SynchExtTriggerEC" -->
   <node pkg="hrpsys" name="SequencePlayerServiceROSBridge" type="SequencePlayerServiceROSBridgeComp"
         output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
   <node pkg="hrpsys" name="CollisionDetectorServiceROSBridge" type="CollisionDetectorServiceROSBridgeComp"
@@ -66,35 +66,51 @@
   <!-- BEGIN:openrtm connection -->
   <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
   <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch"/>
+
+
+  <!-- All Robots -->
   <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="HrpsysSeqStateROSBridge0.rtc:rsangle" subscription_type="new"/>
   <rtconnect from="$(arg SIMULATOR_NAME).rtc:tau" to="HrpsysSeqStateROSBridge0.rtc:rstorque" subscription_type="new"/>
+  <rtconnect from="StateHolderServiceROSBridge.rtc:StateHolderService" to="sh.rtc:StateHolderService"  subscription_type="new"/>
   <rtconnect from="sh.rtc:baseTformOut" to="HrpsysSeqStateROSBridge0.rtc:baseTform" subscription_type="new"/>
   <rtconnect from="sh.rtc:qOut" to="HrpsysSeqStateROSBridge0.rtc:mcangle" subscription_type="new"/>
-  <rtconnect from="kf.rtc:rpy" to="HrpsysSeqStateROSBridge0.rtc:baseRpy" subscription_type="new"/>
   <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
   <rtconnect from="HrpsysJointTrajectoryBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
-  <!-- <rtconnect from="$(arg SIMULATOR_NAME)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" /> -->
   <rtconnect from="DataLoggerServiceROSBridge.rtc:DataLoggerService" to="log.rtc:DataLoggerService" subscription_type="new"/>
   <rtconnect from="SequencePlayerServiceROSBridge.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
-  <rtconnect from="ImpedanceControllerServiceROSBridge.rtc:ImpedanceControllerService" to="ic.rtc:ImpedanceControllerService"  subscription_type="new"/>
-  <rtconnect from="AutoBalancerServiceROSBridge.rtc:AutoBalancerService" to="abc.rtc:AutoBalancerService"  subscription_type="new"/>
-  <rtconnect from="CollisionDetectorServiceROSBridge.rtc:CollisionDetectorService" to="co.rtc:CollisionDetectorService" subscription_type="new"/>
-  <rtconnect from="StateHolderServiceROSBridge.rtc:StateHolderService" to="sh.rtc:StateHolderService"  subscription_type="new"/>
-  <rtconnect from="StabilizerServiceROSBridge.rtc:StabilizerService" to="st.rtc:StabilizerService"  subscription_type="new"/>
-  <!-- <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/> -->
-  <rtconnect from="SoftErrorLimiterServiceROSBridge.rtc:SoftErrorLimiterService" to="el.rtc:SoftErrorLimiterService"  subscription_type="new"/>
+  <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/>
+
+  <rtactivate component="RobotHardwareServiceROSBridge.rtc" />
   <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
   <rtactivate component="HrpsysJointTrajectoryBridge0.rtc" />
-  <rtactivate component="ImageSensorROSBridge0.rtc" />
   <rtactivate component="DataLoggerServiceROSBridge.rtc" />
   <rtactivate component="SequencePlayerServiceROSBridge.rtc" />
-  <rtactivate component="CollisionDetectorServiceROSBridge.rtc" />
-  <rtactivate component="ImpedanceControllerServiceROSBridge.rtc" />
-  <rtactivate component="AutoBalancerServiceROSBridge.rtc" />
   <rtactivate component="StateHolderServiceROSBridge.rtc" />
-  <rtactivate component="RobotHardwareServiceROSBridge.rtc" />
-  <rtactivate component="SoftErrorLimiterServiceROSBridge.rtc" />
+
+  <!-- USE_WALKING -->
+  <rtconnect from="kf.rtc:rpy" to="HrpsysSeqStateROSBridge0.rtc:baseRpy" subscription_type="new" />
+  <rtconnect from="AutoBalancerServiceROSBridge.rtc:AutoBalancerService" to="abc.rtc:AutoBalancerService"  subscription_type="new"/>
+  <rtconnect from="StabilizerServiceROSBridge.rtc:StabilizerService" to="st.rtc:StabilizerService"  subscription_type="new"/>
+  <rtactivate component="AutoBalancerServiceROSBridge.rtc" />
   <rtactivate component="StabilizerServiceROSBridge.rtc" />
+
+  <!-- USE_COLLISIONCHECK -->
+  <rtconnect from="CollisionDetectorServiceROSBridge.rtc:CollisionDetectorService" to="co.rtc:CollisionDetectorService" subscription_type="new"/>
+  <rtactivate component="CollisionDetectorServiceROSBridge.rtc" />
+
+  <!-- USE_IMPEDANCECONTROLLER -->
+  <rtconnect from="ImpedanceControllerServiceROSBridge.rtc:ImpedanceControllerService" to="ic.rtc:ImpedanceControllerService"  subscription_type="new"/>
+  <rtactivate component="ImpedanceControllerServiceROSBridge.rtc" />
+
+  <!-- USE_SOFTERRORLIMIT -->
+  <rtconnect from="SoftErrorLimiterServiceROSBridge.rtc:SoftErrorLimiterService" to="el.rtc:SoftErrorLimiterService"  subscription_type="new"/>
+  <rtactivate component="SoftErrorLimiterServiceROSBridge.rtc" />
+
+  <!-- USE_IMAGESENSOR -->
+  <rtconnect from="$(arg SIMULATOR_NAME)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" />
+  <rtactivate component="ImageSensorROSBridge0.rtc" />
+
+
   <!-- END:openrtm connection -->
 </launch>
 
