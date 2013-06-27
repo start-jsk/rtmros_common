@@ -257,7 +257,7 @@ onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
   std::vector<std::string> joint_names = trajectory.joint_names;
 
   for (unsigned int i=0; i < trajectory.points.size(); i++) {
-    angles[i].length(parent->body->joints().size());
+    angles[i].length(joint_names.size());
 
     trajectory_msgs::JointTrajectoryPoint point = trajectory.points[i];
     for (unsigned int j=0; j < joint_names.size(); j++) {
