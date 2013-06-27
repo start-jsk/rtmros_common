@@ -37,6 +37,8 @@
         output="screen" args ="$(arg openrtm_args)" />
   <node pkg="hrpsys" name="SequencePlayerServiceROSBridge" type="SequencePlayerServiceROSBridgeComp"
         output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
+  <node pkg="hrpsys" name="ForwardKinematicsServiceROSBridge" type="ForwardKinematicsServiceROSBridgeComp"
+        output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
   <node pkg="hrpsys" name="CollisionDetectorServiceROSBridge" type="CollisionDetectorServiceROSBridgeComp"
         output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
   <node pkg="hrpsys" name="AutoBalancerServiceROSBridge" type="AutoBalancerServiceROSBridgeComp"
@@ -78,6 +80,7 @@
   <rtconnect from="HrpsysJointTrajectoryBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
   <rtconnect from="DataLoggerServiceROSBridge.rtc:DataLoggerService" to="log.rtc:DataLoggerService" subscription_type="new"/>
   <rtconnect from="SequencePlayerServiceROSBridge.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
+  <rtconnect from="ForwardKinematicsServiceROSBridge.rtc:ForwardKinematicsService" to="fk.rtc:ForwardKinematicsService" subscription_type="new"/>
   <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/>
 
   <rtactivate component="RobotHardwareServiceROSBridge.rtc" />
@@ -85,6 +88,7 @@
   <rtactivate component="HrpsysJointTrajectoryBridge0.rtc" />
   <rtactivate component="DataLoggerServiceROSBridge.rtc" />
   <rtactivate component="SequencePlayerServiceROSBridge.rtc" />
+  <rtactivate component="ForwardKinematicsServiceROSBridge.rtc" />
   <rtactivate component="StateHolderServiceROSBridge.rtc" />
 
   <!-- USE_WALKING -->
