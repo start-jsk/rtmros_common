@@ -54,7 +54,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
       int num = clock_sub.getNumPublishers();
       clock_pub = nh.advertise<rosgraph_msgs::Clock>("/clock", 5);
       ros::WallTime rnow = ros::WallTime::now();
-      while (clock_sub.getNumPublishers() != num) {
+      while (clock_sub.getNumPublishers() == num) {
         if ((ros::WallTime::now() - rnow).toSec() > 15.0) { // timeout 15 sec
           break;
         }
