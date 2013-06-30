@@ -17,6 +17,7 @@ class HrpsysConfigurator:
     # RobotHardware
     rh = None
     rh_svc = None
+    ep_svc = None
 
     # SequencePlayer
     seq = None
@@ -221,7 +222,7 @@ class HrpsysConfigurator:
             self.rh = rtm.findRTC("RobotHardware0")
             if not self.rh:
                 self.rh = rtm.findRTC(robotname)
-            print self.configurator_name, "wait for Simulator or RobotHardware : ",self.rh, "(timeout ", timeout_count, " < 3)"
+            print self.configurator_name, "wait for", robotname, " : ",self.rh, "(timeout ", timeout_count, " < 3)"
             timeout_count += 1
 
         if not self.rh:
@@ -238,8 +239,8 @@ class HrpsysConfigurator:
             self.simulation_mode = True
         else:
             self.simulation_mode = False
-#           self.rh_svc = narrow(self.rh.service("service0"), "RobotHardwareService")
-#           self.ep_svc = narrow(self.rh.ec, "ExecutionProfileService")
+            self.rh_svc = narrow(self.rh.service("service0"), "RobotHardwareService")
+            self.ep_svc = narrow(self.rh.ec, "ExecutionProfileService")
 
         print self.configurator_name, "simulation_mode : ", self.simulation_mode
 
