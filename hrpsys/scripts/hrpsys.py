@@ -388,7 +388,7 @@ class HrpsysConfigurator:
         self.log_svc.save(fname)
         print self.configurator_name, "saved data to ",fname
 
-    def clearLog(self)
+    def clearLog(self):
         self.log_svc.clear()
 
     ###
