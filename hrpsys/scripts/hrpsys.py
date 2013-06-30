@@ -384,6 +384,13 @@ class HrpsysConfigurator:
     def setTargetPose(self, gname, pos, rpy, tm) :
         return self.seq_svc.setTargetPose(gname, pos, rpy, tm)
 
+    def saveLog(self, fname='sample'):
+        self.log_svc.save(fname)
+        print self.configurator_name, "saved data to ",fname
+
+    def clearLog(self)
+        self.log_svc.clear()
+
     ###
     ### initialize
     ###
