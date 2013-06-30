@@ -14,21 +14,44 @@ import time
 #   In order to specify robot-dependent code, please inherit this HrpsysConfigurator
 class HrpsysConfigurator:
 
-    ms = None # rtm manager
-    rh = None # RobotHardware
-    seq = None # SequencePlayer
-    sh = None # StateHolder
-    fk = None # ForwardKinematics
+    # RobotHardware
+    rh = None
+    rh_svc = None
+
+    # SequencePlayer
+    seq = None
+    seq_svc = None
+
+    # StateHolder
+    sh = None
+    sh_svc = None
+
+    # ForwardKinematics
+    fk = None
+    fk_svc = None
+
     tf = None # TorqueFilter
     kf = None # KalmanFilter
     vs = None # VirtualForceSensor
     ic = None # ImpedanceController
     abc = None # AutoBalancer
     st = None # Stabilizer
-    co = None # CollisionDetector
+
+    # CollisionDetector
+    co = None
+    co_svc = None
+
     el = None # SoftErrorLimiter
-    log = None # DataLogger
-    hgc = None # HGController(Simulation)
+
+    # DataLogger
+    log = None
+    log_svc = None
+
+    # rtm manager
+    ms = None
+
+    # HGController(Simulation)
+    hgc = None
 
     # flag isSimulation?
     simulation_mode = None
@@ -109,10 +132,16 @@ class HrpsysConfigurator:
 
     def createComps(self):
         self.seq = self.createComp("SequencePlayer", "seq")
+        if self.seq :
+            self.seq_svc = narrow(self.seq.service("service0"), "SequencePlayerService")
 
         self.sh = self.createComp("StateHolder", "sh")
+        if self.sh :
+            self.sh_svc = narrow(self.sh.service("service0"), "StateHolderService")
 
         self.fk = self.createComp("ForwardKinematics", "fk")
+        if self.fk :
+            self.fk_svc = narrow(self.fk.service("service0"), "ForwardKinematicsService")
 
         self.tf = self.createComp("TorqueFilter", "tf")
 
@@ -127,11 +156,14 @@ class HrpsysConfigurator:
         self.st = self.createComp("Stabilizer", "st")
 
         self.co = self.createComp("CollisionDetector", "co")
+        if self.co :
+            self.co_svc = narrow(self.co.service("service0"), "CollisionDetectorService")
 
         self.el = self.createComp("SoftErrorLimiter", "el")
 
         self.log = self.createComp("DataLogger", "log")
-        self.log_svc = narrow(self.log.service("service0"), "DataLoggerService");
+        if self.log :
+            self.log_svc = narrow(self.log.service("service0"), "DataLoggerService");
 
     # public method to configure all RTCs to be activated on rtcd
     def getRTCList(self):
