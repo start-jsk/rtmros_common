@@ -306,7 +306,7 @@ class HrpsysConfigurator:
             print self.configurator_name, "Could not find ", robotname
             print self.configurator_name, "Candidates are .... ", [x.name()  for x in self.ms.get_components()]
             print self.configurator_name, "Exitting.... ", robotname
-            return
+            exit(1)
 
         print self.configurator_name, "findComps -> RobotHardware : ",self.rh
 
