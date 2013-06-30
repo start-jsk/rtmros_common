@@ -14,6 +14,21 @@ import time
 #   In order to specify robot-dependent code, please inherit this HrpsysConfigurator
 class HrpsysConfigurator:
 
+    rh = None # RobotHardware
+    seq = None # SequencePlayer
+    sh = None # StateHolder
+    fk = None # ForwardKinematics
+    tf = None # TorqueFilter
+    kf = None # KalmanFilter
+    vs = None # VirtualForceSensor
+    ic = None # ImpedanceController
+    abc = None # AutoBalancer
+    st = None # Stabilizer
+    co = None # CollisionDetector
+    el = None # SoftErrorLimiter
+    log = None # DataLogger
+    hgc = None # HGController(Simulation)
+
     # public method
     def connectComps(self):
         # connection for actual joint angles
