@@ -14,6 +14,7 @@ import time
 #   In order to specify robot-dependent code, please inherit this HrpsysConfigurator
 class HrpsysConfigurator:
 
+    ms = None # rtm manager
     rh = None # RobotHardware
     seq = None # SequencePlayer
     sh = None # StateHolder
@@ -28,6 +29,9 @@ class HrpsysConfigurator:
     el = None # SoftErrorLimiter
     log = None # DataLogger
     hgc = None # HGController(Simulation)
+
+    # flag isSimulation?
+    simulation_mode = None
 
     # public method
     def connectComps(self):
