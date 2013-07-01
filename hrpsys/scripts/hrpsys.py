@@ -260,7 +260,7 @@ class HrpsysConfigurator:
         return sum(map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, self.getBodyInfo(url)._get_links())), [])  # sum is for list flatten
 
     def connectLoggerPort(self, artc, sen_name):
-        if rtm.findPort(artc.ref, sen_name) != None:
+        if artc and rtm.findPort(artc.ref, sen_name) != None:
             sen_type = rtm.dataTypeOfPort(artc.port(sen_name)).split("/")[1].split(":")[0]
             print self.configurator_name, "  setupLogger : type =", sen_type, ",name = ", sen_name, ",port = ", artc.port(sen_name)
             if rtm.findPort(self.log.ref, sen_name) == None:
