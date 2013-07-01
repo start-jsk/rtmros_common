@@ -134,11 +134,16 @@
    (if (find-method robot limb)
        (find-if #'(lambda (x) (member (send x :parent) (send robot limb)))
                 (send robot :force-sensors))))
+  (:update-robot-state
+   ()
+   (send-super :update-robot-state)
+   (send robot :newcoords (send *tfl* :lookup-transform "/imu_floor" (format nil "/~a" (send (car (send robot :links)) :name)) (ros::time)))
+   )
   (:state
     (&rest args)
     (case (car args)
       (:imucoords
-        (send *tfl* :lookup-transform "/imu_floor" (format nil "/~a" (send (car (send robot :links)) :name)) (ros::time)))
+       (send robot :copy-worldcoords))
       (t
         (send-super* :state args))))
   )
