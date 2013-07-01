@@ -13,41 +13,41 @@
 
 (defmethod sandia-hand-interface
   (:init (&optional (l/r_ :larm) (g "hand_group"))
-   (let (gname lrobot topic)
+   (let (gname lrobot topic ns)
      (setq l/r l/r_)
      (case l/r
        (:larm
         (setq service-name "/sandia_hand_left/controller_manager/query")
         (if g (setq gname (format nil "left_~A" g)))
         (setq lrobot (sandia_hand_left))
-        (setq command-topic "/sandia_hands/l_hand/joint_commands")
-        (setq topic "/sandia_hand_left/joint_states"))
+        (setq ns "sandia_hand_left")
+        (setq command-topic "/sandia_hands/l_hand/joint_commands"))
        (:rarm
         (setq service-name "/sandia_hand_right/controller_manager/query")
         (if g (setq gname (format nil "right_~A" g)))
         (setq lrobot (sandia_hand_right))
-        (setq command-topic "/sandia_hands/r_hand/joint_commands")
-        (setq topic "/sandia_hand_right/joint_states")
-        ))
+        (setq ns "sandia_hand_right")
+        (setq command-topic "/sandia_hands/r_hand/joint_commands"))
+        )
      (ros::advertise command-topic osrf_msgs::JointCOmmands)
      (cond
-      (gname (send-super :init :use-tf2 t :joint-state-topic topic
+      (gname (send-super :init :use-tf2 t :namespace ns
                          :robot lrobot :groupname gname))
-      (t (send-super :init :use-tf2 t :joint-state-topic topic
+      (t (send-super :init :use-tf2 t :namespace ns
                      :robot lrobot)))
      self))
   (:left-default-controller ()
    (list
     (list
-     (cons :controller-action "/sandia_hand_left/sandia_hand_left_controller/joint_trajectory_action")
-     (cons :controller-state "/sandia_hand_left/sandia_hand_left_controller/state")
+     (cons :controller-action "sandia_hand_left_controller/joint_trajectory_action")
+     (cons :controller-state "sandia_hand_left_controller/state")
      (cons :action-type pr2_controllers_msgs::JointTrajectoryAction)
      (cons :joint-names (mapcar #'(lambda (n) (if (symbolp n) (symbol-name n) n)) (send-all (send robot :joint-list) :name))))))
   (:right-default-controller ()
    (list
     (list
-     (cons :controller-action "/sandia_hand_right/sandia_hand_right_controller/joint_trajectory_action")
-     (cons :controller-state "/sandia_hand_right/sandia_hand_right_controller/state")
+     (cons :controller-action "sandia_hand_right_controller/joint_trajectory_action")
+     (cons :controller-state "sandia_hand_right_controller/state")
      (cons :action-type pr2_controllers_msgs::JointTrajectoryAction)
      (cons :joint-names (mapcar #'(lambda (n) (if (symbolp n) (symbol-name n) n)) (send-all (send robot :joint-list) :name))))))
   (:default-controller ()
