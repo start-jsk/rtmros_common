@@ -253,7 +253,6 @@
 
 ;; ImpedanceControllerService
 (defmethod rtm-ros-robot-interface
-  (:get-impedance-controller-param (name) (send (send self :impedancecontrollerservice_getimpedancecontrollerparam :name name) :i_param))
   ;;
   ;; usage:
   ;;   (send *ri* :start-impedance :rarm ..), (send *ri* :stop-impedance :rarm ..), (send *ri* :set-impedance-controller-param :rarm :M-p 200) ...
@@ -286,45 +285,58 @@
                             :reference_gain (if reference-gain reference-gain (send current-imp-param :reference_gain))
                             :manipulability_limit (if manipulability-limit manipulability-limit (send current-imp-param :manipulability_limit)))))
      (send self :impedancecontrollerservice_setimpedancecontrollerparam :i_param param)))
-  (:set-impedance-controller-param
-   (limb &rest args)
-   (cond
-    ((send robot :force-sensor limb)
-     (let* ((fs (send robot :force-sensor limb))
-            (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
-       (send* self :_set-impedance-controller-param
-              :name (string-downcase (send fs :name))
-              :base-name (if base-name base-name "WAIST")
-              :target-name (send (send (send fs :parent) :joint) :name) args)))
-    ((and (substringp ":v" (format nil "~A" limb))
-          (find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
-     (let ((rlimb (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
-       (send* self :_set-impedance-controller-param
-              :name (format nil "v~C~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor")))
-              :base-name (send (send (send (send robot rlimb :root-link) :parent) :joint) :name)
-              :target-name (send (send (send (send robot rlimb :end-coords) :parent) :joint) :name)
-              args)))
-    ((eq limb :legs) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rleg :lleg)))
-    ((eq limb :arms) (mapcar #'(lambda (l) (send* self :start-impedance l args)) '(:rarm :larm)))
-    (t ) ;; virtual force sensor is not supported in this file
-    ))
   (:start-impedance
    (limb &rest args)
    (send* self :set-impedance-controller-param limb args))
   (:stop-impedance
    (limb)
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name base-name target-name &rest _args)
+             (send self :impedancecontrollerservice_deleteimpedancecontroller :name name))
+         :stop-impedance))
+  (:set-impedance-controller-param
+   (limb &rest args)
+   (send* self :force-sensor-method
+         limb
+         #'(lambda (name base-name target-name &rest _args)
+             (send* self :_set-impedance-controller-param
+                    :name name
+                    :base-name base-name
+                    :target-name target-name _args))
+         :set-impedance-controller-param
+         args))
+  (:get-impedance-controller-param
+   (limb)
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name base-name target-name &rest _args)
+             (send (send self :impedancecontrollerservice_getimpedancecontrollerparam :name name) :i_param))
+         :get-impedance-controller-param))
+  (:force-sensor-method
+   (limb method-func method-name &rest args)
    (cond
+    ((stringp limb)
+     (apply method-func
+            limb nil nil args))
     ((send robot :force-sensor limb)
-     (let ((fs (send robot :force-sensor limb)))
-       (send self :impedancecontrollerservice_deleteimpedancecontroller
-             :name (string-downcase (send fs :name)))))
+     (let ((fs (send robot :force-sensor limb))
+           (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
+       (apply method-func
+              (string-downcase (send fs :name))
+              (if base-name base-name "WAIST")
+              (send (send (send fs :parent) :joint) :name)
+              args)))
     ((and (substringp ":v" (format nil "~A" limb))
           (find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
      (let ((rlimb (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
-       (send self :impedancecontrollerservice_deleteimpedancecontroller
-	     :name (format nil "v~C~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor"))))))
-    ((eq limb :legs) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rleg :lleg)))
-    ((eq limb :arms) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rarm :larm)))
+       (apply method-func
+              (format nil "v~C~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor")))
+              (send (send (send (send robot rlimb :root-link) :parent) :joint) :name)
+              (send (send (send (send robot rlimb :end-coords) :parent) :joint) :name)
+              args)))
+    ((eq limb :legs) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rleg :lleg)))
+    ((eq limb :arms) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rarm :larm)))
     (t ) ;; virtual force sensor is not supported in this file
     ))
   )
@@ -342,13 +354,19 @@
      (send self :absoluteforcesensorservice_setforcemomentoffsetparam :name name :i_param param)))
   (:set-forcemoment-offset-param
    (limb &rest args)
-   (cond
-    ((send robot :force-sensor limb)
-     (let* ((fs (send robot :force-sensor limb))
-            (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
-       (send* self :_set-forcemoment-offset-param
-              (string-downcase (send fs :name)) args)))))
-  (:get-forcemoment-offset-param (name) (send (send self :absoluteforcesensorservice_getforcemomentoffsetparam :name name) :i_param))
+   (send* self :force-sensor-method
+         limb
+         #'(lambda (name base-name target-name &rest _args)
+             (send* self :_set-forcemoment-offset-param name _args))
+         :set-forcemoment-offset-param
+         args))
+  (:get-forcemoment-offset-param
+   (limb)
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name base-name target-name &rest _args)
+             (send (send self :absoluteforcesensorservice_getforcemomentoffsetparam :name name) :i_param))
+         :get-forcemoment-offset-param))
   (:load-forcemoment-offset-param
    (fname)
    (mapcar #'(lambda (x)
