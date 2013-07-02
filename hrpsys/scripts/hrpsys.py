@@ -282,7 +282,7 @@ class HrpsysConfigurator:
         self.connectLoggerPort(self.seq, 'qRef')
         self.connectLoggerPort(self.rh, 'emergencySignal')
 
-    def waitForRTCManagerAndRoboHardware(self, robotname="Robot", managerhost=socket.gethostname()):
+    def waitForRTCManagerAndRoboHardware(self, robotname="Robot", managerhost=nshost):
         self.ms = None
         while self.ms == None :
             time.sleep(1);
