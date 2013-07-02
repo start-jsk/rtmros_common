@@ -80,12 +80,13 @@ if __name__ == '__main__':
         hostname=args_without_ros_options[1]
 
     try:
+        rtc_init(hostname)
+
         rospy.init_node('hrpsys_profile_diagnostics')
         pub = rospy.Publisher('diagnostics', DiagnosticArray)
 
         r = rospy.Rate(1) # 10hz
 
-        rtc_init(hostname)
         while not rospy.is_shutdown():
             hrpsys_profile()
             try :
