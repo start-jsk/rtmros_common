@@ -30,5 +30,5 @@ clean:
 	-cd $(SVN_DIR) && make clean
 
 download:
-	(cd ${SVN_DIR}; $(SVN_CMDLINE) up)
+	(cd ${SVN_DIR}; $(SVN_CMDLINE) up; rm -f `rospack find hrpsys`/installed)
 
