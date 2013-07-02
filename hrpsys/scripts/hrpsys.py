@@ -402,7 +402,7 @@ class HrpsysConfigurator:
         print self.configurator_name, "start hrpsys"
 
         print self.configurator_name, "finding RTCManager and RobotHardware"
-        self.waitForRTCManagerAndRoboHardware(robotname, url)
+        self.waitForRTCManagerAndRoboHardware(robotname)
 
         print self.configurator_name, "creating components"
         self.createComps()
