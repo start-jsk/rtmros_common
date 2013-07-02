@@ -34,6 +34,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 ##
 ## tests
 ##
+rosbuild_add_rostest(test/hrp4c-test.launch)
 rosbuild_check_for_display(disp)
 if(disp)
   rosbuild_add_rostest(launch/hrp4c.launch)
