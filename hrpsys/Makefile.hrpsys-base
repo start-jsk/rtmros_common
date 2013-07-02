@@ -29,3 +29,6 @@ build/hrpsys-base/plugin/com.generalrobotix.ui.view.GrxRobotHardwareClientView_3
 clean:
 	-cd $(SVN_DIR) && make clean
 
+download:
+	(cd ${SVN_DIR}; $(SVN_CMDLINE) up)
+
