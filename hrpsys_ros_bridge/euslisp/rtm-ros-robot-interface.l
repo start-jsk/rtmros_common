@@ -140,11 +140,6 @@
       (format f "~%")
       )))
   ;;
-  (:get-force-sensor-from-limb-name
-   (limb)
-   (if (find-method robot limb)
-       (find-if #'(lambda (x) (member (send x :parent) (send robot limb)))
-                (send robot :force-sensors))))
   (:update-robot-state
    ()
    (send-super :update-robot-state)
@@ -294,8 +289,8 @@
   (:set-impedance-controller-param
    (limb &rest args)
    (cond
-    ((send self :get-force-sensor-from-limb-name limb)
-     (let* ((fs (send self :get-force-sensor-from-limb-name limb))
+    ((send robot :force-sensor limb)
+     (let* ((fs (send robot :force-sensor limb))
             (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
        (send* self :_set-impedance-controller-param
               :name (string-downcase (send fs :name))
@@ -319,8 +314,8 @@
   (:stop-impedance
    (limb)
    (cond
-    ((send self :get-force-sensor-from-limb-name limb)
-     (let ((fs (send self :get-force-sensor-from-limb-name limb)))
+    ((send robot :force-sensor limb)
+     (let ((fs (send robot :force-sensor limb)))
        (send self :impedancecontrollerservice_deleteimpedancecontroller
              :name (string-downcase (send fs :name)))))
     ((and (substringp ":v" (format nil "~A" limb))
@@ -348,8 +343,8 @@
   (:set-forcemoment-offset-param
    (limb &rest args)
    (cond
-    ((send self :get-force-sensor-from-limb-name limb)
-     (let* ((fs (send self :get-force-sensor-from-limb-name limb))
+    ((send robot :force-sensor limb)
+     (let* ((fs (send robot :force-sensor limb))
             (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
        (send* self :_set-forcemoment-offset-param
               (string-downcase (send fs :name)) args)))))
@@ -397,7 +392,7 @@
    (let ((init-coords
           (midcoords 0.5
                      (send self :abc-footstep->eus-footstep (send (send self :get-foot-step-param) :rleg_coords))
-                     (send self :abc-footstep->eus-footstep (send (send *ri* :get-foot-step-param) :lleg_coords)))))
+                     (send self :abc-footstep->eus-footstep (send (send self :get-foot-step-param) :lleg_coords)))))
      (send self :autobalancerservice_setfootsteps
            :fs
            (mapcar #'(lambda (f)
