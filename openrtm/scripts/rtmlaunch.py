@@ -30,7 +30,7 @@ def wait_component(cmd_path):
     node = alive_component(path)
     while not node and count < 30:
         node = alive_component(path)
-        print "Wait for ",cmd_path
+        print >>sys.stderr, "\033[33m[rtmlaunch] Wait for ",cmd_path," ",count,"/30\033[0m"
         count += 1
         time.sleep(1)
     if not node:
@@ -58,7 +58,7 @@ def rtconnect(nameserver, tags):
         dest_path   = nameserver+"/"+tag.attributes.get("to").value
         source_path = re.sub("\$\(arg SIMULATOR_NAME\)",simulator,source_path);
         dest_path = re.sub("\$\(arg SIMULATOR_NAME\)",simulator,dest_path);
-        print "connect from %s to %s"%(source_path,dest_path)
+        print >>sys.stderr, "[rtmlaunch] Connecting from %s to %s"%(source_path,dest_path)
         source_full_path = path.cmd_path_to_full_path(source_path)
         dest_full_path = path.cmd_path_to_full_path(dest_path)
         if tag.attributes.get("subscription_type") != None:
@@ -77,7 +77,7 @@ def rtconnect(nameserver, tags):
             if check_connect(source_full_path,dest_full_path):
                 continue
         except Exception, e:
-            print >>sys.stderr, 'Could not Connect : ', e,' '
+            print >>sys.stderr, '\033[31m[rtmlaunch] [ERROR] Could not Connect : ', e,'\033[0m'
             return 1
         #print source_path, source_full_path, dest_path, dest_full_path;
         try:
@@ -92,13 +92,15 @@ def rtconnect(nameserver, tags):
                 else:
                     props['dataport.push_rate'] = str('50.0')
             options = optparse.Values({'verbose': False, 'id': '', 'name': None, 'properties': props})
-            print >>sys.stderr, "Connect from",source_path,"to",dest_path,"with",options
+            print >>sys.stderr, "[rtmlaunch] Connected from",source_path
+            print >>sys.stderr, "[rtmlaunch]             to",dest_path
+            print >>sys.stderr, "[rtmlaunch]           with",options
             try :
                 rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, tree=None)
             except Exception, e: # openrtm 1.1.0
                 rtcon.connect_ports([(source_path,source_full_path), (dest_path, dest_full_path)], options, tree=None)
         except Exception, e:
-            print >>sys.stderr, '{0}: {1}'.format(os.path.basename(sys.argv[0]), e)
+            print >>sys.stderr, '\033[31m[rtmlaunch] {0}: {1}'.format(os.path.basename(sys.argv[1]), e),'\033[0m'
     return 0
 
 def rtactivate(nameserver, tags):
@@ -107,15 +109,15 @@ def rtactivate(nameserver, tags):
     for tag in tags:
         cmd_path  = nameserver+"/"+tag.attributes.get("component").value
         full_path = path.cmd_path_to_full_path(cmd_path)
-        print "activate %s"%(full_path)
+        print >>sys.stderr, "[rtmlaunch] activate %s"%(full_path)
         try:
             state = wait_component(full_path)
             if state == 'Active':
                 continue
             else:
-                print "[rtmlaunch] Activate <-",state,full_path
+                print >>sys.stderr, "[rtmlaunch] Activate <-",state,full_path
         except Exception, e:
-            print >>sys.stderr, 'Could not Activate : ', e,' '
+            print >>sys.stderr, '\033[31m[rtmlaunch] Could not Activate : ', e,'\033[0m'
             return 1
         try:
             options = optparse.Values({"ec_index": 0, 'verbose': False})
@@ -124,7 +126,7 @@ def rtactivate(nameserver, tags):
             except Exception, e: # openrtm 1.1.0
                 state_control_base.alter_component_states(activate_action, [(cmd_path, full_path)], options, None)
         except Exception, e:
-            print >>sys.stderr, '{0}: {1}'.format(os.path.basename(sys.argv[0]), e)
+            print >>sys.stderr, '[rtmlaunch] {0}: {1}'.format(os.path.basename(sys.argv[0]), e)
             return 1
     return 0
 
@@ -135,7 +137,7 @@ def main():
         print >>sys.stderr, usage
         return 1
     fullpathname = sys.argv[1]
-    print "[rtmlaunch] starting... ",fullpathname
+    print >>sys.stderr, "[rtmlaunch] starting... ",fullpathname
     try:
         parser = parse(fullpathname)
     except Exception,e:
@@ -144,9 +146,9 @@ def main():
 
     nameserver = os.getenv("RTCTREE_NAMESERVERS","localhost")
     simulator = os.getenv("SIMULATOR_NAME","Simulator")
-    print "[rtmlaunch]", simulator
+    print >>sys.stderr, "[rtmlaunch]", simulator
     while 1:
-        print "[rtmlaunch] check connection/activation"
+        print >>sys.stderr, "[rtmlaunch] check connection/activation"
         rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
         rtactivate(nameserver, parser.getElementsByTagName("rtactivate"))
         time.sleep(10)
