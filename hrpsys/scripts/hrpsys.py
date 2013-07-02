@@ -304,7 +304,8 @@ class HrpsysConfigurator:
 
         if not self.rh:
             print self.configurator_name, "Could not find ", robotname
-            print self.configurator_name, "Candidates are .... ", [x.name()  for x in self.ms.get_components()]
+            if self.ms:
+                print self.configurator_name, "Candidates are .... ", [x.name()  for x in self.ms.get_components()]
             print self.configurator_name, "Exitting.... ", robotname
             exit(1)
 
