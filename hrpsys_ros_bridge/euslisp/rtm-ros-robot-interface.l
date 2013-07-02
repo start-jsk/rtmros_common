@@ -144,9 +144,10 @@
     (&rest args)
     (case (car args)
       (:imucoords
+       (send-super* :state args)
        (send robot :copy-worldcoords))
       (t
-        (send-super* :state args))))
+       (send-super* :state args))))
   )
 
 ;; SequencePlayerService
