@@ -318,15 +318,19 @@
     ((eq limb :arms) (mapcar #'(lambda (l) (send self :stop-impedance l)) '(:rarm :larm)))
     (t ) ;; virtual force sensor is not supported in this file
     ))
+  )
+
+;; AbsoluteForceSensorService
+(defmethod rtm-ros-robot-interface
   (:_set-forcemoment-offset-param
    (name &key force-offset moment-offset link-offset-centroid link-offset-mass)
    (let* ((current-fm-param (send self :get-forcemoment-offset-param name))
-          (param (instance hrpsys::OpenHRP_ImpedanceControllerService_ForceMomentOffsetParam :init
+          (param (instance hrpsys::OpenHRP_AbsoluteForceSensorService_ForceMomentOffsetParam :init
                            :force_offset (if force-offset force-offset (send current-fm-param :force_offset))
                            :moment_offset (if moment-offset moment-offset (send current-fm-param :moment_offset))
                            :link_offset_centroid (if link-offset-centroid link-offset-centroid (send current-fm-param :link_offset_centroid))
                            :link_offset_mass (if link-offset-mass link-offset-mass (send current-fm-param :link_offset_mass)))))
-     (send self :impedancecontrollerservice_setforcemomentoffsetparam :name name :i_param param)))
+     (send self :absoluteforcesensorservice_setforcemomentoffsetparam :name name :i_param param)))
   (:set-forcemoment-offset-param
    (limb &rest args)
    (cond
@@ -335,7 +339,7 @@
             (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
        (send* self :_set-forcemoment-offset-param
               (string-downcase (send fs :name)) args)))))
-  (:get-forcemoment-offset-param (name) (send (send self :impedancecontrollerservice_getforcemomentoffsetparam :name name) :i_param))
+  (:get-forcemoment-offset-param (name) (send (send self :absoluteforcesensorservice_getforcemomentoffsetparam :name name) :i_param))
   (:load-forcemoment-offset-param
    (fname)
    (mapcar #'(lambda (x)

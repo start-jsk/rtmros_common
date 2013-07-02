@@ -111,6 +111,7 @@ class HrpsysConfigurator:
     tf = None # TorqueFilter
     kf = None # KalmanFilter
     vs = None # VirtualForceSensor
+    afs = None # AbsoluteForceSensor
     ic = None # ImpedanceController
     abc = None # AutoBalancer
     st = None # Stabilizer
@@ -137,7 +138,7 @@ class HrpsysConfigurator:
     # public method
     def connectComps(self):
         # connection for actual joint angles
-        connectPorts(self.rh.port("q"), [self.sh.port("currentQIn"), self.fk.port("q"), self.co.port("qCurrent"), self.el.port("qCurrent"), self.vs.port("qCurrent"), self.tf.port("qCurrent"), self.ic.port("qCurrent")])
+        connectPorts(self.rh.port("q"), [self.sh.port("currentQIn"), self.fk.port("q"), self.co.port("qCurrent"), self.el.port("qCurrent"), self.vs.port("qCurrent"), self.afs.port("qCurrent"), self.tf.port("qCurrent"), self.ic.port("qCurrent")])
         # connection for reference joint angles
         tmp_contollers = [self.ic, self.abc, self.st, self.co, self.el]
         connectPorts(self.sh.port("qOut"),  [self.fk.port("qRef"), tmp_contollers[0].port("qRef")])
@@ -163,7 +164,6 @@ class HrpsysConfigurator:
         if (len(s_rate)>0) and self.rh.port(s_rate[0].name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
             connectPorts(self.rh.port(s_rate[0].name), self.kf.port("rate"))
         connectPorts(self.seq.port("accRef"), self.kf.port("accRef"))
-        #connectPorts(self.kf.port("rpy"), self.ic.port("rpy"))
 
         # connection for rh
         if self.rh.port("servoState") != None:
@@ -186,10 +186,13 @@ class HrpsysConfigurator:
             connectPorts(self.abc.port("baseRpy"), self.st.port("baseRpyIn"))
             connectPorts(self.abc.port("basePos"), self.st.port("basePosIn"))
 
-        # connection for ic
+        # connection for vs
+        #connectPorts(self.kf.port("rpy"), self.ic.port("rpy"))
+        connectPorts(self.kf.port("rpy"), self.afs.port("rpy"))
         #  actual force sensors
         for sen in filter(lambda x : x.type == "Force", self.getSensors(self.url)):
-            connectPorts(self.rh.port(sen.name), self.ic.port(sen.name))
+            connectPorts(self.rh.port(sen.name), self.afs.port(sen.name))
+            connectPorts(self.afs.port("abs_"+sen.name), self.ic.port(sen.name))
         #  virtual force sensors
         for vfp in filter(lambda x : str.find(x, 'v') >= 0 and str.find(x, 'sensor') >= 0, self.vs.ports.keys()):
             connectPorts(self.vs.port(vfp), self.ic.port(vfp))
@@ -227,6 +230,8 @@ class HrpsysConfigurator:
 
         self.vs = self.createComp("VirtualForceSensor", "vs")
 
+        self.afs = self.createComp("AbsoluteForceSensor", "afs")
+
         self.ic = self.createComp("ImpedanceController", "ic")
 
         self.abc = self.createComp("AutoBalancer", "abc")
@@ -245,7 +250,7 @@ class HrpsysConfigurator:
 
     # public method to configure all RTCs to be activated on rtcd
     def getRTCList(self):
-        return [self.rh, self.seq, self.sh, self.fk, self.tf, self.kf, self.vs, self.ic, self.abc, self.st, self.co, self.el, self.log]
+        return [self.rh, self.seq, self.sh, self.fk, self.tf, self.kf, self.vs, self.afs, self.ic, self.abc, self.st, self.co, self.el, self.log]
 
     # public method to get bodyInfo
     def getBodyInfo(self, url):

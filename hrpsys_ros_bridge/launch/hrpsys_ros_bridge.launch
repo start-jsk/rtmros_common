@@ -51,6 +51,8 @@
         output="screen" args ="$(arg openrtm_args)" />
   <node pkg="hrpsys" name="StabilizerServiceROSBridge" type="StabilizerServiceROSBridgeComp"
         output="screen" args ="$(arg openrtm_args)" />
+  <node pkg="hrpsys" name="AbsoluteForceSensorServiceROSBridge" type="AbsoluteForceSensorServiceROSBridgeComp"
+        output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
 
   <group if="$(arg INSTALL_ROBOT_DESCRIPTION)" >
     <param name="robot_description" textfile="$(arg COLLADA_FILE)" />
@@ -105,6 +107,8 @@
   <!-- USE_IMPEDANCECONTROLLER -->
   <rtconnect from="ImpedanceControllerServiceROSBridge.rtc:ImpedanceControllerService" to="ic.rtc:ImpedanceControllerService"  subscription_type="new"/>
   <rtactivate component="ImpedanceControllerServiceROSBridge.rtc" />
+  <rtconnect from="AbsoluteForceSensorServiceROSBridge.rtc:AbsoluteForceSensorService" to="afs.rtc:AbsoluteForceSensorService"  subscription_type="new"/>
+  <rtactivate component="AbsoluteForceSensorServiceROSBridge.rtc" />
 
   <!-- USE_SOFTERRORLIMIT -->
   <rtconnect from="SoftErrorLimiterServiceROSBridge.rtc:SoftErrorLimiterService" to="el.rtc:SoftErrorLimiterService"  subscription_type="new"/>
