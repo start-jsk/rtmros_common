@@ -1,0 +1,64 @@
+#!/usr/bin/python
+
+import os,psutil,subprocess,socket,sys
+from omniORB import CORBA
+import CosNaming
+
+cosnames = "omniNames"
+p = None
+pid = None
+start_naming = True
+# check if the process is started from init script
+# if omniName is already started, do nothing
+try:
+    pid = int(open("/var/run/"+cosnames+".pid").read())
+except IOError:
+    print "[rtmlaunch]", "/var/run/"+cosnames+".pid", "is not found"
+if pid in psutil.get_pid_list(): # found omniorb starting from init
+    print "[rtmlaunch]", cosnames, " is already started from init script"
+    print "[rtmlaunch] if rtmlaunch does nost start properly, please"
+    print "[rtmlaunch] sudo /etc/init.d/omniorb4-nameserver stop"
+    start_naming = False
+elif filter(lambda p: p.name == cosnames, psutil.process_iter()) != [] :
+    print "[rtmlaunch]", cosnames, " is already started"
+    try:
+        orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)
+        nameserver = orb.resolve_initial_references("NameService")
+        rootnc = nameserver._narrow(CosNaming.NamingContext)
+        def findObject(name, kind="", rnc=None) :
+            nc = CosNaming.NameComponent(name, kind)
+            if not rnc: rnc = rootnc
+            return rnc.resolve([nc])
+        cxt = findObject(socket.gethostname(), "host_cxt")
+        obj = findObject("manager", "mgr", cxt)
+    except CosNaming.NamingContext.NotFound, ex:
+        # this is ok since host_cxt, manager is not bind
+        pass
+    except:
+        print "[rtmlaunch] name server is unreachable ", sys.exc_info()[0], " so kill process"
+        for p in filter(lambda p: p.name == cosnames, psutil.process_iter()) :
+            print "[rtmlaunch] kill ", cosnames, " of pid", p.pid
+            p.terminate()
+
+if start_naming :
+    print "[rtmlaunch] Start", cosnames
+    logdir = "/tmp"
+    hostname = socket.gethostname()
+    try :
+        os.remove(logdir+"/omninames-"+hostname+".log")
+        os.remove(logdir+"/omninames-"+hostname+".bak")
+    except:
+        pass
+
+    p = subprocess.Popen([cosnames,"-start", "-logdir", logdir])
+
+
+import roslaunch
+try:
+    roslaunch.main()
+finally:
+    # if omniName is invoked from this script, stop this
+    if p :
+        print "[rtmlaunch] terminate", cosnames
+        p.terminate()
+
