@@ -1,0 +1,24 @@
+<!-- for real robot -->
+<launch>
+
+  <rosparam command="load"
+            file="$(find hrpsys_ros_bridge_tutorials)/models/HIRONX_controller_config.yaml" />
+
+  <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
+    <arg name="SIMULATOR_NAME" value="RobotHardware0" /> <!-- arg name="SIMULATOR_NAME" value="HiroNX(Robot)0" / -->
+    <arg name="nameserver" default="hiro014" /> <!-- for real robot -->
+    <arg name="MODEL_FILE" value="/opt/jsk/etc/HIRONX/model/main.wrl" />
+    <!--<arg name="COLLADA_FILE" value="$(find hiro_model)/urdf/scenes/a380_rivetting_hiro.urdf" /> -->
+    <arg name="COLLADA_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae" />
+
+    <arg name="USE_WALKING" value="false" />
+    <arg name="USE_COLLISIONCHECK" value="false" />
+    <arg name="USE_IMPEDANCECONTROLLER" value="false" />
+    <arg name="USE_SOFTERRORLIMIT" value="false" />
+  </include>
+<!--
+  <node name="hironx_rviz" pkg="rviz" type="rviz" respawn="true"
+  args="-sync -d $(find hrpsys_ros_bridge_tutorials)/launch/hironx.vcg"
+        />
+-->
+</launch>
