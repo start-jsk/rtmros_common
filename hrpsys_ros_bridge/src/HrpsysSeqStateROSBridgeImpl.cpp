@@ -112,18 +112,22 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   }
 
   coil::vstring virtual_force_sensor = coil::split(prop["virtual_force_sensor"], ",");
-  int npforce = body->numSensors(hrp::Sensor::FORCE);
+  int npforce = body->numSensors(hrp::Sensor::FORCE) * 2; // forces + absolute forces
   int nvforce = virtual_force_sensor.size()/10;
   int nforce  = npforce + nvforce;
   m_rsforce.resize(nforce);
   m_rsforceIn.resize(nforce);
-  for (unsigned int i=0; i<npforce; i++){
+  for (unsigned int i=0; i<npforce/2; i++){
     hrp::Sensor *s = body->sensor(hrp::Sensor::FORCE, i);
-    m_rsforceIn[i] = new InPort<TimedDoubleSeq>(s->name.c_str(), m_rsforce[i]);
-    m_rsforce[i].data.length(6);
-    registerInPort(s->name.c_str(), *m_rsforceIn[i]);
-    std::cerr << i << " physical force sensor : " << s->name << std::endl;
+    m_rsforceIn[i*2] = new InPort<TimedDoubleSeq>(s->name.c_str(), m_rsforce[i*2]);
+    m_rsforce[i*2].data.length(6);
+    registerInPort(s->name.c_str(), *m_rsforceIn[i*2]);
     m_rsforceName.push_back(s->name);
+    m_rsforceIn[i*2+1] = new InPort<TimedDoubleSeq>(std::string("abs_" + s->name).c_str(), m_rsforce[i*2+1]);
+    m_rsforce[i*2+1].data.length(6);
+    registerInPort(s->name.c_str(), *m_rsforceIn[i*2+1]);
+    m_rsforceName.push_back(std::string("abs_" + s->name));
+    std::cerr << i << " physical force sensor : " << s->name << std::endl;
   }
 
   for (int j = 0 ; j < body->numSensorTypes(); j++) {

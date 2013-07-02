@@ -19,7 +19,9 @@
                      #'send self :rtmros-temperature-callback :groupname groupname)
      (mapcar #'(lambda (x)
                  (ros::subscribe (format nil "/~A" (string-downcase x)) geometry_msgs::WrenchStamped
-                                 #'send self :rtmros-force-sensor-callback x :groupname groupname))
+                                 #'send self :rtmros-force-sensor-callback x :groupname groupname)
+                 (ros::subscribe (format nil "/abs_~A" (string-downcase x)) geometry_msgs::WrenchStamped
+                                 #'send self :rtmros-force-sensor-callback (read-from-string (format nil ":abs-~A" (string-downcase x))) :groupname groupname))
              (send-all (send robot :force-sensors) :name))
      ))
   (:rtmros-temperature-callback
@@ -37,11 +39,14 @@
                          (send (send wrc :torque) :y)
                          (send (send wrc :torque) :z)))))
   (:tmp-force-moment-vector
-   (f/m &optional (limb))
+   (f/m &optional (limb) (abs nil))
    (if limb
-       (subseq (cdr (assoc (send (send self :get-force-sensor-from-limb-name limb) :name) robot-state))
-               (if (eq f/m :force) 0 3)
-               (if (eq f/m :force) 3 6))
+       (let ((key-name (if abs
+                           (read-from-string (format nil ":abs-~A" (string-downcase (send (send robot :force-sensor limb) :name))))
+                         (send (send robot :force-sensor limb) :name))))
+         (subseq (cdr (assoc key-name robot-state))
+                 (if (eq f/m :force) 0 3)
+                 (if (eq f/m :force) 3 6)))
      (mapcar #'(lambda (x)
                  (subseq (cdr (assoc x robot-state))
                          (if (eq f/m :force) 0 3)
@@ -53,6 +58,12 @@
   (:moment-vector
    (&optional (limb))
    (send self :tmp-force-moment-vector :moment limb))
+  (:absolute-force-vector
+   (&optional (limb))
+   (send self :tmp-force-moment-vector :force limb t))
+  (:absolute-moment-vector
+   (&optional (limb))
+   (send self :tmp-force-moment-vector :moment limb t))
   ;; automatically define methods for ROSBridge services
   (:define-all-ROSBridge-srv-methods
    (&key (debug-view nil) (ros-pkg-name "hrpsys"))
