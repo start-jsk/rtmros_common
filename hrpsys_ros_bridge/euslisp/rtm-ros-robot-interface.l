@@ -137,8 +137,9 @@
   (:update-robot-state
    ()
    (send-super :update-robot-state)
-   (send robot :newcoords (send *tfl* :lookup-transform "/imu_floor" (format nil "/~a" (send (car (send robot :links)) :name)) (ros::time)))
-   )
+   (let ((imucoords (send *tfl* :lookup-transform "/imu_floor" (format nil "/~a" (send (car (send robot :links)) :name)) (ros::time))))
+     (if imucoords (send robot :newcoords imucoords))
+     ))
   (:state
     (&rest args)
     (case (car args)
