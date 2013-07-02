@@ -356,6 +356,9 @@ class HrpsysConfigurator:
             self.waitInterpolationOfGroup(gname)
         return ret
 
+    def loadPattern(self, fname, tm):
+        return self.seq_svc.loadPattern(fname, tm)
+
     def waitInterpolation(self):
         self.seq_svc.waitInterpolation()
 
