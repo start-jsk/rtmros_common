@@ -75,8 +75,9 @@ def hrpsys_profile() :
 
 if __name__ == '__main__':
     hostname = socket.gethostname()
-    if len(sys.argv) > 1 :
-        hostname=sys.argv[1]
+    args_without_ros_options = filter(lambda x : str.find(x, '__'), sys.argv)
+    if len(args_without_ros_options) > 1 :
+        hostname=args_without_ros_options[1]
 
     try:
         rospy.init_node('hrpsys_profile_diagnostics')
