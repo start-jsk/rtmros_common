@@ -151,12 +151,15 @@
    (let ((imucoords (send *tfl* :lookup-transform "/imu_floor" (format nil "/~a" (send (car (send robot :links)) :name)) (ros::time))))
      (if imucoords (send robot :newcoords imucoords))
      ))
+  (:imucoords
+   ()
+   (send robot :copy-worldcoords))
   (:state
     (&rest args)
     (case (car args)
       (:imucoords
        (send-super* :state args)
-       (send robot :copy-worldcoords))
+       (send self :imucoords))
       (t
        (send-super* :state args))))
   )
