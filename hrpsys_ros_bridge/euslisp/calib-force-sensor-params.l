@@ -56,10 +56,8 @@
       (send *ri* :state)
       (send robot :angle-vector (send *ri* :potentio-vector))
       (send robot :newcoords (send *ri* :imucoords))
-      (push (mapcar #'(lambda (x) (list x (send (send robot :force-sensor x) :inverse-rotate-vector
-                                                (send *ri* :absolute-force-vector x)))) limbs) force-list)
-      (push (mapcar #'(lambda (x) (list x (send (send robot :force-sensor x) :inverse-rotate-vector
-                                                (send *ri* :absolute-moment-vector x)))) limbs) moment-list)
+      (push (mapcar #'(lambda (x) (list x (send *ri* :force-vector x))) limbs) force-list)
+      (push (mapcar #'(lambda (x) (list x (send *ri* :moment-vector x))) limbs) moment-list)
       (if *viewer* (send (send *viewer* :get :pickviewer) :draw-objects))
       (push
        (flatten
