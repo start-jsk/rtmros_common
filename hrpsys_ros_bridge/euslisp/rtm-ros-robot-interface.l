@@ -368,9 +368,13 @@
              (send (send self :absoluteforcesensorservice_getforcemomentoffsetparam :name name) :i_param))
          :get-forcemoment-offset-param))
   (:load-forcemoment-offset-param
-   (fname)
+   (fname &key (set-offset t))
    (mapcar #'(lambda (x)
-               (send* self :set-forcemoment-offset-param x))
+               (send* self :set-forcemoment-offset-param (car x)
+                      (if set-offset
+                          (cdr x)
+                        (list :link-offset-mass (cadr (memq :link-offset-mass (cdr x)))
+                              :link-offset-centroid (cadr (memq :link-offset-centroid (cdr x)))))))
            (with-open-file
             (f fname :direction :input)
             (read f nil nil)))
@@ -384,31 +388,41 @@
    (send self :_reset-force-moment-offset limbs :moment)
    )
   (:_reset-force-moment-offset
-   (limbs f/m)
+   (limbs f/m &key (itr 10))
    ;; f_ext = Rs * (s^f_s - s^f_off) - m_l * g
    ;; n_ext = Rs * (s^n_s - s^n_off) - (Rs * c_l) x (m_l * g)
    ;; s^f_off = s^f_s - Rs^T * (f_ext + m_l * g)
    ;; s^n_off = s^n_s - Rs^T * (n_ext + (Rs * c_l) x (m_l * g))
-   (mapcar #'(lambda (alimb)
-               (send self :state)
-               (let* ((abs-v (send self (read-from-string (format nil ":absolute-~A-vector" (string-downcase f/m))) alimb))
-                      (param (send self :get-forcemoment-offset-param alimb))
-                      (off (v+ (send param (if (eq f/m :force) :force_offset :moment_offset))
-                               (send (send robot :force-sensor alimb) :inverse-rotate-vector abs-v))))
-                 (send self :set-forcemoment-offset-param alimb
-                       (if (eq f/m :force) :force-offset :moment-offset)
-                       off)
-                 (unix:usleep 100000)
-                 (send self :state)
-                 ;; check ;; compare sensor value before & after resetting
-                 (format t ";; ~A error of ~A ;; ~A[~A] -> ~A[~A]~%"
-                         (string-downcase f/m) alimb
-                         (norm abs-v)
-                         (if (eq f/m :force) "N" "Nm")
-                         (norm (send self (read-from-string (format nil ":absolute-~A-vector" (string-downcase f/m))) alimb))
-                         (if (eq f/m :force) "N" "Nm"))
-                 ))
-           limbs))
+   (labels ((calc-off
+             (alimb)
+             (unix:usleep 10000)
+             (send self :state)
+             (let* ((abs-v (send self (read-from-string (format nil ":absolute-~A-vector" (string-downcase f/m))) alimb))
+                    (param (send self :get-forcemoment-offset-param alimb))
+                    (off (v+ (send param (if (eq f/m :force) :force_offset :moment_offset))
+                             (send (send robot :force-sensor alimb) :inverse-rotate-vector abs-v))))
+               (list off abs-v))))
+     (mapcar #'(lambda (alimb)
+                 (let* ((ret (mapcar #'(lambda (x) (calc-off alimb)) (make-list itr)))
+                        (off (mapcar #'car ret))
+                        (abs-v (mapcar #'cadr ret)))
+                   (send self :set-forcemoment-offset-param alimb
+                         (if (eq f/m :force) :force-offset :moment-offset)
+                         (scale (/ 1.0 (length off)) (reduce #'v+ off)))
+                   (unix:usleep 10000)
+                   ;; check ;; compare sensor value before & after resetting
+                   (format t ";; ~A error of ~A ;; ~A[~A] -> ~A[~A]~%"
+                           (string-downcase f/m) alimb
+                           (norm (scale (/ 1.0 (length abs-v)) (reduce #'v+ abs-v)))
+                           (if (eq f/m :force) "N" "Nm")
+                           (norm
+                            (scale (/ 1.0 5.0)
+                                   (reduce #'v+
+                                           (mapcar #'(lambda (x) (send self :state (read-from-string (format nil ":absolute-~A-vector" (string-downcase f/m))) alimb))
+                                                   (make-list itr)))))
+                           (if (eq f/m :force) "N" "Nm"))
+                   ))
+             limbs)))
   )
 
 ;; AutoBalancerService
