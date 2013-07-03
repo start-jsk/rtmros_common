@@ -299,12 +299,12 @@ class HrpsysConfigurator:
         self.rh = None
         timeout_count = 0;
         # wait for simulator or RobotHardware setup which sometime takes a long time
-        while self.rh == None and timeout_count < 3: # <- time out limit
+        while self.rh == None and timeout_count < 10: # <- time out limit
             time.sleep(1);
             self.rh = rtm.findRTC("RobotHardware0")
             if not self.rh:
                 self.rh = rtm.findRTC(robotname)
-            print self.configurator_name, "wait for", robotname, " : ",self.rh, "(timeout ", timeout_count, " < 3)"
+            print self.configurator_name, "wait for", robotname, " : ",self.rh, "(timeout ", timeout_count, " < 10)"
             timeout_count += 1
 
         if not self.rh:
