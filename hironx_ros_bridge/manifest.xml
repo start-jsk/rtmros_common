@@ -8,7 +8,9 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/hironx_ros_bridge</url>
+
   <depend package="hrpsys_ros_bridge"/>
+  <depend package="hrpsys_ros_bridge_tutorials"/>
 
 </package>
 
