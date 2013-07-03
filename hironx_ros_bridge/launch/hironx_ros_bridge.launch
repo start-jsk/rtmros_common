@@ -4,11 +4,14 @@
   <rosparam command="load"
             file="$(find hrpsys_ros_bridge_tutorials)/models/HIRONX_controller_config.yaml" />
 
+  <arg name="nameserver" default="hiro014" /> <!-- for real robot -->
+  <arg name="MODEL_FILE" default="/opt/jsk/etc/HIRONX/model/main.wrl" />
+  <arg name="SIMULATOR_NAME" default="RobotHardware0" />
+
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
-    <arg name="SIMULATOR_NAME" value="RobotHardware0" /> <!-- arg name="SIMULATOR_NAME" value="HiroNX(Robot)0" / -->
-    <arg name="nameserver" default="hiro014" /> <!-- for real robot -->
-    <arg name="MODEL_FILE" value="/opt/jsk/etc/HIRONX/model/main.wrl" />
-    <!--<arg name="COLLADA_FILE" value="$(find hiro_model)/urdf/scenes/a380_rivetting_hiro.urdf" /> -->
+    <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
+    <arg name="nameserver" value="$(arg nameserver)" />
+    <arg name="MODEL_FILE" value="$(arg MODEL_FILE)" />
     <arg name="COLLADA_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae" />
 
     <arg name="USE_WALKING" value="false" />
