@@ -17,16 +17,6 @@ class TestSampleRobot(unittest.TestCase):
         self.robot.init("SampleRobot(Robot)0", rospkg.RosPack().get_path("openhrp3")+"/share/OpenHRP-3.1/sample/model/sample1.wrl")
 
 
-    def atest_walk(self):
-        self.robot.loadPattern(rospkg.RosPack().get_path("hrpsys")+"/share/hrpsys/samples/SampleRobot/data/walk2m", 1.0)
-        self.robot.waitInterpolation()
-
-
-        print self.robot.getReferencePosition("WAIST")
-        print self.robot.getReferenceRotation("WAIST")
-        self.assertTrue(numpy.linalg.norm(self.robot.getReferencePosition("WAIST") - numpy.array([0,0,0.78415])) < 1.0e-6)
-        self.assertTrue(numpy.array_equal(self.robot.getReferenceRotation("WAIST"),numpy.identity(3)))
-
     def test_ik(self):
         self.robot.seq_svc.addJointGroup("LARM", ["LARM_SHOULDER_P", "LARM_SHOULDER_R", "LARM_SHOULDER_Y", "LARM_ELBOW", "LARM_WRIST_Y", "LARM_WRIST_P", "LARM_WRIST_R"])
         lav = [60,0,0,-90,0,0,0]
