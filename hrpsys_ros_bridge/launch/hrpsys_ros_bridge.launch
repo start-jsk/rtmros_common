@@ -129,7 +129,7 @@
   </group>
 
   <group if="$(arg USE_IMAGESENSOR)" >
-    <rtconnect from="$(arg SIMULATOR_NAME)0.rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" />
+    <rtconnect from="$(arg SIMULATOR_NAME).rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" />
     <rtactivate component="ImageSensorROSBridge0.rtc" />
   </group>
 
