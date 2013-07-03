@@ -5,5 +5,5 @@
     <arg name="LAUNCH_HRPSYSPY" value="false" />
   </include>
 
-  <atest type="hironx-test.py" pkg="hironx_ros_bridge" test-name="hironx_test" time-limit="300" />
+  <test type="hironx-test.py" pkg="hironx_ros_bridge" test-name="hironx_test" time-limit="300" />
 </launch>
