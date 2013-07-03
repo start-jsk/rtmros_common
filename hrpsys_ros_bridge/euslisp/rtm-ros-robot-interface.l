@@ -392,8 +392,8 @@
    (mapcar #'(lambda (alimb)
                (send self :state)
                (let* ((abs-v (send self (read-from-string (format nil ":absolute-~A-vector" (string-downcase f/m))) alimb))
-                      (params (send self :get-forcemoment-offset-param alimb))
-                      (off (v+ (send param (if (eq f/m :force) :force-offset :moment-offset))
+                      (param (send self :get-forcemoment-offset-param alimb))
+                      (off (v+ (send param (if (eq f/m :force) :force_offset :moment_offset))
                                (send (send robot :force-sensor alimb) :inverse-rotate-vector abs-v))))
                  (send self :set-forcemoment-offset-param alimb
                        (if (eq f/m :force) :force-offset :moment-offset)
