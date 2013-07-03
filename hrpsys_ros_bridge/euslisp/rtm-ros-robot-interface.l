@@ -375,6 +375,40 @@
             (f fname :direction :input)
             (read f nil nil)))
    )
+  (:reset-force-moment-offset-arms
+   ()
+   (send self :reset-force-moment-offset '(:rarm :larm)))
+  (:reset-force-moment-offset
+   (limbs)
+   (send self :_reset-force-moment-offset limbs :force)
+   (send self :_reset-force-moment-offset limbs :moment)
+   )
+  (:_reset-force-moment-offset
+   (limbs f/m)
+   ;; f_ext = Rs * (s^f_s - s^f_off) - m_l * g
+   ;; n_ext = Rs * (s^n_s - s^n_off) - (Rs * c_l) x (m_l * g)
+   ;; s^f_off = s^f_s - Rs^T * (f_ext + m_l * g)
+   ;; s^n_off = s^n_s - Rs^T * (n_ext + (Rs * c_l) x (m_l * g))
+   (mapcar #'(lambda (alimb)
+               (send self :state)
+               (let* ((abs-v (send self (read-from-string (format nil ":absolute-~A-vector" (string-downcase f/m))) alimb))
+                      (params (send self :get-forcemoment-offset-param alimb))
+                      (off (v+ (send param (if (eq f/m :force) :force-offset :moment-offset))
+                               (send (send robot :force-sensor alimb) :inverse-rotate-vector abs-v))))
+                 (send self :set-forcemoment-offset-param alimb
+                       (if (eq f/m :force) :force-offset :moment-offset)
+                       off)
+                 (unix:usleep 100000)
+                 (send self :state)
+                 ;; check ;; compare sensor value before & after resetting
+                 (format t ";; ~A error of ~A ;; ~A[~A] -> ~A[~A]~%"
+                         (string-downcase f/m) alimb
+                         (norm abs-v)
+                         (if (eq f/m :force) "N" "Nm")
+                         (norm (send self (read-from-string (format nil ":absolute-~A-vector" (string-downcase f/m))) alimb))
+                         (if (eq f/m :force) "N" "Nm"))
+                 ))
+           limbs))
   )
 
 ;; AutoBalancerService
