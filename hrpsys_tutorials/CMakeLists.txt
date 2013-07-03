@@ -35,12 +35,8 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 ## tests
 ##
 rosbuild_add_rostest(test/hrp4c-test.launch)
-rosbuild_check_for_display(disp)
-if(disp)
-  rosbuild_add_rostest(launch/hrp4c.launch)
-  rosbuild_add_rostest(launch/pa10.launch)
-  rosbuild_add_rostest(launch/samplerobot.launch)
-endif(disp)
+rosbuild_add_rostest(test/pa10-test.launch)
+rosbuild_add_rostest(test/samplerobot-test.launch)
 
 ##
 ## documents
