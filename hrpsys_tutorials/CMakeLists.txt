@@ -36,7 +36,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 ##
 rosbuild_add_rostest(test/hrp4c-test.launch)
 rosbuild_add_rostest(test/pa10-test.launch)
-#rosbuild_add_rostest(test/samplerobot-test.launch)
+rosbuild_add_rostest(test/samplerobot-test.launch)
 
 ##
 ## documents
