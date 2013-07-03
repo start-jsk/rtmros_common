@@ -78,7 +78,7 @@
         args="$(arg MODEL_FILE) $(arg SIMULATOR_NAME) HrpsysSeqStateROSBridge0 $(arg nameserver) -ORBInitRef NameService=corbaloc:iiop:$(arg nameserver):2809/NameService" output="$(arg OUTPUT)"/>
   <!-- BEGIN:openrtm connection -->
   <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
-  <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm" type="rtmlaunch.use_if.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.use_if.launch USE_COMMON=$(arg USE_COMMON) USE_WALKING=$(arg USE_WALKING) USE_COLLISIONCHEC=$(arg USE_COLLISIONCHECK) USE_IMPEDANCECONTROLLER=$(arg USE_IMPEDANCECONTROLLER) USE_SOFTERRORLIMIT=$(arg USE_SOFTERRORLIMIT) USE_IMAGESENSOR=$(arg USE_IMAGESENSOR)"/>
+  <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch USE_COMMON=$(arg USE_COMMON) USE_WALKING=$(arg USE_WALKING) USE_COLLISIONCHEC=$(arg USE_COLLISIONCHECK) USE_IMPEDANCECONTROLLER=$(arg USE_IMPEDANCECONTROLLER) USE_SOFTERRORLIMIT=$(arg USE_SOFTERRORLIMIT) USE_IMAGESENSOR=$(arg USE_IMAGESENSOR)"/>
 
 
   <!-- All Robots -->
