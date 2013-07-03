@@ -45,7 +45,7 @@ class HIRONX(HrpsysConfigurator):
     # hiro specific methods
     #
     def getRTCList(self):
-        return [self.rh, self.seq, self.sh, self.log]
+        return [self.rh, self.seq, self.sh, self.fk, self.log]
 
     def init(self, robotname="HiroNX(Robot)0", url=""):
         HrpsysConfigurator.init(self, robotname=robotname, url=url)
