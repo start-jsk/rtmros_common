@@ -31,6 +31,11 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+rosbuild_find_ros_package("openhrp3")
+configure_file(${PROJECT_SOURCE_DIR}/models/SampleRobot.conf.in
+  ${PROJECT_SOURCE_DIR}/models/SampleRobot.conf)
+configure_file(${PROJECT_SOURCE_DIR}/models/SampleRobot.xml.in
+  ${PROJECT_SOURCE_DIR}/models/SampleRobot.xml)
 ##
 ## tests
 ##
