@@ -12,7 +12,8 @@ from hrpsys import HrpsysConfigurator
 
 class TestSampleRobot(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.robot = HrpsysConfigurator()
         self.robot.init("SampleRobot(Robot)0", rospkg.RosPack().get_path("openhrp3")+"/share/OpenHRP-3.1/sample/model/sample1.wrl")
 
