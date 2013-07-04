@@ -12,7 +12,8 @@ from hrpsys import HrpsysConfigurator
 
 class TestPA10(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.robot = HrpsysConfigurator()
         self.robot.init("PA10Controller(Robot)0", rospkg.RosPack().get_path("openhrp3")+"/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl")
 
