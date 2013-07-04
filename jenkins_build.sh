@@ -25,13 +25,8 @@ while [ -n "$1" ] ; do
     esac
 done
 
-wget 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosbuild?format=raw' -O /tmp/jsk.rosbuild.$$
-. /tmp/jsk.rosbuild.$$ $1 -e
-
 function install-rtm-ros-robotics {
-    wget 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosinstall?format=raw' -O /tmp/jsk.rosinstall.$$
-    wget http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall -O /tmp/rtm-ros-robotics.rosinstall.$$
-    install-pkg /tmp/jsk.rosinstall.$$ /tmp/rtm-ros-robotics.rosinstall.$$
+    install-pkg 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosinstall?format=raw' http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall
 }
 
 function compile-rtm-ros-robotics {
