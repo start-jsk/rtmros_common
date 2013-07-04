@@ -15,12 +15,12 @@ install-pkg 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosinstall?form
 
 rosdep update
 
-compile-pkg hrpsys_ros_bridge
+compile-pkg hrpsys_ros_bridge_tutorials
 
 sudo /etc/init.d/omniorb4-nameserver stop
 yes | rosrun openrtm rtm-naming
 
-test-pkg hrpsys_tutorials hrpsys_ros_bridge_tutorials hironx_ros_bridge
+test-pkg hrpsys_tutorials hironx_ros_bridge
 
 #
 (which rosrun && rosrun rosunit clean_junit_xml.py; echo "done")     # check error
