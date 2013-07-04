@@ -112,7 +112,7 @@ macro(compile_collada_model daefile)
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${daefile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}
     DEPENDS ${daefile})
-  add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile})
+  add_custom_target(${_name}_compile ALL DEPENDS ${_lispfile} ${_xmlfile})
   list(APPEND compile_robots ${_name}_compile)
 endmacro(compile_collada_model daefile)
 
