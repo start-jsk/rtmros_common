@@ -15,6 +15,8 @@ install-pkg 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosinstall?form
 
 rosdep update
 
+sudo /etc/init.d/omniorb4-nameserver stop
+yes | rosrun openrtm rtm-naming
 compile-pkg hrpsys_tutorials hrpsys_ros_bridge_tutorials hironx_ros_bridge
 
 test-pkg hrpsys_tutorials hrpsys_ros_bridge_tutorials hironx_ros_bridge
