@@ -11,9 +11,9 @@ wget 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosbuild?format=raw' -
 rm -fr $ROS_HOME/test_results/
 trap error ERR
 
-rosdep init
-
 install-pkg 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosinstall?format=raw' http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall
+
+rosdep init
 
 compile-pkg hrpsys_tutorials hrpsys_ros_bridge_tutorials hironx_ros_bridge
 
