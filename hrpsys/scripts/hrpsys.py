@@ -192,7 +192,7 @@ class HrpsysConfigurator:
         #  actual force sensors
         for sen in filter(lambda x : x.type == "Force", self.getSensors(self.url)):
             connectPorts(self.rh.port(sen.name), self.afs.port(sen.name))
-            connectPorts(self.afs.port("abs_"+sen.name), self.ic.port(sen.name))
+            connectPorts(self.afs.port("off_"+sen.name), self.ic.port(sen.name))
         #  virtual force sensors
         for vfp in filter(lambda x : str.find(x, 'v') >= 0 and str.find(x, 'sensor') >= 0, self.vs.ports.keys()):
             connectPorts(self.vs.port(vfp), self.ic.port(vfp))

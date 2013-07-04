@@ -16,8 +16,8 @@ def connecSensorRosBridgePort(url, rh, bridge, vs, afs):
                 print program_name, "connect ", sen.name, rh.port(sen.name), bridge.port(sen.name)
                 connectPorts(rh.port(sen.name), bridge.port(sen.name), "new")
                 if sen.type == 'Force':
-                    print program_name, "connect ", sen.name, afs.port("abs_" + sen.name), bridge.port("abs_" + sen.name)
-                    connectPorts(afs.port("abs_" + sen.name), bridge.port("abs_" + sen.name), "new") # for abs forces
+                    print program_name, "connect ", sen.name, afs.port("off_" + sen.name), bridge.port("off_" + sen.name)
+                    connectPorts(afs.port("off_" + sen.name), bridge.port("off_" + sen.name), "new") # for abs forces
         else:
             continue
     if vs != None:

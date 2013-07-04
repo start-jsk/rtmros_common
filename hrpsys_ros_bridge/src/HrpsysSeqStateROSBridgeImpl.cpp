@@ -123,10 +123,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     m_rsforce[i*2].data.length(6);
     registerInPort(s->name.c_str(), *m_rsforceIn[i*2]);
     m_rsforceName.push_back(s->name);
-    m_rsforceIn[i*2+1] = new InPort<TimedDoubleSeq>(std::string("abs_" + s->name).c_str(), m_rsforce[i*2+1]);
+    m_rsforceIn[i*2+1] = new InPort<TimedDoubleSeq>(std::string("off_" + s->name).c_str(), m_rsforce[i*2+1]);
     m_rsforce[i*2+1].data.length(6);
     registerInPort(s->name.c_str(), *m_rsforceIn[i*2+1]);
-    m_rsforceName.push_back(std::string("abs_" + s->name));
+    m_rsforceName.push_back(std::string("off_" + s->name));
     std::cerr << i << " physical force sensor : " << s->name << std::endl;
   }
 

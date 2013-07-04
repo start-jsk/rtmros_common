@@ -20,8 +20,8 @@
      (mapcar #'(lambda (x)
                  (ros::subscribe (format nil "/~A" (string-downcase x)) geometry_msgs::WrenchStamped
                                  #'send self :rtmros-force-sensor-callback x :groupname groupname)
-                 (ros::subscribe (format nil "/abs_~A" (string-downcase x)) geometry_msgs::WrenchStamped
-                                 #'send self :rtmros-force-sensor-callback (read-from-string (format nil ":abs-~A" (string-downcase x))) :groupname groupname))
+                 (ros::subscribe (format nil "/off_~A" (string-downcase x)) geometry_msgs::WrenchStamped
+                                 #'send self :rtmros-force-sensor-callback (read-from-string (format nil ":off-~A" (string-downcase x))) :groupname groupname))
              (send-all (send robot :force-sensors) :name))
      ))
   (:rtmros-temperature-callback
@@ -39,10 +39,10 @@
                          (send (send wrc :torque) :y)
                          (send (send wrc :torque) :z)))))
   (:tmp-force-moment-vector
-   (f/m &optional (limb) (abs nil))
+   (f/m &optional (limb) (off nil))
    (if limb
-       (let ((key-name (if abs
-                           (read-from-string (format nil ":abs-~A" (string-downcase (send (send robot :force-sensor limb) :name))))
+       (let ((key-name (if off
+                           (read-from-string (format nil ":off-~A" (string-downcase (send (send robot :force-sensor limb) :name))))
                          (send (send robot :force-sensor limb) :name))))
          (subseq (cdr (assoc key-name robot-state))
                  (if (eq f/m :force) 0 3)
@@ -58,12 +58,26 @@
   (:moment-vector
    (&optional (limb))
    (send self :tmp-force-moment-vector :moment limb))
-  (:absolute-force-vector
+  (:off-force-vector
    (&optional (limb))
    (send self :tmp-force-moment-vector :force limb t))
-  (:absolute-moment-vector
+  (:off-moment-vector
    (&optional (limb))
    (send self :tmp-force-moment-vector :moment limb t))
+  (:absolute-force-vector
+   (&optional (limb))
+   (if limb
+       (send (send robot :force-sensor limb) :rotate-vector (send self :off-force-vector limb))
+     (mapcar #'(lambda (fs force)
+                 (send fs :rotate-vector force))
+             (send robot :force-sensors) (send self :off-force-vector))))
+  (:absolute-moment-vector
+   (&optional (limb))
+   (if limb
+       (send (send robot :force-sensor limb) :rotate-vector (send self :off-moment-vector limb))
+     (mapcar #'(lambda (fs moment)
+                 (send fs :rotate-vector moment))
+             (send robot :force-sensors) (send self :off-moment-vector))))
   ;; automatically define methods for ROSBridge services
   (:define-all-ROSBridge-srv-methods
    (&key (debug-view nil) (ros-pkg-name "hrpsys"))
