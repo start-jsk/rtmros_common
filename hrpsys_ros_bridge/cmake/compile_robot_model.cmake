@@ -77,7 +77,7 @@ macro(compile_openhrp_model wrlfile)
     COMMAND rosrun openhrp3 export-collada -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
     DEPENDS ${wrlfile})
   add_custom_command(OUTPUT ${_xmlfile}
-    COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option}
+    COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}
     DEPENDS ${wrlfile})
   add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_daefile})
   list(APPEND compile_robots ${_name}_compile)
