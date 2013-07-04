@@ -83,7 +83,7 @@ macro(compile_openhrp_model wrlfile)
   add_custom_command(OUTPUT ${_xmlfile_nosim}
     COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} ${_conf_file_option} ${_robothardware_conf_file_option}
     DEPENDS ${wrlfile})
-  add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_daefile})
+  add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
   list(APPEND compile_robots ${_name}_compile)
 endmacro(compile_openhrp_model)
 
@@ -120,7 +120,7 @@ macro(compile_collada_model daefile)
   add_custom_command(OUTPUT ${_xmlfile_nosim}
     COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${daefile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option}
     DEPENDS ${daefile})
-  add_custom_target(${_name}_compile ALL DEPENDS ${_lispfile} ${_xmlfile})
+  add_custom_target(${_name}_compile ALL DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
   list(APPEND compile_robots ${_name}_compile)
 endmacro(compile_collada_model daefile)
 
