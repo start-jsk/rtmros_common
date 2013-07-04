@@ -61,6 +61,7 @@ macro(compile_openhrp_model wrlfile)
   endif()
   set(_daefile "${_workdir}/${_name}.dae")
   set(_xmlfile "${_workdir}/${_name}.xml")
+  set(_xmlfile_nosim "${_workdir}/${_name}_nosim.xml")
   string(TOLOWER ${_name} _name)
   set(_yamlfile "${_workdir}/${_name}.yaml")
   set(_lispfile "${_workdir}/${_name}.l")
@@ -79,6 +80,9 @@ macro(compile_openhrp_model wrlfile)
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}
     DEPENDS ${wrlfile})
+  add_custom_command(OUTPUT ${_xmlfile_nosim}
+    COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} ${_conf_file_option} ${_robothardware_conf_file_option}
+    DEPENDS ${wrlfile})
   add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_daefile})
   list(APPEND compile_robots ${_name}_compile)
 endmacro(compile_openhrp_model)
@@ -96,6 +100,7 @@ macro(compile_collada_model daefile)
     get_conf_file_option(_conf_file_option _robothardware_conf_file_option ${ARGV})
   endif()
   set(_xmlfile "${_workdir}/${_name}.xml")
+  set(_xmlfile_nosim "${_workdir}/${_name}_nosim.xml")
   string(TOLOWER ${_name} _name)
   set(_yamlfile "${_workdir}/${_name}.yaml")
   set(_lispfile "${_workdir}/${_name}.l")
@@ -111,6 +116,9 @@ macro(compile_collada_model daefile)
   endif(EXISTS ${_yamlfile})
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${daefile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}
+    DEPENDS ${daefile})
+  add_custom_command(OUTPUT ${_xmlfile_nosim}
+    COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${daefile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option}
     DEPENDS ${daefile})
   add_custom_target(${_name}_compile ALL DEPENDS ${_lispfile} ${_xmlfile})
   list(APPEND compile_robots ${_name}_compile)
