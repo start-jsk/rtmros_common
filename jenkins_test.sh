@@ -5,11 +5,13 @@ function error {
     echo "source $ROS_WORKSPACE/setup.bash"
     exit 1
 }
+wget 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosbuild?format=raw' -O /tmp/jsk.rosbuild.$$
+. /tmp/jsk.rosbuild.$$ $1 -e
+
 rm -fr $ROS_HOME/test_results/
 trap error ERR
 
-wget 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosbuild?format=raw' -O /tmp/jsk.rosbuild.$$
-. /tmp/jsk.rosbuild.$$ $1 -e
+rosdep init
 
 install-pkg 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosinstall?format=raw' http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall
 
