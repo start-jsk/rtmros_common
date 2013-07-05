@@ -2,9 +2,7 @@
 
 trap 'exit 1' ERR
 
-#UPSTREAM=$HOME/jobs/hrpsys-ros-bridge-full-test/
-UPSTREAM=$HOME/jobs/hrpsys-ros-bridge-quick-test/
-. $UPSTREAM/workspace/ros/groovy/setup.sh
+. $WORKSPACE/ros/groovy/setup.sh
 
 function rtmros_common_merge {
     # hrpsys
@@ -24,7 +22,7 @@ function rtmros_common_merge {
         export WORKSPACE=$HOME
     fi
     latest=$WORKSPACE/rtmros_common-latest
-    target=$UPSTREAM/workspace/ros/groovy/rtm-ros-robotics/rtmros_common
+    target=$WORKSPACE/ros/groovy/rtm-ros-robotics/rtmros_common
 
     ## rtmros_common
     rm -fr rtmros_common-latest ; svn co $latest_uri rtmros_common-latest;
@@ -62,7 +60,7 @@ function rosinstall_merge {
     ##
     latest_revision=`python -c "import pysvn; print pysvn.Client().info('$latest').commit_revision.number"`
 
-    target_ros_install_dir=$UPSTREAM/workspace/ros/groovy/
+    target_ros_install_dir=$WORKSPACE/ros/groovy/
     latest_ros_install_dir=$WORKSPACE/agentsystem_ros_tutorials
     #
     # get latest .rosinstall
