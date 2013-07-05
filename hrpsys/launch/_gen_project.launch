@@ -4,7 +4,7 @@
   <arg name="CONF_FILE_OPTION" default="" />
   <arg name="ROBOTHARDWARE_CONF_FILE_OPTION" default="" />
   <arg name="CORBA_PORT" default="2809" /> <!-- previous CORBA_PORT is 2800 -->
-  <arg name="OBJECT_MODELS" default="$(find openhrp3)/share/OpenHRP-3.1/sample/model/longfloor.wrl" />
+  <arg name="OBJECT_MODELS" default="$(find openhrp3)/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,0,0,1,0" />
   <arg name="INTEGRATE" default="true" />
   <env name="LANG" value="C" />
   <env name="ORBgiopMaxMsgSize" value="2147483648" />
