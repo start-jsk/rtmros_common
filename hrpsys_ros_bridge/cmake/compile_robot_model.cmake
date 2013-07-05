@@ -114,13 +114,23 @@ macro(compile_collada_model daefile)
       COMMAND rosrun euscollada collada2eus ${daefile} ${_lispfile} ${ARGV1} || echo "[WARNING] ### Did not run collada2eus $for {_lispfile}"
       DEPENDS ${daefile})
   endif(EXISTS ${_yamlfile})
+  # start name server
+  execute_process(COMMAND hostname OUTPUT_VARIABLE _hostname OUTPUT_STRIP_TRAILING_WHITESPACE)
+  add_custom_command(OUTPUT omninames-${_hostname}.log COMMAND rosrun openrtm rtm-naming 2888)
   add_custom_command(OUTPUT ${_xmlfile}
-    COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${daefile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}
-    DEPENDS ${daefile})
+    COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}
+    DEPENDS ${daefile} omninames-${_hostname}.log)
   add_custom_command(OUTPUT ${_xmlfile_nosim}
-    COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${daefile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option}
-    DEPENDS ${daefile})
-  add_custom_target(${_name}_compile ALL DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
+    COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option}
+    DEPENDS ${daefile} omninames-${_hostname}.log)
+  add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
+  ## kill nameserver
+  add_custom_command(OUTPUT ${_name}_compile_cleanup
+    COMMAND pkill -n omniNames || echo "no process to kill"
+    DEPENDS  ${_name}_compile
+    VERBATIM)
+  add_custom_target(${_name}_compile_all ALL DEPENDS ${_name}_compile_cleanup)
+
   list(APPEND compile_robots ${_name}_compile)
 endmacro(compile_collada_model daefile)
 
