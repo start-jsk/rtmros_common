@@ -47,10 +47,10 @@ add_custom_command(
 )
 
 compile_collada_model(${atlas_dae}
-  "--without-technique-limit"
-  -robothardware-conf-file-option "pdgains.file_name: ${PROJECT_SOURCE_DIR}/models/PDgains.sav"
-  -conf-file-option "abc_leg_offset: 0.0, 0.089, 0.0"
-  -conf-file-option "abc_stride_parameter: 0.15,0.05,10"
+  --euscollada-option "--without-technique-limit"
+  --robothardware-conf-file-option "pdgains.file_name: ${PROJECT_SOURCE_DIR}/models/PDgains.sav"
+  --conf-file-option "abc_leg_offset: 0.0, 0.089, 0.0"
+  --conf-file-option "abc_stride_parameter: 0.15,0.05,10"
   )
 ## ALL
 list(GET compile_robots 0 compile_robot)
