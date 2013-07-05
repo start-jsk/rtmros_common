@@ -103,7 +103,7 @@ macro(compile_openhrp_model wrlfile)
   add_custom_command(OUTPUT ${_daefile}
     COMMAND rosrun openhrp3 export-collada -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
     DEPENDS ${wrlfile})
-  message("AA rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}")
+  #message("AA rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}")
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}
     DEPENDS ${wrlfile})
@@ -151,14 +151,14 @@ macro(compile_collada_model daefile)
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}
     DEPENDS ${daefile} omninames-${_hostname}.log)
-  message("rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option}")
+  #message("rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option}")
   add_custom_command(OUTPUT ${_xmlfile_nosim}
     COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option}
     DEPENDS ${daefile} omninames-${_hostname}.log)
   add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
   ## kill nameserver
   add_custom_command(OUTPUT ${_name}_compile_cleanup
-    COMMAND pkill -n omniNames || echo "no process to kill"
+    COMMAND -pkill -KILL -f "omniNames -start 2888" || echo "no process to kill"
     DEPENDS  ${_name}_compile
     VERBATIM)
   add_custom_target(${_name}_compile_all ALL DEPENDS ${_name}_compile_cleanup)
