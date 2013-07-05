@@ -61,7 +61,10 @@ compile_openhrp_model(
   -conf-file-option "abc_leg_offset: 0,0.09,0"
   -conf-file-option "abc_stride_parameter: 0.15,0.05,10")
 
-compile_collada_model(${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae)
+compile_collada_model(
+  ${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae
+  -proj-file-root-option "0,0,0.5,0,0,1,0"
+  )
 compile_collada_model(${collada_robots_PACKAGE_PATH}/data/robots/willowgarage-pr2.dae)
 
 # generate webots model
