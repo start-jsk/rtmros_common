@@ -91,25 +91,33 @@ macro(compile_openhrp_model wrlfile)
   string(TOLOWER ${_name} _name)
   set(_yamlfile "${_workdir}/${_name}.yaml")
   set(_lispfile "${_workdir}/${_name}.l")
+  # use euscollada
+  rosbuild_find_ros_package(euscollada)
+  set(_euscollada_dep_files ${euscollada_PACKAGE_PATH}/bin/collada2eus ${euscollada_PACKAGE_PATH}/src/euscollada-robot.l)
   if(EXISTS ${_yamlfile})
     add_custom_command(OUTPUT ${_lispfile}
       COMMAND rosrun euscollada collada2eus ${_daefile} ${_yamlfile} ${_lispfile}
-      DEPENDS ${_daefile} ${_yamlfile})
+      DEPENDS ${_daefile} ${_yamlfile} ${_euscollada_dep_files})
   else(EXISTS ${_yamlfile})
     add_custom_command(OUTPUT ${_lispfile}
       COMMAND rosrun euscollada collada2eus ${_daefile} ${_lispfile}
-      DEPENDS ${_daefile})
+      DEPENDS ${_daefile} ${_euscollada_dep_files})
   endif(EXISTS ${_yamlfile})
+  # use export-collada
+  rosbuild_find_ros_package(openhrp3)
+  set(_export_collada_dep_files ${openhrp3_PACKAGE_PATH}/bin/export-collada)
   add_custom_command(OUTPUT ${_daefile}
     COMMAND rosrun openhrp3 export-collada -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
-    DEPENDS ${wrlfile})
-  #message("AA rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}")
+    DEPENDS ${wrlfile} ${_export_collada_dep_files})
+  # use _gen_project.launch
+  rosbuild_find_ros_package(hrpsys)
+  set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_PACKAGE_PATH}/launch/_gen_project.launch)
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}
-    DEPENDS ${wrlfile})
+    DEPENDS ${wrlfile} ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
     COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option}
-    DEPENDS ${wrlfile})
+    DEPENDS ${wrlfile} ${_gen_project_dep_files})
   add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
   list(APPEND compile_robots ${_name}_compile)
 endmacro(compile_openhrp_model)
@@ -135,26 +143,30 @@ macro(compile_collada_model daefile)
   string(TOLOWER ${_name} _name)
   set(_yamlfile "${_workdir}/${_name}.yaml")
   set(_lispfile "${_workdir}/${_name}.l")
-
+  # use euscollada
+  rosbuild_find_ros_package(euscollada)
+  set(_euscollada_dep_files ${euscollada_PACKAGE_PATH}/bin/collada2eus ${euscollada_PACKAGE_PATH}/src/euscollada-robot.l)
   if(EXISTS ${_yamlfile})
     add_custom_command(OUTPUT ${_lispfile}
       COMMAND rosrun euscollada collada2eus ${daefile} ${_yamlfile} ${_lispfile} ${_euscollada_option} ||  echo "[WARNING] ### Did not run collada2eus for ${_lispfile}"
-      DEPENDS ${daefile})
+      DEPENDS ${daefile} ${_euscollada_dep_files})
   else(EXISTS ${_yamlfile})
     add_custom_command(OUTPUT ${_lispfile}
       COMMAND rosrun euscollada collada2eus ${daefile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus $for {_lispfile}"
-      DEPENDS ${daefile})
+      DEPENDS ${daefile} ${_euscollada_dep_files})
   endif(EXISTS ${_yamlfile})
   # start name server
   execute_process(COMMAND hostname OUTPUT_VARIABLE _hostname OUTPUT_STRIP_TRAILING_WHITESPACE)
   add_custom_command(OUTPUT omninames-${_hostname}.log COMMAND rosrun openrtm rtm-naming 2888)
+  # use _gen_project.launch
+  rosbuild_find_ros_package(hrpsys)
+  set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_PACKAGE_PATH}/launch/_gen_project.launch)
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}
-    DEPENDS ${daefile} omninames-${_hostname}.log)
-  #message("rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option}")
+    DEPENDS ${daefile} omninames-${_hostname}.log ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
     COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option}
-    DEPENDS ${daefile} omninames-${_hostname}.log)
+    DEPENDS ${daefile} omninames-${_hostname}.log ${_gen_project_dep_files})
   add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
   ## kill nameserver
   add_custom_command(OUTPUT ${_name}_compile_cleanup
