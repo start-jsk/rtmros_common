@@ -48,9 +48,9 @@ if(EXISTS ${hrpsys_PACKAGE_PATH}/share/hrpsys/samples/HRP4C/HRP4Cmain.wrl)
     ${hrpsys_PACKAGE_PATH}/share/hrpsys/samples/HRP4C/HRP4Cmain.wrl
     HRP4C
     -a rightarm_torso,BODY,R_WRIST_R_LINK,0,0,0,0.707,0,0.707,0 -a leftarm_torso,BODY,L_WRIST_R_LINK,0,0,0,0.707,0,0.707,0 -a rightarm,BODY,CHEST_Y_LINK,0,0,0,0.707,0,0.707,0 -a leftarm,CHEST_Y_LINK,L_WRIST_R_LINK,0,0,0,0.707,0,0.707,0
-    -conf-file-option "virtual_force_sensor: vlhsensor, CHEST_Y, L_HAND_J0, 0,0,0, 0,0,1,0, vrhsensor, CHEST_Y, R_HAND_J0, 0,0,0, 0,0,1,0"
-    -conf-file-option "abc_leg_offset: 0.0, 0.06845, 0.0"
-    -conf-file-option "abc_stride_parameter: 0.15,0.05,10"
+    --conf-file-option "virtual_force_sensor: vlhsensor, CHEST_Y, L_HAND_J0, 0,0,0, 0,0,1,0, vrhsensor, CHEST_Y, R_HAND_J0, 0,0,0, 0,0,1,0"
+    --conf-file-option "abc_leg_offset: 0.0, 0.06845, 0.0"
+    --conf-file-option "abc_stride_parameter: 0.15,0.05,10"
 )
 endif(EXISTS ${hrpsys_PACKAGE_PATH}/share/hrpsys/samples/HRP4C/HRP4Cmain.wrl)
 
@@ -58,12 +58,12 @@ compile_openhrp_model(
   ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl)
 compile_openhrp_model(
   ${openhrp3_PACKAGE_PATH}/share/OpenHRP-3.1/sample/model/sample1.wrl SampleRobot
-  -conf-file-option "abc_leg_offset: 0,0.09,0"
-  -conf-file-option "abc_stride_parameter: 0.15,0.05,10")
+  --conf-file-option "abc_leg_offset: 0,0.09,0"
+  --conf-file-option "abc_stride_parameter: 0.15,0.05,10")
 
 compile_collada_model(
   ${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae
-  -proj-file-root-option "0,0,0.5,0,0,1,0"
+  --proj-file-root-option "0,0,0.5,0,0,1,0"
   )
 compile_collada_model(${collada_robots_PACKAGE_PATH}/data/robots/willowgarage-pr2.dae)
 
