@@ -10,7 +10,7 @@ import unittest
 
 class TestHiroNX(unittest.TestCase):
 
-    #@classmethod
+    @classmethod
     def setUpClass(self):
         self.robot = hironx.HIRONX()
         self.robot.init()
