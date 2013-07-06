@@ -145,7 +145,9 @@ macro(compile_collada_model daefile)
   set(_lispfile "${_workdir}/${_name}.l")
   # use euscollada
   rosbuild_find_ros_package(euscollada)
-  set(_euscollada_dep_files ${euscollada_PACKAGE_PATH}/bin/collada2eus ${euscollada_PACKAGE_PATH}/src/euscollada-robot.l)
+  if(EXISTS ${euscollada_PACKAGE_PATH}/bin/collada2eus)
+    set(_euscollada_dep_files ${euscollada_PACKAGE_PATH}/bin/collada2eus ${euscollada_PACKAGE_PATH}/src/euscollada-robot.l)
+  endif()
   if(EXISTS ${_yamlfile})
     add_custom_command(OUTPUT ${_lispfile}
       COMMAND rosrun euscollada collada2eus ${daefile} ${_yamlfile} ${_lispfile} ${_euscollada_option} ||  echo "[WARNING] ### Did not run collada2eus for ${_lispfile}"
@@ -155,20 +157,21 @@ macro(compile_collada_model daefile)
       COMMAND rosrun euscollada collada2eus ${daefile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus $for {_lispfile}"
       DEPENDS ${daefile} ${_euscollada_dep_files})
   endif(EXISTS ${_yamlfile})
-  # start name server
-  execute_process(COMMAND hostname OUTPUT_VARIABLE _hostname OUTPUT_STRIP_TRAILING_WHITESPACE)
-  add_custom_command(OUTPUT omninames-${_hostname}.log COMMAND rosrun openrtm rtm-naming 2888)
   # use _gen_project.launch
   rosbuild_find_ros_package(hrpsys)
   set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_PACKAGE_PATH}/launch/_gen_project.launch)
   add_custom_command(OUTPUT ${_xmlfile}
+    COMMAND rosrun openrtm rtm-naming 2888
     COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}
-    DEPENDS ${daefile} omninames-${_hostname}.log ${_gen_project_dep_files})
+    COMMAND -pkill -KILL -f "omniNames -start 2888" || echo "no process to kill"
+    DEPENDS ${daefile} ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
+    COMMAND rosrun openrtm rtm-naming 2888
     COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option}
-    DEPENDS ${daefile} omninames-${_hostname}.log ${_gen_project_dep_files})
+    COMMAND -pkill -KILL -f "omniNames -start 2888" || echo "no process to kill"
+    DEPENDS ${daefile} ${_gen_project_dep_files})
   add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
-  ## kill nameserver
+  ## make sure to kill nameserver
   add_custom_command(OUTPUT ${_name}_compile_cleanup
     COMMAND -pkill -KILL -f "omniNames -start 2888" || echo "no process to kill"
     DEPENDS  ${_name}_compile
