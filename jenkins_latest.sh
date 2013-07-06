@@ -2,6 +2,9 @@
 
 trap 'exit 1' ERR
 
+export LC_ALL=C
+sudo apt-get install python-svn
+
 . $WORKSPACE/ros/groovy/setup.sh
 
 function rtmros_common_merge {
@@ -47,7 +50,7 @@ Update from previous latest version($latest_revision) are....
 `svn log -r $latest_revision:$target_revision $target`
 EOF
 
-    \svn commit --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -F latest.commit.msg $latest
+    /usr/bin/svn commit --non-interactive --username rtmrosrobotics.testing@gmail.com --password XC6HC3Jy2FG3 -F latest.commit.msg $latest
 
 #if [ `\svn diff --diff-cmd /usr/bin/diff -x "--normal " $latest_uri https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common | grep "^>" | grep -v "@REVISION" | wc -l` != 0 ] ; then
 #    \svn diff $latest_uri https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common
