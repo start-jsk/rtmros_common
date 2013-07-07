@@ -46,6 +46,8 @@ macro(rtmbuild_genidl)
     set(_input_idl ${PROJECT_SOURCE_DIR}/idl/${_idl})
     set(_output_idl_hh ${_output_cpp_dir}/${_idl})
     set(_output_idl_py ${PROJECT_SOURCE_DIR}/src/${_project}/${_idl})
+    set(_output_stub_h ${_output_cpp_dir}/${_idl})
+    set(_output_skel_h ${_output_cpp_dir}/${_idl})
     set(_output_stub_cpp ${_output_cpp_dir}/${_idl})
     set(_output_skel_cpp ${_output_cpp_dir}/${_idl})
     set(_output_stub_lib ${_output_lib_dir}/lib${_idl})
@@ -53,26 +55,29 @@ macro(rtmbuild_genidl)
     string(REPLACE ".idl" ".hh" _output_idl_hh ${_output_idl_hh})
     string(REPLACE ".idl" "_idl.py" _output_idl_py ${_output_idl_py})
     string(REPLACE ".idl" "Stub.cpp" _output_stub_cpp ${_output_stub_cpp})
+    string(REPLACE ".idl" "Stub.h"   _output_stub_h   ${_output_stub_h})
     string(REPLACE ".idl" "Stub.so"  _output_stub_lib ${_output_stub_lib})
     string(REPLACE ".idl" "Skel.cpp" _output_skel_cpp ${_output_skel_cpp})
+    string(REPLACE ".idl" "Skel.h"   _output_skel_h   ${_output_skel_h})
     string(REPLACE ".idl" "Skel.so"  _output_skel_lib ${_output_skel_lib})
 
     # call the  rule to compile idl
     add_custom_command(OUTPUT ${_output_idl_hh}
       COMMAND ${_genidl_exe} `${_openrtm_pkg_dir}/bin/rtm-config --idlflags` `${_openrtm_pkg_dir}/bin/rtm-config --cflags | sed 's/^-[^I]\\S*//g' | sed 's/\ -[^I]\\S*//g'` -I${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl -C${_output_cpp_dir} ${_input_idl}
       DEPENDS ${_input_idl} ${${_idl}_depends})
-    add_custom_command(OUTPUT ${_output_stub_cpp} ${_output_skel_cpp}
+    add_custom_command(OUTPUT ${_output_stub_cpp} ${_output_skel_cpp} ${_output_stub_h} ${_output_skel_h}
       COMMAND cp ${_input_idl} ${_output_cpp_dir}
+      COMMAND rm -f ${_output_stub_cpp} ${_output_skel_cpp} ${_output_stub_h} ${_output_skel_h}
       COMMAND ${_openrtm_pkg_dir}/bin/rtm-skelwrapper --include-dir="" --skel-suffix=Skel --stub-suffix=Stub  --idl-file=${_idl}
       #COMMAND rm ${_output_cpp_dir}/${_idl} # does not work in parallel make
       WORKING_DIRECTORY ${_output_cpp_dir}
       DEPENDS ${_output_idl_hh})
     add_custom_command(OUTPUT ${_output_stub_lib}
       COMMAND ${_rtmcxx_exe} `${_openrtm_pkg_dir}/bin/rtm-config --cflags` -I. ${${_prefix}_IDLLIBRARY_INCDIRS} -shared -o ${_output_stub_lib} ${_output_stub_cpp} `${_openrtm_pkg_dir}/bin/rtm-config --libs` ${OPENHRP_PRIVATE_LIBRARIES}
-      DEPENDS ${_output_stub_cpp})
+      DEPENDS ${_output_stub_cpp} ${_output_stub_h})
     add_custom_command(OUTPUT ${_output_skel_lib}
       COMMAND ${_rtmcxx_exe} `${_openrtm_pkg_dir}/bin/rtm-config --cflags` -I. ${${_prefix}_IDLLIBRARY_INCDIRS} -shared -o ${_output_skel_lib} ${_output_skel_cpp} `${_openrtm_pkg_dir}/bin/rtm-config --libs` ${OPENHRP_PRIVATE_LIBRARIES}
-      DEPENDS ${_output_skel_cpp})
+      DEPENDS ${_output_skel_cpp} ${_output_skel_h})
     # python
     add_custom_command(OUTPUT ${_output_idl_py}
       COMMAND mkdir -p ${_output_python_dir}
