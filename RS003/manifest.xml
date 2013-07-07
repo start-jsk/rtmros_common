@@ -12,7 +12,7 @@
   <depend package="openinvent"/>
   <depend package="hrpsys"/> <!-- just for SDO Package -->
   <depend package="opencv2"/>
-  <depend package="iss_idl"/>
+  <depend package="iis_idl"/>
 
 </package>
 
