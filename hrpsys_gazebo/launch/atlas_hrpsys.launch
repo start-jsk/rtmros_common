@@ -1,59 +1,16 @@
 <launch>
-  <arg name="KILL_SERVERS" default="false" />
-  <arg name="ROBOT_NAME" default="atlas" />
-  <arg name="SIMULATOR_NAME" default="RobotHardware0" />
-  <arg name="CONF_FILE" value="$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).conf" />
   <arg name="USE_LASER" default="true" />
   <arg name="USE_SCREENPOINT" default="true" />
   <arg name="USE_VIEW" default="false" />
   <arg name="USE_HAND"  default="true" />
-  <arg name="USE_IMAGE_TRANSPORT" default="true" />
+  <arg name="USE_IMAGE_TRANSPORT" default="false" />
   <arg name="USE_OCTOMAP" default="true" />
+  <arg name="USE_BDI_ACTION" default="true" />
 
-  <include file="$(find hrpsys)/launch/hrpsys.launch" >
-    <arg name="PROJECT_FILE" value="$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).xml" />
-    <arg name="MODEL_FILE" value="$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).dae" />
-    <arg name="CONF_FILE" value="$(arg CONF_FILE)" />
-    <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
-    <arg name="USE_RTCD" value="true" />
-    <arg name="HRPSYS_PY_PKG" default="hrpsys_gazebo"/>
-    <arg name="hrpsys_args" value='
--o "exec_cxt.periodic.rate:200"
--o "manager.shutdown_onrtcs:NO"
--o "manager.modules.load_path:$(find hrpsys_gazebo)/lib,$(find hrpsys)/lib"
--o "manager.modules.preload:RobotHardware.so,hrpEC.so"
--o "manager.components.precreate:RobotHardware"
--o "exec_cxt.periodic.type:hrpExecutionContext"
--o "example.RobotHardware.config_file:$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).RobotHardware.conf"
--o "example.SequencePlayer.config_file:$(arg CONF_FILE)"
--o "example.ImpedanceController.config_file:$(arg CONF_FILE)"
--o "example.AutoBalancer.config_file:$(arg CONF_FILE)"
--o "example.VirtualForceSensor.config_file:$(arg CONF_FILE)"
--o "example.StateHolder.config_file:$(arg CONF_FILE)"
--o "example.TorqueFilter.config_file:$(arg CONF_FILE)"
--o "example.KalmanFilter.config_file:$(arg CONF_FILE)"
--o "example.Stabilizer.config_file:$(arg CONF_FILE)"
--o "example.CollisionDetector.config_file:$(arg CONF_FILE)"
--o "example.SoftErrorLimiter.config_file:$(arg CONF_FILE)"
--o "example.ForwardKinematics.config_file:$(arg CONF_FILE)"
-' />
-  </include>
+  <!-- hrpsys controller launch -->
+  <include file="$(find hrpsys_gazebo)/launch/atlas_hrpsys_bringup.launch" />
 
-  <!-- hrpsys_ros_bridge -->
-  <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch" >
-    <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
-    <arg name="MODEL_FILE" value="$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).dae" />
-    <arg name="COLLADA_FILE" value="$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).dae" />
-    <arg name="INSTALL_ROBOT_DESCRIPTION" value="false" />
-  </include>
-
-  <!-- BEGIN:openrtm connection -->
-  <env name="ROBOT_NAME" value="$(arg ROBOT_NAME)" />
-  <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
-  <node name="rtmlaunch_hrpsys_gazebo_atlas_hrpsys_launch" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_gazebo)/launch/atlas_hrpsys.launch"/>
-  <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/>
-  <!-- END:openrtm connection -->
-
+  <!-- ROS nodes -->
   <!-- laser scanning -->
   <include if="$(arg USE_LASER)"
            file="$(find hrpsys_gazebo)/launch/atlas_laser.launch" />
@@ -79,7 +36,8 @@
            file="$(find hrpsys_gazebo)/launch/sandia_hand_controller.launch" />
 
   <!-- bdi_controller -->
-  <node pkg="atlas_msgs" type="actionlib_server" name="walking_actionlib_server"/>
+  <node if="$(arg USE_BDI_ACTION)"
+        pkg="atlas_msgs" type="actionlib_server" name="walking_actionlib_server" />
 
   <!-- tf for sensors -->
   <include file="$(find hrpsys_gazebo)/launch/atlas_sensor_tf.launch" />
