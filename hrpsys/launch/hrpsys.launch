@@ -45,6 +45,7 @@
   <arg name="SIMULATOR_NAME"/>
   <arg name="RTCD_LAUNCH_PREFIX" default=""/>
   <arg name="HRPSYS_PY_PKG" default="hrpsys"/>
+  <arg name="HRPSYS_PY_NAME" default="hrpsys.py"/>
   <env name="LANG" value="C" />
   <env name="ORBgiopMaxMsgSize" value="2147483648" />
 
@@ -71,7 +72,7 @@
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
 
   <group if="$(arg LAUNCH_HRPSYSPY)">
-    <node name="hrpsys_py" pkg="$(arg HRPSYS_PY_PKG)" type="hrpsys.py" output="screen"
+    <node name="hrpsys_py" pkg="$(arg HRPSYS_PY_PKG)" type="$(arg HRPSYS_PY_NAME)" output="screen"
           args='$(arg SIMULATOR_NAME) $(arg MODEL_FILE)' />
   </group>
 
