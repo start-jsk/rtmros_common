@@ -48,9 +48,7 @@
                  (if (eq f/m :force) 0 3)
                  (if (eq f/m :force) 3 6)))
      (mapcar #'(lambda (x)
-                 (subseq (cdr (assoc x robot-state))
-                         (if (eq f/m :force) 0 3)
-                         (if (eq f/m :force) 3 6)))
+                 (send self :tmp-force-moment-vector f/m x off))
              (send-all (send robot :force-sensors) :name))))
   (:force-vector
    (&optional (limb))
