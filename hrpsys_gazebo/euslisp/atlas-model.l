@@ -6,13 +6,13 @@
   (atlas)
   ;; left hand
   (sandia_hand_left)
-  (send *sandia_hand_left* :move-to (send *atlas* :l_hand :copy-worldcoords))
-  (send *atlas* :l_hand :assoc *sandia_hand_left*)
+  (send *sandia_hand_left* :move-to (send *atlas* :links :l_hand :copy-worldcoords))
+  (send *atlas* :links :l_hand :assoc *sandia_hand_left*)
   (setf (get *atlas* :lhand-model) *sandia_hand_left*)
   ;; right hand
   (sandia_hand_right)
-  (send *sandia_hand_right* :move-to (send *atlas* :r_hand :copy-worldcoords))
-  (send *atlas* :r_hand :assoc *sandia_hand_right*)
+  (send *sandia_hand_right* :move-to (send *atlas* :links :r_hand :copy-worldcoords))
+  (send *atlas* :links :r_hand :assoc *sandia_hand_right*)
   (setf (get *atlas* :rhand-model) *sandia_hand_right*)
   ;; update bodies
   (let ((atbd (*atlas* . bodies)))
