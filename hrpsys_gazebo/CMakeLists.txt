@@ -42,7 +42,8 @@ add_custom_command(
 )
 add_custom_command(
   OUTPUT ${atlas_dae}
-  COMMAND rosrun collada_urdf_jsk_patch urdf_to_collada ${atlas_urdf} ${atlas_dae}
+  COMMAND rosrun collada_urdf_jsk_patch urdf_to_collada ${atlas_urdf} ${atlas_dae}.bak
+  COMMAND rosrun hrpsys_gazebo add_sensor_to_collada.py ${atlas_dae}.bak > ${atlas_dae}
   DEPENDS ${atlas_urdf}
 )
 
@@ -51,6 +52,7 @@ compile_collada_model(${atlas_dae}
   --robothardware-conf-file-option "pdgains.file_name: ${PROJECT_SOURCE_DIR}/models/PDgains.sav"
   --conf-file-option "abc_leg_offset: 0.0, 0.089, 0.0"
   --conf-file-option "abc_stride_parameter: 0.15,0.05,10"
+  --proj-file-root-option "0,0,1.0,0,0,1,0"
   )
 ## ALL
 list(GET compile_robots 0 compile_robot)
