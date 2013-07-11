@@ -1,0 +1,20 @@
+<package>
+  <description brief="hrpsys_gazebo_tutorials">
+
+     hrpsys_gazebo_tutorials
+
+  </description>
+  <author>Yohei Kakiuchi</author>
+  <license>BSD</license>
+
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hrpsys_gazebo_tutorials</url>
+
+  <rosdep name="drcsim" />
+  <!--rosdep name="gazebo" /-->
+
+  <depend package="hrpsys_gazebo_general" />
+
+  <depend package="collada_tools" />
+  <depend package="collada_urdf_jsk_patch" />
+</package>

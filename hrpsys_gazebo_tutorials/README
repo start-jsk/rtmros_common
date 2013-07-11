@@ -1,0 +1,29 @@
+## at first
+$ cd models/SampleRobot
+$ ./install_robot.sh
+
+## setup gazebo directories
+$ source $(rospack find hrpsys_gazebo_general)/setup.sh
+
+### additional information (memo) ###
+
+## Generating Robot Model and World (
+$ roscd hrpsys_gazebo_tutorials
+$ mkdir -p models/SampleRobot/meshes; cd models/SampleRobot
+$ rosrun collada_tools collada_to_urdf $(rospack find hrpsys_ros_bridge_tutorials)/models/SampleRobot.dae -G -A --mesh_output_dir `pwd`/meshes --mesh_prefix 'package://SampleRobot/meshes'
+# add to urdf
+<<EOF
+  <gazebo>
+    <plugin filename="libIOBPlugin.so" name="hrpsys_gazebo_plugin" >
+      <robotname>SampleRobot</robotname>
+      <controller>sample_robot_configuration</controller>
+    </plugin>
+  </gazebo>
+EOF
+$ touch manifext.xml
+## write worlds
+$ mkdir hrpsys; cd hrpsys
+$ ln -s  $(rospack find hrpsys_ros_bridge_tutorials)/models/SampleRobot.conf .
+$ ln -s  $(rospack find hrpsys_ros_bridge_tutorials)/models/SampleRobot.RobotHardware.conf .
+$ ln -s  $(rospack find hrpsys_ros_bridge_tutorials)/models/SampleRobot.dae .
+$ ln -s  $(rospack find hrpsys_ros_bridge_tutorials)/models/SampleRobot_nosim.xml .

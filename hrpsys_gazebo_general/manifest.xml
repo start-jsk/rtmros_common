@@ -1,0 +1,15 @@
+<package>
+  <description brief="hrpsys_gazebo_general">
+
+     hrpsys_gazebo_general
+
+  </description>
+  <author>Yohei Kakiuchi</author>
+  <license>BSD</license>
+
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hrpsys_gazebo_general</url>
+
+  <depend package="hrpsys_ros_bridge" />
+  <depend package="hrpsys_gazebo_msgs" />
+</package>

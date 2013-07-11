@@ -1,0 +1,24 @@
+<launch>
+  <arg name="gzname" default="gazebo"/>
+  <arg name="WORLD" default="SampleRobot.world"/>
+  <arg name="HRPSYS_GAZEBO_CONFIG" default="$(find hrpsys_gazebo_tutorials)/config/sample_robot.yaml" />
+
+  <arg name="PAUSED" default="false"/>
+  <arg name="ROBOT_MODEL" default="" />
+
+  <arg if="$(arg PAUSED)"
+       name="paused" value="_paused" />
+  <arg unless="$(arg PAUSED)"
+       name="paused" value="" />
+
+  <param name="/use_sim_time" type="bool" value="true"/>
+
+  <!-- start gazebo with the hrpsys_gazebo -->
+  <node name="gazebo" pkg="atlas_utils" type="run_$(arg gzname)$(arg paused)" args="$(arg WORLD)" output="screen" />
+
+  <rosparam command="load" file="$(arg HRPSYS_GAZEBO_CONFIG)" />
+  <!-- Robot Description -->
+  <!--
+  <param name="robot_description" textfile="$(arg ROBOT_MODEL)"/>
+  -->
+</launch>

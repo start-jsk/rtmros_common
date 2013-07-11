@@ -1,0 +1,16 @@
+<package>
+  <description brief="hrpsys_gazebo_msgs">
+
+     hrpsys_gazebo_msgs
+
+  </description>
+  <author>Yohei Kakiuchi</author>
+  <license>BSD</license>
+
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hrpsys_gazebo_msgs</url>
+
+  <depend package="geometry_msgs" />
+</package>
+
+
