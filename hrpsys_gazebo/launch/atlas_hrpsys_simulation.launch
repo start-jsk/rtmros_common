@@ -1,0 +1,21 @@
+<launch>
+  <arg name="KILL_SERVERS" default="false" />
+  <param name="use_sim_time" value="true" />
+
+  <!-- hrpsys -->
+  <include file="$(find hrpsys)/launch/hrpsys.launch">
+    <arg name="PROJECT_FILE" value="$(find hrpsys_gazebo)/models/atlas.xml" />
+    <arg name="MODEL_FILE" value="$(find hrpsys_gazebo)/models/atlas.dae" />
+    <arg name="CONF_FILE" value="$(find hrpsys_gazebo)/models/atlas.conf" />
+    <arg name="SIMULATOR_NAME" value="atlas(Robot)0" />
+    <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
+  </include>
+
+  <!-- ROS bridge -->
+  <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
+    <arg name="SIMULATOR_NAME" value="atlas(Robot)0" />
+    <arg name="MODEL_FILE" value="$(find hrpsys_gazebo)/models/atlas.dae" />
+    <arg name="COLLADA_FILE" value="$(find hrpsys_gazebo)/models/atlas.dae" />
+    <!--arg name="CONF_FILE_ARG" value="-o example.HrpsysSeqStateROSBridge.config_file:$(find hrpsys_gazebo)/models/atlas.conf" /-->
+  </include>
+</launch>
