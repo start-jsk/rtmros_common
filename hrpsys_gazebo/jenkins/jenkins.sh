@@ -9,7 +9,7 @@ function install-hrpsys-atlas {
     sudo sh -c 'echo "deb http://packages.osrfoundation.org/drc/ubuntu precise main" > /etc/apt/sources.list.d/drc-latest.list'
     wget http://packages.osrfoundation.org/drc.key -O - | sudo apt-key add -
     sudo apt-get update
-    sudo apt-get install gazebo drcsim
+    sudo apt-get -f install gazebo drcsim
     # merge ROS_PACKAGE_PATh
     ROS_PACKAGE_PATH_ORG=$ROS_PACKAGE_PATH
     source /usr/share/drcsim/setup.sh
