@@ -1,28 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
+  <!-- BEGIN:common setting -->
+  <arg name="PROJECT_FILE" />
+  <arg name="MODEL_FILE" />
+  <arg name="CONF_FILE" />
+  <arg name="RESPAWN" default="true"/>
+  <arg name="OUTPUT" default="log"/>
+  <arg name="SIMULATOR_NAME"/>
+  <env name="LANG" value="C" />
+  <env name="ORBgiopMaxMsgSize" value="2147483648" />
+  <!-- END:common setting -->
+
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
   <arg name="KILL_SERVERS" default="false" />
-  <arg name="USE_RTCD" default="false" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" default='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
-  <!-- see http://code.google.com/p/hrpsys-base/issues/detail?id=14 for  exec_cxt.periodic.rate:100000 -->
-  <arg name="REALTIME" default="false" />
-  <arg name="GUI" default="true" />
-  <arg name="LAUNCH_HRPSYSPY" default="true" />
   <!-- END:openrtm setting -->
 
   <!-- BEGIN:setting for hrpsys-simulator or rtcd -->
+  <arg name="USE_RTCD" default="false" />
+  <arg name="REALTIME" default="false" />
+  <arg name="GUI" default="true" />
+  <arg name="RTCD_LAUNCH_PREFIX" default=""/>
   <!--   for hrpsys-simulator -->
   <arg unless="$(arg USE_RTCD)" name="hrpsys_periodic_rate" default="1000000"/>
+  <!-- see http://code.google.com/p/hrpsys-base/issues/detail?id=14 for  exec_cxt.periodic.rate:100000 -->
   <arg unless="$(arg USE_RTCD)" name="hrpsys_preload_rtc" default="HGcontroller.so"/>
   <arg unless="$(arg USE_RTCD)" name="hrpsys_precreate_rtc" default="HGcontroller"/>
   <arg unless="$(arg USE_RTCD)" name="hrpsys_periodic_type" value="SynchExtTriggerEC" />
+  <arg unless="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless " />
+  <arg unless="$(arg GUI)" name="hrpsys_gui_args" value="-nodisplay" />
   <!--   for rtcd -->
   <arg     if="$(arg USE_RTCD)" name="hrpsys_periodic_rate" default="200"/>
   <arg     if="$(arg USE_RTCD)" name="hrpsys_preload_rtc" default="RobotHardware.so,hrpEC.so"/>
   <arg     if="$(arg USE_RTCD)" name="hrpsys_precreate_rtc" default="RobotHardware"/>
   <arg     if="$(arg USE_RTCD)" name="hrpsys_periodic_type" value="hrpExecutionContext" />
+  <arg     if="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless -realtime" />
+  <arg     if="$(arg GUI)" name="hrpsys_gui_args" value="" />
   <!--   for both -->
   <arg name="hrpsys_load_path" default="$(find hrpsys)/lib"/>
   <arg name="RobotHardware_conf" default="$(arg CONF_FILE)"/>
@@ -51,24 +66,14 @@
 -o "exec_cxt.periodic.type:$(arg hrpsys_periodic_type)"
  $(arg hrpsys_rtc_config_args) $(arg hrpsys_opt_rtc_config_args)
 ' />
-  <arg unless="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless " />
-  <arg     if="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless -realtime" />
-  <arg unless="$(arg GUI)" name="hrpsys_gui_args" value="-nodisplay" />
-  <arg     if="$(arg GUI)" name="hrpsys_gui_args" value="" />
   <arg name="openrtm_openhrp_server_start" default="true"/>
   <!-- END:setting for hrpsys-simulator or rtcd -->
 
-  <arg name="PROJECT_FILE" />
-  <arg name="MODEL_FILE" />
-  <arg name="CONF_FILE" />
-  <arg name="RESPAWN" default="true"/>
-  <arg name="OUTPUT" default="log"/>
-  <arg name="SIMULATOR_NAME"/>
-  <arg name="RTCD_LAUNCH_PREFIX" default=""/>
+  <!-- BEGIN:hrpsys.py setting -->
   <arg name="HRPSYS_PY_PKG" default="hrpsys"/>
   <arg name="HRPSYS_PY_NAME" default="hrpsys.py"/>
-  <env name="LANG" value="C" />
-  <env name="ORBgiopMaxMsgSize" value="2147483648" />
+  <arg name="LAUNCH_HRPSYSPY" default="true" />
+  <!-- END:hrpsys.py setting -->
 
   <!-- <node if="$(arg START_NAME_SERVER)" -->
   <!--       name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" /> -->
