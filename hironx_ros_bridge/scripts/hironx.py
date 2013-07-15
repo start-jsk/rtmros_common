@@ -117,6 +117,42 @@ class HIRONX(HrpsysConfigurator):
             rtm.connectPorts(self.sh.port('qOut'),       self.rh.port('qRef'))
 
     #
+    # hand interface
+    # hiro.HandOpen("rhand")
+    # hiro.HandOpen()        # for both hand
+    # hiro.HandClose("rhand")
+    # hiro.HandClose()       # for both hand
+    #
+    def HandOpen(self, hand):
+        if not hand:
+            self.setHandWitdh("lhand", 100)
+            self.setHandWitdh("rhand", 100)
+        else
+            self.setHandWitdh(hand, 100)
+    def HandClose(self, hand):
+        if not hand:
+            self.setHandWitdh("lhand", 0)
+            self.setHandWitdh("rhand", 0)
+        else
+            self.setHandWitdh(hand, 0)
+    def setHandJointAngles(self, hand, angles, tm=1):
+        self.sc_svc.setHandJointAnglesOfGroup(hand, angles, tm)
+    def setHandWidth(self, hand, width, tm=1):
+        self.setHandJointAngles(hand, self.hand_width2angles(width), tm)
+    def hand_width2angles(self, width):
+        safetyMargin = 3
+        l1, l2 = (41.9, 19)
+
+        if width < 0.0 or width > (l1+l2 - safetyMargin)*2:
+            return None
+
+        xPos   = width/2.0 + safetyMargin
+        a2Pos  = xPos - l2
+        a1radH = math.acos(a2Pos/l1)
+        a1rad  = math.pi/2.0 - a1radH
+
+        return a1rad, -a1rad, -a1rad, a1rad
+    #
     #
     #
     def setSelfGroups(self):
@@ -124,6 +160,9 @@ class HIRONX(HrpsysConfigurator):
             self.seq_svc.addJointGroup(item[0], item[1])
         for k, v in self.HandGroups.iteritems():
             self.sc_svc.addJointGroup(k, v)
+
+        self.sc_svc.servoOn()
+
 
     #
     def getActualState(self):
