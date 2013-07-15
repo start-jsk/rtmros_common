@@ -34,6 +34,7 @@ class HIRONX(HrpsysConfigurator):
               ['head', ['HEAD_JOINT0', 'HEAD_JOINT1']],
               ['rarm', ['RARM_JOINT0', 'RARM_JOINT1', 'RARM_JOINT2', 'RARM_JOINT3', 'RARM_JOINT4', 'RARM_JOINT5']],
               ['larm', ['LARM_JOINT0', 'LARM_JOINT1', 'LARM_JOINT2', 'LARM_JOINT3', 'LARM_JOINT4', 'LARM_JOINT5']]]
+    HandGroups = {'rhand': [2, 3, 4, 5], 'lhand': [6, 7, 8, 9]}
 
     RtcList = []
 
@@ -45,7 +46,7 @@ class HIRONX(HrpsysConfigurator):
     # hiro specific methods
     #
     def getRTCList(self):
-        return [self.rh, self.seq, self.sh, self.fk, self.log]
+        return [self.rh, self.seq, self.sh, self.fk, self.sc, self.log]
 
     def init(self, robotname="HiroNX(Robot)0", url=""):
         HrpsysConfigurator.init(self, robotname=robotname, url=url)
@@ -87,6 +88,7 @@ class HIRONX(HrpsysConfigurator):
         #if self.co :
         #    self.co_svc = rtm.narrow(self.co.service("service0"), "CollisionDetectorService")
 
+        # servo controller (grasper)
         self.sc = self.createComp("ServoController", "sc")
         if self.sc :
             self.sc_svc = rtm.narrow(self.sc.service("service0"), "ServoControllerService")
@@ -120,6 +122,8 @@ class HIRONX(HrpsysConfigurator):
     def setSelfGroups(self):
         for item in self.Groups:
             self.seq_svc.addJointGroup(item[0], item[1])
+        for k, v in self.HandGroups.iteritems():
+            self.sc_svc.addJointGroup(k, v)
 
     #
     def getActualState(self):
@@ -304,13 +308,13 @@ class HIRONX(HrpsysConfigurator):
 
 
 if __name__ == '__main__':
-    hironx = HIRONX()
+    hiro = HIRONX()
     if len(sys.argv) > 2:
-        hironx.init(sys.argv[1], sys.argv[2])
+        hiro.init(sys.argv[1], sys.argv[2])
     elif len(sys.argv) > 1:
-        hironx.init(sys.argv[1])
-    else :
-        hironx.init()
+        hiro.init(sys.argv[1])
+    else:
+        hiro.init()
 
 # for simulated robot
 # $ ./hironx.py
