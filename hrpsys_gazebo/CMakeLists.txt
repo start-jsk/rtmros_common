@@ -106,3 +106,11 @@ endif()
 
 include_directories(${roseus_PACKAGE_PATH}/build/devel/include)
 rosbuild_add_executable(hand_controller src/hand_controller.cpp)
+
+## test code
+add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/test/.gen_testcode
+  COMMAND make -C ${PROJECT_SOURCE_DIR}/test/
+  VERBATIM)
+add_custom_target(gen_testcode DEPENDS ${PROJECT_SOURCE_DIR}/test/.gen_testcode)
+add_dependencies(tests gen_testcode)
+rosbuild_add_rostest(test/test-atlasmodel.launch)

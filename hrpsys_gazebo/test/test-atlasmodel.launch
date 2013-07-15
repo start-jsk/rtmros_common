@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="openhrp3" type="openhrp-model-loader" name="openhrp_model_loader"/>
+
+  <test pkg="hrpsys_gazebo" type="test_atlas.py" test-name="test_atlas" />
+</launch>
