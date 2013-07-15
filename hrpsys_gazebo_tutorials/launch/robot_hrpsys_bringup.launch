@@ -14,7 +14,6 @@
     <arg name="MODEL_FILE" value="$(arg GAZEBO_MODEL_DIR)/hrpsys/$(arg ROBOT_NAME).dae" />
     <arg name="CONF_FILE" value="$(arg CONF_FILE)" />
     <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
-    <arg name="LAUNCH_HRPSYSPY" value="true" />
     <!--arg name="HRPSYS_PY_PKG" value="hrpsys_gazebo_tutorials"/>
     <arg name="HRPSYS_PY_NAME" value="sample_hrpsys.py"/-->
   </include>
