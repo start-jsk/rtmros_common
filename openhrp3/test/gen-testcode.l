@@ -12,8 +12,11 @@
 (defun print-header (f pkg filepath)
     (format f "#!/usr/bin/env python
 
+import sys,math,rospkg
+sys.path.append(rospkg.RosPack().get_path(\"openhrp3\")+\"/test\")
+
 from  test_modelloader import testModelLoader
-import rospkg, math
+
 
 class Test~A(testModelLoader):
 
