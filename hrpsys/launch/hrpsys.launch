@@ -10,14 +10,22 @@
   <arg name="REALTIME" default="false" />
   <arg name="GUI" default="true" />
   <arg name="LAUNCH_HRPSYSPY" default="true" />
-  <arg name="hrpsys_args" default='
--o "exec_cxt.periodic.rate:1000000"
--o "manager.shutdown_onrtcs:NO"
--o "manager.modules.load_path:$(find hrpsys)/lib"
--o "manager.modules.preload:HGcontroller.so"
--o "manager.components.precreate:HGcontroller"
--o "exec_cxt.periodic.type:SynchExtTriggerEC"
-' />
+  <!-- END:openrtm setting -->
+
+  <!-- BEGIN:setting for hrpsys-simulator or rtcd -->
+  <!--   for hrpsys-simulator -->
+  <arg unless="$(arg USE_RTCD)" name="hrpsys_periodic_rate" default="1000000"/>
+  <arg unless="$(arg USE_RTCD)" name="hrpsys_preload_rtc" default="HGcontroller.so"/>
+  <arg unless="$(arg USE_RTCD)" name="hrpsys_precreate_rtc" default="HGcontroller"/>
+  <arg unless="$(arg USE_RTCD)" name="hrpsys_periodic_type" value="SynchExtTriggerEC" />
+  <!--   for rtcd -->
+  <arg     if="$(arg USE_RTCD)" name="hrpsys_periodic_rate" default="200"/>
+  <arg     if="$(arg USE_RTCD)" name="hrpsys_preload_rtc" default="RobotHardware.so,hrpEC.so"/>
+  <arg     if="$(arg USE_RTCD)" name="hrpsys_precreate_rtc" default="RobotHardware"/>
+  <arg     if="$(arg USE_RTCD)" name="hrpsys_periodic_type" value="hrpExecutionContext" />
+  <!--   for both -->
+  <arg name="hrpsys_load_path" default="$(find hrpsys)/lib"/>
+  <arg name="RobotHardware_conf" default="$(arg CONF_FILE)"/>
   <arg name="hrpsys_rtc_config_args" default='
 -o "example.SequencePlayer.config_file:$(arg CONF_FILE)"
 -o "example.ForwardKinematics.config_file:$(arg CONF_FILE)"
@@ -31,14 +39,25 @@
 -o "example.Stabilizer.config_file:$(arg CONF_FILE)"
 -o "example.CollisionDetector.config_file:$(arg CONF_FILE)"
 -o "example.SoftErrorLimiter.config_file:$(arg CONF_FILE)"
+-o "example.RobotHardware.config_file:$(arg RobotHardware_conf)"
     '/>
+  <arg name="hrpsys_opt_rtc_config_args" default=''/>
+  <arg name="hrpsys_args" default='
+-o "exec_cxt.periodic.rate:$(arg hrpsys_periodic_rate)"
+-o "manager.shutdown_onrtcs:NO"
+-o "manager.modules.load_path:$(arg hrpsys_load_path)"
+-o "manager.modules.preload:$(arg hrpsys_preload_rtc)"
+-o "manager.components.precreate:$(arg hrpsys_precreate_rtc)"
+-o "exec_cxt.periodic.type:$(arg hrpsys_periodic_type)"
+ $(arg hrpsys_rtc_config_args) $(arg hrpsys_opt_rtc_config_args)
+' />
   <arg unless="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless " />
   <arg     if="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless -realtime" />
   <arg unless="$(arg GUI)" name="hrpsys_gui_args" value="-nodisplay" />
   <arg     if="$(arg GUI)" name="hrpsys_gui_args" value="" />
   <arg name="openrtm_openhrp_server_start" default="true"/>
+  <!-- END:setting for hrpsys-simulator or rtcd -->
 
-  <!-- END:openrtm setting -->
   <arg name="PROJECT_FILE" />
   <arg name="MODEL_FILE" />
   <arg name="CONF_FILE" />
@@ -65,11 +84,11 @@
   <node if="$(arg USE_RTCD)"
         name="hrpsys" pkg="openrtm" type="rtcd" output="$(arg OUTPUT)"
         launch-prefix="$(arg RTCD_LAUNCH_PREFIX)"
-        args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_args) $(arg hrpsys_rtc_config_args)" />
+        args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_args)" />
   <node unless="$(arg USE_RTCD)"
         name="hrpsys" pkg="hrpsys" type="hrpsys-simulator" output="$(arg OUTPUT)"
         launch-prefix="$(arg RTCD_LAUNCH_PREFIX)"
-        args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_gui_args) $(arg hrpsys_opt_args) $(arg hrpsys_args) $(arg hrpsys_rtc_config_args)" />g
+        args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_gui_args) $(arg hrpsys_opt_args) $(arg hrpsys_args)" />
 
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
 

@@ -6,15 +6,8 @@
 
   <include file="$(find hrpsys)/launch/hrpsys.launch" >
     <arg name="USE_RTCD" value="true" />
-    <arg name="hrpsys_args" value='
--o "exec_cxt.periodic.rate:200"
--o "manager.shutdown_onrtcs:NO"
--o "manager.modules.load_path:$(find hrpsys_gazebo)/lib,$(find hrpsys)/lib"
--o "manager.modules.preload:RobotHardware.so,hrpEC.so"
--o "manager.components.precreate:RobotHardware"
--o "exec_cxt.periodic.type:hrpExecutionContext"
--o "example.RobotHardware.config_file:$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).RobotHardware.conf"
-' />
+    <arg name="hrpsys_load_path" default="$(find hrpsys_gazebo)/lib,$(find hrpsys)/lib"/>
+    <arg name="RobotHardware_conf" default='$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).RobotHardware.conf'/>
     <arg name="PROJECT_FILE" value="$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).xml" />
     <arg name="MODEL_FILE" value="$(find hrpsys_gazebo)/models/$(arg ROBOT_NAME).dae" />
     <arg name="CONF_FILE" value="$(arg CONF_FILE)" />
