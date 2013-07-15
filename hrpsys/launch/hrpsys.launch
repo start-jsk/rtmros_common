@@ -17,6 +17,8 @@
 -o "manager.modules.preload:HGcontroller.so"
 -o "manager.components.precreate:HGcontroller"
 -o "exec_cxt.periodic.type:SynchExtTriggerEC"
+' />
+  <arg name="hrpsys_rtc_config_args" default='
 -o "example.SequencePlayer.config_file:$(arg CONF_FILE)"
 -o "example.ForwardKinematics.config_file:$(arg CONF_FILE)"
 -o "example.ImpedanceController.config_file:$(arg CONF_FILE)"
@@ -29,7 +31,7 @@
 -o "example.Stabilizer.config_file:$(arg CONF_FILE)"
 -o "example.CollisionDetector.config_file:$(arg CONF_FILE)"
 -o "example.SoftErrorLimiter.config_file:$(arg CONF_FILE)"
-' />
+    '/>
   <arg unless="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless " />
   <arg     if="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless -realtime" />
   <arg unless="$(arg GUI)" name="hrpsys_gui_args" value="-nodisplay" />
@@ -63,11 +65,11 @@
   <node if="$(arg USE_RTCD)"
         name="hrpsys" pkg="openrtm" type="rtcd" output="$(arg OUTPUT)"
         launch-prefix="$(arg RTCD_LAUNCH_PREFIX)"
-        args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_args)" />
+        args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_args) $(arg hrpsys_rtc_config_args)" />
   <node unless="$(arg USE_RTCD)"
         name="hrpsys" pkg="hrpsys" type="hrpsys-simulator" output="$(arg OUTPUT)"
         launch-prefix="$(arg RTCD_LAUNCH_PREFIX)"
-        args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_gui_args) $(arg hrpsys_opt_args) $(arg hrpsys_args)" />
+        args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_gui_args) $(arg hrpsys_opt_args) $(arg hrpsys_args) $(arg hrpsys_rtc_config_args)" />g
 
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
 
