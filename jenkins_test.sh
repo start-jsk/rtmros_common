@@ -13,7 +13,7 @@ trap error ERR
 
 install-pkg 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosinstall?format=raw' http://rtm-ros-robotics.googlecode.com/svn/trunk/agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall
 
-rosdep update
+rosdep update || ( sleep 120; rosdep update )
 
 PKGS='euscollada openhrp3 hrpsys_tutorials hironx_ros_bridge'
 
