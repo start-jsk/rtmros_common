@@ -35,7 +35,9 @@ else
 endif
 lib/ext/j3dcore.jar:
 	if [ ! -f `rospack find openhrp3`/lib/ext/j3dcore.jar ] ; then \
-	   $(CHECKMD5) http://download.java.net/media/java3d/builds/release/1.5.2/$(J3D_FILE).zip build/$(J3D_FILE).zip ;\
+	   $(CHECKMD5) http://download.java.net/media/java3d/builds/release/1.5.2/$(J3D_FILE).zip build/$(J3D_FILE).zip || \
+           (sleep 120; $(CHECKMD5) http://download.java.net/media/java3d/builds/release/1.5.2/$(J3D_FILE).zip build/$(J3D_FILE).zip) || \
+           (sleep 120; $(CHECKMD5) http://download.java.net/media/java3d/builds/release/1.5.2/$(J3D_FILE).zip build/$(J3D_FILE).zip) ;\
 	   unzip -o build/$(J3D_FILE).zip -d build; \
 	   unzip -o build/$(J3D_FILE)/j3d-jre.zip -d `rospack find openhrp3`; \
 	fi
