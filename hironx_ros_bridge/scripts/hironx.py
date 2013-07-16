@@ -127,13 +127,13 @@ class HIRONX(HrpsysConfigurator):
         if not hand:
             self.setHandWitdh("lhand", 100)
             self.setHandWitdh("rhand", 100)
-        else
+        else:
             self.setHandWitdh(hand, 100)
     def HandClose(self, hand):
         if not hand:
             self.setHandWitdh("lhand", 0)
             self.setHandWitdh("rhand", 0)
-        else
+        else:
             self.setHandWitdh(hand, 0)
     def setHandJointAngles(self, hand, angles, tm=1):
         self.sc_svc.setHandJointAnglesOfGroup(hand, angles, tm)
