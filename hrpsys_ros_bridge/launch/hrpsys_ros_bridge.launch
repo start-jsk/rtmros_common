@@ -134,6 +134,7 @@
   </group>
 
   <!-- <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/> -->
+  <!-- <rtconnect from="HrpsysSeqStateROSBridge0.rtc:servoState" to="$(arg SIMULATOR_NAME).rtc:servoState" subscription_type="new"/> -->
 
   <!-- END:openrtm connection -->
 </launch>
