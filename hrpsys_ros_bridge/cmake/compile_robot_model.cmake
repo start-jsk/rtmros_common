@@ -43,9 +43,10 @@ macro(get_option_from_args _option_ret _option_name _separator _quater _ret_add_
   set(${_option_ret} "${_tmp_option}")
 endmacro(get_option_from_args _option_ret _option_name)
 
-macro(get_conf_file_option _conf_file_option_ret _robothardware_conf_file_option_ret)
+macro(get_conf_file_option _conf_file_option_ret _robothardware_conf_file_option_ret _conf_dt_option_ret)
   get_option_from_args(${_conf_file_option_ret} "--conf-file-option" "--conf-file-option\ " ' "CONF_FILE_OPTION:=" ${ARGV})
   get_option_from_args(${_robothardware_conf_file_option_ret} "--robothardware-conf-file-option" "\ --robothardware-conf-file-option\ " ' "ROBOTHARDWARE_CONF_FILE_OPTION:=" ${ARGV})
+  get_option_from_args(${_conf_dt_option_ret} "--conf-dt-option" "\ --dt\ " ' "CONF_DT_OPTION:=" ${ARGV})
 endmacro()
 
 macro(get_proj_file_root_option _proj_file_root_option_ret)
@@ -66,10 +67,11 @@ macro(compile_openhrp_model wrlfile)
     set(_export_collada_option "")
     set(_conf_file_option "")
     set(_robothardware_conf_file_option "")
+    set(_conf_dt_option "")
   else()
     set(_name ${ARGV1})
     get_export_collada_option(_export_collada_option ${ARGV})
-    get_conf_file_option(_conf_file_option _robothardware_conf_file_option ${ARGV})
+    get_conf_file_option(_conf_file_option _robothardware_conf_file_option _conf_dt_option ${ARGV})
   endif()
   set(_daefile "${_workdir}/${_name}.dae")
   set(_xmlfile "${_workdir}/${_name}.xml")
@@ -99,10 +101,10 @@ macro(compile_openhrp_model wrlfile)
   rosbuild_find_ros_package(hrpsys)
   set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_PACKAGE_PATH}/launch/_gen_project.launch)
   add_custom_command(OUTPUT ${_xmlfile}
-    COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}
+    COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     DEPENDS ${wrlfile} ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
-    COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option}
+    COMMAND rostest -t hrpsys _gen_project.launch INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     DEPENDS ${wrlfile} ${_gen_project_dep_files} ${_xmlfile})
   add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
   list(APPEND compile_robots ${_name}_compile)
@@ -117,10 +119,11 @@ macro(compile_collada_model daefile)
   if("${ARGN}" STREQUAL "")
     set(_conf_file_option "")
     set(_robothardware_conf_file_option "")
+    set(_conf_dt_option "")
     set(_proj_file_root_option "")
     set(_euscollada_option "")
   else()
-    get_conf_file_option(_conf_file_option _robothardware_conf_file_option ${ARGV})
+    get_conf_file_option(_conf_file_option _robothardware_conf_file_option _conf_dt_option ${ARGV})
     get_proj_file_root_option(_proj_file_root_option ${ARGV})
     get_euscollada_option(_euscollada_option ${ARGV})
   endif()
@@ -148,12 +151,12 @@ macro(compile_collada_model daefile)
   set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_PACKAGE_PATH}/launch/_gen_project.launch)
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rosrun openrtm rtm-naming 2888
-    COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option}
+    COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2888" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
     COMMAND rosrun openrtm rtm-naming 2888
-    COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option}
+    COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2888" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
   add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
