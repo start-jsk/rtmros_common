@@ -58,10 +58,10 @@ endmacro(get_conf_file_option _conf_file_option_ret _robothardware_conf_file_opt
 macro(get_proj_file_root_option _proj_file_root_option_ret)
   set(_proj_file_root_option "_proj_file_root_option")
   get_option_from_args(${_proj_file_root_option} "--proj-file-root-option" "" "" ${ARGV})
-  set(${_proj_file_root_option_ret} ${_proj_file_root_option})
   if (NOT "${_proj_file_root_option}" STREQUAL "")
     set(_proj_file_root_option ",${_proj_file_root_option}")
   endif (NOT "${_proj_file_root_option}" STREQUAL "")
+  set(${_proj_file_root_option_ret} ${_proj_file_root_option})
 endmacro(get_proj_file_root_option _proj_file_root_option_ret)
 
 macro(get_euscollada_option _euscollada_option_ret)
