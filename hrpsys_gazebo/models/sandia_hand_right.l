@@ -37,15 +37,25 @@
      (send (send j :child-link) :add-parent-link (send j :parent-link))
      (send (send j :parent-link) :add-child-links (send j :child-link)))
    ;; add sensor method ;; e.g., (send self :camera 0), (send self :force-sensor :rasensor), ... etc
-   (dolist (sensor-name '(:force-sensor))
+   (dolist (sensor-name '(:force-sensor :imu-sensor))
      (eval `(defmethod ,(send (class self) :name)
               (,sensor-name (&rest args)
                             (cond ((integerp (car args))
                                    (forward-message-to (elt (send self ,(read-from-string (format nil "~As" sensor-name)) ) (car args)) (cdr args)))
-                                  ((keywordp (car args))
+                                  ;; enable to access sensors by limb name
+                                  ((memq (car args) '(:larm :rarm :lleg :rleg :head :torso))
+                                   (find-if
+                                    #'(lambda (x) (member (send x :parent) (send self (car args))))
+                                    (send self ,(read-from-string (format nil "~As" sensor-name)))))
+                                  ((and (keywordp (car args))
+                                        (derivedp (send self (car args)) cascaded-coords))
                                    (send* self args))
+                                  ((keywordp (car args))
+                                   ;;(warn ";; no such sensor ~A~%" (car args))
+                                   nil)
                                   (t
-                                   (forward-message-to (car (send self ,(read-from-string (format nil "~As" sensor-name)))) args))))
+                                   (forward-message-to (car (send self ,(read-from-string (format nil "~As" sensor-name)))) args)
+                                   )))
               )))
    )
   ;; fullbody-inverse-kinematics overwrite
