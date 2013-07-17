@@ -336,7 +336,7 @@
            (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
        (apply method-func
               (string-downcase (send fs :name))
-              (if base-name base-name "WAIST")
+              (if base-name base-name "")
               (send (send (send fs :parent) :joint) :name)
               args)))
     ((and (substringp ":v" (format nil "~A" limb))
