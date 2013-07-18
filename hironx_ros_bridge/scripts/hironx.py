@@ -118,27 +118,29 @@ class HIRONX(HrpsysConfigurator):
 
     #
     # hand interface
-    # hiro.HandOpen("rhand")
+    # effort: 1~100[%]
+    # hiro.HandOpen("rhand", effort)
     # hiro.HandOpen()        # for both hand
-    # hiro.HandClose("rhand")
+    # hiro.HandClose("rhand", effort)
     # hiro.HandClose()       # for both hand
     #
-    def HandOpen(self, hand):
-        if not hand:
-            self.setHandWitdh("lhand", 100)
-            self.setHandWitdh("rhand", 100)
-        else:
-            self.setHandWitdh(hand, 100)
-    def HandClose(self, hand):
-        if not hand:
-            self.setHandWitdh("lhand", 0)
-            self.setHandWitdh("rhand", 0)
-        else:
-            self.setHandWitdh(hand, 0)
+    def HandOpen(self, hand=None, effort=None):
+        self.setHandWidth(hand, 100, effort=effort)
+    def HandClose(self, hand=None, effort=None):
+        self.setHandWidth(hand, 0, effort=effort)
     def setHandJointAngles(self, hand, angles, tm=1):
-        self.sc_svc.setHandJointAnglesOfGroup(hand, angles, tm)
-    def setHandWidth(self, hand, width, tm=1):
-        self.setHandJointAngles(hand, self.hand_width2angles(width), tm)
+        self.sc_svc.setJointAnglesOfGroup(hand, angles, tm)
+    def setHandEffort(self, effort=100):
+        for i in [ v for vs in HandGroups.values() for v in vs] # flatten
+            self.sc_svc.setMaxTorque(i, effort)
+    def setHandWidth(self, hand, width, tm=1, effort=None):
+        if effort:
+            self.setHandEffort(effort)
+        if hand:
+            self.setHandJointAngles(hand, self.hand_width2angles(width), tm)
+        else:
+            for h in self.HandGroups.keys():
+                self.setHandJointAngles(h, self.hand_width2angles(width), tm)
     def hand_width2angles(self, width):
         safetyMargin = 3
         l1, l2 = (41.9, 19)
