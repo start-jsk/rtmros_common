@@ -306,6 +306,10 @@ class HIRONX(HrpsysConfigurator):
             time.sleep(0.2)
             if jname == 'all':
                 self.rh_svc.power('all', SWITCH_OFF)
+
+            # turn off hand motors
+            self.sc_svc.servoOff()
+
             return 2
         except:
             print self.configurator_name, 'servo off: communication error'
