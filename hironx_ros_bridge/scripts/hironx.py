@@ -132,7 +132,7 @@ class HIRONX(HrpsysConfigurator):
     def setHandJointAngles(self, hand, angles, tm=1):
         self.sc_svc.setJointAnglesOfGroup(hand, angles, tm)
     def setHandEffort(self, effort=100):
-        for i in [ v for vs in HandGroups.values() for v in vs] # flatten
+        for i in [ v for vs in HandGroups.values() for v in vs]: # flatten
             self.sc_svc.setMaxTorque(i, effort)
     def setHandWidth(self, hand, width, tm=1, effort=None):
         if effort:
