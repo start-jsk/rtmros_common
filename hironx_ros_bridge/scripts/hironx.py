@@ -6,6 +6,7 @@ import os
 import socket
 import time
 import math
+import numpy
 
 import rtm
 import OpenHRP
@@ -207,23 +208,16 @@ class HIRONX(HrpsysConfigurator):
 
     def flat2Groups(self, flatList):
         retList = []
-        prev = None
         index = 0
-        DOF = 15
-        for item in self.Groups:
-            if not prev:
-                retList.append(flatList[:len(item[1])])
-                index += len(retList[-1])
-            elif item == self.Groups[-1]:
-                retList.append(flatList[index:DOF])
-            else:
-                retList.append(flatList[index:len(item[1])])
-                index += len(retList[-1])
+        for group in self.Groups:
+            joint_num = len(group[1])
+            retList.append(flatList[index : index+joint_num])
+            index += joint_num
         return retList
 
     # switch servos on/off
     # destroy argument is not used
-    def servoOn(self, jname='all', destroy=1):
+    def servoOn(self, jname='all', destroy=1, tm=3):
         # check joints are calibrated
         if not self.isCalibDone():
             waitInputConfirm('!! Calibrate Encoders with checkEncoders first !!\n\n')
@@ -263,10 +257,11 @@ class HIRONX(HrpsysConfigurator):
             print self.configurator_name, 'exception occured'
 
         try:
-            angles = self.flat2Groups(self.getActualState().angle)
+            angles = self.flat2Groups(map(numpy.rad2deg, self.getActualState().angle))
+            print 'Move to Actual State, Just a minute.'
             for i in range(len(self.Groups)):
-                #self.seq_svc.setJointAnglesOfGroup(nm, angles, tm)
-                self.seq_svc.setJointAnglesOfGroup(self.Groups[i][0], angles[i], tm, wait=False)
+                self.setJointAnglesOfGroup(self.Groups[i][0], angles[i], tm, wait=False)
+            print 'Movement finished'
             for i in range(len(self.Groups)):
                 self.seq_svc.waitInterpolationOfGroup(self.Groups[i][0])
         except:
