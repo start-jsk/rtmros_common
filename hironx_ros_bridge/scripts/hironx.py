@@ -281,7 +281,7 @@ class HIRONX(HrpsysConfigurator):
             print self.configurator_name, 'omit servo off'
             return 0
 
-        # if the servos aren't on do nothing -> send again?
+        # if the servos aren't on switch power off
         if not self.isServoOn(jname):
             if jname.lower() == 'all':
                 self.rh_svc.power('all', SWITCH_OFF)
@@ -302,7 +302,7 @@ class HIRONX(HrpsysConfigurator):
             self.rh_svc.servo('all', SWITCH_OFF)
             time.sleep(0.2)
             if jname == 'all':
-                rh_svc.power('all', SWITCH_OFF)
+                self.rh_svc.power('all', SWITCH_OFF)
             return 2
         except:
             print self.configurator_name, 'servo off: communication error'
