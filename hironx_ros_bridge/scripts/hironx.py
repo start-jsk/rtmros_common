@@ -352,6 +352,8 @@ class HIRONX(HrpsysConfigurator):
         time.sleep(0.1)
         self.rh_svc.servo(jname, SWITCH_ON)
 
+        # turn on hand motors
+        self.sc_svc.servoOn()
 
 if __name__ == '__main__':
     hiro = HIRONX()
