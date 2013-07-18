@@ -163,9 +163,6 @@ class HIRONX(HrpsysConfigurator):
         for k, v in self.HandGroups.iteritems():
             self.sc_svc.addJointGroup(k, v)
 
-        self.sc_svc.servoOn()
-
-
     #
     def getActualState(self):
         return self.rh_svc.getStatus()
@@ -274,6 +271,10 @@ class HIRONX(HrpsysConfigurator):
                 self.seq_svc.waitInterpolationOfGroup(self.Groups[i][0])
         except:
             print self.configurator_name, 'post servo on motion trouble'
+
+        # turn on hand motors
+        self.sc_svc.servoOn()
+
         return 1
 
     #
