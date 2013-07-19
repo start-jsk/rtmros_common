@@ -1,0 +1,8 @@
+<launch>
+  <arg name="GUI" default="false" />
+  <include file="$(find hironx_ros_bridge)/launch/hironx_ros_bridge_simulation.launch" >
+    <arg name="GUI" default="$(arg GUI)" />
+  </include>
+
+  <atest type="hrp4c-test.py" pkg="hrpsys_tutorials" test-name="hrp4c_test" time-limit="300" />
+</launch>
