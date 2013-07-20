@@ -5,9 +5,20 @@
                (send *robot* l :joint :name)
                (elt p 0) (elt p 1) (elt p 2)
                (aref r 0 0) (aref r 0 1) (aref r 0 2) (aref r 1 0) (aref r 1 1) (aref r 1 2) (aref r 2 0) (aref r 2 1) (aref r 2 2)))))
-(defun change-joint (f ls a)
-  (format f "        self.angle_vector([math.pi * ~A / 180.0 for i in range(~A)])~%" a (length ls))
-  (dolist (l ls) (send *robot* l :joint :joint-angle a)))
+(defun change-joint (f ls &optional a)
+  (let (angles)
+    (dolist (l ls)
+      (let ((j (send *robot* l :joint)) angle)
+        (setq angle (if a a (* 0.5 (+ (send j :min-angle) (send j :max-angle)))))
+        (if (and (< angle 0) (> angle 0)) ;; isnan
+            (setq angle 125))
+        (send j :joint-angle angle)
+        (push angle angles)))
+    (setq angles (reverse angles))
+    (format f "        self.angle_vector([")
+    (dolist (a angles) (format f "~A, " (deg2rad a)))
+    (format f "])~%")
+    ))
 
 (defun print-header (f pkg filepath)
     (format f "#!/usr/bin/env python
@@ -33,7 +44,7 @@ if __name__ == '__main__':
 "
             *file-name* *robot-name*))
 
-(defun gen-testcode (robot links &optional pkg filepath)
+(defun gen-testcode (robot links &optional pkg filepath) ;; order of links must be JointID order
   (setq *robot* robot)
   (setq *robot-name* (send *robot* :name))
   (setq *file-name* (pathname-name (cadr (assoc (intern (string-upcase (send *robot* :name)) "KEYWORD") *modules*))))
@@ -42,8 +53,8 @@ if __name__ == '__main__':
     (print-header f pkg filepath)
     (format f "~%    def test_av0(self):~%")
     (print-link f links)
-    (format f "~%    def test_av30(self):~%")
-    (change-joint f links 30)
+    (format f "~%    def test_av_mid(self):~%")
+    (change-joint f links)
     (print-link f links)
     (print-footer f)
   ))

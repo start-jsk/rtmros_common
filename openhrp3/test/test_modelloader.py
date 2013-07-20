@@ -48,6 +48,7 @@ class testModelLoader(unittest.TestCase):
             self.mass = l.mass
             self.parent = l.parentIndex
             self.children = l.childIndices
+            self.jointId = l.jointId
 
     links = []
 
@@ -80,7 +81,7 @@ class testModelLoader(unittest.TestCase):
     #
     def check_link(self, name, p, R) :
         l = filter(lambda l : l.name == name, self.links)[0]
-        print "check_link ", l.name
+        print "check_link ", l.name, l.jointId
         print "           p = ", array(p), "r = ", array(R)
         print "           p = ", l.p, "r = ", dot(l.R, l.Rs).flatten()
         numpy.testing.assert_array_almost_equal(l.p, p, decimal=4)
