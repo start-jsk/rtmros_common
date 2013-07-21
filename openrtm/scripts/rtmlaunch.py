@@ -139,7 +139,7 @@ def main():
     fullpathname = sys.argv[1]
     print >>sys.stderr, "[rtmlaunch] starting... ",fullpathname
     try:
-        parser = parse(fullpathname)
+        parser = get_true_tags(parse(fullpathname).getElementsByTagName("group"))
     except Exception,e:
         print e
         return 1
@@ -152,6 +152,21 @@ def main():
         rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
         rtactivate(nameserver, parser.getElementsByTagName("rtactivate"))
         time.sleep(10)
+
+def get_true_tags(tags):
+    import xml.dom.minidom
+    parser_reduced = xml.dom.minidom.Document()
+    for tag in tags:
+        val = tag.attributes.get("if").value # For example, "$(arg USE_WALKING)"
+        arg = val.split(" ")[1].strip(")") # To "USE_WALKING"
+        if get_flag_from_argv(arg):
+           parser_reduced.childNodes.append(tag)
+    return parser_reduced
+
+def get_flag_from_argv(arg):
+    for a in sys.argv:
+        if arg in a: # If "USE_WALKING" is in argv
+            return True if 'true' in a.split("=")[1] else False
 
 if __name__ == '__main__':
     main()
