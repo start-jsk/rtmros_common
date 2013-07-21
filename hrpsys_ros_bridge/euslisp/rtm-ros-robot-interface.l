@@ -27,7 +27,7 @@
   (:rtmros-motor-states-callback
    (msg)
    (send self :set-robot-state1 :motor-extra-data (send msg :extra_data))
-   (send-super :rtmros-temperature-callback msg))
+   (send self :set-robot-state1 :temperature (send msg :temperature)))
   (:temperature-vector () (cdr (assoc :temperature robot-state)))
   (:motor-extra-data
    ()
