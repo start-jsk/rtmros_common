@@ -135,6 +135,9 @@ class HrpsysConfigurator:
     # flag isSimulation?
     simulation_mode = None
 
+    # sensors
+    sensors = None
+
     # public method
     def connectComps(self):
         # connection for reference joint angles
@@ -152,10 +155,10 @@ class HrpsysConfigurator:
         # connection for kf
         if self.kf:
             #   currently use first acc and rate sensors for kf
-            s_acc=filter(lambda s : s.type == 'Acceleration', self.getSensors(self.url))
+            s_acc=filter(lambda s : s.type == 'Acceleration', self.sensors)
             if (len(s_acc)>0) and self.rh.port(s_acc[0].name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
                 connectPorts(self.rh.port(s_acc[0].name), self.kf.port('acc'))
-            s_rate=filter(lambda s : s.type == 'RateGyro', self.getSensors(self.url))
+            s_rate=filter(lambda s : s.type == 'RateGyro', self.sensors)
             if (len(s_rate)>0) and self.rh.port(s_rate[0].name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
                 connectPorts(self.rh.port(s_rate[0].name), self.kf.port("rate"))
             connectPorts(self.seq.port("accRef"), self.kf.port("accRef"))
@@ -189,7 +192,7 @@ class HrpsysConfigurator:
             #connectPorts(self.kf.port("rpy"), self.ic.port("rpy"))
             connectPorts(self.kf.port("rpy"), self.afs.port("rpy"))
             connectPorts(self.rh.port("q"), self.afs.port("qCurrent"))
-            for sen in filter(lambda x : x.type == "Force", self.getSensors(self.url)):
+            for sen in filter(lambda x : x.type == "Force", self.sensors):
                 connectPorts(self.rh.port(sen.name), self.afs.port(sen.name))
                 if self.ic:
                     connectPorts(self.afs.port("off_"+sen.name), self.ic.port(sen.name))
@@ -290,15 +293,14 @@ class HrpsysConfigurator:
                 print self.configurator_name, "  setupLogger : ", sen_name, " arleady exists in DataLogger"
 
     # public method to configure default logger data ports
-    def setupLogger(self, url=None):
+    def setupLogger(self):
         #
         for pn in ['q', 'tau']:
             self.connectLoggerPort(self.rh, pn)
         # sensor logger ports
-        if url :
-            print self.configurator_name, "sensor names for DataLogger"
-            for sen in self.getSensors(url):
-                self.connectLoggerPort(self.rh, sen.name)
+        print self.configurator_name, "sensor names for DataLogger"
+        for sen in self.sensors:
+            self.connectLoggerPort(self.rh, sen.name)
         #
         self.connectLoggerPort(self.kf, 'rpy')
         self.connectLoggerPort(self.seq, 'qRef')
@@ -422,13 +424,13 @@ class HrpsysConfigurator:
     ###
 
     def init(self, robotname="Robot", url=""):
-        self.url = url
         print self.configurator_name, "waiting ModelLoader"
         self.waitForModelLoader()
         print self.configurator_name, "start hrpsys"
 
         print self.configurator_name, "finding RTCManager and RobotHardware"
         self.waitForRTCManagerAndRoboHardware(robotname)
+        self.sensors = self.getSensors(url)
 
         print self.configurator_name, "creating components"
         self.createComps()
@@ -439,7 +441,7 @@ class HrpsysConfigurator:
         print self.configurator_name, "activating components"
         self.activateComps()
 
-        self.setupLogger(url)
+        self.setupLogger()
         print self.configurator_name, "setup logger done"
 
         print self.configurator_name, "initialized successfully"
