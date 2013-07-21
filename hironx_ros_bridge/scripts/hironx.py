@@ -73,30 +73,20 @@ class HIRONX(HrpsysConfigurator):
         return ret
 
     def createComps(self):
-        self.seq = self.createComp("SequencePlayer", "seq")
-        if self.seq :
-            self.seq_svc = rtm.narrow(self.seq.service("service0"), "SequencePlayerService")
+        [self.seq, self.seq_svc] = self.createComp("SequencePlayer", "seq", True)
 
-        self.sh = self.createComp("StateHolder", "sh")
-        if self.sh :
-            self.sh_svc = rtm.narrow(self.sh.service("service0"), "StateHolderService")
+        [self.sh, self.sh_svc] = self.createComp("StateHolder", "sh", True)
 
-        self.fk = self.createComp("ForwardKinematics", "fk")
-        if self.fk :
-            self.fk_svc = rtm.narrow(self.fk.service("service0"), "ForwardKinematicsService")
+        [self.fk, self.fk_svc] = self.createComp("ForwardKinematics", "fk", True)
 
         #self.co = self.createComp("CollisionDetector", "co")
         #if self.co :
         #    self.co_svc = rtm.narrow(self.co.service("service0"), "CollisionDetectorService")
 
         # servo controller (grasper)
-        self.sc = self.createComp("ServoController", "sc")
-        if self.sc :
-            self.sc_svc = rtm.narrow(self.sc.service("service0"), "ServoControllerService")
+        [self.sc, self.sc_svc] = self.createComp("ServoController", "sc", True)
 
-        self.log = self.createComp("DataLogger", "log")
-        if self.log :
-            self.log_svc = rtm.narrow(self.log.service("service0"), "DataLoggerService");
+        [self.log, self.log_svc] = self.createComp("DataLogger", "log", True)
 
     def connectComps(self):
         if self.sh and self.rh:
