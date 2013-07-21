@@ -13,6 +13,8 @@
     <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
     <arg name="GUI" default="$(arg GUI)" />
     <arg name="LAUNCH_HRPSYSPY" default="$(arg LAUNCH_HRPSYSPY)" />
+    <arg name="HRPSYS_PY_PKG" default="hironx_ros_bridge"/>
+    <arg name="HRPSYS_PY_NAME" default="hironx.py"/>
     <arg name="REALTIME" default="true" />
   </include>
 </launch>
