@@ -208,8 +208,16 @@ jointTrajectoryActionObj(HrpsysJointTrajectoryBridge *ptr,
 }
 
 HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::~jointTrajectoryActionObj() {
-  joint_trajectory_server->setPreempted();
-  follow_joint_trajectory_server->setPreempted();
+  if ( joint_trajectory_server->isActive() ) {
+    joint_trajectory_server->setPreempted();
+  }
+
+  if ( follow_joint_trajectory_server->isActive() ) {
+    follow_joint_trajectory_server->setPreempted();
+  }
+
+  joint_trajectory_server->shutdown();
+  follow_joint_trajectory_server->shutdown();
 }
 
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::

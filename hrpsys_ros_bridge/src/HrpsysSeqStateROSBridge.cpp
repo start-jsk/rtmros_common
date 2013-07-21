@@ -79,12 +79,21 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   follow_joint_trajectory_server.start();
 }
 
-HrpsysSeqStateROSBridge::~HrpsysSeqStateROSBridge() {};
+HrpsysSeqStateROSBridge::~HrpsysSeqStateROSBridge() {
+  joint_trajectory_server.shutdown();
+  follow_joint_trajectory_server.shutdown();
+};
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onFinalize() {
-  ROS_ERROR_STREAM("[HrpsysSeqStateROSBridge] @onFinalize : " << getInstanceName());
-  joint_trajectory_server.setPreempted();
-  follow_joint_trajectory_server.setPreempted();
+  ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @onFinalize : " << getInstanceName());
+  if ( joint_trajectory_server.isActive() ) {
+      joint_trajectory_server.setPreempted();
+  }
+
+  if (   follow_joint_trajectory_server.isActive() ) {
+      follow_joint_trajectory_server.setPreempted();
+  }
+
   return RTC_OK;
 }
 
