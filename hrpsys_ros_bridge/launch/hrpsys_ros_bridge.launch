@@ -34,34 +34,7 @@
         type = "HrpsysJointTrajectoryBridge"
         args = "$(arg openrtm_args) -o model:$(arg MODEL_FILE)"
         output = "$(arg OUTPUT)" />
-  <node pkg="hrpsys_ros_bridge" name="ImageSensorROSBridge" type="ImageSensorROSBridge"
-        output="$(arg OUTPUT)" args="$(arg openrtm_args)" >
-    <param name="frame_id" value="/VISION_SENSOR1" />
-  </node>
-  <node pkg="hrpsys" name="DataLoggerServiceROSBridge" type="DataLoggerServiceROSBridgeComp"
-        output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
-  <node pkg="hrpsys" name="ImpedanceControllerServiceROSBridge" type="ImpedanceControllerServiceROSBridgeComp"
-        output="screen" args ="$(arg openrtm_args)" />
-  <!-- -o "exec_cxt.periodic.type:SynchExtTriggerEC" -->
-  <node pkg="hrpsys" name="SequencePlayerServiceROSBridge" type="SequencePlayerServiceROSBridgeComp"
-        output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
-  <node pkg="hrpsys" name="ForwardKinematicsServiceROSBridge" type="ForwardKinematicsServiceROSBridgeComp"
-        output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
-  <node pkg="hrpsys" name="CollisionDetectorServiceROSBridge" type="CollisionDetectorServiceROSBridgeComp"
-        output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
-  <node pkg="hrpsys" name="AutoBalancerServiceROSBridge" type="AutoBalancerServiceROSBridgeComp"
-        output="screen" args ="$(arg openrtm_args)" />
-  <node pkg="hrpsys" name="StateHolderServiceROSBridge" type="StateHolderServiceROSBridgeComp"
-        output="screen" args ="$(arg openrtm_args)" />
-  <node pkg="hrpsys" name="RobotHardwareServiceROSBridge" type="RobotHardwareServiceROSBridgeComp"
-        output="screen" args ="$(arg openrtm_args)" />
-  <node pkg="hrpsys" name="SoftErrorLimiterServiceROSBridge" type="SoftErrorLimiterServiceROSBridgeComp"
-        output="screen" args ="$(arg openrtm_args)" />
-  <node pkg="hrpsys" name="StabilizerServiceROSBridge" type="StabilizerServiceROSBridgeComp"
-        output="screen" args ="$(arg openrtm_args)" />
-  <node pkg="hrpsys" name="AbsoluteForceSensorServiceROSBridge" type="AbsoluteForceSensorServiceROSBridgeComp"
-        output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
-
+ 
   <group if="$(arg INSTALL_ROBOT_DESCRIPTION)" >
     <param name="robot_description" textfile="$(arg COLLADA_FILE)" />
     <node pkg="robot_state_publisher" type="state_publisher" name="hrpsys_state_publisher" />
@@ -82,7 +55,26 @@
 
 
   <!-- All Robots -->
+  <!-- USE_COMMON
+      RobotHardware
+      SequencePlayer
+      DataLogger
+      ForwardKinematics
+      StateHolder
+  -->
   <group if="$(arg USE_COMMON)" >
+    <node pkg="hrpsys" name="RobotHardwareServiceROSBridge" type="RobotHardwareServiceROSBridgeComp"
+          output="screen" args ="$(arg openrtm_args)" />
+
+    <node pkg="hrpsys" name="SequencePlayerServiceROSBridge" type="SequencePlayerServiceROSBridgeComp"
+          output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
+    <node pkg="hrpsys" name="DataLoggerServiceROSBridge" type="DataLoggerServiceROSBridgeComp"
+          output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
+    <node pkg="hrpsys" name="ForwardKinematicsServiceROSBridge" type="ForwardKinematicsServiceROSBridgeComp"
+          output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
+    <node pkg="hrpsys" name="StateHolderServiceROSBridge" type="StateHolderServiceROSBridgeComp"
+          output="screen" args ="$(arg openrtm_args)" />
+
     <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="HrpsysSeqStateROSBridge0.rtc:rsangle" subscription_type="new"/>
     <rtconnect from="$(arg SIMULATOR_NAME).rtc:tau" to="HrpsysSeqStateROSBridge0.rtc:rstorque" subscription_type="new"/>
     <rtconnect from="StateHolderServiceROSBridge.rtc:StateHolderService" to="sh.rtc:StateHolderService"  subscription_type="new"/>
@@ -92,7 +84,7 @@
     <rtconnect from="HrpsysJointTrajectoryBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
     <rtconnect from="DataLoggerServiceROSBridge.rtc:DataLoggerService" to="log.rtc:DataLoggerService" subscription_type="new"/>
     <rtconnect from="SequencePlayerServiceROSBridge.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
-  <rtconnect from="ForwardKinematicsServiceROSBridge.rtc:ForwardKinematicsService" to="fk.rtc:ForwardKinematicsService" subscription_type="new"/>
+    <rtconnect from="ForwardKinematicsServiceROSBridge.rtc:ForwardKinematicsService" to="fk.rtc:ForwardKinematicsService" subscription_type="new"/>
 
     <rtactivate component="RobotHardwareServiceROSBridge.rtc" />
     <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
@@ -103,7 +95,16 @@
     <rtactivate component="StateHolderServiceROSBridge.rtc" />
   </group>
 
+  <!-- USE_WALING
+      AutoBalancer
+      Stabilizer
+  -->
   <group if="$(arg USE_WALKING)" >
+    <node pkg="hrpsys" name="AutoBalancerServiceROSBridge" type="AutoBalancerServiceROSBridgeComp"
+          output="screen" args ="$(arg openrtm_args)" />
+    <node pkg="hrpsys" name="StabilizerServiceROSBridge" type="StabilizerServiceROSBridgeComp"
+          output="screen" args ="$(arg openrtm_args)" />
+
     <rtconnect from="kf.rtc:rpy" to="HrpsysSeqStateROSBridge0.rtc:baseRpy" subscription_type="new"/>
     <rtconnect from="AutoBalancerServiceROSBridge.rtc:AutoBalancerService" to="abc.rtc:AutoBalancerService"  subscription_type="new"/>
     <rtconnect from="StabilizerServiceROSBridge.rtc:StabilizerService" to="st.rtc:StabilizerService"  subscription_type="new"/>
@@ -111,24 +112,53 @@
     <rtactivate component="StabilizerServiceROSBridge.rtc" />
   </group>
 
+  <!-- USE_COLLISIONCHECK
+       CollisionDetector
+  -->
   <group if="$(arg USE_COLLISIONCHECK)" >
+    <node pkg="hrpsys" name="CollisionDetectorServiceROSBridge" type="CollisionDetectorServiceROSBridgeComp"
+          output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
+
     <rtconnect from="CollisionDetectorServiceROSBridge.rtc:CollisionDetectorService" to="co.rtc:CollisionDetectorService" subscription_type="new"/>
     <rtactivate component="CollisionDetectorServiceROSBridge.rtc" />
   </group>
 
+  <!-- USE_IMPEDANCECONTROLLER
+       ImpedanceController
+       AbsoluteForceSensor
+  -->
   <group if="$(arg USE_IMPEDANCECONTROLLER)" >
+    <node pkg="hrpsys" name="ImpedanceControllerServiceROSBridge" type="ImpedanceControllerServiceROSBridgeComp"
+          output="screen" args ="$(arg openrtm_args)" />
+    <node pkg="hrpsys" name="AbsoluteForceSensorServiceROSBridge" type="AbsoluteForceSensorServiceROSBridgeComp"
+          output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
+
     <rtconnect from="ImpedanceControllerServiceROSBridge.rtc:ImpedanceControllerService" to="ic.rtc:ImpedanceControllerService"  subscription_type="new"/>
     <rtactivate component="ImpedanceControllerServiceROSBridge.rtc" />
     <rtconnect from="AbsoluteForceSensorServiceROSBridge.rtc:AbsoluteForceSensorService" to="afs.rtc:AbsoluteForceSensorService"  subscription_type="new"/>
     <rtactivate component="AbsoluteForceSensorServiceROSBridge.rtc" />
   </group>
 
+  <!-- USE_SOFTERRORLIMIT
+       SoftErrorLimitter
+  -->
   <group if="$(arg USE_SOFTERRORLIMIT)" >
+    <node pkg="hrpsys" name="SoftErrorLimiterServiceROSBridge" type="SoftErrorLimiterServiceROSBridgeComp"
+          output="screen" args ="$(arg openrtm_args)" />
+
     <rtconnect from="SoftErrorLimiterServiceROSBridge.rtc:SoftErrorLimiterService" to="el.rtc:SoftErrorLimiterService"  subscription_type="new"/>
     <rtactivate component="SoftErrorLimiterServiceROSBridge.rtc" />
   </group>
 
+  <!-- USER_IMAGESENSOR
+       ImageSensor
+  -->
   <group if="$(arg USE_IMAGESENSOR)" >
+    <node pkg="hrpsys_ros_bridge" name="ImageSensorROSBridge" type="ImageSensorROSBridge"
+          output="$(arg OUTPUT)" args="$(arg openrtm_args)" >
+      <param name="frame_id" value="/VISION_SENSOR1" />
+    </node>
+
     <rtconnect from="$(arg SIMULATOR_NAME).rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" />
     <rtactivate component="ImageSensorROSBridge0.rtc" />
   </group>
