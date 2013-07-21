@@ -58,7 +58,7 @@ def rtconnect(nameserver, tags):
         dest_path   = nameserver+"/"+tag.attributes.get("to").value
         source_path = re.sub("\$\(arg SIMULATOR_NAME\)",simulator,source_path);
         dest_path = re.sub("\$\(arg SIMULATOR_NAME\)",simulator,dest_path);
-        print >>sys.stderr, "[rtmlaunch] Connecting from %s to %s"%(source_path,dest_path)
+        # print >>sys.stderr, "[rtmlaunch] Connecting from %s to %s"%(source_path,dest_path)
         source_full_path = path.cmd_path_to_full_path(source_path)
         dest_full_path = path.cmd_path_to_full_path(dest_path)
         if tag.attributes.get("subscription_type") != None:
@@ -109,7 +109,7 @@ def rtactivate(nameserver, tags):
     for tag in tags:
         cmd_path  = nameserver+"/"+tag.attributes.get("component").value
         full_path = path.cmd_path_to_full_path(cmd_path)
-        print >>sys.stderr, "[rtmlaunch] activate %s"%(full_path)
+        # print >>sys.stderr, "[rtmlaunch] activate %s"%(full_path)
         try:
             state = wait_component(full_path)
             if state == 'Active':
