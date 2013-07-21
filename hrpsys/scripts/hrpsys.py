@@ -203,26 +203,25 @@ class HrpsysConfigurator:
         for r in rtcList:
             r.start()
 
-    def createComp(self, compName, instanceName):
+    def createComp(self, compName, instanceName, return_svc = False):
         self.ms.load(compName)
         comp = self.ms.create(compName, instanceName)
         print self.configurator_name, "create Comp -> ", compName, " : ", comp
         if comp == None:
             raise RuntimeError("Cannot create component: " + compName)
-        return comp
+        if return_svc :
+            comp_svc = narrow(comp.service("service0"), compName+"Service")
+            print self.configurator_name, "create CompSvc -> ", compName, "Service : ", comp_svc
+            return [comp, comp_svc]
+        else:
+            return comp
 
     def createComps(self):
-        self.seq = self.createComp("SequencePlayer", "seq")
-        if self.seq :
-            self.seq_svc = narrow(self.seq.service("service0"), "SequencePlayerService")
+        [self.seq, self.seq_svc] = self.createComp("SequencePlayer", "seq", True)
 
-        self.sh = self.createComp("StateHolder", "sh")
-        if self.sh :
-            self.sh_svc = narrow(self.sh.service("service0"), "StateHolderService")
+        [self.sh, self.sh_svc] = self.createComp("StateHolder", "sh", True)
 
-        self.fk = self.createComp("ForwardKinematics", "fk")
-        if self.fk :
-            self.fk_svc = narrow(self.fk.service("service0"), "ForwardKinematicsService")
+        [self.fk, self.fk_svc] = self.createComp("ForwardKinematics", "fk", True)
 
         self.tf = self.createComp("TorqueFilter", "tf")
 
@@ -238,15 +237,11 @@ class HrpsysConfigurator:
 
         self.st = self.createComp("Stabilizer", "st")
 
-        self.co = self.createComp("CollisionDetector", "co")
-        if self.co :
-            self.co_svc = narrow(self.co.service("service0"), "CollisionDetectorService")
+        [self.co, self.co_svc] = self.createComp("CollisionDetector", "co", True)
 
         self.el = self.createComp("SoftErrorLimiter", "el")
 
-        self.log = self.createComp("DataLogger", "log")
-        if self.log :
-            self.log_svc = narrow(self.log.service("service0"), "DataLoggerService");
+        [self.log, self.log_svc] = self.createComp("DataLogger", "log", True)
 
     # public method to configure all RTCs to be activated on rtcd
     def getRTCList(self):
