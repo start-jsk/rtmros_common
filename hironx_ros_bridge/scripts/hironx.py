@@ -88,25 +88,6 @@ class HIRONX(HrpsysConfigurator):
 
         [self.log, self.log_svc] = self.createComp("DataLogger", "log", True)
 
-    def connectComps(self):
-        if self.sh and self.rh:
-            print self.configurator_name, 'connectComps: self.rh =', self.rh
-            print self.configurator_name, 'connectComps self.sh =', self.sh
-            rtm.connectPorts(self.rh.port("q"), [self.sh.port("currentQIn"), self.fk.port("q")])
-
-        #
-        if self.seq and self.sh:
-            rtm.connectPorts(self.seq.port('qRef'),      self.sh.port('qIn'))
-            rtm.connectPorts(self.seq.port('basePos'),   self.sh.port('basePosIn'))
-            rtm.connectPorts(self.seq.port('baseRpy'),   self.sh.port('baseRpyIn'))
-
-            #
-            rtm.connectPorts(self.sh.port('qOut'),       [self.fk.port("qRef"),self.seq.port('qInit')])
-            rtm.connectPorts(self.sh.port('basePosOut'), [self.seq.port('basePosInit'), self.fk.port("basePosRef")])
-            rtm.connectPorts(self.sh.port('baseRpyOut'), [self.seq.port('baseRpyInit'), self.fk.port("baseRpyRef")])
-            #
-            rtm.connectPorts(self.sh.port('qOut'),       self.rh.port('qRef'))
-
     #
     # hand interface
     # effort: 1~100[%]
