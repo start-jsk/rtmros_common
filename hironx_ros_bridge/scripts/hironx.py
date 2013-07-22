@@ -232,13 +232,13 @@ class HIRONX(HrpsysConfigurator):
             print 'Move to Actual State, Just a minute.'
             for i in range(len(self.Groups)):
                 self.setJointAnglesOfGroup(self.Groups[i][0], angles[i], tm, wait=False)
-            print 'Movement finished'
             for i in range(len(self.Groups)):
                 self.seq_svc.waitInterpolationOfGroup(self.Groups[i][0])
         except:
             print self.configurator_name, 'post servo on motion trouble'
 
         # turn on hand motors
+        print 'Turn on Hand Servo'
         self.sc_svc.servoOn()
 
         return 1
@@ -250,6 +250,8 @@ class HIRONX(HrpsysConfigurator):
             print self.configurator_name, 'omit servo off'
             return 0
 
+        print 'Turn off Hand Servo'
+        self.sc_svc.servoOff()
         # if the servos aren't on switch power off
         if not self.isServoOn(jname):
             if jname.lower() == 'all':
@@ -274,6 +276,7 @@ class HIRONX(HrpsysConfigurator):
                 self.rh_svc.power('all', SWITCH_OFF)
 
             # turn off hand motors
+            print 'Turn off Hand Servo'
             self.sc_svc.servoOff()
 
             return 2
@@ -319,6 +322,7 @@ class HIRONX(HrpsysConfigurator):
         self.rh_svc.servo(jname, SWITCH_ON)
 
         # turn on hand motors
+        print 'Turn on Hand Servo'
         self.sc_svc.servoOn()
 
 if __name__ == '__main__':
