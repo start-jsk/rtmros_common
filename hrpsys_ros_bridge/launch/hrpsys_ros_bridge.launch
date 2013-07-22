@@ -7,6 +7,7 @@
 
   <!-- Set these values false when using HIRO -->
   <arg name="USE_COMMON" default="true" />
+  <arg name="USE_ROBOTHARDWARE" default="false" />
   <arg name="USE_WALKING" default="true" />
   <arg name="USE_COLLISIONCHECK" default="true" />
   <arg name="USE_IMPEDANCECONTROLLER" default="true" />
@@ -51,7 +52,7 @@
         args="$(arg MODEL_FILE) $(arg SIMULATOR_NAME) HrpsysSeqStateROSBridge0 $(arg nameserver) -ORBInitRef NameService=corbaloc:iiop:$(arg nameserver):2809/NameService" output="$(arg OUTPUT)"/>
   <!-- BEGIN:openrtm connection -->
   <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
-  <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch USE_COMMON=$(arg USE_COMMON) USE_WALKING=$(arg USE_WALKING) USE_COLLISIONCHEC=$(arg USE_COLLISIONCHECK) USE_IMPEDANCECONTROLLER=$(arg USE_IMPEDANCECONTROLLER) USE_SOFTERRORLIMIT=$(arg USE_SOFTERRORLIMIT) USE_IMAGESENSOR=$(arg USE_IMAGESENSOR)"/>
+  <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch USE_COMMON=$(arg USE_COMMON) USE_WALKING=$(arg USE_WALKING) USE_COLLISIONCHEC=$(arg USE_COLLISIONCHECK) USE_IMPEDANCECONTROLLER=$(arg USE_IMPEDANCECONTROLLER) USE_SOFTERRORLIMIT=$(arg USE_SOFTERRORLIMIT) USE_IMAGESENSOR=$(arg USE_IMAGESENSOR) USE_ROBOTHARDWARE=$(arg USE_ROBOTHARDWARE)"/>
 
 
   <!-- All Robots -->
@@ -63,9 +64,6 @@
       StateHolder
   -->
   <group if="$(arg USE_COMMON)" >
-    <node pkg="hrpsys" name="RobotHardwareServiceROSBridge" type="RobotHardwareServiceROSBridgeComp"
-          output="screen" args ="$(arg openrtm_args)" />
-
     <node pkg="hrpsys" name="SequencePlayerServiceROSBridge" type="SequencePlayerServiceROSBridgeComp"
           output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
     <node pkg="hrpsys" name="DataLoggerServiceROSBridge" type="DataLoggerServiceROSBridgeComp"
@@ -86,13 +84,20 @@
     <rtconnect from="SequencePlayerServiceROSBridge.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
     <rtconnect from="ForwardKinematicsServiceROSBridge.rtc:ForwardKinematicsService" to="fk.rtc:ForwardKinematicsService" subscription_type="new"/>
 
-    <rtactivate component="RobotHardwareServiceROSBridge.rtc" />
     <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
     <rtactivate component="HrpsysJointTrajectoryBridge0.rtc" />
     <rtactivate component="DataLoggerServiceROSBridge.rtc" />
     <rtactivate component="SequencePlayerServiceROSBridge.rtc" />
     <rtactivate component="ForwardKinematicsServiceROSBridge.rtc" />
     <rtactivate component="StateHolderServiceROSBridge.rtc" />
+  </group>
+
+  <group if="$(arg USE_ROBOTHARDWARE)" >
+    <node pkg="hrpsys" name="RobotHardwareServiceROSBridge" type="RobotHardwareServiceROSBridgeComp"
+          output="screen" args ="$(arg openrtm_args)" />
+    <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/>
+    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:servoState" to="$(arg SIMULATOR_NAME).rtc:servoState" subscription_type="new"/>
+    <rtactivate component="RobotHardwareServiceROSBridge.rtc" />
   </group>
 
   <!-- USE_WALING
@@ -162,9 +167,6 @@
     <rtconnect from="$(arg SIMULATOR_NAME).rtc:left-eye" to="ImageSensorROSBridge0.rtc:image" />
     <rtactivate component="ImageSensorROSBridge0.rtc" />
   </group>
-
-  <!-- <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/> -->
-  <!-- <rtconnect from="HrpsysSeqStateROSBridge0.rtc:servoState" to="$(arg SIMULATOR_NAME).rtc:servoState" subscription_type="new"/> -->
 
   <!-- END:openrtm connection -->
 </launch>
