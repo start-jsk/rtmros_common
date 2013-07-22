@@ -84,3 +84,7 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${OPENRTM_PYTHON_INST
 ## clean
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_SOURCE_DIR}/bin;${CMAKE_SOURCE_DIR}/lib;${CMAKE_SOURCE_DIR}/src/openrtm;${CMAKE_SOURCE_DIR}/share")
 
+
+### test code
+rosbuild_add_rostesT(test/test-rtmlaunch.launch)
+rosbuild_add_rostesT(test/test-rtmlaunch-tag.launch)

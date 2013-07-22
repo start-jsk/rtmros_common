@@ -1,0 +1,22 @@
+<launch>
+  <!-- END:openrtm setting -->
+  <arg name="TAG" value="true"/>
+  <node pkg="openrtm" name="SeqIn"  type="SeqInComp" args="-o 'naming.formats:%n.rtc'" />
+  <node pkg="openrtm" name="SeqOut" type="SeqOutComp" args="-o 'naming.formats:%n.rtc'" />
+  <!-- BEGIN:openrtm connection -->
+  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find openrtm)/test/test-rtmlaunch-tag.launch TAG=true" output = "screen"/>
+  <group if="$(arg TAG)" >
+    <rtconnect from="SequenceOutComponent0.rtc:Short"
+               to="SequenceInComponent0.rtc:Short" />
+    <rtactivate component="SequenceOutComponent0.rtc" />
+    <rtactivate component="SequenceInComponent0.rtc" />
+
+    <rtconnect from="SequenceOutComponent0.rtc:Short"
+               to="test_seqio0.rtc:Short" />
+    <rtactivate component="test_seqio0.rtc" />
+  </group>
+
+  <test pkg="openrtm" type="test-seqio.py" test-name="test_seqio"
+        args="-f $(find openrtm)/test/test-seqio.conf --"
+        time-limit="30" />
+</launch>
