@@ -164,7 +164,7 @@ class HrpsysConfigurator:
             connectPorts(self.seq.port("accRef"), self.kf.port("accRef"))
 
         # connection for rh
-        if self.rh.port("servoState") != None:
+        if self.rh.port("servoState") != None and self.el:
             connectPorts(self.rh.port("servoState"), self.el.port("servoStateIn"))
 
         # connection for sh, seq, fk
