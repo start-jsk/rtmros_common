@@ -57,7 +57,12 @@ void IOBPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
       XmlRpc::XmlRpcValue joint_lst = param_val["joints"];
       XmlRpc::XmlRpcValue fsensors = param_val["force_torque_sensors"];
       XmlRpc::XmlRpcValue imusensors = param_val["imu_sensors"];
-      ROS_INFO("robotname: %s", rname.c_str());
+      if (rname != this->robot_name) {
+        ROS_ERROR("mismatch robotnames: %s (ros parameter) != %s (gazebo element)",
+                  rname.c_str(), this->robot_name.c_str());
+      } else {
+        ROS_INFO("robotname: %s", rname.c_str());
+      }
       // joint name
       if (joint_lst.getType() == XmlRpc::XmlRpcValue::TypeArray) {
         for(int s = 0; s < joint_lst.size(); s++) {
