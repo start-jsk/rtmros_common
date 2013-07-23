@@ -78,9 +78,10 @@ function rosinstall_merge {
 
     # set rtm-ros-robotics from trunk to latest
     sed -i 's#https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common#http://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common#g' ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
+    # remove version from rtmros_common
     sed -e "/rtm-ros-robotics/{
 N
-s#\(http://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common',\n    version: -r\)[0-9]*#\1${latest_revision}#
+s#\(http://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common'\),\n    version: -r[0-9]*#\1#
 }
 #" ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs > ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs.tmp
     mv ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs.tmp ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
