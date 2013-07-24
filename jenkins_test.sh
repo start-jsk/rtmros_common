@@ -15,7 +15,7 @@ install-pkg 'http://svn.code.sf.net/p/jsk-ros-pkg/code/trunk/jsk.rosinstall?form
 
 rosdep update || ( sleep 120; rosdep update )
 
-PKGS='euscollada openhrp3 hrpsys_tutorials hironx_ros_bridge'
+PKGS='openrtm euscollada openhrp3 hrpsys_tutorials hironx_ros_bridge'
 
 compile-pkg $PKGS
 
