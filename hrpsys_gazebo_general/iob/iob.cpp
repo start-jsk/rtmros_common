@@ -559,21 +559,62 @@ int open_iob(void)
 
     std::cerr << ";; Open IOB / start " << std::endl;
 
-    // robot specify setting
-    int joint_id_real2model[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                                 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-                                 20, 21, 22, 23, 24, 25, 26, 27, 28 };
-
-    joint_real2model_vec.resize(0);
-    for(int i = 0; i < sizeof(joint_id_real2model)/sizeof(joint_id_real2model[0]); i++) {
-      joint_real2model_vec.push_back(joint_id_real2model[i]);
-      joint_model2real_map[joint_id_real2model[i]] = i;
-    }
-
     std::map<std::string, std::string> arg;
     ros::init(arg, "hrpsys_gazebo_iob", ros::init_options::NoSigintHandler);
 
     rosnode = new ros::NodeHandle();
+
+    joint_real2model_vec.resize(0);
+    std::string controller_name;
+    if (rosnode->hasParam("hrpsys_gazebo_iob")) {
+      if (!rosnode->getParam("hrpsys_gazebo_iob", controller_name)) {
+        controller_name = "hrpsys_gazebo_configuration";
+      }
+    }
+
+    if (rosnode->hasParam(controller_name + "/joint_id_list")) {
+      XmlRpc::XmlRpcValue param_val;
+      rosnode->getParam(controller_name + "/joint_id_list", param_val);
+      if (param_val.getType() == XmlRpc::XmlRpcValue::TypeArray) {
+        for(int i = 0; i < param_val.size(); i++) {
+          int num = param_val[i];
+          joint_real2model_vec.push_back(num);
+        }
+      } else {
+        // error
+      }
+    } else if (rosnode->hasParam(controller_name + "/number_of_joints")) {
+      int num;
+      rosnode->getParam(controller_name + "/number_of_joints", num);
+      for(int i = 0; i < num; i++) {
+        joint_real2model_vec.push_back(i);
+      }
+    } else {
+      // error
+    }
+
+    XmlRpc::XmlRpcValue param_val;
+    std::vector<std::string> joint_lst;
+    rosnode->getParam(controller_name + "/joints", param_val);
+    if (param_val.getType() == XmlRpc::XmlRpcValue::TypeArray) {
+      for(unsigned int s = 0; s < param_val.size(); s++) {
+          std::string nstr = param_val[s];
+          ROS_DEBUG("add joint: %s", nstr.c_str());
+          joint_lst.push_back(nstr);
+        }
+    } else {
+      // error
+    }
+
+    if (joint_real2model_vec.size() == 0) {
+      for(unsigned int i = 0; i < joint_lst.size(); i++) {
+        joint_real2model_vec.push_back(i);
+      }
+    }
+
+    for(unsigned int i = 0; i < joint_real2model_vec.size(); i++) {
+      joint_model2real_map[joint_real2model_vec[i]] = i;
+    }
 
     unsigned int n = NUM_OF_REAL_JOINT;
 
@@ -589,23 +630,8 @@ int open_iob(void)
     initial_jointcommand.i_effort_min.resize(n);
     initial_jointcommand.i_effort_max.resize(n);
 
-    std::string namestr("hrpsys_gazebo_configuration");
-
-    XmlRpc::XmlRpcValue param_val;
-    std::vector<std::string> joint_lst;
-    rosnode->getParam(namestr + "/joints", param_val);
-    if (param_val.getType() == XmlRpc::XmlRpcValue::TypeArray) {
-      for(unsigned int s = 0; s < param_val.size(); s++) {
-          std::string nstr = param_val[s];
-          //ROS_INFO("add joint: %s", n.c_str());
-          joint_lst.push_back(nstr);
-        }
-    } else {
-      // error
-    }
-
     for (unsigned int i = 0; i < joint_lst.size(); ++i) {
-      std::string joint_ns(namestr);
+      std::string joint_ns(controller_name);
       joint_ns += ("/gains/" + joint_lst[i] + "/");
 
       double p_val = 0, i_val = 0, d_val = 0, i_clamp_val = 0;
@@ -632,7 +658,7 @@ int open_iob(void)
     }
 
     std::string robotname;
-    std::string rname_str = std::string(namestr) + "/robotname";
+    std::string rname_str = std::string(controller_name) + "/robotname";
     rosnode->getParam(rname_str, robotname);
 
     initial_jointcommand.desired_controller_period_ms = static_cast<unsigned int>(g_period_ns * 1e-6);
@@ -664,7 +690,7 @@ int open_iob(void)
 
     jointcommand = initial_jointcommand;
     isInitialized = true;
-    std::cerr << number_of_joints() << " / " << initial_jointcommand.position.size() << " / " << NUM_OF_REAL_JOINT << std::endl;
+    std::cerr << ";; " << number_of_joints() << " / " << initial_jointcommand.position.size() << " / " << NUM_OF_REAL_JOINT << std::endl;
     std::cerr << ";; Open IOB / finish " << std::endl;
     return TRUE;
 }
