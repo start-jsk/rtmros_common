@@ -1,10 +1,10 @@
 <launch>
   <!-- END:openrtm setting -->
-  <arg name="TAG" value="true"/>
+  <arg name="TAG" default="true"/>
   <node pkg="openrtm" name="SeqIn"  type="SeqInComp" args="-o 'naming.formats:%n.rtc'" />
   <node pkg="openrtm" name="SeqOut" type="SeqOutComp" args="-o 'naming.formats:%n.rtc'" />
   <!-- BEGIN:openrtm connection -->
-  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find openrtm)/test/test-rtmlaunch-tag.launch TAG=true" output = "screen"/>
+  <node name="rtmlaunch" pkg="openrtm" type="rtmlaunch.py" args="$(find openrtm)/test/test-rtmlaunch-tag.launch TAG=$(arg TAG)" output = "screen"/>
   <group if="$(arg TAG)" >
     <rtconnect from="SequenceOutComponent0.rtc:Short"
                to="SequenceInComponent0.rtc:Short" />
