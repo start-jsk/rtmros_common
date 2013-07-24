@@ -1,6 +1,6 @@
 <launch>
   <include file="$(find openrtm_ros_bridge)/samples/myservice_example.launch" >
-    <arg name="HAVE_DISPLAY" value="true" />
+    <arg name="HAVE_DISPLAY" value="false" />
   </include>
   <include file="$(find openrtm_ros_bridge)/samples/myservice_rosbridge.launch" />
 
