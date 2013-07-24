@@ -41,6 +41,10 @@ rtmbuild_genidl()
 #target_link_libraries(example ${PROJECT_NAME})
 
 rtmbuild_genbridge()
+##
+## clean
+##
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_SOURCE_DIR}/bin;${CMAKE_SOURCE_DIR}/src;${CMAKE_SOURCE_DIR}/idl;${CMAKE_SOURCE_DIR}/srv;${CMAKE_SOURCE_DIR}/idl_gen;${CMAKE_SOURCE_DIR}/srv_gen;${CMAKE_SOURCE_DIR}/msg_gen;${CMAKE_SOURCE_DIR}/src_gen;${CMAKE_SOURCE_DIR}/msg/SimpleService_MyService.msg")
 
 ##
 ## tests
