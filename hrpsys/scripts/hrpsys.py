@@ -302,9 +302,12 @@ class HrpsysConfigurator:
         for sen in self.sensors:
             self.connectLoggerPort(self.rh, sen.name)
         #
-        self.connectLoggerPort(self.kf, 'rpy')
-        self.connectLoggerPort(self.seq, 'qRef')
-        self.connectLoggerPort(self.rh, 'emergencySignal')
+        if self.kf != None:
+            self.connectLoggerPort(self.kf, 'rpy')
+        if self.seq != None:
+            self.connectLoggerPort(self.seq, 'qRef')
+        if self.rh != None:
+            self.connectLoggerPort(self.rh, 'emergencySignal')
 
     def waitForRTCManagerAndRoboHardware(self, robotname="Robot", managerhost=nshost):
         self.ms = None
