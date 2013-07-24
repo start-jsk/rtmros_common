@@ -1,0 +1,11 @@
+<launch>
+  <arg name="gzname" default="gazebo"/>
+  <arg name="WORLD" default="HRP2JSKNTS.world"/>
+  <arg name="HRPSYS_GAZEBO_CONFIG" default="$(find hrpsys_gazebo_tutorials)/config/hrp2jsknts.yaml" />
+
+  <include file="$(find hrpsys_gazebo_tutorials)/launch/gazebo_robot_no_controllers.launch">
+    <arg name="gzname" value="$(arg gzname)" />
+    <arg name="WORLD" value="$(arg WORLD)" />
+    <arg name="HRPSYS_GAZEBO_CONFIG" value="$(arg HRPSYS_GAZEBO_CONFIG)" />
+  </include>
+</launch>
