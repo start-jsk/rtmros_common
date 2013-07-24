@@ -1,20 +1,23 @@
 <launch>
+  <arg name="HAVE_DISPLAY" default="true" />
+
+  <arg     if="$(arg HAVE_DISPLAY)"  name="launch_prefix" value="xterm -fn 10x20 -geometry 60x20 -e" />
+  <arg unless="$(arg HAVE_DISPLAY)"  name="launch_prefix" value=""/>
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
   <!-- END:openrtm setting -->
 
-  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
-  <node name="rtsysedit" pkg="openhrp3" type="rtsysedit.sh" />
+  <node name="rtsysedit" pkg="openhrp3" type="rtsysedit.sh" if="$(arg HAVE_DISPLAY)"/>
 
   <!-- RTC Service Provider sample -->
   <node name="provider" pkg="openrtm" type="MyServiceProviderComp"
-	args='$(arg openrtm_args)' launch-prefix="xterm -fn 10x20 -geometry 60x20 -e"/>
+	args='$(arg openrtm_args)' launch-prefix="$(arg launch_prefix)"/>
 
   <!-- RTC Service COnsumet sample -->
   <node name="consumer" pkg="openrtm" type="MyServiceConsumerComp"
-	args='$(arg openrtm_args)' launch-prefix="xterm -fn 10x20 -geometry 60x20 -e" />
+	args='$(arg openrtm_args)' launch-prefix="$(arg launch_prefix)" />
 
 
   <!-- BEGIN:openrtm connection -->
