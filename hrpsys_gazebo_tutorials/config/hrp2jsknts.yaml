@@ -2,31 +2,6 @@ hrpsys_gazebo_configuration:
   robotname: HRP2JSKNTS
 ##
   joints:
-    - CHEST_JOINT0
-    - CHEST_JOINT1
-    - HEAD_JOINT0
-    - HEAD_JOINT1
-    - LARM_JOINT0
-    - LARM_JOINT1
-    - LARM_JOINT2
-    - LARM_JOINT3
-    - LARM_JOINT4
-    - LARM_JOINT5
-    - LARM_JOINT6
-    - RARM_JOINT0
-    - RARM_JOINT1
-    - RARM_JOINT2
-    - RARM_JOINT3
-    - RARM_JOINT4
-    - RARM_JOINT5
-    - RARM_JOINT6
-    - LLEG_JOINT0
-    - LLEG_JOINT1
-    - LLEG_JOINT2
-    - LLEG_JOINT3
-    - LLEG_JOINT4
-    - LLEG_JOINT5
-    - LLEG_JOINT6
     - RLEG_JOINT0
     - RLEG_JOINT1
     - RLEG_JOINT2
@@ -34,6 +9,33 @@ hrpsys_gazebo_configuration:
     - RLEG_JOINT4
     - RLEG_JOINT5
     - RLEG_JOINT6
+    - LLEG_JOINT0
+    - LLEG_JOINT1
+    - LLEG_JOINT2
+    - LLEG_JOINT3
+    - LLEG_JOINT4
+    - LLEG_JOINT5
+    - LLEG_JOINT6
+    - CHEST_JOINT0
+    - CHEST_JOINT1
+    - HEAD_JOINT0
+    - HEAD_JOINT1
+    - RARM_JOINT0
+    - RARM_JOINT1
+    - RARM_JOINT2
+    - RARM_JOINT3
+    - RARM_JOINT4
+    - RARM_JOINT5
+    - RARM_JOINT6
+#    - RARM_JOINT7
+    - LARM_JOINT0
+    - LARM_JOINT1
+    - LARM_JOINT2
+    - LARM_JOINT3
+    - LARM_JOINT4
+    - LARM_JOINT5
+    - LARM_JOINT6
+#    - LARM_JOINT7
 ## jointid:
   gains:
     CHEST_JOINT0: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
@@ -47,6 +49,7 @@ hrpsys_gazebo_configuration:
     LARM_JOINT4: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
     LARM_JOINT5: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
     LARM_JOINT6: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
+#    LARM_JOINT7: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
     RARM_JOINT0: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
     RARM_JOINT1: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
     RARM_JOINT2: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
@@ -54,6 +57,7 @@ hrpsys_gazebo_configuration:
     RARM_JOINT4: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
     RARM_JOINT5: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
     RARM_JOINT6: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
+#    RARM_JOINT7: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
     LLEG_JOINT0: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
     LLEG_JOINT1: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
     LLEG_JOINT2: {p: 700.0, d:   0.075, i: 0.0, i_clamp: 0.0}
