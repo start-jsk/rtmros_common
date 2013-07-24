@@ -101,19 +101,19 @@ macro(compile_openhrp_model wrlfile)
   rosbuild_find_ros_package(hrpsys)
   set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_PACKAGE_PATH}/launch/_gen_project.launch)
   add_custom_command(OUTPUT ${_xmlfile}
-    COMMAND rosrun openrtm rtm-naming 2888
-    COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
-    COMMAND -pkill -KILL -f "omniNames -start 2888" || echo "no process to kill"
+    COMMAND rosrun openrtm rtm-naming 2889
+    COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2889 INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
+    COMMAND -pkill -KILL -f "omniNames -start 2889" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
-    COMMAND rosrun openrtm rtm-naming 2888
-    COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2888 INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
-    COMMAND -pkill -KILL -f "omniNames -start 2888" || echo "no process to kill"
+    COMMAND rosrun openrtm rtm-naming 2889
+    COMMAND rostest -t hrpsys _gen_project.launch CORBA_PORT:=2889 INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
+    COMMAND -pkill -KILL -f "omniNames -start 2889" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
   add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
   ## make sure to kill nameserver
   add_custom_command(OUTPUT ${_name}_compile_cleanup
-    COMMAND -pkill -KILL -f "omniNames -start 2888" || echo "no process to kill"
+    COMMAND -pkill -KILL -f "omniNames -start 2889" || echo "no process to kill"
     DEPENDS  ${_name}_compile
     VERBATIM)
   add_custom_target(${_name}_compile_all ALL DEPENDS ${_name}_compile_cleanup)
