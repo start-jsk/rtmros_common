@@ -139,7 +139,14 @@ def main():
     fullpathname = sys.argv[1]
     print >>sys.stderr, "[rtmlaunch] starting... ",fullpathname
     try:
-        parser = get_true_tags(parse(fullpathname).getElementsByTagName("group"))
+        parser = parse(fullpathname)
+        for node in parser.getElementsByTagName("launch")[0].childNodes:
+            if node.nodeName == u'group':
+                val = node.getAttributeNode(u'if').value
+                arg = val.split(" ")[1].strip(")") # To "USE_WALKING"
+                if not get_flag_from_argv(arg):
+                    for remove_node in node.childNodes:
+                        node.removeChild(rmeove_node)
     except Exception,e:
         print e
         return 1
@@ -152,16 +159,6 @@ def main():
         rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
         rtactivate(nameserver, parser.getElementsByTagName("rtactivate"))
         time.sleep(10)
-
-def get_true_tags(tags):
-    import xml.dom.minidom
-    parser_reduced = xml.dom.minidom.Document()
-    for tag in tags:
-        val = tag.attributes.get("if").value # For example, "$(arg USE_WALKING)"
-        arg = val.split(" ")[1].strip(")") # To "USE_WALKING"
-        if get_flag_from_argv(arg):
-           parser_reduced.childNodes.append(tag)
-    return parser_reduced
 
 def get_flag_from_argv(arg):
     for a in sys.argv:
