@@ -2,9 +2,12 @@
   <arg name="KILL_SERVERS" default="false" />
   <arg name="ROBOT_NAME" default="SampleRobot" />
   <arg name="SIMULATOR_NAME" default="RobotHardware0" />
+  <arg name="CONFIG_NAME" default="hrpsys_gazebo_configuration" />
 
   <arg name="GAZEBO_MODEL_DIR" value="$(find hrpsys_gazebo_tutorials)/models/$(arg ROBOT_NAME)" />
   <arg name="CONF_FILE" value="$(arg GAZEBO_MODEL_DIR)/hrpsys/$(arg ROBOT_NAME).conf" />
+
+  <param name="hrpsys_gazebo_iob" value="$(arg CONFIG_NAME)"/>
 
   <include file="$(find hrpsys)/launch/hrpsys.launch" >
     <arg name="USE_RTCD" value="true" />
