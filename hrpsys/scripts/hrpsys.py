@@ -151,6 +151,10 @@ class HrpsysConfigurator:
                     connectPorts(self.hgc.port("qOut"), self.rh.port("qRef"))
                 else :
                     connectPorts(tmp_contollers[-1].port("q"),  self.rh.port("qRef"))
+        else:
+            if self.simulation_mode :
+                connectPorts(self.sh.port("qOut"),  self.hgc.port("qIn"))
+                connectPorts(self.hgc.port("qOut"), self.rh.port("qRef"))
 
         # connection for kf
         if self.kf:
@@ -281,7 +285,10 @@ class HrpsysConfigurator:
 
     # public method to get sensors list
     def getSensors(self, url):
-        return sum(map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, self.getBodyInfo(url)._get_links())), [])  # sum is for list flatten
+        if url=='':
+            return []
+        else:
+            return sum(map(lambda x : x.sensors, filter(lambda x : len(x.sensors) > 0, self.getBodyInfo(url)._get_links())), [])  # sum is for list flatten
 
     def connectLoggerPort(self, artc, sen_name):
         if artc and rtm.findPort(artc.ref, sen_name) != None:
