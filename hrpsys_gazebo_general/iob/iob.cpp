@@ -581,16 +581,10 @@ int open_iob(void)
           joint_real2model_vec.push_back(num);
         }
       } else {
-        // error
-      }
-    } else if (rosnode->hasParam(controller_name + "/number_of_joints")) {
-      int num;
-      rosnode->getParam(controller_name + "/number_of_joints", num);
-      for(int i = 0; i < num; i++) {
-        joint_real2model_vec.push_back(i);
+        ROS_WARN("%s/joint_id_list is not list of integer", controller_name.c_str());
       }
     } else {
-      // error
+      ROS_DEBUG("%s/joint_id_list is nothing", controller_name.c_str());
     }
 
     XmlRpc::XmlRpcValue param_val;
@@ -603,13 +597,16 @@ int open_iob(void)
           joint_lst.push_back(nstr);
         }
     } else {
-      // error
+      ROS_ERROR("%s/joints is not list of joint name", controller_name.c_str());
     }
 
     if (joint_real2model_vec.size() == 0) {
       for(unsigned int i = 0; i < joint_lst.size(); i++) {
         joint_real2model_vec.push_back(i);
       }
+    } else if (joint_real2model_vec.size() != joint_lst.size()) {
+      ROS_ERROR("size differece on joint_id_list and joints (%d,  %d)",
+                joint_real2model_vec.size(), joint_lst.size());
     }
 
     for(unsigned int i = 0; i < joint_real2model_vec.size(); i++) {
