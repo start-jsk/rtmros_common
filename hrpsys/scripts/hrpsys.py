@@ -221,7 +221,7 @@ class HrpsysConfigurator:
             connectPorts(self.rh.port("q"), self.el.port("qCurrent"))
 
     def activateComps(self):
-        rtcList = self.getRTCList()
+        rtcList = self.getRTCInstanceList()
         rtm.serializeComponents(rtcList)
         for r in rtcList:
             r.start()
@@ -232,43 +232,47 @@ class HrpsysConfigurator:
         print self.configurator_name, "create Comp -> ", compName, " : ", comp
         if comp == None:
             raise RuntimeError("Cannot create component: " + compName)
-        if return_svc :
-            comp_svc = narrow(comp.service("service0"), compName+"Service")
-            print self.configurator_name, "create CompSvc -> ", compName, "Service : ", comp_svc
-            return [comp, comp_svc]
+        if return_svc:
+            if comp.service("service0"):
+                comp_svc = narrow(comp.service("service0"), compName+"Service")
+                print self.configurator_name, "create CompSvc -> ", compName, "Service : ", comp_svc
+                return [comp, comp_svc]
+            else:
+                return [comp, None]
         else:
             return comp
 
     def createComps(self):
-        [self.seq, self.seq_svc] = self.createComp("SequencePlayer", "seq", True)
-
-        [self.sh, self.sh_svc] = self.createComp("StateHolder", "sh", True)
-
-        [self.fk, self.fk_svc] = self.createComp("ForwardKinematics", "fk", True)
-
-        self.tf = self.createComp("TorqueFilter", "tf")
-
-        self.kf = self.createComp("KalmanFilter", "kf")
-
-        self.vs = self.createComp("VirtualForceSensor", "vs")
-
-        self.afs = self.createComp("AbsoluteForceSensor", "afs")
-
-        self.ic = self.createComp("ImpedanceController", "ic")
-
-        self.abc = self.createComp("AutoBalancer", "abc")
-
-        self.st = self.createComp("Stabilizer", "st")
-
-        [self.co, self.co_svc] = self.createComp("CollisionDetector", "co", True)
-
-        self.el = self.createComp("SoftErrorLimiter", "el")
-
-        [self.log, self.log_svc] = self.createComp("DataLogger", "log", True)
+        for rn in self.getRTCList():
+            rn2='self.'+rn[0]
+            if eval(rn2) == None:
+                create_str="[self."+rn[0]+", self."+rn[0]+"_svc] = self.createComp(\""+rn[1]+"\",\""+rn[0]+"\", True)"
+                print self.configurator_name, "  eval : ", create_str
+                exec(create_str)
 
     # public method to configure all RTCs to be activated on rtcd
     def getRTCList(self):
-        return [self.rh, self.seq, self.sh, self.fk, self.tf, self.kf, self.vs, self.afs, self.ic, self.abc, self.st, self.co, self.el, self.log]
+        return [
+            ['seq', "SequencePlayer"],
+            ['sh', "StateHolder"],
+            ['fk', "ForwardKinematics"],
+            ['tf', "TorqueFilter"],
+            ['kf', "KalmanFilter"],
+            ['vs', "VirtualForceSensor"],
+            ['afs', "AbsoluteForceSensor"],
+            ['ic', "ImpedanceController"],
+            ['abc', "AutoBalancer"],
+            ['st', "Stabilizer"],
+            ['co', "CollisionDetector"],
+            ['el', "SoftErrorLimiter"],
+            ['log', "DataLogger"]
+            ]
+
+    def getRTCInstanceList(self):
+        ret = [self.rh]
+        for r in map(lambda x : 'self.'+x[0], self.getRTCList()):
+            ret.append(eval(r))
+        return ret
 
     # public method to get bodyInfo
     def getBodyInfo(self, url):

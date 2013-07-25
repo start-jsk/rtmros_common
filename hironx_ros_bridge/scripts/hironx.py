@@ -46,9 +46,6 @@ class HIRONX(HrpsysConfigurator):
     #
     # hiro specific methods
     #
-    def getRTCList(self):
-        return [self.rh, self.seq, self.sh, self.fk, self.sc, self.log]
-
     def init(self, robotname="HiroNX(Robot)0", url=""):
         HrpsysConfigurator.init(self, robotname=robotname, url=url)
         self.setSelfGroups()
@@ -72,21 +69,16 @@ class HIRONX(HrpsysConfigurator):
                 self.seq_svc.waitInterpolationOfGroup(self.Groups[i][0])
         return ret
 
-    def createComps(self):
-        [self.seq, self.seq_svc] = self.createComp("SequencePlayer", "seq", True)
-
-        [self.sh, self.sh_svc] = self.createComp("StateHolder", "sh", True)
-
-        [self.fk, self.fk_svc] = self.createComp("ForwardKinematics", "fk", True)
-
-        #self.co = self.createComp("CollisionDetector", "co")
-        #if self.co :
-        #    self.co_svc = rtm.narrow(self.co.service("service0"), "CollisionDetectorService")
-
-        # servo controller (grasper)
-        [self.sc, self.sc_svc] = self.createComp("ServoController", "sc", True)
-
-        [self.log, self.log_svc] = self.createComp("DataLogger", "log", True)
+    # overwrite
+    def getRTCList(self):
+        return [
+            ['seq', "SequencePlayer"],
+            ['sh', "StateHolder"],
+            ['fk', "ForwardKinematics"],
+            # ['co', "CollisionDetector"],
+            ['sc', "ServoController"],
+            ['log', "DataLogger"]
+            ]
 
     #
     # hand interface
