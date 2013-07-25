@@ -1,4 +1,7 @@
 <launch>
+  <arg name="nameserver" default="localhost" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
+
   <!-- END:openrtm setting -->
   <node pkg="openrtm" name="SeqIn"  type="SeqInComp" args="-o 'naming.formats:%n.rtc'" />
   <node pkg="openrtm" name="SeqOut" type="SeqOutComp" args="-o 'naming.formats:%n.rtc'" />
