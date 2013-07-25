@@ -12,11 +12,11 @@
   <node name="rtsysedit" pkg="openhrp3" type="rtsysedit.sh" if="$(arg HAVE_DISPLAY)"/>
 
   <!-- RTC Service Provider sample -->
-  <node name="provider" pkg="openrtm_aist" type="MyServiceProviderComp"
+  <node name="provider" pkg="openrtm" type="MyServiceProviderComp"
 	args='$(arg openrtm_args)' launch-prefix="$(arg launch_prefix)"/>
 
   <!-- RTC Service COnsumet sample -->
-  <node name="consumer" pkg="openrtm_aist" type="MyServiceConsumerComp"
+  <node name="consumer" pkg="openrtm" type="MyServiceConsumerComp"
 	args='$(arg openrtm_args)' launch-prefix="$(arg launch_prefix)" />
 
 
