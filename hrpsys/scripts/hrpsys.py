@@ -226,27 +226,24 @@ class HrpsysConfigurator:
         for r in rtcList:
             r.start()
 
-    def createComp(self, compName, instanceName, return_svc = False):
+    def createComp(self, compName, instanceName):
         self.ms.load(compName)
         comp = self.ms.create(compName, instanceName)
         print self.configurator_name, "create Comp -> ", compName, " : ", comp
         if comp == None:
             raise RuntimeError("Cannot create component: " + compName)
-        if return_svc:
-            if comp.service("service0"):
-                comp_svc = narrow(comp.service("service0"), compName+"Service")
-                print self.configurator_name, "create CompSvc -> ", compName, "Service : ", comp_svc
-                return [comp, comp_svc]
-            else:
-                return [comp, None]
+        if comp.service("service0"):
+            comp_svc = narrow(comp.service("service0"), compName+"Service")
+            print self.configurator_name, "create CompSvc -> ", compName, "Service : ", comp_svc
+            return [comp, comp_svc]
         else:
-            return comp
+            return [comp, None]
 
     def createComps(self):
         for rn in self.getRTCList():
             rn2='self.'+rn[0]
             if eval(rn2) == None:
-                create_str="[self."+rn[0]+", self."+rn[0]+"_svc] = self.createComp(\""+rn[1]+"\",\""+rn[0]+"\", True)"
+                create_str="[self."+rn[0]+", self."+rn[0]+"_svc] = self.createComp(\""+rn[1]+"\",\""+rn[0]+"\")"
                 print self.configurator_name, "  eval : ", create_str
                 exec(create_str)
 
