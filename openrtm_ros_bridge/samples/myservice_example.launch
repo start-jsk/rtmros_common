@@ -21,7 +21,7 @@
 
 
   <!-- BEGIN:openrtm connection -->
-  <node name="rtmlaunch_example" pkg="openrtm_tools" type="rtmlaunch.py"
+  <node name="rtmlaunch_example" pkg="openrtm" type="rtmlaunch.py"
         args="$(find openrtm_ros_bridge)/samples/myservice_example.launch"/>
   <rtactivate component="MyServiceProvider0.rtc" />
   <rtactivate component="MyServiceConsumer0.rtc" />
