@@ -140,13 +140,16 @@ def main():
     print >>sys.stderr, "[rtmlaunch] starting... ",fullpathname
     try:
         parser = parse(fullpathname)
-        for node in parser.getElementsByTagName("launch")[0].childNodes:
+        nodes = parser.getElementsByTagName("launch")[0].childNodes
+        remove_nodes = []
+        for node in nodes:
             if node.nodeName == u'group':
                 val = node.getAttributeNode(u'if').value
                 arg = val.split(" ")[1].strip(")") # To "USE_WALKING"
                 if not get_flag_from_argv(arg):
-                    for remove_node in node.childNodes:
-                        node.removeChild(rmeove_node)
+                    remove_nodes.append(node)
+        for remove_node in remove_nodes:
+            nodes.remove(remove_node)
     except Exception,e:
         print e
         return 1
