@@ -12,16 +12,16 @@
   <node name="rtsysedit" pkg="openhrp3" type="rtsysedit.sh" if="$(arg HAVE_DISPLAY)"/>
 
   <!-- RTC Service Provider sample -->
-  <node name="provider" pkg="openrtm" type="MyServiceProviderComp"
+  <node name="provider" pkg="openrtm_aist" type="MyServiceProviderComp"
 	args='$(arg openrtm_args)' launch-prefix="$(arg launch_prefix)"/>
 
   <!-- RTC Service COnsumet sample -->
-  <node name="consumer" pkg="openrtm" type="MyServiceConsumerComp"
+  <node name="consumer" pkg="openrtm_aist" type="MyServiceConsumerComp"
 	args='$(arg openrtm_args)' launch-prefix="$(arg launch_prefix)" />
 
 
   <!-- BEGIN:openrtm connection -->
-  <node name="rtmlaunch_example" pkg="openrtm" type="rtmlaunch.py"
+  <node name="rtmlaunch_example" pkg="openrtm_tools" type="rtmlaunch.py"
         args="$(find openrtm_ros_bridge)/samples/myservice_example.launch"/>
   <rtactivate component="MyServiceProvider0.rtc" />
   <rtactivate component="MyServiceConsumer0.rtc" />

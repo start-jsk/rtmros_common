@@ -18,7 +18,9 @@ class TestMyServiceRosBridge(unittest.TestCase):
         echo = rospy.ServiceProxy("/bridge/echo", openrtm_ros_bridge.srv.SimpleService_MyService_echo)
         req = openrtm_ros_bridge.srv.SimpleService_MyService_echo
         msg = "this is test data 123"
+        rospy.loginfo("send request > " + msg)
         res = echo(msg)
+        rospy.loginfo("check return < " + res.operation_return)
         self.assertTrue(res.operation_return == msg, "SimpleService.echo returns incorrect string")
 
 if __name__ == '__main__':
