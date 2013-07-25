@@ -1,0 +1,86 @@
+hrpsys_gazebo_configuration:
+  robotname: HRP2JSK
+##
+  joints:
+    - RLEG_JOINT0
+    - RLEG_JOINT1
+    - RLEG_JOINT2
+    - RLEG_JOINT3
+    - RLEG_JOINT4
+    - RLEG_JOINT5
+    - LLEG_JOINT0
+    - LLEG_JOINT1
+    - LLEG_JOINT2
+    - LLEG_JOINT3
+    - LLEG_JOINT4
+    - LLEG_JOINT5
+    - CHEST_JOINT0
+    - CHEST_JOINT1
+    - HEAD_JOINT0
+    - HEAD_JOINT1
+    - RARM_JOINT0
+    - RARM_JOINT1
+    - RARM_JOINT2
+    - RARM_JOINT3
+    - RARM_JOINT4
+    - RARM_JOINT5
+    - RARM_JOINT6
+    - RARM_JOINT7
+    - LARM_JOINT0
+    - LARM_JOINT1
+    - LARM_JOINT2
+    - LARM_JOINT3
+    - LARM_JOINT4
+    - LARM_JOINT5
+    - LARM_JOINT6
+    - LARM_JOINT7
+## jointid:
+  gains:
+    CHEST_JOINT0: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+    CHEST_JOINT1: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+    HEAD_JOINT0: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    HEAD_JOINT1: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    LARM_JOINT0: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    LARM_JOINT1: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    LARM_JOINT2: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    LARM_JOINT3: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    LARM_JOINT4: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    LARM_JOINT5: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    LARM_JOINT6: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    LARM_JOINT7: {p: 10.0, d:   0.01, i: 0.0, i_clamp: 0.0}
+    RARM_JOINT0: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    RARM_JOINT1: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    RARM_JOINT2: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    RARM_JOINT3: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    RARM_JOINT4: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    RARM_JOINT5: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    RARM_JOINT6: {p: 700.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    RARM_JOINT7: {p: 10.0, d:   0.01, i: 0.0, i_clamp: 0.0}
+    LLEG_JOINT0: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+    LLEG_JOINT1: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+    LLEG_JOINT2: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+    LLEG_JOINT3: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+    LLEG_JOINT4: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+    LLEG_JOINT5: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+    RLEG_JOINT0: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+    RLEG_JOINT1: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+    RLEG_JOINT2: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+    RLEG_JOINT3: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+    RLEG_JOINT4: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+    RLEG_JOINT5: {p: 5000.0, d:   0.5, i: 0.0, i_clamp: 0.0}
+##
+  force_torque_sensors:
+    - lfsensor
+    - rfsensor 
+    - lhsensor
+    - rhsensor 
+  force_torque_sensors_config:
+    lfsensor: {joint_name: 'LLEG_JOINT6', frame_id: 'LLEG_LINK6'}
+    rfsensor: {joint_name: 'RLEG_JOINT6', frame_id: 'RLEG_LINK6'}
+    lhsensor: {joint_name: 'LARM_JOINT6', frame_id: 'LARM_LINK6'}
+    rhsensor: {joint_name: 'RARM_JOINT6', frame_id: 'RARM_LINK6'}
+##
+  imu_sensors:
+    - imu_sensor0
+  imu_sensors:
+    imu_sensor0: {name: 'waist_imu', link_name: 'CHEST_LINK0', frame_id: 'WAIST_LINK0'}

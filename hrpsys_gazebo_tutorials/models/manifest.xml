@@ -5,6 +5,7 @@
 
   <models>
     <uri>file://SampleRobot</uri>
+    <uri>file://HRP2JSK</uri>
     <uri>file://HRP2JSKNTS</uri>
   </models>
 </database>
