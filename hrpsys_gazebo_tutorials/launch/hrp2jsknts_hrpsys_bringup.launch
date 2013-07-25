@@ -1,0 +1,47 @@
+<launch>
+  <arg name="KILL_SERVERS" default="false" />
+  <arg name="ROBOT_NAME" default="HRP2JSKNTS" />
+  <arg name="SIMULATOR_NAME" default="RobotHardware0" />
+  <arg name="CONFIG_NAME" default="hrpsys_gazebo_configuration" />
+
+  <arg name="GAZEBO_MODEL_DIR" value="$(find hrpsys_gazebo_tutorials)/models/$(arg ROBOT_NAME)" />
+  <arg name="CONF_FILE" value="$(arg GAZEBO_MODEL_DIR)/hrpsys/$(arg ROBOT_NAME).conf" />
+
+  <param name="hrpsys_gazebo_iob" value="$(arg CONFIG_NAME)"/>
+
+  <include file="$(find hrpsys)/launch/hrpsys.launch" >
+    <arg name="USE_RTCD" value="true" />
+    <arg name="hrpsys_load_path" default="$(find hrpsys_gazebo_general)/lib,$(find hrpsys)/lib"/>
+    <arg name="RobotHardware_conf" default='$(arg GAZEBO_MODEL_DIR)/hrpsys/$(arg ROBOT_NAME).RobotHardware.conf'/>
+    <arg name="PROJECT_FILE" value="$(arg GAZEBO_MODEL_DIR)/hrpsys/$(arg ROBOT_NAME)_nosim.xml" />
+    <arg name="MODEL_FILE" value="$(arg GAZEBO_MODEL_DIR)/hrpsys/$(arg ROBOT_NAME).dae" />
+    <arg name="CONF_FILE" value="$(arg CONF_FILE)" />
+    <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
+    <!--arg name="HRPSYS_PY_PKG" value="hrpsys_gazebo_tutorials"/>
+    <arg name="HRPSYS_PY_NAME" value="sample_hrpsys.py"/-->
+  </include>
+
+  <!-- hrpsys_ros_bridge -->
+  <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch" >
+    <arg name="MODEL_FILE" value="$(arg GAZEBO_MODEL_DIR)/hrpsys/$(arg ROBOT_NAME).dae" />
+    <arg name="COLLADA_FILE" value="$(arg GAZEBO_MODEL_DIR)/hrpsys/$(arg ROBOT_NAME).dae" />
+    <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
+    <arg name="INSTALL_ROBOT_DESCRIPTION" value="false" />
+    <!-- settings -->
+    <arg name="USE_COMMON" default="true" />
+    <arg name="USE_WALKING" default="false" />
+    <arg name="USE_COLLISIONCHECK" default="true" />
+    <arg name="USE_IMPEDANCECONTROLLER" default="false" />
+    <arg name="USE_SOFTERRORLIMIT" default="true" />
+  </include>
+
+  <!-- BEGIN:openrtm connection -->
+  <env name="ROBOT_NAME" value="$(arg ROBOT_NAME)" />
+  <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
+  <node name="rtmlaunch_hrpsys_gazebo_atlas_hrpsys_launch" pkg="openrtm" type="rtmlaunch.py"
+        args="$(find hrpsys_gazebo_tutorials)/launch/robot_hrpsys_bringup.launch"/>
+  <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService"
+             to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/>
+  <!-- END:openrtm connection -->
+
+</launch>
