@@ -154,9 +154,16 @@ def main():
         print e
         return 1
 
-    nameserver = os.getenv("RTCTREE_NAMESERVERS","localhost")
+    if os.getenv("RTCTREE_NAMESERVERS") == None:
+        print >>sys.stderr, "[rtmlaunch] RTCTREE_NAMESERVERS is not set, use localhost"
+        nameserver = "localhost"
+        os.environ["RTCTREE_NAMESERVERS"] = nameserver
+    else:
+        nameserver = os.getenv("RTCTREE_NAMESERVERS")
+
     simulator = os.getenv("SIMULATOR_NAME","Simulator")
-    print >>sys.stderr, "[rtmlaunch]", simulator
+    print >>sys.stderr, "[rtmlaunch] RTCTREE_NAMESERVERS", nameserver,  os.getenv("RTCTREE_NAMESERVERS")
+    print >>sys.stderr, "[rtmlaunch] SIMULATOR_NAME", simulator
     while 1:
         print >>sys.stderr, "[rtmlaunch] check connection/activation"
         rtactivate(nameserver, parser.getElementsByTagName("rtactivate"))
