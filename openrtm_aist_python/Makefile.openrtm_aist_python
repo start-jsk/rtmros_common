@@ -1,0 +1,15 @@
+all: installed
+
+INSTALL_DIR = `rospack find openrtm_aist_python`
+FILENAME    = OpenRTM-aist-Python-1.1.0-RC1.tar.gz
+TARBALL     = build/$(FILENAME)
+TARBALL_URL = http://www.openrtm.org/pub/OpenRTM-aist/python/1.1.0/$(FILENAME)
+SOURCE_DIR  = build/OpenRTM-aist-Python-1.1.0
+UNPACK_CMD  = tar xzf
+MD5SUM_FILE = $(FILENAME).md5sum
+include $(shell rospack find mk)/download_unpack_build.mk
+PYTHONDIR   = `python -c 'import sys; print "python%s"%sys.version[:3]'`
+
+installed: $(SOURCE_DIR)/unpacked
+	cd $(SOURCE_DIR) && python ./setup.py build && python ./setup.py install --prefix=$(INSTALL_DIR)
+	touch installed

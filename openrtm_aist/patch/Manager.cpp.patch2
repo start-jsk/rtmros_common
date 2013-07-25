@@ -1,0 +1,103 @@
+--- src/lib/rtm/Manager.cpp.org	2012-04-19 12:32:20.797925566 +0900
++++ src/lib/rtm/Manager.cpp	2012-04-19 12:34:46.961920398 +0900
+@@ -1603,6 +1603,7 @@
+     std::string name_conf(category + "." + inst_name + ".config_file");
+     
+     
++    coil::vstring config_fname;
+     coil::Properties type_prop, name_prop;
+     
+     // Load "category.instance_name.config_file"
+@@ -1612,11 +1613,26 @@
+ 	if (!conff.fail())
+ 	  {
+ 	    name_prop.load(conff);
++	    RTC_INFO(("Component instance conf file: %s loaded.",
++                      m_config[name_conf].c_str()));
++	    RTC_DEBUG_STR((name_prop))
++	    config_fname.push_back(m_config[name_conf].c_str());
+ 	  }
+       }
+     if (m_config.findNode(category + "." + inst_name) != NULL)
+       {
+-	name_prop << m_config.getNode(category + "." + inst_name);
++	coil::Properties& temp(m_config.getNode(category + "." + inst_name));
++	coil::vstring keys(temp.propertyNames());
++	if (!(keys.size() == 1 && keys.back() == "config_file"))
++	{
++	    name_prop << m_config.getNode(category + "." + inst_name);
++	    RTC_INFO(("Component type conf exists in rtc.conf. Merged."));
++	    RTC_DEBUG_STR((name_prop));
++	    if (m_config.findNode("config_file") != NULL)
++	    {
++		config_fname.push_back(m_config["config_file"]);
++	    }
++	}
+       }
+     
+     if (!m_config[type_conf].empty())
+@@ -1625,16 +1641,37 @@
+ 	if (!conff.fail())
+ 	  {
+ 	    type_prop.load(conff);
++	    {
++		type_prop.load(conff);
++		RTC_INFO(("Component type conf file: %s loaded.",
++			  m_config[type_conf].c_str()));
++		RTC_DEBUG_STR((type_prop));
++		config_fname.push_back(m_config[type_conf].c_str());
++	    }
+ 	  }
+       }
+     if (m_config.findNode(category + "." + type_name) != NULL)
+       {
+-	type_prop << m_config.getNode(category + "." + type_name);
++	  
++	  coil::Properties& temp(m_config.getNode(category + "." + type_name));
++	  coil::vstring keys(temp.propertyNames());
++	  if (!(keys.size() == 1 && keys.back() == "config_file"))
++	  {
++	      type_prop << m_config.getNode(category + "." + type_name);
++	      RTC_INFO(("Component type conf exists in rtc.conf. Merged."));
++	      RTC_DEBUG_STR((type_prop));
++	      if (m_config.findNode("config_file") != NULL)
++	      {
++		  config_fname.push_back(m_config["config_file"]);
++	      }
++	  }
++	  type_prop << m_config.getNode(category + "." + type_name);
+       }
+ 
+     // Merge Properties. type_prop is merged properties
+     comp->getProperties() << prop;
+     type_prop << name_prop;
++    type_prop["config_file"] = coil::flatten(coil::unique_sv(config_fname));
+     comp->getProperties() << type_prop;
+     
+     //------------------------------------------------------------
+diff -ru src/lib/rtm/ManagerConfig.cpp.org src/lib/rtm/ManagerConfig.cpp
+--- src/lib/rtm/ManagerConfig.cpp.org	2010-01-28 13:21:45.000000000 +0900
++++ src/lib/rtm/ManagerConfig.cpp	2012-04-19 12:27:48.301935206 +0900
+@@ -114,6 +114,7 @@
+ 
+     // Properties from arguments are marged finally
+     prop << m_argprop;
++    prop["config_file"] = m_configFile;
+   }
+   
+   /*!
+--- src/lib/rtm/RTObject.cpp.org	2010-01-28 13:21:45.000000000 +0900
++++ src/lib/rtm/RTObject.cpp		2012-04-19 21:26:34.861018182 +0900
+@@ -742,10 +742,12 @@
+                                               "default");
+         if (m_configsets.haveConfig(active_set.c_str()))
+           {
++	       m_configsets.activateConfigurationSet(active_set.c_str());
+             m_configsets.update(active_set.c_str());
+           }
+         else
+           {
++	       m_configsets.activateConfigurationSet("default");
+             m_configsets.update("default");
+           }
+       }

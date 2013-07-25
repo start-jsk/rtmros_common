@@ -1,0 +1,17 @@
+<package>
+  <description brief="openrtm_aist">
+    OpenRTM-aist is a software platform to develop the robotic system in component-oriented.
+  </description>
+  <author>AIST, ros package is maintained by Kei Okada</author>
+  <license>EPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/openrtm</url>
+
+  <rosdep name="tix" />
+  <rosdep name="omniorb" />
+
+  <depend package="rtmbuild" />
+
+</package>
+
+
