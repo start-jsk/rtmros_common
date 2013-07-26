@@ -3,6 +3,7 @@ SVN_DIR     = build/OpenHRP-3
 SVN_URL     = https://openrtp.jp/svn/hrg/openhrp/3.1/trunk
 #SVN_REVISION = -r@REVISION@
 SVN_PATCH = patch/OpenHRP2ModelFile.patch patch/ColladaWriter_inertia.patch
+# https://openrtp.jp/redmine/issues/2154, https://openrtp.jp/redmine/issues/2162
 
 
 CHECKMD5=$(shell rospack find rosbuild)/bin/download_checkmd5.py
