@@ -3,9 +3,8 @@
 
    OpenHRP3 : Robot software platform
 
-http://www.openrtp.jp/openhrp3/en/index.html
-
-http://code.google.com/p/openhrp-aist-grx/
+   vcs : https://openrtp.jp/svn/hrg/openhrp/3.1/trunk/
+   bts : https://openrtp.jp/redmine/
 
   </description>
   <author>Developed by AIST, GRX, ROS Package is maintained by Kei Okada</author>
