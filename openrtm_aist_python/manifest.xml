@@ -7,6 +7,12 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/openrtm</url>
 
+
+  <export>
+    <python path="${prefix}/lib/python2.7/site-packages" />
+    <python path="${prefix}/lib/python2.7/site-packages/OpenRTM_aist/RTM_IDL" />
+  </export>
+
   <rosdep name="python-omniorb" />
 
 </package>
