@@ -11,6 +11,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <url>http://ros.org/wiki/hrprtc_ros_bridge</url>
 
   <depend package="hrpsys"/>
+  <depend package="hrpsys_tools"/>
 
   <!-- seq state ros bridge -->
   <depend package="roscpp"/>
