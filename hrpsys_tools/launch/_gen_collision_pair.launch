@@ -1,0 +1,12 @@
+<launch>
+  <arg name="MODEL_FILE" default="$(find openhrp3)/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl" />
+  <env name="LANG" value="C" />
+  <env name="ORBgiopMaxMsgSize" value="2147483648" />
+  <arg name="CORBA_PORT" default="2809" /> <!-- previous CORBA_PORT is 2800 -->
+
+  <!-- <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" args="-p $(arg CORBA_PORT)"/> -->
+  <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" args="-ORBInitRef NameService=corbaloc:iiop:localhost:$(arg CORBA_PORT)/NameService" respawn="true"/>
+
+  <node name="SetupCollisionPair" pkg="hrpsys" type="SetupCollisionPair" args='--model $(arg MODEL_FILE) -ORBInitRef NameService=corbaloc:iiop:localhost:$(arg CORBA_PORT)/NameService' output="screen" />
+
+</launch>
