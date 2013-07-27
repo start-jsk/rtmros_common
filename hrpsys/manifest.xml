@@ -10,16 +10,21 @@
   <url>http://ros.org/wiki/hrpsys</url>
 
   <export>
-    <rosdoc config="rosdoc.yaml" />
-    <python path="${prefix}/src:${prefix}/share/hrpsys/python" />
+    <python path="${prefix}/lib/python2.7/dist-packages" />
   </export>
+
   <depend package="openhrp3"/>
 
-  <depend package="openrtm_ros_bridge" />
+  <rosdep name="jython" />
+  <rosdep name="libxml2" />
+  <rosdep name="sdl" />
+  <rosdep name="opencv2" />
+  <rosdep name="libqhull" />
+  <rosdep name="libglew-dev" />
+  <rosdep name="libirrlicht-dev" />
+  <rosdep name="boost" />
 
   <rosdep name="doxygen" />
-  <rosdep name="libirrlicht-dev" />
-  <rosdep name="libglew-dev" />
 </package>
 
 
