@@ -4,24 +4,16 @@
    OpenHRP3 : Robot software platform tutorials
 
   </description>
-  <author>Developed by AIST, GRX, ROS Package is maintained by Kei Okada</author>
-  <license>EPL</license>
+  <author>Kei Okada</author>
+
+  <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/openhrp3_tutorials</url>
 
-  <export>
-    <rosdoc config="rosdoc.yaml" />
-  </export>
-
   <depend package="openhrp3" />
 
-  <!-- for robothardware_eclipse.zip -->
   <depend package="hrpsys" />
-
-  <!-- for rostest -->
-  <depend package="jsk_tools" />
-  <rosdep name="python-psutil" />
-  <rosdep name="python-svn" />
+  <depend package="euscollada" />
 
 </package>
 
