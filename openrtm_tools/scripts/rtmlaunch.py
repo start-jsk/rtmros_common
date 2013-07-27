@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import roslib
-roslib.load_manifest('openrtm')
+roslib.load_manifest('openrtm_tools')
 
 import sys
 import os
