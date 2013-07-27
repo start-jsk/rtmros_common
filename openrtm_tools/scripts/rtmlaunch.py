@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import roslib
-roslib.load_manifest('openrtm_tools')
+roslib.load_manifest('openrtm')
 
 import sys
 import os
@@ -9,8 +9,6 @@ import time
 import optparse
 
 from xml.dom.minidom import parse
-
-print sys.path
 
 import rtctree
 from rtshell import rtcon
@@ -142,24 +140,34 @@ def main():
     print >>sys.stderr, "[rtmlaunch] starting... ",fullpathname
     try:
         parser = parse(fullpathname)
-        for node in parser.getElementsByTagName("launch")[0].childNodes:
+        nodes = parser.getElementsByTagName("launch")[0].childNodes
+        remove_nodes = []
+        for node in nodes:
             if node.nodeName == u'group':
                 val = node.getAttributeNode(u'if').value
                 arg = val.split(" ")[1].strip(")") # To "USE_WALKING"
                 if not get_flag_from_argv(arg):
-                    for remove_node in node.childNodes:
-                        node.removeChild(rmeove_node)
+                    remove_nodes.append(node)
+        for remove_node in remove_nodes:
+            nodes.remove(remove_node)
     except Exception,e:
         print e
         return 1
 
-    nameserver = os.getenv("RTCTREE_NAMESERVERS","localhost")
+    if os.getenv("RTCTREE_NAMESERVERS") == None:
+        print >>sys.stderr, "[rtmlaunch] RTCTREE_NAMESERVERS is not set, use localhost"
+        nameserver = "localhost"
+        os.environ["RTCTREE_NAMESERVERS"] = nameserver
+    else:
+        nameserver = os.getenv("RTCTREE_NAMESERVERS")
+
     simulator = os.getenv("SIMULATOR_NAME","Simulator")
-    print >>sys.stderr, "[rtmlaunch]", simulator
+    print >>sys.stderr, "[rtmlaunch] RTCTREE_NAMESERVERS", nameserver,  os.getenv("RTCTREE_NAMESERVERS")
+    print >>sys.stderr, "[rtmlaunch] SIMULATOR_NAME", simulator
     while 1:
         print >>sys.stderr, "[rtmlaunch] check connection/activation"
-        rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
         rtactivate(nameserver, parser.getElementsByTagName("rtactivate"))
+        rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
         time.sleep(10)
 
 def get_flag_from_argv(arg):
