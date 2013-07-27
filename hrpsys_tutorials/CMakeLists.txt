@@ -39,13 +39,10 @@ configure_file(${PROJECT_SOURCE_DIR}/models/SampleRobot.xml.in
 ##
 ## tests
 ##
-rosbuild_add_rostest(test/hrp4c-test.launch)
+rosbuild_find_ros_package("hrpsys")
+if(EXISTS ${hrpsys_PACKAGE_PATH}/share/hrpsys/samples/HRP4C/HRP4Cmain.wrl)
+  rosbuild_add_rostest(test/hrp4c-test.launch)
+endif()
 rosbuild_add_rostest(test/pa10-test.launch)
 rosbuild_add_rostest(test/samplerobot-test.launch)
-
-##
-## documents
-##
-rosbuild_find_ros_package("jsk_tools")
-execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_PACKAGE_PATH}/bin/launchdoc-generator.py ${PROJECT_NAME} --output_dir=./build/ --nomakefile RESULT_VARIABLE _make_failed)
 
