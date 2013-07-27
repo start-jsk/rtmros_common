@@ -12,6 +12,12 @@ include(${PROJECT_SOURCE_DIR}/cmake/compile_robot_model.cmake)
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 #set(ROS_BUILD_TYPE RelWithDebInfo)
 
+rosbuild_find_ros_package(hrpsys)
+file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
+file(COPY
+   ${hrpsys_PACKAGE_PATH}/share/hrpsys/idl/
+    DESTINATION ${PROJECT_SOURCE_DIR}/idl)
+
 rtmbuild_init()
 
 #set the default path for built executables to the "bin" directory
@@ -23,7 +29,10 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
-#rtmbuild_genidl()
+rtmbuild_genidl()
+
+rtmbuild_genbridge()
+
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
