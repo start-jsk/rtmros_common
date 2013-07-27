@@ -1,13 +1,11 @@
 <launch>
-  <arg name="KILL_SERVERS" default="false" />
   <arg name="GUI" default="true" />
-  <include file="$(find hrpsys)/launch/hrpsys.launch" >
+  <include file="$(find hrpsys_tools)/launch/hrpsys.launch" >
     <arg name="MODEL_FILE" value="$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample1.wrl" />
     <arg name="CONF_FILE" value="$(find  hrpsys_tutorials)/models/SampleRobot.conf" />
     <arg name="PROJECT_FILE" value="$(find  hrpsys_tutorials)/models/SampleRobot.xml" />
     <arg name="SIMULATOR_NAME" value="SampleRobot(Robot)0" />
     <arg name="GUI" default="$(arg GUI)" />
-    <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
   </include>
 
   <sphinxdoc><![CDATA[
