@@ -9,55 +9,26 @@ http://code.google.com/p/openhrp-aist-grx/
 
   </description>
   <author>Developed by AIST, GRX, ROS Package is maintained by Kei Okada</author>
+
   <license>EPL</license>
+
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/openhrp3</url>
 
   <export>
-    <rosdoc config="rosdoc.yaml" />
+
   </export>
 
   <!-- openhrp3 -->
-  <depend package="openrtm" />
+  <depend package="openrtm_aist" />
   <depend package="openrtm_ros_bridge" />
+
+  <rosdep name="eigen" />
+  <rosdep name="atlas" />
+  <rosdep name="boost" />
 
   <!-- collada -->
   <rosdep name="collada-dom" />
-
-  <!-- java -->
-  <rosdep name="java" />
-  <rosdep name="jython" />
-  <rosdep name="libreadline-java" />
-
-  <rosdep name="ttf-sazanami-gothic" />
-  <rosdep name="ttf-sazanami-mincho" />
-  <rosdep name="ttf-kochi-gothic" />
-  <rosdep name="ttf-kochi-mincho" />
-
-  <!-- omniORB -->
-  <rosdep name="omniorb" />
-  <rosdep name="python-omniorb" />
-  <rosdep name="python-tk" />
-
-  <!-- math -->
-  <rosdep name="atlas" />
-  <rosdep name="f2c" />
-  <rosdep name="libgfortran3" />
-
-  <!-- eclipse3.4.2 -->
-  <rosdep name="eclipse" />
-  <rosdep name="xulrunner-1.9.2" />
-
-  <!-- etc -->
-  <rosdep name="zlib" />
-  <rosdep name="libjpeg" />
-  <rosdep name="libpng12-dev" />
-  <rosdep name="uuid" />
-
-
-  <rosdep name="libxml2" />
-  <rosdep name="libxtst-dev" /> <!-- xdotool require /usr/include/X11/extentions -->
-  <rosdep name="xdotool" />
 
 </package>
 
