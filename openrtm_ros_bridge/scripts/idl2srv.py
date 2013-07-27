@@ -463,7 +463,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if all([ os.path.exists(x) and os.stat(x).st_mtime > os.stat(idlfile).st_mtime for x in [Comp_cpp, mod_cpp, mod_h]]) and not options.overwrite:
             return # do not overwrite
 
-        command = "rosrun openrtm rtc-template -bcxx --module-name=%s --consumer=%s:service0:'%s' --consumer-idl=%s --idl-include=%s" % (module_name, service_name, service_name, idlfile, idldir)
+        command = "PATH=`rospack find openrtm_aist`/bin:$PATH rtc-template -bcxx --module-name=%s --consumer=%s:service0:'%s' --consumer-idl=%s --idl-include=%s" % (module_name, service_name, service_name, idlfile, idldir)
         os.system("mkdir -p %s" % tmpdir)
         os.system("mkdir -p %s" % wd)
         os.system("cd %s; yes 2> /dev/null | %s > /dev/null" % (tmpdir, command))

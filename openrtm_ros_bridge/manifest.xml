@@ -10,7 +10,8 @@
   <url>http://ros.org/wiki/openrtm_ros_bridge</url>
 
   <depend package="roscpp"/>
-  <depend package="openrtm"/>
+  <depend package="openrtm_aist"/>
+  <depend package="openrtm_tools"/>
 
   <export>
     <rosdoc config="rosdoc.yaml" />

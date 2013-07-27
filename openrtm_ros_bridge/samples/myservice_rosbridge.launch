@@ -12,7 +12,7 @@
   </node>
 
   <!-- BEGIN:openrtm connection -->
-  <node name="rtmlaunch_rosbridge" pkg="openrtm" type="rtmlaunch.py"
+  <node name="rtmlaunch_rosbridge" pkg="openrtm_tools" type="rtmlaunch.py"
         args="$(find openrtm_ros_bridge)/samples/myservice_rosbridge.launch"/>
   <rtactivate component="bridge.rtc" />
   <rtconnect from="MyServiceProvider0.rtc:MyService"

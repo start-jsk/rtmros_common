@@ -11,9 +11,9 @@ include(${rtmbuild_PACKAGE_PATH}/cmake/rtmbuild.cmake)
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 #set(ROS_BUILD_TYPE RelWithDebInfo)
 
-rosbuild_find_ros_package(openrtm)
+rosbuild_find_ros_package(openrtm_aist)
 execute_process(COMMAND mkdir -p ${PROJECT_SOURCE_DIR}/idl)
-file(GLOB_RECURSE _idl_files "${openrtm_PACKAGE_PATH}/share/openrtm-1.1/example/*.idl")
+file(GLOB_RECURSE _idl_files "${openrtm_aist_PACKAGE_PATH}/share/openrtm-1.1/example/*.idl")
 foreach(_idl_file ${_idl_files})
   execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_idl_file} ${PROJECT_SOURCE_DIR}/idl/)
 endforeach()
@@ -46,13 +46,9 @@ rtmbuild_genbridge()
 ##
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_SOURCE_DIR}/bin;${CMAKE_SOURCE_DIR}/src;${CMAKE_SOURCE_DIR}/idl;${CMAKE_SOURCE_DIR}/srv;${CMAKE_SOURCE_DIR}/idl_gen;${CMAKE_SOURCE_DIR}/srv_gen;${CMAKE_SOURCE_DIR}/msg_gen;${CMAKE_SOURCE_DIR}/src_gen;${CMAKE_SOURCE_DIR}/msg/SimpleService_MyService.msg")
 
+
 ##
 ## tests
 ##
 rosbuild_add_rostest(samples/test_myservice_rosbridge.launch)
 
-##
-## documents
-##
-rosbuild_find_ros_package("jsk_tools")
-execute_process(COMMAND cmake -E chdir ${PROJECT_SOURCE_DIR} python ${jsk_tools_PACKAGE_PATH}/bin/launchdoc-generator.py ${PROJECT_NAME} --output_dir=./build/ --nomakefile RESULT_VARIABLE _make_failed)
