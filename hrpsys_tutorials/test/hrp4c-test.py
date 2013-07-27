@@ -7,8 +7,7 @@ import rospkg
 import numpy
 import unittest
 
-import sys; sys.path.insert (0, roslib.packages.get_pkg_dir('hrpsys')+'/scripts'); ## add python
-from hrpsys import HrpsysConfigurator
+from hrpsys_config import HrpsysConfigurator
 
 class TestHRP4C(unittest.TestCase):
 
