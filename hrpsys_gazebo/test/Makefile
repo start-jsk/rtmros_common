@@ -1,6 +1,6 @@
 all: test_atlas.py
 
-OPENHRP3_DIR = $(shell rospack find openhrp3)
+OPENHRP3_DIR = $(shell rospack find openhrp3_tutorials)
 
 atlas.l: ../models/atlas.dae
 	rosrun euscollada collada2eus $< $@ || echo "ok"
