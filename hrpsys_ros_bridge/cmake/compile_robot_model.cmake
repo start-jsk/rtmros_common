@@ -99,7 +99,8 @@ macro(compile_openhrp_model wrlfile)
     DEPENDS ${wrlfile} ${_export_collada_dep_files})
   # use _gen_project.launch
   rosbuild_find_ros_package(hrpsys)
-  set(_gen_project_dep_files ${hrpsys_tools_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
+  rosbuild_find_ros_package(hrpsys_tools)
+  set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rosrun openrtm_aist rtm-naming 2889
     COMMAND rostest -t hrpsys_tools _gen_project.launch CORBA_PORT:=2889 INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
@@ -159,7 +160,8 @@ macro(compile_collada_model daefile)
   endif(EXISTS ${_yamlfile})
   # use _gen_project.launch
   rosbuild_find_ros_package(hrpsys)
-  set(_gen_project_dep_files ${hrpsys_tools_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
+  rosbuild_find_ros_package(hrpsys_tools)
+  set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rosrun openrtm_aist rtm-naming 2888
     COMMAND rostest -t hrpsys_tools _gen_project.launch CORBA_PORT:=2888 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
