@@ -54,7 +54,7 @@ macro(rtmbuild_genbridge)
   add_custom_command(OUTPUT /_tmp/idl2srv
     COMMAND rm -fr /tmp/idl2srv/${_project} DEPENDS ${_autogen})
   add_dependencies(rtmbuild_genbridge RTMBUILD_rm_idl2srv)
-  add_custom_target(RTMBUILD_rm_idl2srv ALL DEPENDS /_tmp/idl2srv)
+  add_custom_target(RTMBUILD_rm_idl2srv ALL DEPENDS /_tmp/idl2srv ${PROJECT_SOURCE_DIR}/scripts/idl2srv.py ${PROJECT_SOURCE_DIR}/cmake/servicebridge.cmake)
   #
   foreach(_idl ${_idllist})
     execute_process(COMMAND rosrun openrtm_ros_bridge idl2srv.py --interfaces -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_include_dirs}" OUTPUT_VARIABLE _interface
