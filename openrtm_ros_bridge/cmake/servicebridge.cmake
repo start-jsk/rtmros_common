@@ -35,8 +35,8 @@ macro(rtmbuild_genbridge_init)
       set(_remove_autogen_files 0)
       foreach(_autogen_file ${_autogen_files})
         if(${PROJECT_SOURCE_DIR}/idl/${_idl} IS_NEWER_THAN ${_autogen_file} OR
-           ${PROJECT_SOURCE_DIR}/scripts/idl2srv.py IS_NEWER_THAN ${_autogen_file} OR
-           ${PROJECT_SOURCE_DIR}/cmake/servicebridge.cmake IS_NEWER_THAN ${_autogen_file})
+           ${openrtm_ros_bridge_PACKAGE_PATH}/scripts/idl2srv.py IS_NEWER_THAN ${_autogen_file} OR
+           ${openrtm_ros_bridge_PACKAGE_PATH}/cmake/servicebridge.cmake IS_NEWER_THAN ${_autogen_file})
          set(_remove_autogen_files 1)
        endif()
       endforeach(_autogen_file ${_autogen_files})
