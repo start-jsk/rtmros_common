@@ -12,6 +12,8 @@
   <depend package="std_msgs"/>
 
   <rosdep name="omniorb"/>
+  <rosdep name="libblas-dev"/>
+  <rosdep name="liblapack-dev"/>
 
 </package>
 
