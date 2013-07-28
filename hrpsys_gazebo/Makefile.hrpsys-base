@@ -8,6 +8,7 @@ installed:
 	cmake \
 	-DCMAKE_INSTALL_PREFIX=`rospack find hrpsys_gazebo` \
 	-DOPENRTM_DIR=`rospack find openrtm_aist` \
+        -DCOMPILE_JAVA_STUFF=OFF \
 	-DENABLE_INSTALL_RPATH=ON \
 	-DENABLE_INSTALL_RPATH_TO_SELF=ON \
 	-DLIBIO_DIR=${CURDIR}/iob \
