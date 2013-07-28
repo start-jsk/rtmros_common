@@ -40,7 +40,7 @@ class Test~A(testModelLoader):
     (format f "
 if __name__ == '__main__':
     import rostest
-    rostest.rosrun('openhrp3', 'test_~A', Test~A)
+    rostest.rosrun('openhrp3_tutorials', 'test_~A', Test~A)
 "
             *file-name* *robot-name*))
 

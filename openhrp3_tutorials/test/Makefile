@@ -13,7 +13,7 @@ barrett-wam.l:
 	rosrun euscollada collada2eus barrett-wam.zae barrett-wam.l || echo "ok"
 
 test_barrett-wam.py: barrett-wam.l gen-testcode.l
-	rosrun euslisp irteusgl barrett-wam.l gen-testcode.l "(gen-testcode (wam7) '(:wam1_lk :wam2_lk :wam3_lk :wam4_lk :wam5_lk :wam6_lk :wam7_lk) \"openhrp3\" \"test/barrett-wam.zae\")" "(exit)"
+	rosrun euslisp irteusgl barrett-wam.l gen-testcode.l "(gen-testcode (wam7) '(:wam1_lk :wam2_lk :wam3_lk :wam4_lk :wam5_lk :wam6_lk :wam7_lk) \"openhrp3_tutorials\" \"test/barrett-wam.zae\")" "(exit)"
 	chmod u+x $@
 
 clean:
