@@ -147,7 +147,7 @@ macro(rtmbuild_init)
       string(REPLACE "package.xml" "idl" _idl_dir ${_dir})
       list(APPEND ${_prefix}_IDL_DIRS ${_idl_dir})
     endif()
-    message("[rtmbuild] ${_dir} ${_cpp_dir}")
+    # message("[rtmbuild] ${_dir} ${_cpp_dir}")
   endforeach(_dir)
 
   list(APPEND ${_prefix}_INCLUDE_DIRS ${OPENRTM_INCLUDE_DIRS})
