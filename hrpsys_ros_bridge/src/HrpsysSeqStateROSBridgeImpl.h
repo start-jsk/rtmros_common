@@ -15,7 +15,7 @@
 #include <rtm/CorbaPort.h>
 #include <rtm/DataInPort.h>
 #include <rtm/DataOutPort.h>
-#include "HRPDataTypes.hh"
+#include "hrpsys_ros_bridge/idl/HRPDataTypes.hh"
 
 // hrp
 #include <hrpCorba/ModelLoader.hh>
@@ -32,7 +32,7 @@
 // Service Consumer stub headers
 // <rtc-template block="consumer_stub_h">
 
-#include "hrpsys/idl/SequencePlayerServiceStub.h"
+#include "hrpsys_ros_bridge/idl/SequencePlayerServiceStub.h"
 
 // </rtc-template>
 

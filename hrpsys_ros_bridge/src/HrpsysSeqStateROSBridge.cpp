@@ -6,8 +6,8 @@
  */
 #include "HrpsysSeqStateROSBridge.h"
 #include "rtm/idl/RTC.hh"
-#include "hrpsys/idl/ExecutionProfileService.hh"
-#include "hrpsys/idl/RobotHardwareService.hh"
+#include "hrpsys_ros_bridge/idl/ExecutionProfileService.hh"
+#include "hrpsys_ros_bridge/idl/RobotHardwareService.hh"
 #include <boost/format.hpp>
 
 // Module specification

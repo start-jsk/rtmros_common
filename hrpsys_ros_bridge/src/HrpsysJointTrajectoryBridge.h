@@ -17,7 +17,7 @@
 #include <rtm/DataOutPort.h>
 
 // hrp
-#include "HRPDataTypes.hh"
+#include "hrpsys_ros_bridge/idl/HRPDataTypes.hh"
 #include <hrpCorba/ModelLoader.hh>
 #include <hrpModel/Body.h>
 #include <hrpModel/Sensor.h>
@@ -32,7 +32,7 @@
 #include "pr2_controllers_msgs/JointTrajectoryAction.h"
 #include "pr2_controllers_msgs/JointTrajectoryControllerState.h"
 
-#include "hrpsys/idl/SequencePlayerServiceStub.h"
+#include "hrpsys_ros_bridge/idl/SequencePlayerServiceStub.h"
 
 using namespace RTC;
 

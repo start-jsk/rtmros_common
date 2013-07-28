@@ -7,8 +7,8 @@
 #include "HrpsysJointTrajectoryBridge.h"
 
 #include "rtm/idl/RTC.hh"
-#include "hrpsys/idl/ExecutionProfileService.hh"
-#include "hrpsys/idl/RobotHardwareService.hh"
+#include "hrpsys_ros_bridge/idl/ExecutionProfileService.hh"
+#include "hrpsys_ros_bridge/idl/RobotHardwareService.hh"
 
 // Module specification
 // <rtc-template block="module_spec">

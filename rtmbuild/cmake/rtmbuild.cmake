@@ -122,7 +122,7 @@ macro(rtmbuild_init)
   add_custom_target(rtmbuild_genbridge ALL)
   file(REMOVE ${PROJECT_SOURCE_DIR}/idl_gen/generated)
 
-  list(APPEND ${_prefix}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/idl_gen/cpp/${_prefix}/idl)
+  list(APPEND ${_prefix}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/idl_gen/cpp)
   list(APPEND ${_prefix}_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/idl_gen/lib)
   list(APPEND ${_prefix}_IDL_DIRS ${PROJECT_SOURCE_DIR}/idl)
 
