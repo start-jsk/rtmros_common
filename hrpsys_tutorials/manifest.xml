@@ -10,7 +10,6 @@
   <url>http://ros.org/wiki/hrpsys_tutorials</url>
 
   <depend package="hrpsys"/>
-  <depend package="hrpsys_tools"/>
 
 </package>
 

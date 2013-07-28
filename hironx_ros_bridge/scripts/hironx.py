@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import roslib; roslib.load_manifest("hrpsys_tools")
+import roslib; roslib.load_manifest("hrpsys")
 import sys
 import os
 import socket

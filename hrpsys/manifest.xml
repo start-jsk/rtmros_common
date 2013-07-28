@@ -13,6 +13,7 @@
     <python path="${prefix}/lib/python2.7/dist-packages" />
   </export>
 
+  <depend package="hrpsys_tools"/>
   <depend package="openhrp3"/>
 
   <rosdep name="jython" />
