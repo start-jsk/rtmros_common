@@ -19,6 +19,7 @@ file(COPY
     DESTINATION ${PROJECT_SOURCE_DIR}/idl)
 
 rtmbuild_init()
+#rosbuild_init()
 
 #set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
