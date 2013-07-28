@@ -9,8 +9,6 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/hrpsys_tools</url>
 
-  <depend package="hrpsys" />
-
   <export>
     <python path="${prefix}/scripts" />
   </export>
