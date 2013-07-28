@@ -30,7 +30,22 @@ macro(rtmbuild_genbridge_init)
 	  message("[rtmbuild_genbridge_init] remove already generated file ${_autogen_file}")
 	endif(${_found_autogen_file} GREATER -1)
       endforeach(_autogen_file ${_autogen_files})
-      #
+
+      # check if idl or idl2srv servicebridge.cmake are newer than generated files
+      set(_remove_autogen_files 0)
+      foreach(_autogen_file ${_autogen_files})
+        if(${PROJECT_SOURCE_DIR}/idl/${_idl} IS_NEWER_THAN ${_autogen_file} OR
+           ${PROJECT_SOURCE_DIR}/scripts/idl2srv.py IS_NEWER_THAN ${_autogen_file} OR
+           ${PROJECT_SOURCE_DIR}/cmake/servicebridge.cmake IS_NEWER_THAN ${_autogen_file})
+         set(_remove_autogen_files 1)
+       endif()
+      endforeach(_autogen_file ${_autogen_files})
+      if(_remove_autogen_files)
+	message("[rtmbuild_genbridge_init] idl or idl2srv or cervicebridge.cmake is newer than generated fils")
+	message("[rtmbuild_genbridge_init] remove ${_autogen_files}")
+        file(REMOVE ${_autogen_files})
+      endif()
+
       list(APPEND _autogen ${_autogen_files})
       get_filename_component(_project_name ${CMAKE_SOURCE_DIR} NAME)
       execute_process(COMMAND rosrun openrtm_ros_bridge idl2srv.py -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs=${_include_dirs} --tmpdir=/tmp/idl2srv/${_project_name})
