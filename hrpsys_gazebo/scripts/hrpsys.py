@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import roslib;
 import sys; sys.path.insert (0, roslib.packages.get_pkg_dir('hrpsys')+'/scripts');
-from hrpsys import *
+from hrpsys_config import *
 
 class ATLASHrpsysConfigurator(HrpsysConfigurator):
     def connectComps(self):

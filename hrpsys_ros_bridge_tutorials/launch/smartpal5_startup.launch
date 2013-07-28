@@ -1,6 +1,6 @@
 <launch>
   <arg name="KILL_SERVERS" default="false" />
-  <include file="$(find hrpsys)/launch/hrpsys.launch">
+  <include file="$(find hrpsys_tools)/launch/hrpsys.launch">
     <arg name="PROJECT_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/YaskawaSmartPal5.xml" />
     <arg name="MODEL_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/YaskawaSmartPal5.dae" />
     <arg name="CONF_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/YaskawaSmartPal5.conf" />

@@ -6,7 +6,7 @@
   <!-- begin use sim time -->
   <param name="use_sim_time" value="true" />
   <!-- end use sim time -->
-  <include file="$(find hrpsys)/launch/hrpsys.launch">
+  <include file="$(find hrpsys_tools)/launch/hrpsys.launch">
     <arg name="PROJECT_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/kawada-hironx_nosim.xml" if="$(arg NOSIM)"/>
     <arg name="PROJECT_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/kawada-hironx.xml" unless="$(arg NOSIM)"/>
     <arg name="MODEL_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae" />

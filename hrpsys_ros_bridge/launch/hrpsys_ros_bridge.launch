@@ -64,13 +64,13 @@
       StateHolder
   -->
   <group if="$(arg USE_COMMON)" >
-    <node pkg="hrpsys" name="SequencePlayerServiceROSBridge" type="SequencePlayerServiceROSBridgeComp"
+    <node pkg="hrpsys_ros_bridge" name="SequencePlayerServiceROSBridge" type="SequencePlayerServiceROSBridgeComp"
           output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
-    <node pkg="hrpsys" name="DataLoggerServiceROSBridge" type="DataLoggerServiceROSBridgeComp"
+    <node pkg="hrpsys_ros_bridge" name="DataLoggerServiceROSBridge" type="DataLoggerServiceROSBridgeComp"
           output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
-    <node pkg="hrpsys" name="ForwardKinematicsServiceROSBridge" type="ForwardKinematicsServiceROSBridgeComp"
+    <node pkg="hrpsys_ros_bridge" name="ForwardKinematicsServiceROSBridge" type="ForwardKinematicsServiceROSBridgeComp"
           output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
-    <node pkg="hrpsys" name="StateHolderServiceROSBridge" type="StateHolderServiceROSBridgeComp"
+    <node pkg="hrpsys_ros_bridge" name="StateHolderServiceROSBridge" type="StateHolderServiceROSBridgeComp"
           output="screen" args ="$(arg openrtm_args)" />
 
     <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="HrpsysSeqStateROSBridge0.rtc:rsangle" subscription_type="new"/>
@@ -93,7 +93,7 @@
   </group>
 
   <group if="$(arg USE_ROBOTHARDWARE)" >
-    <node pkg="hrpsys" name="RobotHardwareServiceROSBridge" type="RobotHardwareServiceROSBridgeComp"
+    <node pkg="hrpsys_ros_bridge" name="RobotHardwareServiceROSBridge" type="RobotHardwareServiceROSBridgeComp"
           output="screen" args ="$(arg openrtm_args)" />
     <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:servoState" to="$(arg SIMULATOR_NAME).rtc:servoState" subscription_type="new"/>
@@ -105,9 +105,9 @@
       Stabilizer
   -->
   <group if="$(arg USE_WALKING)" >
-    <node pkg="hrpsys" name="AutoBalancerServiceROSBridge" type="AutoBalancerServiceROSBridgeComp"
+    <node pkg="hrpsys_ros_bridge" name="AutoBalancerServiceROSBridge" type="AutoBalancerServiceROSBridgeComp"
           output="screen" args ="$(arg openrtm_args)" />
-    <node pkg="hrpsys" name="StabilizerServiceROSBridge" type="StabilizerServiceROSBridgeComp"
+    <node pkg="hrpsys_ros_bridge" name="StabilizerServiceROSBridge" type="StabilizerServiceROSBridgeComp"
           output="screen" args ="$(arg openrtm_args)" />
 
     <rtconnect from="kf.rtc:rpy" to="HrpsysSeqStateROSBridge0.rtc:baseRpy" subscription_type="new"/>
@@ -121,7 +121,7 @@
        CollisionDetector
   -->
   <group if="$(arg USE_COLLISIONCHECK)" >
-    <node pkg="hrpsys" name="CollisionDetectorServiceROSBridge" type="CollisionDetectorServiceROSBridgeComp"
+    <node pkg="hrpsys_ros_bridge" name="CollisionDetectorServiceROSBridge" type="CollisionDetectorServiceROSBridgeComp"
           output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
 
     <rtconnect from="CollisionDetectorServiceROSBridge.rtc:CollisionDetectorService" to="co.rtc:CollisionDetectorService" subscription_type="new"/>
@@ -133,9 +133,9 @@
        AbsoluteForceSensor
   -->
   <group if="$(arg USE_IMPEDANCECONTROLLER)" >
-    <node pkg="hrpsys" name="ImpedanceControllerServiceROSBridge" type="ImpedanceControllerServiceROSBridgeComp"
+    <node pkg="hrpsys_ros_bridge" name="ImpedanceControllerServiceROSBridge" type="ImpedanceControllerServiceROSBridgeComp"
           output="screen" args ="$(arg openrtm_args)" />
-    <node pkg="hrpsys" name="AbsoluteForceSensorServiceROSBridge" type="AbsoluteForceSensorServiceROSBridgeComp"
+    <node pkg="hrpsys_ros_bridge" name="AbsoluteForceSensorServiceROSBridge" type="AbsoluteForceSensorServiceROSBridgeComp"
           output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
 
     <rtconnect from="ImpedanceControllerServiceROSBridge.rtc:ImpedanceControllerService" to="ic.rtc:ImpedanceControllerService"  subscription_type="new"/>
@@ -148,7 +148,7 @@
        SoftErrorLimitter
   -->
   <group if="$(arg USE_SOFTERRORLIMIT)" >
-    <node pkg="hrpsys" name="SoftErrorLimiterServiceROSBridge" type="SoftErrorLimiterServiceROSBridgeComp"
+    <node pkg="hrpsys_ros_bridge" name="SoftErrorLimiterServiceROSBridge" type="SoftErrorLimiterServiceROSBridgeComp"
           output="screen" args ="$(arg openrtm_args)" />
 
     <rtconnect from="SoftErrorLimiterServiceROSBridge.rtc:SoftErrorLimiterService" to="el.rtc:SoftErrorLimiterService"  subscription_type="new"/>

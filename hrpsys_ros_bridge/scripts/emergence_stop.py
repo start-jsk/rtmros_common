@@ -6,7 +6,7 @@ roslib.load_manifest('hrpsys_ros_bridge')
 import rospy
 from sensor_msgs.msg import Joy
 
-import hrpsys
+import hrpsys_config
 from hrpsys.srv import *
 
 def joystick_callback(msg) :

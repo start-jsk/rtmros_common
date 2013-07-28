@@ -1,7 +1,7 @@
 <launch>
   <node name="hrp4c_model_download" pkg="hrpsys" type="hrp4c_model_download.sh" />
   <arg name="KILL_SERVERS" default="false" />
-  <include file="$(find hrpsys)/launch/hrpsys.launch">
+  <include file="$(find hrpsys_tools)/launch/hrpsys.launch">
     <arg name="PROJECT_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP4C/HRP4C.xml" />
     <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP4C/HRP4Cmain.wrl" />
     <!-- <arg name="CONF_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP4C/HRP4C.conf" /> -->

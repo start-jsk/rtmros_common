@@ -2,10 +2,8 @@
 
 # This program is used to connect RosBridge sensor ports with simulator or RobotHardware sensor ports based on ModelLoader information.
 
-# use hrpsys/scripts/hrpsys.py file
-import roslib;
-import sys; sys.path.insert (0, roslib.packages.get_pkg_dir('hrpsys')+'/scripts');
-from hrpsys import *
+import roslib; roslib.load_manifest('hrpsys')
+from hrpsys_config import *
 
 program_name = '[sensor_ros_bridge_connect.py] '
 
