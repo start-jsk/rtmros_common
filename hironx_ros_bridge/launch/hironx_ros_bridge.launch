@@ -12,7 +12,7 @@
     <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
     <arg name="nameserver" value="$(arg nameserver)" />
     <arg name="MODEL_FILE" value="$(arg MODEL_FILE)" />
-    <arg name="COLLADA_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae" />
+    <arg name="COLLADA_FILE" value="$(find hironx_ros_bridge)/models/kawada-hironx.dae" />
 
     <arg name="USE_WALKING" value="false" />
     <arg name="USE_COLLISIONCHECK" value="false" />

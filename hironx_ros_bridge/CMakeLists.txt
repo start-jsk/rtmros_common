@@ -31,8 +31,10 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_find_ros_package(collada_robots)
-compile_collada_model(${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae)
+rosbuild_download_data(https://github.com/rdiankov/collada_robots/raw/master/kawada-hironx.zae models/kawada-hironx.zae be4b0015914d33a5aaa24ee055bcdbc8)
+compile_collada_model(${PROJECT_SOURCE_DIR}/models/kawada-hironx.dae)
+#rosbuild_find_ros_package(collada_robots)
+#compile_collada_model(${collada_robots_PACKAGE_PATH}/data/robots/kawada-hironx.dae)
 ##
 ## tests
 ##

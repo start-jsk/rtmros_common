@@ -10,7 +10,6 @@
   <url>http://ros.org/wiki/hironx_ros_bridge</url>
 
   <depend package="hrpsys_ros_bridge"/>
-  <depend package="collada_robots"/>
 
 </package>
 

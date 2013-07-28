@@ -5,7 +5,7 @@
   </include>
   <include file="$(find hironx_ros_bridge)/launch/hironx_ros_bridge.launch" >
     <arg name="nameserver" value="localhost" />
-    <arg name="MODEL_FILE" value="$(find collada_robots)/data/robots/kawada-hironx.dae" />
+    <arg name="MODEL_FILE" value="$(find hironx_ros_bridge)/models/kawada-hironx.dae" />
     <arg name="SIMULATOR_NAME" value="HiroNX(Robot)0" />
   </include>
 </launch>
