@@ -1,7 +1,0 @@
-<launch>
-  <node name="sensor_tf_imu" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 /imu_link /imu_joint 100" />
-  <node name="sensor_tf_lleg" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 /l_foot /l_leg_lax 100" />
-  <node name="sensor_tf_rleg" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 /r_foot /r_leg_lax 100" />
-  <node name="sensor_tf_larm" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 /l_hand /l_arm_mwx 100" />
-  <node name="sensor_tf_rarm" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 /r_hand /r_arm_mwx 100" />
-</launch>

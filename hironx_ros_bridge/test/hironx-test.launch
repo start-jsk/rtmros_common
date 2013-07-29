@@ -1,9 +1,0 @@
-<launch>
-  <arg name="GUI" default="false" />
-  <include file="$(find hironx_ros_bridge)/launch/hironx_startup.launch" >
-    <arg name="GUI" default="$(arg GUI)" />
-    <arg name="LAUNCH_HRPSYSPY" value="false" />
-  </include>
-
-  <test type="hironx-test.py" pkg="hironx_ros_bridge" test-name="hironx_test" time-limit="300" />
-</launch>

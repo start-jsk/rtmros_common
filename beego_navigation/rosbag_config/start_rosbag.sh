@@ -1,2 +1,0 @@
-#!/bin/bash -i
-rosrun rosbag record /tf /scan_throttle	/map /particlecloud /camera/rgb/image_rect_color_throttle /camera/rgb/points_throttle /move_base/current_goal /move_base/goal /move_base_simple/goal /move_base/local_costmap/robot_footprint /move_base/local_costmap/inflated_obstacles /move_base/TrajectoryPlannerROS/global_plan /move_base/TrajectoryPlannerROS/local_plan /move_base/NavfnROS/plan -o /home/chen/beego

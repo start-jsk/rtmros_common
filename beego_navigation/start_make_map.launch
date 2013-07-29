@@ -1,9 +1,0 @@
-<launch>
-  <!-- Run mrobot controller -->
-  <include file="$(find beego_navigation)/beego_ros_bridge.launch" />
-
-  <!-- Run Kinect -->
-  <include file="$(find beego_navigation)/setup_kinect.xml" />
-  <!-- Run the amcl, map server -->
-  <include file="$(find beego_navigation)/beego_slam_gmapping.xml" />
-</launch>

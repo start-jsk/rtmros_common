@@ -1,9 +1,0 @@
-<launch>
-  <arg name="KILL_SERVERS" default="false" />
-  <include file="$(find hrpsys_tools)/launch/hrpsys.launch">
-    <arg name="PROJECT_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/HRP4C.xml" />
-    <arg name="MODEL_FILE" value="$(find hrpsys)/share/hrpsys/samples/HRP-4C/HRP4Cmain.wrl" />
-    <arg name="CONF_FILE" value="$(find hrpsys_ros_bridge_tutorials)/models/HRP4C.conf" />
-    <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
-  </include>
-</launch>

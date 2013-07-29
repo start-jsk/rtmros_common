@@ -1,8 +1,0 @@
-<launch>
-  <arg name="GUI" default="false" />
-  <include file="$(find hrpsys_tutorials)/launch/pa10.launch" >
-    <arg name="GUI" default="$(arg GUI)" />
-  </include>
-
-  <test type="pa10-test.py" pkg="hrpsys_tutorials" test-name="pa10_test" time-limit="300" />
-</launch>

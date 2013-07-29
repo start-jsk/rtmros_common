@@ -1,6 +1,0 @@
-<launch>
-  <node pkg="openhrp3" type="openhrp-model-loader" name="openhrp_model_loader"/>
-
-  <test pkg="openhrp3_tutorials" type="test_barrett-wam.py" test-name="test_barrett" />
-  <test pkg="openhrp3_tutorials" type="test_samplerobot.py" test-name="test_sample" />
-</launch>

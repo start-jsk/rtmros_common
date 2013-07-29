@@ -1,3 +1,0 @@
-<launch>
-  <node name="openvgr_example" pkg="openvgr" type="stilltest.sh" cwd="node"/>
-</launch>

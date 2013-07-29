@@ -1,8 +1,0 @@
-<launch>
-  <arg name="GUI" default="false" />
-  <include file="$(find hrpsys_tutorials)/launch/hrp4c.launch" >
-    <arg name="GUI" default="$(arg GUI)" />
-  </include>
-
-  <test type="hrp4c-test.py" pkg="hrpsys_tutorials" test-name="hrp4c_test" time-limit="300" />
-</launch>

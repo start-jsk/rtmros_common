@@ -1,8 +1,0 @@
-<launch>
-  <!-- Run Kinect -->
-  <include file="$(find mrobot_ros_bridge)/launch/beego_kinect.launch" />
-  <!-- Run the map server -->
-  <include file="$(find jsk_maps)/launch/start_map_eng2.launch" />
-  <!-- Run move_base with amcl -->
-  <include file="$(find mrobot_ros_bridge)/launch/beego_move_base.launch" />
-</launch>

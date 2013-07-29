@@ -1,4 +1,0 @@
-<launch>
-  <node name="choreonoid" pkg="choreonoid" type="choreonoid"
-	args="--start-playback $(find choreonoid)/share/extplugin/graspPlugin/Samples/pa10.cnoid -- " />
-</launch>

@@ -1,3 +1,0 @@
-conf._widget_.map_file: text
-
-conf.default.map_file: @RS003_PACKAGE_PATH@/src/PathPlanning/routemap

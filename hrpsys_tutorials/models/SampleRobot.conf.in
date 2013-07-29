@@ -1,5 +1,0 @@
-model: file:///@openhrp3_PACKAGE_PATH@/share/OpenHRP-3.1/sample/model/sample1.wrl
-dt: 0.005
-
-abc_leg_offset: 0,0.09,0
-abc_stride_parameter: 0.15,0.05,10

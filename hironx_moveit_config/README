@@ -1,3 +1,0 @@
-roscd hironx_moveit_config/models
-mkdir meshes
-rosrun collada_tools collada_to_urdf $(rospack find collada_robots)/data/robots/kawada-hironx.dae -A --mesh_output_dir `pwd`/meshes --mesh_prefix 'package://hironx_moveit_config/models/meshes'
