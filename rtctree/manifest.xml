@@ -14,7 +14,7 @@
   <url>https://github.com/gbiggs/rtctree</url>
 
   <export>
-    <python path="${prefix}/src/lib/python2.7/site-packages" />
+    <python path="${prefix}/lib/python2.7/site-packages" />
   </export>
 
 </package>
