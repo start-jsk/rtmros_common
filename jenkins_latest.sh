@@ -3,8 +3,9 @@
 trap 'exit 1' ERR
 
 export LC_ALL=C
-sudo apt-get install python-svn
+#sudo apt-get install python-svn
 
+export WORKSPACE=/home/k-okada/tmp/rtm-ros-robotics/trunk/rosbuild_ws
 . $WORKSPACE/ros/groovy/setup.sh
 
 function rtmros_common_merge {
@@ -12,7 +13,7 @@ function rtmros_common_merge {
     hrpsys_revision=`python -c "import pysvn; print pysvn.Client().info('\`rospack find hrpsys\`/build/hrpsys-base-source').revision.number"`
 
     # openhrp3
-    openhrp3_revision=`python -c "import pysvn; print pysvn.Client().info('\`rospack find openhrp3\`/build/OpenHRP-3').revision.number"`
+    openhrp3_revision=`python -c "import pysvn; print pysvn.Client().info('\`rospack find openhrp3\`/build/OpenHRP-3.1').revision.number"`
 
     #
     echo ";;   hrpsys revision : $hrpsys_revision"
@@ -20,23 +21,24 @@ function rtmros_common_merge {
 
 
     # download and merge
-    latest_uri=https://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common
+    latest_uri=https://rtm-ros-robotics.googlecode.com/svn/tags/latest
     if [ "$WORKSPACE" == "" ]; then # if not jenkins
         export WORKSPACE=$HOME
     fi
-    latest=$WORKSPACE/rtmros_common-latest
-    target=$WORKSPACE/ros/groovy/rtm-ros-robotics/rtmros_common
+    latest=$WORKSPACE/rtm-ros-robotics-latest
+    target=$WORKSPACE/ros/groovy/rtm-ros-robotics
 
     ## rtmros_common
-    rm -fr rtmros_common-latest ; svn co $latest_uri rtmros_common-latest;
+    rm -fr $latest ; svn co $latest_uri $latest
 
     latest_revision=`python -c "import pysvn; print pysvn.Client().info('$latest').commit_revision.number"`
-    target_revision=`python -c "import pysvn; print pysvn.Client().info('$target').commit_revision.number"`
+    target_revision=`python -c "import pysvn; print pysvn.Client().info('$target/rtmros_common').commit_revision.number"`
     echo ";; latest revision : $latest_revision"
     echo ";; target revision : $target_revision"
 
-
-    (cd $latest; svn merge --accept theirs-full -r 0:$target_revision $target)
+    for dir in openrtm_common rtmros_common rtmros_tutorials rtmros_hironx rtmros_gazebo openrtm_apps; do
+        (cd $latest/$dir; svn merge --accept theirs-full -r 0:$target_revision $target/$dir)
+    done
     export ROS_PACKAGE_PATH=$latest:$ROS_PACKAGE_PATH
     sed -i s/^SVN_REVISION=-r.*$/SVN_REVISION=-r$hrpsys_revision/ `rospack find hrpsys`/Makefile.hrpsys-base
     sed -i s/^SVN_REVISION=-r.*$/SVN_REVISION=-r$openhrp3_revision/ `rospack find openhrp3`/Makefile.openhrp3
@@ -61,7 +63,7 @@ function rosinstall_merge {
     ##
     ## update agentsystem_ros_tutorials/rtm-ros-robotics.rosinstall
     ##
-    latest_revision=`python -c "import pysvn; print pysvn.Client().info('$latest').commit_revision.number"`
+    latest_revision=`python -c "import pysvn; print pysvn.Client().info('$latest/rtmros_common').commit_revision.number"`
 
     target_ros_install_dir=$WORKSPACE/ros/groovy/
     latest_ros_install_dir=$WORKSPACE/agentsystem_ros_tutorials
@@ -77,11 +79,11 @@ function rosinstall_merge {
     rosinstall ${target_ros_install_dir} --generate-versioned-rosinstall=${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs || true
 
     # set rtm-ros-robotics from trunk to latest
-    sed -i 's#https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common#http://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common#g' ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
+    sed -i 's#https://rtm-ros-robotics.googlecode.com/svn/trunk/#http://rtm-ros-robotics.googlecode.com/svn/tags/latest/#g' ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
     # remove version from rtmros_common
     sed -e "/rtm-ros-robotics/{
 N
-s#\(http://rtm-ros-robotics.googlecode.com/svn/tags/latest/rtmros_common'\),\n    version: -r[0-9]*#\1#
+s#\(http://rtm-ros-robotics.googlecode.com/svn/tags/latest/.*'\),\n    version: -r[0-9]*#\1#
 }
 #" ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs > ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs.tmp
     mv ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs.tmp ${latest_ros_install_dir}/rtm-ros-robotics.rosinstall.vcs
