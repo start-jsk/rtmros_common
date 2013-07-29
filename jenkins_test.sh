@@ -18,7 +18,7 @@ PKGS='openrtm_ros_bridge euscollada openhrp3 openhrp3_tutorials hrpsys_tutorials
 compile-pkg $PKGS
 
 sudo /etc/init.d/omniorb4-nameserver stop
-yes | rosrun openrtm rtm-naming
+yes | rosrun openrtm_aist rtm-naming
 
 test-pkg $PKGS
 
