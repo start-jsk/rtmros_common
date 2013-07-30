@@ -2,7 +2,7 @@
 
 (ros::load-ros-manifest "dynamic_reconfigure")
 (ros::roseus-add-msgs "hrpsys_ros_bridge")
-(ros::load-ros-manifest "hrpsys")
+(ros::load-ros-manifest "hrpsys_ros_bridge")
 
 (defclass rtm-ros-robot-interface
   :super robot-interface
@@ -87,7 +87,7 @@
              (send robot :force-sensors) (send self :off-moment-vector))))
   ;; automatically define methods for ROSBridge services
   (:define-all-ROSBridge-srv-methods
-   (&key (debug-view nil) (ros-pkg-name "hrpsys"))
+   (&key (debug-view nil) (ros-pkg-name "hrpsys_ros_bridge"))
    (let ((srv-fnames (send self :get-ROSBridge-srv-fnames ros-pkg-name)))
      (dolist (idl (send self :get-ROSBridge-idl-fnames ros-pkg-name))
        (let ((rtc-name (pathname-name idl)))
@@ -98,16 +98,16 @@
                (eval method-def)
                )))))))
   (:get-ROSBridge-fnames-from-type
-   (type-name &optional (ros-pkg-name "hrpsys"))
+   (type-name &optional (ros-pkg-name "hrpsys_ros_bridge"))
    (let ((path (ros::resolve-ros-path (format nil "package://~A" ros-pkg-name))))
      (remove-if-not #'(lambda (x) (substringp (format nil ".~A" type-name) x)) (directory (format nil "~A/~A" path type-name)))
      ))
-  (:get-ROSBridge-idl-fnames (&optional (ros-pkg-name "hrpsys")) (send self :get-ROSBridge-fnames-from-type "idl" ros-pkg-name))
-  (:get-ROSBridge-srv-fnames (&optional (ros-pkg-name "hrpsys")) (send self :get-ROSBridge-fnames-from-type "srv" ros-pkg-name))
+  (:get-ROSBridge-idl-fnames (&optional (ros-pkg-name "hrpsys_ros_bridge")) (send self :get-ROSBridge-fnames-from-type "idl" ros-pkg-name))
+  (:get-ROSBridge-srv-fnames (&optional (ros-pkg-name "hrpsys_ros_bridge")) (send self :get-ROSBridge-fnames-from-type "srv" ros-pkg-name))
   (:get-ROSBridge-method-def-macro
    (rtc-name srv-name)
    (let* ((meth-name (string-left-trim "_" (string-left-trim rtc-name (string-left-trim "_" (string-left-trim "OpenHRP" srv-name)))))
-          (srv-request (read-from-string (format nil "hrpsys::~ARequest" srv-name)))
+          (srv-request (read-from-string (format nil "hrpsys_ros_bridge::~ARequest" srv-name)))
           (init-method (find-if #'(lambda (x) (eq (car x) :init)) (send (eval srv-request) :methods)))
           ;;(new-method-name (read-from-string (format nil ":~A" (string-left-trim "_" (string-left-trim rtc-name (string-left-trim "_" (string-left-trim "OpenHRP" srv-name))))))))
           (new-method-name (read-from-string (format nil ":~A" (string-left-trim "_" (string-left-trim "OpenHRP" srv-name))))))
@@ -289,7 +289,7 @@
          force-gain moment-gain
          sr-gain avoid-gain reference-gain manipulability-limit)
    (let* ((current-imp-param (send self :get-impedance-controller-param name))
-          (param (instance hrpsys::OpenHRP_ImpedanceControllerService_impedanceParam :init
+          (param (instance hrpsys_ros_bridge::OpenHRP_ImpedanceControllerService_impedanceParam :init
                             :name name :base_name base-name :target_name target-name
                             :M_p (if M-p M-p (send current-imp-param :M_p))
                             :D_p (if D-p D-p (send current-imp-param :D_p))
@@ -367,7 +367,7 @@
   (:_set-forcemoment-offset-param
    (name &key force-offset moment-offset link-offset-centroid link-offset-mass)
    (let* ((current-fm-param (send self :get-forcemoment-offset-param name))
-          (param (instance hrpsys::OpenHRP_AbsoluteForceSensorService_ForceMomentOffsetParam :init
+          (param (instance hrpsys_ros_bridge::OpenHRP_AbsoluteForceSensorService_ForceMomentOffsetParam :init
                            :force_offset (if force-offset force-offset (send current-fm-param :force_offset))
                            :moment_offset (if moment-offset moment-offset (send current-fm-param :moment_offset))
                            :link_offset_centroid (if link-offset-centroid link-offset-centroid (send current-fm-param :link_offset_centroid))
@@ -453,7 +453,7 @@
    (send self :autobalancerservice_startABC
          :alp (mapcar #'(lambda (limb)
                           (let ((target2foot (send (send (send robot limb :end-coords) :parent) :transformation (send robot limb :end-coords))))
-                            (instance hrpsys::openhrp_autobalancerservice_autobalancerlimbparam
+                            (instance hrpsys_ros_bridge::openhrp_autobalancerservice_autobalancerlimbparam
                                       :init :name (format nil "~A" limb)
                                       ;;:target_name (send (send (send robot limb :end-coords) :parent) :joint :name)
                                       ;;:base_name (if (send (send (send robot limb :root-link) :parent) :joint) (send (send (send robot limb :root-link) :parent) :joint :name) "WAIST")
@@ -515,7 +515,7 @@
   (:set-gait-generator-param
    (&key default-step-time default-step-height default-double-support-ratio stride-parameter)
    (let* ((current-param (send self :get-gait-generator-param))
-          (param (instance hrpsys::Openhrp_AutoBalancerService_GaitGeneratorParam
+          (param (instance hrpsys_ros_bridge::Openhrp_AutoBalancerService_GaitGeneratorParam
                            :init
                            :default_step_time (if default-step-time default-step-time (send current-param :default_step_time))
                            :default_step_height (if default-step-height default-step-height (send current-param :default_step_height))
@@ -525,7 +525,7 @@
   (:set-auto-balancer-param
    (&key default-zmp-offsets move-base-gain)
    (let* ((current-param (send self :get-auto-balancer-param))
-          (param (instance hrpsys::Openhrp_AutoBalancerService_AutoBalancerParam
+          (param (instance hrpsys_ros_bridge::Openhrp_AutoBalancerService_AutoBalancerParam
                            :init
                            :default_zmp_offsets
                            (if default-zmp-offsets
@@ -544,7 +544,7 @@
    )
   (:eus-footstep->abc-footstep
    (f)
-   (instance hrpsys::openhrp_autobalancerservice_footstep :init
+   (instance hrpsys_ros_bridge::openhrp_autobalancerservice_footstep :init
              :pos (scale 1e-3 (send f :worldpos))
              :rot (matrix2quaternion (send f :worldrot))
              :leg (print (format nil "~A" (if (find-method f :l/r) (send f :l/r) (send f :get :l/r)))))
@@ -594,7 +594,7 @@
 (defmethod rtm-ros-robot-interface
   (:set-st-param
    (&key k-tpcc-p k-tpcc-x k-brot-p k-brot-tc)
-   (let ((ip (instance hrpsys::openhrp_stabilizerservice_stparam
+   (let ((ip (instance hrpsys_ros_bridge::openhrp_stabilizerservice_stparam
                        :init
                        :k_tpcc_x k-tpcc-x
                        :k_tpcc_p k-tpcc-p
