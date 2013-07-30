@@ -87,7 +87,7 @@
         if="$(arg openrtm_openhrp_server_start)"/> <!-- loading dae files crushes model loader -->
 
   <node if="$(arg USE_RTCD)"
-        name="hrpsys" pkg="openrtm" type="rtcd" output="$(arg OUTPUT)"
+        name="hrpsys" pkg="openrtm_aist" type="rtcd" output="$(arg OUTPUT)"
         launch-prefix="$(arg RTCD_LAUNCH_PREFIX)"
         args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_args)" />
   <node unless="$(arg USE_RTCD)"
