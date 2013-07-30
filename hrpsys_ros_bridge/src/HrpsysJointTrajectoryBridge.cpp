@@ -198,7 +198,15 @@ jointTrajectoryActionObj(HrpsysJointTrajectoryBridge *ptr,
     for(size_t i = 0; i < joint_list.size(); i++) {
       jnames[i] = joint_list[i].c_str();
     }
-    parent->m_service0->addJointGroup(groupname.c_str(), jnames);
+    try {
+        parent->m_service0->addJointGroup(groupname.c_str(), jnames);
+    } catch ( CORBA::SystemException& ex ) {
+      std::cerr << "[HrpsysJointTrajectoryBridge] CORBA::SystemException " << ex._name() << std::endl;
+      sleep(1);
+    } catch ( ... ) {
+      std::cerr << "[HrpsysJointTrajectoryBridge] failed to addJointGroup[" << groupname.c_str() << "]" << std::endl;;
+      sleep(1);
+    }
   }
 
   interpolationp = false;
