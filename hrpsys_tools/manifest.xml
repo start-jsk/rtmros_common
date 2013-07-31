@@ -11,10 +11,6 @@
 
   <depend package="hrpsys"/>
   
-  <export>
-    <python path="${prefix}/scripts" />
-  </export>
-
 </package>
 
 
