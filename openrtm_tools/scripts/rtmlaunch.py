@@ -166,8 +166,8 @@ def main():
     print >>sys.stderr, "[rtmlaunch] SIMULATOR_NAME", simulator
     while 1:
         print >>sys.stderr, "[rtmlaunch] check connection/activation"
-        rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
         rtactivate(nameserver, parser.getElementsByTagName("rtactivate"))
+        rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
         time.sleep(10)
 
 def get_flag_from_argv(arg):
