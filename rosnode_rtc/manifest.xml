@@ -17,16 +17,11 @@
   <depend package="rospy" />
   <depend package="rostopic" />
 
-  <depend package="openrtm" />
+  <depend package="openrtm_tools" />
 
   <!-- for samples -->
   <depend package="roscpp_tutorials" />
   <depend package="move_base_stage_tutorial" />
-
-  <depend package="jsk_tools" />
-  <export>
-    <rosdoc config="rosdoc.yaml" />
-  </export>
 
 </package>
 

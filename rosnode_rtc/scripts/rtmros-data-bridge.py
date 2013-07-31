@@ -328,8 +328,8 @@ module RTMROSDataBridge
 """ % (program, self.idltext)
         open(self.idldir+'/'+self.idlfile, 'w').write(base)
 
-        genidl_bin = Popen(['rosrun','openrtm','rtm-config','--idlc'], stdout=PIPE, stderr=PIPE).communicate()[0]
-        rtmpkg = Popen(['rosrun','openrtm','rtm-config','--prefix'], stdout=PIPE, stderr=PIPE).communicate()[0]
+        genidl_bin = Popen(['rosrun','openrtm_aist','rtm-config','--idlc'], stdout=PIPE, stderr=PIPE).communicate()[0]
+        rtmpkg = Popen(['rosrun','openrtm_aist','rtm-config','--prefix'], stdout=PIPE, stderr=PIPE).communicate()[0]
         genidl_bin = genidl_bin.rstrip('\n')
         rtmpkg = rtmpkg.rstrip('\n')
 

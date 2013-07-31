@@ -2,7 +2,6 @@
 
   <!-- PYTHONPATH must contains path for rtshell  -->
   <env name="PYTHONPATH" value="$(env PYTHONPATH)" />
-  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
 
   <!-- Dataport bridge node -->
   <node pkg="rosnode_rtc" type="rtmros-data-bridge.py" name="bridge"
@@ -18,7 +17,7 @@
 	launch-prefix="xterm -e" />
 
   <!-- BEGIN:openrtm connection -->
-  <node name="rtmlaunch_data_bridge" pkg="openrtm" type="rtmlaunch.py"
+  <node name="rtmlaunch_data_bridge" pkg="openrtm_tools" type="rtmlaunch.py"
 	args="$(find rosnode_rtc)/sample/stage_sample.launch"/>
   <rtactivate component="move_base_node0.rtc" />
   <!-- END:openrtm connection -->
