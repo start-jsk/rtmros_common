@@ -26,7 +26,7 @@ macro(rtmbuild_genidl)
   rtmbuild_get_idls(_idllist)
   set(_autogen "")
   if(NOT _idllist)
-    _rosbuild_warn("rtmbuild_genidl() was called, but no .idl files ware found")
+    message("[rtmbuild_genidl] WARNING: rtmbuild_genidl() was called, but no .idl files ware found")
   else(NOT _idllist)
     file(WRITE ${PROJECT_SOURCE_DIR}/idl_gen/generated "yes")
     file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl_gen/cpp/${_project}/idl)
@@ -108,7 +108,11 @@ endmacro(rtmbuild_genidl)
 macro(rtmbuild_init)
   ## use pkgconfig with openhrp3.1 and openrtm-aist
   # catch the error output to suppress it
+  #
+  # setup pkg path
+  #
   include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
+  execute_process(COMMAND rospack find rtmbuild OUTPUT_VARIABLE _rtmbuild_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
   execute_process(COMMAND rospack find openrtm_aist OUTPUT_VARIABLE _openrtm_aist_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
   execute_process(COMMAND rospack find openhrp3 OUTPUT_VARIABLE _openhrp3_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
   set(ENV{PKG_CONFIG_PATH} "${_openhrp3_pkg_dir}/lib/pkgconfig:${_openrtm_aist_pkg_dir}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
