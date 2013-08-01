@@ -4,7 +4,6 @@
   <arg name="nameserver" default="localhost" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
-  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
 
   <!-- ROS sample -->
   <node pkg="roscpp_tutorials" type="listener" name="listener"
@@ -22,7 +21,7 @@
 	launch-prefix="xterm -e"/>
 
   <!-- BEGIN:openrtm connection -->
-  <node name="rtmlaunch_data_bridge" pkg="openrtm" type="rtmlaunch.py"
+  <node name="rtmlaunch_data_bridge" pkg="openrtm_tools" type="rtmlaunch.py"
 	args="$(find rosnode_rtc)/sample/chatter_inport_1.1.0.launch"/>
   <rtactivate component="RTMROSDataBridge0.rtc" />
   <!-- END:openrtm connection -->

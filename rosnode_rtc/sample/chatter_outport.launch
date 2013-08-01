@@ -1,7 +1,9 @@
 <launch>
   <!-- PYTHONPATH must contains path for rtshell  -->
   <env name="PYTHONPATH" value="$(env PYTHONPATH)" />
-  <node name="rtm_naming" pkg="openrtm" type="rtm-naming-restart" />
+  <arg name="nameserver" default="localhost" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
 
   <!-- ROS sample -->
   <node pkg="roscpp_tutorials" type="talker" name="talker"
@@ -9,7 +11,7 @@
 
   <!-- Dataport bridge node -->
   <node pkg="rosnode_rtc" type="rtmros-data-bridge.py" name="bridge"
-	clear_params="true" cwd="node" output="screen">
+	clear_params="true" output="screen" args="$(arg openrtm_args)">
     <param name="~input_topic" value="/chatter" />
   </node>
 

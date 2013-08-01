@@ -2,10 +2,13 @@
 
   <!-- PYTHONPATH must contains path for rtshell  -->
   <env name="PYTHONPATH" value="$(env PYTHONPATH)" />
+  <arg name="nameserver" default="localhost" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
 
   <!-- Dataport bridge node -->
   <node pkg="rosnode_rtc" type="rtmros-data-bridge.py" name="bridge"
-	clear_params="true" cwd="node" output="screen">
+	clear_params="true" output="screen" args="$(arg openrtm_args)">
     <param name="~output_topic" value="/cmd_vel" />
     <param name="~wrap_node" value="/move_base_node" />
     <param name="~ignore_unbound" value="True" />
