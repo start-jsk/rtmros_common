@@ -16,6 +16,8 @@ macro(rtmbuild_genbridge_init)
   set(_include_dirs "${_rtm_include_dir} ${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl")
 
   set(_autogen "")
+  set(_autogen_msg_files "")
+  set(_autogen_srv_files "")
   foreach(_idl ${_idllist})
     message("[rtmbuild_genbridge_init] Generate msgs/srvs from ${_idl}")
     message("[rtmbuild_genbridge_init] ${_rtmbuild_pkg_dir}/scripts/idl2srv.py --filenames -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs=\"${_include_dirs}\"")
@@ -24,6 +26,15 @@ macro(rtmbuild_genbridge_init)
       string(REPLACE "\n" ";" _autogen_files  ${_autogen_files})
       # remove already generated msg(_autogen) from _autogen_files
       foreach(_autogen_file ${_autogen_files})
+        ## setup _autogen_msg_files, _autogen_srv_files
+        get_filename_component(_ext ${_autogen_file} EXT)
+        get_filename_component(_nam ${_autogen_file} NAME)
+        if (${_ext} STREQUAL ".msg" )
+          list(APPEND _autogen_msg_files ${_nam})
+        elseif(${_ext} STREQUAL ".srv" )
+          list(APPEND _autogen_srv_files ${_nam})
+        endif()
+        ##
 	list(FIND _autogen ${_autogen_file} _found_autogen_file)
 	if(${_found_autogen_file} GREATER -1)
 	  list(REMOVE_ITEM _autogen_files ${_autogen_file})
@@ -62,8 +73,16 @@ macro(rtmbuild_genbridge_init)
 endmacro(rtmbuild_genbridge_init)
 
 macro(rtmbuild_genbridge)
-  rosbuild_genmsg()
-  rosbuild_gensrv()
+  if (${CATKIN_TOPLEVEL})
+    message("[rosbuild_genbridge] msg: ${_autogen_msg_files}")
+    message("[rosbuild_genbridge] srv: ${_autogen_srv_files}")
+    add_message_files(DIRECTORY msg FILES "${_autogen_msg_files}")
+    add_service_files(DIRECTORY srv FILES "${_autogen_srv_files}")
+    generate_messages(DEPENDENCIES std_msgs)
+  else() # if (NOT ${CATKIN_TOPLEVEL}) does not work
+    rosbuild_genmsg()
+    rosbuild_gensrv()
+  endif()
   rtmbuild_get_idls(_idllist)
   # rm tmp/idl2srv
   add_custom_command(OUTPUT /_tmp/idl2srv
