@@ -13,6 +13,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <depend package="hrpsys"/>
   <depend package="hrpsys_tools"/>
   <depend package="openrtm_tools"/>
+  <depend package="openrtm_ros_bridge"/>
 
   <!-- seq state ros bridge -->
   <depend package="roscpp"/>
