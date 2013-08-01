@@ -66,7 +66,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
     DEPENDS omniorb # TODO libblas-dev liblapack-dev
-    CATKIN-DEPENDS # TODO
+    CATKIN-DEPENDS  message_generation std_msgs # TODO
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO
 )
