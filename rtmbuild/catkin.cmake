@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 2.8.3)
 project(rtmbuild)
 # Load catkin and all dependencies required for this package
 # TODO: remove all from COMPONENTS that are not catkin packages.
-find_package(catkin REQUIRED COMPONENTS std_msgs)
+find_package(catkin REQUIRED COMPONENTS)
+
 find_package(PkgConfig)
 pkg_check_modules(OMNIORB REQUIRED omniORB4)
 if (!OMNIORB_FOUND)
   message(FATAL_ERROR  "OmniORB4 is not found")
-else()
 endif()
 
 # include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
@@ -65,13 +65,16 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-    DEPENDS # TODO
-    CATKIN-DEPENDS std_msgs
+    DEPENDS omniorb # TODO libblas-dev liblapack-dev
+    CATKIN-DEPENDS # TODO
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO
 )
 
 # install cmake files for catkin (except some files only used at build time of catkin)
 install(DIRECTORY cmake
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  PATTERN ".svn" EXCLUDE)
+install(DIRECTORY scripts
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   PATTERN ".svn" EXCLUDE)
