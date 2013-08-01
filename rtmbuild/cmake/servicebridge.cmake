@@ -18,8 +18,8 @@ macro(rtmbuild_genbridge_init)
   set(_autogen "")
   foreach(_idl ${_idllist})
     message("[rtmbuild_genbridge_init] Generate msgs/srvs from ${_idl}")
-    message("[rtmbuild_genbridge_init] rosrun openrtm_ros_bridge idl2srv.py --filenames -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs=\"${_include_dirs}\"")
-    execute_process(COMMAND rosrun openrtm_ros_bridge idl2srv.py --filenames -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_include_dirs}" OUTPUT_VARIABLE _autogen_files OUTPUT_STRIP_TRAILING_WHITESPACE)
+    message("[rtmbuild_genbridge_init] rosrun rtmbuild idl2srv.py --filenames -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs=\"${_include_dirs}\"")
+    execute_process(COMMAND rosrun rtmbuild idl2srv.py --filenames -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_include_dirs}" OUTPUT_VARIABLE _autogen_files OUTPUT_STRIP_TRAILING_WHITESPACE)
     if(_autogen_files)
       string(REPLACE "\n" ";" _autogen_files  ${_autogen_files})
       # remove already generated msg(_autogen) from _autogen_files
@@ -35,8 +35,8 @@ macro(rtmbuild_genbridge_init)
       set(_remove_autogen_files 0)
       foreach(_autogen_file ${_autogen_files})
         if(${PROJECT_SOURCE_DIR}/idl/${_idl} IS_NEWER_THAN ${_autogen_file} OR
-           ${openrtm_ros_bridge_PACKAGE_PATH}/scripts/idl2srv.py IS_NEWER_THAN ${_autogen_file} OR
-           ${openrtm_ros_bridge_PACKAGE_PATH}/cmake/servicebridge.cmake IS_NEWER_THAN ${_autogen_file})
+           ${rtmbuild_PACKAGE_PATH}/scripts/idl2srv.py IS_NEWER_THAN ${_autogen_file} OR
+           ${rtmbuild_PACKAGE_PATH}/cmake/servicebridge.cmake IS_NEWER_THAN ${_autogen_file})
          set(_remove_autogen_files 1)
        endif()
       endforeach(_autogen_file ${_autogen_files})
@@ -48,7 +48,7 @@ macro(rtmbuild_genbridge_init)
 
       list(APPEND _autogen ${_autogen_files})
       get_filename_component(_project_name ${CMAKE_SOURCE_DIR} NAME)
-      execute_process(COMMAND rosrun openrtm_ros_bridge idl2srv.py -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs=${_include_dirs} --tmpdir=/tmp/idl2srv/${_project_name})
+      execute_process(COMMAND rosrun rtmbuild idl2srv.py -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs=${_include_dirs} --tmpdir=/tmp/idl2srv/${_project_name})
     endif(_autogen_files)
     set(_generated_msgs_from_idl "")
   endforeach(_idl)
@@ -69,10 +69,10 @@ macro(rtmbuild_genbridge)
   add_custom_command(OUTPUT /_tmp/idl2srv
     COMMAND rm -fr /tmp/idl2srv/${_project} DEPENDS ${_autogen})
   add_dependencies(rtmbuild_genbridge RTMBUILD_rm_idl2srv)
-  add_custom_target(RTMBUILD_rm_idl2srv ALL DEPENDS /_tmp/idl2srv ${openrtm_ros_bridge_PACKAGE_PATH}/scripts/idl2srv.py ${openrtm_ros_bridge_PACKAGE_PATH}/cmake/servicebridge.cmake)
+  add_custom_target(RTMBUILD_rm_idl2srv ALL DEPENDS /_tmp/idl2srv ${rtmbuild_PACKAGE_PATH}/scripts/idl2srv.py ${rtmbuild_PACKAGE_PATH}/cmake/servicebridge.cmake)
   #
   foreach(_idl ${_idllist})
-    execute_process(COMMAND rosrun openrtm_ros_bridge idl2srv.py --interfaces -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_include_dirs}" OUTPUT_VARIABLE _interface
+    execute_process(COMMAND rosrun rtmbuild idl2srv.py --interfaces -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_include_dirs}" OUTPUT_VARIABLE _interface
       OUTPUT_STRIP_TRAILING_WHITESPACE)
     if(_interface)
       string(REPLACE "\n" ";" _interface ${_interface})

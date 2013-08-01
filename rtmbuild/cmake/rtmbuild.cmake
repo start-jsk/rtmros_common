@@ -1,8 +1,12 @@
-cmake_minimum_required(VERSION 2.4.6)
+cmake_minimum_required(VERSION 2.8.3)
 
 # rtmbuild_genbridge_init() and rtmbuild_genbridge()
-rosbuild_find_ros_package(openrtm_ros_bridge)
-include(${openrtm_ros_bridge_PACKAGE_PATH}/cmake/servicebridge.cmake)
+if("${CMAKE_VERSION}" VERSION_LESS "2.8.3")
+  rosbuild_find_ros_package(rtmbuild)
+  include(${rtmbuild_PACKAGE_PATH}/cmake/servicebridge.cmake)
+else()
+  include(${CMAKE_CURRENT_LIST_DIR}/servicebridge.cmake) # > 2.8.3
+endif()
 
 set(_RTMBUILD_GENERATED_IDL_FILES "")
 macro(rtmbuild_get_idls idlvar)
