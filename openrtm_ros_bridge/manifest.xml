@@ -13,6 +13,8 @@
   <depend package="openrtm_aist"/>
   <depend package="openrtm_tools"/>
 
+  <depend package="rtmbuild"/>
+
   <export>
     <rosdoc config="rosdoc.yaml" />
   </export>
