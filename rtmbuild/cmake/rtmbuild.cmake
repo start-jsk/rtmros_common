@@ -94,6 +94,12 @@ macro(rtmbuild_genidl)
   ##
   add_dependencies(rtmbuild_genidl RTMBUILD_genidl)
   add_custom_target(RTMBUILD_genidl ALL DEPENDS ${_autogen})
+  if (${CATKIN_TOPLEVEL})
+    install(DIRECTORY ${_output_lib_dir}/ ## add / is important
+      DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+      USE_SOURCE_PERMISSIONS  # set executable
+      )
+  endif()
 
   #
   if(_autogen)
@@ -117,6 +123,7 @@ macro(rtmbuild_init)
     set(_rtmbuild_pkg_dir ${rtmbuild_SOURCE_DIR})
     pkg_check_modules(openrtm_aist REQUIRED openrtm_aist)
     set(_openrtm_aist_pkg_dir ${openrtm_aist_SOURCE_DIR})
+    find_package(message_generation) ## load add_message_files(), add_service_files()
     ###
     ### TODO openhrp3 stuff
     ###
@@ -137,7 +144,6 @@ macro(rtmbuild_init)
   #
   if (${CATKIN_TOPLEVEL})
     set(_project ${PROJECT_NAME})
-    find_package(message_generation)
     include_directories(${catkin_INCLUDE_DIRS})
   else() # if (NOT ${CATKIN_TOPLEVEL}) does not work
     rosbuild_init()
@@ -213,10 +219,11 @@ endmacro(rtmbuild_init)
 
 macro(rtmbuild_add_executable exe)
   if (${CATKIN_TOPLEVEL})
-    link_directories(${CATKIN_DEVEL_PREFIX}/lib)
+    link_directories(${CATKIN_DEVEL_PREFIX}/lib) ### ??? for -lRTC -lcoil
     add_executable(${ARGV})
     add_dependencies(${exe} RTMBUILD_genidl)
     target_link_libraries(${exe} ${catkin_LIBRARIES} ${${_prefix}_IDLLIBRARY_DIRS} )
+    install(TARGETS ${exe} RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
   else()
     rosbuild_add_executable(${ARGV})
     add_dependencies(${exe} RTMBUILD_genidl)
@@ -234,6 +241,7 @@ macro(rtmbuild_add_library lib)
     add_library(${ARGV})
     add_dependencies(${lib} RTMBUILD_genidl ${${_package}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
     target_link_libraries(${lib} ${${_prefix}_IDLLIBRARY_DIRS})
+    install(TARGETS ${LIB} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
   else()
     rosbuild_add_library(${ARGV})
     add_dependencies(${lib} RTMBUILD_genidl ${${_package}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

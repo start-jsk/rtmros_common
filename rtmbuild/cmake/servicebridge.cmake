@@ -64,6 +64,20 @@ macro(rtmbuild_genbridge_init)
     set(_generated_msgs_from_idl "")
   endforeach(_idl)
 
+  if (${CATKIN_TOPLEVEL})
+    # generated .h file
+    string(REPLACE ";" " ${CATKIN_DEVEL_PREFIX}/include/${_project}/" _autogen_srv_h_files  "${CATKIN_DEVEL_PREFIX}/include/${_project}/${_autogen_srv_files}")
+    string(REPLACE ".srv" ".h" _autogen_srv_h_files  ${_autogen_srv_h_files})
+    string(REPLACE ";" " ${CATKIN_DEVEL_PREFIX}/include/${_project}/" _autogen_msg_h_files  "${CATKIN_DEVEL_PREFIX}/include/${_project}/${_autogen_msg_files}")
+    string(REPLACE ".srv" ".h" _autogen_msg_h_files  ${_autogen_msg_h_files})
+    # message generation
+    message("[rosbuild_genbridge] msg: ${_autogen_msg_files}")
+    message("[rosbuild_genbridge] srv: ${_autogen_srv_files}")
+    add_message_files(DIRECTORY msg FILES "${_autogen_msg_files}")
+    add_service_files(DIRECTORY srv FILES "${_autogen_srv_files}")
+    generate_messages(DEPENDENCIES std_msgs)
+  endif()
+
   if(_autogen)
     # Also set up to clean the generated msg/srv/cpp/h files
     get_directory_property(_old_clean_files ADDITIONAL_MAKE_CLEAN_FILES)
@@ -74,11 +88,6 @@ endmacro(rtmbuild_genbridge_init)
 
 macro(rtmbuild_genbridge)
   if (${CATKIN_TOPLEVEL})
-    message("[rosbuild_genbridge] msg: ${_autogen_msg_files}")
-    message("[rosbuild_genbridge] srv: ${_autogen_srv_files}")
-    add_message_files(DIRECTORY msg FILES "${_autogen_msg_files}")
-    add_service_files(DIRECTORY srv FILES "${_autogen_srv_files}")
-    generate_messages(DEPENDENCIES std_msgs)
   else() # if (NOT ${CATKIN_TOPLEVEL}) does not work
     rosbuild_genmsg()
     rosbuild_gensrv()
@@ -97,7 +106,9 @@ macro(rtmbuild_genbridge)
       string(REPLACE "\n" ";" _interface ${_interface})
       foreach(_comp ${_interface})
 	message("[rtmbuild_genbridge] ${_idl} -> ${_comp}ROSBridgeComp")
+        add_custom_target(${_comp}ROSBridge_cpp DEPENDS ${_autogen} ) # cpp depends on compiled idl
 	rtmbuild_add_executable("${_comp}ROSBridgeComp" "src_gen/${_comp}ROSBridge.cpp" "src_gen/${_comp}ROSBridgeComp.cpp")
+        add_dependencies(${_comp}ROSBridgeComp DEPENDS ${_comp}ROSBridge_cpp ${_project}_generate_messages_cpp) # comp depends on cpp
       endforeach(_comp)
     endif(_interface)
   endforeach(_idl)
