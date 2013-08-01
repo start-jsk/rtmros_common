@@ -1,0 +1,29 @@
+<package>
+  <name>openrtm_ros_bridge</name>
+  <version>0.0.1</version>
+  <description>openrtm_ros_bridge</description>
+  <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/openrtm_ros_bridge</url>
+  <!-- <url type="bugtracker"></url> -->
+
+  <author email="saito@jsk.t.u-tokyo.ac.jp">Manabu Saito</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- <build_depend>openrtm_aist</build_depend> -->
+  <build_depend>openrtm_tools</build_depend>
+  <build_depend>rtmbuild</build_depend>
+  <build_depend>roscpp</build_depend>
+  <!-- <run_depend>openrtm_aist</run_depend> -->
+  <!-- <run_depend>openrtm_tools</run_depend> -->
+
+  <!-- <test_depend>openrtm_aist</test_depend> -->
+  <!-- <test_depend>openrtm_tools</test_depend> -->
+
+  <export>
+    <rosdoc config="rosdoc.yaml"/>
+  </export>
+</package>
