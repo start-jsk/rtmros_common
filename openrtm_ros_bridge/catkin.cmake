@@ -12,7 +12,7 @@ include(${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
 
 # copy idl files from openrtm_aist
 pkg_check_modules(openrtm_aist REQUIRED openrtm_aist)
-execute_process(COMMAND mkdir -p ${PROJECT_SOURCE_DIR}/idl)
+file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
 file(GLOB_RECURSE _idl_files "${openrtm_aist_SOURCE_DIR}/share/openrtm-1.1/example/*.idl")
 foreach(_idl_file ${_idl_files})
   execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_idl_file} ${PROJECT_SOURCE_DIR}/idl/)
