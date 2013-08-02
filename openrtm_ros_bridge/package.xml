@@ -17,8 +17,10 @@
   <build_depend>openrtm_tools</build_depend>
   <build_depend>rtmbuild</build_depend>
   <build_depend>roscpp</build_depend>
-  <!-- <run_depend>openrtm_aist</run_depend> -->
-  <!-- <run_depend>openrtm_tools</run_depend> -->
+  <build_depend>rostest</build_depend>
+
+  <run_depend>openrtm_aist</run_depend>
+  <run_depend>roscpp</run_depend>
 
   <!-- <test_depend>openrtm_aist</test_depend> -->
   <!-- <test_depend>openrtm_tools</test_depend> -->

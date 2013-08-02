@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(openrtm_ros_bridge)
 
 # call catking depends
-find_package(catkin REQUIRED COMPONENTS roscpp openrtm_aist openrtm_tools rtmbuild)
+find_package(catkin REQUIRED COMPONENTS roscpp openrtm_aist openrtm_tools rtmbuild rostest)
 
 # include rtmbuild
 find_package(PkgConfig)
@@ -39,5 +39,5 @@ rtmbuild_genbridge()
 ## tests
 ##
 
-#add_rostest(samples/test_myservice_rosbridge.launch)
+add_rostest(samples/test_myservice_rosbridge.launch)
 
