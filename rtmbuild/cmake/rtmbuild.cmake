@@ -219,7 +219,6 @@ endmacro(rtmbuild_init)
 
 macro(rtmbuild_add_executable exe)
   if (${CATKIN_TOPLEVEL})
-    link_directories(${CATKIN_DEVEL_PREFIX}/lib) ### ??? for -lRTC -lcoil
     add_executable(${ARGV})
     add_dependencies(${exe} RTMBUILD_genidl)
     target_link_libraries(${exe} ${catkin_LIBRARIES} ${${_prefix}_IDLLIBRARY_DIRS} )
