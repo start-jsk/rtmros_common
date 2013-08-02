@@ -51,7 +51,7 @@ find_package(catkin REQUIRED COMPONENTS openrtm_aist openrtm_aist_python rtshell
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES openrtm_tools
-#  CATKIN_DEPENDS openrtm_aist openrtm_aist_python
+  CATKIN_DEPENDS openrtm_aist openrtm_aist_python rtshell
 #  DEPENDS system_lib
 )
 
