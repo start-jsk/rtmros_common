@@ -116,7 +116,7 @@ macro(rtmbuild_genbridge)
 	message("[rtmbuild_genbridge] ${_idl} -> ${_comp}ROSBridgeComp")
         add_custom_target(_${PROJECT_NAME}_${_comp}ROSBridge_cpp DEPENDS ${_autogen} ) # cpp depends on compiled idl
 	rtmbuild_add_executable("${_comp}ROSBridgeComp" "src_gen/${_comp}ROSBridge.cpp" "src_gen/${_comp}ROSBridgeComp.cpp")
-        add_dependencies(${_comp}ROSBridgeComp DEPENDS _${PROJECT_NAME}_${_comp}ROSBridge_cpp _${PROJECT_NAME}_generate_messages_cpp) # comp depends on cpp
+        add_dependencies(${_comp}ROSBridgeComp DEPENDS _${PROJECT_NAME}_${_comp}ROSBridge_cpp ${PROJECT_NAME}_generate_messages_cpp) # comp depends on cpp
       endforeach(_comp)
     endif(_interface)
   endforeach(_idl)
