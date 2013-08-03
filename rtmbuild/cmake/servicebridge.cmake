@@ -103,9 +103,9 @@ macro(rtmbuild_genbridge)
   rtmbuild_get_idls(_idllist)
   # rm tmp/idl2srv
   add_custom_command(OUTPUT /_tmp/idl2srv
-    COMMAND rm -fr /tmp/idl2srv/${_project} DEPENDS ${_autogen})
-  add_dependencies(rtmbuild_${_project}_genbridge RTMBUILD_${_project}_rm_idl2srv)
-  add_custom_target(RTMBUILD_${_project}_rm_idl2srv ALL DEPENDS /_tmp/idl2srv ${_rtmbuild_pkg_dir}/scripts/idl2srv.py ${_rtmbuild_pkg_dir}/cmake/servicebridge.cmake)
+    COMMAND rm -fr /tmp/idl2srv/_${PROJECT_NAME} DEPENDS ${_autogen})
+  add_dependencies(rtmbuild_${PROJECT_NAME}_genbridge RTMBUILD_${PROJECT_NAME}_rm_idl2srv)
+  add_custom_target(RTMBUILD_${PROJECT_NAME}_rm_idl2srv ALL DEPENDS /_tmp/idl2srv ${_rtmbuild_pkg_dir}/scripts/idl2srv.py ${_rtmbuild_pkg_dir}/cmake/servicebridge.cmake)
   #
   foreach(_idl ${_idllist})
     execute_process(COMMAND ${_rtmbuild_pkg_dir}/scripts/idl2srv.py --interfaces -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_include_dirs}" OUTPUT_VARIABLE _interface
@@ -114,9 +114,9 @@ macro(rtmbuild_genbridge)
       string(REPLACE "\n" ";" _interface ${_interface})
       foreach(_comp ${_interface})
 	message("[rtmbuild_genbridge] ${_idl} -> ${_comp}ROSBridgeComp")
-        add_custom_target(${_comp}ROSBridge_cpp DEPENDS ${_autogen} ) # cpp depends on compiled idl
+        add_custom_target(_${PROJECT_NAME}_${_comp}ROSBridge_cpp DEPENDS ${_autogen} ) # cpp depends on compiled idl
 	rtmbuild_add_executable("${_comp}ROSBridgeComp" "src_gen/${_comp}ROSBridge.cpp" "src_gen/${_comp}ROSBridgeComp.cpp")
-        add_dependencies(${_comp}ROSBridgeComp DEPENDS ${_comp}ROSBridge_cpp ${_project}_generate_messages_cpp) # comp depends on cpp
+        add_dependencies(${_comp}ROSBridgeComp DEPENDS _${PROJECT_NAME}_${_comp}ROSBridge_cpp _${PROJECT_NAME}_generate_messages_cpp) # comp depends on cpp
       endforeach(_comp)
     endif(_interface)
   endforeach(_idl)
