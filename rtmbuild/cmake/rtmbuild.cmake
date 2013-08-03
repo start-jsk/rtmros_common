@@ -119,9 +119,9 @@ macro(rtmbuild_init)
   #
   if (${CATKIN_TOPLEVEL})
     find_package(PkgConfig)
-    pkg_check_modules(rtmbuild REQUIRED rtmbuild)
+    pkg_check_modules(rtmbuild rtmbuild) # REQUIRED 
     set(_rtmbuild_pkg_dir ${rtmbuild_SOURCE_DIR})
-    pkg_check_modules(openrtm_aist REQUIRED openrtm_aist)
+    pkg_check_modules(openrtm_aist openrtm_aist) # REQUIRED 
     set(_openrtm_aist_pkg_dir ${openrtm_aist_SOURCE_DIR})
     find_package(message_generation) ## load add_message_files(), add_service_files()
     ###
