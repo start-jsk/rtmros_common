@@ -71,13 +71,13 @@ macro(rtmbuild_genbridge_init)
     string(REPLACE ";" " ${CATKIN_DEVEL_PREFIX}/include/${PROJECT_NAME}/" _autogen_msg_h_files  "${CATKIN_DEVEL_PREFIX}/include/${PROJECT_NAME}/${_autogen_msg_files}")
     string(REPLACE ".srv" ".h" _autogen_msg_h_files  ${_autogen_msg_h_files})
     # message generation
-    foreach(_${PROJECT_NAME}_msg_files ${${PROJECT_NAME}_MESSAGE_FILES})
-      get_filename_component(_${PROJECT_NAME}_msg_file ${_${PROJECT_NAME}_msg_files} NAME)
-      list(APPEND _autogen_msg_files ${_${PROJECT_NAME}_msg_file})
+    foreach(${PROJECT_NAME}_msg_files ${${PROJECT_NAME}_MESSAGE_FILES})
+      get_filename_component(${PROJECT_NAME}_msg_file ${${PROJECT_NAME}_msg_files} NAME)
+      list(APPEND _autogen_msg_files ${${PROJECT_NAME}_msg_file})
     endforeach()
-    foreach(_${PROJECT_NAME}_srv_files ${${PROJECT_NAME}_SERVICE_FILES})
-      get_filename_component(_${PROJECT_NAME}_srv_file ${_${PROJECT_NAME}_srv_files} NAME)
-      list(APPEND _autogen_srv_files ${_${PROJECT_NAME}_srv_files)
+    foreach(${PROJECT_NAME}_srv_files ${${PROJECT_NAME}_SERVICE_FILES})
+      get_filename_component(${PROJECT_NAME}_srv_file ${${PROJECT_NAME}_srv_files} NAME)
+      list(APPEND _autogen_srv_files ${${PROJECT_NAME}_srv_files)
     endforeach()
     message("[rosbuild_genbridge] msg: ${_autogen_msg_files}")
     message("[rosbuild_genbridge] srv: ${_autogen_srv_files}")
@@ -103,7 +103,7 @@ macro(rtmbuild_genbridge)
   rtmbuild_get_idls(_idllist)
   # rm tmp/idl2srv
   add_custom_command(OUTPUT /_tmp/idl2srv
-    COMMAND rm -fr /tmp/idl2srv/_${PROJECT_NAME} DEPENDS ${_autogen})
+    COMMAND rm -fr /tmp/idl2srv/${PROJECT_NAME} DEPENDS ${_autogen})
   add_dependencies(rtmbuild_${PROJECT_NAME}_genbridge RTMBUILD_${PROJECT_NAME}_rm_idl2srv)
   add_custom_target(RTMBUILD_${PROJECT_NAME}_rm_idl2srv ALL DEPENDS /_tmp/idl2srv ${_rtmbuild_pkg_dir}/scripts/idl2srv.py ${_rtmbuild_pkg_dir}/cmake/servicebridge.cmake)
   #
@@ -114,9 +114,9 @@ macro(rtmbuild_genbridge)
       string(REPLACE "\n" ";" _interface ${_interface})
       foreach(_comp ${_interface})
 	message("[rtmbuild_genbridge] ${_idl} -> ${_comp}ROSBridgeComp")
-        add_custom_target(_${PROJECT_NAME}_${_comp}ROSBridge_cpp DEPENDS ${_autogen} ) # cpp depends on compiled idl
+        add_custom_target(${PROJECT_NAME}_${_comp}ROSBridge_cpp DEPENDS ${_autogen} ) # cpp depends on compiled idl
 	rtmbuild_add_executable("${_comp}ROSBridgeComp" "src_gen/${_comp}ROSBridge.cpp" "src_gen/${_comp}ROSBridgeComp.cpp")
-        add_dependencies(${_comp}ROSBridgeComp DEPENDS _${PROJECT_NAME}_${_comp}ROSBridge_cpp ${PROJECT_NAME}_generate_messages_cpp) # comp depends on cpp
+        add_dependencies(${_comp}ROSBridgeComp DEPENDS ${PROJECT_NAME}_${_comp}ROSBridge_cpp ${PROJECT_NAME}_generate_messages_cpp) # comp depends on cpp
       endforeach(_comp)
     endif(_interface)
   endforeach(_idl)
