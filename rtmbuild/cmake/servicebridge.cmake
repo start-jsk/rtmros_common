@@ -2,7 +2,7 @@
 
 # generate msg/srv files from idl, this will be called in rtmbuild_init
 macro(rtmbuild_genbridge_init)
-  message("[rtmbuild_genbridge_init] Generating bridge compornents from idl")
+  message("[rtmbuild_genbridge_init] Generating bridge compornents from ${PROJECT_NAME}/idl")
   rtmbuild_get_idls(_idllist)
   if(NOT _idllist)
     message_warn("[rtmbuild_genbridge_init] WARNING: rtmbuild_genbridge() was called, but no .idl files ware found")
@@ -66,11 +66,19 @@ macro(rtmbuild_genbridge_init)
 
   if (${CATKIN_TOPLEVEL})
     # generated .h file
-    string(REPLACE ";" " ${CATKIN_DEVEL_PREFIX}/include/${_project}/" _autogen_srv_h_files  "${CATKIN_DEVEL_PREFIX}/include/${_project}/${_autogen_srv_files}")
+    string(REPLACE ";" " ${CATKIN_DEVEL_PREFIX}/include/${PROJECT_NAME}/" _autogen_srv_h_files  "${CATKIN_DEVEL_PREFIX}/include/${PROJECT_NAME}/${_autogen_srv_files}")
     string(REPLACE ".srv" ".h" _autogen_srv_h_files  ${_autogen_srv_h_files})
-    string(REPLACE ";" " ${CATKIN_DEVEL_PREFIX}/include/${_project}/" _autogen_msg_h_files  "${CATKIN_DEVEL_PREFIX}/include/${_project}/${_autogen_msg_files}")
+    string(REPLACE ";" " ${CATKIN_DEVEL_PREFIX}/include/${PROJECT_NAME}/" _autogen_msg_h_files  "${CATKIN_DEVEL_PREFIX}/include/${PROJECT_NAME}/${_autogen_msg_files}")
     string(REPLACE ".srv" ".h" _autogen_msg_h_files  ${_autogen_msg_h_files})
     # message generation
+    foreach(_${PROJECT_NAME}_msg_files ${${PROJECT_NAME}_MESSAGE_FILES})
+      get_filename_component(_${PROJECT_NAME}_msg_file ${_${PROJECT_NAME}_msg_files} NAME)
+      list(APPEND _autogen_msg_files ${_${PROJECT_NAME}_msg_file})
+    endforeach()
+    foreach(_${PROJECT_NAME}_srv_files ${${PROJECT_NAME}_SERVICE_FILES})
+      get_filename_component(_${PROJECT_NAME}_srv_file ${_${PROJECT_NAME}_srv_files} NAME)
+      list(APPEND _autogen_srv_files ${_${PROJECT_NAME}_srv_files)
+    endforeach()
     message("[rosbuild_genbridge] msg: ${_autogen_msg_files}")
     message("[rosbuild_genbridge] srv: ${_autogen_srv_files}")
     add_message_files(DIRECTORY msg FILES "${_autogen_msg_files}")
