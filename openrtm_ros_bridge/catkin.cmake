@@ -7,11 +7,11 @@ find_package(catkin REQUIRED COMPONENTS roscpp openrtm_aist openrtm_tools rtmbui
 
 # include rtmbuild
 find_package(PkgConfig)
-pkg_check_modules(rtmbuild REQUIRED rtmbuild)
+pkg_check_modules(rtmbuild rtmbuild) # REQUIRED
 include(${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
 
 # copy idl files from openrtm_aist
-pkg_check_modules(openrtm_aist REQUIRED openrtm_aist)
+pkg_check_modules(openrtm_aist openrtm_aist) # REQUIRED
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
 file(GLOB_RECURSE _idl_files "${openrtm_aist_SOURCE_DIR}/share/openrtm-1.1/example/*.idl")
 foreach(_idl_file ${_idl_files})
