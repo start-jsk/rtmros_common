@@ -1,0 +1,65 @@
+<package>
+  <name>hrpsys_ros_bridge</name>
+  <version>0.0.1</version>
+  <description>hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, this script is usually included from other script.</description>
+  <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/hrprtc_ros_bridge</url>
+  <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/list</url>
+
+  <author email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>hrpsys</build_depend>
+  <build_depend>rtmbuild</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>robot_state_publisher</build_depend>
+  <build_depend>actionlib</build_depend>
+  <build_depend>pr2_controllers_msgs</build_depend>
+  <build_depend>control_msgs</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>camera_info_manager</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>robot_monitor</build_depend>
+  
+  <run_depend>hrpsys</run_depend>
+  <run_depend>rtmbuild</run_depend>
+  <run_depend>openrtm_tools</run_depend>
+  <run_depend>hrpsys_tools</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>actionlib</run_depend>
+  <run_depend>pr2_controllers_msgs</run_depend>
+  <run_depend>control_msgs</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>camera_info_manager</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>robot_monitor</run_depend>
+
+  <!-- <test_depend>hrpsys</test_depend> -->
+  <!-- <test_depend>hrpsys_tools</test_depend> -->
+  <!-- <test_depend>openrtm_tools</test_depend> -->
+  <!-- <test_depend>openrtm_ros_bridge</test_depend> -->
+  <!-- <test_depend>roscpp</test_depend> -->
+  <!-- <test_depend>sensor_msgs</test_depend> -->
+  <!-- <test_depend>robot_state_publisher</test_depend> -->
+  <!-- <test_depend>actionlib</test_depend> -->
+  <!-- <test_depend>pr2_controllers_msgs</test_depend> -->
+  <!-- <test_depend>control_msgs</test_depend> -->
+  <!-- <test_depend>tf</test_depend> -->
+  <!-- <test_depend>camera_info_manager</test_depend> -->
+  <!-- <test_depend>image_transport</test_depend> -->
+  <!-- <test_depend>dynamic_reconfigure</test_depend> -->
+  <!-- <test_depend>robot_monitor</test_depend> -->
+
+  <export>
+
+  </export>
+</package>
