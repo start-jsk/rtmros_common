@@ -159,10 +159,9 @@ macro(rtmbuild_init)
   list(APPEND ${PROJECT_NAME}_IDL_DIRS ${PROJECT_SOURCE_DIR}/idl)
 
   if (${CATKIN_TOPLEVEL})
-    message(";; rospack will run....")
-    execute_process(COMMAND rospack depends-manifests openrtm_ros_bridge OUTPUT_VARIABLE ${PROJECT_NAME}_DIRS
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-    string(REPLACE " " ";" ${PROJECT_NAME}_DIRS ${${PROJECT_NAME}_DIRS})
+    #message(";; rospack will run....")
+    #execute_process(COMMAND rospack depends-manifests openrtm_ros_bridge OUTPUT_VARIABLE ${PROJECT_NAME}_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
+    #string(REPLACE " " ";" ${PROJECT_NAME}_DIRS ${${PROJECT_NAME}_DIRS})
   else()
     rosbuild_invoke_rospack(${PROJECT_NAME} ${PROJECT_NAME} DIRS depends-manifests)
 
