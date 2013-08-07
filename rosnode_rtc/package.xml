@@ -1,32 +1,31 @@
 <package>
   <name>rosnode_rtc</name>
   <version>0.0.1</version>
-  <description>rosnode_rtc
-
+  <description>
      This package gives transparency between RTM and ROS.
 
      rtmros-data-bridge.py is a RT-Component for dataport/topic.
      This automatically convert ROS/topic into RTM/dataport.
-
   </description>
-  <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Manabu Saito</maintainer>
+  <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
+  <maintainer email="iisaito@kinugarage.com">Isao Isaac Saito</maintainer>
+  <author email="saito@jsk.t.u-tokyo.ac.jp">Manabu Saito</author>
 
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/rosnode_rtc</url>
-  <!-- <url type="bugtracker"></url> -->
-
-  <author email="saito@jsk.t.u-tokyo.ac.jp">Manabu Saito</author>
+  <url type="repository">https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common</url>
+  <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>openrtm_tools</build_depend>
   <run_depend>openrtm_tools</run_depend>
 
+  <test_depend>move_base_stage_tutorial</test_depend>
+  <test_depend>roscpp_tutorials</test_depend>
   <test_depend>rospy</test_depend>
   <test_depend>rostopic</test_depend>
-  <test_depend>roscpp_tutorials</test_depend>
-  <test_depend>move_base_stage_tutorial</test_depend>
 
   <export>
 

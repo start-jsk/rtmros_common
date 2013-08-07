@@ -7,7 +7,8 @@
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/hrprtc_ros_bridge</url>
-  <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/list</url>
+  <url type="repository">https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common</url>
+  <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/</url>
 
   <author email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</author>
 

@@ -2,22 +2,23 @@
   <name>openrtm_ros_bridge</name>
   <version>0.0.1</version>
   <description>openrtm_ros_bridge</description>
-  <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
-
   <license>BSD</license>
 
-  <url type="website">http://ros.org/wiki/openrtm_ros_bridge</url>
-  <!-- <url type="bugtracker"></url> -->
-
+  <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
+  <maintainer email="iisaito@kinugarage.com">Isao Isaac Saito</maintainer>
   <author email="saito@jsk.t.u-tokyo.ac.jp">Manabu Saito</author>
+
+  <url type="website">http://ros.org/wiki/openrtm_ros_bridge</url>
+  <url type="repository">https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common</url>
+  <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
   <!-- <build_depend>openrtm_aist</build_depend> -->
   <build_depend>openrtm_tools</build_depend>
-  <build_depend>rtmbuild</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>rostest</build_depend>
+  <build_depend>rtmbuild</build_depend>
 
   <run_depend>openrtm_aist</run_depend>
   <run_depend>roscpp</run_depend>
