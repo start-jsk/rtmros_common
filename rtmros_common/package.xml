@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package>
+  <name>rtmros_common</name>
+  <version>0.0.1</version>
+  <description>Common ROS module suite for RT Middleware.</description>
+
+  <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
+  <maintainer email="iisaito@kinugarage.com">Isao Isaac Saito</maintainer>
+  <author email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</author>
+  <author>Rosen Diankov</author>
+
+  <license>BSD</license>
+  <url type="website">http://ros.org/wiki/rtmros_common</url>
+  <url type="repository">https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common</url>
+  <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>hrpsys_tools</run_depend>
+  <run_depend>openrtm_ros_bridge</run_depend>
+  <run_depend>openrtm_tools</run_depend>
+  <run_depend>rosnode_rtc</run_depend>
+  <run_depend>rtmbuild</run_depend>
+
+ <export>
+   <metapackage/>
+ </export>
+</package>
