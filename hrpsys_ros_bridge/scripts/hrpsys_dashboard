@@ -21,8 +21,6 @@ import wx.py.shell
 import rxtools
 import rxtools.cppwidgets as rxtools
 
-import robot_monitor
-from robot_monitor.robot_monitor_panel import RobotMonitorPanel
 import diagnostic_msgs.msg
 import std_msgs.msg
 import std_srvs.srv
