@@ -121,11 +121,12 @@ RTC::ReturnCode_t HrpsysJointTrajectoryBridge::onActivated(RTC::UniqueId ec_id) 
             cname = gname;
           }
           if(gname.length() > 0 && cname.length() > 0 && jlst.size() > 0) {
-            ROS_INFO_STREAM("ADD_GROUP: " << gname << " (" << cname << ")");
-            ROS_INFO_STREAM("  JOINT:");
+            std::stringstream ss;
             for(size_t s = 0; s < jlst.size(); s++) {
-              ROS_INFO_STREAM("    " << jlst[s]);
+                ss << " " << jlst[s];
             }
+            ROS_INFO_STREAM("ADD_GROUP: " << gname << " (" << cname << ")");
+            ROS_INFO_STREAM("    JOINT:" << ss.str());
             jointTrajectoryActionObj::Ptr tmp (new jointTrajectoryActionObj (this, cval, gval, jlst));
             trajectory_actions.push_back(tmp);
           }
@@ -216,6 +217,7 @@ jointTrajectoryActionObj(HrpsysJointTrajectoryBridge *ptr,
 }
 
 HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::~jointTrajectoryActionObj() {
+  ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @~jointTrajectoryActionObj (" << this->groupname);
   if ( joint_trajectory_server->isActive() ) {
     joint_trajectory_server->setPreempted();
   }
@@ -236,6 +238,7 @@ proc() {
     pr2_controllers_msgs::JointTrajectoryResult result;
     joint_trajectory_server->setSucceeded(result);
     interpolationp = false;
+    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @proc joint_trajectory_server->setSucceeded()");
   }
   if (follow_joint_trajectory_server->isActive() &&
       interpolationp == true && parent->m_service0->isEmpty() == true) {
@@ -243,6 +246,7 @@ proc() {
     result.error_code = control_msgs::FollowJointTrajectoryResult::SUCCESSFUL;
     follow_joint_trajectory_server->setSucceeded(result);
     interpolationp = false;
+    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @proc follow_joint_trajectory_server->setSucceeded()");
   }
 #if 0
   ros::Time tm_on_execute = ros::Time::now();
@@ -272,12 +276,12 @@ onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
 
   std::vector<std::string> joint_names = trajectory.joint_names;
 
+  ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryAction (" << this->groupname << ") : trajectory.points.size() " << trajectory.points.size());
   for (unsigned int i=0; i < trajectory.points.size(); i++) {
     angles[i].length(joint_names.size());
 
     trajectory_msgs::JointTrajectoryPoint point = trajectory.points[i];
     for (unsigned int j=0; j < joint_names.size(); j++) {
-      ROS_INFO_STREAM("b_j: " << joint_names[j] << " -> " << point.positions[j]);
       parent->body->link(joint_names[j])->q = point.positions[j];
     }
 
@@ -292,12 +296,13 @@ onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
       ++it;++j;
     }
 #endif
+    std::stringstream ss;
     for (unsigned int j=0; j < joint_names.size(); j++) {
-      ROS_INFO_STREAM("a_j: " << joint_names[j] << " -> " << point.positions[j]);
       angles[i][j] = parent->body->link(joint_names[j])->q;
+      ss << " " << point.positions[j];
     }
-
     ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryAction (" << this->groupname << ") : time_from_start " << trajectory.points[i].time_from_start.toSec());
+    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] " << ss.str());
 
     if ( i > 0 ) {
       duration[i] =  trajectory.points[i].time_from_start.toSec() - trajectory.points[i-1].time_from_start.toSec();
@@ -313,14 +318,14 @@ onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
   parent->m_mutex.unlock();
   if ( duration.length() == 1 ) {
     if (groupname.length() > 0) { // group
-      ROS_INFO_STREAM("setJointAnglesOfGroup: " << groupname);
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] setJointAnglesOfGroup: " << groupname);
       parent->m_service0->setJointAnglesOfGroup (groupname.c_str(), angles[0], duration[0]);
     } else {  // fullbody
       parent->m_service0->setJointAngles(angles[0], duration[0]);
     }
   } else {
     if (groupname.length() > 0) { // group
-      ROS_INFO_STREAM("playPatternGroup: " << groupname);
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] playPatternGroup: " << groupname);
       parent->m_service0->playPatternOfGroup(groupname.c_str(), angles, duration);
     } else {
       OpenHRP::dSequenceSequence rpy, zmp;
@@ -333,6 +338,7 @@ onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
 
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::
 onJointTrajectoryActionGoal() {
+  ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryActionGoal");
   pr2_controllers_msgs::JointTrajectoryGoalConstPtr
     goal = joint_trajectory_server->acceptNewGoal();
   onJointTrajectory(goal->trajectory);
@@ -340,6 +346,7 @@ onJointTrajectoryActionGoal() {
 
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::
 onFollowJointTrajectoryActionGoal() {
+  ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onFollowJointTrajectoryActionGoal()");
   control_msgs::FollowJointTrajectoryGoalConstPtr
     goal = follow_joint_trajectory_server->acceptNewGoal();
   onJointTrajectory(goal->trajectory);
@@ -347,11 +354,13 @@ onFollowJointTrajectoryActionGoal() {
 
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::
 onJointTrajectoryActionPreempt() {
+  ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryActionPreempt()");
   joint_trajectory_server->setPreempted();
 }
 
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::
 onFollowJointTrajectoryActionPreempt() {
+  ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onFollowJointTrajectoryActionPreempt()");
   follow_joint_trajectory_server->setPreempted();
 }
 
