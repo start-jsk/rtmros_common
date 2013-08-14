@@ -2,6 +2,7 @@
   <arg name="KILL_SERVERS" default="false" />
   <include file="$(find @PROJECT_PKG_NAME@)/launch/@robot@_startup.launch" >
     <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
+    <arg name="NOSIM" default="true" />
   </include>
   <include file="$(find @PROJECT_PKG_NAME@)/launch/@robot@_ros_bridge.launch" />
 
@@ -9,11 +10,11 @@
 
 .. code-block:: bash
 
-  rosrun roseus roseus `rospack find @PROJECT_PKG_NAME@`/euslisp/@robot@-interface.l
+  rosrun roseus roseus `rospack find @PROJECT_PKG_NAME@`/euslisp/@robot@-pickup.l
 
 This launch file shows an example of ros bridge for open @robot@ robot, `@robot@.launch` file launches folloiwng two program
 
-1. `roslaunch @PROJECT_PKG_NAME@ @robot@_startup.launch` : launch simulated robot environment, if you use real robot, you don't need this line
+1. `roslaunch @PROJECT_PKG_NAME@ @robot@_startup.launch NOSIM:=true` : launch simulated robot environment, if you use real robot, you don't need this line
 
 2. `roslaunch @PROJECT_PKG_NAME@ @robot@_ros_bridge.launch` : launch rtm ros bridge
 
