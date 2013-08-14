@@ -1,0 +1,15 @@
+(load "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
+(require :@robot@ "package://@PROJECT_PKG_NAME@/models/@robot@.l")
+
+(defclass @robot@-interface
+  :super rtm-ros-robot-interface
+  :slots ())
+(defmethod @robot@-interface
+  (:init (&rest args)
+         (send-super :init :robot @robot@-robot)))
+
+(defun @robot@-init ()
+  (if (not (boundp '*ri*))
+      (setq *ri* (instance @robot@-interface :init)))
+  (if (not (boundp '*@robot@*))
+      (setq *@robot@* (instance @robot@-robot :init))))

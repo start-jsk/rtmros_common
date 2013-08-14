@@ -1,0 +1,13 @@
+<launch>
+  <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
+    <arg name="SIMULATOR_NAME" value="@ROBOT@(Robot)0" />
+    <arg name="MODEL_FILE" value="@MODEL_FILE@" />
+    <arg name="COLLADA_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.dae" />
+  </include>
+
+  <node name="@robot@_rviz" pkg="rviz" type="rviz" respawn="true"
+	args="-sync -d $(find @PROJECT_PKG_NAME@)/launch/@robot@.vcg"
+	/>
+</launch>
+
+
