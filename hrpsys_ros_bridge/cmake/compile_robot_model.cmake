@@ -192,7 +192,7 @@ macro(compile_collada_model daefile)
   list(APPEND compile_robots ${_name}_compile)
 endmacro(compile_collada_model daefile)
 
-macro (generate_default_launch_eusinterface_flies wrlfile project_pkg_name)
+macro (generate_default_launch_eusinterface_files wrlfile project_pkg_name)
   if("${ARGN}" STREQUAL "")
     get_filename_component(_name ${wrlfile} NAME_WE)
   else()
