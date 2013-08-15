@@ -6,15 +6,21 @@ project(hrpsys_ros_bridge)
 find_package(catkin REQUIRED COMPONENTS hrpsys rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure ) # pr2_controllers_msgs robot_monitor
 
 # include rtmbuild
-find_package(PkgConfig)
-pkg_check_modules(rtmbuild REQUIRED rtmbuild)
-include(${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
-
+#include(${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
+if(EXISTS ${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
+  include(${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
+elseif(EXISTS ${CMAKE_INSTALL_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
+  include(${CMAKE_INSTALL_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
+else()
+  get_cmake_property(_variableNames VARIABLES)
+  foreach (_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+  endforeach()
+endif()
 # include compile_robot_model.cmake
 include(${PROJECT_SOURCE_DIR}/cmake/compile_robot_model.cmake)
 
 # copy idl files from hrpsys
-pkg_check_modules(openrtm_aist REQUIRED hrpsys)
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
 file(COPY
    ${hrpsys_SOURCE_DIR}/share/hrpsys/idl/

@@ -6,12 +6,18 @@ project(openrtm_ros_bridge)
 find_package(catkin REQUIRED COMPONENTS roscpp openrtm_aist openrtm_tools rtmbuild rostest)
 
 # include rtmbuild
-find_package(PkgConfig)
-pkg_check_modules(rtmbuild rtmbuild) # REQUIRED
-include(${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
+if(EXISTS ${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
+  include(${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
+elseif(EXISTS ${CMAKE_INSTALL_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
+  include(${CMAKE_INSTALL_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
+else()
+  get_cmake_property(_variableNames VARIABLES)
+  foreach (_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+  endforeach()
+endif()
 
 # copy idl files from openrtm_aist
-pkg_check_modules(openrtm_aist openrtm_aist) # REQUIRED
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
 file(GLOB_RECURSE _idl_files "${openrtm_aist_SOURCE_DIR}/share/openrtm-1.1/example/*.idl")
 foreach(_idl_file ${_idl_files})
