@@ -124,6 +124,7 @@ macro(rtmbuild_init)
     pkg_check_modules(openrtm_aist openrtm_aist) # REQUIRED 
     set(_openrtm_aist_pkg_dir ${openrtm_aist_SOURCE_DIR})
     find_package(message_generation) ## load add_message_files(), add_service_files()
+    set(ENV{PATH} ${_openrtm_aist_pkg_dir}/bin:$ENV{PATH})
     ###
     ### TODO openhrp3 stuff
     ###
