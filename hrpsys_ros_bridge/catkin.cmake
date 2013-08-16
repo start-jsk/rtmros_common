@@ -22,9 +22,21 @@ include(${PROJECT_SOURCE_DIR}/cmake/compile_robot_model.cmake)
 
 # copy idl files from hrpsys
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
-file(COPY
-   ${hrpsys_SOURCE_DIR}/share/hrpsys/idl/
+if(EXISTS ${hrpsys_SOURCE_DIR}/build/hrpsys-base-source/idl/)
+  file(COPY
+    ${hrpsys_SOURCE_DIR}/build/hrpsys-base-source/idl/
     DESTINATION ${PROJECT_SOURCE_DIR}/idl)
+elseif(EXISTS ${hrpsys_PREFIX}/share/hrpsys/share/hrpsys/idl/)
+  file(COPY
+    ${hrpsys_PREFIX}/share/hrpsys/share/hrpsys/idl/
+    DESTINATION ${PROJECT_SOURCE_DIR}/idl)
+else()
+  get_cmake_property(_variableNames VARIABLES)
+  foreach (_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+  endforeach()
+  message(FATAL_ERROR "hrpsys/idl is not found")
+endif()
 
 # define add_message_files before rtmbuild_init
 add_message_files(FILES MotorStates.msg)
