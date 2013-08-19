@@ -68,6 +68,12 @@ rtmbuild_add_executable(HrpsysSeqStateROSBridge src/HrpsysSeqStateROSBridgeImpl.
 rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/ImageSensorROSBridgeComp.cpp)
 rtmbuild_add_executable(HrpsysJointTrajectoryBridge src/HrpsysJointTrajectoryBridge.cpp src/HrpsysJointTrajectoryBridgeComp.cpp)
 
+if(TARGET compile_hrpsys)
+  add_dependencies(HrpsysSeqStateROSBridge compile_hrpsys)
+  add_dependencies(ImageSensorROSBridge compile_hrpsys)
+  add_dependencies(HrpsysJointTrajectoryBridge compile_hrpsys)
+endif()
+
 ##
 ## test
 ##
