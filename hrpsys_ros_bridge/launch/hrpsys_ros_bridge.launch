@@ -18,8 +18,10 @@
   -->
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
-  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
-  <arg name="openrtm_args" default='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type:PeriodicExecutionContext" -o "exec_cxt.periodic.rate:2000" -o "logger.file_name:/tmp/rtc%p.log"' />
+  <arg name="corbaport" default="5005" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver):$(arg corbaport)" />
+  <arg name="omniorb_args" default="-ORBInitRef NameService=corbaloc:iiop:$(arg nameserver):$(arg corbaport)/NameService" />
+  <arg name="openrtm_args" default='-o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type:PeriodicExecutionContext" -o "exec_cxt.periodic.rate:2000" -o "logger.file_name:/tmp/rtc%p.log"' />
   <!-- END:openrtm setting -->
   <arg name="OUTPUT" default="screen"/>
   <env name="LANG" value="C" />
@@ -43,13 +45,13 @@
 
   <!-- diagnostics -->
   <node pkg="hrpsys_ros_bridge" name="hrpsys_ros_diagnostics" type="diagnostics.py" />
-  <node pkg="hrpsys_ros_bridge" name="hrpsys_profile" type="hrpsys_profile.py" />
+  <node pkg="hrpsys_ros_bridge" name="hrpsys_profile" type="hrpsys_profile.py" args="$(arg omniorb_args)"/>
   <node pkg="diagnostic_aggregator" type="aggregator_node" name="diagnostic_aggregator" >
     <rosparam command="load" file="$(find hrpsys_ros_bridge)/scripts/diagnostics.yaml" />
   </node>
 
   <node pkg="hrpsys_ros_bridge" name="sensor_ros_bridge_connect" type="sensor_ros_bridge_connect.py"
-        args="$(arg MODEL_FILE) $(arg SIMULATOR_NAME) HrpsysSeqStateROSBridge0 $(arg nameserver) -ORBInitRef NameService=corbaloc:iiop:$(arg nameserver):2809/NameService" output="$(arg OUTPUT)"/>
+        args="$(arg MODEL_FILE) $(arg SIMULATOR_NAME) HrpsysSeqStateROSBridge0 $(arg nameserver) $(arg omniorb_args)" output="$(arg OUTPUT)"/>
   <!-- BEGIN:openrtm connection -->
   <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
   <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm_tools" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch USE_COMMON=$(arg USE_COMMON) USE_WALKING=$(arg USE_WALKING) USE_COLLISIONCHECK=$(arg USE_COLLISIONCHECK) USE_IMPEDANCECONTROLLER=$(arg USE_IMPEDANCECONTROLLER) USE_SOFTERRORLIMIT=$(arg USE_SOFTERRORLIMIT) USE_IMAGESENSOR=$(arg USE_IMAGESENSOR) USE_ROBOTHARDWARE=$(arg USE_ROBOTHARDWARE)"/>

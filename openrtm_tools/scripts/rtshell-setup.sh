@@ -10,5 +10,6 @@ else
     echo -e "Warning : Failed to load shell_support, try rosmake openrtm"
 fi
 
-export RTCTREE_NAMESERVERS=localhost
+export RTCTREE_NAMESERVERS=localhost:5005
+complete -F "_roscomplete_launch" -o filenames "rtmlaunch"
 #echo ";; set RTCTREE_NAMESERVERS=$RTCTREE_NAMESERVERS"
