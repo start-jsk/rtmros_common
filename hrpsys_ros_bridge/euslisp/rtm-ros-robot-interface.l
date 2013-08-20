@@ -197,7 +197,7 @@
    (send self :sequenceplayerservice_addjointgroup :gname groupname :jnames jnames))
   (:set-joint-angles-of-group
    (groupname av tm)
-   (send self :sequenceplayerservice_setjointangle :gname groupname :jvs av :tm tm))
+   (send self :sequenceplayerservice_setjointanglesofgroup :gname groupname :jvs av :tm tm))
   (:load-pattern (basename) (send self :sequenceplayerservice_loadpattern :basename basename))
   ;; deprecated
   (:setBasePose
