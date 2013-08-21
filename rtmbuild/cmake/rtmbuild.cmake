@@ -118,7 +118,7 @@ macro(rtmbuild_init)
   #
   # setup pkg path
   #
-  if (${CATKIN_TOPLEVEL})
+  if (${CATKIN_TOPLEVEL} OR ${CATKIN_BUILD_BINARY_PACKAGE})
     find_package(PkgConfig)
     if(EXISTS ${rtmbuild_SOURCE_DIR})
       set(_rtmbuild_pkg_dir ${rtmbuild_SOURCE_DIR})
