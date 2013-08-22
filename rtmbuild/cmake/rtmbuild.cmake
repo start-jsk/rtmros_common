@@ -95,7 +95,7 @@ macro(rtmbuild_genidl)
   ##
   add_dependencies(rtmbuild_${PROJECT_NAME}_genidl RTMBUILD_${PROJECT_NAME}_genidl)
   add_custom_target(RTMBUILD_${PROJECT_NAME}_genidl ALL DEPENDS ${_autogen})
-  if (${CATKIN_TOPLEVEL})
+  if (${use_catkin})
     install(DIRECTORY ${_output_lib_dir}/ ## add / is important
       DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
       USE_SOURCE_PERMISSIONS  # set executable
@@ -118,7 +118,14 @@ macro(rtmbuild_init)
   #
   # setup pkg path
   #
-  if (${CATKIN_TOPLEVEL} OR ${CATKIN_BUILD_BINARY_PACKAGE})
+  set(use_catkin FALSE)
+  if (${CATKIN_TOPLEVEL})
+    set(use_catkin FTRUE)
+  endif()
+  if (${CATKIN_BUILD_BINARY_PACKAGE})
+    set(use_catkin FTRUE)
+  endif()
+  if (use_catkin)
     find_package(PkgConfig)
     if(EXISTS ${rtmbuild_SOURCE_DIR})
       set(_rtmbuild_pkg_dir ${rtmbuild_SOURCE_DIR})
@@ -155,9 +162,9 @@ macro(rtmbuild_init)
   rtmbuild_genbridge_init()
 
   #
-  if (${CATKIN_TOPLEVEL})
+  if (${use_catkin})
     include_directories(${catkin_INCLUDE_DIRS})
-  else() # if (NOT ${CATKIN_TOPLEVEL}) does not work
+  else() # if (NOT ${use_catkin}) does not work
     rosbuild_init()
   endif()
   message("[rtmbuild] Building package ${PROJECT_NAME}")
@@ -171,7 +178,7 @@ macro(rtmbuild_init)
   list(APPEND ${PROJECT_NAME}_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/idl_gen/lib)
   list(APPEND ${PROJECT_NAME}_IDL_DIRS ${PROJECT_SOURCE_DIR}/idl)
 
-  if (${CATKIN_TOPLEVEL})
+  if (${use_catkin})
     #message(";; rospack will run....")
     #execute_process(COMMAND rospack depends-manifests openrtm_ros_bridge OUTPUT_VARIABLE ${PROJECT_NAME}_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
     #string(REPLACE " " ";" ${PROJECT_NAME}_DIRS ${${PROJECT_NAME}_DIRS})
@@ -233,7 +240,7 @@ macro(rtmbuild_init)
 endmacro(rtmbuild_init)
 
 macro(rtmbuild_add_executable exe)
-  if (${CATKIN_TOPLEVEL})
+  if (${use_catkin})
     add_executable(${ARGV})
     add_dependencies(${exe} RTMBUILD_${PROJECT_NAME}_genidl ${${_package}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
     target_link_libraries(${exe} ${catkin_LIBRARIES} ${${PROJECT_NAME}_IDLLIBRARY_DIRS} )
@@ -251,7 +258,7 @@ macro(rtmbuild_add_executable exe)
 endmacro(rtmbuild_add_executable)
 
 macro(rtmbuild_add_library lib)
-  if (${CATKIN_TOPLEVEL})
+  if (${use_catkin})
     add_library(${ARGV})
     add_dependencies(${lib} RTMBUILD_${PROJECT_NAME}_genidl ${${_package}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
     target_link_libraries(${lib} ${${PROJECT_NAME}_IDLLIBRARY_DIRS})

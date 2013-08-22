@@ -71,7 +71,7 @@ macro(rtmbuild_genbridge_init)
     set(_generated_msgs_from_idl "")
   endforeach(_idl)
 
-  if (${CATKIN_TOPLEVEL})
+  if (${use_catkin})
     # generated .h file
     string(REPLACE ";" " ${CATKIN_DEVEL_PREFIX}/include/${PROJECT_NAME}/" _autogen_srv_h_files  "${CATKIN_DEVEL_PREFIX}/include/${PROJECT_NAME}/${_autogen_srv_files}")
     string(REPLACE ".srv" ".h" _autogen_srv_h_files  ${_autogen_srv_h_files})
@@ -102,8 +102,8 @@ macro(rtmbuild_genbridge_init)
 endmacro(rtmbuild_genbridge_init)
 
 macro(rtmbuild_genbridge)
-  if (${CATKIN_TOPLEVEL})
-  else() # if (NOT ${CATKIN_TOPLEVEL}) does not work
+  if (${use_catkin})
+  else() # if (NOT ${use_catkin}) does not work
     rosbuild_genmsg()
     rosbuild_gensrv()
   endif()
