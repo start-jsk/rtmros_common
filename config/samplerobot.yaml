@@ -36,35 +36,35 @@ hrpsys_gazebo_configuration:
     - CHEST
 ## joint gain settings
   gains:
-    LLEG_HIP_R:      {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    LLEG_HIP_P:      {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    LLEG_HIP_Y:      {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    LLEG_KNEE:       {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    LLEG_ANKLE_P:    {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    LLEG_ANKLE_R:    {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    RLEG_HIP_R:      {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    RLEG_HIP_P:      {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    RLEG_HIP_Y:      {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    RLEG_KNEE:       {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    RLEG_ANKLE_P:    {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    RLEG_ANKLE_R:    {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    WAIST_P:         {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    WAIST_R:         {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    CHEST:           {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    LARM_SHOULDER_P: {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    LARM_SHOULDER_R: {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    LARM_SHOULDER_Y: {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    LARM_ELBOW:      {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    LARM_WRIST_Y:    {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    LARM_WRIST_P:    {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    LARM_WRIST_R:    {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    RARM_SHOULDER_P: {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    RARM_SHOULDER_R: {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    RARM_SHOULDER_Y: {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    RARM_ELBOW:      {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    RARM_WRIST_Y:    {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    RARM_WRIST_P:    {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
-    RARM_WRIST_R:    {p: 4000.0, d:   0.4, i: 0.0, i_clamp: 0.0}
+    LLEG_HIP_R:      {p: 4000.0, d:  20.0, i: 0.0, i_clamp: 0.0}
+    LLEG_HIP_P:      {p: 4000.0, d:  20.0, i: 0.0, i_clamp: 0.0}
+    LLEG_HIP_Y:      {p: 1000.0, d:   5.0, i: 0.0, i_clamp: 0.0}
+    LLEG_KNEE:       {p: 3000.0, d:  15.0, i: 0.0, i_clamp: 0.0}
+    LLEG_ANKLE_P:    {p: 2000.0, d:   5.4, i: 0.0, i_clamp: 0.0}
+    LLEG_ANKLE_R:    {p: 2000.0, d:   5.4, i: 0.0, i_clamp: 0.0}
+    RLEG_HIP_R:      {p: 4000.0, d:  20.0, i: 0.0, i_clamp: 0.0}
+    RLEG_HIP_P:      {p: 4000.0, d:  20.0, i: 0.0, i_clamp: 0.0}
+    RLEG_HIP_Y:      {p: 1000.0, d:   5.0, i: 0.0, i_clamp: 0.0}
+    RLEG_KNEE:       {p: 3000.0, d:  15.0, i: 0.0, i_clamp: 0.0}
+    RLEG_ANKLE_P:    {p: 2000.0, d:   5.4, i: 0.0, i_clamp: 0.0}
+    RLEG_ANKLE_R:    {p: 2000.0, d:   5.4, i: 0.0, i_clamp: 0.0}
+    WAIST_P:         {p: 4000.0, d:  40.0, i: 0.0, i_clamp: 0.0}
+    WAIST_R:         {p: 4000.0, d:  40.0, i: 0.0, i_clamp: 0.0}
+    CHEST:           {p: 1000.0, d:   5.0, i: 0.0, i_clamp: 0.0}
+    LARM_SHOULDER_P: {p: 1400.0, d:   4.0, i: 0.0, i_clamp: 0.0}
+    LARM_SHOULDER_R: {p: 1400.0, d:   4.0, i: 0.0, i_clamp: 0.0}
+    LARM_SHOULDER_Y: {p:  700.0, d:   2.0, i: 0.0, i_clamp: 0.0}
+    LARM_ELBOW:      {p: 2000.0, d:  10.0, i: 0.0, i_clamp: 0.0}
+    LARM_WRIST_Y:    {p: 400.0, d:    0.8, i: 0.0, i_clamp: 0.0}
+    LARM_WRIST_P:    {p: 400.0, d:    0.8, i: 0.0, i_clamp: 0.0}
+    LARM_WRIST_R:    {p: 400.0, d:    0.8, i: 0.0, i_clamp: 0.0}
+    RARM_SHOULDER_P: {p: 1400.0, d:   4.0, i: 0.0, i_clamp: 0.0}
+    RARM_SHOULDER_R: {p: 1400.0, d:   4.0, i: 0.0, i_clamp: 0.0}
+    RARM_SHOULDER_Y: {p: 800.0, d:    2.0, i: 0.0, i_clamp: 0.0}
+    RARM_ELBOW:      {p: 2000.0, d:  10.0, i: 0.0, i_clamp: 0.0}
+    RARM_WRIST_Y:    {p: 400.0, d:    0.8, i: 0.0, i_clamp: 0.0}
+    RARM_WRIST_P:    {p: 400.0, d:    0.8, i: 0.0, i_clamp: 0.0}
+    RARM_WRIST_R:    {p: 400.0, d:    0.8, i: 0.0, i_clamp: 0.0}
 ## force sensor settings
 ## list of force sensorname
   force_torque_sensors:
