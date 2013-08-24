@@ -86,7 +86,6 @@ macro(rtmbuild_genidl)
       COMMAND mkdir -p ${_output_python_dir}
       COMMAND echo \"import sys\; sys.path.append('${PROJECT_SOURCE_DIR}/src/${PROJECT_NAME}')\; import ${PROJECT_NAME}\" > ${_output_python_dir}/__init__.py
       COMMAND ${_genidl_exe} -bpython -I`${_openrtm_aist_pkg_dir}/bin/rtm-config --cflags | sed 's/^-[^I]\\S*//g' | sed 's/\ -[^I]\\S*//g'` -I${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl -C${_output_python_dir} ${_input_idl}
-      COMMAND ls -al ${_output_idl_py}
       DEPENDS ${_input_idl} ${${_idl}_depends})
     #
     list(APPEND _autogen ${_output_stub_lib} ${_output_skel_lib} ${_output_idl_py})
