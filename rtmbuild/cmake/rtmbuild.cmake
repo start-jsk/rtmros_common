@@ -86,13 +86,14 @@ macro(rtmbuild_genidl)
       COMMAND mkdir -p ${_output_python_dir}
       COMMAND echo \"import sys\; sys.path.append('${PROJECT_SOURCE_DIR}/src/${PROJECT_NAME}')\; import ${PROJECT_NAME}\" > ${_output_python_dir}/__init__.py
       COMMAND ${_genidl_exe} -bpython -I`${_openrtm_aist_pkg_dir}/bin/rtm-config --cflags | sed 's/^-[^I]\\S*//g' | sed 's/\ -[^I]\\S*//g'` -I${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl -C${_output_python_dir} ${_input_idl}
+      COMMAND ls -al ${_output_idl_py}
       DEPENDS ${_input_idl} ${${_idl}_depends})
     #
     list(APPEND _autogen ${_output_stub_lib} ${_output_skel_lib} ${_output_idl_py})
   endforeach(_idl)
   ##
   add_dependencies(rtmbuild_${PROJECT_NAME}_genidl RTMBUILD_${PROJECT_NAME}_genidl)
-  add_custom_target(RTMBUILD_${PROJECT_NAME}_genidl ALL DEPENDS ${_autogen})
+  add_custom_target(RTMBUILD_${PROJECT_NAME}_genidl DEPENDS ${_autogen})
   if (${use_catkin})
     install(DIRECTORY ${_output_lib_dir}/ ## add / is important
       DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -167,7 +168,7 @@ macro(rtmbuild_init)
   endif()
   message("[rtmbuild] Building package ${PROJECT_NAME}")
   add_custom_target(rtmbuild_${PROJECT_NAME}_genidl ALL)
-  add_custom_target(rtmbuild_${PROJECT_NAME}_genbridge ALL)
+  add_custom_target(rtmbuild_${PROJECT_NAME}_genbridge ALL DEPENDS rtmbuild_${PROJECT_NAME}_genidl)
   file(REMOVE ${PROJECT_SOURCE_DIR}/idl_gen/generated)
 
   file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl_gen/cpp)

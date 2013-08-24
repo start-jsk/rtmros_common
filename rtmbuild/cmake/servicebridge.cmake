@@ -110,9 +110,8 @@ macro(rtmbuild_genbridge)
   rtmbuild_get_idls(_idllist)
   # rm tmp/idl2srv
   add_custom_command(OUTPUT /_tmp/idl2srv
-    COMMAND rm -fr /tmp/idl2srv/${PROJECT_NAME} DEPENDS ${_autogen})
+    COMMAND rm -fr /tmp/idl2srv/${PROJECT_NAME})
   add_dependencies(rtmbuild_${PROJECT_NAME}_genidl RTMBUILD_${PROJECT_NAME}_rm_idl2srv)
-  add_dependencies(rtmbuild_${PROJECT_NAME}_genbridge rtmbuild_${PROJECT_NAME}_genidl)
   add_custom_target(RTMBUILD_${PROJECT_NAME}_rm_idl2srv ALL DEPENDS /_tmp/idl2srv ${_rtmbuild_pkg_dir}/scripts/idl2srv.py ${_rtmbuild_pkg_dir}/cmake/servicebridge.cmake)
   #
   foreach(_idl ${_idllist})
