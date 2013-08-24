@@ -77,12 +77,10 @@ macro(rtmbuild_genidl)
       #COMMAND rm ${_output_cpp_dir}/${_idl} # does not work in parallel make
       WORKING_DIRECTORY ${_output_cpp_dir}
       DEPENDS ${_output_idl_hh})
-    add_custom_command(OUTPUT ${_output_stub_lib}
+    add_custom_command(OUTPUT ${_output_stub_lib} ${_output_skel_lib}
       COMMAND ${_rtmcxx_exe} `${_openrtm_aist_pkg_dir}/bin/rtm-config --cflags` -I. ${${PROJECT_NAME}_IDLLIBRARY_INCDIRS} -shared -o ${_output_stub_lib} ${_output_stub_cpp} `${_openrtm_aist_pkg_dir}/bin/rtm-config --libs` ${OPENHRP_PRIVATE_LIBRARIES}
-      DEPENDS ${_output_stub_cpp} ${_output_stub_h})
-    add_custom_command(OUTPUT ${_output_skel_lib}
       COMMAND ${_rtmcxx_exe} `${_openrtm_aist_pkg_dir}/bin/rtm-config --cflags` -I. ${${PROJECT_NAME}_IDLLIBRARY_INCDIRS} -shared -o ${_output_skel_lib} ${_output_skel_cpp} `${_openrtm_aist_pkg_dir}/bin/rtm-config --libs` ${OPENHRP_PRIVATE_LIBRARIES}
-      DEPENDS ${_output_skel_cpp} ${_output_skel_h})
+      DEPENDS ${_output_stub_cpp} ${_output_stub_h} ${_output_skel_cpp} ${_output_skel_h})
     # python
     add_custom_command(OUTPUT ${_output_idl_py}
       COMMAND mkdir -p ${_output_python_dir}

@@ -111,7 +111,8 @@ macro(rtmbuild_genbridge)
   # rm tmp/idl2srv
   add_custom_command(OUTPUT /_tmp/idl2srv
     COMMAND rm -fr /tmp/idl2srv/${PROJECT_NAME} DEPENDS ${_autogen})
-  add_dependencies(rtmbuild_${PROJECT_NAME}_genbridge RTMBUILD_${PROJECT_NAME}_rm_idl2srv)
+  add_dependencies(rtmbuild_${PROJECT_NAME}_genidl RTMBUILD_${PROJECT_NAME}_rm_idl2srv)
+  add_dependencies(rtmbuild_${PROJECT_NAME}_genbridge rtmbuild_${PROJECT_NAME}_genidl)
   add_custom_target(RTMBUILD_${PROJECT_NAME}_rm_idl2srv ALL DEPENDS /_tmp/idl2srv ${_rtmbuild_pkg_dir}/scripts/idl2srv.py ${_rtmbuild_pkg_dir}/cmake/servicebridge.cmake)
   #
   foreach(_idl ${_idllist})
@@ -121,7 +122,7 @@ macro(rtmbuild_genbridge)
       string(REPLACE "\n" ";" _interface ${_interface})
       foreach(_comp ${_interface})
 	message("[rtmbuild_genbridge] ${_idl} -> ${_comp}ROSBridgeComp")
-        add_custom_target(${PROJECT_NAME}_${_comp}ROSBridge_cpp DEPENDS ${_autogen} ) # cpp depends on compiled idl
+        #add_custom_target(${PROJECT_NAME}_${_comp}ROSBridge_cpp DEPENDS ${_autogen} ) # cpp depends on compiled idl
 	rtmbuild_add_executable("${_comp}ROSBridgeComp" "src_gen/${_comp}ROSBridge.cpp" "src_gen/${_comp}ROSBridgeComp.cpp")
         add_dependencies(${_comp}ROSBridgeComp DEPENDS ${PROJECT_NAME}_${_comp}ROSBridge_cpp ${PROJECT_NAME}_generate_messages_cpp) # comp depends on cpp
       endforeach(_comp)
