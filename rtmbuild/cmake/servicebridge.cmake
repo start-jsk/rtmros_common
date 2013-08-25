@@ -11,9 +11,14 @@ macro(rtmbuild_genbridge_init)
     file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/srv)
   endif(NOT _idllist)
 
-  execute_process(COMMAND ${_openrtm_aist_pkg_dir}/bin/rtm-config --cflags OUTPUT_VARIABLE _rtm_include_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
-  execute_process(COMMAND sh -c "echo ${_rtm_include_dir} | sed 's/^-[^I]\\S*//g' | sed 's/\ -[^I]\\S*//g' | sed 's/-I//g'" OUTPUT_VARIABLE _rtm_include_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
-  set(_include_dirs "${_rtm_include_dir} ${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl")
+  message("[rtmbuild_genbridge_init] rtm_include_dir: ${OPENRTM_INCLUDE_DIRS}")
+  set(_include_dirs "")
+  foreach(_dirs ${OPENRTM_INCLUDE_DIRS})
+    set(_include_dirs "${_include_dirs} ${_dirs}")
+  endforeach()
+
+  set(_include_dirs "${_include_dirs} ${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl")
+  message("[rtmbuild_genbridge_init] _include_dir: ${_include_dirs}")
 
   set(_autogen "")
   set(_autogen_msg_files "")
