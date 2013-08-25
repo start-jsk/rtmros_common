@@ -150,7 +150,7 @@ macro(rtmbuild_init)
     execute_process(COMMAND sh -c "echo ${OPENRTM_INCLUDE_DIRS} | sed 's/^-[^I]\\S*//g' | sed 's/\ -[^I]\\S*//g' | sed 's/-I//g' | sed 's/^\ //g' | sed 's/\ /;/g' " OUTPUT_VARIABLE OPENRTM_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     # setup openhrp3 include dirs
-    set(OPENHRP_INCLUDE_DIRS ${openhrp3_INCLUDE_DIRS))
+    set(OPENHRP_INCLUDE_DIRS ${openhrp3_INCLUDE_DIRS})
     set(OPENHRP_LIBRARY_DIRS ${openhrp3_LIBRARY_DIRS})
     #
     set(ENV{PATH} ${_openrtm_aist_pkg_dir}/bin:$ENV{PATH})
