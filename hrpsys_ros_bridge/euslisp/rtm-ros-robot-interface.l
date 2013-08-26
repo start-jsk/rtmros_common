@@ -91,7 +91,7 @@
    (let ((srv-fnames (send self :get-ROSBridge-srv-fnames ros-pkg-name)))
      (dolist (idl (send self :get-ROSBridge-idl-fnames ros-pkg-name))
        (let ((rtc-name (pathname-name idl)))
-         (dolist (srv-name (mapcar #'pathname-name (remove-if-not #'(lambda (x) (substringp rtc-name x)) srv-fnames)))
+         (dolist (srv-name (mapcar #'pathname-name (remove-if-not #'(lambda (x) (and (substringp rtc-name x) (not (= (char x 0) (char "." 0))))) srv-fnames)))
            (let ((method-def (send self :get-ROSBridge-method-def-macro rtc-name srv-name)))
              (when method-def
                (if debug-view (pprint (macroexpand method-def)))
