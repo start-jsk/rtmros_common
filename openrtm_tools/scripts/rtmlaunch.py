@@ -155,8 +155,8 @@ def main():
         return 1
 
     if os.getenv("RTCTREE_NAMESERVERS") == None:
-        print >>sys.stderr, "[rtmlaunch] RTCTREE_NAMESERVERS is not set, use localhost"
-        nameserver = "localhost"
+        print >>sys.stderr, "[rtmlaunch] RTCTREE_NAMESERVERS is not set, use localhost:5005"
+        nameserver = "localhost:5005"
         os.environ["RTCTREE_NAMESERVERS"] = nameserver
     else:
         nameserver = os.getenv("RTCTREE_NAMESERVERS")
