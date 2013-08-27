@@ -510,8 +510,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
             not_nan = false;
     }
-    if (not_nan)
+    if (not_nan) {
         br.sendTransform(tf::StampedTransform(inv, base_time, "gyrometer", "imu_floor"));
+    } else {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
+                         << m_baseRpy.data.r << ","
+                         << m_baseRpy.data.p << ","
+                         << m_baseRpy.data.y << ")");
+  }
   }
 
   // publish forces sonsors
