@@ -141,13 +141,15 @@ macro(rtmbuild_init)
     message("[rtmbuild] _openrtm_aist_pkg_dir -> ${_openrtm_aist_pkg_dir}")
     message("[rtmbuild] _openhrp3_pkg_dir -> ${_openhrp3_pkg_dir}")
     message("[rtmbuild] openrtm_aist_INCLUDE_DIRS -> ${openrtm_aist_INCLUDE_DIRS}")
-    message("[rtmbuild] openrtm_aist_INCLUDE_DIRS -> ${openrtm_aist_LIBRARIES}")
+    message("[rtmbuild] openrtm_aist_LIBRARIES    -> ${openrtm_aist_LIBRARIES}")
     message("[rtmbuild] openhrp3_INCLUDE_DIRS -> ${openhrp3_INCLUDE_DIRS}")
     message("[rtmbuild] openhrp3_LIBRARIES    -> ${openhrp3_LIBRARIES}")
     find_package(message_generation) ## load add_message_files(), add_service_files()
     # setup openrtm include dirs
-    execute_process(COMMAND ${_openrtm_aist_pkg_dir}/bin/rtm-config --cflags OUTPUT_VARIABLE OPENRTM_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND sh -c "echo ${OPENRTM_INCLUDE_DIRS} | sed 's/^-[^I]\\S*//g' | sed 's/\ -[^I]\\S*//g' | sed 's/-I//g' | sed 's/^\ //g' | sed 's/\ /;/g' " OUTPUT_VARIABLE OPENRTM_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(OPENRTM_INCLUDE_DIRS ${openrtm_aist_INCLUDE_DIRS})
+    set(OPENRTM_LIBRARY_DIRS ${openrtm_aist_LIBRARY_DIRS})
+    #execute_process(COMMAND ${_openrtm_aist_pkg_dir}/bin/rtm-config --cflags OUTPUT_VARIABLE OPENRTM_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
+    #execute_process(COMMAND sh -c "echo ${OPENRTM_INCLUDE_DIRS} | sed 's/^-[^I]\\S*//g' | sed 's/\ -[^I]\\S*//g' | sed 's/-I//g' | sed 's/^\ //g' | sed 's/\ /;/g' " OUTPUT_VARIABLE OPENRTM_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     # setup openhrp3 include dirs
     set(OPENHRP_INCLUDE_DIRS ${openhrp3_INCLUDE_DIRS})
