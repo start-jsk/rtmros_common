@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import roslib; roslib.load_manifest("hrpsys_ros_bridge")
 
+import OpenRTM_aist.RTM_IDL # for catkin
+
 import rospy
 from diagnostic_msgs.msg import *
 
