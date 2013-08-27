@@ -4,7 +4,7 @@ project(hrpsys_tools)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS openrtm_aist openrtm_aist_python)
+find_package(catkin REQUIRED COMPONENTS openrtm_aist_python)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)

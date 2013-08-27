@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(hrpsys_ros_bridge)
 
 # call catkin depends
-find_package(catkin REQUIRED COMPONENTS hrpsys rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure ) # pr2_controllers_msgs robot_monitor
+find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure ) # pr2_controllers_msgs robot_monitor
 
 # include rtmbuild
 #include(${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
@@ -22,20 +22,23 @@ include(${PROJECT_SOURCE_DIR}/cmake/compile_robot_model.cmake)
 
 # copy idl files from hrpsys
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
-if(EXISTS ${hrpsys_SOURCE_DIR}/build/hrpsys-base-source/idl/)
+find_package(PkgConfig)
+pkg_check_modules(hrpsys hrpsys-base)
+if(hrpsys_FOUND)
+  set(hrpsys_IDL_DIR ${hrpsys_PREFIX}/share/hrpsys/idl/)
+else()
+  set(hrpsys_IDL_DIR ${hrpsys_SOURCE_DIR}/share/hrpsys/idl/)
+endif()
+if(EXISTS ${hrpsys_IDL_DIR})
   file(COPY
-    ${hrpsys_SOURCE_DIR}/build/hrpsys-base-source/idl/
-    DESTINATION ${PROJECT_SOURCE_DIR}/idl)
-elseif(EXISTS ${hrpsys_PREFIX}/share/hrpsys/share/hrpsys/idl/)
-  file(COPY
-    ${hrpsys_PREFIX}/share/hrpsys/share/hrpsys/idl/
+    ${hrpsys_IDL_DIR}
     DESTINATION ${PROJECT_SOURCE_DIR}/idl)
 else()
   get_cmake_property(_variableNames VARIABLES)
   foreach (_variableName ${_variableNames})
     message(STATUS "${_variableName}=${${_variableName}}")
   endforeach()
-  message(FATAL_ERROR "hrpsys/idl is not found")
+  message(FATAL_ERROR "${hrpsys_IDL_DIR} is not found")
 endif()
 
 # define add_message_files before rtmbuild_init
@@ -46,8 +49,8 @@ rtmbuild_init()
 
 # call catkin_package, after rtmbuild_init, before rtmbuild_gen*
 catkin_package(
-    DEPENDS # TODO
-    CATKIN-DEPENDS hrpsys rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure # pr2_controllers_msgs robot_monitor
+    DEPENDS hrpsys # TODO
+    CATKIN-DEPENDS rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure # pr2_controllers_msgs robot_monitor
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO
 )
@@ -73,6 +76,18 @@ if(TARGET compile_hrpsys)
   add_dependencies(ImageSensorROSBridge compile_hrpsys)
   add_dependencies(HrpsysJointTrajectoryBridge compile_hrpsys)
 endif()
+
+install(FILES scripts/rtmlaunch
+  DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+  USE_SOURCE_PERMISSIONS  # set executable
+  )
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(DIRECTORY scripts
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  USE_SOURCE_PERMISSIONS
+  PATTERN "rtmlaunch" EXCLUDE)
+
 
 ##
 ## test

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(openrtm_ros_bridge)
 
 # call catking depends
-find_package(catkin REQUIRED COMPONENTS roscpp openrtm_aist openrtm_tools rtmbuild rostest)
+find_package(catkin REQUIRED COMPONENTS roscpp openrtm_tools rtmbuild rostest)
 
 # include rtmbuild
 if(EXISTS ${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
@@ -20,16 +20,17 @@ endif()
 
 # copy idl files from openrtm_aist
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
-if(EXISTS ${openrtm_aist_SOURCE_DIR}/share/openrtm-1.1/example/)
-  file(GLOB_RECURSE _idl_files "${openrtm_aist_SOURCE_DIR}/share/openrtm-1.1/example/*.idl")
-elseif(EXISTS ${openrtm_aist_PREFIX}/share/openrtm_aist/share/openrtm-1.1/example/)
-  file(GLOB_RECURSE _idl_files "${openrtm_aist_PREFIX}/share/openrtm_aist/share/openrtm-1.1/example/*.idl")
+find_package(PkgConfig)
+pkg_check_modules(openrtm_aist openrtm-aist REQUIRED)
+set(openrtm_aist_EXAMPLE_IDL_DIR ${openrtm_aist_PREFIX}/share/openrtm-1.1/example/)
+if(EXISTS ${openrtm_aist_EXAMPLE_IDL_DIR})
+  file(GLOB_RECURSE _idl_files "${openrtm_aist_EXAMPLE_IDL_DIR}/*/*/*.idl") #fix me
 else()
   get_cmake_property(_variableNames VARIABLES)
   foreach (_variableName ${_variableNames})
     message(STATUS "${_variableName}=${${_variableName}}")
   endforeach()
-  message(FATAL_ERROR "openrtm-1.1/example/*.idl is not found")
+  message(FATAL_ERROR "${openrtm_aist_EXAMPLE_IDL_DIR}/*.idl is not found")
 endif()
 foreach(_idl_file ${_idl_files})
   execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_idl_file} ${PROJECT_SOURCE_DIR}/idl/)
