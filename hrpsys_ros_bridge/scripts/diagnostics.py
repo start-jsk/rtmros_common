@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('hrpsys_ros_bridge')
+try:
+    import hrpsys_ros_bridge
+    print "-- this is catikin environment"
+except:
+    import roslib; roslib.load_manifest('hrpsys_ros_bridge')
+    print "-- load manifest for rosbuild environment"
 import rospy
 import time
 import copy
