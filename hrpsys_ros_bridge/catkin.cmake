@@ -77,13 +77,15 @@ if(TARGET compile_hrpsys)
   add_dependencies(HrpsysJointTrajectoryBridge compile_hrpsys)
 endif()
 
-install(FILES scripts/rtmlaunch
+install(PROGRAMS scripts/rtmlaunch
   DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 install(DIRECTORY launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  PATTERN ".svn" EXCLUDE)
 install(DIRECTORY scripts
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
+  PATTERN ".svn" EXCLUDE
   PATTERN "rtmlaunch" EXCLUDE)
 
 
