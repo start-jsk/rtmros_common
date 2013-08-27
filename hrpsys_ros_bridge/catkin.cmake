@@ -78,9 +78,7 @@ if(TARGET compile_hrpsys)
 endif()
 
 install(FILES scripts/rtmlaunch
-  DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-  USE_SOURCE_PERMISSIONS  # set executable
-  )
+  DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(DIRECTORY scripts
