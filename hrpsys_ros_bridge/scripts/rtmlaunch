@@ -8,7 +8,7 @@ cosnames = "omniNames"
 p = None
 pid = None
 start_naming = True
-port_number = 5005
+port_number = 15005
 
 for p in psutil.process_iter():
     try:

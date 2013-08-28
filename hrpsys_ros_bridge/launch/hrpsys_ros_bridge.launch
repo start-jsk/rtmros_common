@@ -18,7 +18,7 @@
   -->
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
-  <arg name="corbaport" default="5005" />
+  <arg name="corbaport" default="15005" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver):$(arg corbaport)" />
   <arg name="omniorb_args" default="-ORBInitRef NameService=corbaloc:iiop:$(arg nameserver):$(arg corbaport)/NameService" />
   <arg name="openrtm_args" default='-o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type:PeriodicExecutionContext" -o "exec_cxt.periodic.rate:2000" -o "logger.file_name:/tmp/rtc%p.log"' />

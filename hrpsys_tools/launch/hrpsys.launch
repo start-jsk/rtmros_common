@@ -13,7 +13,7 @@
 
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
-  <arg name="corbaport" default="5005" />
+  <arg name="corbaport" default="15005" />
   <arg name="KILL_SERVERS" default="false" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver):$(arg corbaport)" />
   <arg name="omniorb_args" default="-ORBInitRef NameService=corbaloc:iiop:$(arg nameserver):$(arg corbaport)/NameService" />
