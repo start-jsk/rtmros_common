@@ -10,7 +10,7 @@ else
     echo -e "Warning : Failed to load shell_support, try rosmake openrtm"
 fi
 
-export RTCTREE_NAMESERVERS=localhost:5005
+export RTCTREE_NAMESERVERS=localhost:15005
 
 # these completion settings are copied from rosbash
 case "$CATKIN_SHELL" in
