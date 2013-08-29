@@ -277,7 +277,7 @@ onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
   std::vector<std::string> joint_names = trajectory.joint_names;
 
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryAction (" << this->groupname << ") : trajectory.points.size() " << trajectory.points.size());
-  for (unsigned int i=0; i < trajectory.points.size(); i++) {
+  for (unsigned int i = 0; i < trajectory.points.size(); i++) {
     angles[i].length(joint_names.size());
 
     trajectory_msgs::JointTrajectoryPoint point = trajectory.points[i];
@@ -287,18 +287,9 @@ onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
 
     parent->body->calcForwardKinematics();
 
-#if 0 // fullbody controller
-    int j = 0;
-    std::vector<hrp::Link*>::const_iterator it = parent->body->joints().begin();
-    while ( it != parent->body->joints().end() ) {
-      hrp::Link* l = ((hrp::Link*)*it);
-      angles[i][j] = l->q;
-      ++it;++j;
-    }
-#endif
     std::stringstream ss;
-    for (unsigned int j=0; j < joint_names.size(); j++) {
-      angles[i][j] = parent->body->link(joint_names[j])->q;
+    for (unsigned int j = 0; j < joint_list.size(); j++) {
+      angles[i][j] = parent->body->link(joint_list[j])->q;
       ss << " " << point.positions[j];
     }
     ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryAction (" << this->groupname << ") : time_from_start " << trajectory.points[i].time_from_start.toSec());
