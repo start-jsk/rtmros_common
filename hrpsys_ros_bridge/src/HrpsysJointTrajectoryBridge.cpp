@@ -275,6 +275,19 @@ onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
   duration.length(trajectory.points.size()) ;
 
   std::vector<std::string> joint_names = trajectory.joint_names;
+  if (joint_names.size() < joint_list.size()) {
+    ROS_ERROR_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryAction / Error : "
+                     << "required joint_names.size() = " << joint_names.size()
+                     << " < joint_list.size() = " << joint_list.size() );
+    return;
+  }
+  for (unsigned int i = 0; i < joint_list.size(); i++) {
+    if (count(joint_names.begin(), joint_names.end(), joint_list[i]) != 1) {
+      ROS_ERROR_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryAction / Error : "
+                       << "joint : " << joint_list[i] << " did not exist in the required trajectory.");
+      return;
+    }
+  }
 
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryAction (" << this->groupname << ") : trajectory.points.size() " << trajectory.points.size());
   for (unsigned int i = 0; i < trajectory.points.size(); i++) {
