@@ -1,6 +1,9 @@
 <launch>
   <arg name="LAUNCH_TELEOP" default="false" />
 
+  <rosparam command="load"
+            file="$(find hrpsys_ros_bridge_tutorials)/models/SampleRobot_controller_config.yaml" />
+
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="SIMULATOR_NAME" value="SampleRobot(Robot)0" />
     <arg name="MODEL_FILE" value="$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample1.wrl" />
