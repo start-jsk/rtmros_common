@@ -81,6 +81,7 @@ class HrpsysJointTrajectoryBridge  : public RTC::DataFlowComponentBase
     void onFollowJointTrajectoryActionPreempt();
 
     void proc();
+    void restart();
   };
 
  protected:

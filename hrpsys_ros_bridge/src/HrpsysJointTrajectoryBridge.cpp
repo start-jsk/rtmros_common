@@ -262,6 +262,27 @@ proc() {
 }
 
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::
+restart() {
+  parent->m_service0->removeJointGroup(groupname.c_str());
+  sleep(0.1);
+  if (groupname.length() > 0) {
+    OpenHRP::SequencePlayerService::StrSequence jnames;
+    jnames.length(joint_list.size());
+    for(size_t i = 0; i < joint_list.size(); i++) {
+      jnames[i] = joint_list[i].c_str();
+    }
+    try {
+      parent->m_service0->addJointGroup(groupname.c_str(), jnames);
+    } catch ( CORBA::SystemException& ex ) {
+      std::cerr << "[HrpsysJointTrajectoryBridge] CORBA::SystemException " << ex._name() << std::endl;
+      sleep(1);
+    } catch ( ... ) {
+      std::cerr << "[HrpsysJointTrajectoryBridge] failed to addJointGroup[" << groupname.c_str() << "]" << std::endl;;
+    }
+  }
+}
+
+void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::
 onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
   parent->m_mutex.lock();
 
