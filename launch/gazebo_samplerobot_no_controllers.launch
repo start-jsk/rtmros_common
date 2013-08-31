@@ -1,0 +1,13 @@
+<launch>
+  <arg name="gzname" default="gazebo"/>
+  <arg name="WORLD" default="SampleRobot.world"/>
+  <arg name="PAUSED" default="false"/>
+
+  <include file="$(find hrpsys_gazebo_tutorials)/launch/gazebo_robot_no_controllers.launch">
+    <arg name="gzname" value="$(arg gzname)" />
+    <arg name="WORLD" value="$(arg WORLD)" />
+    <arg name="PAUSED" value="$(arg PAUSED)"/>
+    <arg name="HRPSYS_GAZEBO_CONFIG" value="$(find hrpsys_gazebo_tutorials)/config/samplerobot.yaml" />
+    <arg name="ROBOT_MODEL" value="$(find SampleRobot)/SampleRobot.urdf" />
+  </include>
+</launch>
