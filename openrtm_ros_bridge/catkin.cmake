@@ -22,7 +22,7 @@ endif()
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
 find_package(PkgConfig)
 pkg_check_modules(openrtm_aist openrtm-aist REQUIRED)
-set(openrtm_aist_EXAMPLE_IDL_DIR ${openrtm_aist_PREFIX}/share/openrtm-1.1/example/)
+set(openrtm_aist_EXAMPLE_IDL_DIR ${openrtm_aist_PREFIX}/share/openrtm_aist/share/openrtm-1.1/example/)
 if(EXISTS ${openrtm_aist_EXAMPLE_IDL_DIR})
   file(GLOB_RECURSE _idl_files "${openrtm_aist_EXAMPLE_IDL_DIR}/*/*/*.idl") #fix me
 else()

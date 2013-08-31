@@ -23,12 +23,8 @@ include(${PROJECT_SOURCE_DIR}/cmake/compile_robot_model.cmake)
 # copy idl files from hrpsys
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
 find_package(PkgConfig)
-pkg_check_modules(hrpsys hrpsys-base)
-if(hrpsys_FOUND)
-  set(hrpsys_IDL_DIR ${hrpsys_PREFIX}/share/hrpsys/idl/)
-else()
-  set(hrpsys_IDL_DIR ${hrpsys_SOURCE_DIR}/share/hrpsys/idl/)
-endif()
+pkg_check_modules(hrpsys hrpsys-base REQUIRED)
+set(hrpsys_IDL_DIR ${hrpsys_PREFIX}/share/hrpsys/share/hrpsys/idl/)
 if(EXISTS ${hrpsys_IDL_DIR})
   file(COPY
     ${hrpsys_IDL_DIR}
