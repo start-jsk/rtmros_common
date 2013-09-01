@@ -144,7 +144,7 @@ macro(rtmbuild_init)
     message("[rtmbuild] openrtm_aist_LIBRARIES    -> ${openrtm_aist_LIBRARIES}")
     message("[rtmbuild] openhrp3_INCLUDE_DIRS -> ${openhrp3_INCLUDE_DIRS}")
     message("[rtmbuild] openhrp3_LIBRARIES    -> ${openhrp3_LIBRARIES}")
-    find_package(message_generation) ## load add_message_files(), add_service_files()
+    find_package(message_generation REQUIRED) ## load add_message_files(), add_service_files()
     # setup openrtm include dirs
     set(OPENRTM_INCLUDE_DIRS ${openrtm_aist_INCLUDE_DIRS})
     set(OPENRTM_LIBRARY_DIRS ${openrtm_aist_LIBRARY_DIRS})

@@ -22,6 +22,7 @@
   <run_depend>libblas-dev</run_depend>
   <run_depend>liblapack-dev</run_depend>
   <run_depend>message_runtime</run_depend>
+  <run_depend>message_generation</run_depend>
   <run_depend>omniorb</run_depend>
   <run_depend>pkg-config</run_depend>
   <run_depend>std_msgs</run_depend>
