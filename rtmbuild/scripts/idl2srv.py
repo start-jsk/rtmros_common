@@ -633,6 +633,9 @@ if __name__ == '__main__':
     parser.add_option("--interfaces", action="store_true",
                       dest="interfaces", default=False,
                       help="print interface names")
+    parser.add_option("--package-name", action="store", type="string",
+                      dest="package_name", default=False,
+                      help="overwrite package name")
     parser.add_option("--tmpdir", action="store", type="string",
                       dest="tmpdir", default="/tmp/idl2srv",
                       help="tmporary directory")
@@ -645,7 +648,10 @@ if __name__ == '__main__':
     idlfile = os.path.abspath(idlfile)
     idldir = os.path.split(idlfile)[0]
     basedir = os.path.split(idldir)[0]
-    pkgname = os.path.split(basedir)[1] # global var
+    if options.package_name:
+        pkgname = options.package_name
+    else:
+        pkgname = os.path.split(basedir)[1] # global var
 
     # preproccess and compile idl
     if options.idlpath:
