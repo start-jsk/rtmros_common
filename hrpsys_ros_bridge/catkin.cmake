@@ -61,7 +61,7 @@ rtmbuild_genbridge()
 ## hrpsys ros bridge tools
 ##
 # pr2_controller_msgs is not catkinized
-include_directories(/opt/ros/groovy/stacks/pr2_controllers/pr2_controllers_msgs/msg_gen/cpp/include)
+include_directories(/opt/ros/$ENV{ROS_DISTRO}/stacks/pr2_controllers/pr2_controllers_msgs/msg_gen/cpp/include)
 
 rtmbuild_add_executable(HrpsysSeqStateROSBridge src/HrpsysSeqStateROSBridgeImpl.cpp src/HrpsysSeqStateROSBridge.cpp src/HrpsysSeqStateROSBridgeComp.cpp)
 rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/ImageSensorROSBridgeComp.cpp)
