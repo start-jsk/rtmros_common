@@ -175,17 +175,18 @@ macro(rtmbuild_init)
   message("[rtmbuild] OPENRTM_LIBRARY_DIRS: ${OPENRTM_LIBRARY_DIRS}")
   message("[rtmbuild] OPENHRP_LIBRARY_DIRS: ${OPENHRP_LIBRARY_DIRS}")
 
-  # for rosbridge
-  rtmbuild_genbridge_init()
-
-  #
   if (${use_catkin})
     include_directories(${catkin_INCLUDE_DIRS})
     message("[rtmbuild] catkin_INCLUDE_DIRS: ${catkin_INCLUDE_DIRS}")
   else() # if (NOT ${use_catkin}) does not work
     rosbuild_init()
   endif()
+
   message("[rtmbuild] Building package ${PROJECT_NAME}")
+
+  # for rosbridge
+  rtmbuild_genbridge_init()
+
   add_custom_target(rtmbuild_${PROJECT_NAME}_genidl ALL)
   add_custom_target(rtmbuild_${PROJECT_NAME}_genbridge ALL DEPENDS rtmbuild_${PROJECT_NAME}_genidl)
   file(REMOVE ${PROJECT_SOURCE_DIR}/idl_gen/generated)
