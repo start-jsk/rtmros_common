@@ -92,7 +92,7 @@ if(TARGET compile_hrpsys)
   add_dependencies(HrpsysJointTrajectoryBridge compile_hrpsys)
 endif()
 
-install(PROGRAMS scripts/rtmlaunch
+install(PROGRAMS scripts/rtmlaunch scripts/rtmtest scripts/rtmstart.py
   DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
