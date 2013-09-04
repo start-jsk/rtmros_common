@@ -14,6 +14,7 @@ export RTCTREE_NAMESERVERS=localhost:15005
 
 # these completion settings are copied from rosbash
 alias rtmlaunch=`rospack find hrpsys_ros_bridge`/scripts/rtmlaunch
+alias rtmtest=`rospack find hrpsys_ros_bridge`/scripts/rtmtest
 case "$CATKIN_SHELL" in
     "bash" )
         complete -F "_roscomplete_launch" -o filenames "rtmlaunch" ;;
