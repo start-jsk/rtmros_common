@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 cosnames = "omniNames"
-port_number = 15055
+port_number = 15005
 
 import rtmstart
 from rostest import rostestmain
