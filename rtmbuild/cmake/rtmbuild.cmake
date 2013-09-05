@@ -187,9 +187,6 @@ macro(rtmbuild_init)
     rosbuild_init()
   endif()
 
-  # for rosbridge
-  rtmbuild_genbridge_init()
-
   add_custom_target(rtmbuild_${PROJECT_NAME}_genidl ALL)
   add_custom_target(rtmbuild_${PROJECT_NAME}_genbridge ALL DEPENDS rtmbuild_${PROJECT_NAME}_genidl)
   file(REMOVE ${PROJECT_SOURCE_DIR}/idl_gen/generated)
