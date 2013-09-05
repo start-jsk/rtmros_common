@@ -175,14 +175,17 @@ macro(rtmbuild_init)
   message("[rtmbuild] OPENRTM_LIBRARY_DIRS: ${OPENRTM_LIBRARY_DIRS}")
   message("[rtmbuild] OPENHRP_LIBRARY_DIRS: ${OPENHRP_LIBRARY_DIRS}")
 
+  message("[rtmbuild] Building package ${CMAKE_SOURCE_DIR}")
+
+  # generate msg/srv file before rosbuild_init()
+  rtmbuild_genbridge_init()
+
   if (${use_catkin})
     include_directories(${catkin_INCLUDE_DIRS})
     message("[rtmbuild] catkin_INCLUDE_DIRS: ${catkin_INCLUDE_DIRS}")
   else() # if (NOT ${use_catkin}) does not work
     rosbuild_init()
   endif()
-
-  message("[rtmbuild] Building package ${PROJECT_NAME}")
 
   # for rosbridge
   rtmbuild_genbridge_init()
