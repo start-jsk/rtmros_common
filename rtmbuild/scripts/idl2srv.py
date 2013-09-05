@@ -291,6 +291,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             return # do not overwrite
 
         os.system('mkdir -p %s/msg' % basedir)
+        print "[idl2srv] writing "+msgfile+"...."
         fd = open(msgfile, 'w')
         if isinstance(typ, idlast.Enum):
             for val in typ.enumerators():
@@ -319,6 +320,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         os.system('mkdir -p %s/srv' % basedir)
         args = op.parameters()
 
+        print "[idl2srv] writing "+srvfile+"...."
         fd = open(srvfile, 'w')
         for arg in [arg for arg in args if arg.is_in()]:
             fd.write("%s %s\n" % (self.getROSTypeText(arg.paramType()), arg.identifier()))
