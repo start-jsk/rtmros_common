@@ -44,6 +44,7 @@
   <run_depend>sensor_msgs</run_depend>
   <!-- run_depend>pr2_controllers</run_depend -->
   <run_depend>tf</run_depend>
+  <run_depend>python-psutil</run_depend>
 
   <!-- <test_depend>hrpsys</test_depend> -->
   <!-- <test_depend>hrpsys_tools</test_depend> -->

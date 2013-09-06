@@ -33,6 +33,9 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <depend package="robot_monitor"/>
   <!-- depend package="pr2_dashboard"/ --> <!-- need to comment out for groovy http://answers.ros.org/question/52023/package-swig-wx-not-found-in-rxtools-in-groovy/ -->
 
+  <!-- rtm* command -->
+  <rosdep name="python-psutil"/>
+
 </package>
 
 
