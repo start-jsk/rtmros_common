@@ -37,6 +37,8 @@ else()
   message(FATAL_ERROR "${hrpsys_IDL_DIR} is not found")
 endif()
 
+unset(hrpsys_LIBRARIES CACHE) # remove not to add hrpsys_LIBRARIES to hrpsys_ros_bridgeConfig.cmake
+
 # define add_message_files before rtmbuild_init
 add_message_files(FILES MotorStates.msg)
 
@@ -78,19 +80,11 @@ if (_compile_failed)
   message(FATAL_ERROR "Compile pr2_controllers_msgs failed : ${_compile_failed}")
 endif(_compile_failed)
 
-
-#include_directories(/opt/ros/$ENV{ROS_DISTRO}/stacks/pr2_controllers/pr2_controllers_msgs/msg_gen/cpp/include)
 include_directories(/tmp/pr2_controllers_msgs/msg_gen/cpp/include)
 
 rtmbuild_add_executable(HrpsysSeqStateROSBridge src/HrpsysSeqStateROSBridgeImpl.cpp src/HrpsysSeqStateROSBridge.cpp src/HrpsysSeqStateROSBridgeComp.cpp)
 rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/ImageSensorROSBridgeComp.cpp)
 rtmbuild_add_executable(HrpsysJointTrajectoryBridge src/HrpsysJointTrajectoryBridge.cpp src/HrpsysJointTrajectoryBridgeComp.cpp)
-
-if(TARGET compile_hrpsys)
-  add_dependencies(HrpsysSeqStateROSBridge compile_hrpsys)
-  add_dependencies(ImageSensorROSBridge compile_hrpsys)
-  add_dependencies(HrpsysJointTrajectoryBridge compile_hrpsys)
-endif()
 
 install(PROGRAMS scripts/rtmlaunch scripts/rtmtest scripts/rtmstart.py
   DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})

@@ -48,6 +48,8 @@ find_package(catkin REQUIRED COMPONENTS openrtm_aist_python rtshell)
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
+
+unset(openrtm_aist_LIBRARIES CACHE) # remove not to add openrtm_aist_LIBRARIES to openrtm_toolsConfig.cmake
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES openrtm_tools

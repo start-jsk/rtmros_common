@@ -36,6 +36,8 @@ foreach(_idl_file ${_idl_files})
   execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_idl_file} ${PROJECT_SOURCE_DIR}/idl/)
 endforeach()
 
+unset(openrtm_aist_LIBRARIES CACHE) # remove not to add openrtm_aist_LIBRARIES to hrpsys_ros_bridgeConfig.cmake
+
 # initialize rtmbuild
 rtmbuild_init()
 
