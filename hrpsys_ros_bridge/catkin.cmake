@@ -72,7 +72,8 @@ if (_download_failed)
   message(FATAL_ERROR "Download pr2_controllers_msgs failed : ${_download_failed}")
 endif(_download_failed)
 execute_process(
-  COMMAND sh -c "ROS_PACKAGE_PATH=/tmp/pr2_controllers_msgs:$ROS_PACKAGE_PATH sh -c 'rosdep update; make -C /tmp/pr2_controllers_msgs'"
+  COMMAND sh -c "rosdep update"
+  COMMAND sh -c "LC_ALL=en_US.UTF-8 ROS_PACKAGE_PATH=/tmp/pr2_controllers_msgs:$ROS_PACKAGE_PATH make -C /tmp/pr2_controllers_msgs"
   OUTPUT_VARIABLE _compile_output
   RESULT_VARIABLE _compile_failed)
 message("Compile pr2_controllers_msgs files ${_compile_output}")
