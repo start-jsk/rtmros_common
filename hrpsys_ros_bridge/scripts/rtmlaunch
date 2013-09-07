@@ -13,6 +13,6 @@ try:
 finally:
     # if omniName is invoked from this script, stop this
     if p :
-        print "\033[34m[rtmlaunch] terminate", rtmstart.cosnames, "at port", rtmstart.port_number, "\033[0m"
+        print "\033[34m[rtmlaunch] terminate", cosnames, "at port", port_number, "\033[0m"
         p.terminate()
 
