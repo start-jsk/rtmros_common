@@ -17,6 +17,7 @@
   <build_depend>actionlib</build_depend>
   <build_depend>camera_info_manager</build_depend>
   <build_depend>control_msgs</build_depend>
+  <build_depend>diagnostic_msgs</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>hrpsys</build_depend>
   <build_depend>image_transport</build_depend>
@@ -36,6 +37,7 @@
   <run_depend>actionlib</run_depend>
   <run_depend>camera_info_manager</run_depend>
   <run_depend>control_msgs</run_depend>
+  <run_depend>diagnostic_msgs</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>hrpsys</run_depend>
   <run_depend>hrpsys_tools</run_depend>
