@@ -63,8 +63,9 @@ rtmbuild_genbridge()
 ## hrpsys ros bridge tools
 ##
 # pr2_controller_msgs is not catkinized
+string(RANDOM _random_string)
 execute_process(
-  COMMAND svn co --non-interactive --trust-server-cert https://code.ros.org/svn/wg-ros-pkg/stacks/pr2_controllers/tags/groovy/pr2_controllers_msgs /tmp/pr2_controllers_msgs
+  COMMAND svn co --non-interactive --trust-server-cert https://code.ros.org/svn/wg-ros-pkg/stacks/pr2_controllers/tags/groovy/pr2_controllers_msgs /tmp/${_random_string}/pr2_controllers_msgs
   OUTPUT_VARIABLE _download_output
   RESULT_VARIABLE _download_failed)
 message("download pr2_controllers_msgs files ${_download_output}")
@@ -73,7 +74,7 @@ if (_download_failed)
 endif(_download_failed)
 execute_process(
   COMMAND sh -c "rosdep update"
-  COMMAND sh -c "LC_ALL=en_US.UTF-8 ROS_PACKAGE_PATH=/tmp/pr2_controllers_msgs:$ROS_PACKAGE_PATH make -C /tmp/pr2_controllers_msgs"
+  COMMAND sh -c "LC_ALL=en_US.UTF-8 ROS_PACKAGE_PATH=/tmp/${_random_string}/pr2_controllers_msgs:$ROS_PACKAGE_PATH make -C /tmp/${_random_string}/pr2_controllers_msgs"
   OUTPUT_VARIABLE _compile_output
   RESULT_VARIABLE _compile_failed)
 message("Compile pr2_controllers_msgs files ${_compile_output}")
@@ -81,7 +82,7 @@ if (_compile_failed)
   message(FATAL_ERROR "Compile pr2_controllers_msgs failed : ${_compile_failed}")
 endif(_compile_failed)
 
-include_directories(/tmp/pr2_controllers_msgs/msg_gen/cpp/include)
+include_directories(/tmp/${_random_string}/pr2_controllers_msgs/msg_gen/cpp/include)
 
 rtmbuild_add_executable(HrpsysSeqStateROSBridge src/HrpsysSeqStateROSBridgeImpl.cpp src/HrpsysSeqStateROSBridge.cpp src/HrpsysSeqStateROSBridgeComp.cpp)
 rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/ImageSensorROSBridgeComp.cpp)
