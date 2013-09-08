@@ -8,8 +8,8 @@ find_package(catkin REQUIRED COMPONENTS roscpp openrtm_tools rtmbuild rostest)
 # include rtmbuild
 if(EXISTS ${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
   include(${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
-elseif(EXISTS ${CMAKE_INSTALL_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
-  include(${CMAKE_INSTALL_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
+elseif(EXISTS ${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
+  include(${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
 else()
   get_cmake_property(_variableNames VARIABLES)
   foreach (_variableName ${_variableNames})
@@ -36,15 +36,15 @@ foreach(_idl_file ${_idl_files})
   execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_idl_file} ${PROJECT_SOURCE_DIR}/idl/)
 endforeach()
 
-unset(openrtm_aist_LIBRARIES CACHE) # remove not to add openrtm_aist_LIBRARIES to hrpsys_ros_bridgeConfig.cmake
+unset(openrtm_tools_LIBRARIES CACHE) # remove not to add openrtm_aist_LIBRARIES to hrpsys_ros_bridgeConfig.cmake
 
 # initialize rtmbuild
 rtmbuild_init()
 
 # call catkin_package, after rtmbuild_init, before rtmbuild_gen*
 catkin_package(
-    DEPENDS openrtm_aist #
-    CATKIN-DEPENDS # openrtm_tools rtmbuild roscpp
+    DEPENDS #
+    CATKIN-DEPENDS openrtm_tools roscpp
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO
 )
