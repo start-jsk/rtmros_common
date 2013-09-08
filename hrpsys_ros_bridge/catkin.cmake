@@ -64,6 +64,7 @@ rtmbuild_genbridge()
 ##
 # pr2_controller_msgs is not catkinized
 string(RANDOM _random_string)
+
 execute_process(
   COMMAND svn co --non-interactive --trust-server-cert https://code.ros.org/svn/wg-ros-pkg/stacks/pr2_controllers/tags/groovy/pr2_controllers_msgs /tmp/${_random_string}/pr2_controllers_msgs
   OUTPUT_VARIABLE _download_output
@@ -72,16 +73,33 @@ message("download pr2_controllers_msgs files ${_download_output}")
 if (_download_failed)
   message(FATAL_ERROR "Download pr2_controllers_msgs failed : ${_download_failed}")
 endif(_download_failed)
+file(WRITE /tmp/${_random_string}/rospack
+"\#!/bin/sh
+echo $@ 1>&2
+if [ \"$1\"  = \"deps-manifests\" ];then
+   echo \"/opt/ros/groovy/share/genmsg/package.xml /opt/ros/groovy/share/gencpp/package.xml /opt/ros/groovy/share/genlisp/package.xml /opt/ros/groovy/share/genpy/package.xml /opt/ros/groovy/share/message_generation/package.xml /opt/ros/groovy/share/cpp_common/package.xml /opt/ros/groovy/share/rostime/package.xml /opt/ros/groovy/share/roscpp_traits/package.xml /opt/ros/groovy/share/roscpp_serialization/package.xml /opt/ros/groovy/share/message_runtime/package.xml /opt/ros/groovy/share/std_msgs/package.xml /opt/ros/groovy/share/actionlib_msgs/package.xml /opt/ros/groovy/share/trajectory_msgs/package.xml /opt/ros/groovy/share/geometry_msgs/package.xml\"
+elif [ \"$1\"  = \"deps-msgsrv\" ];then
+   true
+elif [ \"$1\"  = \"cflags-only-I\" ];then
+   echo \"/tmp/${_random_string}/pr2_controllers_msgs/msg_gen/cpp/include /tmp/${_random_string}/pr2_controllers_msgs/srv_gen/cpp/include /opt/ros/groovy/include\"
+elif [ \"$1\"  = \"cflags-only-other\" ];then
+   true
+elif [ \"$1\"  = \"libs-only-L\" ];then
+   echo \"/opt/ros/groovy/lib\"
+elif [ \"$1\"  = \"libs-only-l\" ];then
+   echo \"roscpp_serialization rostime :/usr/lib/libboost_date_time-mt.so :/usr/lib/libboost_system-mt.so :/usr/lib/libboost_thread-mt.so pthread cpp_common\"
+elif [ \"$1\"  = \"libs-only-other\" ];then
+   true
+elif [ \"$1\"  = \"langs\" ];then
+   true
+else
+   /opt/ros/groovy/bin/rospack $@
+fi
+")
 execute_process(
-  COMMAND sh -c "rosdep update"
-  OUTPUT_VARIABLE _update_output
-  RESULT_VARIABLE _update_failed)
-message("Update rosdep ${_update_output}")
-if (_update_failed)
-  message(FATAL_ERROR "Update rosdep failed : ${_update_failed}")
-endif(_update_failed)
-execute_process(
-  COMMAND sh -c "ROS_PACKAGE_PATH=/tmp/${_random_string}/pr2_controllers_msgs:$ROS_PACKAGE_PATH make -C /tmp/${_random_string}/pr2_controllers_msgs"
+  COMMAND sh -c "chmod u+x /tmp/${_random_string}/rospack"
+  COMMAND sh -c "touch /tmp/${_random_string}/rosdep; chmod u+x /tmp/${_random_string}/rosdep"
+  COMMAND sh -c "PATH=/tmp/${_random_string}:$PATH ROS_PACKAGE_PATH=/tmp/${_random_string}/pr2_controllers_msgs:$ROS_PACKAGE_PATH make -C /tmp/${_random_string}/pr2_controllers_msgs"
   OUTPUT_VARIABLE _compile_output
   RESULT_VARIABLE _compile_failed)
 message("Compile pr2_controllers_msgs files ${_compile_output}")
