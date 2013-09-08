@@ -74,6 +74,13 @@ if (_download_failed)
 endif(_download_failed)
 execute_process(
   COMMAND sh -c "rosdep update"
+  OUTPUT_VARIABLE _update_output
+  RESULT_VARIABLE _update_failed)
+message("Update rosdep ${_update_output}")
+if (_update_failed)
+  message(FATAL_ERROR "Update rosdep failed : ${_update_failed}")
+endif(_update_failed)
+execute_process(
   COMMAND sh -c "ROS_PACKAGE_PATH=/tmp/${_random_string}/pr2_controllers_msgs:$ROS_PACKAGE_PATH make -C /tmp/${_random_string}/pr2_controllers_msgs"
   OUTPUT_VARIABLE _compile_output
   RESULT_VARIABLE _compile_failed)

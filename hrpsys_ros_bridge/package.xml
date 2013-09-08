@@ -24,6 +24,8 @@
   <build_depend>subversion</build_depend>
   <build_depend>mk</build_depend>
   <build_depend>rosbuild</build_depend>
+  <build_depend>python-rosdep</build_depend>
+  <!-- -->
   <build_depend>robot_state_publisher</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>rtmbuild</build_depend>
