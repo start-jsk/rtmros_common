@@ -43,7 +43,7 @@ rtmbuild_init()
 
 # call catkin_package, after rtmbuild_init, before rtmbuild_gen*
 catkin_package(
-    DEPENDS #
+    DEPENDS openrtm_aist #
     CATKIN-DEPENDS # openrtm_tools rtmbuild roscpp
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO
