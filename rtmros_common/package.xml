@@ -16,6 +16,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <run_depend>hrpsys_tools</run_depend>
+  <run_depend>hrpsys_ros_bridge</run_depend>
   <run_depend>openrtm_ros_bridge</run_depend>
   <run_depend>openrtm_tools</run_depend>
   <run_depend>rosnode_rtc</run_depend>
