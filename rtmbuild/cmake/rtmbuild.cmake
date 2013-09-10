@@ -34,10 +34,17 @@ macro(rtmbuild_genidl)
     file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl_gen/lib)
   endif(NOT _idllist)
 
-  set(_output_dir ${PROJECT_SOURCE_DIR}/idl_gen)
-  set(_output_cpp_dir ${PROJECT_SOURCE_DIR}/idl_gen/cpp/${PROJECT_NAME}/idl)
-  set(_output_python_dir ${PROJECT_SOURCE_DIR}/src/${PROJECT_NAME})
-  set(_output_lib_dir ${PROJECT_SOURCE_DIR}/idl_gen/lib)
+  if (${use_catkin})
+    set(_output_dir ${PROJECT_SOURCE_DIR}/idl_gen)
+    set(_output_cpp_dir ${PROJECT_SOURCE_DIR}/idl_gen/cpp/${PROJECT_NAME}/idl)
+    set(_output_lib_dir ${PROJECT_SOURCE_DIR}/idl_gen/lib)
+    set(_output_python_dir ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION}/${PROJECT_NAME})
+  else()
+    set(_output_dir ${PROJECT_SOURCE_DIR}/idl_gen)
+    set(_output_cpp_dir ${PROJECT_SOURCE_DIR}/idl_gen/cpp/${PROJECT_NAME}/idl)
+    set(_output_lib_dir ${PROJECT_SOURCE_DIR}/idl_gen/lib)
+    set(_output_python_dir ${PROJECT_SOURCE_DIR}/src/${PROJECT_NAME})
+  endif()
 
   foreach(_idl ${_idllist})
     message("[rtmbuild_genidl] ${_idl}")
@@ -84,7 +91,7 @@ macro(rtmbuild_genidl)
     # python
     add_custom_command(OUTPUT ${_output_idl_py}
       COMMAND mkdir -p ${_output_python_dir}
-      COMMAND echo \"import sys\; sys.path.append('${PROJECT_SOURCE_DIR}/src/${PROJECT_NAME}')\; import ${PROJECT_NAME}\" > ${_output_python_dir}/__init__.py
+      COMMAND echo \"import sys\; sys.path.append('${_output_python_dir}')\; import ${PROJECT_NAME}\" > ${_output_python_dir}/__init__.py
       COMMAND ${_genidl_exe} -bpython -I`${_openrtm_aist_pkg_dir}/bin/rtm-config --cflags | sed 's/^-[^I]\\S*//g' | sed 's/\ -[^I]\\S*//g'` -I${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl -C${_output_python_dir} ${_input_idl}
       DEPENDS ${_input_idl} ${${_idl}_depends})
     #
