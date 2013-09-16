@@ -3,6 +3,7 @@
   <version>1.0.0</version>
   <description>hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, this script is usually included from other script.</description>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
+  <maintainer email="iisaito@opensource-robotics.tokyo.jp">Isao Isaac Saito</maintainer>
 
   <license>BSD</license>
 
