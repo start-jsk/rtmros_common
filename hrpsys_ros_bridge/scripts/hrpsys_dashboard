@@ -25,7 +25,7 @@ import diagnostic_msgs.msg
 import std_msgs.msg
 import std_srvs.srv
 
-import hrpsys
+#import hrpsys  #9/15/2013 Removed since it looks not in use.
 import hrpsys_ros_bridge
 from hrpsys_ros_bridge.srv import *
 
