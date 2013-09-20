@@ -40,9 +40,12 @@ import re
 ## check if pr2_dashboard is alive
 try:
   import pr2_dashboard
-except:
+  roslib.packages.get_pkg_dir('pr2_dashboard')
+except ImportError:
   print >> sys.stderr, ";;\n;; pr2_dashboard is not found\n;; please try\n;;  >> apt-get install ros-groovy-pr2-gui\n;; "
   exit()
+except roslib.packages.InvalidROSPkgException:
+  sys.path.append(roslib.packages.get_pkg_dir('pr2_dashboard')+"src/")
 
 from pr2_dashboard.status_control import StatusControl
 from pr2_dashboard.power_state_control import PowerStateControl
