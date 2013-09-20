@@ -37,7 +37,13 @@ import threading
 import time
 import re
 
-##
+## check if pr2_dashboard is alive
+try:
+  import pr2_dashboard
+except:
+  print >> sys.stderr, ";;\n;; pr2_dashboard is not found\n;; please try\n;;  >> apt-get install ros-groovy-pr2-gui\n;; "
+  exit()
+
 from pr2_dashboard.status_control import StatusControl
 from pr2_dashboard.power_state_control import PowerStateControl
 from pr2_dashboard.diagnostics_frame import DiagnosticsFrame
