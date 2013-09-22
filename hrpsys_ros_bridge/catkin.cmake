@@ -65,6 +65,15 @@ rtmbuild_genbridge()
 # pr2_controller_msgs is not catkinized
 string(RANDOM _random_string)
 
+# Check ROS distro.
+IF(ENV{ROS_ROOT} MATCHES "/opt/ros/hydro/share/ros")
+    SET(ROS_DISTRO hydro)
+ELIF(ENV{ROS_ROOT} MATCHES "/opt/ros/groovy/share/ros")
+    SET(ROS_DISTRO groovy)
+ELSE()
+    SET(ROS_DISTRO groovy)
+ENDIF(ENV{ROS_ROOT} MATCHES "/opt/ros/hydro/share/ros")
+
 execute_process(
   COMMAND svn co --non-interactive --trust-server-cert https://code.ros.org/svn/wg-ros-pkg/stacks/pr2_controllers/tags/groovy/pr2_controllers_msgs /tmp/${_random_string}/pr2_controllers_msgs
   OUTPUT_VARIABLE _download_output
@@ -77,15 +86,15 @@ file(WRITE /tmp/${_random_string}/rospack
 "\#!/bin/sh
 echo $@ 1>&2
 if [ \"$1\"  = \"deps-manifests\" ];then
-   echo \"/opt/ros/groovy/share/genmsg/package.xml /opt/ros/groovy/share/gencpp/package.xml /opt/ros/groovy/share/genlisp/package.xml /opt/ros/groovy/share/genpy/package.xml /opt/ros/groovy/share/message_generation/package.xml /opt/ros/groovy/share/cpp_common/package.xml /opt/ros/groovy/share/rostime/package.xml /opt/ros/groovy/share/roscpp_traits/package.xml /opt/ros/groovy/share/roscpp_serialization/package.xml /opt/ros/groovy/share/message_runtime/package.xml /opt/ros/groovy/share/std_msgs/package.xml /opt/ros/groovy/share/actionlib_msgs/package.xml /opt/ros/groovy/share/trajectory_msgs/package.xml /opt/ros/groovy/share/geometry_msgs/package.xml\"
+   echo \"/opt/ros/${ROS_DISTRO}/share/genmsg/package.xml /opt/ros/${ROS_DISTRO}/share/gencpp/package.xml /opt/ros/${ROS_DISTRO}/share/genlisp/package.xml /opt/ros/${ROS_DISTRO}/share/genpy/package.xml /opt/ros/${ROS_DISTRO}/share/message_generation/package.xml /opt/ros/${ROS_DISTRO}/share/cpp_common/package.xml /opt/ros/${ROS_DISTRO}/share/rostime/package.xml /opt/ros/${ROS_DISTRO}/share/roscpp_traits/package.xml /opt/ros/${ROS_DISTRO}/share/roscpp_serialization/package.xml /opt/ros/${ROS_DISTRO}/share/message_runtime/package.xml /opt/ros/${ROS_DISTRO}/share/std_msgs/package.xml /opt/ros/${ROS_DISTRO}/share/actionlib_msgs/package.xml /opt/ros/${ROS_DISTRO}/share/trajectory_msgs/package.xml /opt/ros/${ROS_DISTRO}/share/geometry_msgs/package.xml\"
 elif [ \"$1\"  = \"deps-msgsrv\" ];then
    true
 elif [ \"$1\"  = \"cflags-only-I\" ];then
-   echo \"/tmp/${_random_string}/pr2_controllers_msgs/msg_gen/cpp/include /tmp/${_random_string}/pr2_controllers_msgs/srv_gen/cpp/include /opt/ros/groovy/include\"
+   echo \"/tmp/${_random_string}/pr2_controllers_msgs/msg_gen/cpp/include /tmp/${_random_string}/pr2_controllers_msgs/srv_gen/cpp/include /opt/ros/${ROS_DISTRO}/include\"
 elif [ \"$1\"  = \"cflags-only-other\" ];then
    true
 elif [ \"$1\"  = \"libs-only-L\" ];then
-   echo \"/opt/ros/groovy/lib\"
+   echo \"/opt/ros/${ROS_DISTRO}/lib\"
 elif [ \"$1\"  = \"libs-only-l\" ];then
    echo \"roscpp_serialization rostime :/usr/lib/libboost_date_time-mt.so :/usr/lib/libboost_system-mt.so :/usr/lib/libboost_thread-mt.so pthread cpp_common\"
 elif [ \"$1\"  = \"libs-only-other\" ];then
@@ -93,7 +102,7 @@ elif [ \"$1\"  = \"libs-only-other\" ];then
 elif [ \"$1\"  = \"langs\" ];then
    true
 else
-   /opt/ros/groovy/bin/rospack $@
+   /opt/ros/${ROS_DISTRO}/bin/rospack $@
 fi
 ")
 execute_process(
