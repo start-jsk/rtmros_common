@@ -4,6 +4,12 @@ __doc__ = """
 Hrpsys_Dashboard
 GUI for the hrpsys robots."""
 
+from os import path
+import threading
+import time
+import re
+import sys
+
 import roslib
 roslib.load_manifest('hrpsys_ros_bridge')
 
@@ -25,17 +31,13 @@ import diagnostic_msgs.msg
 import std_msgs.msg
 import std_srvs.srv
 
-#import hrpsys  #9/15/2013 Removed since it looks not in use.
 import hrpsys_ros_bridge
-from hrpsys_ros_bridge.srv import *
+#from hrpsys_ros_bridge.srv import *
+import openrtm_ros_bridge.srv
+#print sys.modules
 
 import rospy
 from roslib import rosenv
-
-from os import path
-import threading
-import time
-import re
 
 ## check if pr2_dashboard is alive
 try:
