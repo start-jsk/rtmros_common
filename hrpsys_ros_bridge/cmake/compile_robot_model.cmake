@@ -93,14 +93,26 @@ macro(compile_openhrp_model wrlfile)
   endif(EXISTS ${_yamlfile})
   # use export-collada
   rosbuild_find_ros_package(openhrp3)
-  set(_export_collada_dep_files ${openhrp3_PACKAGE_PATH}/bin/export-collada)
+  if(EXISTS ${openhrp3_PACKAGE_PATH}/bin/export-collada)
+    set(_export_collada_dep_files ${openhrp3_PACKAGE_PATH}/bin/export-collada)
+  else()
+    # when openhrp3 is catkin installed
+    set(_export_collada_dep_files )
+    message("assuming export-collada is already compiled")
+  endif()
   add_custom_command(OUTPUT ${_daefile}
     COMMAND rosrun openhrp3 export-collada -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
     DEPENDS ${wrlfile} ${_export_collada_dep_files})
   # use _gen_project.launch
   rosbuild_find_ros_package(hrpsys)
   rosbuild_find_ros_package(hrpsys_tools)
-  set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
+  if(EXISTS ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator)
+    set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
+  else()
+    # when hrpsys is catkin installed
+    set(_gen_project_dep_files)
+    message("assuming hrpsys/ProjectGenerator is already compiled")
+  endif()
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rosrun openrtm_aist rtm-naming 2889
     COMMAND rostest -t hrpsys_tools _gen_project.launch CORBA_PORT:=2889 INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
@@ -170,7 +182,13 @@ macro(compile_collada_model daefile)
     set(hrpsys_PACKAGE_PATH ${hrpsys_SOURCE_DIR})
     set(hrpsys_tools_PACKAGE_PATH ${hrpsys_tools_SOURCE_DIR})
   endif()
-  set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
+  if(EXISTS ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator)
+    set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
+  else()
+    # when hrpsys is catkin installed
+    set(_gen_project_dep_files)
+    message("assuming hrpsys/ProjectGenerator is already compiled")
+  endif()
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND rosrun openrtm_aist rtm-naming 2890
     COMMAND rostest -t hrpsys_tools _gen_project.launch CORBA_PORT:=2890 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
