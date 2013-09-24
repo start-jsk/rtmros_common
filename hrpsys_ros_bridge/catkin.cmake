@@ -136,6 +136,10 @@ install(DIRECTORY scripts
 #  PATTERN "rtmstart.py" EXCLUDE
   )
 
+install(DIRECTORY cmake
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  PATTERN ".svn" EXCLUDE
+  )
 
 ##
 ## test
