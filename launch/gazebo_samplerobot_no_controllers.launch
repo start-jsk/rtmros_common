@@ -8,6 +8,6 @@
     <arg name="WORLD" value="$(arg WORLD)" />
     <arg name="PAUSED" value="$(arg PAUSED)"/>
     <arg name="HRPSYS_GAZEBO_CONFIG" value="$(find hrpsys_gazebo_tutorials)/config/samplerobot.yaml" />
-    <arg name="ROBOT_MODEL" value="$(find SampleRobot)/SampleRobot.urdf" />
+    <arg name="ROBOT_MODEL" value="$(find hrpsys_gazebo_tutorials)/robot_models/SampleRobot/SampleRobot.urdf" />
   </include>
 </launch>
