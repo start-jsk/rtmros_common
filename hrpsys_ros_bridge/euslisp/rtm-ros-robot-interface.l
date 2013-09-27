@@ -178,6 +178,18 @@
        (send self :imucoords))
       (t
        (send-super* :state args))))
+  ;; Calculate zmp from state [mm]
+  ;; example ;; (progn (send *ri* :go-velocity 0 0 0) (objects (list (*ri* . robot))) (do-until-key (let ((zmp (send *ri* :calc-zmp-from-state))) (send *irtviewer* :draw-objects :flush nil) (send zmp :draw-on :flush t :size 300))))
+  (:calc-zmp-from-state
+   (&key (wrt :world))
+   ;; :wrt is :local => calc local zmp for (*ri* . robot)'s root-link coords
+   ;; :wrt is :world => calc world zmp for (*ri* . robot)
+   (send self :state)
+   (send robot :calc-zmp-from-forces-moments
+         (mapcar #'(lambda (x) (send self :force-vector x)) '(:rleg :lleg))
+         (mapcar #'(lambda (x) (send self :moment-vector x)) '(:rleg :lleg))
+         :wrt wrt)
+   )
   )
 
 ;; SequencePlayerService
