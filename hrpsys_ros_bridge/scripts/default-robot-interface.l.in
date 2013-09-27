@@ -1,5 +1,7 @@
 (load "package://hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l")
 (require :@robot@ "package://@PROJECT_PKG_NAME@/models/@robot@.l")
+(when (probe-file (ros::resolve-ros-path "package://@PROJECT_PKG_NAME@/euslisp/@robot@-utils.l"))
+  (require :@robot@-utils "package://@PROJECT_PKG_NAME@/euslisp/@robot@-utils.l"))
 
 (defclass @robot@-interface
   :super rtm-ros-robot-interface
