@@ -134,7 +134,7 @@ macro(compile_openhrp_model wrlfile)
   set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
     "${_workdir}/${_name}.conf;${_workdir}/${_name}.RobotHardware.conf;${_workdir}/${_name}_nosim.conf;${_workdir}/${_name}_nosim.RobotHardware.conf;${_current_directory_properties}")
 
-  list(APPEND compile_robots ${_name}_compile)
+  list(APPEND compile_robots ${_sname}_compile)
 endmacro(compile_openhrp_model)
 
 macro(compile_collada_model daefile)
@@ -213,7 +213,7 @@ macro(compile_collada_model daefile)
   set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
     "${_workdir}/${_name}.conf;${_workdir}/${_name}.RobotHardware.conf;${_workdir}/${_name}_nosim.conf;${_workdir}/${_name}_nosim.RobotHardware.conf;${_current_directory_properties}")
 
-  list(APPEND compile_robots ${_name}_compile)
+  list(APPEND compile_robots ${_sname}_compile)
 endmacro(compile_collada_model daefile)
 
 macro (generate_default_launch_eusinterface_files wrlfile project_pkg_name)
