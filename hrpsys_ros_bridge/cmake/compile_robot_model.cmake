@@ -76,9 +76,9 @@ macro(compile_openhrp_model wrlfile)
   set(_daefile "${_workdir}/${_name}.dae")
   set(_xmlfile "${_workdir}/${_name}.xml")
   set(_xmlfile_nosim "${_workdir}/${_name}_nosim.xml")
-  string(TOLOWER ${_name} _name)
-  set(_yamlfile "${_workdir}/${_name}.yaml")
-  set(_lispfile "${_workdir}/${_name}.l")
+  string(TOLOWER ${_name} _sname)
+  set(_yamlfile "${_workdir}/${_sname}.yaml")
+  set(_lispfile "${_workdir}/${_sname}.l")
   # use euscollada
   rosbuild_find_ros_package(euscollada)
   set(_euscollada_dep_files ${euscollada_PACKAGE_PATH}/bin/collada2eus ${euscollada_PACKAGE_PATH}/src/euscollada-robot.l)
@@ -123,13 +123,16 @@ macro(compile_openhrp_model wrlfile)
     COMMAND rostest -t hrpsys_tools _gen_project.launch CORBA_PORT:=2889 INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2889" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
-  add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
+  add_custom_target(${_sname}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
   ## make sure to kill nameserver
-  add_custom_command(OUTPUT ${_name}_compile_cleanup
+  add_custom_command(OUTPUT ${_sname}_compile_cleanup
     COMMAND -pkill -KILL -f "omniNames -start 2889" || echo "no process to kill"
-    DEPENDS  ${_name}_compile
+    DEPENDS  ${_sname}_compile
     VERBATIM)
-  add_custom_target(${_name}_compile_all ALL DEPENDS ${_name}_compile_cleanup)
+  add_custom_target(${_sname}_compile_all ALL DEPENDS ${_sname}_compile_cleanup)
+  get_directory_property(_current_directory_properties ADDITIONAL_MAKE_CLEAN_FILES)
+  set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
+    "${_workdir}/${_name}.conf;${_workdir}/${_name}.RobotHardware.conf;${_workdir}/${_name}_nosim.conf;${_workdir}/${_name}_nosim.RobotHardware.conf;${_current_directory_properties}")
 
   list(APPEND compile_robots ${_name}_compile)
 endmacro(compile_openhrp_model)
@@ -153,9 +156,9 @@ macro(compile_collada_model daefile)
   endif()
   set(_xmlfile "${_workdir}/${_name}.xml")
   set(_xmlfile_nosim "${_workdir}/${_name}_nosim.xml")
-  string(TOLOWER ${_name} _name)
-  set(_yamlfile "${_workdir}/${_name}.yaml")
-  set(_lispfile "${_workdir}/${_name}.l")
+  string(TOLOWER ${_name} _sname)
+  set(_yamlfile "${_workdir}/${_sname}.yaml")
+  set(_lispfile "${_workdir}/${_sname}.l")
   # use euscollada
   if(${USE_ROSBUILD})
     rosbuild_find_ros_package(euscollada)
@@ -199,13 +202,16 @@ macro(compile_collada_model daefile)
     COMMAND rostest -t hrpsys_tools _gen_project.launch CORBA_PORT:=2890 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2890" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
-  add_custom_target(${_name}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
+  add_custom_target(${_sname}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
   ## make sure to kill nameserver
-  add_custom_command(OUTPUT ${_name}_compile_cleanup
+  add_custom_command(OUTPUT ${_sname}_compile_cleanup
     COMMAND -pkill -KILL -f "omniNames -start 2890" || echo "no process to kill"
-    DEPENDS  ${_name}_compile
+    DEPENDS  ${_sname}_compile
     VERBATIM)
-  add_custom_target(${_name}_compile_all ALL DEPENDS ${_name}_compile_cleanup)
+  add_custom_target(${_sname}_compile_all ALL DEPENDS ${_sname}_compile_cleanup)
+  get_directory_property(_current_directory_properties ADDITIONAL_MAKE_CLEAN_FILES)
+  set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
+    "${_workdir}/${_name}.conf;${_workdir}/${_name}.RobotHardware.conf;${_workdir}/${_name}_nosim.conf;${_workdir}/${_name}_nosim.RobotHardware.conf;${_current_directory_properties}")
 
   list(APPEND compile_robots ${_name}_compile)
 endmacro(compile_collada_model daefile)
@@ -222,24 +228,25 @@ macro (generate_default_launch_eusinterface_files wrlfile project_pkg_name)
   set(ROBOT ${_name})
   set(robot ${_sname})
   rosbuild_find_ros_package(hrpsys_ros_bridge)
-  set(_generated_launch_euslisp_files)
+  set(${_sname}_generated_launch_euslisp_files)
   configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot_startup.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}_startup.launch)
-  list(APPEND _generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}_startup.launch)
+  list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}_startup.launch)
   if(NOT EXISTS ${PROJECT_SOURCE_DIR}/models/${_name}_controller_config.yaml)
     configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot_controller_config.yaml.in ${PROJECT_SOURCE_DIR}/models/${_name}_controller_config.yaml)
-    list(APPEND _generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/models/${_name}_controller_config.yaml)
+    list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/models/${_name}_controller_config.yaml)
   endif()
   configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot_ros_bridge.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}_ros_bridge.launch)
-  list(APPEND _generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}_ros_bridge.launch)
+  list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}_ros_bridge.launch)
   if (NOT "${ARGV3}" STREQUAL "--no-toplevel-launch")
     configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}.launch)
     configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot_nosim.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}_nosim.launch)
-    list(APPEND _generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}.launch)
-    list(APPEND _generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}_nosim.launch)
+    list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}.launch)
+    list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}_nosim.launch)
   endif()
   if (NOT "${ARGV3}" STREQUAL "--no-euslisp")
     configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default-robot-interface.l.in ${PROJECT_SOURCE_DIR}/build/${_sname}-interface.l)
-    list(APPEND _generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/build/${_sname}-interface.l)
+    list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/build/${_sname}-interface.l)
   endif()
-  set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${_generated_launch_euslisp_files}")
+  get_directory_property(_current_directory_properties ADDITIONAL_MAKE_CLEAN_FILES)
+  set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${${_sname}_generated_launch_euslisp_files};${_current_directory_properties}")
 endmacro ()
