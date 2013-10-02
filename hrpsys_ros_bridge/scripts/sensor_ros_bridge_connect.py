@@ -22,7 +22,7 @@ def connecSensorRosBridgePort(url, rh, bridge, vs, afs):
     if vs != None:
         for vfp in filter(lambda x : str.find(x, 'v') >= 0 and str.find(x, 'sensor') >= 0, vs.ports.keys()):
             print program_name, "connect ", vfp, vs.port(vfp).get_port_profile().name, bridge.port(vfp).get_port_profile().name
-            connectPorts(vs.port(vfp), bridge.port(vfp))
+            connectPorts(vs.port(vfp), bridge.port(vfp), "new")
 
 def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name, managerhost):
     hcf.waitForModelLoader()
