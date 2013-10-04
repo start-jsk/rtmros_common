@@ -1,8 +1,25 @@
 <launch>
+  <arg name="SYNCHRONIZED" default="false" />
+
   <rosparam command="load"
             file="$(find hrpsys_ros_bridge_tutorials)/models/SampleRobot_controller_config.yaml" />
 
+  <!-- TODO: fix colladaWriter -->
+  <node pkg="tf" type="static_transform_publisher" name="sensor_transform_0"
+        args="0 0 0 0 0 0 /LLEG_LINK6 lfsensor 100" />
+  <node pkg="tf" type="static_transform_publisher" name="sensor_transform_1"
+        args="0 0 0 0 0 0 /RLEG_LINK6 rfsensor 100" />
+  <node pkg="tf" type="static_transform_publisher" name="sensor_transform_2"
+        args="0 0 0 0 0 0 /LARM_LINK7 lhsensor 100" />
+  <node pkg="tf" type="static_transform_publisher" name="sensor_transform_3"
+        args="0 0 0 0 0 0 /RARM_LINK7 rhsensor 100" />
+  <node pkg="tf" type="static_transform_publisher" name="sensor_transform_4"
+        args="0 0 0 0 0 0 /WAIST_LINK0 gyrometer 100" />
+
   <include file="$(find hrpsys_gazebo_tutorials)/launch/robot_hrpsys_bringup.launch">
-    <arg name="ROBOT_NAME" default="SampleRobot" />
+    <arg name="ROBOT_NAME" value="SampleRobot" />
+    <arg name="SYNCHRONIZED" value="$(arg SYNCHRONIZED)" />
+    <arg name="IOB_SUBSTEPS" value="5" />
+    <arg name="HRPSYS_RATE"  value="200" />
   </include>
 </launch>
