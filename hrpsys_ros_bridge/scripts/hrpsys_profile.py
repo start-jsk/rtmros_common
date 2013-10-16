@@ -7,6 +7,7 @@ import rospy
 from diagnostic_msgs.msg import *
 
 import os
+import hrpsys
 import rtm
 
 from rtm import *
@@ -15,14 +16,14 @@ from OpenHRP import *
 import socket
 import time
 
-def rtc_init (hostname="localhost") :
+def rtc_init () :
     global ms, rh, eps
 
     initCORBA()
-    ms = rtm.findRTCmanager(hostname)
+    ms = rtm.findRTCmanager(rtm.nshost)
     while ms == None :
         time.sleep(1);
-        ms = rtm.findRTCmanager(hostname)
+        ms = rtm.findRTCmanager(rtm.nshost)
         print "[hrpsys_profile.py] wait for RTCmanager : ",ms
 
 def hrpsys_profile() :
@@ -76,13 +77,8 @@ def hrpsys_profile() :
 
 
 if __name__ == '__main__':
-    hostname = socket.gethostname()
-    args_without_ros_options = filter(lambda x : str.find(x, '__'), sys.argv)
-    if len(args_without_ros_options) > 1 :
-        hostname=args_without_ros_options[1]
-
     try:
-        rtc_init(hostname)
+        rtc_init()
 
         rospy.init_node('hrpsys_profile_diagnostics')
         pub = rospy.Publisher('diagnostics', DiagnosticArray)

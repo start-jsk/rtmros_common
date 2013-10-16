@@ -4,7 +4,7 @@
 
 import roslib; roslib.load_manifest('hrpsys')
 import OpenRTM_aist.RTM_IDL # for catkin
-from hrpsys_config import *
+from hrpsys.hrpsys_config import *
 
 program_name = '[sensor_ros_bridge_connect.py] '
 
