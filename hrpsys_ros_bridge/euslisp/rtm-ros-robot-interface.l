@@ -608,3 +608,11 @@
    (send self :stabilizerservice_stopstabilizer)
    )
   )
+
+(defun print-abc-parameter-conf-from-robot
+  (rb)
+  (format t "abc_end_effectors:")
+  (dolist (l '(:rarm :larm :rleg :lleg))
+    (let ((rl (send (send (send rb l :root-link) :parent) :joint)))
+      (format t " ~A,~A,~A," l (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))))
+  (format t "~%"))
