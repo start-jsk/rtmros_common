@@ -73,7 +73,7 @@
 
   <!-- BEGIN:hrpsys.py setting -->
   <arg name="HRPSYS_PY_PKG" default="hrpsys_tools"/>
-  <arg name="HRPSYS_PY_NAME" default="hrpsys_config.py"/>
+  <arg name="HRPSYS_PY_NAME" default="hrpsys_tools_config.py"/>
   <arg name="LAUNCH_HRPSYSPY" default="true" />
   <!-- END:hrpsys.py setting -->
 

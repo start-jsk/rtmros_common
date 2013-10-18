@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 import roslib; roslib.load_manifest("hrpsys")
 import OpenRTM_aist.RTM_IDL # for catkin
-
 import sys
-from hrpsys_config import HrpsysConfigurator
+
+import hrpsys
+from hrpsys.hrpsys_config import *
+import OpenHRP
+#from hrpsys.hrpsys_config import HrpsysConfigurator
 
 # copy from hrpsys/lib/python2.7/dist-packages/hrpsys_config.py
 if __name__ == '__main__':
