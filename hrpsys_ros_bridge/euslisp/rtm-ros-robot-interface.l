@@ -434,7 +434,7 @@
                            (norm (scale (/ 1.0 (length abs-v)) (reduce #'v+ abs-v)))
                            (if (eq f/m :force) "N" "Nm")
                            (norm
-                            (scale (/ 1.0 5.0)
+                            (scale (/ 1.0 itr)
                                    (reduce #'v+
                                            (mapcar #'(lambda (x) (send self :state (read-from-string (format nil ":absolute-~A-vector" (string-downcase f/m))) alimb))
                                                    (make-list itr)))))
