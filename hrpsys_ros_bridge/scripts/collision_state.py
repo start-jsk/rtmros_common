@@ -143,9 +143,11 @@ if __name__ == '__main__':
         while not rospy.is_shutdown():
             try :
                 collision_state()
-            except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE), e :
-                print "[collision_state.py] catch exception", e
+            except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE, omniORB.CORBA.OBJECT_NOT_EXISTS), e :
+                print "[collision_state.py] catch exception, restart rtc_init", e
                 rtc_init(hostname)
+            except Exception as e:
+                print "[collision_state.py] catch exception", e
             r.sleep()
 
     except rospy.ROSInterruptException: pass
