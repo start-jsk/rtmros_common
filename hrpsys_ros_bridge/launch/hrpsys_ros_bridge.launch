@@ -128,6 +128,8 @@
 
     <rtconnect from="CollisionDetectorServiceROSBridge.rtc:CollisionDetectorService" to="co.rtc:CollisionDetectorService" subscription_type="new"/>
     <rtactivate component="CollisionDetectorServiceROSBridge.rtc" />
+    <node pkg="hrpsys_ros_bridge" name="collision_state" type="collision_state.py"
+          args="$(arg MODEL_FILE) $(arg omniorb_args)" output="$(arg OUTPUT)"/>
   </group>
 
   <!-- USE_IMPEDANCECONTROLLER
