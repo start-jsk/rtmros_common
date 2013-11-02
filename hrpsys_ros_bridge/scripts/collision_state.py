@@ -83,7 +83,7 @@ def collision_state() :
         sphere_color = ColorRGBA(0,1,0,1)
         line_length = numpy.linalg.norm(numpy.array((p1.x,p1.y,p1.z))-numpy.array((p2.x,p2.y,p2.z)))
         if (line_length < 0.1) :
-           sphere_color = ColorRGBA(line_length*10,1-line_length*10,0,1)
+           sphere_color = ColorRGBA(1-line_length*10,line_length*10,0,1)
 
         marker = Marker()
         marker.header.frame_id = frame_id
