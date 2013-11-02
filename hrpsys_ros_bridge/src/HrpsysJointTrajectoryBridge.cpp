@@ -74,10 +74,10 @@ RTC::ReturnCode_t HrpsysJointTrajectoryBridge::onInitialize()
       bodyinfo = hrp::loadBodyInfo(modelfile.c_str(), CosNaming::NamingContext::_duplicate(naming.getRootContext()));
       ret = loadBodyFromBodyInfo(body, bodyinfo);
     } catch ( CORBA::SystemException& ex ) {
-      std::cerr << "[HrpsysJointTrajectoryBridge] CORBA::SystemException " << ex._name() << std::endl;
+      std::cerr << "[HrpsysJointTrajectoryBridge] loadBodyInfo(): CORBA::SystemException " << ex._name() << std::endl;
       sleep(1);
     } catch ( ... ) {
-      std::cerr << "[HrpsysJointTrajectoryBridge] failed to load model[" << modelfile << "]" << std::endl;;
+      std::cerr << "[HrpsysJointTrajectoryBridge] loadBodyInfo(): failed to load model[" << modelfile << "]" << std::endl;;
       sleep(1);
     }
   }
@@ -202,10 +202,10 @@ jointTrajectoryActionObj(HrpsysJointTrajectoryBridge *ptr,
     try {
         parent->m_service0->addJointGroup(groupname.c_str(), jnames);
     } catch ( CORBA::SystemException& ex ) {
-      std::cerr << "[HrpsysJointTrajectoryBridge] CORBA::SystemException " << ex._name() << std::endl;
+      std::cerr << "[HrpsysJointTrajectoryBridge] addJointGroup(" << groupname << "), CORBA::SystemException " << ex._name() << std::endl;
       sleep(1);
     } catch ( ... ) {
-      std::cerr << "[HrpsysJointTrajectoryBridge] failed to addJointGroup[" << groupname.c_str() << "]" << std::endl;;
+      std::cerr << "[HrpsysJointTrajectoryBridge] addJointGroup(" << groupname << "), failed to addJointGroup[" << groupname.c_str() << "]" << std::endl;;
       sleep(1);
     }
   }
@@ -274,10 +274,10 @@ restart() {
     try {
       parent->m_service0->addJointGroup(groupname.c_str(), jnames);
     } catch ( CORBA::SystemException& ex ) {
-      std::cerr << "[HrpsysJointTrajectoryBridge] CORBA::SystemException " << ex._name() << std::endl;
+      std::cerr << "[HrpsysJointTrajectoryBridge] addJointGroup(" << groupname << "), CORBA::SystemException " << ex._name() << std::endl;
       sleep(1);
     } catch ( ... ) {
-      std::cerr << "[HrpsysJointTrajectoryBridge] failed to addJointGroup[" << groupname.c_str() << "]" << std::endl;;
+      std::cerr << "[HrpsysJointTrajectoryBridge] addJointGroup(" << groupname << "), failed to addJointGroup[" << groupname.c_str() << "]" << std::endl;;
     }
   }
 }

@@ -291,7 +291,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
     catch(const std::runtime_error &e)
       {
-	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+	ROS_ERROR_STREAM("[" << getInstanceName() << "] m_rservoStateIn failed with " << e.what());
       }
   }  // end: servoStateIn
 
@@ -304,7 +304,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
     catch(const std::runtime_error &e)
       {
-	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+	ROS_ERROR_STREAM("[" << getInstanceName() << "] m_rstorqueIn failed with " << e.what());
       }
   }  // end: rstorqueIn
 
@@ -325,7 +325,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
     catch(const std::runtime_error &e)
       {
-	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+	ROS_ERROR_STREAM("[" << getInstanceName() << "] m_rsangleIn failed with " << e.what());
       }
     //
     if ( use_hrpsys_time ) {
