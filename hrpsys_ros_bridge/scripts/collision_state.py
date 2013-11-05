@@ -124,6 +124,7 @@ def collision_state() :
 
     id = 0
     for m in markerArray.markers:
+        m.lifetime = rospy.Duration(1.0)
         m.id = id
         id += 1
 
