@@ -23,8 +23,11 @@ from geometry_msgs.msg import Vector3
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
 
+import tf
+from tf.transformations import *
+
 def rtc_init () :
-    global ms, co, co_svc, root_link_name
+    global ms, co, co_svc, root_link_name, root_link_offset
 
     initCORBA()
     ms = rtm.findRTCmanager(rtm.nshost)
@@ -46,13 +49,19 @@ def rtc_init () :
         rospy.loginfo("  bodyinfo URL = file://"+modelfile)
         body_info = mdlldr.getBodyInfo("file://"+modelfile)
         root_link_name = body_info._get_links()[0].name
+
+        root_link_offset = inverse_matrix(concatenate_matrices(translation_matrix(body_info._get_links()[0].translation),
+                                                rotation_matrix(body_info._get_links()[0].rotation[3],
+                                                                body_info._get_links()[0].rotation[0:3])))
     else:
         root_link_name = "WAIST"
+        root_link_offset = identity_matrix()
 
+        rospy.loginfo("ssetup collision_state with " + root_link_name + " " + root_link_offset)
 
 
 def collision_state() :
-    global ms, co_svc, root_link_name, last_collision_status
+    global ms, co_svc, root_link_name, root_link_offset, last_collision_status
 
     diagnostic = DiagnosticArray()
     now = rospy.Time.now()
@@ -83,8 +92,8 @@ def collision_state() :
     frame_id = root_link_name # root id
     markerArray = MarkerArray()
     for line in collision_status[1].lines:
-        p1 = Point(line[0][0],line[0][1],line[0][2])
-        p2 = Point(line[1][0],line[1][1],line[1][2])
+        p1 = Point(*(numpy.dot(root_link_offset[3,3], line[0]) + root_link_offset[0:3,3]))
+        p2 = Point(*(numpy.dot(root_link_offset[3,3], line[1]) + root_link_offset[0:3,3]))
 
         sphere_color = ColorRGBA(0,1,0,1)
         line_length = numpy.linalg.norm(numpy.array((p1.x,p1.y,p1.z))-numpy.array((p2.x,p2.y,p2.z)))
