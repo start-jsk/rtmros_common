@@ -1,0 +1,29 @@
+<!-- launch collision detctor as solo program for rviz display -->
+<launch>
+  <arg name="nameserver" default="localhost" />
+  <arg name="corbaport" default="15005" />
+  <arg name="SIMULATOR_NAME" default="RobotHardware0"/> <!-- please set $(arg ROBOT_NAME)(Robot) for simulation -->
+  <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
+  
+  <arg name="omniorb_args" default="-ORBInitRef NameService=corbaloc:iiop:$(arg nameserver):$(arg corbaport)/NameService" />
+  <arg name="openrtm_args" default='-o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type:PeriodicExecutionContext" -o "exec_cxt.periodic.rate:2000" -o "logger.file_name:/tmp/collision_detector%p.log"' />
+  <arg name="MODLE_FILE" />
+  <arg name="CONF_FILE" />
+
+  <!-- launch collision detector -->
+  <node pkg="hrpsys" name="CollisionDetectorComp"
+        type="CollisionDetectorComp"
+        args="$(arg openrtm_args) -o example.CollisionDetector0.config_file:$(arg CONF_FILE)" />
+  <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="CollisionDetector0.rtc:qCurrent" />
+  <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="CollisionDetector0.rtc:qRef" />
+  <rtactivate component="CollisionDetector0.rtc" />
+  <node name="rtmlaunch_collision_detector" pkg="openrtm_tools" type="rtmlaunch.py"
+        args="$(find hrpsys_ros_bridge)/launch/collision_detector.launch" />
+
+  <!-- launch collision result publisher -->
+  <node pkg="hrpsys_ros_bridge" name="collision_state" type="collision_state.py"
+        output="screen"
+        args="$(arg MODEL_FILE) $(arg omniorb_args)" >
+    <param name="comp_name" type="string" value="CollisionDetector0" />
+  </node>
+</launch>

@@ -33,7 +33,7 @@ def rtc_init () :
         ms = rtm.findRTCmanager(rtm.nshost)
         rospy.loginfo("[collision_state.py] wait for RTCmanager : ",ms)
 
-    co = rtm.findRTC("co")
+    co = rtm.findRTC(rospy.get_param('~comp_name', 'co'))
     if co == None:
         rospy.logerr("Could not found CollisionDetector, exiting...")
         exit(1)
@@ -43,7 +43,7 @@ def rtc_init () :
         #import CosNaming
         obj = rtm.rootnc.resolve([CosNaming.NameComponent('ModelLoader', '')])
         mdlldr = obj._narrow(ModelLoader_idl._0_OpenHRP__POA.ModelLoader)
-        rospy.loginfo("  bodyinfo URL = file://",modelfile)
+        rospy.loginfo("  bodyinfo URL = file://"+modelfile)
         body_info = mdlldr.getBodyInfo("file://"+modelfile)
         root_link_name = body_info._get_links()[0].name
     else:
@@ -52,12 +52,18 @@ def rtc_init () :
 
 
 def collision_state() :
-    global ms, co_svc, root_link_name
+    global ms, co_svc, root_link_name, last_collision_status
 
     diagnostic = DiagnosticArray()
-    diagnostic.header.stamp = rospy.Time.now()
+    now = rospy.Time.now()
+    diagnostic.header.stamp = now
 
     collision_status = co_svc.getCollisionStatus()
+
+    if (now - last_collision_status > rospy.Duration(5.0)):
+        num_collision_pairs = len(collision_status[1].lines)
+        rospy.loginfo("check %d collision status, %f Hz",num_collision_pairs, num_collision_pairs/(now - last_collision_status).to_sec())
+        last_collision_status = now
 
     # check if ther are collision
     status = DiagnosticStatus(name = 'CollisionDetector', level = DiagnosticStatus.OK, message = "Ok")
@@ -132,20 +138,23 @@ if __name__ == '__main__':
         modelfile = sys.argv[1]
 
     try:
-        rtc_init()
-
         rospy.init_node('collision_state_diagnostics')
         pub_diagnostics = rospy.Publisher('diagnostics', DiagnosticArray)
         pub_collision = rospy.Publisher('collision_detector_marker_array', MarkerArray)
 
         r = rospy.Rate(50)
 
+        rtc_init()
+
+        last_collision_status = rospy.Time.now()
+
         while not rospy.is_shutdown():
             try :
                 collision_state()
-            except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE, omniORB.CORBA.OBJECT_NOT_EXISTS), e :
+            except (CORBA.OBJECT_NOT_EXIST, omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE), e :
                 print "[collision_state.py] catch exception, restart rtc_init", e
-                rtc_init(hostname)
+                time.sleep(2)
+                rtc_init()
             except Exception as e:
                 print "[collision_state.py] catch exception", e
             r.sleep()
