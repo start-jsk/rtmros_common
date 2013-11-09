@@ -51,6 +51,7 @@
   <run_depend>pr2_controllers</run_depend> <!-- groovy does not have catkin pr2_controllers package -->
   <run_depend>tf</run_depend>
   <run_depend>python-psutil</run_depend>
+  <run_depend>rostest</run_depend>
 
   <!-- <test_depend>hrpsys</test_depend> -->
   <!-- <test_depend>hrpsys_tools</test_depend> -->
