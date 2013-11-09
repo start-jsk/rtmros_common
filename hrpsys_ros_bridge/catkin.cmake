@@ -65,14 +65,12 @@ rtmbuild_genbridge()
 # pr2_controller_msgs is not catkinized
 string(RANDOM _random_string)
 
-# Check ROS distro.
-IF(ENV{ROS_ROOT} MATCHES "/opt/ros/hydro/share/ros")
-    SET(ROS_DISTRO hydro)
-ELIF(ENV{ROS_ROOT} MATCHES "/opt/ros/groovy/share/ros")
-    SET(ROS_DISTRO groovy)
-ELSE()
-    SET(ROS_DISTRO groovy)
-ENDIF(ENV{ROS_ROOT} MATCHES "/opt/ros/hydro/share/ros")
+# Check ROS distro. since pr2_controller_msgs of groovy is not catkinized
+if(ENV{ROS_ROOT} MATCHES "/opt/ros/groovy/share/ros")
+
+execute_process(
+  COMMAND sh -c "sed -i s@'<\(.*_depend\)>pr2_controllers</\(.*_depend\)>'@'<\!-- \1>pr2_controllers</\2 -->'@g ${PROJECT_SOURCE_DIR}/package.xml"
+  )
 
 execute_process(
   COMMAND svn co --non-interactive --trust-server-cert https://code.ros.org/svn/wg-ros-pkg/stacks/pr2_controllers/tags/groovy/pr2_controllers_msgs /tmp/${_random_string}/pr2_controllers_msgs
@@ -117,6 +115,8 @@ if (_compile_failed)
 endif(_compile_failed)
 
 include_directories(/tmp/${_random_string}/pr2_controllers_msgs/msg_gen/cpp/include)
+
+endif(ENV{ROS_ROOT} MATCHES "/opt/ros/groovy/share/ros")
 
 rtmbuild_add_executable(HrpsysSeqStateROSBridge src/HrpsysSeqStateROSBridgeImpl.cpp src/HrpsysSeqStateROSBridge.cpp src/HrpsysSeqStateROSBridgeComp.cpp)
 rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/ImageSensorROSBridgeComp.cpp)

@@ -22,7 +22,7 @@
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>hrpsys</build_depend>
   <build_depend>image_transport</build_depend>
-  <!-- build_depend>pr2_controllers</build_depend -->
+  <build_depend>pr2_controllers</build_depend> <!-- groovy does not have catkin pr2_controllers package -->
   <build_depend>subversion</build_depend>
   <build_depend>mk</build_depend>
   <build_depend>rosbuild</build_depend>
@@ -48,7 +48,7 @@
   <run_depend>roscpp</run_depend>
   <run_depend>rtmbuild</run_depend>
   <run_depend>sensor_msgs</run_depend>
-  <!-- run_depend>pr2_controllers</run_depend -->
+  <run_depend>pr2_controllers</run_depend> <!-- groovy does not have catkin pr2_controllers package -->
   <run_depend>tf</run_depend>
   <run_depend>python-psutil</run_depend>
 
