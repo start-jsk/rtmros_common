@@ -69,7 +69,7 @@ string(RANDOM _random_string)
 if($ENV{ROS_ROOT} MATCHES "/opt/ros/groovy/share/ros")
 
 execute_process(
-  COMMAND sh -c "sed -i s@'<\(.*_depend\)>pr2_controllers</\(.*_depend\)>'@'<\!-- \1>pr2_controllers</\2 -->'@g ${PROJECT_SOURCE_DIR}/package.xml"
+  COMMAND sh -c "sed -i s@'<\\(.*_depend\\)>pr2_controllers</\\(.*_depend\\)>'@'<!-- \\1>pr2_controllers</\\2 -->'@g ${PROJECT_SOURCE_DIR}/package.xml"
   )
 
 execute_process(
