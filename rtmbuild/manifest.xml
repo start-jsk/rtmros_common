@@ -14,6 +14,7 @@
   <rosdep name="omniorb"/>
   <rosdep name="libblas-dev"/>
   <rosdep name="liblapack-dev"/>
+  <rosdep name="cmake_modules">
 
 </package>
 
