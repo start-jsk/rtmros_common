@@ -79,6 +79,12 @@ macro(compile_openhrp_model wrlfile)
   string(TOLOWER ${_name} _sname)
   set(_yamlfile "${_workdir}/${_sname}.yaml")
   set(_lispfile "${_workdir}/${_sname}.l")
+  # rtm-naming
+  if(${USE_ROSBUILD})
+    rosbuild_find_ros_package(openrtm_aist)
+  else()
+    set(openrtm_aist_PACKAGE_PATH ${openrtm_aist_SOURCE_DIR})
+  endif()
   # use euscollada
   if(${USE_ROSBUILD})
     rosbuild_find_ros_package(euscollada)
@@ -131,13 +137,13 @@ macro(compile_openhrp_model wrlfile)
     message("assuming hrpsys/ProjectGenerator is already compiled")
   endif()
   add_custom_command(OUTPUT ${_xmlfile}
-    COMMAND rosrun openrtm_aist rtm-naming 2889
-    COMMAND rostest -t hrpsys_tools _gen_project.launch CORBA_PORT:=2889 INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
+    COMMAND ${openrtm_aist_PACKAGE_PATH}/bin/rtm-naming 2889
+    COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=2889 INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2889" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
-    COMMAND rosrun openrtm_aist rtm-naming 2889
-    COMMAND rostest -t hrpsys_tools _gen_project.launch CORBA_PORT:=2889 INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
+    COMMAND ${openrtm_aist_PACKAGE_PATH}/bin/rtm-naming 2889
+    COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=2889 INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2889" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
   add_custom_target(${_sname}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
@@ -210,13 +216,13 @@ macro(compile_collada_model daefile)
     message("assuming hrpsys/ProjectGenerator is already compiled")
   endif()
   add_custom_command(OUTPUT ${_xmlfile}
-    COMMAND rosrun openrtm_aist rtm-naming 2890
-    COMMAND rostest -t hrpsys_tools _gen_project.launch CORBA_PORT:=2890 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
+    COMMAND ${openrtm_aist_PACKAGE_PATH}/bin/rtm-naming 2890
+    COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=2890 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2890" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
-    COMMAND rosrun openrtm_aist rtm-naming 2890
-    COMMAND rostest -t hrpsys_tools _gen_project.launch CORBA_PORT:=2890 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
+    COMMAND ${openrtm_aist_PACKAGE_PATH}/bin/rtm-naming 2890
+    COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=2890 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2890" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
   add_custom_target(${_sname}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
