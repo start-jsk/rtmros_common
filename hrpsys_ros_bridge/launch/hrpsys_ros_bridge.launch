@@ -11,6 +11,7 @@
   <arg name="USE_WALKING" default="true" />
   <arg name="USE_COLLISIONCHECK" default="true" />
   <arg name="USE_IMPEDANCECONTROLLER" default="true" />
+  <arg name="USE_GRASPCONTROLLER" default="false" />
   <arg name="USE_SOFTERRORLIMIT" default="true" />
   <arg name="USE_IMAGESENSOR" default="false" />
   <!--
@@ -98,7 +99,7 @@
     <node pkg="hrpsys_ros_bridge" name="RobotHardwareServiceROSBridge" type="RobotHardwareServiceROSBridgeComp"
           output="screen" args ="$(arg openrtm_args)" />
     <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/>
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:servoState" to="$(arg SIMULATOR_NAME).rtc:servoState" subscription_type="new"/>
+    <rtconnect from="$(arg SIMULATOR_NAME).rtc:servoState" to="HrpsysSeqStateROSBridge0.rtc:servoState" subscription_type="new" unless="$(arg USE_SOFTERRORLIMIT)"/>
     <rtactivate component="RobotHardwareServiceROSBridge.rtc" />
   </group>
 
@@ -148,14 +149,24 @@
     <rtactivate component="AbsoluteForceSensorServiceROSBridge.rtc" />
   </group>
 
+  <!-- USE_GRASPCONTROLLER
+       GraspController
+  -->
+  <group if="$(arg USE_GRASPCONTROLLER)" >
+    <node pkg="hrpsys_ros_bridge" name="GraspControllerServiceROSBridge" type="GraspControllerServiceROSBridgeComp"
+          output="screen" args ="$(arg openrtm_args)" />
+    <rtconnect from="GraspControllerServiceROSBridge.rtc:SoftErrorLimiterService" to="gc.rtc:GraspControllerService"  subscription_type="new"/>
+    <rtactivate component="GraspControllerServiceROSBridge.rtc" />
+  </group>
+
   <!-- USE_SOFTERRORLIMIT
        SoftErrorLimitter
   -->
   <group if="$(arg USE_SOFTERRORLIMIT)" >
     <node pkg="hrpsys_ros_bridge" name="SoftErrorLimiterServiceROSBridge" type="SoftErrorLimiterServiceROSBridgeComp"
           output="screen" args ="$(arg openrtm_args)" />
-
     <rtconnect from="SoftErrorLimiterServiceROSBridge.rtc:SoftErrorLimiterService" to="el.rtc:SoftErrorLimiterService"  subscription_type="new"/>
+    <rtconnect from="el.rtc:servoStateOut" to="HrpsysSeqStateROSBridge0.rtc:servoState" subscription_type="new"/>
     <rtactivate component="SoftErrorLimiterServiceROSBridge.rtc" />
   </group>
 
