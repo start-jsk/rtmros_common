@@ -55,6 +55,20 @@ def check_connect(src_path, dest_path):
 def rtconnect(nameserver, tags):
     import re
     for tag in tags:
+
+        # check if/unless attribute in rtconnect tags
+        exec_flag = True
+        if tag.attributes.get(u'if'):
+            val = tag.attributes.get(u'if').value
+            arg = val.split(" ")[1].strip(")") # To "USE_WALKING"
+            exec_flag =  get_flag_from_argv(arg)
+        if tag.attributes.get(u'unless'):
+            val = tag.attributes.get(u'unless').value
+            arg = val.split(" ")[1].strip(")") # To "USE_WALKING"
+            exec_flag = not get_flag_from_argv(arg)
+        if not exec_flag:
+            continue
+
         source_path = nameserver+"/"+tag.attributes.get("from").value
         dest_path   = nameserver+"/"+tag.attributes.get("to").value
         source_path = re.sub("\$\(arg SIMULATOR_NAME\)",simulator,source_path);
@@ -78,7 +92,7 @@ def rtconnect(nameserver, tags):
             if check_connect(source_full_path,dest_full_path):
                 continue
         except Exception, e:
-            print >>sys.stderr, '\033[31m[rtmlaunch] [ERROR] Could not Connect : ', e,'\033[0m'
+            print >>sys.stderr, '\033[31m[rtmlaunch] [ERROR] Could not Connect (', source_full_path, ',', dest_full_path, '): ', e,'\033[0m'
             return 1
         #print source_path, source_full_path, dest_path, dest_full_path;
         try:
@@ -108,6 +122,20 @@ def rtactivate(nameserver, tags):
     def activate_action(object, ec_index):
         object.activate_in_ec(ec_index)
     for tag in tags:
+        
+        # check if/unless attribute in rtactivate tags
+        exec_flag = True
+        if tag.attributes.get(u'if'):
+            val = tag.attributes.get(u'if').value
+            arg = val.split(" ")[1].strip(")") # To "USE_WALKING"
+            exec_flag =  get_flag_from_argv(arg)
+        if tag.attributes.get(u'unless'):
+            val = tag.attributes.get(u'unless').value
+            arg = val.split(" ")[1].strip(")") # To "USE_WALKING"
+            exec_flag = not get_flag_from_argv(arg)
+        if not exec_flag:
+            continue
+
         cmd_path  = nameserver+"/"+tag.attributes.get("component").value
         full_path = path.cmd_path_to_full_path(cmd_path)
         # print >>sys.stderr, "[rtmlaunch] activate %s"%(full_path)
@@ -118,7 +146,7 @@ def rtactivate(nameserver, tags):
             else:
                 print >>sys.stderr, "[rtmlaunch] Activate <-",state,full_path
         except Exception, e:
-            print >>sys.stderr, '\033[31m[rtmlaunch] Could not Activate : ', e,'\033[0m'
+            print >>sys.stderr, '\033[31m[rtmlaunch] Could not Activate (', cmd_path, ') : ', e,'\033[0m'
             return 1
         try:
             options = optparse.Values({"ec_index": 0, 'verbose': False})
