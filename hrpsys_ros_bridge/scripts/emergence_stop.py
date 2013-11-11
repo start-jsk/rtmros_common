@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
-import roslib, time
-roslib.load_manifest('hrpsys_ros_bridge')
+try: # catkin does not requires load_manifest
+    import roslib
+except:
+    roslib.load_manifest('hrpsys_ros_bridge')
+import time
 
 import rospy
 from sensor_msgs.msg import Joy

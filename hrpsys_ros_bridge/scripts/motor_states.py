@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('hrpsys_ros_bridge')
+
+try: # catkin does not requires load_manifest
+    import roslib
+except:
+    import roslib; roslib.load_manifest('hrpsys_ros_bridge')
+
 import rospy
 import time
 import copy
