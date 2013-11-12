@@ -103,21 +103,20 @@ macro(compile_openhrp_model wrlfile)
     message(FATAL_ERROR "-- ${_rtm_naming_exe} not found")
   endif()
   if(NOT EXISTS ${_collada2eus_exe})
-    message(FATAL_ERROR "-- ${_collada2eus_exe} not found")
+    message(AUTHOR_WARNING "-- ${_collada2eus_exe} not found")
+  else()
+    #
+    set(_euscollada_dep_files ${_collada2eus_exe} ${euscollada_PACKAGE_PATH}/src/euscollada-robot.l)
+    if(EXISTS ${_yamlfile})
+      add_custom_command(OUTPUT ${_lispfile}
+        COMMAND ${_collada2eus} ${_daefile} ${_yamlfile} ${_lispfile}
+        DEPENDS ${_daefile} ${_yamlfile} ${_euscollada_dep_files})
+    else(EXISTS ${_yamlfile})
+      add_custom_command(OUTPUT ${_lispfile}
+        COMMAND ${_collada2eus} ${_daefile} ${_lispfile}
+        DEPENDS ${_daefile} ${_euscollada_dep_files})
+    endif(EXISTS ${_yamlfile})
   endif()
-  #
-  if(EXISTS ${euscollada_PACKAGE_PATH}/bin/collada2eus)
-    set(_euscollada_dep_files ${euscollada_PACKAGE_PATH}/bin/collada2eus ${euscollada_PACKAGE_PATH}/src/euscollada-robot.l)
-  endif()
-  if(EXISTS ${_yamlfile})
-    add_custom_command(OUTPUT ${_lispfile}
-      COMMAND ${_collada2eus} ${_daefile} ${_yamlfile} ${_lispfile}
-      DEPENDS ${_daefile} ${_yamlfile} ${_euscollada_dep_files})
-  else(EXISTS ${_yamlfile})
-    add_custom_command(OUTPUT ${_lispfile}
-      COMMAND ${_collada2eus} ${_daefile} ${_lispfile}
-      DEPENDS ${_daefile} ${_euscollada_dep_files})
-  endif(EXISTS ${_yamlfile})
   # use export-collada
   if(${USE_ROSBUILD})
     rosbuild_find_ros_package(openhrp3)
@@ -224,17 +223,18 @@ macro(compile_collada_model daefile)
     message(FATAL_ERROR "-- ${_rtm_naming_exe} not found")
   endif()
   if(NOT EXISTS ${_collada2eus_exe})
-    message(FATAL_ERROR "-- ${_collada2eus_exe} not found")
+    message(AUTHOR_WARNING "-- ${_collada2eus_exe} not found")
+  else()
+    if(EXISTS ${_yamlfile})
+      add_custom_command(OUTPUT ${_lispfile}
+        COMMAND ${_collada2eus_exe} ${daefile} ${_yamlfile} ${_lispfile} ${_euscollada_option} ||  echo "[WARNING] ### Did not run collada2eus for ${_lispfile}"
+        DEPENDS ${daefile} ${_euscollada_dep_files})
+    else(EXISTS ${_yamlfile})
+      add_custom_command(OUTPUT ${_lispfile}
+        COMMAND ${_collada2eus_exe} ${daefile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus $for {_lispfile}"
+        DEPENDS ${daefile} ${_euscollada_dep_files})
+    endif(EXISTS ${_yamlfile})
   endif()
-  if(EXISTS ${_yamlfile})
-    add_custom_command(OUTPUT ${_lispfile}
-      COMMAND ${_collada2eus_exe} ${daefile} ${_yamlfile} ${_lispfile} ${_euscollada_option} ||  echo "[WARNING] ### Did not run collada2eus for ${_lispfile}"
-      DEPENDS ${daefile} ${_euscollada_dep_files})
-  else(EXISTS ${_yamlfile})
-    add_custom_command(OUTPUT ${_lispfile}
-      COMMAND ${_collada2eus_exe} ${daefile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus $for {_lispfile}"
-      DEPENDS ${daefile} ${_euscollada_dep_files})
-  endif(EXISTS ${_yamlfile})
   # use _gen_project.launch
   if(${USE_ROSBUILD})
     rosbuild_find_ros_package(hrpsys)
