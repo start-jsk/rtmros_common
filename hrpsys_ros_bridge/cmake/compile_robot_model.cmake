@@ -82,44 +82,61 @@ macro(compile_openhrp_model wrlfile)
   # rtm-naming
   if(${USE_ROSBUILD})
     rosbuild_find_ros_package(openrtm_aist)
+    set(_rtm_naming_exe ${openrtm_aist_PACKAGE_PATH}/bin/rtm-naming)
   else()
+    find_package(PkgConfig)
+    pkg_check_modules(openrtm_aist openrtm-aist REQUIRED)
     set(openrtm_aist_PACKAGE_PATH ${openrtm_aist_SOURCE_DIR})
+    set(_rtm_naming_exe ${openrtm_aist_PREFIX}/lib/openrtm_aist/bin/rtm-naming)
   endif()
   # use euscollada
   if(${USE_ROSBUILD})
     rosbuild_find_ros_package(euscollada)
+    set(_collada2eus_exe ${euscollada_PACKAGE_PATH}/bin/collada2eus)
   else()
+    find_package(euscollada)
     set(euscollada_PACKAGE_PATH ${euscollada_SOURCE_DIR})
+    set(_collada2eus_exe ${euscollada_PREFIX}/lib/euscollada/collada2eus)
   endif()
+  # check if binary exists
+  if(NOT EXISTS ${_rtm_naming_exe})
+    message(FATAL_ERROR "-- ${_rtm_naming_exe} not found")
+  endif()
+  if(NOT EXISTS ${_collada2eus_exe})
+    message(FATAL_ERROR "-- ${_collada2eus_exe} not found")
+  endif()
+  #
   if(EXISTS ${euscollada_PACKAGE_PATH}/bin/collada2eus)
     set(_euscollada_dep_files ${euscollada_PACKAGE_PATH}/bin/collada2eus ${euscollada_PACKAGE_PATH}/src/euscollada-robot.l)
   endif()
   if(EXISTS ${_yamlfile})
     add_custom_command(OUTPUT ${_lispfile}
-      COMMAND rosrun euscollada collada2eus ${_daefile} ${_yamlfile} ${_lispfile}
+      COMMAND ${_collada2eus} ${_daefile} ${_yamlfile} ${_lispfile}
       DEPENDS ${_daefile} ${_yamlfile} ${_euscollada_dep_files})
   else(EXISTS ${_yamlfile})
     add_custom_command(OUTPUT ${_lispfile}
-      COMMAND rosrun euscollada collada2eus ${_daefile} ${_lispfile}
+      COMMAND ${_collada2eus} ${_daefile} ${_lispfile}
       DEPENDS ${_daefile} ${_euscollada_dep_files})
   endif(EXISTS ${_yamlfile})
   # use export-collada
   if(${USE_ROSBUILD})
     rosbuild_find_ros_package(openhrp3)
+    set(_export_collada_exe ${openhrp3_PACKAGE_PATH}/bin/export-collada)
   else()
-    set(openhrp3_PACKAGE_PATH ${openhrp3_SOURCE_DIR})
+    #set(openhrp3_PACKAGE_PATH ${openhrp3_SOURCE_DIR})
+    set(_export_collada_exe ${CATKIN_DEVEL_PREFIX}/lib/openhrp3/export-collada)
   endif()
-  if(EXISTS ${openhrp3_PACKAGE_PATH}/bin/export-collada)
-    set(_export_collada_dep_files ${openhrp3_PACKAGE_PATH}/bin/export-collada)
+  if(EXISTS ${_export_collada_exe})
+    message("using export-collada to convert models ${_export_collada_exe}")
   else()
     # when openhrp3 is catkin installed
-    set(_export_collada_dep_files )
+    set(_export_collada_exe )
     message("assuming export-collada is already compiled")
   endif()
-  if(EXISTS ${euscollada_PACKAGE_PATH}/bin/collada2eus)
+  if(EXISTS ${_export_collada_exe})
     add_custom_command(OUTPUT ${_daefile}
-      COMMAND rosrun openhrp3 export-collada -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
-      DEPENDS ${wrlfile} ${_export_collada_dep_files})
+      COMMAND ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
+      DEPENDS ${wrlfile} ${_export_collada_exe})
   endif()
   # use _gen_project.launch
   if(${USE_ROSBUILD})
@@ -137,12 +154,12 @@ macro(compile_openhrp_model wrlfile)
     message("assuming hrpsys/ProjectGenerator is already compiled")
   endif()
   add_custom_command(OUTPUT ${_xmlfile}
-    COMMAND ${openrtm_aist_PACKAGE_PATH}/bin/rtm-naming 2889
+    COMMAND ${_rtm_naming_exe} 2889
     COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=2889 INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2889" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
-    COMMAND ${openrtm_aist_PACKAGE_PATH}/bin/rtm-naming 2889
+    COMMAND ${_rtm_naming_exe} 2889
     COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=2889 INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2889" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
@@ -182,22 +199,40 @@ macro(compile_collada_model daefile)
   string(TOLOWER ${_name} _sname)
   set(_yamlfile "${_workdir}/${_sname}.yaml")
   set(_lispfile "${_workdir}/${_sname}.l")
+  # rtm-naming
+  if(${USE_ROSBUILD})
+    rosbuild_find_ros_package(openrtm_aist)
+    set(_rtm_naming_exe ${openrtm_aist_PACKAGE_PATH}/bin/rtm-naming)
+  else()
+    find_package(PkgConfig)
+    pkg_check_modules(openrtm_aist openrtm-aist REQUIRED)
+    set(openrtm_aist_PACKAGE_PATH ${openrtm_aist_SOURCE_DIR})
+    set(_rtm_naming_exe ${openrtm_aist_PREFIX}/lib/openrtm_aist/bin/rtm-naming)
+  endif()
   # use euscollada
   if(${USE_ROSBUILD})
     rosbuild_find_ros_package(euscollada)
-  else()
-    set(euscollada_PACKAGE_PATH ${euscollada_SOURCE_DIR})
-  endif()
-  if(EXISTS ${euscollada_PACKAGE_PATH}/bin/collada2eus)
+    set(_collada2eus_exe ${euscollada_PACKAGE_PATH}/bin/collada2eus)
     set(_euscollada_dep_files ${euscollada_PACKAGE_PATH}/bin/collada2eus ${euscollada_PACKAGE_PATH}/src/euscollada-robot.l)
+  else()
+    find_package(euscollada)
+    set(euscollada_PACKAGE_PATH ${euscollada_SOURCE_DIR})
+    set(_collada2eus_exe ${euscollada_PREFIX}/lib/euscollada/collada2eus)
+  endif()
+  # check if binary exists
+  if(NOT EXISTS ${_rtm_naming_exe})
+    message(FATAL_ERROR "-- ${_rtm_naming_exe} not found")
+  endif()
+  if(NOT EXISTS ${_collada2eus_exe})
+    message(FATAL_ERROR "-- ${_collada2eus_exe} not found")
   endif()
   if(EXISTS ${_yamlfile})
     add_custom_command(OUTPUT ${_lispfile}
-      COMMAND rosrun euscollada collada2eus ${daefile} ${_yamlfile} ${_lispfile} ${_euscollada_option} ||  echo "[WARNING] ### Did not run collada2eus for ${_lispfile}"
+      COMMAND ${_collada2eus_exe} ${daefile} ${_yamlfile} ${_lispfile} ${_euscollada_option} ||  echo "[WARNING] ### Did not run collada2eus for ${_lispfile}"
       DEPENDS ${daefile} ${_euscollada_dep_files})
   else(EXISTS ${_yamlfile})
     add_custom_command(OUTPUT ${_lispfile}
-      COMMAND rosrun euscollada collada2eus ${daefile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus $for {_lispfile}"
+      COMMAND ${_collada2eus_exe} ${daefile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus $for {_lispfile}"
       DEPENDS ${daefile} ${_euscollada_dep_files})
   endif(EXISTS ${_yamlfile})
   # use _gen_project.launch
@@ -216,12 +251,12 @@ macro(compile_collada_model daefile)
     message("assuming hrpsys/ProjectGenerator is already compiled")
   endif()
   add_custom_command(OUTPUT ${_xmlfile}
-    COMMAND ${openrtm_aist_PACKAGE_PATH}/bin/rtm-naming 2890
+    COMMAND ${_rtm_naming_exe} 2890
     COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=2890 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2890" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
-    COMMAND ${openrtm_aist_PACKAGE_PATH}/bin/rtm-naming 2890
+    COMMAND ${_rtm_naming_exe} 2890
     COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=2890 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2890" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
