@@ -109,11 +109,11 @@ macro(compile_openhrp_model wrlfile)
     set(_euscollada_dep_files ${_collada2eus_exe} ${euscollada_PACKAGE_PATH}/src/euscollada-robot.l)
     if(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
-        COMMAND ${_collada2eus} ${_daefile} ${_yamlfile} ${_lispfile}
+        COMMAND ${_collada2eus_exe} ${_daefile} ${_yamlfile} ${_lispfile}
         DEPENDS ${_daefile} ${_yamlfile} ${_euscollada_dep_files})
     else(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
-        COMMAND ${_collada2eus} ${_daefile} ${_lispfile}
+        COMMAND ${_collada2eus_exe} ${_daefile} ${_lispfile}
         DEPENDS ${_daefile} ${_euscollada_dep_files})
     endif(EXISTS ${_yamlfile})
   endif()
