@@ -162,7 +162,11 @@ macro(compile_openhrp_model wrlfile)
     COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=2889 INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2889" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
-  add_custom_target(${_sname}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
+  if(EXISTS ${_collada2eus_exe})
+    add_custom_target(${_sname}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
+  else()
+    add_custom_target(${_sname}_compile DEPENDS ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
+  endif()
   ## make sure to kill nameserver
   add_custom_command(OUTPUT ${_sname}_compile_cleanup
     COMMAND -pkill -KILL -f "omniNames -start 2889" || echo "no process to kill"
@@ -260,7 +264,11 @@ macro(compile_collada_model daefile)
     COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=2890 INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option}
     COMMAND -pkill -KILL -f "omniNames -start 2890" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
-  add_custom_target(${_sname}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
+  if(EXISTS ${_collada2eus_exe})
+    add_custom_target(${_sname}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
+  else()
+    add_custom_target(${_sname}_compile DEPENDS ${_xmlfile} ${_xmlfile_nosim})
+  endif()
   ## make sure to kill nameserver
   add_custom_command(OUTPUT ${_sname}_compile_cleanup
     COMMAND -pkill -KILL -f "omniNames -start 2890" || echo "no process to kill"
