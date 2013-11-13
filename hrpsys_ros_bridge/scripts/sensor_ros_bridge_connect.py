@@ -3,13 +3,13 @@
 # This program is used to connect RosBridge sensor ports with simulator or RobotHardware sensor ports based on ModelLoader information.
 
 try: # catkin does not requires load_manifest
-    import roslib
+    import hrpsys
 except:
     import roslib; roslib.load_manifest('hrpsys')
+    import hrpsys
 
 import OpenRTM_aist.RTM_IDL # for catkin
 
-import hrpsys
 from hrpsys.hrpsys_config import *
 import OpenHRP
 
