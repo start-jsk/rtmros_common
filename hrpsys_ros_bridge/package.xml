@@ -1,6 +1,6 @@
 <package>
   <name>hrpsys_ros_bridge</name>
-  <version>1.0.4</version>
+  <version>1.0.5</version>
   <description>hrpsys_ros_bridge package provides modules that work as "bridge" between <a href = "http://openrtm.org/">OpenRTM</a>-based controller <a href = "wiki.ros.org/hrpsys">hrpsys</a> and ROS.</description>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
   <maintainer email="iisaito@opensource-robotics.tokyo.jp">Isao Isaac Saito</maintainer>
