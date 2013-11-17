@@ -1,4 +1,6 @@
 hrpsys_gazebo_configuration:
+# ///
+  use_synchronized_command: false
 # name of robot (using for namespace)
   robotname: SampleRobot
 # joint_id (order) conversion from gazebo to hrpsys, joint_id_list[gazebo_id] := hrpsys_id
@@ -57,14 +59,14 @@ hrpsys_gazebo_configuration:
     LARM_ELBOW:      {p: 1000.0, d:   1.4, i: 0.0, i_clamp: 0.0}
     LARM_WRIST_Y:    {p:  200.0, d:   0.1, i: 0.0, i_clamp: 0.0}
     LARM_WRIST_P:    {p:  300.0, d:   0.2, i: 0.0, i_clamp: 0.0}
-    LARM_WRIST_R:    {p:  150.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    LARM_WRIST_R:    {p:   20.0, d:   0.1, i: 0.0, i_clamp: 0.0}
     RARM_SHOULDER_P: {p: 1200.0, d:   1.0, i: 0.0, i_clamp: 0.0}
     RARM_SHOULDER_R: {p:  500.0, d:   0.5, i: 0.0, i_clamp: 0.0}
     RARM_SHOULDER_Y: {p:  200.0, d:   0.3, i: 0.0, i_clamp: 0.0}
     RARM_ELBOW:      {p: 1000.0, d:   1.4, i: 0.0, i_clamp: 0.0}
     RARM_WRIST_Y:    {p:  200.0, d:   0.1, i: 0.0, i_clamp: 0.0}
     RARM_WRIST_P:    {p:  300.0, d:   0.2, i: 0.0, i_clamp: 0.0}
-    RARM_WRIST_R:    {p:  150.0, d:   0.1, i: 0.0, i_clamp: 0.0}
+    RARM_WRIST_R:    {p:   20.0, d:   0.1, i: 0.0, i_clamp: 0.0}
 ## force sensor settings
 ## list of force sensorname
   force_torque_sensors:
