@@ -149,11 +149,11 @@
   ;;  rs-list : list of (list :time time0 :angle-vector av ...)
   ;;  output-basename : output file (output-basename.pos, ...)
   (:dump-seq-pattern-file
-   (rs-list output-basename &key (initial-sync-tile 3.0)) ;; [s]
+   (rs-list output-basename &key (initial-sync-time 3.0)) ;; [s]
    (with-open-file
     (f (format nil "~A.pos" output-basename) :direction :output)
     (dolist (l rs-list)
-      (format f "~A " (+ initial-sync-tile (cadr (memq :time l))))
+      (format f "~A " (+ initial-sync-time (cadr (memq :time l))))
       (let ((av (cadr (memq :angle-vector l))))
         (dotimes (i (length av))
           (format f "~A " (deg2rad (elt av i)))
