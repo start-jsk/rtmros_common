@@ -99,9 +99,11 @@ def collision_state() :
         p2 = Point(*(numpy.dot(root_link_offset[3,3], line[1]) + root_link_offset[0:3,3]))
 
         sphere_color = ColorRGBA(0,1,0,1)
+        line_width = 0.01
         line_length = numpy.linalg.norm(numpy.array((p1.x,p1.y,p1.z))-numpy.array((p2.x,p2.y,p2.z)))
         # color changes between 0.15(green) -> 0.05(red), under 0.05, it always red
         if (line_length < 0.15) :
+            line_width = 0.05
             if ( line_length < 0.05) :
                 sphere_color = ColorRGBA(1, 0, 0, 1)
             else:
@@ -113,7 +115,7 @@ def collision_state() :
         marker.action = marker.ADD
         marker.color = sphere_color
         marker.points = [p1, p2]
-        marker.scale.x = 0.01
+        marker.scale.x = line_width
         markerArray.markers.append(marker)
 
         sphere_scale = Vector3(0.02, 0.02, 0.02)
