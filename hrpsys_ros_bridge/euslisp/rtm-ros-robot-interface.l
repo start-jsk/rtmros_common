@@ -146,20 +146,32 @@
 		 (dotimes (i (length v)) (setq str (format nil "~A ~A" str (deg2rad (elt v i)))))
 		 (format nil "~A ~A" str (* 1e-3 tm))))))
   ;; dump pattern file for SequencePlayer
-  ;;  rs-list : list of (list :time time0 :angle-vector av ...)
+  ;;  rs-list : list of (list :time time0 :angle-vector av :root-coords rc ...)
   ;;  output-basename : output file (output-basename.pos, ...)
   (:dump-seq-pattern-file
    (rs-list output-basename &key (initial-sync-time 3.0)) ;; [s]
    (with-open-file
-    (f (format nil "~A.pos" output-basename) :direction :output)
-    (dolist (l rs-list)
-      (format f "~A " (+ initial-sync-time (cadr (memq :time l))))
-      (let ((av (cadr (memq :angle-vector l))))
+    (wf (format nil "~A.waist" output-basename) :direction :output) ;; waist file -> base position and orientation
+    (with-open-file
+     (pf (format nil "~A.pos" output-basename) :direction :output) ;; pos file -> joint angles
+     (dolist (l rs-list)
+       ;; write pos file
+       (format pf "~A " (+ initial-sync-time (cadr (memq :time l))))
+       (let ((av (cadr (memq :angle-vector l))))
         (dotimes (i (length av))
-          (format f "~A " (deg2rad (elt av i)))
+          (format pf "~A " (deg2rad (elt av i)))
           ))
-      (format f "~%")
-      )))
+       (format pf "~%")
+       ;; write waist file
+       (when (cadr (memq :root-coords l))
+         (format wf "~A " (+ initial-sync-time (cadr (memq :time l))))
+         (let ((wp (scale 1e-3 (send (cadr (memq :root-coords l)) :worldpos))) ;; [mm] -> [m]
+               (wr (car (send (send (cadr (memq :root-coords l)) :copy-worldcoords) :rpy-angle))))
+           (format wf "~A ~A ~A " (elt wp 0) (elt wp 1) (elt wp 2))
+           (format wf "~A ~A ~A " (elt wr 2) (elt wr 1) (elt wr 0))
+           (format wf "~%")
+           ))) ;; dolist
+     )))
   ;;
   (:update-robot-state
    ()
