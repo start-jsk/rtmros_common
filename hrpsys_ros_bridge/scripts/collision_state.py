@@ -101,13 +101,15 @@ def collision_state() :
         sphere_color = ColorRGBA(0,1,0,1)
         line_width = 0.01
         line_length = numpy.linalg.norm(numpy.array((p1.x,p1.y,p1.z))-numpy.array((p2.x,p2.y,p2.z)))
+        sphere_scale = 0.02
         # color changes between 0.15(green) -> 0.05(red), under 0.05, it always red
         if (line_length < 0.15) :
-            line_width = 0.05
             if ( line_length < 0.05) :
                 sphere_color = ColorRGBA(1, 0, 0, 1)
             else:
-                sphere_color = ColorRGBA(1-line_length*10,line_length*10,0,1)
+                ratio = 1.0 - (line_length-0.05)*10 # 0.0 (0.15) -> 1.0 ( 0.05)
+                sphere_scale = 0.02+(1 - ratio)*0.08
+                sphere_color = ColorRGBA(1-ratio,ratio,0,1)
 
         marker = Marker()
         marker.header.frame_id = frame_id
@@ -118,7 +120,7 @@ def collision_state() :
         marker.scale.x = line_width
         markerArray.markers.append(marker)
 
-        sphere_scale = Vector3(0.02, 0.02, 0.02)
+        sphere_scale = Vector3(sphere_scale, sphere_scale, sphere_scale)
         marker = Marker()
         marker.header.frame_id = frame_id
         marker.type = marker.SPHERE
