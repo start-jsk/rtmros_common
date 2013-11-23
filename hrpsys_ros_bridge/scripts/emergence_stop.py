@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 try: # catkin does not requires load_manifest
-    import roslib
+    import hrpsys
 except:
-    roslib.load_manifest('hrpsys_ros_bridge')
+    import roslib; roslib.load_manifest('hrpsys_ros_bridge')
+
 import time
 
 import rospy
