@@ -108,8 +108,8 @@ def collision_state() :
                 sphere_color = ColorRGBA(1, 0, 0, 1)
             else:
                 ratio = 1.0 - (line_length-0.05)*10 # 0.0 (0.15) -> 1.0 ( 0.05)
-                sphere_scale = 0.02+(1 - ratio)*0.08
-                sphere_color = ColorRGBA(1-ratio,ratio,0,1)
+                sphere_scale = 0.02+ ratio*0.08
+                sphere_color = ColorRGBA(ratio, 1-ratio,0,1)
 
         marker = Marker()
         marker.header.frame_id = frame_id
