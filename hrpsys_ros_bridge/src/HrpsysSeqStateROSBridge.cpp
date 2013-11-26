@@ -255,7 +255,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       } else{
           mot_states.header.stamp = tm_on_execute;
       }
-      //for ( unsigned int i = 0; i < m_servoState.data.length() ; i++ ) std::cerr << m_servoState.data[i] << " "; std::cerr << std::endl;
+      if (m_servoState.data.length() != body->joints().size()){
+        std::cerr << __PRETTY_FUNCTION__ << "m_servoState.data.length() = " << m_servoState.data.length() << std::endl;
+        std::cerr << __PRETTY_FUNCTION__ << "body->joints().size() = " << body->joints().size() << std::endl;
+        for ( unsigned int i = 0; i < body->joints().size() ; i++ ) std::cerr << body->joint(i)->name << " "; std::cerr << std::endl;
+      }
       assert(m_servoState.data.length() == body->joints().size());
       int joint_size = body->joints().size();
       mot_states.name.resize(joint_size);
