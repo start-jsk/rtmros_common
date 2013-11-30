@@ -51,7 +51,7 @@
    (f/m &optional (limb) (off nil))
    (if limb
        (let ((key-name (if off
-                           (read-from-string (format nil ":off-~A" (string-downcase (send (send robot :force-sensor limb) :name))))
+                           (read-from-string (format nil ":~A-~A" off (string-downcase (send (send robot :force-sensor limb) :name))))
                          (send (send robot :force-sensor limb) :name))))
          (subseq (cdr (assoc key-name robot-state))
                  (if (eq f/m :force) 0 3)
@@ -67,10 +67,10 @@
    (send self :tmp-force-moment-vector :moment limb))
   (:off-force-vector
    (&optional (limb))
-   (send self :tmp-force-moment-vector :force limb t))
+   (send self :tmp-force-moment-vector :force limb "off"))
   (:off-moment-vector
    (&optional (limb))
-   (send self :tmp-force-moment-vector :moment limb t))
+   (send self :tmp-force-moment-vector :moment limb "off"))
   (:absolute-force-vector
    (&optional (limb))
    (if limb
