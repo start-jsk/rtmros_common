@@ -57,7 +57,7 @@ class HrpsysFrame(wx.Frame):
     _CONFIG_WINDOW_X="/Window/X"
     _CONFIG_WINDOW_Y="/Window/Y"
 
-    def __init__(self, parent, id=wx.ID_ANY, title='Hrpsys Dashboard', pos=wx.DefaultPosition, size=(400, 50), style=wx.CAPTION|wx.CLOSE_BOX|wx.STAY_ON_TOP):
+    def __init__(self, parent, id=wx.ID_ANY, title='Hrpsys Dashboard', pos=wx.DefaultPosition, size=(400, 50), style=wx.CAPTION|wx.CLOSE_BOX|wx.STAY_ON_TOP, use_diagnostics=True, use_rosout=True, use_battery=True):
         wx.Frame.__init__(self, parent, id, title, pos, size, style)
 
         wx.InitAllImageHandlers()
@@ -80,26 +80,35 @@ class HrpsysFrame(wx.Frame):
         sizer.Add(static_poser, 0)
 
         # Diagnostics
-        self._diagnostics_button = StatusControl(self, wx.ID_ANY, self._icons_path, "diag", True)
-        self._diagnostics_button.SetToolTip(wx.ToolTip("Diagnostics"))
-        static_poser.Add(self._diagnostics_button, 0)
+        if use_diagnostics:
+          self._diagnostics_button = StatusControl(self, wx.ID_ANY, self._icons_path, "diag", True)
+          self._diagnostics_button.SetToolTip(wx.ToolTip("Diagnostics"))
+          static_poser.Add(self._diagnostics_button, 0)
+        else:
+          self._diagnostics_button = None
 
         # Rosout
-        self._rosout_button = StatusControl(self, wx.ID_ANY, self._icons_path, "rosout", True)
-        self._rosout_button.SetToolTip(wx.ToolTip("Rosout"))
-        static_poser.Add(self._rosout_button, 0)
+        if use_rosout:
+          self._rosout_button = StatusControl(self, wx.ID_ANY, self._icons_path, "rosout", True)
+          self._rosout_button.SetToolTip(wx.ToolTip("Rosout"))
+          static_poser.Add(self._rosout_button, 0)
+        else:
+          self._rosout_button = None
 
         # Log
         self._log_button = StatusControl(self, wx.ID_ANY, self._icons_path, "breakerleft", True)
         self._log_button.SetToolTip(wx.ToolTip("Log"))
-        self._log_button.set_ok()
         static_poser.Add(self._log_button, 0)
+        if not use_diagnostics:
+          self._log_button.set_ok()
 
         # Motors
         self._motors_button = StatusControl(self, wx.ID_ANY, self._icons_path, "motor", True)
         self._motors_button.SetToolTip(wx.ToolTip("Mode"))
         static_poser.Add(self._motors_button, 0)
         self._motors_button.Bind(wx.EVT_LEFT_DOWN, self.on_motors_clicked)
+        if not use_diagnostics:
+          self._motors_button.set_ok()
 
         # power / motor
         static_poser = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, "Power"), wx.HORIZONTAL)
@@ -110,13 +119,16 @@ class HrpsysFrame(wx.Frame):
         static_poser.Add(self._power_button, 0)
 
 
-        static_poser = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, "Battery"), wx.HORIZONTAL)
-        sizer.Add(static_poser, 0)
+        if use_battery:
+          static_poser = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, "Battery"), wx.HORIZONTAL)
+          sizer.Add(static_poser, 0)
 
-        # Battery State
-        self._battery_state_ctrl = PowerStateControl(self, wx.ID_ANY, self._icons_path)
-        self._battery_state_ctrl.SetToolTip(wx.ToolTip("Battery: Stale"))
-        static_poser.Add(self._battery_state_ctrl, 1, wx.EXPAND)
+          # Battery State
+          self._battery_state_ctrl = PowerStateControl(self, wx.ID_ANY, self._icons_path)
+          self._battery_state_ctrl.SetToolTip(wx.ToolTip("Battery: Stale"))
+          static_poser.Add(self._battery_state_ctrl, 1, wx.EXPAND)
+        else:
+          self._battery_state_ctrl = None
 
         #
         self.setup_extra_layout()
@@ -131,12 +143,14 @@ class HrpsysFrame(wx.Frame):
         self._diagnostics_frame = DiagnosticsFrame(self, wx.ID_ANY, "Diagnostics")
         self._diagnostics_frame.Hide()
         self._diagnostics_frame.Center()
-        self._diagnostics_button.Bind(wx.EVT_BUTTON, self.on_diagnostics_clicked)
+        if self._diagnostics_button:
+          self._diagnostics_button.Bind(wx.EVT_BUTTON, self.on_diagnostics_clicked)
 
         self._rosout_frame = RosoutFrame(self, wx.ID_ANY, "Rosout")
         self._rosout_frame.Hide()
         self._rosout_frame.Center()
-        self._rosout_button.Bind(wx.EVT_BUTTON, self.on_rosout_clicked)
+        if self._rosout_button:
+          self._rosout_button.Bind(wx.EVT_BUTTON, self.on_rosout_clicked)
 
         self._log_frame = RosoutFrame(self, wx.ID_ANY, "Log")
         self._log_frame.Hide()
@@ -149,7 +163,8 @@ class HrpsysFrame(wx.Frame):
         self.Bind(wx.EVT_TIMER, self.on_timer)
         self._timer.Start(500)
 
-        self._dashboard_agg_sub = rospy.Subscriber('diagnostics_agg', diagnostic_msgs.msg.DiagnosticArray, self.dashboard_callback)
+        if use_diagnostics:
+          self._dashboard_agg_sub = rospy.Subscriber('diagnostics_agg', diagnostic_msgs.msg.DiagnosticArray, self.dashboard_callback)
 
         self._dashboard_message = None
         self._last_dashboard_message_time = 0.0
@@ -163,30 +178,35 @@ class HrpsysFrame(wx.Frame):
 
     def on_timer(self, evt):
       # fuerte does not have self._diagnostics_frame._diagnostics_panel
-      if self._diagnostics_frame._diagnostics_panel is not None:
-        level = self._diagnostics_frame._diagnostics_panel.get_top_level_state()
-      else:
-        level = self._diagnostics_frame.get_top_level_state()
+      if self._diagnostics_button:
+        if self._diagnostics_frame._diagnostics_panel is not None:
+          level = self._diagnostics_frame._diagnostics_panel.get_top_level_state()
+        else:
+          level = self._diagnostics_frame.get_top_level_state()
 
-      if (level == -1 or level == 3):
-        if (self._diagnostics_button.set_stale()):
+        if (level == -1 or level == 3):
+          if (self._diagnostics_button.set_stale()):
             self._diagnostics_button.SetToolTip(wx.ToolTip("Diagnostics: Stale"))
-      elif (level >= 2):
-        if (self._diagnostics_button.set_error()):
+        elif (level >= 2):
+          if (self._diagnostics_button.set_error()):
             self._diagnostics_button.SetToolTip(wx.ToolTip("Diagnostics: Error"))
-      elif (level == 1):
-        if (self._diagnostics_button.set_warn()):
+        elif (level == 1):
+          if (self._diagnostics_button.set_warn()):
             self._diagnostics_button.SetToolTip(wx.ToolTip("Diagnostics: Warning"))
-      else:
-        if (self._diagnostics_button.set_ok()):
+        else:
+          if (self._diagnostics_button.set_ok()):
             self._diagnostics_button.SetToolTip(wx.ToolTip("Diagnostics: OK"))
 
-      self.update_rosout()
+      if self._rosout_button:
+        self.update_rosout()
 
-      if (rospy.get_time() - self._last_dashboard_message_time > 5.0):
+      if self._last_dashboard_message_time and (rospy.get_time() - self._last_dashboard_message_time > 5.0):
           self._motors_button.set_stale()
-          self._battery_state_ctrl.set_stale()
-          ctrls = [self._motors_button, self._battery_state_ctrl]
+          ctrls = [self._motors_button]
+          if self._battery_state_ctrl:
+            self._battery_state_ctrl.set_stale()
+            ctrls.append = [self._battery_state_ctrl]
+
           for ctrl in ctrls:
               ctrl.SetToolTip(wx.ToolTip("No message received on dashboard_agg in the last 5 seconds"))
 
@@ -204,8 +224,10 @@ class HrpsysFrame(wx.Frame):
     def on_log_clicked(self, evt):
       hrpsys_save = rospy.ServiceProxy("/DataLoggerServiceROSBridge/save", OpenHRP_DataLoggerService_save )
       try:
-        hrpsys_save(OpenHRP_DataLoggerService_saveRequest("/tmp/rtclog" + time.strftime("%Y%m%d%H%M%S")))
-        time.sleep(1)
+        name = "/tmp/rtclog-" + time.strftime("%Y%m%d%H%M%S")
+        print "Writing log data to ",name
+        hrpsys_save(OpenHRP_DataLoggerService_saveRequest(name))
+        print "Done writing",name
       except rospy.ServiceException, e:
         wx.MessageBox("Failed to save rtcd log: service call failed with error: %s"%(e), "Error", wx.OK|wx.ICON_ERROR)
 
@@ -266,10 +288,11 @@ class HrpsysFrame(wx.Frame):
           if status.name == "/Hrpsys/hrpEC Profile (log)":
               log_mode = status.message
 
-      if (battery_status):
-        self._battery_state_ctrl.set_power_state(battery_status)
-      else:
-        self._battery_state_ctrl.set_stale()
+      if self._battery_state_ctrl:
+        if (battery_status):
+          self._battery_state_ctrl.set_power_state(battery_status)
+        else:
+          self._battery_state_ctrl.set_stale()
 
       if (op_mode):
         if (op_mode=='Servo On'):
