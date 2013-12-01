@@ -5,6 +5,8 @@
   <arg name="SIMULATOR_NAME" default="RobotHardware0"/> <!-- please set $(arg ROBOT_NAME)(Robot) for simulation -->
   <arg name="INSTALL_ROBOT_DESCRIPTION" default="true" />
 
+  <arg name="LAUNCH_DIAGNOSTICS" default="true" />
+
   <!-- Set these values false when using HIRO -->
   <arg name="USE_COMMON" default="true" />
   <arg name="USE_ROBOTHARDWARE" default="false" />
@@ -45,11 +47,13 @@
   </group>
 
   <!-- diagnostics -->
-  <node pkg="hrpsys_ros_bridge" name="hrpsys_ros_diagnostics" type="diagnostics.py" />
-  <node pkg="hrpsys_ros_bridge" name="hrpsys_profile" type="hrpsys_profile.py" args="$(arg omniorb_args)"/>
-  <node pkg="diagnostic_aggregator" type="aggregator_node" name="diagnostic_aggregator" >
-    <rosparam command="load" file="$(find hrpsys_ros_bridge)/scripts/diagnostics.yaml" />
-  </node>
+  <group if="$(arg LAUNCH_DIAGNOSTICS)" >
+    <node pkg="hrpsys_ros_bridge" name="hrpsys_ros_diagnostics" type="diagnostics.py" />
+    <node pkg="hrpsys_ros_bridge" name="hrpsys_profile" type="hrpsys_profile.py" args="$(arg omniorb_args)"/>
+    <node pkg="diagnostic_aggregator" type="aggregator_node" name="diagnostic_aggregator" >
+      <rosparam command="load" file="$(find hrpsys_ros_bridge)/scripts/diagnostics.yaml" />
+    </node>
+  </group>
 
   <node pkg="hrpsys_ros_bridge" name="sensor_ros_bridge_connect" type="sensor_ros_bridge_connect.py"
         args="$(arg MODEL_FILE) $(arg SIMULATOR_NAME) HrpsysSeqStateROSBridge0 $(arg nameserver) $(arg omniorb_args)" output="$(arg OUTPUT)"/>
