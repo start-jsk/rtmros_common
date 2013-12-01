@@ -5,7 +5,7 @@
   <arg name="SIMULATOR_NAME" default="RobotHardware0"/> <!-- please set $(arg ROBOT_NAME)(Robot) for simulation -->
   <arg name="INSTALL_ROBOT_DESCRIPTION" default="true" />
 
-  <arg name="LAUNCH_DIAGNOSTICS" default="true" />
+  <arg name="USE_DIAGNOSTICS" default="true" />
 
   <!-- Set these values false when using HIRO -->
   <arg name="USE_COMMON" default="true" />
@@ -47,7 +47,7 @@
   </group>
 
   <!-- diagnostics -->
-  <group if="$(arg LAUNCH_DIAGNOSTICS)" >
+  <group if="$(arg USE_DIAGNOSTICS)" >
     <node pkg="hrpsys_ros_bridge" name="hrpsys_ros_diagnostics" type="diagnostics.py" />
     <node pkg="hrpsys_ros_bridge" name="hrpsys_profile" type="hrpsys_profile.py" args="$(arg omniorb_args)"/>
     <node pkg="diagnostic_aggregator" type="aggregator_node" name="diagnostic_aggregator" >
