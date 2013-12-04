@@ -205,7 +205,7 @@ class HrpsysFrame(wx.Frame):
           ctrls = [self._motors_button]
           if self._battery_state_ctrl:
             self._battery_state_ctrl.set_stale()
-            ctrls.append = [self._battery_state_ctrl]
+            ctrls.append(self._battery_state_ctrl)
 
           for ctrl in ctrls:
               ctrl.SetToolTip(wx.ToolTip("No message received on dashboard_agg in the last 5 seconds"))
