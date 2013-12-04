@@ -301,6 +301,9 @@ class HrpsysFrame(wx.Frame):
         elif(op_mode=='Servo Off'):
           if (self._motors_button.set_error()):
               self._motors_button.SetToolTip(wx.ToolTip("Mode: Servo Off"))
+        else:
+          if (self._motors_button.set_stale()):
+              self._motors_button.SetToolTip(wx.ToolTip("Mode: Stale"))
       else:
           if (self._motors_button.set_stale()):
               self._motors_button.SetToolTip(wx.ToolTip("Mode: Stale"))
