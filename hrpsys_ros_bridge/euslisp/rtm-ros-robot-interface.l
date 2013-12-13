@@ -150,28 +150,9 @@
   ;;  output-basename : output file (output-basename.pos, ...)
   (:dump-seq-pattern-file
    (rs-list output-basename &key (initial-sync-time 3.0)) ;; [s]
-   (with-open-file
-    (wf (format nil "~A.waist" output-basename) :direction :output) ;; waist file -> base position and orientation
-    (with-open-file
-     (pf (format nil "~A.pos" output-basename) :direction :output) ;; pos file -> joint angles
-     (dolist (l rs-list)
-       ;; write pos file
-       (format pf "~A " (+ initial-sync-time (cadr (memq :time l))))
-       (let ((av (cadr (memq :angle-vector l))))
-        (dotimes (i (length av))
-          (format pf "~A " (deg2rad (elt av i)))
-          ))
-       (format pf "~%")
-       ;; write waist file
-       (when (cadr (memq :root-coords l))
-         (format wf "~A " (+ initial-sync-time (cadr (memq :time l))))
-         (let ((wp (scale 1e-3 (send (cadr (memq :root-coords l)) :worldpos))) ;; [mm] -> [m]
-               (wr (car (send (send (cadr (memq :root-coords l)) :copy-worldcoords) :rpy-angle))))
-           (format wf "~A ~A ~A " (elt wp 0) (elt wp 1) (elt wp 2))
-           (format wf "~A ~A ~A " (elt wr 2) (elt wr 1) (elt wr 0))
-           (format wf "~%")
-           ))) ;; dolist
-     )))
+   (warn ";; :dump-seq-pattern-file is deprecated!! Please use (dump-seq-pattern-file) funciton!!~%")
+   (dump-seq-pattern-file rs-list output-basename :initial-sync-time initial-sync-time)
+   )
   ;;
   (:update-robot-state
    ()
@@ -623,6 +604,37 @@
       (format t " ~A,~A,~A," l (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))))
   (format t "~%"))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; utility functions for seq
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  ;; dump pattern file for SequencePlayer
+  ;;  rs-list : list of (list :time time0 :angle-vector av :root-coords rc ...)
+  ;;  output-basename : output file (output-basename.pos, ...)
+(defun dump-seq-pattern-file
+  (rs-list output-basename &key (initial-sync-time 3.0)) ;; [s]
+  (with-open-file
+   (wf (format nil "~A.waist" output-basename) :direction :output) ;; waist file -> base position and orientation
+   (with-open-file
+    (pf (format nil "~A.pos" output-basename) :direction :output) ;; pos file -> joint angles
+    (dolist (l rs-list)
+      ;; write pos file
+      (format pf "~A " (+ initial-sync-time (cadr (memq :time l))))
+      (let ((av (cadr (memq :angle-vector l))))
+        (dotimes (i (length av))
+          (format pf "~A " (deg2rad (elt av i)))
+          ))
+      (format pf "~%")
+      ;; write waist file
+      (when (cadr (memq :root-coords l))
+        (format wf "~A " (+ initial-sync-time (cadr (memq :time l))))
+        (let ((wp (scale 1e-3 (send (cadr (memq :root-coords l)) :worldpos))) ;; [mm] -> [m]
+              (wr (car (send (send (cadr (memq :root-coords l)) :copy-worldcoords) :rpy-angle))))
+          (format wf "~A ~A ~A " (elt wp 0) (elt wp 1) (elt wp 2))
+          (format wf "~A ~A ~A " (elt wr 2) (elt wr 1) (elt wr 0))
+          (format wf "~%")
+          ))) ;; dolist
+    )))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility functions for project generator generation
