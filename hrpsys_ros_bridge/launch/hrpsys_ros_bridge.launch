@@ -118,6 +118,7 @@
           output="screen" args ="$(arg openrtm_args)" />
 
     <rtconnect from="kf.rtc:rpy" to="HrpsysSeqStateROSBridge0.rtc:baseRpy" subscription_type="new"/>
+    <rtconnect from="st.rtc:zmp" to="HrpsysSeqStateROSBridge0.rtc:rszmp" subscription_type="new"/>
     <rtconnect from="AutoBalancerServiceROSBridge.rtc:AutoBalancerService" to="abc.rtc:AutoBalancerService"  subscription_type="new"/>
     <rtconnect from="StabilizerServiceROSBridge.rtc:StabilizerService" to="st.rtc:StabilizerService"  subscription_type="new"/>
     <rtactivate component="AutoBalancerServiceROSBridge.rtc" />

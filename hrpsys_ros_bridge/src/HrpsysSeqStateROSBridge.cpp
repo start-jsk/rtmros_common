@@ -121,6 +121,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
     fsensor_pub[i] = nh.advertise<geometry_msgs::WrenchStamped>(m_rsforceName[i], 10);
   }
+  zmp_pub = nh.advertise<geometry_msgs::Vector3Stamped>("/zmp", 10);
 
   return RTC::RTC_OK;
 }
@@ -553,6 +554,28 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	}
     }
   } // end: publish forces sonsors
+
+  if ( m_rszmpIn.isNew() ) {
+    try {
+      m_rszmpIn.read();
+      //ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute " << m_rsforceName[i] << " size = " << m_rsforce[i].data.length() );
+      geometry_msgs::Vector3Stamped zmpv;
+      if ( use_hrpsys_time ) {
+        zmpv.header.stamp = ros::Time(m_rszmp.tm.sec, m_rszmp.tm.nsec);
+      }else{
+        zmpv.header.stamp = tm_on_execute;
+      }
+      zmpv.header.frame_id = rootlink_name;
+      zmpv.vector.x = m_rszmp.data.x;
+      zmpv.vector.y = m_rszmp.data.y;
+      zmpv.vector.z = m_rszmp.data.z;
+      zmp_pub.publish(zmpv);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
 
   //
   return RTC::RTC_OK;
