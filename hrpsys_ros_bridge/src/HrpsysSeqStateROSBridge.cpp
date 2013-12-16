@@ -516,7 +516,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
             not_nan = false;
     }
     if (not_nan) {
-        br.sendTransform(tf::StampedTransform(inv, base_time, "gyrometer", "imu_floor"));
+      std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
+      while ( its != sensor_info.end() ) {
+        if ( (*its).second.type_name == "RateGyro" ) {
+          br.sendTransform(tf::StampedTransform(inv, base_time, (*its).first, "imu_floor"));
+          break;
+        }
+        ++its;
+      }
     } else {
         ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
                          << m_baseRpy.data.r << ","

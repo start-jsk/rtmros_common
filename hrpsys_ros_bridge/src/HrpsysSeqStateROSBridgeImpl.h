@@ -157,7 +157,7 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   OpenHRP::BodyInfo_var bodyinfo;
 
   typedef struct  {
-    std::string link_name;
+    std::string link_name, type_name;
     tf::Transform transform;
   } SensorInfo;
   std::map<std::string, SensorInfo> sensor_info;

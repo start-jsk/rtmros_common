@@ -145,6 +145,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
         for ( int l = 0; l < sensors.length(); l++ ) {
           if ( std::string(sensors[l].name) == std::string(sensor->name) ) {
             si.link_name = links[k].segments[0].name;
+            si.type_name = sensors[l].type;
             sensor_info[sensor->name] = si;
           }
         }
@@ -180,6 +181,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     for ( int k = 0; k < links->length(); k++ ) {
       if ( std::string(links[k].name) == target ) {
         si.link_name = links[k].segments[0].name;
+        si.type_name = "Force";
       }
     }
     sensor_info[name] = si;
