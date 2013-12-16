@@ -614,27 +614,29 @@
 (defun dump-seq-pattern-file
   (rs-list output-basename &key (initial-sync-time 3.0)) ;; [s]
   (with-open-file
-   (wf (format nil "~A.waist" output-basename) :direction :output) ;; waist file -> base position and orientation
-   (with-open-file
-    (pf (format nil "~A.pos" output-basename) :direction :output) ;; pos file -> joint angles
-    (dolist (l rs-list)
-      ;; write pos file
-      (format pf "~A " (+ initial-sync-time (cadr (memq :time l))))
-      (let ((av (cadr (memq :angle-vector l))))
-        (dotimes (i (length av))
-          (format pf "~A " (deg2rad (elt av i)))
-          ))
-      (format pf "~%")
-      ;; write waist file
-      (when (cadr (memq :root-coords l))
-        (format wf "~A " (+ initial-sync-time (cadr (memq :time l))))
-        (let ((wp (scale 1e-3 (send (cadr (memq :root-coords l)) :worldpos))) ;; [mm] -> [m]
-              (wr (car (send (send (cadr (memq :root-coords l)) :copy-worldcoords) :rpy-angle))))
-          (format wf "~A ~A ~A " (elt wp 0) (elt wp 1) (elt wp 2))
-          (format wf "~A ~A ~A " (elt wr 2) (elt wr 1) (elt wr 0))
-          (format wf "~%")
-          ))) ;; dolist
-    )))
+   (pf (format nil "~A.pos" output-basename) :direction :output) ;; pos file -> joint angles
+   (dolist (l rs-list)
+     ;; write pos file
+     (format pf "~A " (+ initial-sync-time (cadr (memq :time l))))
+     (let ((av (cadr (memq :angle-vector l))))
+       (dotimes (i (length av))
+         (format pf "~A " (deg2rad (elt av i)))
+         ))
+     (format pf "~%"))) ;; with-open-file for .pos file
+  (when (cadr (memq :root-coords (car rs-list)))
+    (with-open-file
+     (wf (format nil "~A.waist" output-basename) :direction :output) ;; waist file -> base position and orientation
+     (dolist (l rs-list)
+       ;; write waist file
+       (format wf "~A " (+ initial-sync-time (cadr (memq :time l))))
+       (let ((wp (scale 1e-3 (send (cadr (memq :root-coords l)) :worldpos))) ;; [mm] -> [m]
+             (wr (car (send (send (cadr (memq :root-coords l)) :copy-worldcoords) :rpy-angle))))
+         (format wf "~A ~A ~A " (elt wp 0) (elt wp 1) (elt wp 2))
+         (format wf "~A ~A ~A " (elt wr 2) (elt wr 1) (elt wr 0))
+         (format wf "~%")
+         ))) ;; with-open-file for .waist file
+    )
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility functions for project generator generation
