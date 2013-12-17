@@ -23,11 +23,18 @@
                  (ros::subscribe (format nil "/off_~A" (string-downcase x)) geometry_msgs::WrenchStamped
                                  #'send self :rtmros-force-sensor-callback (read-from-string (format nil ":off-~A" (string-downcase x))) :groupname groupname))
              (send-all (send robot :force-sensors) :name))
+     (ros::subscribe "/zmp" geometry_msgs::PointStamped
+                     #'send self :rtmros-zmp-callback :groupname groupname)
+
      ))
   (:rtmros-motor-states-callback
    (msg)
    (send self :set-robot-state1 :motor-extra-data (send msg :extra_data))
    (send self :set-robot-state1 :temperature (send msg :temperature)))
+  (:rtmros-zmp-callback
+   (msg)
+   (let ((p (send msg :point)))
+     (send self :set-robot-state1 :zmp (float-vector (send p :x) (send p :y) (send p :z)))))
   (:temperature-vector () (cdr (assoc :temperature robot-state)))
   (:motor-extra-data
    ()
@@ -85,6 +92,12 @@
      (mapcar #'(lambda (fs moment)
                  (send fs :rotate-vector moment))
              (send robot :force-sensors) (send self :off-moment-vector))))
+  (:zmp-vector
+   (&optional (wrt :local))
+   (let ((zmp (scale 1e3 (cdr (assoc :zmp robot-state)))))
+     (case wrt
+       (:local zmp)
+       (:world (send (car (send robot :links)) :transform-vector zmp)))))
   ;; automatically define methods for ROSBridge services
   (:define-all-ROSBridge-srv-methods
    (&key (debug-view nil) (ros-pkg-name "hrpsys_ros_bridge"))
@@ -603,6 +616,22 @@
     (let ((rl (send (send (send rb l :root-link) :parent) :joint)))
       (format t " ~A,~A,~A," l (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))))
   (format t "~%"))
+
+(defun print-end-effector-parameter-conf-from-robot
+  (rb)
+  (format t "end_effectors:")
+  (dolist (l '(:rarm :larm :rleg :lleg))
+    (let ((rl (send (send (send rb l :root-link) :parent) :joint)))
+      (format t " ~A,~A,~A," l (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))
+      (let* ((dif (send (send rb l :end-coords :parent) :transformation (send rb l :end-coords)))
+             (wp (scale 1e-3 (send dif :worldpos))) ;; [mm] -> [m]
+             (wr (normalize-vector (matrix-log (send dif :worldrot))))
+             (wrn (norm (matrix-log (send dif :worldrot)))))
+         (format t "~A,~A,~A," (elt wp 0) (elt wp 1) (elt wp 2))
+         (format t "~A,~A,~A,~A," (elt wr 0) (elt wr 1) (elt wr 2) wrn)
+         )))
+  (format t "~%")
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility functions for seq
