@@ -14,7 +14,9 @@
   <arg name="USE_COLLISIONCHECK" default="true" />
   <arg name="USE_IMPEDANCECONTROLLER" default="true" />
   <arg name="USE_GRASPCONTROLLER" default="false" />
+  <arg name="USE_TORQUECONTROLLER" default="false" />
   <arg name="USE_SOFTERRORLIMIT" default="true" />
+  <arg name="USE_TORQUEFILTER" default="false" />
   <arg name="USE_IMAGESENSOR" default="false" />
   <!--
       roslaunch hrpsys_ros_bridge sample.launch nameserver:=192.168.1.1
@@ -59,7 +61,7 @@
         args="$(arg MODEL_FILE) $(arg SIMULATOR_NAME) HrpsysSeqStateROSBridge0 $(arg nameserver) $(arg omniorb_args)" output="$(arg OUTPUT)"/>
   <!-- BEGIN:openrtm connection -->
   <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
-  <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm_tools" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch USE_COMMON=$(arg USE_COMMON) USE_WALKING=$(arg USE_WALKING) USE_COLLISIONCHECK=$(arg USE_COLLISIONCHECK) USE_IMPEDANCECONTROLLER=$(arg USE_IMPEDANCECONTROLLER) USE_SOFTERRORLIMIT=$(arg USE_SOFTERRORLIMIT) USE_IMAGESENSOR=$(arg USE_IMAGESENSOR) USE_ROBOTHARDWARE=$(arg USE_ROBOTHARDWARE)"/>
+  <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm_tools" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch USE_COMMON=$(arg USE_COMMON) USE_WALKING=$(arg USE_WALKING) USE_COLLISIONCHECK=$(arg USE_COLLISIONCHECK) USE_IMPEDANCECONTROLLER=$(arg USE_IMPEDANCECONTROLLER) USE_SOFTERRORLIMIT=$(arg USE_SOFTERRORLIMIT) USE_IMAGESENSOR=$(arg USE_IMAGESENSOR) USE_ROBOTHARDWARE=$(arg USE_ROBOTHARDWARE) USE_TORQUECONTROLLER=$(arg USE_TORQUECONTROLLER) USE_TORQUEFILTER=$(arg USE_TORQUEFILTER)"/>
 
 
   <!-- All Robots -->
@@ -81,7 +83,7 @@
           output="screen" args ="$(arg openrtm_args)" />
 
     <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="HrpsysSeqStateROSBridge0.rtc:rsangle" subscription_type="new"/>
-    <rtconnect from="$(arg SIMULATOR_NAME).rtc:tau" to="HrpsysSeqStateROSBridge0.rtc:rstorque" subscription_type="new"/>
+    <rtconnect from="$(arg SIMULATOR_NAME).rtc:tau" to="HrpsysSeqStateROSBridge0.rtc:rstorque" subscription_type="new" unless="$(arg USE_TORQUEFILTER)"/>
     <rtconnect from="StateHolderServiceROSBridge.rtc:StateHolderService" to="sh.rtc:StateHolderService"  subscription_type="new"/>
     <rtconnect from="sh.rtc:baseTformOut" to="HrpsysSeqStateROSBridge0.rtc:baseTform" subscription_type="new"/>
     <rtconnect from="sh.rtc:qOut" to="HrpsysSeqStateROSBridge0.rtc:mcangle" subscription_type="new"/>
@@ -160,10 +162,27 @@
   <group if="$(arg USE_GRASPCONTROLLER)" >
     <node pkg="hrpsys_ros_bridge" name="GraspControllerServiceROSBridge" type="GraspControllerServiceROSBridgeComp"
           output="screen" args ="$(arg openrtm_args)" />
-    <rtconnect from="GraspControllerServiceROSBridge.rtc:SoftErrorLimiterService" to="gc.rtc:GraspControllerService"  subscription_type="new"/>
+    <rtconnect from="GraspControllerServiceROSBridge.rtc:GraspControllerService" to="gc.rtc:GraspControllerService"  subscription_type="new"/>
     <rtactivate component="GraspControllerServiceROSBridge.rtc" />
   </group>
 
+  <!-- USE_TORQUECONTROLLER
+       TorqueController
+  -->
+  <group if="$(arg USE_TORQUECONTROLLER)" >
+    <node pkg="hrpsys_ros_bridge" name="TorqueControllerServiceROSBridge" type="TorqueControllerServiceROSBridgeComp"
+          output="screen" args ="$(arg openrtm_args)" />
+    <rtconnect from="TorqueControllerServiceROSBridge.rtc:TorqueControllerService" to="tc.rtc:TorqueControllerService"  subscription_type="new"/>
+    <rtactivate component="TorqueControllerServiceROSBridge.rtc" />
+  </group>
+
+  <!-- USE_TORQUEFILTER
+       TorqueFilter
+  -->
+  <group if="$(arg USE_TORQUEFILTER)" >
+    <rtconnect from="tf.rtc:tauOut" to="HrpsysSeqStateROSBridge0.rtc:rstorque" subscription_type="new"/>
+  </group>
+  
   <!-- USE_SOFTERRORLIMIT
        SoftErrorLimitter
   -->
