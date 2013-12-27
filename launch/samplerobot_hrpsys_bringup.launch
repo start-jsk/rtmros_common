@@ -17,7 +17,7 @@
         args="0 0 0 0 0 0 /WAIST_LINK0 gyrometer 100" />
 
   <include file="$(find hrpsys_gazebo_tutorials)/launch/robot_hrpsys_bringup.launch">
-    <arg name="ROBOT_NAME" value="SampleRobot" />
+    <arg name="ROBOT_TYPE" value="SampleRobot" />
     <arg name="SYNCHRONIZED" value="$(arg SYNCHRONIZED)" />
     <arg name="IOB_SUBSTEPS" value="5" />
     <arg name="HRPSYS_RATE"  value="200" />
