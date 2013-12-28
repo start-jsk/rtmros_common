@@ -4,7 +4,7 @@
   <rosparam command="load"
             file="$(find hrpsys_ros_bridge_tutorials)/models/SampleRobot_controller_config.yaml" />
 
-  <!-- TODO: fix colladaWriter -->
+  <!-- TODO: fix colladaWriter see https://code.google.com/p/rtm-ros-robotics/issues/detail?id=182 -->
   <node pkg="tf" type="static_transform_publisher" name="sensor_transform_0"
         args="0 0 0 0 0 0 /LLEG_LINK6 lfsensor 100" />
   <node pkg="tf" type="static_transform_publisher" name="sensor_transform_1"
