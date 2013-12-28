@@ -1,8 +1,13 @@
 <launch>
   <arg name="KILL_SERVERS" default="false" />
   <arg name="LAUNCH_TELEOP" default="false" />
+  <arg name="NOSIM" default="false" />
+  <arg name="PROJECT_FILE" default="$(find hrpsys_ros_bridge_tutorials)/models/SampleRobot_nosim.xml" if="$(arg NOSIM)"/>
+  <arg name="PROJECT_FILE" default="$(find hrpsys_ros_bridge_tutorials)/models/SampleRobot.xml" unless="$(arg NOSIM)"/>
   <include file="$(find hrpsys_ros_bridge_tutorials)/launch/samplerobot_startup.launch" >
     <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
+    <arg name="NOSIM" value="$(arg NOSIM)" />
+    <arg name="PROJECT_FILE" value="$(arg PROJECT_FILE)" />
   </include>
   <include file="$(find hrpsys_ros_bridge_tutorials)/launch/samplerobot_ros_bridge.launch">
     <arg name="LAUNCH_TELEOP" default="$(arg LAUNCH_TELEOP)" />
