@@ -19,7 +19,5 @@
   <include file="$(find hrpsys_gazebo_tutorials)/launch/robot_hrpsys_bringup.launch">
     <arg name="ROBOT_TYPE" value="SampleRobot" />
     <arg name="SYNCHRONIZED" value="$(arg SYNCHRONIZED)" />
-    <arg name="IOB_SUBSTEPS" value="5" />
-    <arg name="HRPSYS_RATE"  value="200" />
   </include>
 </launch>
