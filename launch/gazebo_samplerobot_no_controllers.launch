@@ -10,7 +10,6 @@
     <arg name="PAUSED" value="$(arg PAUSED)"/>
     <arg name="HRPSYS_GAZEBO_CONFIG" value="$(find hrpsys_gazebo_tutorials)/config/SampleRobot.yaml" />
     <arg name="ROBOT_MODEL" value="$(find hrpsys_gazebo_tutorials)/robot_models/SampleRobot/SampleRobot.urdf" />
-
     <arg name="SYNCHRONIZED" value="$(arg SYNCHRONIZED)" />
   </include>
 </launch>
