@@ -544,7 +544,7 @@
    (instance hrpsys_ros_bridge::openhrp_autobalancerservice_footstep :init
              :pos (scale 1e-3 (send f :worldpos))
              :rot (matrix2quaternion (send f :worldrot))
-             :leg (print (format nil "~A" (if (find-method f :l/r) (send f :l/r) (send f :get :l/r)))))
+             :leg (format nil "~A" (if (find-method f :l/r) (send f :l/r) (send f :get :l/r))))
    )
   (:cmd-vel-cb
    (msg &key (vel-x-ratio 1.0) (vel-y-ratio 1.0) (vel-th-ratio 1.0))
