@@ -9,7 +9,7 @@
   </include>
 
   <node name="@robot@_rviz" pkg="rviz" type="rviz" respawn="true"
-        args="-sync -d $(find @PROJECT_PKG_NAME@)/launch/@robot@.vcg" />
+        args="-sync -d $(find @PROJECT_PKG_NAME@)/launch/@robot@.rviz" />
 </launch>
 
 
