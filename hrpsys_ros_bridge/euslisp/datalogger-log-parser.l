@@ -16,6 +16,7 @@
      (setq file (open fname))
      (setq count c index i)
      ))
+  (:fname () (send file :fname))
   (:read-state () read-state)
   (:proc
    ()
