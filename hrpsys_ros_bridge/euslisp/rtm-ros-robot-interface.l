@@ -665,6 +665,17 @@
          (format wf "~%")
          ))) ;; with-open-file for .waist file
     )
+  (when (cadr (memq :zmp (car rs-list)))
+    (with-open-file
+     (zf (format nil "~A.zmp" output-basename) :direction :output) ;; zmp file -> root-relative zmp[m]
+     (dolist (l rs-list)
+       ;; write zmp file
+       (format wf "~A " (+ initial-sync-time (cadr (memq :time l))))
+       (let ((zp (scale 1e-3 (cadr (memq :zmp l))))) ;; [mm] -> [m]
+         (format wf "~A ~A ~A " (elt zp 0) (elt zp 1) (elt zp 2))
+         (format wf "~%")
+         ))) ;; with-open-file for .zmp file
+    )
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
