@@ -652,6 +652,17 @@
          (format pf "~A " (deg2rad (elt av i)))
          ))
      (format pf "~%"))) ;; with-open-file for .pos file
+  (when (cadr (memq :torque-vector (car rs-list)))
+    (with-open-file
+     (tf (format nil "~A.torque" output-basename) :direction :output) ;; torque file -> joint torques
+     (dolist (l rs-list)
+       ;; write torque file
+       (format tf "~A " (+ initial-sync-time (cadr (memq :time l))))
+       (let ((av (cadr (memq :torque-vector l))))
+         (dotimes (i (length av))
+           (format tf "~A " (elt av i))
+           ))
+       (format tf "~%")))) ;; with-open-file for .torque file
   (when (cadr (memq :root-coords (car rs-list)))
     (with-open-file
      (wf (format nil "~A.waist" output-basename) :direction :output) ;; waist file -> base position and orientation
