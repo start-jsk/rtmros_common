@@ -85,6 +85,10 @@
    (map float-vector #'rad2deg
         (send (send self :parser-list (format nil "~A(Robot)0_q" robot-name)) :read-state))
    )
+  (:reference-torque-vector
+   ()
+   (send (send self :parser-list "sh_tqOut") :read-state)
+   )
   )
 
 ;; (progn (setq *log* (instance datalogger-log-parser-controller :init "/tmp/testlog.sh_qOut")) (send *log* :state) (send *log* :potentio-vector))
