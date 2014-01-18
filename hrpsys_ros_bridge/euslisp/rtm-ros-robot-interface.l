@@ -704,7 +704,7 @@
   (let ((str
          (format nil "rosrun hrpsys_ros_bridge rtmtest -t hrpsys_tools _gen_project.launch \\\
                INPUT:=~A,~A \\\
-               OBJECT_MODELS:='`rospack find openhrp3`/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,-0.1,1,0,0,0 ~A' \\\
+               OBJECT_MODELS:='`rospack find openhrp3`/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,1,0,0,0 ~A' \\\
                OUTPUT:=~A.xml \\\
                INTEGRATE:=~A \\\
                SIMULATION_TIMESTEP_OPTION:='--timeStep ~A' \\\
