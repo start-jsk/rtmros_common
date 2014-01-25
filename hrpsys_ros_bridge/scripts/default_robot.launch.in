@@ -1,12 +1,14 @@
 <launch>
   <arg name="KILL_SERVERS" default="false" />
   <arg name="NOSIM" default="false" />
+  <arg name="REALTIME" default="false" />
   <arg name="PROJECT_FILE" default="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@_nosim.xml" if="$(arg NOSIM)"/>
   <arg name="PROJECT_FILE" default="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.xml" unless="$(arg NOSIM)"/>
   <include file="$(find @PROJECT_PKG_NAME@)/launch/@robot@_startup.launch" >
     <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
     <arg name="NOSIM" value="$(arg NOSIM)" />
     <arg name="PROJECT_FILE" value="$(arg PROJECT_FILE)" />
+    <arg name="REALTIME" default="$(arg REALTIME)" />
   </include>
   <include file="$(find @PROJECT_PKG_NAME@)/launch/@robot@_ros_bridge.launch" />
 
