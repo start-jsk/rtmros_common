@@ -1,10 +1,13 @@
 <launch>
   <arg name="KILL_SERVERS" default="false" />
+  <arg name="RUN_RVIZ" default="true" />
   <include file="$(find @PROJECT_PKG_NAME@)/launch/@robot@_startup.launch" >
     <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
     <arg name="NOSIM" default="true" />
   </include>
   <include file="$(find @PROJECT_PKG_NAME@)/launch/@robot@_ros_bridge.launch" />
+    <arg name="RUN_RVIZ" default="$(arg RUN_RVIZ)" />
+  </include>
 
   <sphinxdoc><![CDATA[
 

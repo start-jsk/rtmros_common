@@ -1,4 +1,5 @@
 <launch>
+  <arg name="RUN_RVIZ" default="true" />
   <rosparam command="load"
             file="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@_controller_config.yaml" />
 
@@ -8,8 +9,10 @@
     <arg name="COLLADA_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.dae" />
   </include>
 
-  <node name="@robot@_rviz" pkg="rviz" type="rviz" respawn="true"
-        args="-sync -d $(find @PROJECT_PKG_NAME@)/launch/@robot@.rviz" />
+  <group if="$(arg RUN_RVIZ)" >
+    <node name="@robot@_rviz" pkg="rviz" type="rviz" respawn="true"
+          args="-sync -d $(find @PROJECT_PKG_NAME@)/launch/@robot@.rviz" />
+  </group>
 </launch>
 
 
