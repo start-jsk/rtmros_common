@@ -8,7 +8,7 @@
      This automatically convert ROS/topic into RTM/dataport.
   </description>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
-  <maintainer email="iisaito@kinugarage.com">Isao Isaac Saito</maintainer>
+  <maintainer email="iisaito@kinugarage.com">Isaac Isao Saito</maintainer>
   <author email="saito@jsk.t.u-tokyo.ac.jp">Manabu Saito</author>
 
   <license>BSD</license>
