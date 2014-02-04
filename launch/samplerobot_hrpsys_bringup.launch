@@ -18,6 +18,7 @@
 
   <include file="$(find hrpsys_gazebo_tutorials)/launch/robot_hrpsys_bringup.launch">
     <arg name="ROBOT_TYPE" value="SampleRobot" />
+    <arg name="USE_INSTANCE_NAME" value="true" />
     <arg name="SYNCHRONIZED" value="$(arg SYNCHRONIZED)" />
   </include>
 </launch>
