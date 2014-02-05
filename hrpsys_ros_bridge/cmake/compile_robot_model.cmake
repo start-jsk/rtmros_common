@@ -38,7 +38,7 @@ macro(get_option_from_args _option_ret _option_name _separator _quater _ret_add_
     list(REMOVE_AT _arg_list 0)
   endforeach(anarg ${_arg_list2})
   if (NOT "${_tmp_option}" STREQUAL "" AND NOT "${_ret_add_str}" STREQUAL "")
-    set(_tmp_option "${_ret_add_str}${_tmp_option}")
+    set(_tmp_option "${_ret_add_str}\"${_tmp_option}\"")
   endif (NOT "${_tmp_option}" STREQUAL "" AND NOT "${_ret_add_str}" STREQUAL "")
   set(${_option_ret} "${_tmp_option}")
 endmacro(get_option_from_args _option_ret _option_name)
@@ -127,7 +127,7 @@ macro(compile_openhrp_model wrlfile)
     rosbuild_find_ros_package(openhrp3)
     set(_export_collada_exe ${openhrp3_PACKAGE_PATH}/bin/export-collada)
   else()
-    #set(openhrp3_PACKAGE_PATH ${openhrp3_SOURCE_DIR})
+    set(openhrp3_PACKAGE_PATH ${openhrp3_SOURCE_DIR})
     set(_export_collada_exe ${CATKIN_DEVEL_PREFIX}/lib/openhrp3/export-collada)
   endif()
   if(EXISTS ${_export_collada_exe})
@@ -169,12 +169,14 @@ macro(compile_openhrp_model wrlfile)
   endif()
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND ${_rtm_naming_exe} ${_corba_port}
-    COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}
+    COMMAND echo 'ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}' > /tmp/_gen_project_${_name}_xml.sh
+    COMMAND sh /tmp/_gen_project_${_name}_xml.sh
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
     COMMAND ${_rtm_naming_exe} ${_corba_port}
-    COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}
+    COMMAND echo 'ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}' > /tmp/_gen_project_${_name}_xml_nosim.sh
+    COMMAND sh /tmp/_gen_project_${_name}_xml_nosim.sh
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
   if(EXISTS ${_collada2eus_exe})
@@ -287,12 +289,14 @@ macro(compile_collada_model daefile)
   endif()
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND ${_rtm_naming_exe} ${_corba_port}
-    COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}
+    COMMAND echo 'ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}' > /tmp/_gen_project_${_name}_xml.sh
+    COMMAND sh /tmp/_gen_project_${_name}_xml.sh
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
     COMMAND ${_rtm_naming_exe} ${_corba_port}
-    COMMAND rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}
+    COMMAND echo 'ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}' > /tmp/_gen_project_${_name}_xml_nosim.sh
+    COMMAND sh /tmp/_gen_project_${_name}_xml_nosim.sh
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
   if(EXISTS ${_collada2eus_exe})
