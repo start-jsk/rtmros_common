@@ -15,8 +15,11 @@
   <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+
   <build_depend>hrpsys</build_depend>
+
   <run_depend>hrpsys</run_depend>
+  <run_depend>openrtm_tools</run_depend>
 
   <export/>
 </package>

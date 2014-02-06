@@ -43,7 +43,6 @@
   <run_depend>hrpsys</run_depend>
   <run_depend>hrpsys_tools</run_depend>
   <run_depend>image_transport</run_depend>
-  <run_depend>openrtm_tools</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rtmbuild</run_depend>
