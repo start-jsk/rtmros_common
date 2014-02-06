@@ -698,7 +698,7 @@
 (defun dump-project-file-by-cloning-euslisp-models
   (robot robot-file-path ;; robot euslisp model, robot VRML(or Collada) file path
    &key (object-models) (object-models-file-path) ;; list of object euslisp model, list of object VRML(or Collada) file path
-        (nosim) (timestep 0.005) ;; [s]
+        (nosim) (timestep 0.005) (dt 0.005) ;; [s]
         (output-fname (format nil "/tmp/~A" (send robot :name)))) ;; output file name "output-fname.xml"
   ;; TODO : Is longfloor.wrl necessary??
   (let ((str
@@ -706,7 +706,7 @@
                INPUT:=~A,~A \\\
                OBJECT_MODELS:='`rospack find openhrp3`/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,1,0,0,0 ~A' \\\
                OUTPUT:=~A.xml \\\
-               INTEGRATE:=~A CORBA_PORT:=15005\\\
+               INTEGRATE:=~A CORBA_PORT:=15005 CONF_DT_OPTION:='--dt ~A' \\\
                SIMULATION_TIMESTEP_OPTION:='--timeStep ~A' \\\
                SIMULATION_JOINT_PROPERTIES_OPTION:='--joint-properties ~A'"
                  robot-file-path
@@ -719,6 +719,7 @@
                      ""))
                  (format nil "~A~A" output-fname (if nosim "_nosim" ""))
                  (if nosim "false" "true")
+                 dt
                  timestep
                  (gen-ProjectGenerator-joint-properties-string robot)
                  )))
