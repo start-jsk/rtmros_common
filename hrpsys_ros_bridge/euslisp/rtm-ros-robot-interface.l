@@ -706,7 +706,7 @@
                INPUT:=~A,~A \\\
                OBJECT_MODELS:='`rospack find openhrp3`/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,1,0,0,0 ~A' \\\
                OUTPUT:=~A.xml \\\
-               INTEGRATE:=~A \\\
+               INTEGRATE:=~A CORBA_PORT:=15005\\\
                SIMULATION_TIMESTEP_OPTION:='--timeStep ~A' \\\
                SIMULATION_JOINT_PROPERTIES_OPTION:='--joint-properties ~A'"
                  robot-file-path
