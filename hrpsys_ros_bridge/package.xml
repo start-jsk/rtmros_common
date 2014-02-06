@@ -1,13 +1,22 @@
 <package>
   <name>hrpsys_ros_bridge</name>
   <version>1.0.5</version>
-  <description>hrpsys_ros_bridge package provides modules that work as "bridge" between <a href = "http://openrtm.org/">OpenRTM</a>-based controller <a href = "wiki.ros.org/hrpsys">hrpsys</a> and ROS.</description>
+  <description>hrpsys_ros_bridge package provides basic functionalities to bind
+  	<a href = "http://wiki.ros.org/hrpsys">hrpsys</a>, a 
+  	<a href = "http://openrtm.org/">OpenRTM</a>-based controller, and ROS.<br /> 
+    By using this package, you can write your ROS packages that communicate with your
+    non-ROS robots that run on hrpsys.
+  		
+    For communicating with the robots that run on OpenRTM without hrpsys,
+  	you can use <a href = "http://wiki.ros.org/openrtm_ros_bridge">openrtm_ros_bridge</a>
+  	package.
+  </description>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
-  <maintainer email="iisaito@opensource-robotics.tokyo.jp">Isao Isaac Saito</maintainer>
+  <maintainer email="iisaito@opensource-robotics.tokyo.jp">Isaac Isao Saito</maintainer>
 
   <license>BSD</license>
 
-  <url type="website">http://ros.org/wiki/hrprtc_ros_bridge</url>
+  <url type="website">http://wiki.ros.org/hrpsys_ros_bridge</url>
   <url type="repository">https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common</url>
   <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/</url>
 
@@ -22,17 +31,16 @@
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>hrpsys</build_depend>
   <build_depend>image_transport</build_depend>
-  <build_depend>pr2_controllers</build_depend> <!-- groovy does not have catkin pr2_controllers package -->
-  <build_depend>subversion</build_depend>
+  <!-- build_depend>pr2_controllers</build_depend --> <!-- groovy does not have catkin pr2_controllers package -->
   <build_depend>mk</build_depend>
-  <build_depend>rosbuild</build_depend>
-  <build_depend>roslang</build_depend>
   <build_depend>python-rosdep</build_depend>
-  <!-- -->
   <build_depend>robot_state_publisher</build_depend>
+  <build_depend>rosbuild</build_depend>
   <build_depend>roscpp</build_depend>
+  <build_depend>roslang</build_depend>
   <build_depend>rtmbuild</build_depend>
   <build_depend>sensor_msgs</build_depend>
+  <build_depend>subversion</build_depend>
   <build_depend>tf</build_depend>
   
   <run_depend>actionlib</run_depend>
@@ -43,14 +51,14 @@
   <run_depend>hrpsys</run_depend>
   <run_depend>hrpsys_tools</run_depend>
   <run_depend>image_transport</run_depend>
+  <run_depend>python-psutil</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>roscpp</run_depend>
+  <run_depend>rostest</run_depend>
   <run_depend>rtmbuild</run_depend>
   <run_depend>sensor_msgs</run_depend>
-  <run_depend>pr2_controllers</run_depend> <!-- groovy does not have catkin pr2_controllers package -->
+  <!-- run_depend>pr2_controllers</run_depend --> <!-- groovy does not have catkin pr2_controllers package -->
   <run_depend>tf</run_depend>
-  <run_depend>python-psutil</run_depend>
-  <run_depend>rostest</run_depend>
 
   <!-- <test_depend>hrpsys</test_depend> -->
   <!-- <test_depend>hrpsys_tools</test_depend> -->

@@ -2,21 +2,25 @@
 <package>
   <name>rtmros_common</name>
   <version>1.0.5</version>
-  <description>Common ROS module suite for RT Middleware.</description>
+  <description>A package suite that provides all the capabilities for
+    the ROS users to connect to the robots that run on
+    <a href = "http://www.openrtm.org/openrtm/en/content/what-rt-middleware-0">RT Middleware</a>
+    or RTM-based controllers.    
+  </description>
 
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
-  <maintainer email="iisaito@kinugarage.com">Isao Isaac Saito</maintainer>
+  <maintainer email="iisaito@kinugarage.com">Isaac Isao Saito</maintainer>
   <author email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</author>
   <author>Rosen Diankov</author>
 
   <license>BSD</license>
-  <url type="website">http://ros.org/wiki/rtmros_common</url>
+  <url type="website">http://wiki.ros.org/rtmros_common</url>
   <url type="repository">https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common</url>
   <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/</url>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <run_depend>hrpsys_tools</run_depend>
   <run_depend>hrpsys_ros_bridge</run_depend>
+  <run_depend>hrpsys_tools</run_depend>
   <run_depend>openrtm_ros_bridge</run_depend>
   <run_depend>openrtm_tools</run_depend>
   <run_depend>rosnode_rtc</run_depend>

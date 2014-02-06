@@ -1,20 +1,26 @@
 <package>
   <name>openrtm_ros_bridge</name>
   <version>1.0.5</version>
-  <description>openrtm_ros_bridge</description>
+  <description>openrtm_ros_bridge package provides basic functionalities to bind
+    two robotics framework: <a href = "http://openrtm.org/">OpenRTM</a> and ROS.<br />
+    By using this package, you can write your ROS packages that communicate with your
+    non-ROS robots that run on OpenRTM.
+  		
+    For communicating with the robots that run on hrpsys, you can use
+    <a href = "http://wiki.ros.org/hrpsys_ros_bridge">hrpsys_ros_bridge</a> package.
+  </description>
   <license>BSD</license>
 
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
-  <maintainer email="iisaito@kinugarage.com">Isao Isaac Saito</maintainer>
+  <maintainer email="iisaito@kinugarage.com">Isaac Isao Saito</maintainer>
   <author email="saito@jsk.t.u-tokyo.ac.jp">Manabu Saito</author>
 
-  <url type="website">http://ros.org/wiki/openrtm_ros_bridge</url>
+  <url type="website">http://wiki.ros.org/openrtm_ros_bridge</url>
   <url type="repository">https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common</url>
   <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <!-- <build_depend>openrtm_aist</build_depend> -->
   <build_depend>openrtm_tools</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>rostest</build_depend>
