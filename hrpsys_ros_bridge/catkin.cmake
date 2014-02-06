@@ -51,6 +51,7 @@ catkin_package(
     CATKIN-DEPENDS rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure # pr2_controllers_msgs robot_monitor
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO
+    CFG_EXTRAS compile_robot_model.cmake
 )
 
 # generate idl
