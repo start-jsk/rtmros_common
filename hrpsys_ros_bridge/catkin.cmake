@@ -4,7 +4,7 @@ project(hrpsys_ros_bridge)
 
 # call catkin depends
 find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure ) # pr2_controllers_msgs robot_monitor
-
+catkin_python_setup()
 # include rtmbuild
 #include(${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
 if(EXISTS ${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
