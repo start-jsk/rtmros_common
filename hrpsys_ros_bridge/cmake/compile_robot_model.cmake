@@ -166,12 +166,19 @@ macro(compile_openhrp_model wrlfile)
     set(_gen_project_dep_files)
     message("assuming hrpsys/ProjectGenerator is already compiled")
   endif()
+  # this command should depends on the LATEST compile_robots, in order to prevent
+  # parallel execution of rostest
+  if (compile_robots)
+    list(LENGTH compile_robots _compile_robot_length)
+    math(EXPR _compile_robot_latest_index "${_compile_robot_length} - 1")
+    list(GET compile_robots ${_compile_robot_latest_index} _latest_robot)
+  endif(compile_robots)
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND ${_rtm_naming_exe} ${_corba_port}
     COMMAND echo 'ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}' > /tmp/_gen_project_${_name}_xml.sh
     COMMAND sh /tmp/_gen_project_${_name}_xml.sh
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
-    DEPENDS ${daefile} ${_gen_project_dep_files})
+    DEPENDS ${daefile} ${_gen_project_dep_files} ${_latest_robot})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
     COMMAND ${_rtm_naming_exe} ${_corba_port}
     COMMAND echo 'ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}' > /tmp/_gen_project_${_name}_xml_nosim.sh
@@ -286,12 +293,19 @@ macro(compile_collada_model daefile)
     set(_gen_project_dep_files)
     message("assuming hrpsys/ProjectGenerator is already compiled")
   endif()
+  # this command should depends on the LATEST compile_robots, in order to prevent
+  # parallel execution of rostest
+  if (compile_robots)
+    list(LENGTH ${compile_robots} _compile_robot_length)
+    math(EXPR _compile_robot_latest_index "${_compile_robot_length} - 1")
+    list(GET compile_robots ${_compile_robot_latest_index} _latest_robot)
+  endif(compile_robots)
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND ${_rtm_naming_exe} ${_corba_port}
     COMMAND echo 'ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}' > /tmp/_gen_project_${_name}_xml.sh
     COMMAND sh /tmp/_gen_project_${_name}_xml.sh
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
-    DEPENDS ${daefile} ${_gen_project_dep_files})
+    DEPENDS ${daefile} ${_gen_project_dep_files} ${_latest_robot})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
     COMMAND ${_rtm_naming_exe} ${_corba_port}
     COMMAND echo 'ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}' > /tmp/_gen_project_${_name}_xml_nosim.sh
