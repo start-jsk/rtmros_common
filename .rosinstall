@@ -1,0 +1,9 @@
+- git:
+    uri: https://github.com/start-jsk/openrtm_common
+    local-name: rtm-ros-robotics/openrtm_common
+- git:
+    uri: https://github.com/start-jsk/rtmros_common
+    local-name: rtm-ros-robotics/rtmros_common
+- git:
+    uri: https://github.com/start-jsk/rtmros_hironx
+    local-name: rtm-ros-robotics/rtmros_hironx
