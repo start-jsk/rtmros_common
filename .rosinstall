@@ -1,6 +1,15 @@
 - git:
-    uri: https://github.com/start-jsk/openrtm_common
-    local-name: rtm-ros-robotics/openrtm_common
+    uri: https://github.com/start-jsk/openrtm_common/openrtm_aist_core
+    local-name: rtm-ros-robotics/openrtm_common/openrtm_aist_core
+- git:
+    uri: https://github.com/start-jsk/openrtm_common/openhrp3
+    local-name: rtm-ros-robotics/openrtm_common/openhrp3
+- git:
+    uri: https://github.com/start-jsk/rtmros_common/hrpsys
+    local-name: rtm-ros-robotics/rtmros_common/hrpsys
+- git:
+    uri: https://github.com/start-jsk/rtmros_common/rtshell_core 
+    local-name: rtm-ros-robotics/rtmros_common/rtshell_core
 - git:
     uri: https://github.com/start-jsk/rtmros_common
     local-name: rtm-ros-robotics/rtmros_common
