@@ -23,8 +23,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <rosdep name="control_msgs"/>
   <rosdep name="dynamic_reconfigure" />
 
-  <rosdep name="robot_monitor"/>
-  <rosdep name="pr2_dashboard"/>
+  <rosdep name="diagnostic_msgs"/>
 
   <!-- hrpsys -->
   <depend package="hrpsys"/>
