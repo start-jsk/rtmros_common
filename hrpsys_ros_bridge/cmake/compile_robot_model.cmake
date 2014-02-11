@@ -185,10 +185,12 @@ macro(compile_openhrp_model wrlfile)
     COMMAND sh /tmp/_gen_project_${_name}_xml_nosim.sh
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
-  if(EXISTS ${_collada2eus_exe})
+  if(EXISTS ${_collada2eus_exe} AND EXISTS ${_export_collada_exe})
     add_custom_target(${_sname}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
-  else()
+  elseif(EXISTS ${_export_collada_exe})
     add_custom_target(${_sname}_compile DEPENDS ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
+  else()
+    add_custom_target(${_sname}_compile DEPENDS ${_xmlfile} ${_xmlfile_nosim})
   endif()
   ## make sure to kill nameserver
   add_custom_command(OUTPUT ${_sname}_compile_cleanup
