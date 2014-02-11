@@ -10,11 +10,22 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/hrprtc_ros_bridge</url>
 
+  <!-- to fake rosdep install -->
   <rosdep name="hrpsys"/>
   <rosdep name="hrpsys_tools"/>
   <rosdep name="openrtm_tools"/>
   <rosdep name="openrtm_ros_bridge"/>
 
+  <rosdep name="actionlib"/>
+  <rosdep name="robot_state_publisher"/>
+  <rosdep name="camera_info_manager" />
+  <rosdep name="pr2_controllers_msgs"/>
+  <rosdep name="control_msgs"/>
+
+  <rosdep name="robot_monitor"/>
+  <rosdep name="pr2_dashboard"/>
+
+  <!-- hrpsys -->
   <depend package="hrpsys"/>
   <depend package="hrpsys_tools"/>
   <depend package="openrtm_tools"/>
