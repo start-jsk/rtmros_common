@@ -21,6 +21,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <rosdep name="camera_info_manager" />
   <rosdep name="pr2_controllers_msgs"/>
   <rosdep name="control_msgs"/>
+  <rosdep name="dynamic_reconfigure" />
 
   <rosdep name="robot_monitor"/>
   <rosdep name="pr2_dashboard"/>
