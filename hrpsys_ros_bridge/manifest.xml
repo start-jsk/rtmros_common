@@ -10,6 +10,11 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/hrprtc_ros_bridge</url>
 
+  <rosdep name="hrpsys"/>
+  <rosdep name="hrpsys_tools"/>
+  <rosdep name="openrtm_tools"/>
+  <rosdep name="openrtm_ros_bridge"/>
+
   <depend package="hrpsys"/>
   <depend package="hrpsys_tools"/>
   <depend package="openrtm_tools"/>

@@ -14,6 +14,11 @@
 
   <depend package="rtshell" />
 
+  <rosdep name="openrtm_aist" />
+  <rosdep name="openrtm_aist_python" />
+
+  <rosdep name="rtshell" />
+
   <export>
   </export>
 
