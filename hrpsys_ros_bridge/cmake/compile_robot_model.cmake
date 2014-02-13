@@ -138,9 +138,16 @@ macro(compile_openhrp_model wrlfile)
     message("assuming export-collada is already compiled")
   endif()
   if(EXISTS ${_export_collada_exe})
-    add_custom_command(OUTPUT ${_daefile}
-      COMMAND ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
-      DEPENDS ${wrlfile} ${_export_collada_exe})
+    if(${USE_ROSBUILD})
+      add_custom_command(OUTPUT ${_daefile}
+        COMMAND ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
+        DEPENDS ${wrlfile} ${_export_collada_exe})
+    else()                      #when catkin, appending LD_LIBRARY_PATH
+      add_custom_command(OUTPUT ${_daefile}
+        WORKING_DIRECTORY ${CATKIN_DEVEL_PREFIX}/lib
+        COMMAND ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
+        DEPENDS ${wrlfile} ${_export_collada_exe})
+    endif()
   endif()
   # use _gen_project.launch
   if(${USE_ROSBUILD})
