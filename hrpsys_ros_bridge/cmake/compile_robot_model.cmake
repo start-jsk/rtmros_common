@@ -144,8 +144,7 @@ macro(compile_openhrp_model wrlfile)
         DEPENDS ${wrlfile} ${_export_collada_exe})
     else()                      #when catkin, appending LD_LIBRARY_PATH
       add_custom_command(OUTPUT ${_daefile}
-        WORKING_DIRECTORY ${CATKIN_DEVEL_PREFIX}/lib
-        COMMAND ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
+        COMMAND LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CATKIN_DEVEL_PREFIX}/lib ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
         DEPENDS ${wrlfile} ${_export_collada_exe})
     endif()
   endif()
