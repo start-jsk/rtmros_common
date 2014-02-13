@@ -49,7 +49,7 @@ This document explains how to use and how to contribute to rtm-ros-robotics soft
  - `roscd rtmros_common`
  - Add your forked repository as upstream
  - `git remote name origin upstream`
- - `git add origin https://github.com/<your github user name>/rtmros_common
+ - `git add origin https://github.com/<your github user name>/rtmros_common`
  - `git pull upstream master`
  - write awesome code
  - `git commit -m "detailed description of what you did"`
