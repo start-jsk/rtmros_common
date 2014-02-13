@@ -46,7 +46,6 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <depend package="dynamic_reconfigure" />
 
   <!-- dashboard -->
-  <depend package="robot_monitor"/>
   <depend package="pr2_dashboard"/>
 
   <!-- rtm* command -->
