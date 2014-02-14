@@ -69,5 +69,3 @@ before you use them.
  - `git merge <awesome-fork>/<branch-name>`
 
 
-
-[magit](https://github.com/magit/magit)
