@@ -57,7 +57,8 @@ This document explains how to use and how to contribute to rtm-ros-robotics soft
  - Submit a pull request on GitHub to the repository
  - Please check travic-ci status after sending your pull request.
 
-4. Using other forked branch before merging into master.
+4. Uses other forked repository *before* merged into master.
+
 You don't need to wait for the maintainers to merge some pull requests by others
 before you use them.
  - Adding other's remote repository to your git remote
@@ -66,3 +67,7 @@ before you use them.
  - `git fetch <awesome-fork>`
  - Merge those remote branch into your current branch
  - `git merge <awesome-fork>/<branch-name>`
+
+
+
+[magit](https://github.com/magit/magit)
