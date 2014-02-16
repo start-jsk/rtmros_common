@@ -112,13 +112,18 @@ macro(compile_openhrp_model wrlfile)
   else()
     #
     set(_euscollada_dep_files ${_collada2eus_exe} ${euscollada_PACKAGE_PATH}/src/euscollada-robot.l)
+    if(${USE_ROSBUILD})
+      set(_collada2eus_option "")
+    else()
+      set(_collada2eus_option ROS_PACKAGE_PATH=${euscollada_PACKAGE_PATH}/..:$ENV{ROS_PACKAGE_PATH})
+    endif()
     if(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
-        COMMAND ${_collada2eus_exe} ${_daefile} ${_yamlfile} ${_lispfile}
+        COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${_daefile} ${_yamlfile} ${_lispfile}
         DEPENDS ${_daefile} ${_yamlfile} ${_euscollada_dep_files})
     else(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
-        COMMAND ${_collada2eus_exe} ${_daefile} ${_lispfile}
+        COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${_daefile} ${_lispfile}
         DEPENDS ${_daefile} ${_euscollada_dep_files})
     endif(EXISTS ${_yamlfile})
   endif()
@@ -138,9 +143,15 @@ macro(compile_openhrp_model wrlfile)
     message("assuming export-collada is already compiled")
   endif()
   if(EXISTS ${_export_collada_exe})
-    add_custom_command(OUTPUT ${_daefile}
-      COMMAND ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
-      DEPENDS ${wrlfile} ${_export_collada_exe})
+    if(${USE_ROSBUILD})
+      add_custom_command(OUTPUT ${_daefile}
+        COMMAND ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
+        DEPENDS ${wrlfile} ${_export_collada_exe})
+    else()                      #when catkin, appending LD_LIBRARY_PATH
+      add_custom_command(OUTPUT ${_daefile}
+        COMMAND LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CATKIN_DEVEL_PREFIX}/lib ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
+        DEPENDS ${wrlfile} ${_export_collada_exe})
+    endif()
   endif()
   # use _gen_project.launch
   if(${USE_ROSBUILD})
