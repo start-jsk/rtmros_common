@@ -1,5 +1,19 @@
 <launch>
-  <include file="$(find hrpsys)/test/test-hrpsys.test" />
+<!-- include file="$(find hrpsys)/test/test-hrpsys.test" / -->
+  <!-- BEGIN:common setting -->
+  <env name="LANG" value="C" />
+  <env name="ORBgiopMaxMsgSize" value="2147483648" />
+  <!-- env name="PROJECT_DIR" value="$(find hrpsys)" / -->
+  <env name="PATH" value="$(find openrtm_aist)/../../lib/openrtm_aist/bin/:$(env PATH)" />
+  <!-- END:common setting -->
+
+  <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" output="screen"/>
+  <node name="rtcd" pkg="openrtm_aist"
+  type="rtcd" args='-o "manager.modules.preload:hrpEC.so,RobotHardware.so" -o "manager.components.precreate:RobotHardware" -o "corba.nameservers:localhost:2809" -o "naming.formats:%n.rtc" -o "logger.enable:YES" -o "logger.log_level:NORMAL" -o "logger.file_name:stdout" -o "exec_cxt.periodic.rate:1000" -o "manager.shutdown_onrtcs:NO" -o "manager.is_master:YES" -o "manager.modules.load_path:$(find hrpsys)/lib" -o "example.RobotHardware.config_file:$(find hrpsys)/share/hrpsys/samples/PA10/RobotHardware.conf" -o "example.SequencePlayer.config_file:$(find hrpsys)/share/hrpsys/samples/PA10/PA10.conf" -o "example.StateHolder.config_file:$(find hrpsys)/share/hrpsys/samples/PA10/PA10.conf"'
+        output="screen"/>
+
+<!-- end of include -->
+
   <test test-name="configure_host_port" pkg="hrpsys_tools"
         type="test-hrpsys-config.py" args="--host 127.0.0.1 --port 2809" />
 </launch>
