@@ -46,5 +46,7 @@ script: # All commands must exit with code 0 on success. Anything else is consid
   - catkin_make -j2
   - catkin_make test
   - catkin_make install
-  
+after_failure:
+  - cat ./build/Testing/Temporary/LastTest.log
+
 
