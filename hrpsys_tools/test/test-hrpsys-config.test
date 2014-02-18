@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find hrpsys)/test/test-hrpsys.test" />
+  <test test-name="configure_host_port" pkg="hrpsys_tools"
+        type="test-hrpsys-config.py" args="--host 127.0.0.1 --port 2809" />
+</launch>

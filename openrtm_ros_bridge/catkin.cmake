@@ -59,5 +59,5 @@ rtmbuild_genbridge()
 ## tests
 ##
 
-add_rostest(samples/test_myservice_rosbridge.launch)
+#add_rostest(samples/test_myservice_rosbridge.launch)
 

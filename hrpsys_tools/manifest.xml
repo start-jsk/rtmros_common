@@ -12,6 +12,7 @@
   <depend package="hrpsys"/>
 
   <rosdep name="hrpsys"/>
+  <rosdep name="rostest"/>
   
 </package>
 
