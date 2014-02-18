@@ -12,7 +12,7 @@ class SampleHrpsysConfigurator(HrpsysConfigurator):
     def init(self, robotname="SampleRobot(Robot)0", url=""):
          HrpsysConfigurator.init(self, robotname=robotname, url=url)
 
-class TestHrpsysConfgurator(unittest.TestCase):
+class TestHrpsysConfigurator(unittest.TestCase):
     def setUp():
         parser = argparse.ArgumentParser(description='hrpsys command line interpreters')
         parser.add_argument('--host', help='corba name server hostname')
