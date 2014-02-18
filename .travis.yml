@@ -43,4 +43,7 @@ before_script: # Use this to prepare your build for testing e.g. copy database c
 script: # All commands must exit with code 0 on success. Anything else is considered failure.
   - find -L . \! -path "*/.*" -type f | xargs egrep -i "(hoge|fuga)" ; if [ $? == 0 ]; then exit 1; fi
   - catkin_make -j2
+  - catkin_make test
+  - catkin_make install
+  
 

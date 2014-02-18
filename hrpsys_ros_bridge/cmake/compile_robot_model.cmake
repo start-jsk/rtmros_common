@@ -215,7 +215,6 @@ macro(compile_openhrp_model wrlfile)
   get_directory_property(_current_directory_properties ADDITIONAL_MAKE_CLEAN_FILES)
   set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
     "${_workdir}/${_name}.conf;${_workdir}/${_name}.RobotHardware.conf;${_workdir}/${_name}_nosim.conf;${_workdir}/${_name}_nosim.RobotHardware.conf;${_current_directory_properties}")
-
   list(APPEND compile_robots ${_sname}_compile)
 endmacro(compile_openhrp_model)
 
@@ -309,7 +308,7 @@ macro(compile_collada_model daefile)
   # this command should depends on the LATEST compile_robots, in order to prevent
   # parallel execution of rostest
   if (compile_robots)
-    list(LENGTH ${compile_robots} _compile_robot_length)
+    list(LENGTH compile_robots _compile_robot_length)
     math(EXPR _compile_robot_latest_index "${_compile_robot_length} - 1")
     list(GET compile_robots ${_compile_robot_latest_index} _latest_robot)
   endif(compile_robots)
@@ -342,7 +341,6 @@ macro(compile_collada_model daefile)
   get_directory_property(_current_directory_properties ADDITIONAL_MAKE_CLEAN_FILES)
   set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
     "${_workdir}/${_name}.conf;${_workdir}/${_name}.RobotHardware.conf;${_workdir}/${_name}_nosim.conf;${_workdir}/${_name}_nosim.RobotHardware.conf;${_current_directory_properties}")
-
   list(APPEND compile_robots ${_sname}_compile)
 endmacro(compile_collada_model daefile)
 
