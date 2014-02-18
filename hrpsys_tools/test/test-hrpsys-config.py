@@ -8,7 +8,7 @@ from hrpsys import rtm
 
 import argparse,unittest,rostest
 
-class TestHrpsysConfigurator(HrpsysConfigurator):
+class SampleHrpsysConfigurator(HrpsysConfigurator):
     def init(self, robotname="SampleRobot(Robot)0", url=""):
          HrpsysConfigurator.init(self, robotname=robotname, url=url)
 
@@ -23,7 +23,7 @@ class TestHrpsysConfgurator(unittest.TestCase):
             rtm.nshost = args.host
         if args.port:
             rtm.nsport = args.port
-        h = TestHrpsysConfigurator()
+        h = SampleHrpsysConfigurator()
 
     def test():
         self.assertTrue(True,"ok")
