@@ -13,7 +13,7 @@ class SampleHrpsysConfigurator(HrpsysConfigurator):
          HrpsysConfigurator.init(self, robotname=robotname, url=url)
 
 class TestHrpsysConfigurator(unittest.TestCase):
-    def setUp():
+    def setUp(self):
         parser = argparse.ArgumentParser(description='hrpsys command line interpreters')
         parser.add_argument('--host', help='corba name server hostname')
         parser.add_argument('--port', help='corba name server port number')
@@ -25,7 +25,7 @@ class TestHrpsysConfigurator(unittest.TestCase):
             rtm.nsport = args.port
         h = SampleHrpsysConfigurator()
 
-    def test():
+    def test(self):
         self.assertTrue(True,"ok")
 
 
