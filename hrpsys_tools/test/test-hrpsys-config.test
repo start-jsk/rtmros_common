@@ -1,5 +1,16 @@
 <launch>
-  <include file="$(find hrpsys)/test/test-hrpsys.test" />
+<!-- include file="$(find hrpsys)/test/test-hrpsys.test" / -->
+  <!-- BEGIN:common setting -->
+  <env name="LANG" value="C" />
+  <env name="ORBgiopMaxMsgSize" value="2147483648" />
+  <!-- env name="PROJECT_DIR" value="$(find hrpsys)" / -->
+  <env name="ROS_HOME" value="$(find hrpsys)/share/hrpsys/samples/PA10/" />
+  <!-- END:common setting -->
+
+  <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader" output="screen"/>
+  <node name="hrpsys" pkg="hrpsys" type="hrpsys.sh" output="screen"  cwd="node" />
+<!-- end of include -->
+
   <test test-name="configure_host_port" pkg="hrpsys_tools"
         type="test-hrpsys-config.py" args="--host 127.0.0.1 --port 2809" />
 </launch>
