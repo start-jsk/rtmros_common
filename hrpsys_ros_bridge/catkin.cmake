@@ -126,10 +126,7 @@ rtmbuild_add_executable(HrpsysJointTrajectoryBridge src/HrpsysJointTrajectoryBri
 
 install(PROGRAMS scripts/rtmlaunch scripts/rtmtest scripts/rtmstart.py
   DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-install(DIRECTORY launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  PATTERN ".svn" EXCLUDE)
-install(DIRECTORY euslisp
+install(DIRECTORY launch euslisp srv idl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   PATTERN ".svn" EXCLUDE)
 install(DIRECTORY scripts
