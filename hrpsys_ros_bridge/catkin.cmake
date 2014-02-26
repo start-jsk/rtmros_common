@@ -79,7 +79,7 @@ execute_process(
   )
 
 execute_process(
-  COMMAND svn co --non-interactive --trust-server-cert https://code.ros.org/svn/wg-ros-pkg/stacks/pr2_controllers/tags/groovy/pr2_controllers_msgs /tmp/${_random_string}/pr2_controllers_msgs
+  COMMAND git clone -b groovy-devel https://github.com/PR2/pr2_controllers.git /tmp/${_random_string}
   OUTPUT_VARIABLE _download_output
   RESULT_VARIABLE _download_failed)
 message("download pr2_controllers_msgs files ${_download_output}")
@@ -130,10 +130,7 @@ rtmbuild_add_executable(HrpsysJointTrajectoryBridge src/HrpsysJointTrajectoryBri
 
 install(PROGRAMS scripts/rtmlaunch scripts/rtmtest scripts/rtmstart.py
   DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-install(DIRECTORY launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  PATTERN ".svn" EXCLUDE)
-install(DIRECTORY euslisp
+install(DIRECTORY launch euslisp srv idl
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   PATTERN ".svn" EXCLUDE)
 install(DIRECTORY scripts
