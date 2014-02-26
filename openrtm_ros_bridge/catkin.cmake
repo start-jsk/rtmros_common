@@ -20,9 +20,14 @@ endif()
 
 # copy idl files from openrtm_aist
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
-find_package(PkgConfig)
-pkg_check_modules(openrtm_aist openrtm-aist REQUIRED)
-set(openrtm_aist_EXAMPLE_IDL_DIR ${openrtm_aist_PREFIX}/share/openrtm_aist/share/openrtm-1.1/example/)
+execute_process(COMMAND pkg-config --variable=data_prefix openrtm-aist
+  OUTPUT_VARIABLE openrtm_aist_DATA_PREFIX
+  RESULT_VARIABLE RESULT
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(NOT RESULT EQUAL 0)
+  message(FATAL_ERROR "fail to run pkg-config")
+endif()
+set(openrtm_aist_EXAMPLE_IDL_DIR ${openrtm_aist_DATA_PREFIX}/openrtm-1.1/example/)
 if(EXISTS ${openrtm_aist_EXAMPLE_IDL_DIR})
   file(GLOB_RECURSE _idl_files "${openrtm_aist_EXAMPLE_IDL_DIR}/*/*/*.idl") #fix me
 else()

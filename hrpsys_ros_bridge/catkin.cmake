@@ -22,9 +22,13 @@ include(${PROJECT_SOURCE_DIR}/cmake/compile_robot_model.cmake)
 
 # copy idl files from hrpsys
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
-find_package(PkgConfig)
-pkg_check_modules(hrpsys hrpsys-base REQUIRED)
-set(hrpsys_IDL_DIR ${hrpsys_PREFIX}/share/hrpsys/share/hrpsys/idl/)
+execute_process(COMMAND pkg-config --variable=idldir hrpsys-base
+  OUTPUT_VARIABLE hrpsys_IDL_DIR
+  RESULT_VARIABLE RESULT
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(NOT RESULT EQUAL 0)
+  message(FATAL_ERROR "fail to run pkg-config")
+endif()
 if(EXISTS ${hrpsys_IDL_DIR})
   file(COPY
     ${hrpsys_IDL_DIR}
