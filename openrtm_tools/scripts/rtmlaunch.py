@@ -111,7 +111,7 @@ def rtconnect(nameserver, tags):
             print >>sys.stderr, "[rtmlaunch]             to",dest_path
             print >>sys.stderr, "[rtmlaunch]           with",options
             try :
-                rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, 0, tree=None)
+                rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, tree=None)
             except Exception, e_1_1_0: # openrtm 1.1.0
                 try:
                     rtcon.connect_ports([(source_path,source_full_path), (dest_path, dest_full_path)], options, tree=None)
