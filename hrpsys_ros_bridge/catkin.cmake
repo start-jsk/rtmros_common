@@ -28,7 +28,9 @@ execute_process(COMMAND pkg-config --variable=idldir hrpsys-base
   RESULT_VARIABLE RESULT
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 if(NOT RESULT EQUAL 0)
-  message(FATAL_ERROR "fail to run pkg-config ${RESULT}")
+  execute_process(COMMAND "pkg-config" "--list-all")
+  execute_process(COMMAND "env")
+  message(FATAL_ERROR "Fail to run pkg-config ${RESULT}")
 endif()
 if(EXISTS ${hrpsys_IDL_DIR})
   file(COPY
