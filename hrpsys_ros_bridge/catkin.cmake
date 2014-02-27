@@ -34,7 +34,7 @@ if(NOT RESULT EQUAL 0)
 endif()
 if(EXISTS ${hrpsys_IDL_DIR})
   file(COPY
-    ${hrpsys_IDL_DIR}
+    ${hrpsys_IDL_DIR}/
     DESTINATION ${PROJECT_SOURCE_DIR}/idl)
 else()
   get_cmake_property(_variableNames VARIABLES)
