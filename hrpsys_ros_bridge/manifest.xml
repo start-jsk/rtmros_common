@@ -11,6 +11,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <url>http://ros.org/wiki/hrprtc_ros_bridge</url>
 
   <!-- to fake rosdep install -->
+  <rosdep name="pkg-config"/>
   <rosdep name="hrpsys"/>
   <rosdep name="hrpsys_tools"/>
   <rosdep name="openrtm_tools"/>
