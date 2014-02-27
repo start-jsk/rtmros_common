@@ -22,6 +22,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/compile_robot_model.cmake)
 
 # copy idl files from hrpsys
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
+set(ENV{PKG_CONFIG_PATH} ${hrpsys_PREFIX}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}) #update PKG_CONFIG_PATH for pkg-config
 execute_process(COMMAND pkg-config --variable=idldir hrpsys-base
   OUTPUT_VARIABLE hrpsys_IDL_DIR
   RESULT_VARIABLE RESULT
