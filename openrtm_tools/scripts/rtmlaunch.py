@@ -123,6 +123,8 @@ def rtconnect(nameserver, tags):
                     print >>sys.stderr, '\033[31m[rtmlaunch] configuration with `ifconfig` on both robot and client side. \033[0m'
                     print >>sys.stderr, '\033[31m[rtmlaunch]  Having multiple network interface sometimes causes problem, \033[0m'
                     print >>sys.stderr, '\033[31m[rtmlaunch] please see FAQ site http://www.openrtm.org/OpenRTM-aist/html/FAQ2FE38388E383A9E38396E383ABE382B7E383A5E383BCE38386E382A3E383B3E382B0.html#f2bc375d\033[0m'
+                    print >>sys.stderr, '\033[31m[rtmlaunch]            Issue related to this https://github.com/start-jsk/rtmros_hironx/issues/33\033[0m'
+                    print >>sys.stderr, '\033[31m[rtmlaunch]            ~/.ros/log may contains usefully informations\033[0m'
         except Exception, e:
             print >>sys.stderr, '\033[31m[rtmlaunch] {0}: {1}'.format(os.path.basename(sys.argv[1]), e),'\033[0m'
     return 0
