@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(hrpsys_ros_bridge)
 
 # call catkin depends
-find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure ) # pr2_controllers_msgs robot_monitor
+find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure hrpsys) # pr2_controllers_msgs robot_monitor
 catkin_python_setup()
 # include rtmbuild
 #include(${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
@@ -22,12 +22,19 @@ include(${PROJECT_SOURCE_DIR}/cmake/compile_robot_model.cmake)
 
 # copy idl files from hrpsys
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
-find_package(PkgConfig)
-pkg_check_modules(hrpsys hrpsys-base REQUIRED)
-set(hrpsys_IDL_DIR ${hrpsys_PREFIX}/share/hrpsys/share/hrpsys/idl/)
+set(ENV{PKG_CONFIG_PATH} ${hrpsys_PREFIX}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}) #update PKG_CONFIG_PATH for pkg-config
+execute_process(COMMAND pkg-config --variable=idldir hrpsys-base
+  OUTPUT_VARIABLE hrpsys_IDL_DIR
+  RESULT_VARIABLE RESULT
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(NOT RESULT EQUAL 0)
+  execute_process(COMMAND "pkg-config" "--list-all")
+  execute_process(COMMAND "env")
+  message(FATAL_ERROR "Fail to run pkg-config ${RESULT}")
+endif()
 if(EXISTS ${hrpsys_IDL_DIR})
   file(COPY
-    ${hrpsys_IDL_DIR}
+    ${hrpsys_IDL_DIR}/
     DESTINATION ${PROJECT_SOURCE_DIR}/idl)
 else()
   get_cmake_property(_variableNames VARIABLES)
