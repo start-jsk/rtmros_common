@@ -111,9 +111,18 @@ def rtconnect(nameserver, tags):
             print >>sys.stderr, "[rtmlaunch]             to",dest_path
             print >>sys.stderr, "[rtmlaunch]           with",options
             try :
-                rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, tree=None)
-            except Exception, e: # openrtm 1.1.0
-                rtcon.connect_ports([(source_path,source_full_path), (dest_path, dest_full_path)], options, tree=None)
+                rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, 0, tree=None)
+            except Exception, e_1_1_0: # openrtm 1.1.0
+                try:
+                    rtcon.connect_ports([(source_path,source_full_path), (dest_path, dest_full_path)], options, tree=None)
+                except Exception, e_1_0_0: # openrtm 1.0.0
+                    print >>sys.stderr, '\033[31m[rtmlaunch] {0} did not work on both OpenRTM 1.0.0 and 1.1.0'.format(os.path.basename(sys.argv[1])),'\033[0m'
+                    print >>sys.stderr, '\033[31m[rtmlaunch]    OpenRTM 1.0.0 {0}'.format(e_1_0_0),'\033[0m'
+                    print >>sys.stderr, '\033[31m[rtmlaunch]    OpenRTM 1.1.0 {0}'.format(e_1_1_0),'\033[0m'
+                    print >>sys.stderr, '\033[31m[rtmlaunch]  This is very weird situation, Please check your network\033[0m'
+                    print >>sys.stderr, '\033[31m[rtmlaunch] configuration with `ifconfig` on both robot and client side. \033[0m'
+                    print >>sys.stderr, '\033[31m[rtmlaunch]  Having multiple network interface sometimes causes problem, \033[0m'
+                    print >>sys.stderr, '\033[31m[rtmlaunch] please see FAQ site http://www.openrtm.org/OpenRTM-aist/html/FAQ2FE38388E383A9E38396E383ABE382B7E383A5E383BCE38386E382A3E383B3E382B0.html#f2bc375d\033[0m'
         except Exception, e:
             print >>sys.stderr, '\033[31m[rtmlaunch] {0}: {1}'.format(os.path.basename(sys.argv[1]), e),'\033[0m'
     return 0
