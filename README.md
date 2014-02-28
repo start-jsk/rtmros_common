@@ -30,7 +30,7 @@ This document explains how to use and how to contribute to rtm-ros-robotics soft
  - `wstool init .`
  
  If compile all source code
- - `rosws merge https://raw.github.com/start-jsk/rtmros_common/master/.rosinstall -y`
+ - `wstool merge https://raw.github.com/start-jsk/rtmros_common/master/.rosinstall -y`
  
  Else if compile only targe repository
  - `wstool set rtm-ros-robotics/rtmros_common https://github.com/start-jsk/rtmros_common --git -y`
