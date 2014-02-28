@@ -6,7 +6,7 @@ A package suite that provides all the capabilities for the ROS users to connect 
 
 --------------
 
-This document explains how to use and how to contribute to rtm-ros-robotics softwares ([openrtm_aist_core](https://github.com/start-jsk/openrtm_aist_core), [openhrp3](https://github.com/start-jsk/openhrp3), [hrpsys](https://github.com/start-jsk/hrpsys), [rtshell_core](https://github.com/start-jsk/rtshell_core), [rtmros_common](https://github.com/start-jsk/rtmros_common), [rtmros_hironx](https://github.com/start-jsk/rtmros_hironx), [rtmros_tutorial](https://github.com/start-jsk/rtmros_turorial), [rtmros_gazebo](https://github.com/start-jsk/rtmros_gazebo)). The instruction uses `rtmros_common` repository as an example, but to works for other rtm-ros-robotics repositories.
+This document explains how to use and how to contribute to rtm-ros-robotics softwares ([openrtm_aist_core](https://github.com/start-jsk/openrtm_aist_core), [openhrp3](https://github.com/start-jsk/openhrp3), [hrpsys](https://github.com/start-jsk/hrpsys), [rtshell_core](https://github.com/start-jsk/rtshell_core), [rtmros_common](https://github.com/start-jsk/rtmros_common), [rtmros_hironx](https://github.com/start-jsk/rtmros_hironx), [rtmros_tutorial](https://github.com/start-jsk/rtmros_turorial), [rtmros_gazebo](https://github.com/start-jsk/rtmros_gazebo)). The instruction uses `rtmros_common` repository as an example, but also works for other rtm-ros-robotics repositories.
 
 1. Install software
  rtm-ros-robotics software is distributed as ros-debian packages, if you already uses ROS system, install the software as follows:
