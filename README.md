@@ -53,8 +53,8 @@ This document explains how to use and how to contribute to rtm-ros-robotics soft
  -   ... wite code....
  - `git commit -m "detailed description of what you did"`
  -  Add your forked repository as upstream
- - `git remote add upstream https://github.com/<your github user name>/rtmros_common`
- - `git push upstream your_awesome_code_branch`
+ - `git remote add experimental https://github.com/<your github user name>/rtmros_common`
+ - `git push experimental your_awesome_code_branch`
  - Submit a pull request on GitHub to the repository
  - Please check travic-ci status after sending your pull request.
 
