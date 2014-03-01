@@ -14,8 +14,8 @@
 
 <!-- end of include -->
 
-  <node name="test_hrpsys_tool_config" pkg="hrpsys_tools"
-        type="hrpsys_tools_config.py" args="--host 127.0.0.1 --port 2809 -i  quit\(\)" respawn="true"/>
+  <test test-name="hrpsys_tool_config_interactive" pkg="hrpsys_tools"
+        type="hrpsys_tools_config.py" args='--host 127.0.0.1 --port 2809 -i "import rostest, unittest" "rostest.rosrun(\"hrpsys_tools\", \"interactive\", unittest.TestCase)" "quit()"' />
 
   <test test-name="configure_host_port" pkg="hrpsys_tools"
         type="test-hrpsys-config.py" args="--host 127.0.0.1 --port 2809" />
