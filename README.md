@@ -47,13 +47,14 @@ This document explains how to use and how to contribute to rtm-ros-robotics soft
  - Move to the package direcotry
  - `source ~/catkin_ws/devel/setup.bash`
  - `roscd rtmros_common`
- - Add your forked repository as upstream
- - `git remote name origin upstream`
- - `git add origin https://github.com/<your github user name>/rtmros_common`
- - `git pull upstream master`
- - write awesome code
+ -  create branch for your fix
+ - `git checkout -b your_awesome_code_branch`
+ -  write awesome code and commit to local repo
+ -   ... wite code....
  - `git commit -m "detailed description of what you did"`
- - `git push origin master`
+ -  Add your forked repository as upstream
+ - `git remote add experimental https://github.com/<your github user name>/rtmros_common`
+ - `git push experimental your_awesome_code_branch`
  - Submit a pull request on GitHub to the repository
  - Please check travic-ci status after sending your pull request.
 
