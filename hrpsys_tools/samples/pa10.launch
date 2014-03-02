@@ -1,0 +1,12 @@
+<launch>
+  <arg name="GUI" default="true" />
+  <arg name="corbaport" default="15005" />
+  <include file="$(find hrpsys_tools)/launch/hrpsys.launch" >
+    <arg name="MODEL_FILE" value="$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample1.wrl" />
+    <arg name="CONF_FILE" value="$(find  hrpsys)/share/hrpsys/samples/PA10/PA10.conf" />
+    <arg name="PROJECT_FILE" value="$(find  hrpsys)/share/hrpsys/samples/PA10/PA10simulation.xml" />
+    <arg name="SIMULATOR_NAME" value="PA10Controller(Robot)0" />
+    <arg name="GUI" default="$(arg GUI)" />
+    <arg name="corbaport" default="$(arg corbaport)" />
+  </include>
+</launch>
