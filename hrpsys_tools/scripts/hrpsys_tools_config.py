@@ -23,16 +23,21 @@ if __name__ == '__main__':
     if args.port:
         rtm.nsport = args.port; sys.argv = [sys.argv[0]] + sys.argv[3:]
 
-    # ipython ./hrpsys_tools_config.py -- --port 2809  -i
+    # ipython ./hrpsys_tools_config.py -i -- --port 2809
     hcf = HrpsysConfigurator()
     if args.i or '__IPYTHON__' in vars(__builtins__):
+        hcf.waitForModelLoader()
+        if len(sys.argv) > 1:
+            hcf.waitForRTCManagerAndRoboHardware(robotname=sys.argv[1])
+            sys.argv = [sys.argv[0]] + sys.argv[2:]
         hcf.findComps()
         print >> sys.stderr, "[hrpsys.py] #\n[hrpsys.py] # use `hcf` as robot interface, for example hcf.getJointAngles()\n[hrpsys.py] #"
         while len(sys.argv) >= 2:
             print >> sys.stderr, ">>", sys.argv[1]
             exec(sys.argv[1])
             sys.argv = [sys.argv[0]] + sys.argv[2:]
-        code.interact(local=locals())
+        if not (args.i and '__IPYTHON__' in vars(__builtins__)):
+            code.interact(local=locals()) #drop in shell if invoke from python, or ipython without -i option
     elif len(sys.argv) > 2 :
         hcf.init(sys.argv[1], sys.argv[2])
     elif len(sys.argv) > 1 :
