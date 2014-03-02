@@ -14,10 +14,14 @@ if __name__ == '__main__':
     parser.add_argument('--host', help='corba name server hostname')
     parser.add_argument('--port', help='corba name server port number')
     parser.add_argument('-i', help='interactive mode',  action='store_true')
+    parser.add_argument('-c', help='execute command',  nargs='*')
     args, unknown = parser.parse_known_args()
 
     if args.i: # interactive
         sys.argv.remove('-i')
+    if args.c:
+        sys.argv.remove('-c')
+        [sys.argv.remove(a) for a in args.c] # remove command from sys.argv
     if args.host:
         rtm.nshost = args.host; sys.argv = [sys.argv[0]] + sys.argv[3:]
     if args.port:
@@ -27,15 +31,15 @@ if __name__ == '__main__':
     hcf = HrpsysConfigurator()
     if args.i or '__IPYTHON__' in vars(__builtins__):
         hcf.waitForModelLoader()
-        if len(sys.argv) > 1:
+        if len(sys.argv) > 1 and not sys.argv[1].startswith('-'):
             hcf.waitForRTCManagerAndRoboHardware(robotname=sys.argv[1])
             sys.argv = [sys.argv[0]] + sys.argv[2:]
         hcf.findComps()
         print >> sys.stderr, "[hrpsys.py] #\n[hrpsys.py] # use `hcf` as robot interface, for example hcf.getJointAngles()\n[hrpsys.py] #"
-        while len(sys.argv) >= 2:
-            print >> sys.stderr, ">>", sys.argv[1]
-            exec(sys.argv[1])
-            sys.argv = [sys.argv[0]] + sys.argv[2:]
+        while args.c != None:
+            print >> sys.stderr, ">>", args.c[0]
+            exec(args.c[0])
+            args.c.pop(0)
         if not (args.i and '__IPYTHON__' in vars(__builtins__)):
             code.interact(local=locals()) #drop in shell if invoke from python, or ipython without -i option
     elif len(sys.argv) > 2 :
