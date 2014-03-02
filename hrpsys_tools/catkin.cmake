@@ -134,6 +134,6 @@ install(DIRECTORY scripts DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION} USE_SO
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-install(DIRECTORY test DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION} USE_SOURCE_PERMISSIONS)
+install(DIRECTORY test samples DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION} USE_SOURCE_PERMISSIONS)
 add_rostest(test/test-hrpsys-config.test)
 add_rostest(test/test-pa10.test)
