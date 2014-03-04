@@ -687,6 +687,17 @@
          (format zf "~%")
          ))) ;; with-open-file for .zmp file
     )
+  (when (cadr (memq :wrenches (car rs-list)))
+    (with-open-file
+     (wrf (format nil "~A.wrenches" output-basename) :direction :output) ;; wrench file -> force and moment ;; 6 x force-sensor-num
+     (dolist (l rs-list)
+       ;; write wrenches file
+       (format wrf "~A " (+ initial-sync-time (cadr (memq :time l))))
+       (let ((wr (cadr (memq :wrenches l))))
+         (dotimes (i (length wr)) (format wrf "~A " (elt wr i))))
+       (format wrf "~%")
+       )) ;; with-open-file for .wrenches file
+    )
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
