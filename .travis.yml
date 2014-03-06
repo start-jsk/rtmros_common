@@ -55,6 +55,7 @@ script: # All commands must exit with code 0 on success. Anything else is consid
   - catkin_make test
   - source devel/setup.bash
   - rostest -t hrpsys_tools test-pa10.test
+  - (cd `rospack find hrpsys_ros_bridge`/test/test_compile_robot_model; rm -rf models; mkdir -p build && cd build && cmake .. -DHRPSYS_TOOLS_SOURCE_DIR=`rospack find hrpsys_tools` && make)
   - catkin_make install
   - rm -fr devel src build
   - source install/setup.bash
