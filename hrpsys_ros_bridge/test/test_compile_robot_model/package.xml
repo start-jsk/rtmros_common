@@ -7,7 +7,9 @@
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>hrpsys_ros_bridge</build_depend>
+  <build_depend>hrpsys_tools</build_depend>
   <build_depend>openhrp3</build_depend>
   <run_depend>hrpsys_ros_bridge</run_depend>
+  <run_depend>hrpsys_tools</run_depend>
   <run_depend>openhrp3</run_depend>
 </package>
