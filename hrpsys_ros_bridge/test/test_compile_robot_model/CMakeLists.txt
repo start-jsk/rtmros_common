@@ -7,7 +7,7 @@ set(hrpsys_tools_SOURCE_DIR ${HRPSYS_TOOLS_SOURCE_DIR})
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS hrpsys_ros_bridge hrpsys_tools)
+find_package(catkin REQUIRED COMPONENTS hrpsys_ros_bridge hrpsys_tools euscollada)
 # Use pa10.dae to test compile_robot_model.cmake
 set(PKG_CONFIG_PATH "${openhrp3_PREFIX}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}") # for openrtm3.1.pc
 execute_process(
