@@ -55,7 +55,7 @@ script: # All commands must exit with code 0 on success. Anything else is consid
   - catkin_make test --pkg hrpsys_ros_bridge hrpsys_tools openrtm_ros_bridge openrtm_tools rosnode_rtc rtmbuild rtmros_common
   - source devel/setup.bash
   - rostest -t hrpsys_tools test-pa10.test
-  - (cd `rospack find hrpsys_ros_bridge`/test/test_compile_robot_model; rm -rf models; mkdir -p build && cd build && cmake .. -DHRPSYS_TOOLS_SOURCE_DIR=`rospack find hrpsys_tools` && make)
+  - (cd `rospack find hrpsys_ros_bridge`/test/test_compile_robot_model; rm -rf models; mkdir -p build && cd build && cmake .. -DHRPSYS_TOOLS_SOURCE_DIR=`rospack find hrpsys_tools` -DEUSCOLLADA_DIR=~/ros/ws_$REPOSITORY_NAME/devel/share/euscollada/cmake && make)
   - catkin_make install
   - rm -fr devel src build
   - source install/setup.bash

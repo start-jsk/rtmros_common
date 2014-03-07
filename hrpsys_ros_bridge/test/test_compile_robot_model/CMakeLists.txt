@@ -4,6 +4,7 @@ project(hrpsys_ros_bridge_cmake_test)
 
 #ADD_SUBDIRECTORY($ENV{HOME}/ros/hydro/src/)
 set(hrpsys_tools_SOURCE_DIR ${HRPSYS_TOOLS_SOURCE_DIR})
+set(euscollada_DIR ${EUSCOLLADA_DIR})
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
