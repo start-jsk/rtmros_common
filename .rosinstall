@@ -16,3 +16,4 @@
 - git:
     uri: https://github.com/jsk-ros-pkg/jsk_model_tools
     local-name: jsk-ros-pkg/jsk_model_tools
+    
