@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>hrpsys_ros_bridge_cmake_test</name>
+  <version>1.0.6</version>
+  <description>The hrpsys_ros_bridge_cmake_test package</description>
+  <maintainer email="garaemon@gmail.com">Ryohei Ueda</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>hrpsys_ros_bridge</build_depend>
+  <build_depend>hrpsys_tools</build_depend>
+  <build_depend>euscollada</build_depend>
+  <build_depend>openhrp3</build_depend>
+  <run_depend>euscollada</run_depend>
+  <run_depend>hrpsys_ros_bridge</run_depend>
+  <run_depend>hrpsys_tools</run_depend>
+  <run_depend>openhrp3</run_depend>
+</package>
