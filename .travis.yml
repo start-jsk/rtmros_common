@@ -40,6 +40,7 @@ install: # Use this to install any prerequisites or dependencies necessary to ru
   - wstool set openrtm_aist_core https://github.com/start-jsk/openrtm_aist_core --git -y
   - wstool set openhrp3 https://github.com/start-jsk/openhrp3 --git -y
   - wstool set hrpsys https://github.com/start-jsk/hrpsys --git -y
+  - wstool set jsk-ros-pkg/jsk_model_tools https://github.com/jsk-ros-pkg/jsk_model_tools --git -y
   - wstool update
   # END
   - ln -s $CI_SOURCE_PATH . # Link the repo we are testing to the new workspace
@@ -55,7 +56,7 @@ script: # All commands must exit with code 0 on success. Anything else is consid
   - catkin_make test --pkg hrpsys_ros_bridge hrpsys_tools openrtm_ros_bridge openrtm_tools rosnode_rtc rtmbuild rtmros_common
   - source devel/setup.bash
   - rostest -t hrpsys_tools test-pa10.test
-  - (cd `rospack find hrpsys_ros_bridge`/test/test_compile_robot_model; rm -rf models; mkdir -p build && cd build && cmake .. -DHRPSYS_TOOLS_SOURCE_DIR=`rospack find hrpsys_tools` -DEUSCOLLADA_DIR=~/ros/ws_$REPOSITORY_NAME/devel/share/euscollada/cmake && make)
+  - (cd `rospack find hrpsys_ros_bridge`/test/test_compile_robot_model; rm -rf models; mkdir -p build && cd build && cmake .. -DHRPSYS_TOOLS_SOURCE_DIR=`rospack find hrpsys_tools` && make)
   - catkin_make install
   - rm -fr devel src build
   - source install/setup.bash
