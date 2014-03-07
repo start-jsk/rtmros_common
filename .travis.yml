@@ -52,7 +52,7 @@ before_script: # Use this to prepare your build for testing e.g. copy database c
 script: # All commands must exit with code 0 on success. Anything else is considered failure.
   - find -L . \! -path "*/.*" -type f | xargs egrep -i "(hoge|fuga)" ; if [ $? == 0 ]; then exit 1; fi
   - catkin_make -j2
-  - catkin_make test
+  - catkin_make test --pkg hrpsys_ros_bridge hrpsys_tools openrtm_ros_bridge openrtm_tools rosnode_rtc rtmbuild rtmros_common
   - source devel/setup.bash
   - rostest -t hrpsys_tools test-pa10.test
   - (cd `rospack find hrpsys_ros_bridge`/test/test_compile_robot_model; rm -rf models; mkdir -p build && cd build && cmake .. -DHRPSYS_TOOLS_SOURCE_DIR=`rospack find hrpsys_tools` && make)
