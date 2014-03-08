@@ -52,13 +52,14 @@ before_script: # Use this to prepare your build for testing e.g. copy database c
 script: # All commands must exit with code 0 on success. Anything else is considered failure.
   - find -L . \! -path "*/.*" -type f | xargs egrep -i "(hoge|fuga)" ; if [ $? == 0 ]; then exit 1; fi
   - catkin_make -j2
-  - catkin_make test
-  - source devel/setup.bash
-  - rostest -t hrpsys_tools test-pa10.test
+  #- catkin_make test
+  - export TARGET_PKG=`find build/$REPOSITORY_NAME -name Makefile -print |  sed s@.*/\\\\\([^\/]*\\\\\)/Makefile@\\\1@g`
+  - catkin_make test --pkg $TARGET_PKG
   - catkin_make install
   - rm -fr devel src build
   - source install/setup.bash
-  - find install -iname "*.test" -print0 | xargs -0 -n1 rostest
+  #- find install -iname "*.test" -print0 | xargs -0 -n1 rostest
+  - export EXIT_STATUS=0; for pkg in $TARGET_PKG; do [ "`find install/share/$pkg -iname '*.test'`" == "" ] && echo "[$pkg] No tests ware found!!!"  || find install/share/$pkg -iname "*.test" -print0 | xargs -0 -n1 rostest || export EXIT_STATUS=$?; done; [ $EXIT_STATUS == 0 ]
 after_failure:
   - cat ./build/Testing/Temporary/LastTest.log
   - find ${HOME}/.ros/test_results -type f -exec echo "== {} ==" \; -exec cat {} \;
