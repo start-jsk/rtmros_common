@@ -27,6 +27,7 @@ if __name__ == '__main__':
     if args.port:
         rtm.nsport = args.port; sys.argv = [sys.argv[0]] + sys.argv[3:]
 
+    import time; time.sleep(10); # need wait?
     # ipython ./hrpsys_tools_config.py -i -- --port 2809
     hcf = HrpsysConfigurator()
     if args.i or '__IPYTHON__' in vars(__builtins__):
