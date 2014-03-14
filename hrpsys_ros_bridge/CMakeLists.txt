@@ -38,6 +38,17 @@ if(NOT EXISTS "${pr2_controllers_msgs_PACKAGE_PATH}")
   endif()
 endif()
 
+## <depend package="pr2_controllers_msgs"/> in manifest.xml is initially commented out
+## since rosmake -a seems to check manifest.xml and if some of depend is not found, 
+## it does not create dependency graph. To avoid this, we commented out.
+## However when make hrpsys_ros_bridge component, it uses pr2_controller_msgs,
+## so we need to comment in, in compilation time.
+message("sed -i s@'<!--\\s*\\(.*pr2_controllers.*/\\)\\s*-->'@'<\\1>'@g ${PROJECT_SOURCE_DIR}/manifest.xml")
+execute_process(
+  COMMAND sh -c "sed -i s@'<!--\\s*\\(.*pr2_controllers.*/\\)\\s*-->'@'<\\1>'@g ${PROJECT_SOURCE_DIR}/manifest.xml"
+  )
+
+
 # Set the build type.  Options are:
 #  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
 #  Debug          : w/ debug symbols, w/o optimization
