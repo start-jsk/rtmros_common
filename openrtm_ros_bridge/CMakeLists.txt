@@ -54,5 +54,5 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_SOURCE_
 ##
 ## tests
 ##
-rosbuild_add_rostest(samples/test_myservice_rosbridge.launch)
+## rosbuild_add_rostest(samples/test_myservice_rosbridge.launch)
 
