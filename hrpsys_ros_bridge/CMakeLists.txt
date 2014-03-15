@@ -8,6 +8,47 @@ rosbuild_find_ros_package(rtmbuild)
 include(${rtmbuild_PACKAGE_PATH}/cmake/rtmbuild.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/compile_robot_model.cmake)
 
+# if groovy and not found pr2_controllers_msgs
+rosbuild_find_ros_package(pr2_controllers_msgs)
+if(NOT EXISTS "${pr2_controllers_msgs_PACKAGE_PATH}")
+  if(NOT EXISTS "${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs")
+    execute_process(COMMAND cmake -E remove_directory /tmp/pr2_controllers)
+    execute_process(
+      COMMAND git clone --depth 1 -b groovy-devel https://github.com/PR2/pr2_controllers.git /tmp/pr2_controllers
+      OUTPUT_VARIABLE _download_output
+      RESULT_VARIABLE _download_failed)
+    execute_process(
+      COMMAND cmake -E copy_directory  /tmp/pr2_controllers/pr2_controllers_msgs ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs)
+    message("download pr2_controllers_msgs files ${_download_output}")
+    if (_download_failed)
+      message(FATAL_ERROR "Download pr2_controllers_msgs failed : ${_download_failed}")
+    endif(_download_failed)
+    # rospack profile
+    execute_process(COMMAND rospack profile OUTPUT_VARIABLE _profile_output RESULT_VARIABLE _profile_failed)
+    message("rospack profile ${_profile_output}")
+    if (_compile_failed)
+      message(FATAL_ERROR "rospack profile failed : ${_profile_failed}")
+    endif(_compile_failed)
+    # rosmake pr2_controllers_msgs
+    execute_process(COMMAND rosmake pr2_controllers_msgs OUTPUT_VARIABLE _compile_output RESULT_VARIABLE _compile_failed)
+    message("compile pr2_controllers_msgs ${_compile_output}")
+    if (_compile_failed)
+      message(FATAL_ERROR "compile pr2_controllers_msgs failed : ${_compile_failed}")
+    endif(_compile_failed)
+  endif()
+endif()
+
+## <depend package="pr2_controllers_msgs"/> in manifest.xml is initially commented out
+## since rosmake -a seems to check manifest.xml and if some of depend is not found, 
+## it does not create dependency graph. To avoid this, we commented out.
+## However when make hrpsys_ros_bridge component, it uses pr2_controller_msgs,
+## so we need to comment in, in compilation time.
+message("sed -i s@'<!--\\s*\\(.*pr2_controllers.*/\\)\\s*-->'@'<\\1>'@g ${PROJECT_SOURCE_DIR}/manifest.xml")
+execute_process(
+  COMMAND sh -c "sed -i s@'<!--\\s*\\(.*pr2_controllers.*/\\)\\s*-->'@'<\\1>'@g ${PROJECT_SOURCE_DIR}/manifest.xml"
+  )
+
+
 # Set the build type.  Options are:
 #  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
 #  Debug          : w/ debug symbols, w/o optimization
