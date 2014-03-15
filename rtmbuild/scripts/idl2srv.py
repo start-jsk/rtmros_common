@@ -465,7 +465,13 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         if all([ os.path.exists(x) and os.stat(x).st_mtime > os.stat(idlfile).st_mtime for x in [Comp_cpp, mod_cpp, mod_h]]) and not options.overwrite:
             return # do not overwrite
 
-        command = "PATH=`rospack find openrtm_aist`/bin:$PATH rtc-template -bcxx --module-name=%s --consumer=%s:service0:'%s' --consumer-idl=%s --idl-include=%s" % (module_name, service_name, service_name, idlfile, idldir)
+        # check if rtc-template exists under `rospack find openrtm_aist`/bin, otherwise use openrtm_aist_PREFIX/lib/openrtm_aist/bin
+        from subprocess import check_output, Popen, PIPE
+        openrtm_path = Popen(['rospack','find','openrtm_aist'], stdout=PIPE).communicate()[0].rstrip() # use Popen, not check_output, since catkin_make can not found rospack find
+        if not os.path.exists(os.path.join(openrtm_path, "bin")) :
+            openrtm_path = os.path.join(check_output(['pkg-config','openrtm-aist','--variable=prefix']).rstrip(),"lib/openrtm_aist")
+        command = "PATH=%s/bin:$PATH rtc-template -bcxx --module-name=%s --consumer=%s:service0:'%s' --consumer-idl=%s --idl-include=%s" % (openrtm_path, module_name, service_name, service_name, idlfile, idldir)
+        #command = "rosrun openrtm_aist rtc-template -bcxx --module-name=%s --consumer=%s:service0:'%s' --consumer-idl=%s --idl-include=%s" % (module_name, service_name, service_name, idlfile, idldir)
         os.system("mkdir -p %s" % tmpdir)
         os.system("mkdir -p %s" % wd)
         os.system("cd %s; yes 2> /dev/null | %s > /dev/null" % (tmpdir, command))
