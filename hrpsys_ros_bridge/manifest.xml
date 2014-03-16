@@ -10,21 +10,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/hrprtc_ros_bridge</url>
 
-  <!-- to fake rosdep install -->
   <rosdep name="pkg-config"/>
-  <rosdep name="hrpsys"/>
-  <rosdep name="hrpsys_tools"/>
-  <rosdep name="openrtm_tools"/>
-  <rosdep name="openrtm_ros_bridge"/>
-
-  <rosdep name="actionlib"/>
-  <rosdep name="robot_state_publisher"/>
-  <rosdep name="camera_info_manager" />
-  <rosdep name="pr2_controllers_msgs"/>
-  <rosdep name="control_msgs"/>
-  <rosdep name="dynamic_reconfigure" />
-
-  <rosdep name="diagnostic_msgs"/>
 
   <!-- hrpsys -->
   <depend package="hrpsys"/>
@@ -37,7 +23,19 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <depend package="sensor_msgs"/>
   <depend package="robot_state_publisher"/>
   <depend package="actionlib"/>
-  <depend package="pr2_controllers_msgs"/>
+  <!-- pr2_controllers_msgs in manifest.xml is initially commented out
+       since rosmake -a seems to check manifest.xml and if some of depend is not found, 
+       it does not create dependency graph. To avoid this, we commented out.
+       However when make hrpsys_ros_bridge component, it uses pr2_controller_msgs,
+       so we need to comment in, this is done in sed command in execute_process 
+       CMakeLists.txt   -->
+  <!-- depend package="pr2_controllers_msgs"/ -->
+
+  <!-- these packages are added do to emporarily removal of pr2_controllers_msgs -->
+    <depend package="actionlib_msgs" />
+    <depend package="trajectory_msgs" />
+    <depend package="geometry_msgs" />
+
   <depend package="control_msgs"/>
   <depend package="tf" />
 
@@ -47,7 +45,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <depend package="dynamic_reconfigure" />
 
   <!-- dashboard -->
-  <depend package="pr2_dashboard"/>
+  <!-- depend package="pr2_dashboard"/ -->
 
   <!-- rtm* command -->
   <rosdep name="python-psutil"/>
