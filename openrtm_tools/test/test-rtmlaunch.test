@@ -1,0 +1,30 @@
+<launch>
+  <arg name="nameserver" default="localhost" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+
+  <!-- RTC Service Provider sample -->
+  <node name="provider" pkg="openrtm_aist" type="MyServiceProviderComp"	args='$(arg openrtm_args)' />
+  <!-- RTC Service Consumet sample -->
+  <node name="consumer" pkg="openrtm_aist" type="MyServiceConsumerComp"	args='$(arg openrtm_args)' />
+
+  <!-- RTC SeqIn/SeqOut sample -->
+  <node name="seqin"  pkg="openrtm_aist" type="SeqInComp"	args='$(arg openrtm_args)' />
+  <node name="seqout" pkg="openrtm_aist" type="SeqOutComp"	args='$(arg openrtm_args)' />
+
+  <!-- BEGIN:openrtm connection -->
+  <node name="rtmlaunch_py" pkg="openrtm_tools" type="rtmlaunch.py"
+        args="$(find openrtm_tools)/test/test-rtmlaunch.test" />
+  <rtactivate component="MyServiceProvider0.rtc" />
+  <rtactivate component="MyServiceConsumer0.rtc" />
+  <rtconnect from="MyServiceProvider0.rtc:MyService"
+	     to="MyServiceConsumer0.rtc:MyService"/>
+
+  <rtactivate component="SequenceInComponent0.rtc" />
+  <rtactivate component="SequenceOutComponent0.rtc" />
+  <rtconnect from="SequenceInComponent0.rtc:Float"     to="SequenceOutComponent0.rtc:Float"    subscription_type="new"/>
+  <rtconnect from="SequenceInComponent0.rtc:FloatSeq"  to="SequenceOutComponent0.rtc:FloatSeq" subscription_type="flush"/>
+  <!-- END:openrtm connection -->
+
+  <test test-name="rtmlaunch" pkg="openrtm_tools" type="test-rtmlaunch.py" />
+</launch>
