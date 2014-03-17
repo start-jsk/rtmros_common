@@ -20,6 +20,8 @@
   <rosdep name="rtshell" />
   <rosdep name="rosbash" />
 
+  <rosdep name="rostest" />
+
   <export>
   </export>
 
