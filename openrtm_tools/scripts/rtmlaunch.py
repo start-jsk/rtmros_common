@@ -3,7 +3,6 @@
 import roslib
 roslib.load_manifest('openrtm_tools')
 
-import OpenRTM_aist.RTM_IDL # for catkin
 import sys
 import os
 import time
