@@ -3,16 +3,24 @@
   <arg name="NOSIM" default="false" />
   <arg name="REALTIME" default="false" />
   <arg name="RUN_RVIZ" default="true" />
+  <arg name="GUI" default="true" />
   <arg name="PROJECT_FILE" default="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@_nosim.xml" if="$(arg NOSIM)"/>
   <arg name="PROJECT_FILE" default="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.xml" unless="$(arg NOSIM)"/>
+  <arg name="SIMULATOR_NAME" default="@ROBOT@(Robot)0" />
+  <arg name="corbaport" default="15005" />
   <include file="$(find @PROJECT_PKG_NAME@)/launch/@robot@_startup.launch" >
     <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
     <arg name="NOSIM" value="$(arg NOSIM)" />
     <arg name="PROJECT_FILE" value="$(arg PROJECT_FILE)" />
+    <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
     <arg name="REALTIME" default="$(arg REALTIME)" />
+    <arg name="corbaport" default="$(arg corbaport)" />
+    <arg name="GUI" default="$(arg GUI)" />
   </include>
   <include file="$(find @PROJECT_PKG_NAME@)/launch/@robot@_ros_bridge.launch" >
+    <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
     <arg name="RUN_RVIZ" default="$(arg RUN_RVIZ)" />
+    <arg name="corbaport" default="$(arg corbaport)" />
   </include>
 
   <sphinxdoc><![CDATA[

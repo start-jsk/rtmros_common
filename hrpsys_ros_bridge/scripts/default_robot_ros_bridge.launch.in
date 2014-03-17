@@ -1,12 +1,15 @@
 <launch>
   <arg name="RUN_RVIZ" default="true" />
+  <arg name="SIMULATOR_NAME" default="@ROBOT@(Robot)0" />
   <rosparam command="load"
             file="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@_controller_config.yaml" />
 
+  <arg name="corbaport" default="15005" />
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
-    <arg name="SIMULATOR_NAME" value="@ROBOT@(Robot)0" />
+    <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
     <arg name="MODEL_FILE" value="@MODEL_FILE@" />
     <arg name="COLLADA_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.dae" />
+    <arg name="corbaport" default="$(arg corbaport)" />
   </include>
 
   <group if="$(arg RUN_RVIZ)" >
