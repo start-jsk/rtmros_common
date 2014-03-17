@@ -15,8 +15,10 @@
 <!-- end of include -->
 
   <test test-name="hrpsys_tool_config_interactive" pkg="hrpsys_tools"
-        type="hrpsys_tools_config.py" args='--host 127.0.0.1 --port 2809 -i -c "import rostest, unittest" "rostest.rosrun(\"hrpsys_tools\", \"interactive\", unittest.TestCase)" "quit()" "quit()"' />
+        type="hrpsys_tools_config.py" args='--host 127.0.0.1 --port 2809 -i -c "import rostest, unittest" "rostest.rosrun(\"hrpsys_tools\", \"interactive\", unittest.TestCase)" "quit()" "quit()"'
+        retry="4" />
 
   <test test-name="configure_host_port" pkg="hrpsys_tools"
-        type="test-hrpsys-config.py" args="--host 127.0.0.1 --port 2809" />
+        type="test-hrpsys-config.py" args="--host 127.0.0.1 --port 2809"
+        retry="4" />
 </launch>
