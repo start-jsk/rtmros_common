@@ -12,8 +12,8 @@
   <param name="hztest_tf/hz" value="1000.0" />
   <param name="hztest_tf/hzerror" value="2000.0" />
   <param name="hztest_tf/test_duration" value="5.0" />
-  <test test-name="hztest_tf" pkg="rostest" type="hztest" name="hztest_tf" />
+  <test test-name="hztest_tf" pkg="rostest" type="hztest" name="hztest_tf" retry="4" />
 
-  <test test-name="samplerobot" pkg="hrpsys_ros_bridge" type="test-samplerobot.py" />
+  <test test-name="samplerobot" pkg="hrpsys_ros_bridge" type="test-samplerobot.py" retry="4" />
 
 </launch>
