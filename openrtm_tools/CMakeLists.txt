@@ -34,3 +34,4 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_rostest(test/test-openrtm-tools.test)
+rosbuild_add_rostest(test/test-rtmlaunch.test)
