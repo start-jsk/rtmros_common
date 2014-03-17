@@ -133,26 +133,71 @@ rtmbuild_add_executable(HrpsysJointTrajectoryBridge src/HrpsysJointTrajectoryBri
 
 install(PROGRAMS scripts/rtmlaunch scripts/rtmtest scripts/rtmstart.py
   DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-install(DIRECTORY launch euslisp srv idl
+install(DIRECTORY launch euslisp srv idl scripts models test cmake
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  PATTERN ".svn" EXCLUDE)
-install(DIRECTORY scripts
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  USE_SOURCE_PERMISSIONS
-  PATTERN ".svn" EXCLUDE
-#  PATTERN "rtmlaunch" EXCLUDE   copy rtmlaunch to both share and bin for backword compatibility
-#  PATTERN "rtmtest" EXCLUDE
-#  PATTERN "rtmstart.py" EXCLUDE
-  )
-
-install(DIRECTORY cmake
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  PATTERN ".svn" EXCLUDE
-  )
-
-  
+  USE_SOURCE_PERMISSIONS)
 
 ##
-## test
+## test (Copy from CMakeLists.txt)
 ##
 
+execute_process(COMMAND pkg-config openhrp3.1 --variable=idl_dir
+  OUTPUT_VARIABLE _OPENHRP3_IDL_DIR
+  RESULT_VARIABLE _OPENHRP3_RESULT
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+set(_OPENHRP3_MODEL_DIR ${_OPENHRP3_IDL_DIR}/../sample/model)
+if(NOT _OPENHRP3_RESULT EQUAL 0)
+  message(FATAL_ERROR "Fail to run pkg-config ${_OPENHRP3_RESULT}")
+endif()
+if(NOT EXISTS ${_OPENHRP3_IDL_DIR})
+  message(FATAL_ERROR "Path ${_OPENHRP3_IDL_DIR} is not exists")
+endif()
+if(NOT EXISTS ${_OPENHRP3_MODEL_DIR})
+  message(FATAL_ERROR "Path ${_OPENHRP3_MODEL_DIR} is not exists")
+endif()
+
+compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/PA10/pa10.main.wrl)
+compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/sample1.wrl SampleRobot)
+generate_default_launch_eusinterface_files(${_OPENHRP3_MODEL_DIR}/PA10/pa10.main.wrl hrpsys_ros_bridge)
+generate_default_launch_eusinterface_files(${_OPENHRP3_MODEL_DIR}/sample1.wrl hrpsys_ros_bridge SampleRobot)
+execute_process(COMMAND sed -i s@pa10\(Robot\)0@HRP1\(Robot\)0@ ${PROJECT_SOURCE_DIR}/launch/pa10.launch)
+execute_process(COMMAND sed -i s@pa10\(Robot\)0@HRP1\(Robot\)0@ ${PROJECT_SOURCE_DIR}/launch/pa10_startup.launch)
+execute_process(COMMAND sed -i s@pa10\(Robot\)0@HRP1\(Robot\)0@ ${PROJECT_SOURCE_DIR}/launch/pa10_ros_bridge.launch)
+file(WRITE models/SampleRobot_controller_config.yaml
+"controller_configuration:
+  - group_name: rarm
+    controller_name: /rarm_controller
+    joint_list:
+      - RARM_SHOULDER_P
+      - RARM_SHOULDER_R
+      - RARM_SHOULDER_Y
+      - RARM_ELBOW
+      - RARM_WRIST_Y
+      - RARM_WRIST_P
+  - group_name: larm
+    controller_name: /larm_controller
+    joint_list:
+      - LARM_SHOULDER_P
+      - LARM_SHOULDER_R
+      - LARM_SHOULDER_Y
+      - LARM_ELBOW
+      - LARM_WRIST_Y
+      - LARM_WRIST_P
+  - group_name: torso
+    controller_name: /torso_controller
+    joint_list:
+      - WAIST_P
+      - WAIST_R
+      - CHEST
+  - group_name: rhand
+    controller_name: /rhand_controller
+    joint_list:
+      - RARM_WRIST_R
+  - group_name: lhand
+    controller_name: /lhand_controller
+    joint_list:
+      - LARM_WRIST_R
+")
+
+add_rostest(test/test-samplerobot.test)
+add_rostest(test/test-pa10.test)
