@@ -43,6 +43,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <depend package="camera_info_manager" />
   <depend package="image_transport" />
   <depend package="dynamic_reconfigure" />
+  <depend package="diagnostic_aggregator" />
 
   <!-- dashboard -->
   <!-- depend package="pr2_dashboard"/ -->
