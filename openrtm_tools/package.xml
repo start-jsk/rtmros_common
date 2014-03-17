@@ -18,10 +18,12 @@
   <build_depend>openrtm_aist_python</build_depend>
   <build_depend>rtshell</build_depend>
   <build_depend>rostest</build_depend>
+  <build_depend>rosbash</build_depend>
 
   <run_depend>openrtm_aist</run_depend>
   <run_depend>openrtm_aist_python</run_depend>
   <run_depend>rtshell</run_depend>
+  <run_depend>rosbash</run_depend>
 
   <export/>
 </package>
