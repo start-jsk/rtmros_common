@@ -49,6 +49,8 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <!-- dashboard -->
   <!-- depend package="pr2_dashboard"/ -->
 
+  <rosdep name="collada_urdf"/>
+
   <!-- rtm* command -->
   <rosdep name="python-psutil"/>
 
