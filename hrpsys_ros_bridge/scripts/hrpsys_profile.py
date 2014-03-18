@@ -95,7 +95,7 @@ if __name__ == '__main__':
                 hrpsys_profile()
             except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE), e :
                 print "[hrpsys_profile.py] catch exception", e
-                rtc_init(hostname)
+                rtc_init()
 
             r.sleep()
         
