@@ -45,7 +45,7 @@ def rtc_init () :
         co = rtm.findRTC(rospy.get_param('~comp_name', 'co'))
         if co :
             break
-        rospy.logerr("Could not found CollisionDetector, waiting...")
+        rospy.logwarn("Could not found CollisionDetector, waiting...")
         time.sleep(1)
         count += 1
     if co == None:
