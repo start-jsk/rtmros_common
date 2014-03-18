@@ -18,6 +18,9 @@
   <rosdep name="openrtm_aist_python" />
 
   <rosdep name="rtshell" />
+  <rosdep name="rosbash" />
+
+  <rosdep name="rostest" />
 
   <export>
   </export>

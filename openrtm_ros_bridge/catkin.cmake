@@ -61,8 +61,12 @@ rtmbuild_genidl()
 rtmbuild_genbridge()
 
 ##
+## install
+##
+install(DIRECTORY test samples DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION} USE_SOURCE_PERMISSIONS)
+
+##
 ## tests
 ##
-
-#add_rostest(samples/test_myservice_rosbridge.launch)
+add_rostest(test/test_myservice_rosbridge.test)
 

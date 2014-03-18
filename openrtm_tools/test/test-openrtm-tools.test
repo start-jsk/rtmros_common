@@ -1,0 +1,3 @@
+<launch>
+  <test test-name="rtshell_setup" pkg="openrtm_tools" type="test-rtshell-setup.py" />
+</launch>
