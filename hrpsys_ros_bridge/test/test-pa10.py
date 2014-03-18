@@ -31,7 +31,10 @@ class TestPA10Robot(unittest.TestCase):
         self.listener = tf.TransformListener()
 
     def test_tf_odom_J7_LINK(self): # need to check if map/ is published?
-        self.listener.waitForTransform('/odom', '/J7_LINK', rospy.Time(), rospy.Duration(10))
+        try:
+            self.listener.waitForTransform('/odom', '/J7_LINK', rospy.Time(), rospy.Duration(120))
+        except tf.Exception:
+            self.assertTrue(None, "could not found tf from /odom to /J7_LINK")
         (trans,rot) = self.listener.lookupTransform('/odom', '/J7_LINK', rospy.Time(0))
         rospy.logwarn("tf_echo /odom /J7_LINK %r %r"%(trans,rot))
         self.assertAlmostEqual(trans[2],1.0,delta=0.5)
@@ -41,7 +44,10 @@ class TestPA10Robot(unittest.TestCase):
         larm = actionlib.SimpleActionClient("/fullbody_controller/joint_trajectory_action", JointTrajectoryAction)
         larm.wait_for_server()
 
-        self.listener.waitForTransform('/BASE_LINK', '/J7_LINK', rospy.Time(), rospy.Duration(10))
+        try:
+            self.listener.waitForTransform('/BASE_LINK', '/J7_LINK', rospy.Time(), rospy.Duration(120))
+        except tf.Exception:
+            self.assertTrue(None, "could not found tf from /BASE_LINK to /J7_LINK")
         (trans1,rot1) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
         rospy.logwarn("tf_echo /BASE_LINK /J7_LINK %r %r"%(trans1,rot1))
         goal = JointTrajectoryGoal()

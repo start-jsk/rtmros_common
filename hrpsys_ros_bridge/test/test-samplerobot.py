@@ -39,7 +39,10 @@ class TestSampleRobot(unittest.TestCase):
         self.listener = tf.TransformListener()
 
     def test_tf_imu_floor_WAIST_LINK(self): # need to check if map/ is published?
-        self.listener.waitForTransform('/imu_floor', '/WAIST_LINK0', rospy.Time(), rospy.Duration(10))
+        try:
+            self.listener.waitForTransform('/imu_floor', '/WAIST_LINK0', rospy.Time(), rospy.Duration(120))
+        except tf.Exception:
+            self.assertTrue(None, "could not found tf from /imu_floor to /WAIST_LINK0")
         (trans,rot) = self.listener.lookupTransform('/imu_floor', '/WAIST_LINK0', rospy.Time(0))
         rospy.logwarn("tf_echo /imu_floor /WAIST_LINK0 %r %r"%(trans,rot))
         self.assertAlmostEqual(trans[2],0.7235,2)
@@ -75,7 +78,10 @@ class TestSampleRobot(unittest.TestCase):
         larm = actionlib.SimpleActionClient("/larm_controller/joint_trajectory_action", JointTrajectoryAction)
         larm.wait_for_server()
 
-        self.listener.waitForTransform('/WAIST_LINK0', '/LARM_LINK7', rospy.Time(), rospy.Duration(10))
+        try:
+            self.listener.waitForTransform('/WAIST_LINK0', '/LARM_LINK7', rospy.Time(), rospy.Duration(120))
+        except tf.Exception:
+            self.assertTrue(None, "could not found tf from /WAIST_LINK0 to /LARM_LINK7")
         (trans1,rot1) = self.listener.lookupTransform('/WAIST_LINK0', '/LARM_LINK7', rospy.Time(0))
         rospy.logwarn("tf_echo /WAIST_LINK0 /LARM_LINK7 %r %r"%(trans1,rot1))
         goal = JointTrajectoryGoal()
