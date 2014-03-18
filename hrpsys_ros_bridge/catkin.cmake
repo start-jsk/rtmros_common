@@ -155,6 +155,9 @@ install(CODE
    endforeach()
   ")
 
+## temprarily fix (FIXME)
+install(CODE "execute_process(COMMAND cmake -E touch \$ENV{DISTDIR}/${CMAKE_INSTALL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}/__init__.py)")
+
 ##
 ## test (Copy from CMakeLists.txt)
 ##
