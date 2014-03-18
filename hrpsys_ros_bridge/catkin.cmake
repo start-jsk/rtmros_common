@@ -2,6 +2,28 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(hrpsys_ros_bridge)
 
+find_package(pr2_controllers_msgs QUIET)
+if(NOT pr2_controllers_msgs_FOUND)
+  execute_process(COMMAND cmake -E remove_directory /tmp/pr2_controllers)
+  execute_process(
+    COMMAND git clone --depth 1 -b hydro-devel https://github.com/PR2/pr2_controllers.git /tmp/pr2_controllers
+    OUTPUT_VARIABLE _download_output
+    RESULT_VARIABLE _download_failed)
+  execute_process(
+    COMMAND cmake -E copy_directory  /tmp/pr2_controllers/pr2_controllers_msgs ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs)
+  message("download pr2_controllers_msgs files ${_download_output}")
+  if (_download_failed)
+    message(FATAL_ERROR "Download pr2_controllers_msgs failed : ${_download_failed}")
+  endif(_download_failed)
+  # catkin_make
+  # rosmake pr2_controllers_msgs
+  execute_process(COMMAND cmake -E chdir ${CMAKE_SOURCE_DIR}/../ catkin_make --build /tmp/pr2_controllers --source ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs --pkg pr2_controllers_msgs OUTPUT_VARIABLE _compile_output RESULT_VARIABLE _compile_failed)
+  message("compile pr2_controllers_msgs ${_compile_output}")
+  if (_compile_failed)
+    message(FATAL_ERROR "compile pr2_controllers_msgs failed : ${_compile_failed}")
+  endif(_compile_failed)
+endif()
+
 # call catkin depends
 find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure hrpsys) # pr2_controllers_msgs robot_monitor
 catkin_python_setup()
@@ -75,56 +97,10 @@ string(RANDOM _random_string)
 
 # Check ROS distro. since pr2_controller_msgs of groovy is not catkinized
 if($ENV{ROS_ROOT} MATCHES "/opt/ros/groovy/share/ros")
-
-message("sed -i s@'<\\(.*_depend\\)>pr2_controllers</\\(.*_depend\\)>'@'<!-- \\1>pr2_controllers</\\2 -->'@g ${PROJECT_SOURCE_DIR}/package.xml")
-execute_process(
+  message("sed -i s@'<\\(.*_depend\\)>pr2_controllers</\\(.*_depend\\)>'@'<!-- \\1>pr2_controllers</\\2 -->'@g ${PROJECT_SOURCE_DIR}/package.xml")
+  execute_process(
   COMMAND sh -c "sed -i s@'<\\(.*_depend\\)>pr2_controllers</\\(.*_depend\\)>'@'<!-- \\1>pr2_controllers</\\2 -->'@g ${PROJECT_SOURCE_DIR}/package.xml"
   )
-
-execute_process(
-  COMMAND git clone -b groovy-devel https://github.com/PR2/pr2_controllers.git /tmp/${_random_string}
-  OUTPUT_VARIABLE _download_output
-  RESULT_VARIABLE _download_failed)
-message("download pr2_controllers_msgs files ${_download_output}")
-if (_download_failed)
-  message(FATAL_ERROR "Download pr2_controllers_msgs failed : ${_download_failed}")
-endif(_download_failed)
-file(WRITE /tmp/${_random_string}/rospack
-"\#!/bin/sh
-echo $@ 1>&2
-if [ \"$1\"  = \"deps-manifests\" ];then
-   echo \"/opt/ros/groovy/share/genmsg/package.xml /opt/ros/groovy/share/gencpp/package.xml /opt/ros/groovy/share/genlisp/package.xml /opt/ros/groovy/share/genpy/package.xml /opt/ros/groovy/share/message_generation/package.xml /opt/ros/groovy/share/cpp_common/package.xml /opt/ros/groovy/share/rostime/package.xml /opt/ros/groovy/share/roscpp_traits/package.xml /opt/ros/groovy/share/roscpp_serialization/package.xml /opt/ros/groovy/share/message_runtime/package.xml /opt/ros/groovy/share/std_msgs/package.xml /opt/ros/groovy/share/actionlib_msgs/package.xml /opt/ros/groovy/share/trajectory_msgs/package.xml /opt/ros/groovy/share/geometry_msgs/package.xml\"
-elif [ \"$1\"  = \"deps-msgsrv\" ];then
-   true
-elif [ \"$1\"  = \"cflags-only-I\" ];then
-   echo \"/tmp/${_random_string}/pr2_controllers_msgs/msg_gen/cpp/include /tmp/${_random_string}/pr2_controllers_msgs/srv_gen/cpp/include /opt/ros/groovy/include\"
-elif [ \"$1\"  = \"cflags-only-other\" ];then
-   true
-elif [ \"$1\"  = \"libs-only-L\" ];then
-   echo \"/opt/ros/groovy/lib\"
-elif [ \"$1\"  = \"libs-only-l\" ];then
-   echo \"roscpp_serialization rostime :/usr/lib/libboost_date_time-mt.so :/usr/lib/libboost_system-mt.so :/usr/lib/libboost_thread-mt.so pthread cpp_common\"
-elif [ \"$1\"  = \"libs-only-other\" ];then
-   true
-elif [ \"$1\"  = \"langs\" ];then
-   true
-else
-   /opt/ros/groovy/bin/rospack $@
-fi
-")
-execute_process(
-  COMMAND sh -c "chmod u+x /tmp/${_random_string}/rospack"
-  COMMAND sh -c "touch /tmp/${_random_string}/rosdep; chmod u+x /tmp/${_random_string}/rosdep"
-  COMMAND sh -c "PATH=/tmp/${_random_string}:$PATH ROS_PACKAGE_PATH=/tmp/${_random_string}/pr2_controllers_msgs:$ROS_PACKAGE_PATH make -C /tmp/${_random_string}/pr2_controllers_msgs"
-  OUTPUT_VARIABLE _compile_output
-  RESULT_VARIABLE _compile_failed)
-message("Compile pr2_controllers_msgs files ${_compile_output}")
-if (_compile_failed)
-  message(FATAL_ERROR "Compile pr2_controllers_msgs failed : ${_compile_failed}")
-endif(_compile_failed)
-
-include_directories(/tmp/${_random_string}/pr2_controllers_msgs/msg_gen/cpp/include)
-
 endif($ENV{ROS_ROOT} MATCHES "/opt/ros/groovy/share/ros")
 
 rtmbuild_add_executable(HrpsysSeqStateROSBridge src/HrpsysSeqStateROSBridgeImpl.cpp src/HrpsysSeqStateROSBridge.cpp src/HrpsysSeqStateROSBridgeComp.cpp)
