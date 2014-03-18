@@ -95,6 +95,8 @@ if __name__ == '__main__':
             except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE), e :
                 print "[hrpsys_profile.py] catch exception", e
                 rtc_init()
+            except Exception, e:
+                pass
 
             r.sleep()
         
