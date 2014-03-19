@@ -4,7 +4,9 @@
   <arg name="PROJECT_FILE" />
   <arg name="MODEL_FILE" />
   <arg name="CONF_FILE" />
-  <arg name="RESPAWN" default="true"/>
+  <arg name="RESPAWN_MODELLOADER" default="true"/>
+  <arg name="RESPAWN_RTCD" default="false" />
+  <arg name="RESPAWN_SIMULATOR" default="true" />
   <arg name="OUTPUT" default="log"/>
   <arg name="SIMULATOR_NAME"/>
   <env name="LANG" value="C" />
@@ -87,15 +89,15 @@
 
   <node name="modelloader" pkg="openhrp3" type="openhrp-model-loader"
         args="$(arg omniorb_args)"
-        respawn="$(arg RESPAWN)" output="screen"
+        respawn="$(arg RESPAWN_MODELLOADER)" output="screen"
         if="$(arg openrtm_openhrp_server_start)"/> <!-- loading dae files crushes model loader -->
 
   <node if="$(arg USE_RTCD)"
-        name="hrpsys" pkg="openrtm_aist" type="rtcd" output="$(arg OUTPUT)"
+        name="hrpsys" pkg="openrtm_aist" type="rtcd" respawn="$(arg RESPAWN_RTCD)" output="$(arg OUTPUT)"
         launch-prefix="$(arg RTCD_LAUNCH_PREFIX)"
         args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_args)" />
   <node unless="$(arg USE_RTCD)"
-        name="hrpsys" pkg="hrpsys" type="hrpsys-simulator" output="$(arg OUTPUT)"
+        name="hrpsys" pkg="hrpsys" type="hrpsys-simulator" respawn="$(arg RESPAWN_SIMULATOR)" output="$(arg OUTPUT)"
         launch-prefix="$(arg RTCD_LAUNCH_PREFIX)"
         args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_gui_args) $(arg hrpsys_opt_args) $(arg hrpsys_args)" />
 
