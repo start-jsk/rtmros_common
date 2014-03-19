@@ -1,16 +1,21 @@
 <launch>
   <arg name="KILL_SERVERS" default="false" />
+  <arg name="GUI" default="true" />
   <arg name="NOSIM" default="false" />
   <arg name="REALTIME" default="false" />
+  <arg name="SIMULATOR_NAME" default="@ROBOT@(Robot)0" />
   <arg name="PROJECT_FILE" default="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@_nosim.xml" if="$(arg NOSIM)"/>
   <arg name="PROJECT_FILE" default="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.xml" unless="$(arg NOSIM)"/>
+  <arg name="corbaport" default="15005" />
   <param name="use_sim_time" value="true" />
   <include file="$(find hrpsys_tools)/launch/hrpsys.launch">
     <arg name="PROJECT_FILE" value="$(arg PROJECT_FILE)"/>
     <arg name="MODEL_FILE" value="@MODEL_FILE@" />
     <arg name="CONF_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.conf" />
-    <arg name="SIMULATOR_NAME" value="@ROBOT@(Robot)0" />
+    <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
     <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
     <arg name="REALTIME" default="$(arg REALTIME)" />
+    <arg name="corbaport" default="$(arg corbaport)" />
+    <arg name="GUI" default="$(arg GUI)" />
   </include>
 </launch>

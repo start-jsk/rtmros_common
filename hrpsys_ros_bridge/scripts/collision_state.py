@@ -39,10 +39,18 @@ def rtc_init () :
         ms = rtm.findRTCmanager(rtm.nshost)
         rospy.loginfo("[collision_state.py] wait for RTCmanager : ",ms)
 
-    co = rtm.findRTC(rospy.get_param('~comp_name', 'co'))
+    co = None
+    count = 0
+    while co  == None and count < 10:
+        co = rtm.findRTC(rospy.get_param('~comp_name', 'co'))
+        if co :
+            break
+        rospy.logwarn("Could not found CollisionDetector, waiting...")
+        time.sleep(1)
+        count += 1
     if co == None:
         rospy.logerr("Could not found CollisionDetector, exiting...")
-        exit(1)
+        exit(0)
     co_svc = narrow(co.service("service0"), "CollisionDetectorService")
 
     if modelfile:

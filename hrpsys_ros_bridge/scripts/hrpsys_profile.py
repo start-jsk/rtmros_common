@@ -90,12 +90,13 @@ if __name__ == '__main__':
         r = rospy.Rate(1) # 10hz
 
         while not rospy.is_shutdown():
-            hrpsys_profile()
             try :
                 hrpsys_profile()
             except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE), e :
                 print "[hrpsys_profile.py] catch exception", e
-                rtc_init(hostname)
+                rtc_init()
+            except Exception, e:
+                pass
 
             r.sleep()
         

@@ -21,6 +21,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <!-- seq state ros bridge -->
   <depend package="roscpp"/>
   <depend package="sensor_msgs"/>
+  <depend package="visualization_msgs"/>
   <depend package="robot_state_publisher"/>
   <depend package="actionlib"/>
   <!-- pr2_controllers_msgs in manifest.xml is initially commented out
@@ -43,9 +44,12 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <depend package="camera_info_manager" />
   <depend package="image_transport" />
   <depend package="dynamic_reconfigure" />
+  <depend package="diagnostic_aggregator" />
 
   <!-- dashboard -->
   <!-- depend package="pr2_dashboard"/ -->
+
+  <rosdep name="collada_urdf"/>
 
   <!-- rtm* command -->
   <rosdep name="python-psutil"/>
