@@ -1,0 +1,13 @@
+<launch>
+
+  <node name="teset_compile_robot" pkg="hrpsys_ros_bridge" type="test-compile-robot.sh" />
+
+  <!-- check if tf is published -->
+  <param name="hztest_tf/topic" value="/tf" />
+  <param name="hztest_tf/wait_time" value="100" />
+  <param name="hztest_tf/hz" value="1000.0" />
+  <param name="hztest_tf/hzerror" value="2000.0" />
+  <param name="hztest_tf/test_duration" value="5.0" />
+  <test test-name="hztest_tf" pkg="rostest" type="hztest" name="hztest_tf" retry="4" />
+
+</launch>

@@ -10,8 +10,8 @@ ln -sf `rospack find hrpsys_tools` ${CATKIN_DIR}/src/hrpsys_tools
 cd ${CATKIN_DIR}
 catkin_make
 source ${CATKIN_DIR}/devel/setup.bash
-yes | rosrun openrtm_aist rtm-naming
-roslaunch hrpsys_ros_bridge_test samplerobot.launch corbaport:=2809 GUI:=false RUN_RVIZ:=false
+#yes | rosrun openrtm_aist rtm-naming
+#roslaunch hrpsys_ros_bridge_test samplerobot.launch corbaport:=2809 GUI:=false RUN_RVIZ:=false
 
 
 
