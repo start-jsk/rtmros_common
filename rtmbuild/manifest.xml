@@ -10,11 +10,14 @@
   <url>http://ros.org/wiki/rtmbuild</url>
 
   <depend package="std_msgs"/>
+  <depend package="openrtm_aist"/>
+  <depend package="openrtm_aist_python"/>
 
   <rosdep name="omniorb"/>
   <rosdep name="libblas-dev"/>
   <rosdep name="liblapack-dev"/>
   <rosdep name="cmake_modules"/>
+  <rosdep name="rostest"/>
 
 </package>
 

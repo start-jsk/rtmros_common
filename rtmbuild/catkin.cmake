@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(rtmbuild)
 # Load catkin and all dependencies required for this package
 # TODO: remove all from COMPONENTS that are not catkin packages.
-find_package(catkin REQUIRED COMPONENTS)
+find_package(catkin REQUIRED COMPONENTS rostest)
 
 find_package(PkgConfig)
 pkg_check_modules(OMNIORB REQUIRED omniORB4)
@@ -69,6 +69,7 @@ catkin_package(
     CATKIN_DEPENDS  message_generation std_msgs # TODO
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO
+    CFG_EXTRAS rtmbuild.cmake servicebridge.cmake
 )
 
 # install cmake files for catkin (except some files only used at build time of catkin)
@@ -79,3 +80,5 @@ install(DIRECTORY scripts
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
   PATTERN ".svn" EXCLUDE)
+
+add_rostest(test/test-compile-idl.test)
