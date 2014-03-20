@@ -1,0 +1,13 @@
+<launch>
+  <env name="RTCTREE_NAMESERVERS" value="localhost:9999" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:localhost:9999" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+
+  <node name="start_name_server_9999" pkg="rtmbuild" type="start_omninames.sh" args="9999" />
+
+  <node name="provider" pkg="openrtm_aist" type="MyServiceProviderComp" args='$(arg openrtm_args)' />
+  <node name="consumer" pkg="openrtm_aist" type="MyServiceConsumerComp"	args='$(arg openrtm_args)' />
+
+  <node name="test_compile_idl_sh" pkg="rtmbuild" type="test-compile-idl.sh" />
+
+  <test test-name="test_compile_idl_py" pkg="rtmbuild" type="test-compile-idl.py" />
+</launch>
