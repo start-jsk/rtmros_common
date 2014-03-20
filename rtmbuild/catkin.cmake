@@ -69,6 +69,7 @@ catkin_package(
     CATKIN_DEPENDS  message_generation std_msgs # TODO
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO
+    CFG_EXTRAS rtmbuild.cmake servicebridge.cmake
 )
 
 # install cmake files for catkin (except some files only used at build time of catkin)
