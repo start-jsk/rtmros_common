@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(rtmbuild)
 # Load catkin and all dependencies required for this package
 # TODO: remove all from COMPONENTS that are not catkin packages.
-find_package(catkin REQUIRED COMPONENTS)
+find_package(catkin REQUIRED COMPONENTS rostest)
 
 find_package(PkgConfig)
 pkg_check_modules(OMNIORB REQUIRED omniORB4)
@@ -79,3 +79,5 @@ install(DIRECTORY scripts
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   USE_SOURCE_PERMISSIONS
   PATTERN ".svn" EXCLUDE)
+
+add_rostest(test/test-compile-idl.test)

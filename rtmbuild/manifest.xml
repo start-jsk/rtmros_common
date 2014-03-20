@@ -15,6 +15,7 @@
   <rosdep name="libblas-dev"/>
   <rosdep name="liblapack-dev"/>
   <rosdep name="cmake_modules"/>
+  <rosdep name="rostest"/>
 
 </package>
 
