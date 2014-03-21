@@ -219,25 +219,26 @@ macro(compile_openhrp_model wrlfile)
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
   if(EXISTS ${_collada2eus_exe} AND EXISTS ${_export_collada_exe})
-    add_custom_target(${_sname}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
+    add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
   elseif(EXISTS ${_export_collada_exe})
-    add_custom_target(${_sname}_compile DEPENDS ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
+    add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
   else()
-    add_custom_target(${_sname}_compile DEPENDS ${_xmlfile} ${_xmlfile_nosim})
+    add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_xmlfile} ${_xmlfile_nosim})
   endif()
   ## make sure to kill nameserver
-  add_custom_command(OUTPUT ${_sname}_compile_cleanup
+  add_custom_command(OUTPUT ${_sname}_${PROJECT_NAME}_compile_cleanup
     COMMAND echo "pkill -KILL -f omniNames -start ${_corba_port} for compile_openhrp_model"
     COMMAND echo "pkill -KILL -f omniNames\\ -start\\ ${_corba_port}" >  ./pkill-omninames-${_corba_port}.sh
     COMMAND sh ./pkill-omninames-${_corba_port}.sh || echo "no process to kill"
     COMMAND ps -C omniNames || true
-    DEPENDS  ${_sname}_compile
+    DEPENDS  ${_sname}_${PROJECT_NAME}_compile
     VERBATIM)
-  add_custom_target(${_sname}_compile_all ALL DEPENDS ${_sname}_compile_cleanup)
+  add_custom_target(${_sname}_${PROJECT_NAME}_compile_all ALL DEPENDS ${_sname}_${PROJECT_NAME}_compile_cleanup)
   get_directory_property(_current_directory_properties ADDITIONAL_MAKE_CLEAN_FILES)
   set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
     "${_workdir}/${_name}.conf;${_workdir}/${_name}.RobotHardware.conf;${_workdir}/${_name}_nosim.conf;${_workdir}/${_name}_nosim.RobotHardware.conf;${_current_directory_properties}")
-  list(APPEND compile_robots ${_sname}_compile)
+  list(APPEND compile_robots ${_sname}_${PROJECT_NAME}_compile_all)
+  set(compile_robots ${compile_robots} PARENT_SCOPE)
 endmacro(compile_openhrp_model)
 
 macro(compile_collada_model daefile)
@@ -363,23 +364,24 @@ macro(compile_collada_model daefile)
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
   if(EXISTS ${_collada2eus_exe})
-    add_custom_target(${_sname}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
+    add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
   else()
-    add_custom_target(${_sname}_compile DEPENDS ${_xmlfile} ${_xmlfile_nosim})
+    add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_xmlfile} ${_xmlfile_nosim})
   endif()
   ## make sure to kill nameserver
-  add_custom_command(OUTPUT ${_sname}_compile_cleanup
+  add_custom_command(OUTPUT ${_sname}_${PROJECT_NAME}_compile_cleanup
     COMMAND echo "pkill -KILL -f omniNames -start ${_corba_port} for compile_collada_model"
     COMMAND echo "pkill -KILL -f omniNames\\ -start\\ ${_corba_port}" >  ./pkill-omninames-${_corba_port}.sh
     COMMAND sh ./pkill-omninames-${_corba_port}.sh || echo "no process to kill"
     COMMAND ps -C omniNames || true
-    DEPENDS  ${_sname}_compile
+    DEPENDS  ${_sname}_${PROJECT_NAME}_compile
     VERBATIM)
-  add_custom_target(${_sname}_compile_all ALL DEPENDS ${_sname}_compile_cleanup)
+  add_custom_target(${_sname}_${PROJECT_NAME}_compile_all ALL DEPENDS ${_sname}_${PROJECT_NAME}_compile_cleanup)
   get_directory_property(_current_directory_properties ADDITIONAL_MAKE_CLEAN_FILES)
   set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
     "${_workdir}/${_name}.conf;${_workdir}/${_name}.RobotHardware.conf;${_workdir}/${_name}_nosim.conf;${_workdir}/${_name}_nosim.RobotHardware.conf;${_current_directory_properties}")
-  list(APPEND compile_robots ${_sname}_compile)
+  list(APPEND compile_robots ${_sname}_${PROJECT_NAME}_compile_all)
+  set(compile_robots ${compile_robots} PARENT_SCOPE)
 endmacro(compile_collada_model daefile)
 
 macro (generate_default_launch_eusinterface_files wrlfile project_pkg_name)
