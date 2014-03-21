@@ -283,15 +283,15 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         msgfile = basedir + "/msg/" + self.getCppTypeText(typ,full=ROS_FULL) + ".msg"
         if not os.path.exists(basedir):
             return
+        print msgfile
         if options.filenames:
-            print msgfile
             return
 
         if os.path.exists(msgfile) and (os.stat(msgfile).st_mtime > os.stat(idlfile).st_mtime) and not options.overwrite:
             return # do not overwrite
 
         os.system('mkdir -p %s/msg' % basedir)
-        print "[idl2srv] writing "+msgfile+"...."
+        print >>sys.stderr,"[idl2srv] writing "+msgfile+"...."
         fd = open(msgfile, 'w')
         if isinstance(typ, idlast.Enum):
             for val in typ.enumerators():
@@ -311,8 +311,8 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         srvfile = basedir + "/srv/" + self.getCppTypeText(op,full=ROS_FULL) + ".srv"
         if not os.path.exists(basedir):
             return
+        print srvfile
         if options.filenames:
-            print srvfile
             return
 
         if os.path.exists(srvfile) and (os.stat(srvfile).st_mtime > os.stat(idlfile).st_mtime) and not options.overwrite:
@@ -320,7 +320,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         os.system('mkdir -p %s/srv' % basedir)
         args = op.parameters()
 
-        print "[idl2srv] writing "+srvfile+"...."
+        print >>sys.stderr, "[idl2srv] writing "+srvfile+"...."
         fd = open(srvfile, 'w')
         for arg in [arg for arg in args if arg.is_in()]:
             fd.write("%s %s\n" % (self.getROSTypeText(arg.paramType()), arg.identifier()))
@@ -456,10 +456,10 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         Comp_cpp = wd + '/' + module_name + 'Comp.cpp'
         mod_cpp = wd + '/' + module_name + '.cpp'
         mod_h = wd + '/' + module_name + '.h'
+        print Comp_cpp
+        print mod_cpp
+        print mod_h
         if options.filenames:
-            print Comp_cpp
-            print mod_cpp
-            print mod_h
             return
 
         if all([ os.path.exists(x) and os.stat(x).st_mtime > os.stat(idlfile).st_mtime for x in [Comp_cpp, mod_cpp, mod_h]]) and not options.overwrite:
@@ -620,8 +620,10 @@ class InterfaceNameVisitor (idlvisitor.AstVisitor):
         for n in node.definitions():
             n.accept(self)
     def visitInterface(self, node):
-        if options.interfaces and node.mainFile():
+        if node.mainFile():
             print node.identifier()
+            if options.interfaces:
+                pass
 
 
 if __name__ == '__main__':
@@ -664,7 +666,7 @@ if __name__ == '__main__':
     # preproccess and compile idl
     if options.idlpath:
         pathlist = options.idlpath.strip('"')
-        option = ' '.join(['-I'+d for d in pathlist.split(' ')])
+        option = ' '.join(['-I'+d for d in filter(None, pathlist.split(' '))])
     else:
         option = ''
 
@@ -679,3 +681,5 @@ if __name__ == '__main__':
         tree.accept(InterfaceNameVisitor())
     else:
         tree.accept(ServiceVisitor())
+        tree.accept(InterfaceNameVisitor())
+
