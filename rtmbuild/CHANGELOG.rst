@@ -4,6 +4,7 @@ Changelog for package rtmbuild
 
 1.0.7 (2014-03-20)
 ------------------
+* add depends from RTMBUILD__rm_idl2srv to _generate_messages_cpp, so that we can generate message in the beginning
 * rtmbuild: check if openrtm_aist_PREFIX/lib/openrtm_aist/bin exists, if not, try rospack find, this happens when you compile your catkin code over rosbuild compiled rtmbuild (that never happens?)
 * rtmbuild: add test program to see if rtmbuild works
 * (rtmbuild.cmake, idl2srv.py) fix for rtmbuild/deb environment

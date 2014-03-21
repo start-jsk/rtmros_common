@@ -4,6 +4,7 @@ Changelog for package hrpsys_ros_bridge
 
 1.0.7 (2014-03-20)
 ------------------
+* `#22 <https://github.com/start-jsk/rtmros_common/issues/22>`_: add PROJECT_NAME to the target used in compile_robot_model to avoid collision of the target names
 * add rostest/hrpsys_tools to depends and find_package
 * hrpsys_ros_bridge: (test-compile-robot.launch) add test-compile-robot.launch (but is is not includeded in CMakeLists.txt and use .launch instead of .test due to Issue `#87 <https://github.com/start-jsk/rtmros_common/issues/87>`_), fix compile_robot_model.cmake work with devel of hrpsys_ros_bridge, disable launch script from test-compile-robot.sh
 * hrpsys_ros_bridge: add test-compile-robot.sh test-compile-robot.xml  test-compile-robot.cmake
@@ -75,7 +76,7 @@ Changelog for package hrpsys_ros_bridge
 * profibit to run rostest parallel
 * installing src directory as python package
 * (hrpsys_ros_bridge/package.xml) Partially revert r6936 where a dependency was removed by mistake.
-* Contributors: Kei Okada
+* Contributors: Kei Okada, Ryohei Ueda
 
 1.0.6
 -----
