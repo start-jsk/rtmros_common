@@ -4,10 +4,13 @@ Changelog for package rtmbuild
 
 1.0.7 (2014-03-20)
 ------------------
+* rtmbuild: check if openrtm_aist_PREFIX/lib/openrtm_aist/bin exists, if not, try rospack find, this happens when you compile your catkin code over rosbuild compiled rtmbuild (that never happens?)
+* rtmbuild: add test program to see if rtmbuild works
 * (rtmbuild.cmake, idl2srv.py) fix for rtmbuild/deb environment
 * (rtmbuild.cmake) display variables on both rtmbuild and cmake
 * (rtmbuild.cmake) add find_package(PkgConfig)
 * Wrong catkin macro (CATKIN-DEPENDS to CATKIN_DEPENDS).
+* Contributors: Kei Okada
 
 1.0.6
 -----
