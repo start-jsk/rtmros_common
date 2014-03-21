@@ -126,6 +126,9 @@ macro(rtmbuild_genbridge)
     COMMAND rm -fr /tmp/idl2srv/${PROJECT_NAME})
   add_dependencies(rtmbuild_${PROJECT_NAME}_genidl RTMBUILD_${PROJECT_NAME}_rm_idl2srv)
   add_custom_target(RTMBUILD_${PROJECT_NAME}_rm_idl2srv ALL DEPENDS /_tmp/idl2srv ${_rtmbuild_pkg_dir}/scripts/idl2srv.py ${_rtmbuild_pkg_dir}/cmake/servicebridge.cmake)
+  if (${use_catkin})
+    add_dependencies(RTMBUILD_${PROJECT_NAME}_rm_idl2srv ${PROJECT_NAME}_generate_messages_cpp)
+  endif()
   #
   foreach(_idl ${_idllist})
     execute_process(COMMAND ${_rtmbuild_pkg_dir}/scripts/idl2srv.py --interfaces -i ${PROJECT_SOURCE_DIR}/idl/${_idl} --include-dirs="${_servicebridge_include_dirs}" --package-name=${PROJECT_NAME} OUTPUT_VARIABLE _interface
