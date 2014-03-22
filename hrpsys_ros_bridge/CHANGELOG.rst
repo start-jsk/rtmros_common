@@ -4,6 +4,7 @@ Changelog for package hrpsys_ros_bridge
 
 1.0.7 (2014-03-20)
 ------------------
+* call find_package(catkin) fist
 * `#22 <https://github.com/start-jsk/rtmros_common/issues/22>`_: add PROJECT_NAME to the target used in compile_robot_model to avoid collision of the target names
 * add rostest/hrpsys_tools to depends and find_package
 * hrpsys_ros_bridge: (test-compile-robot.launch) add test-compile-robot.launch (but is is not includeded in CMakeLists.txt and use .launch instead of .test due to Issue `#87 <https://github.com/start-jsk/rtmros_common/issues/87>`_), fix compile_robot_model.cmake work with devel of hrpsys_ros_bridge, disable launch script from test-compile-robot.sh
