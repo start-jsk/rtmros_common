@@ -27,6 +27,7 @@ if(NOT pr2_controllers_msgs_FOUND)
   if (_compile_failed)
     message(FATAL_ERROR "compile pr2_controllers_msgs failed : ${_compile_failed}")
   endif(_compile_failed)
+ include_directories(${CMAKE_SOURCE_DIR}/../devel/include)
 endif()
 
 # include rtmbuild
