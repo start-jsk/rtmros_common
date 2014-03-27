@@ -1,321 +1,289 @@
 cmake_minimum_required(VERSION 2.8.3)
 
-# rtmbuild_genbridge_init() and rtmbuild_genbridge()
-if("${CMAKE_VERSION}" VERSION_LESS "2.8.3")
-  rosbuild_find_ros_package(rtmbuild)
+#set(DEBUG_RTMBUILD_CMAKE TRUE)
+
+set(use_catkin TRUE)
+
+# for rosbuild
+if(NOT COMMAND _rtmbuild_genbridge_init)
   include(${rtmbuild_PACKAGE_PATH}/cmake/servicebridge.cmake)
-else()
-  include(${CMAKE_CURRENT_LIST_DIR}/servicebridge.cmake) # > 2.8.3
+  set(use_catkin FALSE)
 endif()
 
-set(_RTMBUILD_GENERATED_IDL_FILES "")
-macro(rtmbuild_get_idls idlvar)
-  message("[rtmbuild_get_idls] glab idl files under ${PROJECT_SOURCE_DIR}/idl/")
-  file(GLOB _idl_files RELATIVE "${PROJECT_SOURCE_DIR}/idl" "${PROJECT_SOURCE_DIR}/idl/*.idl")
-  set(${idlvar} ${_RTMBUILD_GENERATED_IDL_FILES})
-  foreach(_idl ${_idl_files})
-    # copy from rosbuild_get_msgs to avoid .#Foo.idl, by emacs
-    if(${_idl} MATCHES "^[^\\.].*\\.idl$")
-      list(APPEND ${idlvar} ${_idl})
-    endif(${_idl} MATCHES "^[^\\.].*\\.idl$")
-  endforeach(_idl)
-endmacro(rtmbuild_get_idls)
 
-#compile idl/*.idl file into c++
+##
+## GLOBAL VARIABLES
+##
+## openrtm_aist_INCLUDE_DIRS
+## openrtm_aist_LIBRARIES
+## openhrp3_INCLUDE_DIRS
+## openhrp3_LIBRARIES
+## idl2srv_EXECUTABLE
+## rtmskel_EXECUTABLE
+## ${PROJECT_NAME}_idl_files
+## ${PROJECT_NAME}_autogen_files
+## ${PROJECT_NAME}_autogen_msg_files
+## ${PROJECT_NAME}_autogen_srv_files
+## ${PROJECT_NAME}_autogen_interfaces
+## rtm_idlc, rtm_idlflags, rtm_idldir
+## rtm_cxx,  rtm_cflags
+## hrp_idldir
+
+
+#
+# setup global variables
+#
+macro(rtmbuild_init)
+  if(NOT use_catkin) ## rosbuild_init cleans all variable so we first defind project and call rosbuild_init later with ROSBUILD_DONT_REDEFINE_PROJECT=TRUE
+    get_filename_component(_project ${CMAKE_SOURCE_DIR} NAME)
+    project(${_project})
+
+    rosbuild_find_ros_package(openrtm_aist)
+    rosbuild_find_ros_package(openhrp3)
+    set(ENV{PKG_CONFIG_PATH} ${openrtm_aist_PACKAGE_PATH}/lib/pkgconfig:${openhrp3_PACKAGE_PATH}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH})
+    message("[rtmbuild_init] - ENV{PKG_CONFIG_PATH} -  > $ENV{PKG_CONFIG_PATH}")
+  endif()
+  #
+  # use pkg-config to set --cflags --libs plus rtm-related flags
+  #
+  find_package(PkgConfig)
+  pkg_check_modules(openrtm_aist openrtm-aist REQUIRED)
+  pkg_check_modules(openhrp3 openhrp3.1)
+  message("[rtmbuild_init] Building package ${CMAKE_SOURCE_DIR} ${PROJECT_NAME}")
+  message("[rtmbuild_init] - CATKIN_TOPLEVEL = ${CATKIN_TOPLEVEL}")
+  if(DEBUG_RTMBUILD_CMAKE)
+    message("[rtmbuild_init] - openrtm_aist_INCLUDE_DIRS -> ${openrtm_aist_INCLUDE_DIRS}")
+    message("[rtmbuild_init] - openrtm_aist_LIBRARIES    -> ${openrtm_aist_LIBRARIES}")
+    message("[rtmbuild_init] - openhrp3_INCLUDE_DIRS -> ${openhrp3_INCLUDE_DIRS}")
+    message("[rtmbuild_init] - openhrp3_LIBRARIES    -> ${openhrp3_LIBRARIES}")
+  endif()
+
+  if(EXISTS ${rtmbuild_SOURCE_DIR})
+    set(idl2srv_EXECUTABLE ${rtmbuild_SOURCE_DIR}/scripts/idl2srv.py)
+  elseif(EXISTS ${rtmbuild_PACKAGE_PATH}) ## for rosbuild
+    set(idl2srv_EXECUTABLE ${rtmbuild_PACKAGE_PATH}/scripts/idl2srv.py)
+  else()
+    pkg_check_modules(rtmbuild rtmbuild REQUIRED)
+    set(idl2srv_EXECUTABLE ${rtmbuild_PREFIX}/share/rtmbuild/scripts/id2srv.py)
+  endif()
+  message("[rtmbuild_init] - idl2srv_EXECUTABLE     -> ${idl2srv_EXECUTABLE}")
+
+  execute_process(COMMAND pkg-config openrtm-aist --variable=prefix      OUTPUT_VARIABLE rtm_prefix    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(EXISTS ${rtm_prefix}/bin/rtm-config)
+    set(_rtm_exe_path ${rtm_prefix}/bin)
+  else()
+    set(_rtm_exe_path ${rtm_prefix}/lib/openrtm_aist/bin)
+  endif()
+  set(rtmskel_EXECUTABLE PATH=${_rtm_exe_path}:$ENV{PATH} PYTHONPATH=${openrtm_aist_PREFIX}/lib/openrtm-1.1/py_helper:$ENV{PYTHONPATH} ${_rtm_exe_path}/rtm-skelwrapper)
+  message("[rtmbuild_init] - rtmskel_EXECUTABLE     -> ${rtmskel_EXECUTABLE}")
+
+  execute_process(COMMAND pkg-config openrtm-aist --variable=rtm_idlc     OUTPUT_VARIABLE rtm_idlc     OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND pkg-config openrtm-aist --variable=rtm_idlflags OUTPUT_VARIABLE rtm_idlflags OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND pkg-config openrtm-aist --variable=rtm_idldir   OUTPUT_VARIABLE rtm_idldir   OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND pkg-config openrtm-aist --variable=rtm_cxx      OUTPUT_VARIABLE rtm_cxx      OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND pkg-config openrtm-aist --variable=rtm_cflags   OUTPUT_VARIABLE rtm_cflags   OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND pkg-config openrtm-aist --variable=rtm_libs     OUTPUT_VARIABLE rtm_libs     OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND pkg-config openhrp3.1   --variable=idl_dir      OUTPUT_VARIABLE hrp_idldir   OUTPUT_STRIP_TRAILING_WHITESPACE)
+  separate_arguments(rtm_idlflags)
+  separate_arguments(rtm_cflags)
+  separate_arguments(rtm_libs)
+  set(rtm_cxx "c++") ## openrtm-aist --variable=rtm_cxx sometimes returns /usr/lib/ccache/c++
+  message("[rtmbuild_init] - rtm_idlc               -> ${rtm_idlc}")
+  message("[rtmbuild_init] - rtm_idlflags           -> ${rtm_idlflags}")
+  message("[rtmbuild_init] - rtm_idldir             -> ${rtm_idldir}")
+  message("[rtmbuild_init] - rtm_cxx                -> ${rtm_cxx}")
+  message("[rtmbuild_init] - rtm_cflags             -> ${rtm_cflags}")
+  message("[rtmbuild_init] - rtm_libs               -> ${rtm_libs}")
+  message("[rtmbuild_init] - hrp_idldir             -> ${hrp_idldir}")
+
+  ##
+  ## get idl files and store to _idl_list
+  message("[rtmbuild_init] Generating bridge compornents from ${PROJECT_SOURCE_DIR}/idl")
+  set(${PROJECT_NAME}_idl_files "")
+  _rtmbuild_get_idls() ## set ${PROJECT_NAME}_idl_files
+  message("[rtmbuild_init] - ${PROJECT_NAME}_idl_files : ${${PROJECT_NAME}_idl_files}")
+  if(NOT ${PROJECT_NAME}_idl_files)
+    message(AUTHOR_WARNING "[rtmbuild_init] - no idl file is defined")
+  endif()
+
+  ## generate msg/srv/cpp from idl
+  set(${PROJECT_NAME}_autogen_msg_files "")
+  set(${PROJECT_NAME}_autogen_srv_files "")
+  _rtmbuild_genbridge_init()
+  message("[rtmbuild_init] - ${PROJECT_NAME}_autogen_msg_files  : ${${PROJECT_NAME}_autogen_msg_files}")
+  message("[rtmbuild_init] - ${PROJECT_NAME}_autogen_srv_files  : ${${PROJECT_NAME}_autogen_srv_files}")
+  message("[rtmbuild_init] - ${PROJECT_NAME}_autogen_interfaces : ${${PROJECT_NAME}_autogen_interfaces}")
+  set(rtmbuild_${PROJECT_NAME}_autogen_msg_files ${${PROJECT_NAME}_autogen_msg_files}) 
+
+  ##
+  ## rosbulid_init for rosbuild
+  if(NOT use_catkin)
+    set(ROSBUILD_DONT_REDEFINE_PROJECT TRUE)
+    rosbuild_init()
+  endif()
+
+  if(use_catkin)
+    add_message_files(DIRECTORY msg FILES "${${PROJECT_NAME}_autogen_msg_files}")
+    add_service_files(DIRECTORY srv FILES "${${PROJECT_NAME}_autogen_srv_files}")
+    generate_messages(DEPENDENCIES std_msgs)
+  else()
+    rosbuild_genmsg()
+    rosbuild_gensrv()
+  endif()
+
+  include_directories(${catkin_INCLUDE_DIRS} ${openrtm_aist_INCLUDE_DIRS} ${openhrp3_INCLUDE_DIRS})
+  link_directories(${catkin_LIBRARY_DIRS} ${openrtm_aist_LIBRARY_DIRS} ${openhrp3_LIBRARY_DIRS})
+
+endmacro(rtmbuild_init)
+
+# add_custom_command to compile idl/*.idl file into c++
 macro(rtmbuild_genidl)
-  message("[rtmbuild_genidl] Compiling idls in package ${PROJECT_NAME}")
-  rtmbuild_get_idls(_idllist)
-  set(_autogen "")
-  if(NOT _idllist)
-    message("[rtmbuild_genidl] WARNING: rtmbuild_genidl() was called, but no .idl files ware found")
-  else(NOT _idllist)
-    file(WRITE ${PROJECT_SOURCE_DIR}/idl_gen/generated "yes")
-    file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl_gen/cpp/${PROJECT_NAME}/idl)
-    file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl_gen/lib)
-  endif(NOT _idllist)
+  message("[rtmbuild_genidl] add_custom_command for idl files in package ${PROJECT_NAME}")
 
-  if (${use_catkin})
-    set(_output_dir ${PROJECT_SOURCE_DIR}/idl_gen)
-    set(_output_cpp_dir ${PROJECT_SOURCE_DIR}/idl_gen/cpp/${PROJECT_NAME}/idl)
-    set(_output_lib_dir ${PROJECT_SOURCE_DIR}/idl_gen/lib)
+  set(_autogen "")
+
+  if (use_catkin)
+    set(_output_cpp_dir ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+    set(_output_lib_dir ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_LIB_DESTINATION})
     set(_output_python_dir ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION}/${PROJECT_NAME})
   else()
     set(_output_dir ${PROJECT_SOURCE_DIR}/idl_gen)
-    set(_output_cpp_dir ${PROJECT_SOURCE_DIR}/idl_gen/cpp/${PROJECT_NAME}/idl)
+    set(_output_cpp_dir ${PROJECT_SOURCE_DIR}/idl_gen/cpp/${PROJECT_NAME})
     set(_output_lib_dir ${PROJECT_SOURCE_DIR}/idl_gen/lib)
     set(_output_python_dir ${PROJECT_SOURCE_DIR}/src/${PROJECT_NAME})
+    include_directories(${PROJECT_SOURCE_DIR}/idl_gen/cpp/)
   endif()
 
   set(_output_idl_py_prev "")
-  foreach(_idl ${_idllist})
-    message("[rtmbuild_genidl] ${_idl}")
-    execute_process(COMMAND ${_openrtm_aist_pkg_dir}/bin/rtm-config --idlc OUTPUT_VARIABLE _genidl_exe
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-#    --cxx is grx option???
-#    execute_process(COMMAND rtm-config --cxx OUTPUT_VARIABLE _rtmcxx_ex
-#      OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(_rtmcxx_exe "g++")
+  file(MAKE_DIRECTORY ${_output_cpp_dir}/idl)
+  file(MAKE_DIRECTORY ${_output_lib_dir})
+  link_directories(${_output_lib_dir})
 
-    set(_input_idl ${PROJECT_SOURCE_DIR}/idl/${_idl})
-    set(_output_idl_hh ${_output_cpp_dir}/${_idl})
-    set(_output_idl_py ${PROJECT_SOURCE_DIR}/src/${PROJECT_NAME}/${_idl})
-    set(_output_stub_h ${_output_cpp_dir}/${_idl})
-    set(_output_skel_h ${_output_cpp_dir}/${_idl})
-    set(_output_stub_cpp ${_output_cpp_dir}/${_idl})
-    set(_output_skel_cpp ${_output_cpp_dir}/${_idl})
-    set(_output_stub_lib ${_output_lib_dir}/lib${_idl})
-    set(_output_skel_lib ${_output_lib_dir}/lib${_idl})
-    string(REPLACE ".idl" ".hh" _output_idl_hh ${_output_idl_hh})
-    string(REPLACE ".idl" "_idl.py" _output_idl_py ${_output_idl_py})
-    string(REPLACE ".idl" "Stub.cpp" _output_stub_cpp ${_output_stub_cpp})
-    string(REPLACE ".idl" "Stub.h"   _output_stub_h   ${_output_stub_h})
-    string(REPLACE ".idl" "Stub.so"  _output_stub_lib ${_output_stub_lib})
-    string(REPLACE ".idl" "Skel.cpp" _output_skel_cpp ${_output_skel_cpp})
-    string(REPLACE ".idl" "Skel.h"   _output_skel_h   ${_output_skel_h})
-    string(REPLACE ".idl" "Skel.so"  _output_skel_lib ${_output_skel_lib})
+  message("[rtmbuild_genidl] - _output_cpp_dir : ${_output_cpp_dir}")
+  message("[rtmbuild_genidl] - _output_lib_dir : ${_output_lib_dir}")
+  message("[rtmbuild_genidl] - _output_python_dir : ${_output_python_dir}")
 
+  ## RTMBUILD_${PROJECT_NAME}_genrpc) depends on each RTMBUILD_${PROJECT_NAME}_${_idl_name}_genrpc)
+  add_custom_target(RTMBUILD_${PROJECT_NAME}_genrpc)
+  if(NOT ${PROJECT_NAME}_idl_files)
+    message(AUTHOR_WARNING "[rtmbuild_genidl] - no idl file is defined")
+  endif()
+  foreach(_idl_file ${${PROJECT_NAME}_idl_files})
+    get_filename_component(_idl_name ${_idl_file} NAME_WE)
+    message("[rtmbuild_genidl] - _idl_file : ${_idl_file}")
+    message("[rtmbuild_genidl] - _idl_name : ${_idl_name}")
+
+    # set(_input_idl ${PROJECT_SOURCE_DIR}/idl/${_idl})
+
+    set(_output_idl_hh ${_output_cpp_dir}/idl/${_idl_name}.hh)
+    set(_output_idl_py ${_output_python_dir}/${_idl_name}_idl.py)
+    set(_output_stub_h ${_output_cpp_dir}/idl/${_idl_name}Stub.h)
+    set(_output_skel_h ${_output_cpp_dir}/idl/${_idl_name}Skel.h)
+    set(_output_stub_cpp ${_output_cpp_dir}/idl/${_idl_name}Stub.cpp)
+    set(_output_skel_cpp ${_output_cpp_dir}/idl/${_idl_name}Skel.cpp)
+    set(_output_stub_lib ${_output_lib_dir}/lib${_idl_name}Stub.so)
+    set(_output_skel_lib ${_output_lib_dir}/lib${_idl_name}Skel.so)
+    list(APPEND ${PROJECT_NAME}_IDLLIBRARY_DIRS lib${_idl_name}Stub.so lib${_idl_name}Skel.so)
     # call the  rule to compile idl
+    if(DEBUG_RTMBUILD_CMAKE)
+      message("[rtmbuild_genidl] ${_output_idl_hh}\n -> ${_idl_file} ${${_idl}_depends}")
+      message("[rtmbuild_genidl] ${_output_stub_cpp} ${_output_skel_cpp} ${_output_stub_h} ${_output_skel_h}\n -> ${_output_idl_hh}")
+      message("[rtmbuild_genidl] ${_output_stub_lib} ${_output_skel_lib}\n -> ${_output_stub_cpp} ${_output_stub_h} ${_output_skel_cpp} ${_output_skel_h}")
+    endif()
+    # cpp
     add_custom_command(OUTPUT ${_output_idl_hh}
-      COMMAND ${_genidl_exe} `${_openrtm_aist_pkg_dir}/bin/rtm-config --idlflags` `${_openrtm_aist_pkg_dir}/bin/rtm-config --cflags | sed 's/^-[^I]\\S*//g' | sed 's/\ -[^I]\\S*//g'` -I${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl -C${_output_cpp_dir} ${_input_idl}
-      DEPENDS ${_input_idl} ${${_idl}_depends})
+      COMMAND ${rtm_idlc} ${rtm_idlflags} -C${_output_cpp_dir}/idl ${_idl_file}
+      DEPENDS ${_idl_file})
     add_custom_command(OUTPUT ${_output_stub_cpp} ${_output_skel_cpp} ${_output_stub_h} ${_output_skel_h}
-      COMMAND cp ${_input_idl} ${_output_cpp_dir}
+      COMMAND cp ${_idl_file} ${_output_cpp_dir}/idl
       COMMAND rm -f ${_output_stub_cpp} ${_output_skel_cpp} ${_output_stub_h} ${_output_skel_h}
-      COMMAND PATH=${_openrtm_aist_pkg_dir}/bin/:$ENV{PATH} rtm-skelwrapper --include-dir="" --skel-suffix=Skel --stub-suffix=Stub  --idl-file=${_idl}
-      #COMMAND rm ${_output_cpp_dir}/${_idl} # does not work in parallel make
-      WORKING_DIRECTORY ${_output_cpp_dir}
+      COMMAND ${rtmskel_EXECUTABLE} --include-dir="" --skel-suffix=Skel --stub-suffix=Stub  --idl-file=${_idl_file}
+      WORKING_DIRECTORY ${_output_cpp_dir}/idl
       DEPENDS ${_output_idl_hh})
     add_custom_command(OUTPUT ${_output_stub_lib} ${_output_skel_lib}
-      COMMAND ${_rtmcxx_exe} `${_openrtm_aist_pkg_dir}/bin/rtm-config --cflags` -I. ${${PROJECT_NAME}_IDLLIBRARY_INCDIRS} -shared -o ${_output_stub_lib} ${_output_stub_cpp} `${_openrtm_aist_pkg_dir}/bin/rtm-config --libs` ${OPENHRP_PRIVATE_LIBRARIES}
-      COMMAND ${_rtmcxx_exe} `${_openrtm_aist_pkg_dir}/bin/rtm-config --cflags` -I. ${${PROJECT_NAME}_IDLLIBRARY_INCDIRS} -shared -o ${_output_skel_lib} ${_output_skel_cpp} `${_openrtm_aist_pkg_dir}/bin/rtm-config --libs` ${OPENHRP_PRIVATE_LIBRARIES}
+      COMMAND ${rtm_cxx} ${rtm_cflags} -I. -shared -o ${_output_stub_lib} ${_output_stub_cpp} ${rtm_libs}
+      COMMAND ${rtm_cxx} ${rtm_cflags} -I. -shared -o ${_output_skel_lib} ${_output_skel_cpp} ${rtm_libs}
       DEPENDS ${_output_stub_cpp} ${_output_stub_h} ${_output_skel_cpp} ${_output_skel_h})
+    list(APPEND ${PROJECT_NAME}_IDLLIBRARY_DIRS ${_output_stub_lib} ${_output_skel_lib})
+    if(use_catkin)
+      install(PROGRAMS ${_output_stub_lib} ${_output_skel_lib} DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+    endif()
     # python
     add_custom_command(OUTPUT ${_output_idl_py}
       COMMAND mkdir -p ${_output_python_dir}
-      COMMAND echo \"import sys\; sys.path.append('${_output_python_dir}')\; import ${PROJECT_NAME}\" > ${_output_python_dir}/__init__.py
-      COMMAND ${_genidl_exe} -bpython -I`${_openrtm_aist_pkg_dir}/bin/rtm-config --cflags | sed 's/^-[^I]\\S*//g' | sed 's/\ -[^I]\\S*//g'` -I${_openhrp3_pkg_dir}/share/OpenHRP-3.1/idl -C${_output_python_dir} ${_input_idl}
-      DEPENDS ${_input_idl} ${${_idl}_depends} ${_output_idl_py_prev})
-    set(_output_idl_py_prev ${_output_idl_py})
+      COMMAND ${rtm_idlc} -bpython ${rtm_idlflags} -C${_output_python_dir} ${_idl_file}
+      DEPENDS ${_idl_file} ${_output_idl_py_prev})
+    set(${_output_idl_py_prev} ${_output_idl_py})
     #
     list(APPEND _autogen ${_output_stub_lib} ${_output_skel_lib} ${_output_idl_py})
-  endforeach(_idl)
-  ##
-  add_dependencies(rtmbuild_${PROJECT_NAME}_genidl RTMBUILD_${PROJECT_NAME}_genidl)
-  add_custom_target(RTMBUILD_${PROJECT_NAME}_genidl DEPENDS ${_autogen})
-  if (${use_catkin})
-    install(DIRECTORY ${_output_lib_dir}/ ## add / is important
-      DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-      USE_SOURCE_PERMISSIONS  # set executable
-      )
-  endif()
 
-  #
+    # add custom target
+    add_custom_target(RTMBUILD_${PROJECT_NAME}_${_idl_name}_genrpc DEPENDS ${_output_stub_lib} ${_output_skel_lib} ${_output_idl_py})
+    add_dependencies(RTMBUILD_${PROJECT_NAME}_genrpc RTMBUILD_${PROJECT_NAME}_${_idl_name}_genrpc)
+
+  endforeach(_idl_file)
+  ##
+
   if(_autogen)
+    if(DEBUG_RTMBUILD_CMAKE)
+      message("[rtmbuild_genidl] ADDITIONAL_MAKE_CLEAN_FILES : ${_autogen}")
+    endif()
     # Also set up to clean the srv_gen directory
     get_directory_property(_old_clean_files ADDITIONAL_MAKE_CLEAN_FILES)
-    list(APPEND _old_clean_files ${PROJECT_SOURCE_DIR}/idl_gen)
+    list(APPEND _old_clean_files ${_autogen})
     set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${_old_clean_files}")
   endif(_autogen)
 endmacro(rtmbuild_genidl)
 
-##
-macro(rtmbuild_init)
-  ## use pkgconfig with openhrp3.1 and openrtm-aist
-  # catch the error output to suppress it
+macro(rtmbuild_genbridge)
+  message("[rtmbuild_genbridge] generate OpenRTM-ROS bridges")
   #
-  # setup pkg path
-  #
-  set(use_catkin FALSE)
-  if (${CATKIN_TOPLEVEL})
-    set(use_catkin TRUE)
+  add_custom_target(RTMBUILD_${PROJECT_NAME}_genbridge)
+
+  message("[rtmbuild_genbridge] - ${PROJECT_NAME}_autogen_interfaces : ${${PROJECT_NAME}_autogen_interfaces}")
+  if(NOT ${PROJECT_NAME}_autogen_interfaces)
+    message(AUTHOR_WARNING "[rtmbuild_genbridge] - no interface is defined")
   endif()
-  if (${CATKIN_BUILD_BINARY_PACKAGE})
-    set(use_catkin TRUE)
-  endif()
-  if (use_catkin)
-    find_package(PkgConfig)
-    # to find idl2srv.py
-    if(EXISTS ${rtmbuild_SOURCE_DIR})
-      set(_rtmbuild_pkg_dir ${rtmbuild_SOURCE_DIR})
-    else()
-      pkg_check_modules(rtmbuild rtmbuild REQUIRED)
-      set(_rtmbuild_pkg_dir ${rtmbuild_PREFIX}/share/rtmbuild)
-    endif()
-    pkg_check_modules(openrtm_aist openrtm-aist REQUIRED)
-    if ( EXISTS ${openrtm_aist_PREFIX}/lib/openrtm_aist/bin )
-      set(_openrtm_aist_pkg_dir ${openrtm_aist_PREFIX}/lib/openrtm_aist)
-    else()
-      execute_process(COMMAND rospack find openrtm_aist OUTPUT_VARIABLE _openrtm_aist_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
-    endif()
-    pkg_check_modules(openhrp3 openhrp3.1)
-    set(_openhrp3_pkg_dir ${openhrp3_PREFIX}/share/openhrp3)
-    message("[rtmbuild] CATKIN compile : set pkg_dirs")
-    message("[rtmbuild] openrtm_aist_INCLUDE_DIRS -> ${openrtm_aist_INCLUDE_DIRS}")
-    message("[rtmbuild] openrtm_aist_LIBRARIES    -> ${openrtm_aist_LIBRARIES}")
-    message("[rtmbuild] openhrp3_INCLUDE_DIRS -> ${openhrp3_INCLUDE_DIRS}")
-    message("[rtmbuild] openhrp3_LIBRARIES    -> ${openhrp3_LIBRARIES}")
-    find_package(message_generation REQUIRED) ## load add_message_files(), add_service_files()
-    # setup openrtm include dirs
-    set(OPENRTM_INCLUDE_DIRS ${openrtm_aist_INCLUDE_DIRS})
-    set(OPENRTM_LIBRARY_DIRS ${openrtm_aist_LIBRARY_DIRS})
-    #execute_process(COMMAND ${_openrtm_aist_pkg_dir}/bin/rtm-config --cflags OUTPUT_VARIABLE OPENRTM_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
-    #execute_process(COMMAND sh -c "echo ${OPENRTM_INCLUDE_DIRS} | sed 's/^-[^I]\\S*//g' | sed 's/\ -[^I]\\S*//g' | sed 's/-I//g' | sed 's/^\ //g' | sed 's/\ /;/g' " OUTPUT_VARIABLE OPENRTM_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
+  foreach(_comp ${${PROJECT_NAME}_autogen_interfaces})
+    message("[rtmbuild_genbridge] - rtmbuild_add_executable : ${_comp}ROSBridgeComp")
+    rtmbuild_add_executable("${_comp}ROSBridgeComp" "src_gen/${_comp}ROSBridge.cpp" "src_gen/${_comp}ROSBridgeComp.cpp")
+    add_custom_target(RTMBUILD_${PROJECT_NAME}_${_comp}_genbridge DEPENDS src_gen/${_comp}ROSBridge.cpp src_gen/${_comp}ROSBridgeComp.cpp)
+    add_dependencies(RTMBUILD_${PROJECT_NAME}_genbridge RTMBUILD_${PROJECT_NAME}_${_comp}_genbridge)
+  endforeach(_comp)
 
-    # setup openhrp3 include dirs
-    set(OPENHRP_INCLUDE_DIRS ${openhrp3_INCLUDE_DIRS})
-    set(OPENHRP_LIBRARY_DIRS ${openhrp3_LIBRARY_DIRS})
-    #
-    set(ENV{PATH} ${_openrtm_aist_pkg_dir}/bin:$ENV{PATH})
-    ###
-    ### TODO openhrp3 stuff
-    ###
-  else()
-    include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
-    execute_process(COMMAND rospack find rtmbuild OUTPUT_VARIABLE _rtmbuild_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND rospack find openrtm_aist OUTPUT_VARIABLE _openrtm_aist_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (NOT EXISTS "${_openrtm_aist_pkg_dir}/bin")
-      find_package(openrtm_aist)
-      set(_openrtm_aist_pkg_dir ${openrtm_aist_PREFIX}/lib/openrtm_aist)
-    endif()
-    execute_process(COMMAND rospack find openhrp3 OUTPUT_VARIABLE _openhrp3_pkg_dir OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(ENV{PKG_CONFIG_PATH} "${_openhrp3_pkg_dir}/lib/pkgconfig:${_openrtm_aist_pkg_dir}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
-    #set(ENV{PKG_CONFIG_PATH} "${_openhrp3_pkg_dir}/lib/pkgconfig:/opt/grx/lib/pkgconfig")
-    find_package(PkgConfig)
-    pkg_check_modules(OPENRTM REQUIRED openrtm-aist)
-    pkg_check_modules(OPENHRP openhrp3.1)
-  endif()
+  # TARGET
+  ## RTMBUILD_${PROJECT_NAME}_gencpp    : generated cpp files from idl with id2srv.py
+  ##                                    -> depends on idl
+  ## RTMBUILD_${PROJECT_NAME}_genrpc    : stub/skel files generated from genidl
+  ##                                    -> RTMBUILD_${PROJECT_NAME}_gencpp
+  ## RTMBUILD_${PROJECT_NAME}_genbridge : bridge component files generated from stub skel
+  ##                                    -> RTMBUILD_${PROJECT_NAME}_genrpc
+  ## ${exe}                             -> RTMBUILD_${PROJECT_NAME}_genbridge
 
-  message("[rtmbuild] OPENRTM_INCLUDE_DIRS: ${OPENRTM_INCLUDE_DIRS}")
-  message("[rtmbuild] OPENHRP_INCLUDE_DIRS: ${OPENHRP_INCLUDE_DIRS}")
-  message("[rtmbuild] OPENRTM_LIBRARY_DIRS: ${OPENRTM_LIBRARY_DIRS}")
-  message("[rtmbuild] OPENHRP_LIBRARY_DIRS: ${OPENHRP_LIBRARY_DIRS}")
-  message("[rtmbuild]     _rtmbuild_pkg_dir -> ${_rtmbuild_pkg_dir}")
-  message("[rtmbuild] _openrtm_aist_pkg_dir -> ${_openrtm_aist_pkg_dir}")
-  message("[rtmbuild]     _openhrp3_pkg_dir -> ${_openhrp3_pkg_dir}")
+  add_dependencies(RTMBUILD_${PROJECT_NAME}_gencpp RTMBUILD_${PROJECT_NAME}_genidl ROSBUILD_genmsg_cpp ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_generate_messages_py)
+  add_dependencies(RTMBUILD_${PROJECT_NAME}_genrpc RTMBUILD_${PROJECT_NAME}_gencpp)
+  add_dependencies(RTMBUILD_${PROJECT_NAME}_genbridge RTMBUILD_${PROJECT_NAME}_genrpc)
 
-  message("[rtmbuild] Building package ${CMAKE_SOURCE_DIR}")
-
-  # generate msg/srv file before rosbuild_init()
-  rtmbuild_genbridge_init()
-
-  if (${use_catkin})
-    include_directories(${catkin_INCLUDE_DIRS})
-    message("[rtmbuild] catkin_INCLUDE_DIRS: ${catkin_INCLUDE_DIRS}")
-  else() # if (NOT ${use_catkin}) does not work
-    rosbuild_init()
-  endif()
-
-  add_custom_target(rtmbuild_${PROJECT_NAME}_genidl ALL)
-  add_custom_target(rtmbuild_${PROJECT_NAME}_genbridge ALL DEPENDS rtmbuild_${PROJECT_NAME}_genidl)
-  file(REMOVE ${PROJECT_SOURCE_DIR}/idl_gen/generated)
-
-  file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl_gen/cpp)
-  file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl_gen/lib)
-  list(APPEND ${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/idl_gen/cpp)
-  list(APPEND ${PROJECT_NAME}_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/idl_gen/lib)
-  list(APPEND ${PROJECT_NAME}_IDL_DIRS ${PROJECT_SOURCE_DIR}/idl)
-
-  if (${use_catkin})
-    #message(";; rospack will run....")
-    #execute_process(COMMAND rospack depends-manifests openrtm_ros_bridge OUTPUT_VARIABLE ${PROJECT_NAME}_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
-    #string(REPLACE " " ";" ${PROJECT_NAME}_DIRS ${${PROJECT_NAME}_DIRS})
-  else()
-    rosbuild_invoke_rospack(${PROJECT_NAME} ${PROJECT_NAME} DIRS depends-manifests)
-
-    foreach(_dir ${${PROJECT_NAME}_DIRS})
-      if("${_dir}" MATCHES ".*manifest.xml")
-        string(REPLACE "manifest.xml" "idl_gen/cpp" _cpp_dir ${_dir})
-        list(APPEND ${PROJECT_NAME}_INCLUDE_DIRS ${_cpp_dir})
-        string(REGEX REPLACE ".*/([^/]*)/manifest.xml" "\\1" _tmp_pkg ${_dir})
-        list(APPEND ${PROJECT_NAME}_INCLUDE_DIRS ${_cpp_dir}/${_tmp_pkg}/idl)
-        string(REPLACE "manifest.xml" "idl_gen/lib" _lib_dir ${_dir})
-        list(APPEND ${PROJECT_NAME}_LIBRARY_DIRS ${_lib_dir})
-        string(REPLACE "manifest.xml" "idl" _idl_dir ${_dir})
-        list(APPEND ${PROJECT_NAME}_IDL_DIRS ${_idl_dir})
-      else()
-        string(REPLACE "package.xml" "idl_gen/cpp" _cpp_dir ${_dir})
-        list(APPEND ${PROJECT_NAME}_INCLUDE_DIRS ${_cpp_dir})
-        string(REGEX REPLACE ".*/([^/]*)/package.xml" "\\1" _tmp_pkg ${_dir})
-        list(APPEND ${PROJECT_NAME}_INCLUDE_DIRS ${_cpp_dir}/${_tmp_pkg}/idl)
-        string(REPLACE "package.xml" "idl_gen/lib" _lib_dir ${_dir})
-        list(APPEND ${PROJECT_NAME}_LIBRARY_DIRS ${_lib_dir})
-        string(REPLACE "package.xml" "idl" _idl_dir ${_dir})
-        list(APPEND ${PROJECT_NAME}_IDL_DIRS ${_idl_dir})
-      endif()
-      # message("[rtmbuild] ${_dir} ${_cpp_dir}")
-    endforeach(_dir)
-  endif()
-
-  foreach(_dir ${OPENRTM_INCLUDE_DIRS})
-    list(APPEND ${PROJECT_NAME}_INCLUDE_DIRS ${_dir})
-  endforeach()
-  foreach(_dir ${OPENHRP_INCLUDE_DIRS})
-    list(APPEND ${PROJECT_NAME}_INCLUDE_DIRS ${_dir})
-  endforeach()
-  foreach(_dir ${OPENRTM_LIBRARY_DIRS})
-    list(APPEND ${PROJECT_NAME}_LIBRARY_DIRS ${_dir})
-  endforeach()
-  foreach(_dir ${OPENHRP_LIBRARY_DIRS})
-    list(APPEND ${PROJECT_NAME}_LIBRARY_DIRS ${_dir})
-  endforeach()
-
-  include_directories(${${PROJECT_NAME}_INCLUDE_DIRS})
-  link_directories(${${PROJECT_NAME}_LIBRARY_DIRS})
-  foreach(_lib ${OPENRTM_LIBRARIES})
-    list(APPEND ${PROJECT_NAME}_LIBRARIES ${_lib})
-  endforeach(_lib)
-  foreach(_lib ${OPENHRP_LIBRARIES})
-    list(APPEND ${PROJECT_NAME}_LIBRARIES ${_lib})
-  endforeach(_lib)
-
-  # get all libraries
-  foreach(_idl_dir ${${PROJECT_NAME}_IDL_DIRS})
-    file(GLOB _idl_files "${_idl_dir}/*.idl")
-    foreach(_idl_file ${_idl_files})
-      string(REPLACE "/idl/" "/idl_gen/lib/lib" _idl_file ${_idl_file})
-      string(REPLACE ".idl" "Skel.so" _idl_skel_file ${_idl_file})
-      string(REPLACE ".idl" "Stub.so" _idl_stub_file ${_idl_file})
-      list(APPEND ${PROJECT_NAME}_IDLLIBRARY_DIRS ${_idl_skel_file})
-      list(APPEND ${PROJECT_NAME}_IDLLIBRARY_DIRS ${_idl_stub_file})
-    endforeach(_idl_file)
-    string(REGEX REPLACE ".*/([^/]*)/idl" "\\1" _tmp_pkg ${_idl_dir})
-    list(APPEND ${PROJECT_NAME}_IDLLIBRARY_IDLDIRS "-I${_idl_dir}")
-    list(APPEND ${PROJECT_NAME}_IDLLIBRARY_INCDIRS "-I${_idl_dir}/../idl_gen/cpp/${_tmp_pkg}/idl")
-  endforeach(_idl_dir)
-endmacro(rtmbuild_init)
+endmacro(rtmbuild_genbridge)
 
 macro(rtmbuild_add_executable exe)
-  if (${use_catkin})
+  if (use_catkin)
     add_executable(${ARGV})
-    add_dependencies(${exe} RTMBUILD_${PROJECT_NAME}_genidl ${${_package}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    target_link_libraries(${exe} ${catkin_LIBRARIES} ${openrtm_aist_LIBRARIES} ${openhrp3_LIBRARIES} ${${PROJECT_NAME}_IDLLIBRARY_DIRS} )
     install(TARGETS ${exe} RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
   else()
     rosbuild_add_executable(${ARGV})
-    add_dependencies(${exe} RTMBUILD_${PROJECT_NAME}_genidl)
-    target_link_libraries(${exe} ${${PROJECT_NAME}_IDLLIBRARY_DIRS}${catkin_LIBRARIES})
   endif()
-#  rosbuild_add_executable(${ARGV})
-#  message(${${PROJECT_NAME}_CFLAGS_OTHER})
-#  rosbuild_add_compile_flags(${exe} ${${PROJECT_NAME}_CFLAGS_OTHER})
-#  rosbuild_add_link_flags(${exe} ${${PROJECT_NAME}_LDFLAGS_OTHER})
-#  target_link_libraries(${exe} ${PROJECT_NAME}_LD)
+  add_dependencies(${exe} RTMBUILD_${PROJECT_NAME}_genbridge ${${_package}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
+  target_link_libraries(${exe} ${catkin_LIBRARIES} ${openrtm_aist_LIBRARIES} ${openhrp3_LIBRARIES} ${${PROJECT_NAME}_IDLLIBRARY_DIRS} )
 endmacro(rtmbuild_add_executable)
 
 macro(rtmbuild_add_library lib)
-  if (${use_catkin})
+  if (use_catkin)
     add_library(${ARGV})
-    add_dependencies(${lib} RTMBUILD_${PROJECT_NAME}_genidl ${${_package}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    target_link_libraries(${lib} ${openrtm_aist_LIBRARIES} ${openhrp3_LIBRARIES} ${${PROJECT_NAME}_IDLLIBRARY_DIRS})
     install(TARGETS ${LIB} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
   else()
     rosbuild_add_library(${ARGV})
-    add_dependencies(${lib} RTMBUILD${PROJECT_NAME}_genidl ${${_package}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    target_link_libraries(${lib} ${${PROJECT_NAME}_IDLLIBRARY_DIRS})
   endif()
-#  rosbuild_add_library(${ARGV})
-#  message(${${PROJECT_NAME}_CFLAGS_OTHER})
-#  rosbuild_add_compile_flags(${exe} ${${PROJECT_NAME}_CFLAGS_OTHER})
-#  rosbuild_add_link_flags(${exe} ${${PROJECT_NAME}_LDFLAGS_OTHER})
-#  target_link_libraries(${exe} ${PROJECT_NAME}_LD)
+  target_link_libraries(${lib} ${openrtm_aist_LIBRARIES} ${openhrp3_LIBRARIES} ${${PROJECT_NAME}_IDLLIBRARY_DIRS})
 endmacro(rtmbuild_add_library)
+
