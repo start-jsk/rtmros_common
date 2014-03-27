@@ -609,13 +609,17 @@
    )
   )
 
-(defun print-abc-parameter-conf-from-robot
+(defun print-abc-leg-offset-conf-from-robot
   (rb)
-  (format t "abc_end_effectors:")
-  (dolist (l '(:rarm :larm :rleg :lleg))
-    (let ((rl (send (send (send rb l :root-link) :parent) :joint)))
-      (format t " ~A,~A,~A," l (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))))
-  (format t "~%"))
+  (let ((pav (send rb :angle-vector))
+        (prc (send rb :copy-worldcoords)))
+    (format t "abc_leg_offset: ")
+    (let ((diff (scale (* 0.5 1e-3) (send (send (send rb :rleg :end-coords) :transformation (send rb :lleg :end-coords)) :worldpos))))
+      (format t "~A,~A,~A" (elt diff 0) (elt diff 1) (elt diff 2)))
+    (format t "~%")
+    (send rb :angle-vector pav)
+    (send rb :newcoords prc)
+    ))
 
 (defun print-end-effector-parameter-conf-from-robot
   (rb)
