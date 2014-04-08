@@ -1,4 +1,6 @@
 <launch>
+  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2809" />
+
   <arg name="nameserver" default="localhost" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
