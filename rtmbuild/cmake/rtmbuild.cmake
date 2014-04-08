@@ -58,13 +58,13 @@ macro(rtmbuild_init)
     message("[rtmbuild_init] - openhrp3_LIBRARIES    -> ${openhrp3_LIBRARIES}")
   endif()
 
-  if(EXISTS ${rtmbuild_SOURCE_DIR})
-    set(idl2srv_EXECUTABLE ${rtmbuild_SOURCE_DIR}/scripts/idl2srv.py)
+  if(EXISTS ${rtmbuild_SOURCE_PREFIX}) # catkin
+    set(idl2srv_EXECUTABLE ${rtmbuild_SOURCE_PREFIX}/scripts/idl2srv.py)
   elseif(EXISTS ${rtmbuild_PACKAGE_PATH}) ## for rosbuild
     set(idl2srv_EXECUTABLE ${rtmbuild_PACKAGE_PATH}/scripts/idl2srv.py)
   else()
     pkg_check_modules(rtmbuild rtmbuild REQUIRED)
-    set(idl2srv_EXECUTABLE ${rtmbuild_PREFIX}/share/rtmbuild/scripts/id2srv.py)
+    set(idl2srv_EXECUTABLE ${rtmbuild_PREFIX}/share/rtmbuild/scripts/idl2srv.py)
   endif()
   message("[rtmbuild_init] - idl2srv_EXECUTABLE     -> ${idl2srv_EXECUTABLE}")
 

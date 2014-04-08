@@ -16,8 +16,9 @@ if [ -e `rospack find openrtm_aist`/lib/pkgconfig ]; then
 fi
 
 cp `pkg-config  openrtm-aist --variable=data_prefix`/openrtm-1.1/example/src/SimpleService/MyService.idl ${CATKIN_DIR}/src/rtmbuild_test/idl/
-# copy hrpsys_tools
-ln -sf `rospack find rtmbuild` ${CATKIN_DIR}/src/rtmbuild
+if [ -e `rospack find rtmbuild`/build ]; then
+    ln -sf `rospack find rtmbuild`/build ${CATKIN_DIR}/src/rtmbuild/build
+fi
 cd ${CATKIN_DIR}
 catkin_make
 source ${CATKIN_DIR}/devel/setup.bash
