@@ -8,7 +8,7 @@ if [ -e `rospack find rtshell`/bin ] ; then # if rosbuild
 	_PYTHON_DIR=lib/${_PYTHONVER}/site-packages
     fi
     # export PATH=`rospack find openrtm_aist`/bin:$PATH
-    # export PYTHONPATH=`rospack find openrtm_aist_python`/${_PYTHON_DIR}:$PYTHONPATH
+    export PYTHONPATH=`rospack find openrtm_aist_python`/${_PYTHON_DIR}:$PYTHONPATH
     export PATH=`rospack find rtshell`/bin:$PATH
     export PYTHONPATH=`rospack find rtshell`/${_PYTHON_DIR}:`rospack find rtctree`/${_PYTHON_DIR}:`rospack find rtsprofile`/${_PYTHON_DIR}:$PYTHONPATH
 else
