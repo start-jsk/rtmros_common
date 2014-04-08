@@ -17,7 +17,7 @@ if(NOT USE_ROSBUILD) ## if catkin
     CFG_EXTRAS servicebridge.cmake rtmbuild.cmake
     )
 
-  install(DIRECTORY cmake scripts
+  install(DIRECTORY cmake scripts test
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
     USE_SOURCE_PERMISSIONS
     )
