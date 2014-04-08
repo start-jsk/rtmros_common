@@ -27,6 +27,8 @@
   <arg name="REALTIME" default="false" />
   <arg name="GUI" default="true" />
   <arg name="RTCD_LAUNCH_PREFIX" default=""/>
+  <!--arg name="RTCD_LAUNCH_PREFIX" default="xterm -e gdb \-\-args"--> <!-- for debugging with gdb -->
+  <arg name="PY_LAUNCH_PREFIX" default=""/>
   <!--   for hrpsys-simulator -->
   <arg unless="$(arg USE_RTCD)" name="hrpsys_periodic_rate" default="1000000"/>
   <!-- see http://code.google.com/p/hrpsys-base/issues/detail?id=14 for  exec_cxt.periodic.rate:100000 -->
@@ -106,7 +108,7 @@
   <group if="$(arg LAUNCH_HRPSYSPY)">
     <node name="hrpsys_py" pkg="$(arg HRPSYS_PY_PKG)" type="$(arg HRPSYS_PY_NAME)" output="screen"
           args='$(arg SIMULATOR_NAME) $(arg MODEL_FILE) $(arg omniorb_args)'
-          launch-prefix="$(arg RTCD_LAUNCH_PREFIX)" />
+          launch-prefix="$(arg PY_LAUNCH_PREFIX)" />
   </group>
 
   <!-- <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="$(arg OUTPUT)" -->
