@@ -1,4 +1,6 @@
 <launch>
+  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2809" />
+
   <include file="$(find hrpsys_tools)/samples/pa10.launch" >
     <arg name="GUI" default="false" />
     <arg name="corbaport" default="2809" />
