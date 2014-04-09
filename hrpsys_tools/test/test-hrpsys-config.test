@@ -1,4 +1,6 @@
 <launch>
+  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2809" />
+
 <!-- include file="$(find hrpsys)/test/test-hrpsys.test" / -->
   <!-- BEGIN:common setting -->
   <env name="LANG" value="C" />

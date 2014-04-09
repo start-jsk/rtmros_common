@@ -1,0 +1,17 @@
+<package>
+  <description brief="rtmbuild_test">rtmbuild_test</description>
+  <author>Kei Okada</author>
+
+  <license>BSD</license>
+
+  <export>
+    <python path="${prefix}/src" />
+  </export>
+
+  <depend package="roscpp"/>
+  <depend package="rtmbuild"/>
+  <depend package="std_msgs"/>
+  <depend package="openrtm_aist" />
+  <depend package="openrtm_aist_python" />
+
+</package>
