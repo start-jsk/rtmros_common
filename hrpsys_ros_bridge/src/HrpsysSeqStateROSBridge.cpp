@@ -45,6 +45,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   joint_state_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
   joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
+  odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
 
   // is use_sim_time is set and no one publishes clock, publish clock time
   use_sim_time = ros::Time::isSimTime();
@@ -463,21 +464,34 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   // m_baseTformIn
   if ( m_baseTformIn.isNew () ) {
-    m_baseTformIn.read();
-    tf::Transform base;
+    // m_baseTformIn.read();
+    // tf::Transform base;
     double *a = m_baseTform.data.get_buffer();
-    base.setOrigin( tf::Vector3(a[0], a[1], a[2]) );
+    // base.setOrigin( tf::Vector3(a[0], a[1], a[2]) );
     hrp::Matrix33 R;
     hrp::getMatrix33FromRowMajorArray(R, a, 3);
     hrp::Vector3 rpy = hrp::rpyFromRot(R);
-    base.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
+    tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));
+    // base.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
 
-    // odom publish
-    ros::Time base_time = tm_on_execute;
-    if ( use_hrpsys_time ) {
-        base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
-    }
-    br.sendTransform(tf::StampedTransform(base, base_time, "odom", rootlink_name));
+    // // odom publish
+    // ros::Time base_time = tm_on_execute;
+    // if ( use_hrpsys_time ) {
+    //     base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
+    // }
+    // br.sendTransform(tf::StampedTransform(base, base_time, "odom", rootlink_name));
+
+    nav_msgs::Odometry odom;
+    odom.header.frame_id = rootlink_name;
+    odom.header.stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
+    odom.pose.pose.position.x = a[0];
+    odom.pose.pose.position.y = a[1];
+    odom.pose.pose.position.z = a[2];
+    odom.pose.pose.orientation.x = q.getX();
+    odom.pose.pose.orientation.y = q.getY();
+    odom.pose.pose.orientation.z = q.getZ();
+    odom.pose.pose.orientation.w = q.getW();
+    odom_pub.publish(odom);
   }  // end: m_baseTformIn
 
   bool updateTfImu = false;
