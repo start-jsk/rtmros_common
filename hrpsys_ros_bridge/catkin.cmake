@@ -9,17 +9,7 @@ catkin_python_setup()
 # download pr2_controllers_msgs for git
 find_package(pr2_controllers_msgs QUIET)
 if(NOT pr2_controllers_msgs_FOUND)
-  execute_process(COMMAND cmake -E remove_directory /tmp/pr2_controllers)
-  execute_process(
-    COMMAND git clone --depth 1 -b hydro-devel https://github.com/PR2/pr2_controllers.git /tmp/pr2_controllers
-    OUTPUT_VARIABLE _download_output
-    RESULT_VARIABLE _download_failed)
-  execute_process(
-    COMMAND cmake -E copy_directory  /tmp/pr2_controllers/pr2_controllers_msgs ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs)
-  message("download pr2_controllers_msgs files ${_download_output}")
-  if (_download_failed)
-    message(FATAL_ERROR "Download pr2_controllers_msgs failed : ${_download_failed}")
-  endif(_download_failed)
+  download_pr2_controllers_msgs(hydro-devel)
   # catkin_make
   # rosmake pr2_controllers_msgs
   execute_process(COMMAND cmake -E chdir ${CMAKE_SOURCE_DIR}/../ catkin_make --build /tmp/pr2_controllers --source ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs --pkg pr2_controllers_msgs OUTPUT_VARIABLE _compile_output RESULT_VARIABLE _compile_failed)

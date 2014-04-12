@@ -1,3 +1,27 @@
+macro(download_pr2_controllers_msgs branch)
+  execute_process(COMMAND cmake -E remove_directory /tmp/pr2_controllers)
+  set(ENV{GIT_SSH} 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $*')
+  execute_process(
+    COMMAND git clone git://github.com/PR2/pr2_controllers /tmp/pr2_controllers
+    OUTPUT_VARIABLE _download_output
+    RESULT_VARIABLE _download_failed)
+  execute_process(
+    COMMAND git checkout ${branch}
+    WORKING_DIRECTORY /tmp/pr2_controllers)
+  execute_process(
+    COMMAND cmake -E copy_directory  /tmp/pr2_controllers/pr2_controllers_msgs ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs)
+  message("download pr2_controllers_msgs files ${_download_output}")
+  if (_download_failed)
+    message(FATAL_ERROR "Download pr2_controllers_msgs failed : ${_download_failed}")
+  endif(_download_failed)
+  # rospack profile
+  execute_process(COMMAND rospack profile OUTPUT_VARIABLE _profile_output RESULT_VARIABLE _profile_failed)
+  message("rospack profile ${_profile_output}")
+  if (_compile_failed)
+    message(FATAL_ERROR "rospack profile failed : ${_profile_failed}")
+  endif(_compile_failed)
+endmacro()
+
 if(NOT USE_ROSBUILD)
   include(catkin.cmake)
   return()
@@ -12,23 +36,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/compile_robot_model.cmake)
 rosbuild_find_ros_package(pr2_controllers_msgs)
 if(NOT EXISTS "${pr2_controllers_msgs_PACKAGE_PATH}")
   if(NOT EXISTS "${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs")
-    execute_process(COMMAND cmake -E remove_directory /tmp/pr2_controllers)
-    execute_process(
-      COMMAND git clone --depth 1 -b groovy-devel https://github.com/PR2/pr2_controllers.git /tmp/pr2_controllers
-      OUTPUT_VARIABLE _download_output
-      RESULT_VARIABLE _download_failed)
-    execute_process(
-      COMMAND cmake -E copy_directory  /tmp/pr2_controllers/pr2_controllers_msgs ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs)
-    message("download pr2_controllers_msgs files ${_download_output}")
-    if (_download_failed)
-      message(FATAL_ERROR "Download pr2_controllers_msgs failed : ${_download_failed}")
-    endif(_download_failed)
-    # rospack profile
-    execute_process(COMMAND rospack profile OUTPUT_VARIABLE _profile_output RESULT_VARIABLE _profile_failed)
-    message("rospack profile ${_profile_output}")
-    if (_compile_failed)
-      message(FATAL_ERROR "rospack profile failed : ${_profile_failed}")
-    endif(_compile_failed)
+    download_pr2_controllers_msgs(groovy-devel)
     # rosmake pr2_controllers_msgs
     execute_process(COMMAND rosmake pr2_controllers_msgs OUTPUT_VARIABLE _compile_output RESULT_VARIABLE _compile_failed)
     message("compile pr2_controllers_msgs ${_compile_output}")
