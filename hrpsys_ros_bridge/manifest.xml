@@ -39,6 +39,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
 
   <depend package="control_msgs"/>
   <depend package="tf" />
+  <depend package="rosnode" /> <!-- actionlib depeds on ronsode as test_depends -->
 
   <!-- image ros bridge -->
   <depend package="camera_info_manager" />
