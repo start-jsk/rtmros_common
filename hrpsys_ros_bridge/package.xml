@@ -45,6 +45,7 @@
   <build_depend>rosbuild</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>roslang</build_depend>
+  <build_depend>rosnode</build_depend>
   <build_depend>rostest</build_depend>
   <build_depend>rtmbuild</build_depend>
   <build_depend>sensor_msgs</build_depend>
@@ -67,6 +68,7 @@
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rostest</run_depend>
+  <run_depend>rosnode</run_depend>
   <run_depend>rtmbuild</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>pr2_controllers</run_depend> <!-- groovy does not have catkin pr2_controllers package -->
