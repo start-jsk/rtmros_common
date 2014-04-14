@@ -2,6 +2,9 @@
 Changelog for package rosnode_rtc
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.7 (2014-03-20)
 ------------------
 * (package.xml) move rostopic from test_depend to build_depend
