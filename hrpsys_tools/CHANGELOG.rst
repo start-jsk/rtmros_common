@@ -2,8 +2,8 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.8 (2014-04-14)
+------------------
 * use start_omninames.sh for rosdevel build environment, see `#400 <https://github.com/start-jsk/rtmros_common/issues/400>`_
 * add_py_launch_prefix
 * Contributors: Kei Okada, Yohei Kakiuchi, Isaac Isao Saito

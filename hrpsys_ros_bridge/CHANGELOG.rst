@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.8 (2014-04-14)
+------------------
 * use git:// for download pr2_controllers (potential fix for `#410 <https://github.com/start-jsk/rtmros_common/issues/410>`_)
 * add rosdnode to depends(see https://github.com/jsk-ros-pkg/jsk_roseus/pull/65, `#411 <https://github.com/start-jsk/rtmros_common/issues/411>`_)
 * add euscollada_SOURCE_PREFIX and euscollada_PREFIX

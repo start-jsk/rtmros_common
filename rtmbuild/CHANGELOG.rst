@@ -2,8 +2,8 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.8 (2014-04-14)
+------------------
 * fix to work on rosbuild
 * fix for installed test, use rtmbuild_SOURCE_PREFIX to check if devel/src environment
 * rtmbuild: install test directory so that others can uses this
