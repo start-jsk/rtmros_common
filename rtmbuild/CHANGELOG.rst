@@ -2,6 +2,15 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix to work on rosbuild
+* fix for installed test, use rtmbuild_SOURCE_PREFIX to check if devel/src environment
+* rtmbuild: install test directory so that others can uses this
+* rtmbuild: rewrite rtmbulid.cmake
+* rtmbuild: cleanup catkin.cmake and put everything into CMakeLists.txt
+* Contributors: Kei Okada
+
 1.0.7 (2014-03-20)
 ------------------
 * add depends from RTMBUILD__rm_idl2srv to _generate_messages_cpp, so that we can generate message in the beginning

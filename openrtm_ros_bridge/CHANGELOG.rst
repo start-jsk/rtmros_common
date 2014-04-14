@@ -2,6 +2,11 @@
 Changelog for package openrtm_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* use start_omninames.sh for rosdevel build environment, see `#400 <https://github.com/start-jsk/rtmros_common/issues/400>`_
+* Contributors: Kei Okada
+
 1.0.7 (2014-03-20)
 ------------------
 * openrtm_ros_bridge: (test_myservice_rosbridge.test) add retry=4

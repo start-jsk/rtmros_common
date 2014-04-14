@@ -2,6 +2,16 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* use git:// for download pr2_controllers (potential fix for `#410 <https://github.com/start-jsk/rtmros_common/issues/410>`_)
+* add rosdnode to depends(see https://github.com/jsk-ros-pkg/jsk_roseus/pull/65, `#411 <https://github.com/start-jsk/rtmros_common/issues/411>`_)
+* add euscollada_SOURCE_PREFIX and euscollada_PREFIX
+* use start_omninames.sh for rosdevel build environment, see `#400 <https://github.com/start-jsk/rtmros_common/issues/400>`_
+* remove deprecate function to generate conf parameter
+* Added procps, hostname, net-tools build_depends. These tools are used during building and testing
+* Contributors: Kei Okada, Scott K Logan, Shunichi Nozawa
+
 1.0.7 (2014-03-20)
 ------------------
 * call find_package(catkin) fist
