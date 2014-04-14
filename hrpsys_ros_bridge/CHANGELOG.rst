@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.9 (2014-04-14)
+------------------
 * (hrpsys_ros_bridge) add git to build_depend
 * Contributors: Isaac IY Saito
 
