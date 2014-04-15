@@ -154,7 +154,7 @@ macro(rtmbuild_genidl)
     include_directories(${PROJECT_SOURCE_DIR}/idl_gen/cpp/)
   endif()
 
-  set(_output_idl_py_prev "")
+  set(_output_idl_py_files "")
   file(MAKE_DIRECTORY ${_output_cpp_dir}/idl)
   file(MAKE_DIRECTORY ${_output_lib_dir})
   link_directories(${_output_lib_dir})
@@ -209,19 +209,24 @@ macro(rtmbuild_genidl)
       install(PROGRAMS ${_output_stub_lib} ${_output_skel_lib} DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
     endif()
     # python
-    add_custom_command(OUTPUT ${_output_idl_py}
-      COMMAND mkdir -p ${_output_python_dir}
-      COMMAND ${rtm_idlc} -bpython ${rtm_idlflags} -C${_output_python_dir} ${_idl_file}
-      DEPENDS ${_idl_file} ${_output_idl_py_prev})
-    set(${_output_idl_py_prev} ${_output_idl_py})
+    list(APPEND _output_idl_py_files ${_output_idl_py})
     #
     list(APPEND _autogen ${_output_stub_lib} ${_output_skel_lib} ${_output_idl_py})
 
     # add custom target
-    add_custom_target(RTMBUILD_${PROJECT_NAME}_${_idl_name}_genrpc DEPENDS ${_output_stub_lib} ${_output_skel_lib} ${_output_idl_py})
+    add_custom_target(RTMBUILD_${PROJECT_NAME}_${_idl_name}_genrpc DEPENDS ${_output_stub_lib} ${_output_skel_lib})
     add_dependencies(RTMBUILD_${PROJECT_NAME}_genrpc RTMBUILD_${PROJECT_NAME}_${_idl_name}_genrpc)
 
   endforeach(_idl_file)
+  # python
+  add_custom_target(RTMBUILD_${PROJECT_NAME}_genpy DEPENDS ${_output_idl_py_files})
+  add_custom_command(OUTPUT ${_output_idl_py_files}
+    COMMAND mkdir -p ${_output_python_dir}
+    COMMAND echo \"${rtm_idlc} -bpython -I${rtm_idldir} -C${_output_python_dir} ${${PROJECT_NAME}_idl_files}\"
+    COMMAND ${rtm_idlc} -bpython -I${rtm_idldir} -C${_output_python_dir} ${${PROJECT_NAME}_idl_files}
+    COMMENT "Generating python/idl from ${${PROJECT_NAME}_idl_files}"
+    DEPENDS ${${PROJECT_NAME}_idl_files})
+  add_dependencies(RTMBUILD_${PROJECT_NAME}_genrpc RTMBUILD_${PROJECT_NAME}_genpy)
   ##
 
   if(_autogen)
