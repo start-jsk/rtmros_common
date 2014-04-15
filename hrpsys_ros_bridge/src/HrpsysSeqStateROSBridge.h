@@ -64,6 +64,10 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   std::string rootlink_name;
 
   ros::Subscriber clock_sub;
+
+  nav_msgs::Odometry prev_odom;
+  bool prev_odom_acquired;
+  hrp::Vector3 prev_rpy;
   void clock_cb(const rosgraph_msgs::ClockPtr& str) {};
 
   bool follow_action_initialized;

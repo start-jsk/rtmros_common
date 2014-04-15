@@ -472,18 +472,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     hrp::getMatrix33FromRowMajorArray(R, a, 3);
     hrp::Vector3 rpy = hrp::rpyFromRot(R);
     tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));
-    // base.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
-
-    // // odom publish
-    // ros::Time base_time = tm_on_execute;
-    // if ( use_hrpsys_time ) {
-    //     base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
-    // }
-    // br.sendTransform(tf::StampedTransform(base, base_time, "odom", rootlink_name));
-
     nav_msgs::Odometry odom;
-    odom.header.frame_id = rootlink_name;
+    //odom.header.frame_id = rootlink_name;
+    odom.header.frame_id = "odom";
     odom.header.stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
+    //odom.child_frame_id = "/odom";
     odom.pose.pose.position.x = a[0];
     odom.pose.pose.position.y = a[1];
     odom.pose.pose.position.z = a[2];
@@ -491,7 +484,32 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     odom.pose.pose.orientation.y = q.getY();
     odom.pose.pose.orientation.z = q.getZ();
     odom.pose.pose.orientation.w = q.getW();
-    odom_pub.publish(odom);
+    
+    odom.pose.covariance[0] = 0.002 * 0.002;
+    odom.pose.covariance[7] = 0.002 * 0.002;
+    odom.pose.covariance[14] = 0.002 * 0.002;
+    odom.pose.covariance[21] = 0.002 * 0.002;
+    odom.pose.covariance[28] = 0.002 * 0.002;
+    odom.pose.covariance[35] = 0.002 * 0.002;
+    if (prev_odom_acquired) {
+      // calc velocity
+      double dt = (odom.header.stamp - prev_odom.header.stamp).toSec();
+      odom.twist.twist.linear.x = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
+      odom.twist.twist.linear.y = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
+      odom.twist.twist.linear.z = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;
+      odom.twist.twist.angular.x = (rpy(0) - prev_rpy(0)) / dt;
+      odom.twist.twist.angular.x = (rpy(1) - prev_rpy(1)) / dt;
+      odom.twist.twist.angular.x = (rpy(2) - prev_rpy(2)) / dt;
+      odom.twist.covariance = odom.pose.covariance;
+      prev_odom = odom;
+      prev_rpy = rpy;
+      odom_pub.publish(odom);
+    }
+    else {
+      prev_odom = odom;
+      prev_rpy = rpy;
+      prev_odom_acquired = true;
+    }
   }  // end: m_baseTformIn
 
   bool updateTfImu = false;
