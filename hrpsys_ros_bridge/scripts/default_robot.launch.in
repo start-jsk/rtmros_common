@@ -1,7 +1,7 @@
 <launch>
   <arg name="KILL_SERVERS" default="false" />
   <arg name="NOSIM" default="false" />
-  <arg name="REALTIME" default="false" />
+  <arg name="REALTIME" default="true" />
   <arg name="RUN_RVIZ" default="true" />
   <arg name="GUI" default="true" />
   <arg name="PROJECT_FILE" default="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@_nosim.xml" if="$(arg NOSIM)"/>
