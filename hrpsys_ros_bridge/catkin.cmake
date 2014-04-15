@@ -88,14 +88,6 @@ rtmbuild_genbridge()
 # pr2_controller_msgs is not catkinized
 string(RANDOM _random_string)
 
-# Check ROS distro. since pr2_controller_msgs of groovy is not catkinized
-if($ENV{ROS_ROOT} MATCHES "/opt/ros/groovy/share/ros")
-  message("sed -i s@'<\\(.*_depend\\)>pr2_controllers</\\(.*_depend\\)>'@'<!-- \\1>pr2_controllers</\\2 -->'@g ${PROJECT_SOURCE_DIR}/package.xml")
-  execute_process(
-  COMMAND sh -c "sed -i s@'<\\(.*_depend\\)>pr2_controllers</\\(.*_depend\\)>'@'<!-- \\1>pr2_controllers</\\2 -->'@g ${PROJECT_SOURCE_DIR}/package.xml"
-  )
-endif($ENV{ROS_ROOT} MATCHES "/opt/ros/groovy/share/ros")
-
 rtmbuild_add_executable(HrpsysSeqStateROSBridge src/HrpsysSeqStateROSBridgeImpl.cpp src/HrpsysSeqStateROSBridge.cpp src/HrpsysSeqStateROSBridgeComp.cpp)
 rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/ImageSensorROSBridgeComp.cpp)
 rtmbuild_add_executable(HrpsysJointTrajectoryBridge src/HrpsysJointTrajectoryBridge.cpp src/HrpsysJointTrajectoryBridgeComp.cpp)
