@@ -60,7 +60,17 @@ macro(get_euscollada_option _euscollada_option_ret)
   get_option_from_args(${_euscollada_option_ret} "--euscollada-option" "" "" "" ${ARGV})
 endmacro()
 
-set(_corba_port 2889)
+# this code removes generated .xml files since every time we call cmake, it changes the corb_port and custom_commnad(OUTPUT robot.xml) has changed. This lead to removing robot.xml when cmake is inovked, this is why we use cache to keep previous variable
+if (_corba_port_${PROJECT_NAME})
+  set(_corba_port ${_corba_port_${PROJECT_NAME}})
+message(STATUS "using corba port ${_corba_port} (using cache _corba_port_${PROJECT_NAME})")
+else()
+  set(_corba_port 2890)
+  string(RANDOM LENGTH 1 ALPHABET 123456789 _corba_port_offset)
+  math(EXPR _corba_port "${_corba_port}+${_corba_port_offset}*10") ## set start point randomly
+  message(STATUS "using corba port ${_corba_port} (using offset ${_corba_port_offset})")
+  set(_corba_port_${PROJECT_NAME} ${_corba_port} CACHE _corba_port_${PROJECT_NAME} ${_corba_port})
+endif()
 macro(compile_openhrp_model wrlfile)
   math(EXPR _corba_port "${_corba_port}+1")
   message("compile openhrp model ${wrlfile} at port ${_corba_port}")
@@ -217,12 +227,12 @@ macro(compile_openhrp_model wrlfile)
     set(_CMAKE_PREFIX_PATH "${_CMAKE_PREFIX_PATH}:${_PATH}")
   endforeach()
   add_custom_command(OUTPUT ${_xmlfile}
-    COMMAND ${_rtm_naming_exe} ${_corba_port}
+    COMMAND ${_rtm_naming_exe} ${_corba_port} || echo "fail to run rtm_naming, but try to continue"
     COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}"
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_latest_robot})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
-    COMMAND ${_rtm_naming_exe} ${_corba_port}
+    COMMAND ${_rtm_naming_exe} ${_corba_port} || echo "fail to run rtm_naming, but try to continue"
     COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}"
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
@@ -370,12 +380,12 @@ macro(compile_collada_model daefile)
     set(_CMAKE_PREFIX_PATH "${_CMAKE_PREFIX_PATH}:${_PATH}")
   endforeach()
   add_custom_command(OUTPUT ${_xmlfile}
-    COMMAND ${_rtm_naming_exe} ${_corba_port}
+    COMMAND ${_rtm_naming_exe} ${_corba_port} || echo "fail to run rtm_naming, but try to continue"
     COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}"
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_latest_robot})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
-    COMMAND ${_rtm_naming_exe} ${_corba_port}
+    COMMAND ${_rtm_naming_exe} ${_corba_port} || echo "fail to run rtm_naming, but try to continue"
     COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}"
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
