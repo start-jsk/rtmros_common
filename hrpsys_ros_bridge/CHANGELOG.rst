@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.10 (2014-04-15)
+-------------------
 * remove sed to comment out pr2_controllers
 * Contributors: Kei Okada
 
