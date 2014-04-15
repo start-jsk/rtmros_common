@@ -464,7 +464,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   // m_baseTformIn
   if ( m_baseTformIn.isNew () ) {
-    // m_baseTformIn.read();
+    m_baseTformIn.read();
     // tf::Transform base;
     double *a = m_baseTform.data.get_buffer();
     // base.setOrigin( tf::Vector3(a[0], a[1], a[2]) );
