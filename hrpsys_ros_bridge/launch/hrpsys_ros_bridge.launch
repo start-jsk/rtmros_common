@@ -143,18 +143,18 @@
 
   <!-- USE_IMPEDANCECONTROLLER
        ImpedanceController
-       AbsoluteForceSensor
+       RemoveForceSensorLinkOffset
   -->
   <group if="$(arg USE_IMPEDANCECONTROLLER)" >
     <node pkg="hrpsys_ros_bridge" name="ImpedanceControllerServiceROSBridge" type="ImpedanceControllerServiceROSBridgeComp"
           output="screen" args ="$(arg openrtm_args)" />
-    <node pkg="hrpsys_ros_bridge" name="AbsoluteForceSensorServiceROSBridge" type="AbsoluteForceSensorServiceROSBridgeComp"
+    <node pkg="hrpsys_ros_bridge" name="RemoveForceSensorLinkOffsetServiceROSBridge" type="RemoveForceSensorLinkOffsetServiceROSBridgeComp"
           output="$(arg OUTPUT)" args="$(arg openrtm_args)" />
 
     <rtconnect from="ImpedanceControllerServiceROSBridge.rtc:ImpedanceControllerService" to="ic.rtc:ImpedanceControllerService"  subscription_type="new"/>
     <rtactivate component="ImpedanceControllerServiceROSBridge.rtc" />
-    <rtconnect from="AbsoluteForceSensorServiceROSBridge.rtc:AbsoluteForceSensorService" to="afs.rtc:AbsoluteForceSensorService"  subscription_type="new"/>
-    <rtactivate component="AbsoluteForceSensorServiceROSBridge.rtc" />
+    <rtconnect from="RemoveForceSensorLinkOffsetServiceROSBridge.rtc:RemoveForceSensorLinkOffsetService" to="rmfo.rtc:RemoveForceSensorLinkOffsetService"  subscription_type="new"/>
+    <rtactivate component="RemoveForceSensorLinkOffsetServiceROSBridge.rtc" />
   </group>
 
   <!-- USE_GRASPCONTROLLER
