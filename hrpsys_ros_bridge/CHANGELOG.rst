@@ -2,6 +2,11 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* use random staritng  port number for rtm_naming, also try to continue if name server is already running
+* Contributors: Kei Okada
+
 1.0.10 (2014-04-15)
 -------------------
 * remove sed to comment out pr2_controllers
