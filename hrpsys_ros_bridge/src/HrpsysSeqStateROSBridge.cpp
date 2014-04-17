@@ -513,24 +513,24 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
   }  // end: m_baseTformIn
 
-  bool updateTfImu = false;
+  bool updateImu = false;
   // m_baseRpyIn
   if (m_baseRpyIn.isNew()){
     m_baseRpyIn.read();
-    updateTfImu = true;
+    updateImu = true;
   } // end: m_baseRpyIn
 
   if (m_baseRpyVelIn.isNew()) {
     m_baseRpyVelIn.read();
-    updateTfImu = true;
+    updateImu = true;
   }
 
   if (m_basePosAccIn.isNew()) {
     m_basePosAccIn.read();
-     updateTfImu = true;
+     updateImu = true;
   }
   
-  if (updateTfImu){
+  if (updateImu){
     sensor_msgs::Imu imu;
     imu.header.frame_id = rootlink_name;
     imu.header.stamp = ros::Time(m_baseRpy.tm.sec, m_baseRpy.tm.nsec);
