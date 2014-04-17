@@ -24,7 +24,12 @@ fi
 export RTCTREE_NAMESERVERS=localhost:15005
 
 # enable set alias on non-interactive shell
-shopt -s expand_aliases
+case "$CATKIN_SHELL" in
+    "bash" )
+        shopt -s expand_aliases
+        ;;
+esac
+
 alias rtmlaunch=`rospack find hrpsys_ros_bridge`/scripts/rtmlaunch
 alias rtmtest=`rospack find hrpsys_ros_bridge`/scripts/rtmtest
 
