@@ -25,6 +25,7 @@
 #include "dynamic_reconfigure/Reconfigure.h"
 #include "hrpsys_ros_bridge/MotorStates.h"
 #include "diagnostic_msgs/DiagnosticArray.h"
+#include "sensor_msgs/Imu.h"
 
 extern const char* hrpsysseqstaterosbridgeimpl_spec[];
 

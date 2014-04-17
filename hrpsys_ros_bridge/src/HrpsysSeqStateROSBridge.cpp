@@ -513,55 +513,46 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   }  // end: m_baseTformIn
 
   bool updateTfImu = false;
-  // m_basePosIn
-  if (m_basePosIn.isNew()){
-    m_basePosIn.read();
-    updateTfImu = true;
-  } // end: m_basePosIn
-
   // m_baseRpyIn
   if (m_baseRpyIn.isNew()){
     m_baseRpyIn.read();
     updateTfImu = true;
   } // end: m_baseRpyIn
 
-  if (updateTfImu){
-    tf::Transform base;
-    base.setOrigin( tf::Vector3(m_basePos.data.x, m_basePos.data.y, m_basePos.data.z) );
-    base.setRotation( tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y));
-
-    // publish base_footprint calculated from IMU
-    ros::Time base_time = tm_on_execute;
-    if ( use_hrpsys_time ) {
-        base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
-    }
-    tf::Transform inv = base.inverse();
-#if ROS_VERSION_MINIMUM(1,8,0)
-    tf::Matrix3x3 m;
-#else
-    btMatrix3x3 m; // for electric
-#endif
-    m = inv.getBasis();
-    bool not_nan = true;
-    for (int i = 0; i < 3; ++i) {
-        if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
-            not_nan = false;
-    }
-    if (not_nan) {
-      std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
-      while ( its != sensor_info.end() ) {
-        if ( (*its).second.type_name == "RateGyro" ) {
-          br.sendTransform(tf::StampedTransform(inv, base_time, (*its).first, "imu_floor"));
-          break;
-        }
-        ++its;
-      }
-    } else {
-        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
-                         << m_baseRpy.data.r << ","
-                         << m_baseRpy.data.p << ","
-                         << m_baseRpy.data.y << ")");
+  if (m_baseRpyVelIn.isNew()) {
+    m_baseRpyVelIn.read();
+    updateTfImu = true;
   }
+
+  if (m_basePosAccIn.isNew()) {
+    m_basePosAccIn.read();
+     updateTfImu = true;
+  }
+  
+  if (updateTfImu){
+    sensor_msgs::Imu imu;
+    imu.header.frame_id = rootlink_name;
+    imu.header.stamp = ros::Time(m_baseRpy.tm.sec, m_baseRpy.tm.nsec);
+    tf::Quaternion q = tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y);
+    imu.orientation.x = q.getX();
+    imu.orientation.y = q.getY();
+    imu.orientation.z = q.getZ();
+    imu.orientation.w = q.getW();
+    imu.angular_velocity.x = m_baseRpyVel.data.avx;
+    imu.angular_velocity.y = m_baseRpyVel.data.avy;
+    imu.angular_velocity.z = m_baseRpyVel.data.avz;
+    imu.linear_acceleration.x = m_basePosAcc.data.ax;
+    imu.linear_acceleration.y = m_basePosAcc.data.ay;
+    imu.linear_acceleration.z = m_basePosAcc.data.az;
+    imu.orientation_covariance[0] = 2.89e-08;
+    imu.orientation_covariance[4] = 2.89e-08;
+    imu.orientation_covariance[8] = 2.89e-08;
+    imu.angular_velocity_covariance[0] = 0.000144;
+    imu.angular_velocity_covariance[4] = 0.000144;
+    imu.angular_velocity_covariance[8] = 0.000144;
+    imu.linear_acceleration_covariance[0] = 0.0096;
+    imu.linear_acceleration_covariance[4] = 0.0096;
+    imu.linear_acceleration_covariance[8] = 0.0096;
   }
 
   // publish forces sonsors
