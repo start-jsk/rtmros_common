@@ -46,6 +46,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
   odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
+  imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1);
 
   // is use_sim_time is set and no one publishes clock, publish clock time
   use_sim_time = ros::Time::isSimTime();
@@ -553,6 +554,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     imu.linear_acceleration_covariance[0] = 0.0096;
     imu.linear_acceleration_covariance[4] = 0.0096;
     imu.linear_acceleration_covariance[8] = 0.0096;
+    imu_pub.publish(imu);
   }
 
   // publish forces sonsors
