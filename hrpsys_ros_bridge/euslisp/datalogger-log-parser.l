@@ -102,17 +102,17 @@
    ()
    (send (send self :parser-list "sh_tqOut") :read-state)
    )
-  (:base-pos
+  (:root-pos
    ()
    (scale 1e3 (send (send self :parser-list "sh_basePosOut") :read-state))
    )
-  (:base-rpy
+  (:root-rpy
    ()
    (send (send self :parser-list "sh_baseRpyOut") :read-state)
    )
   (:root-coords
    ()
-   (make-coords :pos (send self :base-pos) :rpy (send self :base-rpy))
+   (make-coords :pos (send self :root-pos) :rpy (send self :root-rpy))
    )
   (:time
    (&optional (str "sh_qOut"))
