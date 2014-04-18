@@ -1,6 +1,6 @@
 (defclass datalogger-log-parser
   :super propertied-object
-  :slots (file index count read-state)
+  :slots (file index count read-state time)
   )
 
 (defmethod datalogger-log-parser
@@ -18,6 +18,7 @@
      ))
   (:fname () (send file :fname))
   (:read-state () read-state)
+  (:time () time)
   (:proc
    ()
    (let (line)
@@ -34,9 +35,21 @@
      (setq index count)
 
      (setq read-state (read-from-string (format nil "#f(~A)" (string-left-trim ".0123456789" line))))
+     (let ((tm (data-string-split (car (data-string-split line " ")) ".")))
+       (setq time (instance ros::time :init :sec (read-from-string (car tm)) :nsec (* 1000 (read-from-string (cadr tm))))))
      t
      ))
   )
+
+(defun data-string-split ;; this function will be replaced by https://github.com/euslisp/EusLisp/issues/16
+  (str separator)
+  (let ((start-idx 0) (ret))
+    (dotimes (i (length str))
+      (when (= (elt str i) (elt separator 0))
+        (push (subseq str start-idx i) ret)
+        (setq start-idx (1+ i))))
+    (if (/= start-idx (length str)) (push (subseq str start-idx) ret))
+    (reverse ret)))
 
 (defclass datalogger-log-parser-controller
   :super propertied-object
@@ -88,6 +101,22 @@
   (:reference-torque-vector
    ()
    (send (send self :parser-list "sh_tqOut") :read-state)
+   )
+  (:base-pos
+   ()
+   (scale 1e3 (send (send self :parser-list "sh_basePosOut") :read-state))
+   )
+  (:base-rpy
+   ()
+   (send (send self :parser-list "sh_baseRpyOut") :read-state)
+   )
+  (:root-coords
+   ()
+   (make-coords :pos (send self :base-pos) :rpy (send self :base-rpy))
+   )
+  (:time
+   (&optional (str "sh_qOut"))
+   (send (send self :parser-list str) :time)
    )
   )
 
