@@ -53,7 +53,7 @@ endif()
 ## so we need to comment in, in compilation time.
 message("sed -i s@'<!--\\s*\\(.*pr2_controllers.*/\\)\\s*-->'@'<\\1>'@g ${PROJECT_SOURCE_DIR}/manifest.xml")
 execute_process(
-  COMMAND sh -c "sed -i s@'<!--\\s*\\(.*pr2_controllers.*/\\)\\s*-->'@'<\\1>'@g ${PROJECT_SOURCE_DIR}/manifest.xml"
+  COMMAND sh -c "grep '<depend package=\"pr2_controllers_msgs\"/>' ${PROJECT_SOURCE_DIR}/manifest.xml || sed -i s@'<!--\\s*\\(.*pr2_controllers.*/\\)\\s*-->'@'<\\1>'@g ${PROJECT_SOURCE_DIR}/manifest.xml"
   )
 
 
@@ -67,9 +67,12 @@ execute_process(
 
 rosbuild_find_ros_package(hrpsys)
 file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/idl)
-file(COPY
-   ${hrpsys_PACKAGE_PATH}/share/hrpsys/idl/
-    DESTINATION ${PROJECT_SOURCE_DIR}/idl)
+file(GLOB _hrpsys_idl_files RELATIVE ${hrpsys_PACKAGE_PATH}/share/hrpsys/idl/ ${hrpsys_PACKAGE_PATH}/share/hrpsys/idl/*.idl)
+foreach(_hrpsys_idl_file ${_hrpsys_idl_files})
+  if(${hrpsys_PACKAGE_PATH}/share/hrpsys/idl/${_hrpsys_idl_file} IS_NEWER_THAN ${PROJECT_SOURCE_DIR}/idl/${_hrpsys_idl_file})
+    execute_process(COMMAND cmake -E copy ${hrpsys_PACKAGE_PATH}/share/hrpsys/idl/${_hrpsys_idl_file} ${PROJECT_SOURCE_DIR}/idl)
+  endif()
+endforeach()
 
 rtmbuild_init()
 #rosbuild_init()
