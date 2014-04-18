@@ -54,6 +54,9 @@
   <build_depend>subversion</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>visualization_msgs</build_depend>
+  <build_depend>rqt_robot_monitor</build_depend>
+  <build_depend>rqt_gui</build_depend>
+  <build_depend>rqt_gui_py</build_depend>
   
   <run_depend>actionlib</run_depend>
   <run_depend>camera_info_manager</run_depend>
@@ -75,7 +78,10 @@
   <run_depend>sensor_msgs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>visualization_msgs</run_depend>
-
+  <run_depend>rqt_robot_monitor</run_depend>
+  <run_depend>rqt_gui</run_depend>
+  <run_depend>rqt_gui_py</run_depend>
+     
   <!-- <test_depend>hrpsys</test_depend> -->
   <!-- <test_depend>hrpsys_tools</test_depend> -->
   <!-- <test_depend>openrtm_tools</test_depend> -->
@@ -92,6 +98,6 @@
   <!-- <test_depend>dynamic_reconfigure</test_depend> -->
 
   <export>
-
+    <rqt_gui plugin="${prefix}/rqt_plugin.xml"/>
   </export>
 </package>
