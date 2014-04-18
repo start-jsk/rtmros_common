@@ -183,3 +183,11 @@ file(WRITE models/SampleRobot_controller_config.yaml
 
 add_rostest(test/test-samplerobot.test)
 add_rostest(test/test-pa10.test)
+
+install(FILES rqt_plugin.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+# # it's a hack!
+# add_custom_command(OUTPUT ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION}/${PROJECT_NAME}/hrpsys_dashboard.py
+#   COMMAND cp ${PROJECT_SOURCE_DIR}/src/hrpsys_ros_bridge/hrpsys_dashboard.py ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION}/${PROJECT_NAME}
+#   DEPENDS ${PROJECT_SOURCE_DIR}/src/hrpsys_ros_bridge/hrpsys_dashboard.py ${PROJECT_NAME}_generate_messages_py)
+# add_custom_target(copy_hrpsys_dashbaord ALL DEPENDS ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION}/${PROJECT_NAME}/hrpsys_dashboard.py)
