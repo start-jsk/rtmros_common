@@ -48,13 +48,18 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <depend package="diagnostic_aggregator" />
 
   <!-- dashboard -->
-  <!-- depend package="pr2_dashboard"/ -->
+  <depend package="rqt_robot_dashboard" />
+  <depend package="rqt_robot_monitor" />
+  <depend package="rqt_gui" />
+  <depend package="rqt_gui_py" />
 
   <rosdep name="collada_urdf"/>
 
   <!-- rtm* command -->
   <rosdep name="python-psutil"/>
-
+  <export>
+    <rqt_gui plugin="${prefix}/rqt_plugin.xml"/>
+  </export>
 </package>
 
 
