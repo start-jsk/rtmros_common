@@ -116,8 +116,8 @@ install(CODE
    endforeach()
   ")
 
-## temprarily fix (FIXME)
-install(CODE "execute_process(COMMAND cmake -E touch \$ENV{DISTDIR}/${CMAKE_INSTALL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}/__init__.py)")
+install(FILES rqt_plugin.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 ##
 ## test (Copy from CMakeLists.txt)
@@ -183,3 +183,5 @@ file(WRITE models/SampleRobot_controller_config.yaml
 
 add_rostest(test/test-samplerobot.test)
 add_rostest(test/test-pa10.test)
+add_rostest(test/test-import-python.test)
+

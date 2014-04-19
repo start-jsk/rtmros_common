@@ -169,3 +169,4 @@ file(WRITE models/SampleRobot_controller_config.yaml
 
 rosbuild_add_rostest(test/test-samplerobot.test)
 rosbuild_add_rostest(test/test-pa10.test)
+rosbuild_add_rostest(test/test-import-python.test)
