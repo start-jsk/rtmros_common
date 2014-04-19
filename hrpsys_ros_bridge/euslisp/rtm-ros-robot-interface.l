@@ -453,17 +453,9 @@
 (defmethod rtm-ros-robot-interface
   (:start-auto-balancer
    (&key (limbs '(:rleg :lleg)))
-   (send self :autobalancerservice_startABC
-         :alp (mapcar #'(lambda (limb)
-                          (let ((target2foot (send (send (send robot limb :end-coords) :parent) :transformation (send robot limb :end-coords))))
-                            (instance hrpsys_ros_bridge::openhrp_autobalancerservice_autobalancerlimbparam
-                                      :init :name (format nil "~A" limb)
-                                      ;;:target_name (send (send (send robot limb :end-coords) :parent) :joint :name)
-                                      ;;:base_name (if (send (send (send robot limb :root-link) :parent) :joint) (send (send (send robot limb :root-link) :parent) :joint :name) "WAIST")
-                                      :target2foot_offset_pos (scale 1e-3 (send target2foot :worldpos))
-                                      :target2foot_offset_rot (matrix2quaternion (send target2foot :worldrot)))))
-                      limbs)))
-  (:stop-auto-balancer () (send self :autobalancerservice_stopABC))
+   (send self :autobalancerservice_startAutoBalancer
+         :limbs (mapcar #'(lambda (x) (format nil "~A" x)) limbs)))
+  (:stop-auto-balancer () (send self :autobalancerservice_stopAutoBalancer))
   (:go-pos-no-wait
    (xx yy th)
    (send self :autobalancerservice_goPos :x xx :y yy :th th))

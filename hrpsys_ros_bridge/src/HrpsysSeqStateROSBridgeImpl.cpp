@@ -32,8 +32,9 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_rsangleIn("rsangle", m_rsangle),
     m_mcangleIn("mcangle", m_mcangle),
     m_baseTformIn("baseTform", m_baseTform),
-    m_basePosIn("basePos", m_basePos),
     m_baseRpyIn("baseRpy", m_baseRpy),
+    m_baseRpyVelIn("baseRpyVel", m_baseRpyVel),
+    m_basePosAccIn("basePosAcc", m_basePosAcc),
     m_rstorqueIn("rstorque", m_rstorque),
     m_servoStateIn("servoState", m_servoState),
     m_rszmpIn("rszmp", m_rszmp),
@@ -57,8 +58,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("rsangle", m_rsangleIn);
   addInPort("mcangle", m_mcangleIn);
   addInPort("baseTform", m_baseTformIn);
-  addInPort("basePos", m_basePosIn);
   addInPort("baseRpy", m_baseRpyIn);
+  addInPort("baseRpyVel", m_baseRpyVelIn);
+  addInPort("basePosAcc", m_basePosAccIn);
   addInPort("rstorque", m_rstorqueIn);
   addInPort("rszmp", m_rszmpIn);
   addInPort("servoState", m_servoStateIn);
@@ -218,9 +220,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     hrp::Matrix33 R = hrp::rodrigues(axis, li.rotation[3]);
     hrp::Vector3 rpy = hrp::rpyFromRot(R);
 
-    m_basePos.data.x = li.translation[0];
-    m_basePos.data.y = li.translation[1];
-    m_basePos.data.z = li.translation[2];
     m_baseRpy.data.r = rpy[0];
     m_baseRpy.data.p = rpy[1];
     m_baseRpy.data.y = rpy[2];

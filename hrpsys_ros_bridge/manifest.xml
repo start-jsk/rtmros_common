@@ -21,6 +21,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <!-- seq state ros bridge -->
   <depend package="roscpp"/>
   <depend package="sensor_msgs"/>
+  <depend package="nav_msgs"/>
   <depend package="visualization_msgs"/>
   <depend package="robot_state_publisher"/>
   <depend package="actionlib"/>
@@ -30,7 +31,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
        However when make hrpsys_ros_bridge component, it uses pr2_controller_msgs,
        so we need to comment in, this is done in sed command in execute_process 
        CMakeLists.txt   -->
-  <!-- depend package="pr2_controllers_msgs"/ -->
+  <depend package="pr2_controllers_msgs"/>
 
   <!-- these packages are added do to emporarily removal of pr2_controllers_msgs -->
     <depend package="actionlib_msgs" />

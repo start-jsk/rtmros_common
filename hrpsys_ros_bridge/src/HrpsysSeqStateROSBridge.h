@@ -16,6 +16,7 @@
 #include "ros/ros.h"
 #include "rosgraph_msgs/Clock.h"
 #include "sensor_msgs/JointState.h"
+#include "nav_msgs/Odometry.h"
 #include "geometry_msgs/WrenchStamped.h"
 #include "actionlib/server/simple_action_server.h"
 #include "control_msgs/FollowJointTrajectoryAction.h"
@@ -24,6 +25,7 @@
 #include "dynamic_reconfigure/Reconfigure.h"
 #include "hrpsys_ros_bridge/MotorStates.h"
 #include "diagnostic_msgs/DiagnosticArray.h"
+#include "sensor_msgs/Imu.h"
 
 extern const char* hrpsysseqstaterosbridgeimpl_spec[];
 
@@ -47,7 +49,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
  private:
   ros::NodeHandle nh;
-  ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub;
+  ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, odom_pub, imu_pub;
   std::vector<ros::Publisher> fsensor_pub;
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> joint_trajectory_server;
   actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> follow_joint_trajectory_server;
@@ -63,6 +65,10 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   std::string rootlink_name;
 
   ros::Subscriber clock_sub;
+
+  nav_msgs::Odometry prev_odom;
+  bool prev_odom_acquired;
+  hrp::Vector3 prev_rpy;
   void clock_cb(const rosgraph_msgs::ClockPtr& str) {};
 
   bool follow_action_initialized;
