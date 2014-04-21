@@ -105,7 +105,7 @@
      (dolist (idl (send self :get-ROSBridge-idl-fnames ros-pkg-name))
        (let ((rtc-name (pathname-name idl)))
          (dolist (srv-name (mapcar #'pathname-name (remove-if-not #'(lambda (x) (and (substringp rtc-name x) (not (= (char x 0) (char "." 0))))) srv-fnames)))
-           (let ((method-def (send self :get-ROSBridge-method-def-macro rtc-name srv-name)))
+           (let ((method-def (send self :get-ROSBridge-method-def-macro rtc-name srv-name ros-pkg-name)))
              (when method-def
                (if debug-view (pprint (macroexpand method-def)))
                (eval method-def)
@@ -118,9 +118,9 @@
   (:get-ROSBridge-idl-fnames (&optional (ros-pkg-name "hrpsys_ros_bridge")) (send self :get-ROSBridge-fnames-from-type "idl" ros-pkg-name))
   (:get-ROSBridge-srv-fnames (&optional (ros-pkg-name "hrpsys_ros_bridge")) (send self :get-ROSBridge-fnames-from-type "srv" ros-pkg-name))
   (:get-ROSBridge-method-def-macro
-   (rtc-name srv-name)
+   (rtc-name srv-name &optional (ros-pkg-name "hrpsys_ros_bridge"))
    (let* ((meth-name (string-left-trim "_" (string-left-trim rtc-name (string-left-trim "_" (string-left-trim "OpenHRP" srv-name)))))
-          (srv-request (read-from-string (format nil "hrpsys_ros_bridge::~ARequest" srv-name)))
+          (srv-request (read-from-string (format nil "~A::~ARequest" ros-pkg-name srv-name)))
           (init-method (find-if #'(lambda (x) (eq (car x) :init)) (send (eval srv-request) :methods)))
           ;;(new-method-name (read-from-string (format nil ":~A" (string-left-trim "_" (string-left-trim rtc-name (string-left-trim "_" (string-left-trim "OpenHRP" srv-name))))))))
           (new-method-name (read-from-string (format nil ":~A" (string-left-trim "_" (string-left-trim "OpenHRP" srv-name))))))
@@ -453,17 +453,9 @@
 (defmethod rtm-ros-robot-interface
   (:start-auto-balancer
    (&key (limbs '(:rleg :lleg)))
-   (send self :autobalancerservice_startABC
-         :alp (mapcar #'(lambda (limb)
-                          (let ((target2foot (send (send (send robot limb :end-coords) :parent) :transformation (send robot limb :end-coords))))
-                            (instance hrpsys_ros_bridge::openhrp_autobalancerservice_autobalancerlimbparam
-                                      :init :name (format nil "~A" limb)
-                                      ;;:target_name (send (send (send robot limb :end-coords) :parent) :joint :name)
-                                      ;;:base_name (if (send (send (send robot limb :root-link) :parent) :joint) (send (send (send robot limb :root-link) :parent) :joint :name) "WAIST")
-                                      :target2foot_offset_pos (scale 1e-3 (send target2foot :worldpos))
-                                      :target2foot_offset_rot (matrix2quaternion (send target2foot :worldrot)))))
-                      limbs)))
-  (:stop-auto-balancer () (send self :autobalancerservice_stopABC))
+   (send self :autobalancerservice_startAutoBalancer
+         :limbs (mapcar #'(lambda (x) (format nil "~A" x)) limbs)))
+  (:stop-auto-balancer () (send self :autobalancerservice_stopAutoBalancer))
   (:go-pos-no-wait
    (xx yy th)
    (send self :autobalancerservice_goPos :x xx :y yy :th th))

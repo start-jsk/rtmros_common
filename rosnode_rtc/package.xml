@@ -1,6 +1,6 @@
 <package>
   <name>rosnode_rtc</name>
-  <version>1.0.7</version>
+  <version>1.0.11</version>
   <description>
      This package gives transparency between RTM and ROS.
 

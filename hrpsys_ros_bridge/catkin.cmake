@@ -9,17 +9,7 @@ catkin_python_setup()
 # download pr2_controllers_msgs for git
 find_package(pr2_controllers_msgs QUIET)
 if(NOT pr2_controllers_msgs_FOUND)
-  execute_process(COMMAND cmake -E remove_directory /tmp/pr2_controllers)
-  execute_process(
-    COMMAND git clone --depth 1 -b hydro-devel https://github.com/PR2/pr2_controllers.git /tmp/pr2_controllers
-    OUTPUT_VARIABLE _download_output
-    RESULT_VARIABLE _download_failed)
-  execute_process(
-    COMMAND cmake -E copy_directory  /tmp/pr2_controllers/pr2_controllers_msgs ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs)
-  message("download pr2_controllers_msgs files ${_download_output}")
-  if (_download_failed)
-    message(FATAL_ERROR "Download pr2_controllers_msgs failed : ${_download_failed}")
-  endif(_download_failed)
+  download_pr2_controllers_msgs(hydro-devel)
   # catkin_make
   # rosmake pr2_controllers_msgs
   execute_process(COMMAND cmake -E chdir ${CMAKE_SOURCE_DIR}/../ catkin_make --build /tmp/pr2_controllers --source ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs --pkg pr2_controllers_msgs OUTPUT_VARIABLE _compile_output RESULT_VARIABLE _compile_failed)
@@ -58,9 +48,12 @@ if(NOT RESULT EQUAL 0)
   message(FATAL_ERROR "Fail to run pkg-config ${RESULT}")
 endif()
 if(EXISTS ${hrpsys_IDL_DIR})
-  file(COPY
-    ${hrpsys_IDL_DIR}/
-    DESTINATION ${PROJECT_SOURCE_DIR}/idl)
+  file(GLOB _hrpsys_idl_files RELATIVE ${hrpsys_IDL_DIR}/ ${hrpsys_IDL_DIR}/*.idl)
+  foreach(_hrpsys_idl_file ${_hrpsys_idl_files})
+    if(${hrpsys_IDL_DIR}/${_hrpsys_idl_file} IS_NEWER_THAN ${PROJECT_SOURCE_DIR}/idl/${_hrpsys_idl_file})
+      execute_process(COMMAND cmake -E copy ${hrpsys_IDL_DIR}/${_hrpsys_idl_file} ${PROJECT_SOURCE_DIR}/idl)
+    endif()
+  endforeach()
 else()
   get_cmake_property(_variableNames VARIABLES)
   foreach (_variableName ${_variableNames})
@@ -98,14 +91,6 @@ rtmbuild_genbridge()
 # pr2_controller_msgs is not catkinized
 string(RANDOM _random_string)
 
-# Check ROS distro. since pr2_controller_msgs of groovy is not catkinized
-if($ENV{ROS_ROOT} MATCHES "/opt/ros/groovy/share/ros")
-  message("sed -i s@'<\\(.*_depend\\)>pr2_controllers</\\(.*_depend\\)>'@'<!-- \\1>pr2_controllers</\\2 -->'@g ${PROJECT_SOURCE_DIR}/package.xml")
-  execute_process(
-  COMMAND sh -c "sed -i s@'<\\(.*_depend\\)>pr2_controllers</\\(.*_depend\\)>'@'<!-- \\1>pr2_controllers</\\2 -->'@g ${PROJECT_SOURCE_DIR}/package.xml"
-  )
-endif($ENV{ROS_ROOT} MATCHES "/opt/ros/groovy/share/ros")
-
 rtmbuild_add_executable(HrpsysSeqStateROSBridge src/HrpsysSeqStateROSBridgeImpl.cpp src/HrpsysSeqStateROSBridge.cpp src/HrpsysSeqStateROSBridgeComp.cpp)
 rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/ImageSensorROSBridgeComp.cpp)
 rtmbuild_add_executable(HrpsysJointTrajectoryBridge src/HrpsysJointTrajectoryBridge.cpp src/HrpsysJointTrajectoryBridgeComp.cpp)
@@ -134,8 +119,8 @@ install(CODE
    endforeach()
   ")
 
-## temprarily fix (FIXME)
-install(CODE "execute_process(COMMAND cmake -E touch \$ENV{DISTDIR}/${CMAKE_INSTALL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}/__init__.py)")
+install(FILES rqt_plugin.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 ##
 ## test (Copy from CMakeLists.txt)
@@ -201,3 +186,5 @@ file(WRITE models/SampleRobot_controller_config.yaml
 
 add_rostest(test/test-samplerobot.test)
 add_rostest(test/test-pa10.test)
+add_rostest(test/test-import-python.test)
+

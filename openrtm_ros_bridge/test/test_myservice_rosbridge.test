@@ -1,4 +1,7 @@
 <launch>
+
+  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2809" />
+
   <include file="$(find openrtm_ros_bridge)/samples/myservice_example.launch" >
     <arg name="HAVE_DISPLAY" value="false" />
   </include>

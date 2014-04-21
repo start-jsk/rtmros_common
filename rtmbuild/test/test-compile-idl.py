@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-PKG = 'rtmbuild'
+PKG = 'rtmbuild_test'
 
 import imp  ## for rosbuild
 try:
