@@ -105,7 +105,7 @@
      (dolist (idl (send self :get-ROSBridge-idl-fnames ros-pkg-name))
        (let ((rtc-name (pathname-name idl)))
          (dolist (srv-name (mapcar #'pathname-name (remove-if-not #'(lambda (x) (and (substringp rtc-name x) (not (= (char x 0) (char "." 0))))) srv-fnames)))
-           (let ((method-def (send self :get-ROSBridge-method-def-macro rtc-name srv-name)))
+           (let ((method-def (send self :get-ROSBridge-method-def-macro rtc-name srv-name ros-pkg-name)))
              (when method-def
                (if debug-view (pprint (macroexpand method-def)))
                (eval method-def)
@@ -118,9 +118,9 @@
   (:get-ROSBridge-idl-fnames (&optional (ros-pkg-name "hrpsys_ros_bridge")) (send self :get-ROSBridge-fnames-from-type "idl" ros-pkg-name))
   (:get-ROSBridge-srv-fnames (&optional (ros-pkg-name "hrpsys_ros_bridge")) (send self :get-ROSBridge-fnames-from-type "srv" ros-pkg-name))
   (:get-ROSBridge-method-def-macro
-   (rtc-name srv-name)
+   (rtc-name srv-name &optional (ros-pkg-name "hrpsys_ros_bridge"))
    (let* ((meth-name (string-left-trim "_" (string-left-trim rtc-name (string-left-trim "_" (string-left-trim "OpenHRP" srv-name)))))
-          (srv-request (read-from-string (format nil "hrpsys_ros_bridge::~ARequest" srv-name)))
+          (srv-request (read-from-string (format nil "~A::~ARequest" ros-pkg-name srv-name)))
           (init-method (find-if #'(lambda (x) (eq (car x) :init)) (send (eval srv-request) :methods)))
           ;;(new-method-name (read-from-string (format nil ":~A" (string-left-trim "_" (string-left-trim rtc-name (string-left-trim "_" (string-left-trim "OpenHRP" srv-name))))))))
           (new-method-name (read-from-string (format nil ":~A" (string-left-trim "_" (string-left-trim "OpenHRP" srv-name))))))
