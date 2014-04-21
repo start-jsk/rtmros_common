@@ -96,6 +96,7 @@ macro(compile_openhrp_model wrlfile)
   string(TOLOWER ${_name} _sname)
   set(_yamlfile "${_workdir}/${_sname}.yaml")
   set(_lispfile "${_workdir}/${_sname}.l")
+  set(_urdffile "${_workdir}/${_name}.urdf")
   # rtm-naming
   if(${USE_ROSBUILD})
     rosbuild_find_ros_package(openrtm_aist)
@@ -124,6 +125,14 @@ macro(compile_openhrp_model wrlfile)
     endif()
     set(_collada2eus_exe ${euscollada_PREFIX}/lib/euscollada/collada2eus)
   endif()
+  # use collad_to_urdf
+  if(${USE_ROSBUILD})
+    rosbuild_find_ros_package(collada_tools)
+    set(_collada_to_urdf_exe ${collada_tools_PACKAGE_PATH}/bin/collada_to_urdf)
+  else()
+    find_package(collada_urdf)
+    set(_collada_to_urdf_exe ${collada_urdf_PREFIX}/lib/collada_urdf/collada_to_urdf)
+  endif()
   # check if binary exists
   if(NOT EXISTS ${_rtm_naming_exe})
     message(FATAL_ERROR "-- ${_rtm_naming_exe} not found")
@@ -147,6 +156,19 @@ macro(compile_openhrp_model wrlfile)
         COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${_daefile} ${_lispfile}
         DEPENDS ${_daefile} ${_euscollada_dep_files})
     endif(EXISTS ${_yamlfile})
+  endif()
+  if(NOT EXISTS ${_collada_to_urdf_exe})
+    message(AUTHOR_WARNING "-- ${_collada_to_urdf_exe} not found")
+  else()
+    set(_mesh_dir "${_workdir}/${_name}_meshes")
+    if(PROJECT_NAME)
+      set(_mesh_prefix "package://${PROJECT_NAME}/models/${_name}_meshes")
+    else()
+      set(_mesh_prefix "file://${_workdir}/${_name}_meshes") ## set absolute file path
+    endif()
+    add_custom_command(OUTPUT ${_urdffile} ${_mesh_dir}
+      COMMAND ${_collada_to_urdf_exe} ${_daefile} --output_file ${_urdffile} -G -A --mesh_output_dir ${_mesh_dir} --mesh_prefix ${_mesh_prefix}
+      DEPENDS ${_daefile})
   endif()
   # use export-collada
   if(${USE_ROSBUILD})
@@ -236,13 +258,17 @@ macro(compile_openhrp_model wrlfile)
     COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}"
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
-  if(EXISTS ${_collada2eus_exe} AND EXISTS ${_export_collada_exe})
-    add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
-  elseif(EXISTS ${_export_collada_exe})
-    add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_xmlfile} ${_xmlfile_nosim} ${_daefile})
-  else()
-    add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_xmlfile} ${_xmlfile_nosim})
+  list(APPEND _depends_files ${_xmlfile} ${_xmlfile_nosim})
+  if(EXISTS ${_export_collada_exe})
+    list(APPEND _depends_files ${_daefile})
+    if(EXISTS ${_collada2eus_exe})
+      list(APPEND _depends_files ${_lispfile})
+    endif()
+    if(EXISTS ${_collada_to_urdf_exe})
+      list(APPEND _depends_files ${_urdffile})
+    endif()
   endif()
+  add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_depends_files})
   ## make sure to kill nameserver
   add_custom_command(OUTPUT ${_sname}_${PROJECT_NAME}_compile_cleanup
     COMMAND echo "pkill -KILL -f omniNames -start ${_corba_port} for compile_openhrp_model"
@@ -284,6 +310,7 @@ macro(compile_collada_model daefile)
   string(TOLOWER ${_name} _sname)
   set(_yamlfile "${_workdir}/${_sname}.yaml")
   set(_lispfile "${_workdir}/${_sname}.l")
+  set(_urdffile "${_workdir}/${_name}.urdf")
   # rtm-naming
   if(${USE_ROSBUILD})
     rosbuild_find_ros_package(openrtm_aist)
@@ -313,6 +340,14 @@ macro(compile_collada_model daefile)
     endif()
     set(_collada2eus_exe ${euscollada_PREFIX}/lib/euscollada/collada2eus)
   endif()
+  # use collad_to_urdf
+  if(${USE_ROSBUILD})
+    rosbuild_find_ros_package(collada_tools)
+    set(_collada_to_urdf_exe ${collada_tools_PACKAGE_PATH}/bin/collada_to_urdf)
+  else()
+    find_package(collada_urdf)
+    set(_collada_to_urdf_exe ${collada_urdf_PREFIX}/lib/collada_urdf/collada_to_urdf)
+  endif()
   # check if binary exists
   if(NOT EXISTS ${_rtm_naming_exe})
     message(FATAL_ERROR "-- ${_rtm_naming_exe} not found")
@@ -329,6 +364,19 @@ macro(compile_collada_model daefile)
         COMMAND ${_collada2eus_exe} ${daefile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus $for {_lispfile}"
         DEPENDS ${daefile} ${_euscollada_dep_files})
     endif(EXISTS ${_yamlfile})
+  endif()
+  if(NOT EXISTS ${_collada_to_urdf_exe})
+    message(AUTHOR_WARNING "-- ${_collada_to_urdf_exe} not found")
+  else()
+    set(_mesh_dir "${_workdir}/${_name}_meshes")
+    if(PROJECT_NAME)
+      set(_mesh_prefix "package://${PROJECT_NAME}/models/${_name}_meshes")
+    else()
+      set(_mesh_prefix "file://${_workdir}/${_name}_meshes") ## set absolute file path
+    endif()
+    add_custom_command(OUTPUT ${_urdffile} ${_mesh_dir}
+      COMMAND ${_collada_to_urdf_exe} ${daefile} --output_file ${_urdffile} -G -A --mesh_output_dir ${_mesh_dir} --mesh_prefix ${_mesh_prefix}
+      DEPENDS ${daefile})
   endif()
   # use _gen_project.launch
   if(${USE_ROSBUILD})
@@ -389,11 +437,14 @@ macro(compile_collada_model daefile)
     COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}"
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
     DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
+  list(APPEND _depends_files ${_xmlfile} ${_xmlfile_nosim})
   if(EXISTS ${_collada2eus_exe})
-    add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_lispfile} ${_xmlfile} ${_xmlfile_nosim})
-  else()
-    add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_xmlfile} ${_xmlfile_nosim})
+    list(APPEND _depends_files ${_lispfile})
   endif()
+  if(EXISTS ${_collada_to_urdf_exe})
+    list(APPEND _depends_files ${_urdffile})
+  endif()
+  add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_depends_files})
   ## make sure to kill nameserver
   add_custom_command(OUTPUT ${_sname}_${PROJECT_NAME}_compile_cleanup
     COMMAND echo "pkill -KILL -f omniNames -start ${_corba_port} for compile_collada_model"
