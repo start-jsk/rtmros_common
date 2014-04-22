@@ -28,7 +28,7 @@ from rqt_robot_dashboard.widgets import MenuDashWidget
 from python_qt_binding.QtCore import QSize
 from python_qt_binding.QtGui import QMessageBox
 
-from subprocess import check_call
+from subprocess import check_call, Popen
 
 # subclasses required for hrpsys_dasboard
 class HrpsysLogMenu(MenuDashWidget):
@@ -80,9 +80,9 @@ class HrpsysRTCDMenu(MenuDashWidget):
       self.add_action('stop rtcd', self.on_stop_rtcd)
     self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
   def on_start_rtcd(self):
-    check_call(['bash', '-c', self.start_command])
+    Popen(['bash', '-c', self.start_command])
   def on_stop_rtcd(self):
-    check_call(['bash', '-c', self.stop_command])
+    Popen(['bash', '-c', self.stop_command])
 
 
 class HrpsysROSBridgeMenu(MenuDashWidget):
@@ -104,9 +104,9 @@ class HrpsysROSBridgeMenu(MenuDashWidget):
       self.add_action('stop hrpsys_ros_bridge', self.on_stop_ros_bridge)
     self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
   def on_start_ros_bridge(self):
-    check_call(['bash', '-c', self.rosbridge_start_command])
+    Popen(['bash', '-c', self.rosbridge_start_command])
   def on_stop_ros_bridge(self):
-    check_call(['bash', '-c', self.rosbridge_stop_command])
+    Popen(['bash', '-c', self.rosbridge_stop_command])
 
 class HrpsysPowerMenu(MenuDashWidget):
   """
@@ -159,7 +159,7 @@ class HrpsysServoMenu(MenuDashWidget):
   def on_servo_on(self):
     try:
       if self.start_command:
-        check_call(['bash', '-c', self.start_command])
+        Popen(['bash', '-c', self.start_command])
       else:
         servo = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/servo", OpenHRP_RobotHardwareService_servo )
         power = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/power", OpenHRP_RobotHardwareService_power )
@@ -177,7 +177,7 @@ class HrpsysServoMenu(MenuDashWidget):
   def on_servo_off(self):
     try:
       if self.stop_command:
-        check_call(['bash', '-c', self.stop_command])
+        Popen(['bash', '-c', self.stop_command])
       else:
         power = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/power", OpenHRP_RobotHardwareService_power )
         servo = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/servo", OpenHRP_RobotHardwareService_servo )
