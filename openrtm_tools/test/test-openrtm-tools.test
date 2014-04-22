@@ -1,3 +1,23 @@
 <launch>
+
+  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2809" />
+
+  <arg name="nameserver" default="localhost" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+
+  <!-- RTC SeqIn/SeqOut sample -->
+  <node name="seqin"  pkg="openrtm_aist" type="SeqInComp"	args='$(arg openrtm_args)' />
+  <node name="seqout" pkg="openrtm_aist" type="SeqOutComp"	args='$(arg openrtm_args)' />
+
+  <!-- BEGIN:openrtm connection -->
+  <node name="rtmlaunch_py" pkg="openrtm_tools" type="rtmlaunch.py"
+        args="$(find openrtm_tools)/test/test-openrtm-tools.test" />
+  <rtactivate component="SequenceInComponent0.rtc" />
+  <rtactivate component="SequenceOutComponent0.rtc" />
+  <rtconnect from="SequenceInComponent0.rtc:Float"     to="SequenceOutComponent0.rtc:Float"    subscription_type="new"/>
+  <rtconnect from="SequenceInComponent0.rtc:FloatSeq"  to="SequenceOutComponent0.rtc:FloatSeq" subscription_type="flush"/>
+  <!-- END:openrtm connection -->
+
   <test test-name="rtshell_setup" pkg="openrtm_tools" type="test-rtshell-setup.py" />
 </launch>
