@@ -57,6 +57,7 @@
 -o "example.TorqueController.config_file:$(arg CONF_FILE)"
 -o "example.VirtualForceSensor.config_file:$(arg CONF_FILE)"
 -o "example.AbsoluteForceSensor.config_file:$(arg CONF_FILE)"
+-o "example.RemoveForceSensorLinkOffset.config_file:$(arg CONF_FILE)"
 -o "example.KalmanFilter.config_file:$(arg CONF_FILE)"
 -o "example.Stabilizer.config_file:$(arg CONF_FILE)"
 -o "example.CollisionDetector.config_file:$(arg CONF_FILE)"
