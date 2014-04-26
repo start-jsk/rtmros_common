@@ -26,18 +26,18 @@ macro(_rtmbuild_genbridge_init)
     ## gen cpp/msg/srv filenames from idl and store filename to _autogen_files
     if(DEBUG_RTMBUILD_CMAKE)
       message("[_rtmbuild_genbridge_init] Get msgs/srvs filenames from ${_idl_file}")
-      message("[_rtmbuild_genbridge_init] running\n>> ${idl2srv_EXECUTABLE} -i ${_idl_file} --include-dirs=\"${rtm_idldir} ${hrp_idldir}\" --package-name=${PROJECT_NAME} --tmpdir=/tmp/idl2srv_${PROJECT_NAME}_${_idl_name}")
+      message("[_rtmbuild_genbridge_init] running\n>> ${idl2srv_EXECUTABLE} -i ${_idfgl_file} --include-dirs=\"${rtm_idldir} ${hrp_idldir}\" --package-name=${PROJECT_NAME} --tmpdir=/tmp/idl2srv_$ENV{USER}_${PROJECT_NAME}_${_idl_name}")
     endif()
     ##
     set(${PROJECT_NAME}_autogen_files "")
-    execute_process(COMMAND ${idl2srv_EXECUTABLE} -i ${_idl_file} --include-dirs="${rtm_idldir} ${hrp_idldir}" --package-name=${PROJECT_NAME} --tmpdir=/tmp/idl2srv_${PROJECT_NAME}_${_idl_name} OUTPUT_VARIABLE ${PROJECT_NAME}_autogen_files OUTPUT_STRIP_TRAILING_WHITESPACE RESULT_VARIABLE _idl2srv_failed ERROR_VARIABLE _idl2srv_error)
+    execute_process(COMMAND ${idl2srv_EXECUTABLE} -i ${_idl_file} --include-dirs="${rtm_idldir} ${hrp_idldir}" --package-name=${PROJECT_NAME} --tmpdir=/tmp/idl2srv_$ENV{USER}_${PROJECT_NAME}_${_idl_name} OUTPUT_VARIABLE ${PROJECT_NAME}_autogen_files OUTPUT_STRIP_TRAILING_WHITESPACE RESULT_VARIABLE _idl2srv_failed ERROR_VARIABLE _idl2srv_error)
     if(DEBUG_RTMBUILD_CMAKE)
       message("[_rtmbuild_genbridge_init] ${idl2srv_EXECUTABLE} returned ${_idl2srv_failed} (stdout:${${PROJECT_NAME}_autogen_files}, stderr:${_idl2srv_error})")
       message("[_rtmbuild_genbridge_init] ${PROJECT_NAME}_autogen_files : ${${PROJECT_NAME}_autogen_files}")
     endif()
     if ( _idl2srv_failed )
       message(WARNING ".. running idl2srv.py failed ${_idl2srv_error} ${_autogen_files}")
-      message(WARNING ">> ${idl2srv_EXECUTABLE} -i ${_idl_file} --include-dirs=\"${rtm_idldir} ${hrp_idldir}\" --package-name=${PROJECT_NAME} --tmpdir=/tmp/idl2srv_${PROJECT_NAME}_${_idl_name}")
+      message(WARNING ">> ${idl2srv_EXECUTABLE} -i ${_idl_file} --include-dirs=\"${rtm_idldir} ${hrp_idldir}\" --package-name=${PROJECT_NAME} --tmpdir=/tmp/idl2srv_$ENV{USER}_${PROJECT_NAME}_${_idl_name}")
       message(FATAL_ERROR "quitting...")
     endif()
 
@@ -87,9 +87,9 @@ macro(_rtmbuild_genbridge_init)
 
       # add custom command for nexttime you invoke make
       add_custom_command(OUTPUT ${${PROJECT_NAME}_${_idl_name}_autogen_cpp_files}
-        COMMAND ${idl2srv_EXECUTABLE} -i ${_idl_file} --include-dirs="${rtm_idldir} ${hrp_idldir}" --package-name=${PROJECT_NAME} --tmpdir=/tmp/idl2srv_${PROJECT_NAME}_${_idl_name}
+        COMMAND ${idl2srv_EXECUTABLE} -i ${_idl_file} --include-dirs="${rtm_idldir} ${hrp_idldir}" --package-name=${PROJECT_NAME} --tmpdir=/tmp/idl2srv_$ENV{USER}_${PROJECT_NAME}_${_idl_name}
         DEPENDS ${_idl_file})
-      list(APPEND _autogen /tmp/idl2srv_${PROJECT_NAME}_${_idl_name})
+      list(APPEND _autogen /tmp/idl2srv_$ENV{USER}_${PROJECT_NAME}_${_idl_name})
 
     endif( ${PROJECT_NAME}_autogen_files ) 
 
