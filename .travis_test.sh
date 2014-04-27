@@ -57,7 +57,6 @@ else
             # set up sorce code of downstream package
     cd src
     wstool init
-    wstool set rtmros_common http://github.com/start-jsk/rtmros_common --git -y
     wstool set rtmros_hironx http://github.com/start-jsk/rtmros_hironx --git -y
     wstool set rtmros_nextage http://github.com/tork-a/rtmros_nextage --git -y
     wstool update
