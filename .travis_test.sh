@@ -35,7 +35,7 @@ source /opt/ros/hydro/setup.bash
 # set hrpsys (hrpsys wrapper for ROS, just for compile and test)
 mkdir -p ~/catkin_ws/src
 cd ~/catkin_ws
-ln -sf ${CI_SOURCE_PATH} src/
+ln -sf ${CI_SOURCE_PATH} src/rtmros_common
 
 if [ "$TEST_TYPE" == "work_with_downstream" ]; then
     echo "
@@ -62,7 +62,8 @@ else
     wstool update
     cd ..
     # do not install rtmros_common because we want to use them
-    for _pkg in hrpsys_ros_bridge, hrpsys_tools, rtmbuild; do
+    find src
+    for _pkg in hrpsys_ros_bridge hrpsys_tools rtmbuild; do
         sed -i "1imacro(dummy_install)\nmessage(\"install(\${ARGN})\")\nendmacro()" src/rtmros_common/${_pkg}/CMakeLists.txt
         sed -i "s@install\(@dummy_install\(@f" src/rtmros_common/${_pkg}/CMakeLists.txt
         sed -i "s@install\(@dummy_install\(@f" src/rtmros_common/${_pkg}/catkin.cmake
