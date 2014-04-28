@@ -65,8 +65,8 @@ else
     find src
     for _pkg in hrpsys_ros_bridge hrpsys_tools rtmbuild; do
         sed -i "1imacro(dummy_install)\nmessage(\"install(\${ARGN})\")\nendmacro()" src/rtmros_common/${_pkg}/CMakeLists.txt
-        sed -i "s@install\(@dummy_install\(@f" src/rtmros_common/${_pkg}/CMakeLists.txt
-        sed -i "s@install\(@dummy_install\(@f" src/rtmros_common/${_pkg}/catkin.cmake
+        sed -i "s@install\(@dummy_install\(@g" src/rtmros_common/${_pkg}/CMakeLists.txt
+        sed -i "s@install\(@dummy_install\(@g" src/rtmros_common/${_pkg}/catkin.cmake
     done
     catkin_make -j8 -l8 --only-pkg-with-deps `echo $pkg | sed s/-/_/g`
     catkin_make install -j8 -l8
