@@ -64,9 +64,13 @@ else
     # do not install rtmros_common because we want to use them
     find src
     for _pkg in hrpsys_ros_bridge hrpsys_tools rtmbuild; do
-        sed -i "1imacro(dummy_install)\nmessage(\"install(\${ARGN})\")\nendmacro()" src/rtmros_common/${_pkg}/CMakeLists.txt
-        sed -i "s@install(@dummy_install(@g" src/rtmros_common/${_pkg}/CMakeLists.txt
-        sed -i "s@install(@dummy_install(@g" src/rtmros_common/${_pkg}/catkin.cmake
+        if [ -e src/rtmros_common/${_pkg}/CMakeLists.txt ] ; then
+            sed -i "1imacro(dummy_install)\nmessage(\"install(\${ARGN})\")\nendmacro()" src/rtmros_common/${_pkg}/CMakeLists.txt
+            sed -i "s@install(@dummy_install(@g" src/rtmros_common/${_pkg}/CMakeLists.txt
+        fi
+        if [ -e src/rtmros_common/${_pkg}/catkin.cmake ] ; then
+            sed -i "s@install(@dummy_install(@g" src/rtmros_common/${_pkg}/catkin.cmake
+        fi
     done
     catkin_make -j8 -l8 --only-pkg-with-deps `echo $pkg | sed s/-/_/g`
     catkin_make install -j8 -l8
