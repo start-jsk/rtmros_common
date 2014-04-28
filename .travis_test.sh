@@ -90,5 +90,11 @@ else
     find $pkg_path/test -iname "*.test" -print0 | xargs -0 -n1 rostest || export EXIT_STATUS=$?;
 fi
 
-[ $EXIT_STATUS == 0 ] || exit 1
+if [ $EXIT_STATUS == 0 ] ; then
+    exit 0
+else
+    if [ $BUILDER == catkin ]; then find build -name LastTest.log -exec echo "==== {} ====" \; -exec cat {} \;  ; fi
+    if [ -e ${HOME}/.ros/test_results ]; then find ${HOME}/.ros/test_results -type f -exec echo "=== {} ===" \; -exec cat {} \; ; fi
+    exit 1
+fi
 
