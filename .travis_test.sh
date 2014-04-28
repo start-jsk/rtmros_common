@@ -29,6 +29,8 @@ sudo apt-get install -y ros-hydro-$pkg
 # this is hotfix
 sudo wget https://raw.githubusercontent.com/start-jsk/rtmros_common/master/hrpsys_tools/test/test-pa10.test -O /opt/ros/hydro/share/hrpsys_tools/test/test-pa10.test
 
+sudo apt-get install -y -qq ros-hydro-rqt-robot-dashboard
+
 #
 source /opt/ros/hydro/setup.bash
 
