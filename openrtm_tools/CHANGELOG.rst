@@ -2,8 +2,8 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.12 (2014-05-06)
+-------------------
 * Merge pull request #404 from k-okada/403_check_rtprint
   add add check to rtprint
 * add python path to openrtm_aist_python, this will fix #403

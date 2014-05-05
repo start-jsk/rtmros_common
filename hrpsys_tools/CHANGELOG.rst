@@ -2,8 +2,8 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.12 (2014-05-06)
+-------------------
 * add RemoveForceSensorLinkOffset setting ;; I write both AbsoluteForceSensor and RemoveForceSensorLinkOffset for compatibility
 * make fail when pa10 is fail to launch
 * Contributors: Kei Okada, Shunichi Nozawa

@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.12 (2014-05-06)
+-------------------
 * (collision_detector.launch) typo
 * use odom instad of imu_floor
 * do not connect port when afs is not found
