@@ -2,6 +2,9 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.0.11 (2014-04-16)
 -------------------
 * compile idl files at once, omniidl -bpython support compile multiple idl
