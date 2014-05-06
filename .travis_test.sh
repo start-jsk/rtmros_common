@@ -73,6 +73,12 @@ else
     done
     catkin_make -j8 -l8 --only-pkg-with-deps `echo $pkg | sed s/-/_/g`
     catkin_make install -j8 -l8
+    # make sure to kill test
+    for _pkg in hrpsys_ros_bridge hrpsys_tools rtmbuild; do
+	rm -fr install/lib/${_pkg}
+	rm -fr install/share/${_pkg}
+	rm -fr install/lib/python2.7/dist-packages/${_pkg}*
+    done
 
 fi
 
