@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2014-05-14)
+------------------
 
 * bump to 1.2.0for hrpsys 315.2.0
 
