@@ -2,6 +2,11 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
+* bump to 1.2.0 for hrpsys 315.2.0
+
 1.0.12 (2014-05-06)
 -------------------
 
