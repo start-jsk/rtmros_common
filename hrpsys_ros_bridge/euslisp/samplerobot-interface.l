@@ -6,7 +6,7 @@
   :slots ())
 (defmethod samplerobot-interface
   (:init (&rest args)
-         (send-super :init :robot samplerobot-robot)))
+         (send-super* :init :robot samplerobot-robot args)))
 
 (defun samplerobot-init ()
   (if (not (boundp '*ri*))
