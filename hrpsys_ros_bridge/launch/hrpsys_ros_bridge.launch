@@ -10,9 +10,9 @@
   <!-- Set these values false when using HIRO -->
   <arg name="USE_COMMON" default="true" />
   <arg name="USE_ROBOTHARDWARE" default="false" />
-  <arg name="USE_WALKING" default="true" />
+  <arg name="USE_WALKING" default="false" />
   <arg name="USE_COLLISIONCHECK" default="true" />
-  <arg name="USE_IMPEDANCECONTROLLER" default="true" />
+  <arg name="USE_IMPEDANCECONTROLLER" default="false" />
   <arg name="USE_GRASPCONTROLLER" default="false" />
   <arg name="USE_TORQUECONTROLLER" default="false" />
   <arg name="USE_SOFTERRORLIMIT" default="true" />

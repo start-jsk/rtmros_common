@@ -2,6 +2,14 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.0 (2014-05-14)
+------------------
+
+* bump to 1.2.0 for hrpsys 315.2.0
+
+1.0.12 (2014-05-06)
+-------------------
+
 1.0.11 (2014-04-16)
 -------------------
 * compile idl files at once, omniidl -bpython support compile multiple idl

@@ -2,6 +2,21 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.0 (2014-05-14)
+------------------
+
+* bump to 1.2.0for hrpsys 315.2.0
+
+1.0.12 (2014-05-06)
+-------------------
+* Merge pull request #404 from k-okada/403_check_rtprint
+  add add check to rtprint
+* add python path to openrtm_aist_python, this will fix #403
+* add test program for rtshell/rtprint
+* remove redundant rosdep name from manifest.xml
+* does not call shopt on zsh
+* Contributors: Kei Okada, Ryohei Ueda
+
 1.0.11 (2014-04-16)
 -------------------
 
