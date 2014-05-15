@@ -26,7 +26,7 @@ macro(_rtmbuild_genbridge_init)
     ## gen cpp/msg/srv filenames from idl and store filename to _autogen_files
     if(DEBUG_RTMBUILD_CMAKE)
       message("[_rtmbuild_genbridge_init] Get msgs/srvs filenames from ${_idl_file}")
-      message("[_rtmbuild_genbridge_init] running\n>> ${idl2srv_EXECUTABLE} -i ${_idfgl_file} --include-dirs=\"${rtm_idldir} ${hrp_idldir}\" --package-name=${PROJECT_NAME} --tmpdir=/tmp/idl2srv_${PROJECT_NAME}_${_idl_name}_${_rand_str}")
+      message("[_rtmbuild_genbridge_init] running\n>> ${idl2srv_EXECUTABLE} -i ${_idl_file} --include-dirs=\"${rtm_idldir} ${hrp_idldir}\" --package-name=${PROJECT_NAME} --tmpdir=/tmp/idl2srv_${PROJECT_NAME}_${_idl_name}_${_rand_str}")
     endif()
     ##
     set(${PROJECT_NAME}_autogen_files "")
