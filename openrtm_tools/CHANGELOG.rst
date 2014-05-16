@@ -2,6 +2,11 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.0 (2014-05-14)
+------------------
+
+* bump to 1.2.0for hrpsys 315.2.0
+
 1.0.12 (2014-05-06)
 -------------------
 * Merge pull request #404 from k-okada/403_check_rtprint
