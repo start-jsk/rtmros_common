@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+pkg = 'hrpsys'
+import imp
+try:
+    imp.find_module(pkg)
+except:
+    import roslib
+    roslib.load_manifest(pkg)
+
+from hrpsys.hrpsys_config import *
+import OpenHRP
+
+class @ROBOT@Configurator(HrpsysConfigurator):
+    def getRTCList (self):
+        return self.getRTCListUnstable()
+
+if __name__ == '__main__':
+    hcf = @ROBOT@Configurator()
+    if len(sys.argv) > 2 :
+        hcf.init(sys.argv[1], sys.argv[2])
+    elif len(sys.argv) > 1 :
+        hcf.init(sys.argv[1])
+    else :
+        hcf.init()
