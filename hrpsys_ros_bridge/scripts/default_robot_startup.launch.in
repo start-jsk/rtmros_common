@@ -17,5 +17,6 @@
     <arg name="REALTIME" default="$(arg REALTIME)" />
     <arg name="corbaport" default="$(arg corbaport)" />
     <arg name="GUI" default="$(arg GUI)" />
+@STARTUP_ARGS@
   </include>
 </launch>
