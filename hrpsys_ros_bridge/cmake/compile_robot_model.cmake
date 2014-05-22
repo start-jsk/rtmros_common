@@ -560,17 +560,30 @@ macro (generate_default_launch_eusinterface_files wrlfile project_pkg_name)
   if(NOT EXISTS ${hrpsys_ros_bridge_PACKAGE_PATH}/scripts)
     message(FATAL_ERROR "hrpsys_ros_bridge_PACKAGE_PATH could not found")
   endif()
+
+  # generate files
   set(${_sname}_generated_launch_euslisp_files)
+  #   generate hrpsys_config.py to use unstable RTCs
+  if ("${ARGV3}" STREQUAL "--use-unstable-hrpsys-config")
+    configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_unstable_hrpsys_config.py.in ${PROJECT_SOURCE_DIR}/scripts/${_sname}_unstable_hrpsys_config.py)
+    list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/scripts/${_sname}_unstable_hrpsys_config.py)
+    set(ROSBRIDGE_ARGS "    <arg name=\"USE_WALKING\" default=\"true\" />\n    <arg name=\"USE_IMPEDANCECONTROLLER\" default=\"true\" />")
+    set(STARTUP_ARGS "    <arg name=\"HRPSYS_PY_PKG\" default=\"${PROJECT_PKG_NAME}\" />\n    <arg name=\"HRPSYS_PY_NAME\" default=\"${robot}_unstable_hrpsys_config.py\" />")
+  endif()
+  #  generate startup.launch
   configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot_startup.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}_startup.launch)
   list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}_startup.launch)
+  #  generate ros_bridge.launch
   configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot_ros_bridge.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}_ros_bridge.launch)
   list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}_ros_bridge.launch)
+  #  generate toplevel launch which includes ros_bridge.launch and startup.launch
   if (NOT "${ARGV3}" STREQUAL "--no-toplevel-launch")
     configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}.launch)
     configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot_nosim.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}_nosim.launch)
     list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}.launch)
     list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}_nosim.launch)
   endif()
+  #  generate euslisp robot-interface file
   if (NOT "${ARGV3}" STREQUAL "--no-euslisp")
     configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default-robot-interface.l.in ${PROJECT_SOURCE_DIR}/build/${_sname}-interface.l)
     list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/build/${_sname}-interface.l)
