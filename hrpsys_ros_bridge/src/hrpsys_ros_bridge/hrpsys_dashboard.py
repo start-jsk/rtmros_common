@@ -17,6 +17,7 @@ import rospy
 import hrpsys_ros_bridge
 from hrpsys_ros_bridge.srv import *
 import time
+import re
 
 ####### rqt
 
