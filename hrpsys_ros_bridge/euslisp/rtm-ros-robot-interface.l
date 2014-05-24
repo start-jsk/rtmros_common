@@ -54,17 +54,20 @@
                          (send (send wrc :torque) :x)
                          (send (send wrc :torque) :y)
                          (send (send wrc :torque) :z)))))
+  (:tmp-force-moment-vector-for-limb
+   (f/m fsensor-name &optional (off nil))
+   (let ((key-name (if off
+                       (read-from-string (format nil ":~A-~A" off (string-downcase fsensor-name)))
+                     fsensor-name)))
+     (subseq (cdr (assoc key-name robot-state))
+             (if (eq f/m :force) 0 3)
+             (if (eq f/m :force) 3 6))))
   (:tmp-force-moment-vector
    (f/m &optional (limb) (off nil))
    (if limb
-       (let ((key-name (if off
-                           (read-from-string (format nil ":~A-~A" off (string-downcase (send (send robot :force-sensor limb) :name))))
-                         (send (send robot :force-sensor limb) :name))))
-         (subseq (cdr (assoc key-name robot-state))
-                 (if (eq f/m :force) 0 3)
-                 (if (eq f/m :force) 3 6)))
+       (send self :tmp-force-moment-vector-for-limb f/m (send (car (send robot limb :force-sensors)) :name) off)
      (mapcar #'(lambda (x)
-                 (send self :tmp-force-moment-vector f/m x off))
+                 (send self :tmp-force-moment-vector-for-limb f/m x off))
              (send-all (send robot :force-sensors) :name))))
   (:force-vector
    (&optional (limb))
@@ -81,14 +84,14 @@
   (:absolute-force-vector
    (&optional (limb))
    (if limb
-       (send (send robot :force-sensor limb) :rotate-vector (send self :off-force-vector limb))
+       (send (car (send robot limb :force-sensors)) :rotate-vector (send self :off-force-vector limb))
      (mapcar #'(lambda (fs force)
                  (send fs :rotate-vector force))
              (send robot :force-sensors) (send self :off-force-vector))))
   (:absolute-moment-vector
    (&optional (limb))
    (if limb
-       (send (send robot :force-sensor limb) :rotate-vector (send self :off-moment-vector limb))
+       (send (car (send robot limb :force-sensors)) :rotate-vector (send self :off-moment-vector limb))
      (mapcar #'(lambda (fs moment)
                  (send fs :rotate-vector moment))
              (send robot :force-sensors) (send self :off-moment-vector))))
@@ -343,8 +346,10 @@
     ((stringp limb)
      (apply method-func
             limb nil nil args))
-    ((send robot :force-sensor limb)
-     (let ((fs (send robot :force-sensor limb))
+    ((eq limb :legs) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rleg :lleg)))
+    ((eq limb :arms) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rarm :larm)))
+    ((car (send robot limb :force-sensors))
+     (let ((fs (car (send robot limb :force-sensors)))
            (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
        (apply method-func
               (string-downcase (send fs :name))
@@ -359,8 +364,6 @@
               (send (send (send (send robot rlimb :root-link) :parent) :joint) :name)
               (send (send (send (send robot rlimb :end-coords) :parent) :joint) :name)
               args)))
-    ((eq limb :legs) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rleg :lleg)))
-    ((eq limb :arms) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rarm :larm)))
     (t ) ;; virtual force sensor is not supported in this file
     ))
   )
@@ -424,7 +427,7 @@
              (let* ((abs-v (send self (read-from-string (format nil ":absolute-~A-vector" (string-downcase f/m))) alimb))
                     (param (send self :get-forcemoment-offset-param alimb))
                     (off (v+ (send param (if (eq f/m :force) :force_offset :moment_offset))
-                             (send (send robot :force-sensor alimb) :inverse-rotate-vector abs-v))))
+                             (send (car (send robot alimb :force-sensors)) :inverse-rotate-vector abs-v))))
                (list off abs-v))))
      (mapcar #'(lambda (alimb)
                  (let* ((ret (mapcar #'(lambda (x) (calc-off alimb)) (make-list itr)))
