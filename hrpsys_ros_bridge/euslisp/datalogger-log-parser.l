@@ -55,7 +55,7 @@
 
 (defclass datalogger-log-parser-controller
   :super rtm-ros-robot-interface
-  :slots (parser-list robothardware-name)
+  :slots (parser-list robothardware-name eof-p)
   )
 
 (defmethod datalogger-log-parser-controller
@@ -89,9 +89,10 @@
    (if str
        (find-if #'(lambda (x) (string= str (pathname-type (send x :fname)))) parser-list)
      parser-list))
+  (:eof-p () eof-p)
   (:update-robot-state
    ()
-   (send-all parser-list :proc)
+   (setq eof-p (some #'null (send-all parser-list :proc)))
    (send self :set-robot-state1
          :reference-vector
          (map float-vector #'rad2deg (send (send self :parser-list "sh_qOut") :read-state)))
@@ -99,6 +100,11 @@
          :potentio-vector
          (map float-vector #'rad2deg
               (send (send self :parser-list (format nil "~A_q" robothardware-name)) :read-state)))
+   (send robot :angle-vector (cdr (assoc :potentio-vector robot-state)))
+   (send self :set-robot-state1
+         :torque-vector
+         (send (send self :parser-list (format nil "~A_tau" robothardware-name)) :read-state))
+   ;; (send robot :torque-vector (cdr (assoc :torque-vector robot-state)))
    (send self :set-robot-state1
          :reference-torque-vector
          (send (send self :parser-list "sh_tqOut") :read-state))
@@ -112,12 +118,22 @@
          :root-coords
          (make-coords :pos (cdr (assoc :root-pos robot-state))
                       :rpy (cdr (assoc :root-rpy robot-state))))
+   (send robot :move-coords (cdr (assoc :root-coords robot-state)) (car (send robot :links)))
    (dolist (f (send robot :force-sensors))
      (send self :set-robot-state1
            (send f :name)
            (send (send self :parser-list (format nil "~A_~A" robothardware-name (send f :name))) :read-state)
            ))
+   (dolist (i (send robot :imu-sensors))
+     (send self :set-robot-state1
+           (send i :name)
+           (send (send self :parser-list (format nil "~A_~A" robothardware-name (send i :name))) :read-state)
+           ))
    )
+  ;; overwrite
+  (:reference-vector () (cdr (assoc :reference-vector robot-state)))
+  (:actual-vector () (send self :potentio-vector))
+  (:error-vector () (v- (send self :potentio-vector) (send self :reference-vector)))
   (:time
    (&optional (str "sh_qOut"))
    (send (send self :parser-list str) :time)
