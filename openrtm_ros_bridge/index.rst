@@ -11,6 +11,8 @@ openrtm_ros_bridge ROS Launch Files
 
 **License:** BSD
 
+.. contents:: :local:
+
 myservice_example.launch
 ------------------------
 

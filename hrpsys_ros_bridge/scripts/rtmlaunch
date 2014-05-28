@@ -1,5 +1,27 @@
 #!/usr/bin/python
 
+'''
+Enables to run RTM components by a single command.
+
+Running OpenRTM components requires multiple steps including connecting and activating each components. Using rtmlaunch, the set of the RT components you run can be defined in a single file (in ROS .launch file format with a little extensions) and also run by a single command.
+
+Eg. 
+{{{
+$ rtmlaunch hironx_ros_bridge hironx_ros_bridge_simulation.launch 
+}}}
+
+The ROS nodes that are supposed to be started via this command need to be described in a bit special way in .launch file. See for example https://github.com/start-jsk/rtmros_common/blob/master/openrtm_ros_bridge/index.rst#contents-1:
+
+  <node args="$(find openrtm_ros_bridge)/samples/myservice_rosbridge.launch" name="rtmlaunch_rosbridge" pkg="openrtm" type="rtmlaunch.py" />
+  <rtactivate component="MyServiceROSBridge0.rtc" />
+  <rtconnect from="MyServiceProvider0.rtc:MyService" to="MyServiceROSBridge0.rtc:MyService" />
+
+Here 3 things are happening:
+  1. Run a node of rtmlaunch.py with the designated .launch file.
+  2. Specify rtactivate tag.
+  3. Specify rtconnect tag with connecting components info.
+'''
+
 cosnames = "omniNames"
 port_number = 15005
 
