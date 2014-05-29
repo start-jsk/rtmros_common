@@ -45,6 +45,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   joint_state_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
   joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
+  odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
 
   // is use_sim_time is set and no one publishes clock, publish clock time
   use_sim_time = ros::Time::isSimTime();
@@ -464,20 +465,56 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   // m_baseTformIn
   if ( m_baseTformIn.isNew () ) {
     m_baseTformIn.read();
-    tf::Transform base;
+    // tf::Transform base;
     double *a = m_baseTform.data.get_buffer();
-    base.setOrigin( tf::Vector3(a[0], a[1], a[2]) );
+    
+    // base.setOrigin( tf::Vector3(a[0], a[1], a[2]) );
     hrp::Matrix33 R;
     hrp::getMatrix33FromRowMajorArray(R, a, 3);
+    
     hrp::Vector3 rpy = hrp::rpyFromRot(R);
-    base.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
-
-    // odom publish
-    ros::Time base_time = tm_on_execute;
-    if ( use_hrpsys_time ) {
-        base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
+    tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));
+    nav_msgs::Odometry odom;
+    //odom.header.frame_id = rootlink_name;
+    odom.header.frame_id = "odom";
+    odom.header.stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
+    //odom.child_frame_id = "/odom";
+    odom.pose.pose.position.x = a[0];
+    odom.pose.pose.position.y = a[1];
+    odom.pose.pose.position.z = a[2];
+    odom.pose.pose.orientation.x = q.getX();
+    odom.pose.pose.orientation.y = q.getY();
+    odom.pose.pose.orientation.z = q.getZ();
+    odom.pose.pose.orientation.w = q.getW();
+    
+    odom.pose.covariance[0] = 0.002 * 0.002;
+    odom.pose.covariance[7] = 0.002 * 0.002;
+    odom.pose.covariance[14] = 0.002 * 0.002;
+    odom.pose.covariance[21] = 0.002 * 0.002;
+    odom.pose.covariance[28] = 0.002 * 0.002;
+    odom.pose.covariance[35] = 0.002 * 0.002;
+    if (prev_odom_acquired) {
+      // calc velocity
+      double dt = (odom.header.stamp - prev_odom.header.stamp).toSec();
+      if (dt > 0) {
+        odom.twist.twist.linear.x = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
+        odom.twist.twist.linear.y = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
+        odom.twist.twist.linear.z = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;
+        odom.twist.twist.angular.x = (rpy(0) - prev_rpy(0)) / dt;
+        odom.twist.twist.angular.x = (rpy(1) - prev_rpy(1)) / dt;
+        odom.twist.twist.angular.x = (rpy(2) - prev_rpy(2)) / dt;
+        odom.twist.covariance = odom.pose.covariance;
+        odom_pub.publish(odom);
+      }
+      prev_odom = odom;
+      prev_rpy = rpy;
+      
     }
-    br.sendTransform(tf::StampedTransform(base, base_time, "odom", rootlink_name));
+    else {
+      prev_odom = odom;
+      prev_rpy = rpy;
+      prev_odom_acquired = true;
+    }
   }  // end: m_baseTformIn
 
   bool updateTfImu = false;
