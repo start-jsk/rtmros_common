@@ -467,9 +467,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     m_baseTformIn.read();
     // tf::Transform base;
     double *a = m_baseTform.data.get_buffer();
+    
     // base.setOrigin( tf::Vector3(a[0], a[1], a[2]) );
     hrp::Matrix33 R;
     hrp::getMatrix33FromRowMajorArray(R, a, 3);
+    
     hrp::Vector3 rpy = hrp::rpyFromRot(R);
     tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));
     nav_msgs::Odometry odom;
@@ -494,16 +496,19 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     if (prev_odom_acquired) {
       // calc velocity
       double dt = (odom.header.stamp - prev_odom.header.stamp).toSec();
-      odom.twist.twist.linear.x = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
-      odom.twist.twist.linear.y = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
-      odom.twist.twist.linear.z = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;
-      odom.twist.twist.angular.x = (rpy(0) - prev_rpy(0)) / dt;
-      odom.twist.twist.angular.x = (rpy(1) - prev_rpy(1)) / dt;
-      odom.twist.twist.angular.x = (rpy(2) - prev_rpy(2)) / dt;
-      odom.twist.covariance = odom.pose.covariance;
+      if (dt > 0) {
+        odom.twist.twist.linear.x = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
+        odom.twist.twist.linear.y = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
+        odom.twist.twist.linear.z = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;
+        odom.twist.twist.angular.x = (rpy(0) - prev_rpy(0)) / dt;
+        odom.twist.twist.angular.x = (rpy(1) - prev_rpy(1)) / dt;
+        odom.twist.twist.angular.x = (rpy(2) - prev_rpy(2)) / dt;
+        odom.twist.covariance = odom.pose.covariance;
+        odom_pub.publish(odom);
+      }
       prev_odom = odom;
       prev_rpy = rpy;
-      odom_pub.publish(odom);
+      
     }
     else {
       prev_odom = odom;
