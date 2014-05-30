@@ -1,0 +1,12 @@
+idl/
+models/
+msg/Img_CameraCaptureService.msg
+msg/OpenHRP_*
+msg/OpenRTM_*
+msg/RTC_*
+msg/SDOPackage_*
+*.pyc
+src_gen
+srv
+launch/pa10*
+launch/samplerobot*
