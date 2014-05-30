@@ -14,6 +14,7 @@ from numpy import *
 
 import rospy,rospkg, tf
 from geometry_msgs.msg import WrenchStamped
+from nav_msgs.msg import Odometry
 from hrpsys_ros_bridge.srv import OpenHRP_SequencePlayerService_loadPattern, OpenHRP_SequencePlayerService_waitInterpolation
 
 import actionlib
@@ -25,28 +26,34 @@ class TestSampleRobot(unittest.TestCase):
     listener = None
     lfsensor = None
     rfsensor = None
-
+    odom = None
     def lfsensor_cb(self, sensor):
         self.lfsensor = sensor
 
     def rfsensor_cb(self, sensor):
         self.rfsensor = sensor
-
+    def odom_cb(self, odom):
+        self.odom = odom
     def setUp(self):
         rospy.init_node('TestSampleRobot')
         rospy.Subscriber('/lfsensor', WrenchStamped, self.lfsensor_cb)
         rospy.Subscriber('/rfsensor', WrenchStamped, self.rfsensor_cb)
+        rospy.Subscriber('/odom', Odometry, self.odom_cb)
         self.listener = tf.TransformListener()
 
-    def test_tf_odom_WAIST_LINK(self): # need to check if map/ is published?
-        try:
-            self.listener.waitForTransform('/odom', '/WAIST_LINK0', rospy.Time(), rospy.Duration(120))
-        except tf.Exception:
-            self.assertTrue(None, "could not found tf from /odom to /WAIST_LINK0")
-        (trans,rot) = self.listener.lookupTransform('/odom', '/WAIST_LINK0', rospy.Time(0))
-        rospy.logwarn("tf_echo /odom /WAIST_LINK0 %r %r"%(trans,rot))
-        self.assertAlmostEqual(trans[2],0.7235,2)
-        self.assertTrue(True,"ok")
+    def test_odom(self): # need to check if map/ is published?
+        # wait odom topic
+        start_time = rospy.Time.now()
+        r = rospy.Rate(1)
+        while not rospy.is_shutdown() and (rospy.Time.now() - start_time).to_sec() < 120:
+            if self.odom:
+                break
+            rospy.loginfo("waiting for /odom")
+            r.sleep()
+        if not self.odom:
+            self.assertTrue(False, "no odom topic is available")
+        else:
+            self.assertTrue(True,"ok")
 
     def test_force_sensor(self):
         while self.lfsensor == None or self.rfsensor == None:
@@ -68,8 +75,6 @@ class TestSampleRobot(unittest.TestCase):
         ret = wait_interpolation()
         t2 = rospy.get_time()
         rospy.logwarn("waitInterpolation %f"%(t2-t1))
-        (trans,rot) = self.listener.lookupTransform('/odom', '/WAIST_LINK0', rospy.Time(0))
-        rospy.logwarn("tf_echo /odom /WAIST_LINK0 %r %r"%(trans,rot))
         self.assertAlmostEqual(t2-t1, 20, delta=5)
         #self.assertNotAlmostEqual(trans[1],0,2)
 
