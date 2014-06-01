@@ -8,7 +8,7 @@
   :slots ())
 (defmethod @robot@-interface
   (:init (&rest args)
-         (send-super :init :robot @robot@-robot)))
+         (send-super* :init :robot @robot@-robot args)))
 
 (defun @robot@-init ()
   (if (not (boundp '*ri*))
