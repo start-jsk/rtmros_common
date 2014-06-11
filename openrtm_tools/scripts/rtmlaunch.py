@@ -183,10 +183,17 @@ def main():
         remove_nodes = []
         for node in nodes:
             if node.nodeName == u'group':
-                val = node.getAttributeNode(u'if').value
-                arg = val.split(" ")[1].strip(")") # To "USE_WALKING"
-                if not get_flag_from_argv(arg):
-                    remove_nodes.append(node)
+                if node.attributes.get(u'if'):
+                    val = node.getAttributeNode(u'if').value
+                    arg = val.split(" ")[1].strip(")") # To "USE_WALKING"
+                    if not get_flag_from_argv(arg):
+                        remove_nodes.append(node)
+                if node.attributes.get(u'unless'):
+                    val = node.getAttributeNode(u'unless').value
+                    arg = val.split(" ")[1].strip(")") # To "USE_WALKING"
+                    if get_flag_from_argv(arg):
+                        remove_nodes.append(node)
+                
         for remove_node in remove_nodes:
             nodes.remove(remove_node)
     except Exception,e:

@@ -1,6 +1,6 @@
 <package>
   <name>rosnode_rtc</name>
-  <version>1.0.11</version>
+  <version>1.2.0</version>
   <description>
      This package gives transparency between RTM and ROS.
 
@@ -14,8 +14,8 @@
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/rosnode_rtc</url>
-  <url type="repository">https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common</url>
-  <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/</url>
+  <url type="repository">https://github.com/start-jsk/rtmros_common</url>
+  <url type="bugtracker">https://github.com/start-jsk/rtmros_common/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>openrtm_tools</build_depend>

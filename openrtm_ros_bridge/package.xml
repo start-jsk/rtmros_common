@@ -1,6 +1,6 @@
 <package>
   <name>openrtm_ros_bridge</name>
-  <version>1.0.11</version>
+  <version>1.2.0</version>
   <description>openrtm_ros_bridge package provides basic functionalities to bind
     two robotics framework: <a href = "http://openrtm.org/">OpenRTM</a> and ROS.<br />
     By using this package, you can write your ROS packages that communicate with your
@@ -16,8 +16,8 @@
   <author email="saito@jsk.t.u-tokyo.ac.jp">Manabu Saito</author>
 
   <url type="website">http://wiki.ros.org/openrtm_ros_bridge</url>
-  <url type="repository">https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common</url>
-  <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/</url>
+  <url type="repository">https://github.com/start-jsk/rtmros_common</url>
+  <url type="bugtracker">https://github.com/start-jsk/rtmros_common/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 

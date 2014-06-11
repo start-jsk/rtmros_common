@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>openrtm_tools</name>
-  <version>1.0.11</version>
+  <version>1.2.0</version>
   <description>The openrtm_tools package</description>
 
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
@@ -9,8 +9,8 @@
   <author email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</author>
   <license>BSD</license>
   <url type="website">http://ros.org/wiki/openrtm_tools</url>
-  <url type="repository">https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common</url>
-  <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/</url>
+  <url type="repository">https://github.com/start-jsk/rtmros_common</url>
+  <url type="bugtracker">https://github.com/start-jsk/rtmros_common/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 

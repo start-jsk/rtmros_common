@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>rtmros_common</name>
-  <version>1.0.11</version>
+  <version>1.2.0</version>
   <description>A package suite that provides all the capabilities for
     the ROS users to connect to the robots that run on
     <a href = "http://www.openrtm.org/openrtm/en/content/what-rt-middleware-0">RT Middleware</a>
@@ -15,8 +15,8 @@
 
   <license>BSD</license>
   <url type="website">http://wiki.ros.org/rtmros_common</url>
-  <url type="repository">https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common</url>
-  <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/</url>
+  <url type="repository">https://github.com/start-jsk/rtmros_common</url>
+  <url type="bugtracker">https://github.com/start-jsk/rtmros_common/issues/</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <run_depend>hrpsys_ros_bridge</run_depend>

@@ -1,6 +1,6 @@
 <package>
   <name>rtmbuild</name>
-  <version>1.0.11</version>
+  <version>1.2.0</version>
   <description>Build scripts for OpenRTM and OpenHRP</description>
   <license>BSD</license>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
@@ -9,8 +9,8 @@
   <author email="saito@jsk.t.u-tokyo.ac.jp">Manabu Saito</author>
 
   <url type="website">http://ros.org/wiki/rtmbuild</url>
-  <url type="repository">https://rtm-ros-robotics.googlecode.com/svn/trunk/rtmros_common</url>
-  <url type="bugtracker">https://code.google.com/p/rtm-ros-robotics/issues/</url>
+  <url type="repository">https://github.com/start-jsk/rtmros_common</url>
+  <url type="bugtracker">https://github.com/start-jsk/rtmros_common/issues/</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 

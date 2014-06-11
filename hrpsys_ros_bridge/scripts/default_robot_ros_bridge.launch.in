@@ -10,6 +10,7 @@
     <arg name="MODEL_FILE" value="@MODEL_FILE@" />
     <arg name="COLLADA_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.dae" />
     <arg name="corbaport" default="$(arg corbaport)" />
+@ROSBRIDGE_ARGS@
   </include>
 
   <group if="$(arg RUN_RVIZ)" >

@@ -38,13 +38,13 @@ class TestSampleRobot(unittest.TestCase):
         rospy.Subscriber('/rfsensor', WrenchStamped, self.rfsensor_cb)
         self.listener = tf.TransformListener()
 
-    def test_tf_imu_floor_WAIST_LINK(self): # need to check if map/ is published?
+    def test_tf_odom_WAIST_LINK(self): # need to check if map/ is published?
         try:
-            self.listener.waitForTransform('/imu_floor', '/WAIST_LINK0', rospy.Time(), rospy.Duration(120))
+            self.listener.waitForTransform('/odom', '/WAIST_LINK0', rospy.Time(), rospy.Duration(120))
         except tf.Exception:
-            self.assertTrue(None, "could not found tf from /imu_floor to /WAIST_LINK0")
-        (trans,rot) = self.listener.lookupTransform('/imu_floor', '/WAIST_LINK0', rospy.Time(0))
-        rospy.logwarn("tf_echo /imu_floor /WAIST_LINK0 %r %r"%(trans,rot))
+            self.assertTrue(None, "could not found tf from /odom to /WAIST_LINK0")
+        (trans,rot) = self.listener.lookupTransform('/odom', '/WAIST_LINK0', rospy.Time(0))
+        rospy.logwarn("tf_echo /odom /WAIST_LINK0 %r %r"%(trans,rot))
         self.assertAlmostEqual(trans[2],0.7235,2)
         self.assertTrue(True,"ok")
 
@@ -68,7 +68,7 @@ class TestSampleRobot(unittest.TestCase):
         ret = wait_interpolation()
         t2 = rospy.get_time()
         rospy.logwarn("waitInterpolation %f"%(t2-t1))
-        (trans,rot) = self.listener.lookupTransform('/imu_floor', '/WAIST_LINK0', rospy.Time(0))
+        (trans,rot) = self.listener.lookupTransform('/odom', '/WAIST_LINK0', rospy.Time(0))
         rospy.logwarn("tf_echo /odom /WAIST_LINK0 %r %r"%(trans,rot))
         self.assertAlmostEqual(t2-t1, 20, delta=5)
         #self.assertNotAlmostEqual(trans[1],0,2)
