@@ -118,6 +118,9 @@
          :root-coords
          (make-coords :pos (cdr (assoc :root-pos robot-state))
                       :rpy (cdr (assoc :root-rpy robot-state))))
+   (send self :set-robot-state1
+         :zmp
+         (send (send self :parser-list "sh_zmpOut") :read-state))
    (send robot :move-coords (cdr (assoc :root-coords robot-state)) (car (send robot :links)))
    (dolist (f (send robot :force-sensors))
      (send self :set-robot-state1
