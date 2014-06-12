@@ -467,7 +467,10 @@ class ServiceVisitor (idlvisitor.AstVisitor):
 
         # check if rtc-template exists under `rospack find openrtm_aist`/bin, otherwise use openrtm_aist_PREFIX/lib/openrtm_aist/bin
         from subprocess import check_output, Popen, PIPE
-        openrtm_path = Popen(['rospack','find','openrtm_aist'], stdout=PIPE).communicate()[0].rstrip() # use Popen, not check_output, since catkin_make can not found rospack find
+        try:
+            openrtm_path = Popen(['rospack','find','openrtm_aist'], stdout=PIPE).communicate()[0].rstrip() # use Popen, not check_output, since catkin_make can not found rospack find
+        except:
+            openrtm_path = os.environ["CMAKE_PREFIX_PATH"].split(':')[0]+'/lib/openrtm_aist/'
         if not os.path.exists(os.path.join(openrtm_path, "bin")) :
             openrtm_path = os.path.join(check_output(['pkg-config','openrtm-aist','--variable=prefix']).rstrip(),"lib/openrtm_aist")
         command = "PATH=%s/bin:$PATH rtc-template -bcxx --module-name=%s --consumer=%s:service0:'%s' --consumer-idl=%s --idl-include=%s" % (openrtm_path, module_name, service_name, service_name, idlfile, idldir)
