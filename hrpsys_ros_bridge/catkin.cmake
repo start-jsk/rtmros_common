@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(hrpsys_ros_bridge)
 
 # call catkin depends
-find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp rostest sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager hrpsys_tools image_transport dynamic_reconfigure hrpsys) # pr2_controllers_msgs robot_monitor
+find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp rostest sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager hrpsys_tools image_transport dynamic_reconfigure hrpsys nav_msgs) # pr2_controllers_msgs robot_monitor
 catkin_python_setup()
 
 # download pr2_controllers_msgs for git
@@ -73,7 +73,7 @@ rtmbuild_init()
 # call catkin_package, after rtmbuild_init, before rtmbuild_gen*
 catkin_package(
     DEPENDS hrpsys # TODO
-    CATKIN_DEPENDS rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure # pr2_controllers_msgs robot_monitor
+    CATKIN_DEPENDS rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure nav_msgs # pr2_controllers_msgs robot_monitor
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO
     CFG_EXTRAS compile_robot_model.cmake

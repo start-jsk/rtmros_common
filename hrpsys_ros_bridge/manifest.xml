@@ -21,6 +21,7 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <!-- seq state ros bridge -->
   <depend package="roscpp"/>
   <depend package="sensor_msgs"/>
+  <depend package="nav_msgs"/>
   <depend package="visualization_msgs"/>
   <depend package="robot_state_publisher"/>
   <depend package="actionlib"/>
