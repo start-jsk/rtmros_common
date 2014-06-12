@@ -127,11 +127,27 @@
            (send f :name)
            (send (send self :parser-list (format nil "~A_~A" robothardware-name (send f :name))) :read-state)
            ))
-   (dolist (i (send robot :imu-sensors))
-     (send self :set-robot-state1
-           (send i :name)
-           (send (send self :parser-list (format nil "~A_~A" robothardware-name (send i :name))) :read-state)
-           ))
+   ;; (dolist (i (send robot :imu-sensors))
+   ;;   (send self :set-robot-state1
+   ;;         (send i :name)
+   ;;         (send (send self :parser-list (format nil "~A_~A" robothardware-name (send i :name))) :read-state)
+   ;;         ))
+   (send self :set-robot-state1
+         :imu
+         (let* ((rpy (send (send self :parser-list "kf_rpy") :read-state))
+                (qt (ros::rot->tf-quaternion (rpy-matrix (elt rpy 2) (elt rpy 1) (elt rpy 0)))))
+           (instance* sensor_msgs::Imu :init
+                      :orientation qt
+                      (append
+                       (if (send robot :imu-sensor "gsensor")
+                           (list :linear_acceleration
+                                 (let ((acc (send (send self :parser-list (format nil "~A_~A" robothardware-name "gsensor")) :read-state)))
+                                   (instance geometry_msgs::Vector3 :init :x (elt acc 0) :y (elt acc 1) :z (elt acc 2)))))
+                       (if (send robot :imu-sensor "gyrometer")
+                           (list :angular_velocity
+                                 (let ((gyro (send (send self :parser-list (format nil "~A_~A" robothardware-name "gyrometer")) :read-state)))
+                                   (instance geometry_msgs::Vector3 :init :x (elt gyro 0) :y (elt gyro 1) :z (elt gyro 2))))))
+                      )))
    )
   ;; overwrite
   (:reference-vector () (cdr (assoc :reference-vector robot-state)))

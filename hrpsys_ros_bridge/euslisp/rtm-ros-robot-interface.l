@@ -25,7 +25,8 @@
              (send-all (send robot :force-sensors) :name))
      (ros::subscribe "/zmp" geometry_msgs::PointStamped
                      #'send self :rtmros-zmp-callback :groupname groupname)
-
+     (ros::subscribe "/imu" sensor_msgs::Imu
+                     #'send self :rtmros-imu-callback :groupname groupname)
      ))
   (:rtmros-motor-states-callback
    (msg)
@@ -35,6 +36,9 @@
    (msg)
    (let ((p (send msg :point)))
      (send self :set-robot-state1 :zmp (float-vector (send p :x) (send p :y) (send p :z)))))
+  (:rtmros-imu-callback
+   (msg)
+   (send self :set-robot-state1 :imu msg))
   (:temperature-vector () (cdr (assoc :temperature robot-state)))
   (:motor-extra-data
    ()
@@ -173,12 +177,19 @@
   (:update-robot-state
    ()
    (send-super :update-robot-state)
-   (let ((imucoords (send *tfl* :lookup-transform "/imu_floor" (format nil "/~a" (send (car (send robot :links)) :name)) (ros::time))))
-     (if imucoords (send robot :newcoords imucoords))
-     ))
+   (let ((imucoords (make-coords :rot (ros::tf-quaternion->rot (send (cdr (assoc :imu robot-state)) :orientation)))))
+     (if imucoords (send robot :move-coords imucoords (car (send robot :imu-sensors))))))
   (:imucoords
    ()
    (send robot :copy-worldcoords))
+  (:accel-vector
+   ()
+   (let ((acc (send (cdr (assoc :imu robot-state)) :linear_acceleration)))
+     (float-vector (send acc :x) (send acc :y) (send acc :z))))
+  (:gyro-vector
+   ()
+   (let ((gyro (send (cdr (assoc :imu robot-state)) :angular_velocity)))
+     (float-vector (send gyro :x) (send gyro :y) (send gyro :z))))
   (:state
     (&rest args)
     (case (car args)
