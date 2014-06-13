@@ -30,13 +30,13 @@ class TestPA10Robot(unittest.TestCase):
         rospy.init_node('TestPA10Robot')
         self.listener = tf.TransformListener()
 
-    def test_tf_odom_J7_LINK(self): # need to check if map/ is published?
+    def test_tf_base_link_J7_LINK(self): # need to check if map/ is published?
         try:
-            self.listener.waitForTransform('/odom', '/J7_LINK', rospy.Time(), rospy.Duration(120))
+            self.listener.waitForTransform('/BASE_LINK', '/J7_LINK', rospy.Time(), rospy.Duration(120))
         except tf.Exception:
-            self.assertTrue(None, "could not found tf from /odom to /J7_LINK")
-        (trans,rot) = self.listener.lookupTransform('/odom', '/J7_LINK', rospy.Time(0))
-        rospy.logwarn("tf_echo /odom /J7_LINK %r %r"%(trans,rot))
+            self.assertTrue(None, "could not found tf from /BASE_LINK to /J7_LINK")
+        (trans,rot) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
+        rospy.logwarn("tf_echo /BASE_LINK /J7_LINK %r %r"%(trans,rot))
         self.assertAlmostEqual(trans[2],1.0,delta=0.5)
 
     # send joint angles
