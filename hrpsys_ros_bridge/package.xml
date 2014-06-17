@@ -67,6 +67,7 @@
   <run_depend>diagnostic_aggregator</run_depend>
   <run_depend>diagnostic_msgs</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>ipython</run_depend>
   <run_depend>hrpsys</run_depend>
   <run_depend>hrpsys_tools</run_depend>
   <run_depend>image_transport</run_depend>
