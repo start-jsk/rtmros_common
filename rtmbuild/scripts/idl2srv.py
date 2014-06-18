@@ -472,9 +472,10 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             try:
                 openrtm_path = os.path.join(check_output(['pkg-config','openrtm-aist','--variable=prefix']).rstrip(),"lib/openrtm_aist")
             except:
-                os.putenv("PKG_CONFIG_PATH",':'.join([os.path.join(path,"lib/pkgconfig") for path in os.getenv("CMAKE_PREFIX_PATH").split(':')])+':'+os.getenv("PKG_CONFIG_PATH"))
+                os.environ["PKG_CONFIG_PATH"] = ':'.join([os.path.join(path,"lib/pkgconfig") for path in os.getenv("CMAKE_PREFIX_PATH").split(':')])+':'+os.getenv("PKG_CONFIG_PATH")
                 print >>sys.stderr,"[idl2srv] set CMAKE_PREFIX_PATH = "+os.getenv("CMAKE_PREFIX_PATH")
                 print >>sys.stderr,"[idl2srv] set PKG_CONFIG_PATH = "+os.getenv("PKG_CONFIG_PATH")
+                print >>sys.stderr,check_output(['pkg-config','--list-all'])
                 openrtm_path = os.path.join(check_output(['pkg-config','openrtm-aist','--variable=prefix']).rstrip(),"lib/openrtm_aist")
         command = "PATH=%s/bin:$PATH rtc-template -bcxx --module-name=%s --consumer=%s:service0:'%s' --consumer-idl=%s --idl-include=%s" % (openrtm_path, module_name, service_name, service_name, idlfile, idldir)
         #command = "rosrun openrtm_aist rtc-template -bcxx --module-name=%s --consumer=%s:service0:'%s' --consumer-idl=%s --idl-include=%s" % (module_name, service_name, service_name, idlfile, idldir)
