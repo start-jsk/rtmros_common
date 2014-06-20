@@ -615,6 +615,42 @@
    )
   )
 
+;; utility method
+(defmethod rtm-ros-robot-interface
+  (:reach-until-touch
+   (limb dir
+    &key (thre 10) (max-dist 1000) (dist-step 10) (time-step 200)
+    (rotation-axis t) (debug nil))
+   (let* ((tmp-robot (copy-object robot))
+          (ndir (normalize-vector dir))
+          (initial-force (send self :state :force-vector limb)))
+     ;; 1. initialize
+     (send tmp-robot :angle-vector (send self :state :potentio-vector))
+     (send tmp-robot :fix-leg-to-coords (make-coords))
+     (send self :set-interpolation-mode ":linear")
+     (when debug (warn ";; ndir: ~a    initial-force: ~a~%" ndir initial-force))
+     ;; 2. loop
+     (do-until-key
+      ;; 2.1 check whether end condition is satisfied
+      (let* ((current-force (send self :state :force-vector limb))
+             (diff-force (v- current-force initial-force))
+             (diff-dired-force (- (v. diff-force ndir))))
+        (when debug (warn ";; diff-dired-force: ~a    thre: ~a~%" diff-dired-force thre))
+        (when (> diff-dired-force thre)
+          (return-from nil nil)))
+      ;; 2.2 solve ik and move real robot
+      (let* ((ik-res (send tmp-robot limb :move-end-pos (scale dist-step ndir) :world)))
+        (unless ik-res
+          (warn ";; ik failed~%")
+          (return-from nil nil)))
+      (send self :angle-vector (send tmp-robot :angle-vector) time-step)
+      (unix::usleep (round (* (* time-step 1000) 0.8)))
+      )
+     ;; 3. send final posture again
+     (send self :angle-vector (send self :state :potentio-vector) 10)
+     )
+   ))
+
 (defun print-abc-leg-offset-conf-from-robot
   (rb)
   (let ((pav (send rb :angle-vector))
