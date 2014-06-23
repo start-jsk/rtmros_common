@@ -2,6 +2,11 @@
 Changelog for package rtmros_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* (package.xml files) Update repository URLs
+* Contributors: Isaac Isao Saito
+
 1.2.0 (2014-05-14)
 ------------------
 
