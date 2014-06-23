@@ -2,8 +2,8 @@
 Changelog for package openrtm_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.1 (2014-06-23)
+------------------
 * (index.rst) Add usage api doc
 * (package.xml files) Update repository URLs
 * Contributors: Isaac IY Saito, Isaac Isao Saito

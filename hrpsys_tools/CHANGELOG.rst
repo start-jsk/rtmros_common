@@ -2,8 +2,8 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.1 (2014-06-23)
+------------------
 * hrpsys_tools/launch/hrpsys.launch: Added ThermoLimiter/ThermoEstimator definition to hrpsys.launch
 * (package.xml files) Update repository URLs
 * Contributors: Isaac Isao Saito, iori

@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.1 (2014-06-23)
+------------------
 * add euscollada path for compile collada model
 * Merge pull request #495 from k-okada/add_servo_controller
   hrpsys_ros_bridge.launch: add servo controller
