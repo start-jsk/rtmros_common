@@ -38,7 +38,9 @@
      (send self :set-robot-state1 :zmp (float-vector (send p :x) (send p :y) (send p :z)))))
   (:rtmros-imu-callback
    (msg)
-   (send self :set-robot-state1 :imu msg))
+   (send self :set-robot-state1 :imu msg)
+   (let ((imucoords (make-coords :rot (ros::tf-quaternion->rot (send (cdr (assoc :imu robot-state)) :orientation)))))
+     (send robot :move-coords imucoords (car (send robot :imu-sensors)))))
   (:temperature-vector () (cdr (assoc :temperature robot-state)))
   (:motor-extra-data
    ()
@@ -174,11 +176,6 @@
    (dump-seq-pattern-file rs-list output-basename :initial-sync-time initial-sync-time)
    )
   ;;
-  (:update-robot-state
-   ()
-   (send-super :update-robot-state)
-   (let ((imucoords (make-coords :rot (ros::tf-quaternion->rot (send (cdr (assoc :imu robot-state)) :orientation)))))
-     (if imucoords (send robot :move-coords imucoords (car (send robot :imu-sensors))))))
   (:imucoords
    ()
    (send robot :copy-worldcoords))
