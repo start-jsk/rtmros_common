@@ -177,8 +177,9 @@
   (:update-robot-state
    ()
    (send-super :update-robot-state)
-   (let ((imucoords (make-coords :rot (ros::tf-quaternion->rot (send (cdr (assoc :imu robot-state)) :orientation)))))
-     (if imucoords (send robot :move-coords imucoords (car (send robot :imu-sensors))))))
+   (when (assoc :imu robot-state)
+     (let ((imucoords (make-coords :rot (ros::tf-quaternion->rot (send (cdr (assoc :imu robot-state)) :orientation)))))
+       (if imucoords (send robot :move-coords imucoords (car (send robot :imu-sensors)))))))
   (:imucoords
    ()
    (send robot :copy-worldcoords))
