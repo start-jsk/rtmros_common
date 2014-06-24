@@ -82,6 +82,7 @@
   <!-- BEGIN:hrpsys.py setting -->
   <arg name="HRPSYS_PY_PKG" default="hrpsys_tools"/>
   <arg name="HRPSYS_PY_NAME" default="hrpsys_tools_config.py"/>
+  <arg name="HRPSYS_PY_ARGS" default='' />
   <arg name="LAUNCH_HRPSYSPY" default="true" />
   <!-- END:hrpsys.py setting -->
 
@@ -110,7 +111,7 @@
 
   <group if="$(arg LAUNCH_HRPSYSPY)">
     <node name="hrpsys_py" pkg="$(arg HRPSYS_PY_PKG)" type="$(arg HRPSYS_PY_NAME)" output="screen"
-          args='$(arg SIMULATOR_NAME) $(arg MODEL_FILE) $(arg omniorb_args)'
+          args='$(arg HRPSYS_PY_ARGS) $(arg SIMULATOR_NAME) $(arg MODEL_FILE) $(arg omniorb_args)'
           launch-prefix="$(arg PY_LAUNCH_PREFIX)" />
   </group>
 
