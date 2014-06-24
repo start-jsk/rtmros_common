@@ -20,6 +20,6 @@
     <arg name="ROBOT_TYPE" value="SampleRobot" />
     <arg name="USE_INSTANCE_NAME" value="true" />
     <arg name="SYNCHRONIZED" value="$(arg SYNCHRONIZED)" />
-    <arg name="HRPSYS_PY_NAME" value="samplerobot_unstable_hrpsys_config.py" />
+    <arg name="HRPSYS_PY_ARGS" value="--use-unstable-rtc" />
   </include>
 </launch>
