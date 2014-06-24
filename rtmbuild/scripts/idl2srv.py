@@ -388,7 +388,8 @@ class ServiceVisitor (idlvisitor.AstVisitor):
                 if is_out:
                     ptr = ('*' if cxx.types.variableDecl(ptype.decl()) else '')
                     res_code += '  convert(%s%s, res.%s);\n' % (ptr, var, var)
-                    res_code += '  delete %s;\n' % (var)
+                    if cxx.types.variableDecl(ptype.decl()):
+                        res_code += '  delete %s;\n' % (var)
 
                 else:
                     req_code += '  convert(req.%s, %s);\n' % (var, var)

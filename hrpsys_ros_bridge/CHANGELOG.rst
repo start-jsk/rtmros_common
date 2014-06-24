@@ -2,6 +2,48 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.1 (2014-06-23)
+------------------
+* add euscollada path for compile collada model
+* Merge pull request #495 from k-okada/add_servo_controller
+  hrpsys_ros_bridge.launch: add servo controller
+* (datalogger-log-parser.l) : Check existence of zmp value and rpy value
+* hrpsys_ros_bridge.launch: add servo controller fix rtmlaunch options (thanks to @hyaguchijsk)
+* does not use group tag, just use unless tag to disable connection
+  between sh.rtc:baseTformOut and baseTform
+* (hrpsys_ros_bridge/package.xml) run_depend on ipython
+* (hrpsys_ros_bridge/package.xml) Sort in alphabetical order
+* (rtm-ros-robot-interface.l, datalogger-log-parser.l) Update imu euslisp methods ;; We should use /imu instead of tf according to https://github.com/start-jsk/rtmros_common/pull/477
+* hrpsys_ros_bridge/euslisp/datalogger-log-parser.l:add reading zmp data from hrpsys log file
+* Merge pull request #458 from snozawa/rotate_camera_z_axis
+  Rotate sensor->localR 180[deg] because OpenHRP3 camera -Z axis equals to ROS camera Z axis
+* Merge pull request #477 from garaemon/add-imu-topic-remove-imu-floor
+  Add /imu topic and /odom topic remove imu_floor
+* Merge pull request #460 from k-okada/hrpsys_version_gte
+  set hrpsys version greater than 315.2.0
+* update pa10 test code
+* publish Imu value to /imu topic and odometory value to /odom.
+* fix ProjectGenerator path for compile_collada_model
+* update .gitignore for auto generated files under hrpsys_ros_bridge directory
+* rtmlaunch; Add usage api doc
+* hrpsys_ros_bridge/euslisp/datalogger-log-parser.l : update state methods and add eof check
+* hrpsys_ros_bridge/README.md, hrpsys_ros_bridge/euslisp/README.md : add README for hrpsys_ros_bridge and euslisp usage
+* hrpsys_ros_bridge/euslisp/datalogger-log-parser.l : support force sensor reading
+* hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l : update sensor accessor commited in https://github.com/euslisp/jskeus/pull/92
+* (package.xml files) Update repository URLs
+* (start-jsk/rtmros_common/pull/397) hrpsys_ros_bridge/launch/hrpsys_ros_bridge.launch, hrpsys_ros_bridge/scripts/sensor_ros_bridge_connect.py : rename AbsoluteForceSensor => RemoveForceSensorLinkOffset
+* (collision_detector.launch) add default model file path using one fromreal robot
+* ( https://github.com/start-jsk/rtmros_gazebo/issues/44 ) hrpsys_dashboard.py: add 'import re' for using regular expression
+* add generation of hrpsys_config for robots using unstable RTCs ;; add configuration for unstable RTCs in cmake ;; by default, do not nothing, so there will be no side effect for robots only using Stable RTCs
+* set RTCTREE_NAMESERVERS environment variables, for #453
+* pass args to super class
+* set hrpsys version greater than 315.2.0
+* Rotate sensor->localR 180[deg] because OpenHRP3 camera -Z axis equals to ROS camera Z axis http://www.openrtp.jp/openhrp3/jp/create_model.html
+* add samplerobot.rviz
+* hrpsys_ros_bridge/collision_state.py) Use logerr to highlight an error that could be overlooked
+* (HrpsysJointTrajectoryBridge) ros cpp style macro applied.
+* Contributors: Isaac Desu Saito, Isaac IY Saito, Isaac Isao Saito, Kei Okada, Kunio Kojima, Ryohei Ueda, Tatsushi Karasawa, YoheiKakiuchi, mmurooka, nozawa
+
 1.2.0 (2014-05-14)
 ------------------
 

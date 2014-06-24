@@ -382,6 +382,11 @@ macro(compile_collada_model daefile)
     endif()
     set(_collada2eus_exe ${euscollada_PREFIX}/lib/euscollada/collada2eus)
   endif()
+  if(${USE_ROSBUILD})
+    set(_collada2eus_option "")
+  else()
+    set(_collada2eus_option ROS_PACKAGE_PATH=${euscollada_PACKAGE_PATH}/..:$ENV{ROS_PACKAGE_PATH})
+  endif()
   # use collad_to_urdf
   if(${USE_ROSBUILD})
     rosbuild_find_ros_package(collada_tools)
@@ -413,11 +418,11 @@ macro(compile_collada_model daefile)
   else()
     if(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
-        COMMAND ${_collada2eus_exe} ${daefile} ${_yamlfile} ${_lispfile} ${_euscollada_option} ||  echo "[WARNING] ### Did not run collada2eus for ${_lispfile}"
+        COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${daefile} ${_yamlfile} ${_lispfile} ${_euscollada_option} ||  echo "[WARNING] ### Did not run collada2eus for ${_lispfile}"
         DEPENDS ${daefile} ${_euscollada_dep_files})
     else(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
-        COMMAND ${_collada2eus_exe} ${daefile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus $for {_lispfile}"
+        COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${daefile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus $for {_lispfile}"
         DEPENDS ${daefile} ${_euscollada_dep_files})
     endif(EXISTS ${_yamlfile})
   endif()
