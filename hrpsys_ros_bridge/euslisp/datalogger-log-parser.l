@@ -109,20 +109,19 @@
          :reference-torque-vector
          (send (send self :parser-list "sh_tqOut") :read-state))
    (send self :set-robot-state1
-         :root-pos
+         :reference-root-pos
          (scale 1e3 (send (send self :parser-list "sh_basePosOut") :read-state)))
    (send self :set-robot-state1
-         :root-rpy
+         :reference-root-rpy
          (send (send self :parser-list "sh_baseRpyOut") :read-state))
    (send self :set-robot-state1
-         :root-coords
-         (make-coords :pos (cdr (assoc :root-pos robot-state))
-                      :rpy (cdr (assoc :root-rpy robot-state))))
+         :reference-root-coords
+         (make-coords :pos (cdr (assoc :reference-root-pos robot-state))
+                      :rpy (cdr (assoc :reference-root-rpy robot-state))))
    (if (send self :parser-list "sh_zmpOut")
        (send self :set-robot-state1
              :zmp
              (send (send self :parser-list "sh_zmpOut") :read-state)))
-   (send robot :move-coords (cdr (assoc :root-coords robot-state)) (car (send robot :links)))
    (dolist (f (send robot :force-sensors))
      (send self :set-robot-state1
            (send f :name)
@@ -133,8 +132,8 @@
    ;;         (send i :name)
    ;;         (send (send self :parser-list (format nil "~A_~A" robothardware-name (send i :name))) :read-state)
    ;;         ))
-   (if (send self :parser-list "kf_rpy")
-       (send self :set-robot-state1
+   (when (send self :parser-list "kf_rpy")
+     (send self :set-robot-state1
              :imu
              (let* ((rpy (send (send self :parser-list "kf_rpy") :read-state))
                     (qt (ros::rot->tf-quaternion (rpy-matrix (elt rpy 2) (elt rpy 1) (elt rpy 0)))))
@@ -149,7 +148,16 @@
                                (list :angular_velocity
                                      (let ((gyro (send (send self :parser-list (format nil "~A_~A" robothardware-name "gyrometer")) :read-state)))
                                        (instance geometry_msgs::Vector3 :init :x (elt gyro 0) :y (elt gyro 1) :z (elt gyro 2))))))
-                          ))))
+                          )))
+     (send robot :move-coords
+           (make-coords :rot (ros::tf-quaternion->rot (send (cdr (assoc :imu robot-state)) :orientation)))
+           (car (send robot :imu-sensors))))
+   )
+  (:reference-worldcoords
+   ()
+   (send (send (cdr (assoc :reference-root-coords robot-state)) :copy-worldcoords)
+         :transform
+         (send (car (send robot :links)) :transformation robot))
    )
   ;; overwrite
   (:reference-vector () (cdr (assoc :reference-vector robot-state)))
