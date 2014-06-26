@@ -381,12 +381,12 @@
   (:_set-forcemoment-offset-param
    (name &key force-offset moment-offset link-offset-centroid link-offset-mass)
    (let* ((current-fm-param (send self :get-forcemoment-offset-param name))
-          (param (instance hrpsys_ros_bridge::OpenHRP_AbsoluteForceSensorService_ForceMomentOffsetParam :init
+          (param (instance hrpsys_ros_bridge::OpenHRP_RemoveForceSensorLinkOffsetService_ForceMomentOffsetParam :init
                            :force_offset (if force-offset force-offset (send current-fm-param :force_offset))
                            :moment_offset (if moment-offset moment-offset (send current-fm-param :moment_offset))
                            :link_offset_centroid (if link-offset-centroid link-offset-centroid (send current-fm-param :link_offset_centroid))
                            :link_offset_mass (if link-offset-mass link-offset-mass (send current-fm-param :link_offset_mass)))))
-     (send self :absoluteforcesensorservice_setforcemomentoffsetparam :name name :i_param param)))
+     (send self :removeforcesensorlinkoffsetservice_setforcemomentoffsetparam :name name :i_param param)))
   (:set-forcemoment-offset-param
    (limb &rest args)
    (send* self :force-sensor-method
@@ -400,7 +400,7 @@
    (send self :force-sensor-method
          limb
          #'(lambda (name base-name target-name &rest _args)
-             (send (send self :absoluteforcesensorservice_getforcemomentoffsetparam :name name) :i_param))
+             (send (send self :removeforcesensorlinkoffsetservice_getforcemomentoffsetparam :name name) :i_param))
          :get-forcemoment-offset-param))
   (:load-forcemoment-offset-param
    (fname &key (set-offset t))
