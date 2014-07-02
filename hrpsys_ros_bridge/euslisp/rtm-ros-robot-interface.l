@@ -513,14 +513,22 @@
    ()
    (send (send self :autobalancerservice_getgaitgeneratorparam) :i_param))
   (:set-gait-generator-param
-   (&key default-step-time default-step-height default-double-support-ratio stride-parameter)
+   (&key default-step-time default-step-height default-double-support-ratio stride-parameter default-orbit-type)
    (let* ((current-param (send self :get-gait-generator-param))
           (param (instance hrpsys_ros_bridge::Openhrp_AutoBalancerService_GaitGeneratorParam
                            :init
                            :default_step_time (if default-step-time default-step-time (send current-param :default_step_time))
                            :default_step_height (if default-step-height default-step-height (send current-param :default_step_height))
                            :default_double_support_ratio (if default-double-support-ratio default-double-support-ratio (send current-param :default_double_support_ratio))
-                           :stride_parameter (if stride-parameter stride-parameter (send current-param :stride_parameter)))))
+                           :stride_parameter (if stride-parameter stride-parameter (send current-param :stride_parameter))
+                           :default_orbit_type (if default-orbit-type
+                                                   (case default-orbit-type
+                                                     (:shuffling 0)
+                                                     (:cycloid 1)
+                                                     (:rectangle 2))
+                                                 (send current-param :default_orbit_type))
+                           :stride_parameter (if stride-parameter stride-parameter (send current-param :stride_parameter))
+                           )))
      (send self :autobalancerservice_setgaitgeneratorparam :i_param param)))
   (:set-auto-balancer-param
    (&key default-zmp-offsets move-base-gain)
@@ -592,16 +600,19 @@
 
 ;; StabilizerService
 (defmethod rtm-ros-robot-interface
+  (:get-st-param
+   ()
+   (send (send self :stabilizerservice_getparameter) :i_param))
   (:set-st-param
    (&key k-tpcc-p k-tpcc-x k-brot-p k-brot-tc)
-   (let ((ip (instance hrpsys_ros_bridge::openhrp_stabilizerservice_stparam
-                       :init
-                       :k_tpcc_x k-tpcc-x
-                       :k_tpcc_p k-tpcc-p
-		       :k_brot_p k-brot-p
-		       :k_brot_tc k-brot-tc
-                       )))
-     (send self :stabilizerservice_setparameter :i_param ip)))
+   (let* ((current-param (send self :get-st-param))
+          (param (instance hrpsys_ros_bridge::Openhrp_StabilizerService_stParam
+                           :init
+                           :k_tpcc_p (if k-tpcc-p k-tpcc-p (send current-param :k_tpcc_p))
+                           :k_tpcc_x (if k-tpcc-x k-tpcc-x (send current-param :k_tpcc_x))
+                           :k_brot_p (if k-brot-p k-brot-p (send current-param :k_brot_p))
+                           :k_brot_tc (if k-brot-tc k-brot-tc (send current-param :k_brot_tc)))))
+     (send self :stabilizerservice_setparameter :i_param param)))
   (:start-st
    ()
    (send self :stabilizerservice_startstabilizer)
