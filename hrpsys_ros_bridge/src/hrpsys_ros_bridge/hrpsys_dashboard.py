@@ -45,10 +45,11 @@ class HrpsysLogMenu(MenuDashWidget):
     self.update_state(0)
     self.add_action('download rtm log', self.on_download)
     self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
+
   def on_download(self):
     try:
       hrpsys_save = rospy.ServiceProxy("/DataLoggerServiceROSBridge/save", OpenHRP_DataLoggerService_save )
-      name = "/tmp/rtclog-" + time.strftime("%Y%m%d%H%M%S")
+      name = "~/.ros/log/rtclog-" + time.strftime("%Y%m%d%H%M%S")
       print "Writing log data to ",name
       hrpsys_save(OpenHRP_DataLoggerService_saveRequest(name))
       print "Done writing",name
