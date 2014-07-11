@@ -1,14 +1,19 @@
 # hrpsys\_ros\_bridge
 ## Introduction
-hrpsys\_ros\_bridge is a package to connect OpenRTM system and ROS system.
+hrpsys\_ros\_bridge is a package to connect `hrpsys <http://wiki.ros.org/hrpsys>`_ (OpenRTM-based controller) system and ROS system.
 
-This package contains RosBridge, cmake_libraries, launch files, Euslisp interface, and examples.
+This package contains ROSBridge to `hrpsys`, cmake_libraries, launch files, Euslisp interface, and examples.
 
 ### ROSBridge
-  ROSBridge is a ROS node to bridge OpenRTM system and ROS system.
+  ROSBridge here is a ROS node to bridge `hrpsys` system and ROS system.
 
-  You can use OpenRTM resources from ROS like interface, e.g., 
-  use OpenRTM ``Data Ports`` through ROS ``Topic`` and OpenRTM ``Servie Ports`` through ROS ``Service``.
+    You might want to check other "bridging" software in ROS too such as:
+    
+    - `rosbridge_suite <http://wiki.ros.org/rosbridge_suite>`_ provides a JSON API to ROS functionality for non-ROS programs.
+    - `openrtm_ros_bridge <http://wiki.ros.org/openrtm_ros_bridge?distro=hydro>`_ Provides a ROS node between `OpenRTM`.
+
+  You can use `OpenRTM` resources from ROS interface, e.g., 
+  use OpenRTM ``Data Ports`` through ROS ``Topic`` and OpenRTM ``Servie Ports`` through ROS ``Service``. The following table shows the corresponding concepts for the 2 worlds.
 
 | \ | ROS | OpenRTM |
 | --- | --- | --- |
