@@ -62,7 +62,7 @@
       (push
        (flatten
         (mapcar #'(lambda (a)
-                    (list a (copy-object (send (send robot :force-sensor a) :worldrot))))
+                    (list a (copy-object (send (car (send robot a :force-sensors)) :worldrot))))
                 limbs))
        rot-list)
       )
