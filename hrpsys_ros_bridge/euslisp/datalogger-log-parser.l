@@ -91,7 +91,7 @@
      parser-list))
   (:eof-p () eof-p)
   (:update-robot-state
-   ()
+   (&key (wait-until-update nil))
    (setq eof-p (some #'null (send-all parser-list :proc)))
    (send self :set-robot-state1
          :reference-vector
