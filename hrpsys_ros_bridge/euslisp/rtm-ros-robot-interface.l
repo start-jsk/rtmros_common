@@ -465,7 +465,7 @@
   (:start-auto-balancer
    (&key (limbs '(:rleg :lleg)))
    (send self :autobalancerservice_startAutoBalancer
-         :limbs (mapcar #'(lambda (x) (format nil "~A" x)) limbs)))
+         :limbs (mapcar #'(lambda (x) (format nil "~A" (string-downcase x))) limbs)))
   (:stop-auto-balancer () (send self :autobalancerservice_stopAutoBalancer))
   (:go-pos-no-wait
    (xx yy th)
