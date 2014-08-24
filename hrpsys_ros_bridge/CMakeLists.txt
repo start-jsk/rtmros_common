@@ -17,9 +17,9 @@ macro(download_pr2_controllers_msgs branch)
   # rospack profile
   execute_process(COMMAND rospack profile OUTPUT_VARIABLE _profile_output RESULT_VARIABLE _profile_failed)
   message("rospack profile ${_profile_output}")
-  if (_compile_failed)
+  if (_profile_failed)
     message(FATAL_ERROR "rospack profile failed : ${_profile_failed}")
-  endif(_compile_failed)
+  endif(_profile_failed)
 endmacro()
 
 if(NOT USE_ROSBUILD)
