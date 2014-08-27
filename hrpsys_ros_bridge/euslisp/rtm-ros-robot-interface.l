@@ -644,6 +644,14 @@
    )
   )
 
+;; KalmanFilterService
+(defmethod rtm-ros-robot-interface
+  (:set-kalman-filter-param
+   (&key (q-angle 0.001) (q-rate 0.003) (r-angle 0.03))
+   (send self :kalmanfilterservice_setkalmanfilterparam :q_angle q-angle :q_rate q-rate :r_angle r-angle)
+   )
+  )
+
 (defun print-abc-leg-offset-conf-from-robot
   (rb)
   (let ((pav (send rb :angle-vector))
