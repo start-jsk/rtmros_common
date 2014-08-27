@@ -279,6 +279,10 @@
     (name limit)
     (send self :robothardwareservice_setservoerrorlimit :name name :limit limit)
     )
+  (:calibrate-inertia-sensor
+   ()
+   (send self :robothardwareservice_calibrateInertiaSensor)
+   )
   ;; deprecated
   (:setServoGainPercentage
    (name percentage)
