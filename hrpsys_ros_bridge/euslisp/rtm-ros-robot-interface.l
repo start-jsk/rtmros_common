@@ -604,14 +604,31 @@
    ()
    (send (send self :stabilizerservice_getparameter) :i_param))
   (:set-st-param
-   (&key k-tpcc-p k-tpcc-x k-brot-p k-brot-tc)
+   (&key k-tpcc-p k-tpcc-x k-brot-p k-brot-tc
+         eefm-k1 eefm-k2 eefm-k3
+         eefm-zmp-delay-time-const
+         eefm-ref-zmp-aux
+         eefm-rot-damping-gain
+         eefm-rot-time-const
+         eefm-pos-damping-gain
+         eefm-pos-time-const)
    (let* ((current-param (send self :get-st-param))
           (param (instance hrpsys_ros_bridge::Openhrp_StabilizerService_stParam
                            :init
                            :k_tpcc_p (if k-tpcc-p k-tpcc-p (send current-param :k_tpcc_p))
                            :k_tpcc_x (if k-tpcc-x k-tpcc-x (send current-param :k_tpcc_x))
                            :k_brot_p (if k-brot-p k-brot-p (send current-param :k_brot_p))
-                           :k_brot_tc (if k-brot-tc k-brot-tc (send current-param :k_brot_tc)))))
+                           :k_brot_tc (if k-brot-tc k-brot-tc (send current-param :k_brot_tc))
+                           :eefm_k1 (if eefm-k1 eefm-k1 (send current-param :eefm_k1))
+                           :eefm_k2 (if eefm-k2 eefm-k2 (send current-param :eefm_k2))
+                           :eefm_k3 (if eefm-k3 eefm-k3 (send current-param :eefm_k3))
+                           :eefm_zmp_delay_time_const (if eefm-zmp-delay-time-const eefm-zmp-delay-time-const (send current-param :eefm_zmp_delay_time_const))
+                           :eefm_ref_zmp_aux (if eefm-ref-zmp-aux eefm-ref-zmp-aux (send current-param :eefm_ref_zmp_aux))
+                           :eefm_rot_damping_gain (if eefm-rot-damping-gain eefm-rot-damping-gain (send current-param :eefm_rot_damping_gain))
+                           :eefm_rot_time_const (if eefm-rot-time-const eefm-rot-time-const (send current-param :eefm_rot_time_const))
+                           :eefm_pos_damping_gain (if eefm-pos-damping-gain eefm-pos-damping-gain (send current-param :eefm_pos_damping_gain))
+                           :eefm_pos_time_const (if eefm-pos-time-const eefm-pos-time-const (send current-param :eefm_pos_time_const))
+                           )))
      (send self :stabilizerservice_setparameter :i_param param)))
   (:start-st
    ()
