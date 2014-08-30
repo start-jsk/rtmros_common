@@ -12,7 +12,7 @@ if(NOT pr2_controllers_msgs_FOUND)
   download_pr2_controllers_msgs(hydro-devel)
   # catkin_make
   # rosmake pr2_controllers_msgs
-  execute_process(COMMAND cmake -E chdir ${CMAKE_SOURCE_DIR}/../ catkin_make --build /tmp/pr2_controllers --source ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs --pkg pr2_controllers_msgs OUTPUT_VARIABLE _compile_output RESULT_VARIABLE _compile_failed)
+  execute_process(COMMAND cmake -E chdir ${CMAKE_SOURCE_DIR}/../ catkin_make -C ${CMAKE_SOURCE_DIR}/../ --build /tmp/pr2_controllers --source ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs --pkg pr2_controllers_msgs OUTPUT_VARIABLE _compile_output RESULT_VARIABLE _compile_failed)
   message("compile pr2_controllers_msgs ${_compile_output}")
   if (_compile_failed)
     message(FATAL_ERROR "compile pr2_controllers_msgs failed : ${_compile_failed}")
