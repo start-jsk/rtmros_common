@@ -209,6 +209,50 @@
    )
   )
 
+;; define Euslisp setter and getter method
+(defun def-set-get-param-method
+  (param-class ;; parameter class
+   set-param-method-name get-param-method-name ;; Euslisp setter and getter method which user want to define
+   set-param-idl-name get-param-idl-name ;; raw setter and getter method converted from idl2srv files
+   &key (optional-args) ;; arguments for raw setter and getter method
+        (debug nil))
+  (let* ((param-slots-list ;; get slots list for param-class
+          (remove-if #'(lambda (x) (string= "plist" x))
+                     (mapcar #'(lambda (x) (string-left-trim "::_" (string-left-trim "ros" (format nil "~A" x))))
+                             (concatenate cons (send (eval param-class) :slots)))))
+         (getter-defmethod-macro
+           `(defmethod rtm-ros-robot-interface
+              (,get-param-method-name
+               ,(if optional-args (list (cadr optional-args)) (list ))
+               (send (send self ,get-param-idl-name ,@optional-args) :i_param))))
+         ;; generate defmethod like
+         ;;  (:set-xx-param (&key yy-zz)
+         ;;   (let ((current-param (send self :get-xx-param))
+         ;;         (param (instance ww :init (if yy-zz yy-zz (send current-param :yy_zz))))
+         ;;      (send self :aaService_setParameter :i_param param)))
+         (setter-defmethod-macro
+           `(defmethod rtm-ros-robot-interface
+              (,set-param-method-name
+               ,(append (if optional-args (list (cadr optional-args))) (list '&key) (mapcar #'(lambda (x) (read-from-string (substitute (elt "-" 0) (elt "_" 0) x))) param-slots-list)) ;; replace _ => - for Euslisp friendly argument
+               (let* ((current-param ,(append (list 'send 'self get-param-method-name) (if optional-args (list (cadr optional-args)))))
+                      (param (instance ,param-class
+                                       :init
+                                       ,@(apply #'append
+                                                (mapcar #'(lambda (x)
+                                                            (let ((eus-sym (read-from-string (substitute (elt "-" 0) (elt "_" 0) x)))
+                                                                  (param-sym (read-from-string (format nil ":~A" x))))
+                                                              (list param-sym (list 'if eus-sym eus-sym (list 'send 'current-param param-sym)))))
+                                                        param-slots-list))
+                                       )))
+                 (send self ,set-param-idl-name :i_param param ,@optional-args)
+                 )))))
+    (when debug
+      (pprint (macroexpand getter-defmethod-macro))
+      (pprint (macroexpand setter-defmethod-macro)))
+    (eval getter-defmethod-macro)
+    (eval setter-defmethod-macro)
+    t))
+
 ;; SequencePlayerService
 (defmethod rtm-ros-robot-interface
   (:set-base-pose
@@ -380,23 +424,19 @@
     ))
   )
 
-;; AbsoluteForceSensorService
+;; RemoveForceSensorLinkOffset
+(def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_RemoveForceSensorLinkOffsetService_ForceMomentOffsetParam
+  :raw-set-forcemoment-offset-param :raw-get-forcemoment-offset-param
+  :removeforcesensorlinkoffsetservice_setforcemomentoffsetparam :removeforcesensorlinkoffsetservice_getforcemomentoffsetparam
+  :optional-args (list :name 'name))
+
 (defmethod rtm-ros-robot-interface
-  (:_set-forcemoment-offset-param
-   (name &key force-offset moment-offset link-offset-centroid link-offset-mass)
-   (let* ((current-fm-param (send self :get-forcemoment-offset-param name))
-          (param (instance hrpsys_ros_bridge::OpenHRP_RemoveForceSensorLinkOffsetService_ForceMomentOffsetParam :init
-                           :force_offset (if force-offset force-offset (send current-fm-param :force_offset))
-                           :moment_offset (if moment-offset moment-offset (send current-fm-param :moment_offset))
-                           :link_offset_centroid (if link-offset-centroid link-offset-centroid (send current-fm-param :link_offset_centroid))
-                           :link_offset_mass (if link-offset-mass link-offset-mass (send current-fm-param :link_offset_mass)))))
-     (send self :removeforcesensorlinkoffsetservice_setforcemomentoffsetparam :name name :i_param param)))
   (:set-forcemoment-offset-param
    (limb &rest args)
    (send* self :force-sensor-method
          limb
          #'(lambda (name base-name target-name &rest _args)
-             (send* self :_set-forcemoment-offset-param name _args))
+             (send* self :raw-set-forcemoment-offset-param name _args))
          :set-forcemoment-offset-param
          args))
   (:get-forcemoment-offset-param
@@ -404,7 +444,7 @@
    (send self :force-sensor-method
          limb
          #'(lambda (name base-name target-name &rest _args)
-             (send (send self :removeforcesensorlinkoffsetservice_getforcemomentoffsetparam :name name) :i_param))
+             (send self :raw-get-forcemoment-offset-param name))
          :get-forcemoment-offset-param))
   (:load-forcemoment-offset-param
    (fname &key (set-offset t))
@@ -465,6 +505,11 @@
   )
 
 ;; AutoBalancerService
+(def-set-get-param-method
+  'hrpsys_ros_bridge::Openhrp_AutoBalancerService_GaitGeneratorParam
+  :raw-set-gait-generator-param :get-gait-generator-param
+  :autobalancerservice_setgaitgeneratorparam :autobalancerservice_getgaitgeneratorparam)
+
 (defmethod rtm-ros-robot-interface
   (:start-auto-balancer
    (&key (limbs '(:rleg :lleg)))
@@ -510,30 +555,20 @@
   (:wait-foot-steps
    ()
    (send self :autobalancerservice_waitFootSteps))
+  ;; wrap :set-gait-generator-param to use symbol for default-orbit-type
+  (:set-gait-generator-param
+   (&rest args &key default-orbit-type &allow-other-keys)
+   (send* self :raw-set-gait-generator-param
+          :default-orbit-type (case default-orbit-type
+                                (:shuffling 0)
+                                (:cycloid 1)
+                                (:rectangle 2)
+                                (t default-orbit-type))
+          args))
+  ;; :get-auto-balancer-param and :set-auto-balancer-param is not defined by def-set-get-param-method yet.
   (:get-auto-balancer-param
    ()
    (send (send self :autobalancerservice_getautobalancerparam) :i_param))
-  (:get-gait-generator-param
-   ()
-   (send (send self :autobalancerservice_getgaitgeneratorparam) :i_param))
-  (:set-gait-generator-param
-   (&key default-step-time default-step-height default-double-support-ratio stride-parameter default-orbit-type)
-   (let* ((current-param (send self :get-gait-generator-param))
-          (param (instance hrpsys_ros_bridge::Openhrp_AutoBalancerService_GaitGeneratorParam
-                           :init
-                           :default_step_time (if default-step-time default-step-time (send current-param :default_step_time))
-                           :default_step_height (if default-step-height default-step-height (send current-param :default_step_height))
-                           :default_double_support_ratio (if default-double-support-ratio default-double-support-ratio (send current-param :default_double_support_ratio))
-                           :stride_parameter (if stride-parameter stride-parameter (send current-param :stride_parameter))
-                           :default_orbit_type (if default-orbit-type
-                                                   (case default-orbit-type
-                                                     (:shuffling 0)
-                                                     (:cycloid 1)
-                                                     (:rectangle 2))
-                                                 (send current-param :default_orbit_type))
-                           :stride_parameter (if stride-parameter stride-parameter (send current-param :stride_parameter))
-                           )))
-     (send self :autobalancerservice_setgaitgeneratorparam :i_param param)))
   (:set-auto-balancer-param
    (&key default-zmp-offsets move-base-gain)
    (let* ((current-param (send self :get-auto-balancer-param))
@@ -603,42 +638,12 @@
   )
 
 ;; StabilizerService
+(def-set-get-param-method
+  'hrpsys_ros_bridge::Openhrp_StabilizerService_stParam
+  :set-st-param :get-st-param
+  :stabilizerservice_setparameter :stabilizerservice_getparameter)
+
 (defmethod rtm-ros-robot-interface
-  (:get-st-param
-   ()
-   (send (send self :stabilizerservice_getparameter) :i_param))
-  (:set-st-param
-   (&key k-tpcc-p k-tpcc-x k-brot-p k-brot-tc
-         eefm-k1 eefm-k2 eefm-k3
-         eefm-zmp-delay-time-const
-         eefm-ref-zmp-aux
-         eefm-rot-damping-gain
-         eefm-rot-time-const
-         eefm-pos-damping-gain
-         eefm-pos-time-const-support
-         eefm-pos-time-const-swing
-         eefm-pos-transition-time
-         )
-   (let* ((current-param (send self :get-st-param))
-          (param (instance hrpsys_ros_bridge::Openhrp_StabilizerService_stParam
-                           :init
-                           :k_tpcc_p (if k-tpcc-p k-tpcc-p (send current-param :k_tpcc_p))
-                           :k_tpcc_x (if k-tpcc-x k-tpcc-x (send current-param :k_tpcc_x))
-                           :k_brot_p (if k-brot-p k-brot-p (send current-param :k_brot_p))
-                           :k_brot_tc (if k-brot-tc k-brot-tc (send current-param :k_brot_tc))
-                           :eefm_k1 (if eefm-k1 eefm-k1 (send current-param :eefm_k1))
-                           :eefm_k2 (if eefm-k2 eefm-k2 (send current-param :eefm_k2))
-                           :eefm_k3 (if eefm-k3 eefm-k3 (send current-param :eefm_k3))
-                           :eefm_zmp_delay_time_const (if eefm-zmp-delay-time-const eefm-zmp-delay-time-const (send current-param :eefm_zmp_delay_time_const))
-                           :eefm_ref_zmp_aux (if eefm-ref-zmp-aux eefm-ref-zmp-aux (send current-param :eefm_ref_zmp_aux))
-                           :eefm_rot_damping_gain (if eefm-rot-damping-gain eefm-rot-damping-gain (send current-param :eefm_rot_damping_gain))
-                           :eefm_rot_time_const (if eefm-rot-time-const eefm-rot-time-const (send current-param :eefm_rot_time_const))
-                           :eefm_pos_damping_gain (if eefm-pos-damping-gain eefm-pos-damping-gain (send current-param :eefm_pos_damping_gain))
-                           :eefm_pos_time_const_support (if eefm-pos-time-const-support eefm-pos-time-const-support (send current-param :eefm_pos_time_const_support))
-                           :eefm_pos_time_const_swing (if eefm-pos-time-const-swing eefm-pos-time-const-swing (send current-param :eefm_pos_time_const_swing))
-                           :eefm_pos_transition_time (if eefm-pos-transition-time eefm-pos-transition-time (send current-param :eefm_pos_transition_time))
-                           )))
-     (send self :stabilizerservice_setparameter :i_param param)))
   (:start-st
    ()
    (send self :stabilizerservice_startstabilizer)
