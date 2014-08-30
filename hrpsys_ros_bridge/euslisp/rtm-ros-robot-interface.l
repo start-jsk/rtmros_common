@@ -615,7 +615,10 @@
          eefm-rot-damping-gain
          eefm-rot-time-const
          eefm-pos-damping-gain
-         eefm-pos-time-const)
+         eefm-pos-time-const-support
+         eefm-pos-time-const-swing
+         eefm-pos-transition-time
+         )
    (let* ((current-param (send self :get-st-param))
           (param (instance hrpsys_ros_bridge::Openhrp_StabilizerService_stParam
                            :init
@@ -631,7 +634,9 @@
                            :eefm_rot_damping_gain (if eefm-rot-damping-gain eefm-rot-damping-gain (send current-param :eefm_rot_damping_gain))
                            :eefm_rot_time_const (if eefm-rot-time-const eefm-rot-time-const (send current-param :eefm_rot_time_const))
                            :eefm_pos_damping_gain (if eefm-pos-damping-gain eefm-pos-damping-gain (send current-param :eefm_pos_damping_gain))
-                           :eefm_pos_time_const (if eefm-pos-time-const eefm-pos-time-const (send current-param :eefm_pos_time_const))
+                           :eefm_pos_time_const_support (if eefm-pos-time-const-support eefm-pos-time-const-support (send current-param :eefm_pos_time_const_support))
+                           :eefm_pos_time_const_swing (if eefm-pos-time-const-swing eefm-pos-time-const-swing (send current-param :eefm_pos_time_const_swing))
+                           :eefm_pos_transition_time (if eefm-pos-transition-time eefm-pos-transition-time (send current-param :eefm_pos_transition_time))
                            )))
      (send self :stabilizerservice_setparameter :i_param param)))
   (:start-st
