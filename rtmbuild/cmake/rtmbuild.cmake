@@ -69,7 +69,7 @@ macro(rtmbuild_init)
   message("[rtmbuild_init] - idl2srv_EXECUTABLE     -> ${idl2srv_EXECUTABLE}")
 
   execute_process(COMMAND pkg-config openrtm-aist --variable=prefix      OUTPUT_VARIABLE rtm_prefix    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  if(EXISTS ${rtm_prefix}/bin/rtm-config)
+  if(EXISTS ${rtm_prefix}/bin/rtm-skelwrapper)
     set(_rtm_exe_path ${rtm_prefix}/bin)
   else()
     set(_rtm_exe_path ${rtm_prefix}/lib/openrtm_aist/bin)
