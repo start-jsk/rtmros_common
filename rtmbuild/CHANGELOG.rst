@@ -2,8 +2,8 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.3 (2014-09-03)
+------------------
 * fix rtmbuild.cmake
 * Contributors: terasawa
 
