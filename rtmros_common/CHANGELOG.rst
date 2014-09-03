@@ -2,6 +2,9 @@
 Changelog for package rtmros_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.2 (2014-08-31)
 ------------------
 * (rtm-ros-robot-interface)
