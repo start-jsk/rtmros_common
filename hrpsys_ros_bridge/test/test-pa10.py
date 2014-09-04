@@ -19,16 +19,29 @@ from hrpsys_ros_bridge.srv import OpenHRP_SequencePlayerService_loadPattern, Ope
 import actionlib
 
 from pr2_controllers_msgs.msg import JointTrajectoryAction, JointTrajectoryGoal
-from trajectory_msgs.msg import JointTrajectoryPoint
+from trajectory_msgs.msg import JointTrajectoryPoint, JointTrajectory
 
 class TestPA10Robot(unittest.TestCase):
     listener = None
     lfsensor = None
     rfsensor = None
 
+    def send_joint_angles(self,angles):
+        pub = rospy.Publisher("/fullbody_controller/command", JointTrajectory)
+        point = JointTrajectoryPoint()
+        point.positions = [ x * math.pi / 180.0 for x in angles ]
+        point.time_from_start = rospy.Duration(5.0)
+        msg = JointTrajectory()
+        msg.header.stamp = rospy.Time().now()
+        msg.joint_names = ["J1","J2","J3","J4","J5","J6","J7"]
+        msg.points = [point]
+        pub.publish(msg)
+        rospy.sleep(rospy.Duration(6.0))
+
     def setUp(self):
         rospy.init_node('TestPA10Robot')
         self.listener = tf.TransformListener()
+        self.send_joint_angles([0,0,0,0,0,0,0])
 
     def test_tf_base_link_J7_LINK(self): # need to check if map/ is published?
         try:
@@ -40,7 +53,7 @@ class TestPA10Robot(unittest.TestCase):
         self.assertAlmostEqual(trans[2],1.0,delta=0.5)
 
     # send joint angles
-    def test_joint_angles(self):
+    def test_joint_trajectory_action(self):
         larm = actionlib.SimpleActionClient("/fullbody_controller/joint_trajectory_action", JointTrajectoryAction)
         larm.wait_for_server()
 
@@ -66,6 +79,21 @@ class TestPA10Robot(unittest.TestCase):
         goal.trajectory.points.append(point)
         larm.send_goal(goal)
         larm.wait_for_result()
+        (trans2,rot2) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
+        rospy.logwarn("tf_echo /BASE_LINK /J7_LINK %r %r"%(trans2,rot2))
+        rospy.logwarn("difference between two /J7_LINK %r %r"%(array(trans1)-array(trans2),linalg.norm(array(trans1)-array(trans2))))
+        self.assertNotAlmostEqual(linalg.norm(array(trans1)-array(trans2)), 0, delta=0.1)
+
+    def test_joint_trajectory_command(self):
+        try:
+            self.listener.waitForTransform('/BASE_LINK', '/J7_LINK', rospy.Time(), rospy.Duration(120))
+        except tf.Exception:
+            self.assertTrue(None, "could not found tf from /BASE_LINK to /J7_LINK")
+        (trans1,rot1) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
+        rospy.logwarn("tf_echo /BASE_LINK /J7_LINK %r %r"%(trans1,rot1))
+
+        self.send_joint_angles([10,20,30,40,50,60,70])
+
         (trans2,rot2) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
         rospy.logwarn("tf_echo /BASE_LINK /J7_LINK %r %r"%(trans2,rot2))
         rospy.logwarn("difference between two /J7_LINK %r %r"%(array(trans1)-array(trans2),linalg.norm(array(trans1)-array(trans2))))
