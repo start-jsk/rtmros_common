@@ -226,6 +226,8 @@ HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::jointTrajectoryActionObj(
   follow_joint_trajectory_server.reset(
       new actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>(
           parent->nh, controller_name + "/follow_joint_trajectory_action", false));
+  trajectory_command_sub = parent->nh.subscribe(controller_name + "/command", 1, &HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onTrajectoryCommandCB, this);
+
 
   joint_trajectory_server->registerGoalCallback(
       boost::bind(&HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryActionGoal, this));
@@ -478,6 +480,12 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTraject
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onFollowJointTrajectoryActionPreempt()");
   follow_joint_trajectory_server->setPreempted();
+}
+
+void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg)
+{
+  ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onTrajectoryCommandCB()");
+  onJointTrajectory(*msg);
 }
 
 extern "C"

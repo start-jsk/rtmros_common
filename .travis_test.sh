@@ -11,6 +11,11 @@ function error {
 
 trap error ERR
 
+# MongoDB hack
+dpkg -s mongodb || echo "ok"; export HAVE_MONGO_DB=$?
+if [ $HAVE_MONGO_DB == 0 ]; then sudo apt-get remove -qq -y mongodb mongodb-10gen || echo "ok"; fi
+if [ $HAVE_MONGO_DB == 0 ]; then sudo apt-get install -qq -y mongodb-clients mongodb-server -o Dpkg::Options::="--force-confdef" || echo "ok"; fi # default actions
+
 ### before_install: # Use this to prepare the system to install prerequisites or dependencies
 # Define some config vars
 export CI_SOURCE_PATH=$(pwd)
