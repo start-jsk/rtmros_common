@@ -62,6 +62,7 @@
 #include "actionlib/server/simple_action_server.h"
 #include "pr2_controllers_msgs/JointTrajectoryAction.h"
 #include "pr2_controllers_msgs/JointTrajectoryControllerState.h"
+#include "trajectory_msgs/JointTrajectory.h"
 
 #include "hrpsys_ros_bridge/idl/SequencePlayerServiceStub.h"
 
@@ -89,6 +90,7 @@ public:
 
     boost::shared_ptr<actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> > joint_trajectory_server;
     boost::shared_ptr<actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> > follow_joint_trajectory_server;
+    ros::Subscriber trajectory_command_sub;
 
     std::string controller_name;
     std::string groupname;
@@ -106,6 +108,7 @@ public:
     void onJointTrajectoryActionPreempt();
     void onFollowJointTrajectoryActionGoal();
     void onFollowJointTrajectoryActionPreempt();
+    void onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg);
 
     void proc();
     void restart();
