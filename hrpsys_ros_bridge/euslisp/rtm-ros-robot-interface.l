@@ -655,12 +655,10 @@
   )
 
 ;; KalmanFilterService
-(defmethod rtm-ros-robot-interface
-  (:set-kalman-filter-param
-   (&key (q-angle 0.001) (q-rate 0.003) (r-angle 0.03))
-   (send self :kalmanfilterservice_setkalmanfilterparam :q_angle q-angle :q_rate q-rate :r_angle r-angle)
-   )
-  )
+(def-set-get-param-method
+  'hrpsys_ros_bridge::Openhrp_KalmanFilterService_KalmanFilterParam
+  :set-kalman-filter-param :get-kalman-filter-param
+  :kalmanfilterservice_setkalmanfilterparam :kalmanfilterservice_getkalmanfilterparam)
 
 (defun print-abc-leg-offset-conf-from-robot
   (rb)
