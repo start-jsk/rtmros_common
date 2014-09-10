@@ -538,7 +538,7 @@
            (mapcar #'(lambda (f)
                        (let ((lf (send (send init-coords :copy-worldcoords)
                                        :transform f)))
-                         (send lf :put :l/r (send f :get :l/r))
+                         (send lf :name (send f :name))
                          (send self :eus-footstep->abc-footstep lf)))
                    fs))
      ))
@@ -594,7 +594,7 @@
    (instance hrpsys_ros_bridge::openhrp_autobalancerservice_footstep :init
              :pos (scale 1e-3 (send f :worldpos))
              :rot (matrix2quaternion (send f :worldrot))
-             :leg (format nil "~A" (if (find-method f :l/r) (send f :l/r) (send f :get :l/r))))
+             :leg (string-downcase (if (find-method f :l/r) (send f :l/r) (send f :name))))
    )
   (:cmd-vel-cb
    (msg &key (vel-x-ratio 1.0) (vel-y-ratio 1.0) (vel-th-ratio 1.0))
