@@ -125,8 +125,10 @@
    (dolist (f (send robot :force-sensors))
      (send self :set-robot-state1
            (send f :name)
-           (send (send self :parser-list (format nil "~A_~A" robothardware-name (send f :name))) :read-state)
-           ))
+           (send (send self :parser-list (format nil "~A_~A" robothardware-name (send f :name))) :read-state))
+     (send self :set-robot-state1
+           (read-from-string (format nil ":off-~A" (string-downcase (send f :name))))
+           (send (send self :parser-list (format nil "rmfo_off_~A" (send f :name))) :read-state)))
    ;; (dolist (i (send robot :imu-sensors))
    ;;   (send self :set-robot-state1
    ;;         (send i :name)
