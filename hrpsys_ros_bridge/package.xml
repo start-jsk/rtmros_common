@@ -44,6 +44,7 @@
   <build_depend>pr2_controllers</build_depend> <!-- groovy does not have catkin pr2_controllers package -->
   <build_depend>procps</build_depend>
   <build_depend>python-rosdep</build_depend>
+  <build_depend>robot_pose_ekf</build_depend>
   <build_depend>robot_state_publisher</build_depend>
   <build_depend>rosbuild</build_depend>
   <build_depend>roscpp</build_depend>
@@ -74,6 +75,7 @@
   <run_depend>nav_msgs</run_depend>
   <run_depend>pr2_controllers</run_depend> <!-- groovy does not have catkin pr2_controllers package -->
   <run_depend>python-psutil</run_depend>
+  <run_depend>robot_pose_ekf</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rosnode</run_depend>
