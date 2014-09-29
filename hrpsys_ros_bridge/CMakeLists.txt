@@ -127,7 +127,9 @@ if(NOT EXISTS ${_OPENHRP3_MODEL_DIR})
 endif()
 
 compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/PA10/pa10.main.wrl)
-compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/sample1.wrl SampleRobot)
+compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/sample1.wrl SampleRobot
+  --conf-dt-option "0.002"
+  --simulation-timestep-option "0.002")
 generate_default_launch_eusinterface_files(${_OPENHRP3_MODEL_DIR}/PA10/pa10.main.wrl hrpsys_ros_bridge)
 generate_default_launch_eusinterface_files(${_OPENHRP3_MODEL_DIR}/sample1.wrl hrpsys_ros_bridge SampleRobot)
 execute_process(COMMAND sed -i s@pa10\(Robot\)0@HRP1\(Robot\)0@ ${PROJECT_SOURCE_DIR}/launch/pa10.launch)
