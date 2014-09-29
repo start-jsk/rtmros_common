@@ -55,6 +55,17 @@ class TestSampleRobot(unittest.TestCase):
         else:
             self.assertTrue(True,"ok")
 
+    def test_odom_tf(self): # echeck if tf/odom is published
+        # wait odom topic
+        try:
+            rospy.loginfo("waiting for /WAIST_LINK0 to /odom")
+            self.listener.waitForTransform('/WAIST_LINK0', '/odom', rospy.Time(), rospy.Duration(120))
+        except tf.Exception:
+            self.assertTrue(None, "could not found tf from /WAIST_LINK0 to /odom")
+        (trans1,rot1) = self.listener.lookupTransform('/WAIST_LINK0', '/odom', rospy.Time(0))
+
+        self.assertTrue(True,"ok")
+
     def test_force_sensor(self):
         while self.lfsensor == None or self.rfsensor == None:
             time.sleep(1)
