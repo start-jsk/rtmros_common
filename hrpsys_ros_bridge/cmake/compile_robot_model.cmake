@@ -569,8 +569,9 @@ macro (generate_default_launch_eusinterface_files wrlfile project_pkg_name)
   # generate files
   set(${_sname}_generated_launch_euslisp_files)
   #   generate hrpsys_config.py to use unstable RTCs
+  set(ROSBRIDGE_ARGS "    <arg name=\"BASE_LINK\" default=\"WAIST_LINK0\" />\n")
   if ("${ARGV3}" STREQUAL "--use-unstable-hrpsys-config")
-    set(ROSBRIDGE_ARGS "    <arg name=\"USE_WALKING\" default=\"true\" />\n    <arg name=\"USE_IMPEDANCECONTROLLER\" default=\"true\" />")
+    set(ROSBRIDGE_ARGS "    <arg name=\"USE_WALKING\" default=\"true\" />\n    <arg name=\"USE_IMPEDANCECONTROLLER\" default=\"true\" />${ROSBRIDGE_ARGS}")
     set(STARTUP_ARGS "    <arg name=\"HRPSYS_PY_ARGS\" default=\"--use-unstable-rtc\" />")
   endif()
   #  generate startup.launch
