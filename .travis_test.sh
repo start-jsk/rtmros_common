@@ -27,6 +27,7 @@ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
 sudo apt-get update -qq
 sudo apt-get install -qq -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin ros-$ROS_DISTRO-rosbash
 
+if [ "$EXTRA_DEB" ]; then sudo apt-get install -qq -y $EXTRA_DEB;  fi
 ###
 pkg=$TEST_PACKAGE
 sudo apt-get install -y ros-hydro-$pkg
