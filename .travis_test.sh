@@ -11,6 +11,11 @@ function error {
 
 trap error ERR
 
+# MongoDB hack
+dpkg -s mongodb || echo "ok"; export HAVE_MONGO_DB=$?
+if [ $HAVE_MONGO_DB == 0 ]; then sudo apt-get remove -qq -y mongodb mongodb-10gen || echo "ok"; fi
+if [ $HAVE_MONGO_DB == 0 ]; then sudo apt-get install -qq -y mongodb-clients mongodb-server -o Dpkg::Options::="--force-confdef" || echo "ok"; fi # default actions
+
 ### before_install: # Use this to prepare the system to install prerequisites or dependencies
 # Define some config vars
 export CI_SOURCE_PATH=$(pwd)
@@ -22,6 +27,7 @@ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
 sudo apt-get update -qq
 sudo apt-get install -qq -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin ros-$ROS_DISTRO-rosbash
 
+if [ "$EXTRA_DEB" ]; then sudo apt-get install -qq -y $EXTRA_DEB;  fi
 ###
 pkg=$TEST_PACKAGE
 sudo apt-get install -y ros-hydro-$pkg

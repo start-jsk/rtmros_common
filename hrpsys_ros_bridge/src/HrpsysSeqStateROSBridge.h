@@ -44,12 +44,14 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void onJointTrajectoryActionPreempt();
   void onFollowJointTrajectoryActionGoal();
   void onFollowJointTrajectoryActionPreempt();
+  void onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg);
   bool sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
 		dynamic_reconfigure::Reconfigure::Response &res);
 
  private:
   ros::NodeHandle nh;
   ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, odom_pub, imu_pub;
+  ros::Subscriber trajectory_command_sub;
   std::vector<ros::Publisher> fsensor_pub;
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> joint_trajectory_server;
   actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> follow_joint_trajectory_server;

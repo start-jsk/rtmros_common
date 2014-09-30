@@ -1,10 +1,11 @@
 <launch>
 
+  <arg name="GUI" default="false" />
   <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2809" />
 
   <include file="$(find hrpsys_ros_bridge)/launch/pa10.launch" >
     <arg name="corbaport" default="2809" />
-    <arg name="GUI" default="false" />
+    <arg name="GUI" default="$(arg GUI)" />
     <arg name="RUN_RVIZ" default="false" />
     <arg name="SIMULATOR_NAME" default="HRP1(Robot)0" />
   </include>

@@ -2,6 +2,17 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.4 (2014-09-08)
+------------------
+* (test/test-pa10.test) support GUI argument
+* (test/test-pa10.py)   add test for /command
+* (hrpsys_ros_bridge/src/HrpsysJointTrajectoryBridge.cpp) support <controller>/command, see #537
+* (README.md) fix document, based on snozawa's comment
+* Contributors: Kei Okada
+
+1.2.3 (2014-09-03)
+------------------
+
 1.2.2 (2014-08-31)
 ------------------
 * (rtm-ros-robot-interface)
