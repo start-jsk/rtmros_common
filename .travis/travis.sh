@@ -27,7 +27,7 @@ echo "Testing branch $TRAVIS_BRANCH of $REPOSITORY_NAME"
 sudo sh -c 'echo "deb http://packages.ros.org/ros-shadow-fixed/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros-latest.list'
 wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
 sudo apt-get update -qq
-sudo apt-get install -qq -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin ros-$ROS_DISTRO-rosbash
+sudo apt-get install -qq -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin ros-$ROS_DISTRO-rosbash ros-$ROS_DISTRO-roslint
 if [ $ROSWS == rosws ]; then sudo apt-get install -qq -y python-rosinstall     ; fi
 if [ $BUILDER == rosbuild ]; then sudo apt-get install -qq -y ros-$ROS_DISTRO-rosmake ; fi
 if [ "$EXTRA_DEB" ]; then sudo apt-get install -qq -y $EXTRA_DEB;  fi
