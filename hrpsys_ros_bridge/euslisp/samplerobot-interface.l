@@ -16,9 +16,12 @@
          :rarm-controller
          :torso-controller
          :lhand-controller
-         :rhand-controller))
+         :rhand-controller
+         :fullbody-controller))
   (:default-controller ()
     (mapcar #'(lambda (ctype) (car (send self ctype))) (send self :default-controller-list)))
+  (:fullbody-controller ()
+   (send-message self robot-interface :default-controller))
   (:larm-controller ()
    (list
     (list
