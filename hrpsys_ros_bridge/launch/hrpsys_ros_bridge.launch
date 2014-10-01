@@ -1,6 +1,7 @@
 <launch>
   <arg name="MODEL_FILE" />
   <arg name="COLLADA_FILE" />
+  <arg name="BASE_LINK" default="BODY" />
   <arg name="CONF_FILE_ARG" default="" />
   <arg name="SIMULATOR_NAME" default="RobotHardware0"/> <!-- please set $(arg ROBOT_NAME)(Robot) for simulation -->
   <arg name="INSTALL_ROBOT_DESCRIPTION" default="true" />
@@ -223,5 +224,9 @@
   </group>
 
   <!-- END:openrtm connection -->
+
+  <include file="$(find hrpsys_ros_bridge)/launch/robot_pose_ekf.launch" >
+    <arg name="base_link" value="$(arg BASE_LINK)"/>
+  </include>
 </launch>
 
