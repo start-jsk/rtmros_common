@@ -483,7 +483,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     nav_msgs::Odometry odom;
     //odom.header.frame_id = rootlink_name;
     odom.header.frame_id = "odom";
-    odom.header.stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
+    if ( use_hrpsys_time ) {
+      odom.header.stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
+    } else {
+      odom.header.stamp = tm_on_execute;
+    }
     //odom.child_frame_id = "/odom";
     odom.pose.pose.position.x = a[0];
     odom.pose.pose.position.y = a[1];
@@ -557,7 +561,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       imu.header.frame_id = rootlink_name;
     }
     
-    imu.header.stamp = ros::Time(m_baseRpy.tm.sec, m_baseRpy.tm.nsec);
+    if ( use_hrpsys_time ) {
+      imu.header.stamp = ros::Time(m_baseRpy.tm.sec, m_baseRpy.tm.nsec);
+    } else {
+      imu.header.stamp = tm_on_execute;
+    }
     tf::Quaternion q = tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y);
     imu.orientation.x = q.getX();
     imu.orientation.y = q.getY();
