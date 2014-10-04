@@ -2,6 +2,13 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Improvement on rtm-ros-robot-interface, datalogger-log-parser, samplerobot
+* Fix stamp of odom and imu
+* Improve dependency: robot_pose_ekf.launch, robot_pose_ekf
+* Contributors: Kei Okada, Shunichi Nozawa, YoheiKakiuchi
+
 1.2.4 (2014-09-08)
 ------------------
 * (test/test-pa10.test) support GUI argument
