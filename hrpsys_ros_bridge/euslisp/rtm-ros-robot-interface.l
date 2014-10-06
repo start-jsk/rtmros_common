@@ -41,15 +41,6 @@
    (send self :set-robot-state1 :imu msg)
    (let ((imucoords (make-coords :rot (ros::tf-quaternion->rot (send (cdr (assoc :imu robot-state)) :orientation)))))
      (send robot :move-coords imucoords (car (send robot :imu-sensors)))))
-  (:temperature-vector () (cdr (assoc :temperature robot-state)))
-  (:motor-extra-data
-   ()
-   (let* ((d (cdr (assoc :motor-extra-data robot-state)))
-          (dims (mapcar #'(lambda (x) (send x :size)) (send (send d :layout) :dim)))
-          (ret))
-     (dotimes (j (car dims))
-       (push (subseq (send d :data) (* j (cadr dims)) (* (1+ j) (cadr dims))) ret))
-     (reverse ret)))
   (:rtmros-force-sensor-callback
    (fsensor-name msg)
    (let ((wrc (send msg :wrench)))
@@ -77,18 +68,31 @@
              (send-all (send robot :force-sensors) :name))))
   (:force-vector
    (&optional (limb))
+   "Returns :force-vector [N] list for all limbs obtained by :state.
+    If a limb argument is specified, returns a vector for the limb."
    (send self :tmp-force-moment-vector :force limb))
   (:moment-vector
    (&optional (limb))
+   "Returns :moment-vector [Nm] list for all limbs obtained by :state.
+    If a limb argument is specified, returns a vector for the limb."
    (send self :tmp-force-moment-vector :moment limb))
   (:off-force-vector
    (&optional (limb))
+   "Returns offset-removed :force-vector [N] list for all limbs obtained by :state.
+    This value corresponds to RemoveForceSensorLinkOffset RTC.
+    If a limb argument is specified, returns a vector for the limb."
    (send self :tmp-force-moment-vector :force limb "off"))
   (:off-moment-vector
    (&optional (limb))
+   "Returns offset-removed :moment-vector [Nm] list for all limbs obtained by :state.
+    This value corresponds to RemoveForceSensorLinkOffset RTC.
+    If a limb argument is specified, returns a vector for the limb."
    (send self :tmp-force-moment-vector :moment limb "off"))
   (:absolute-force-vector
    (&optional (limb))
+   "Returns offset-removed :force-vector [N] list for all limbs in world frame obtained by :state.
+    This value corresponds to RemoveForceSensorLinkOffset RTC.
+    If a limb argument is specified, returns a vector for the limb."
    (if limb
        (send (car (send robot limb :force-sensors)) :rotate-vector (send self :off-force-vector limb))
      (mapcar #'(lambda (fs force)
@@ -96,6 +100,9 @@
              (send robot :force-sensors) (send self :off-force-vector))))
   (:absolute-moment-vector
    (&optional (limb))
+   "Returns offset-removed :moment-vector [Nm] list for all limbs in world frame obtained by :state.
+    This value corresponds to RemoveForceSensorLinkOffset RTC.
+    If a limb argument is specified, returns a vector for the limb."
    (if limb
        (send (car (send robot limb :force-sensors)) :rotate-vector (send self :off-moment-vector limb))
      (mapcar #'(lambda (fs moment)
@@ -103,10 +110,48 @@
              (send robot :force-sensors) (send self :off-moment-vector))))
   (:zmp-vector
    (&optional (wrt :local))
-   (let ((zmp (scale 1e3 (cdr (assoc :zmp robot-state)))))
+   "Returns zmp vector [mm].
+    If wrt is :local, returns zmp in the base-link frame. If wrt is :world, returns zmp in the world frame."
+   (let ((zmp (scale 1e3 (cdr (assoc :zmp robot-state))))) ;; [m] -> [mm]
      (case wrt
        (:local zmp)
        (:world (send (car (send robot :links)) :transform-vector zmp)))))
+  (:temperature-vector
+   ()
+   "Returns temperature vector."
+   (cdr (assoc :temperature robot-state)))
+  (:motor-extra-data
+   ()
+   "Returns motor extra data. Please see iob definition for each system."
+   (let* ((d (cdr (assoc :motor-extra-data robot-state)))
+          (dims (mapcar #'(lambda (x) (send x :size)) (send (send d :layout) :dim)))
+          (ret))
+     (dotimes (j (car dims))
+       (push (subseq (send d :data) (* j (cadr dims)) (* (1+ j) (cadr dims))) ret))
+     (reverse ret)))
+  (:imucoords
+   ()
+   "Returns robot's coords based on imu measurement."
+   (send robot :copy-worldcoords))
+  (:accel-vector
+   ()
+   "Returns acceleration [m/s^2] of the acceleration sensor."
+   (let ((acc (send (cdr (assoc :imu robot-state)) :linear_acceleration)))
+     (float-vector (send acc :x) (send acc :y) (send acc :z))))
+  (:gyro-vector
+   ()
+   "Returns angular velocity [rad/s] of the gyro sensor."
+   (let ((gyro (send (cdr (assoc :imu robot-state)) :angular_velocity)))
+     (float-vector (send gyro :x) (send gyro :y) (send gyro :z))))
+  (:state
+    (&rest args)
+    "Obtains sensor and robot command topics using spin-once."
+    (case (car args)
+      (:imucoords
+       (send-super* :state args)
+       (send self :imucoords))
+      (t
+       (send-super* :state args))))
   ;; automatically define methods for ROSBridge services
   (:define-all-ROSBridge-srv-methods
    (&key (debug-view nil) (ros-pkg-name "hrpsys_ros_bridge"))
@@ -176,25 +221,6 @@
    (dump-seq-pattern-file rs-list output-basename :initial-sync-time initial-sync-time)
    )
   ;;
-  (:imucoords
-   ()
-   (send robot :copy-worldcoords))
-  (:accel-vector
-   ()
-   (let ((acc (send (cdr (assoc :imu robot-state)) :linear_acceleration)))
-     (float-vector (send acc :x) (send acc :y) (send acc :z))))
-  (:gyro-vector
-   ()
-   (let ((gyro (send (cdr (assoc :imu robot-state)) :angular_velocity)))
-     (float-vector (send gyro :x) (send gyro :y) (send gyro :z))))
-  (:state
-    (&rest args)
-    (case (car args)
-      (:imucoords
-       (send-super* :state args)
-       (send self :imucoords))
-      (t
-       (send-super* :state args))))
   ;; Calculate zmp from state [mm]
   ;; example ;; (progn (send *ri* :go-velocity 0 0 0) (objects (list (*ri* . robot))) (do-until-key (let ((zmp (send *ri* :calc-zmp-from-state))) (send *irtviewer* :draw-objects :flush nil) (send zmp :draw-on :flush t :size 300))))
   (:calc-zmp-from-state
@@ -305,11 +331,21 @@
 
 ;; DataLoggerService
 (defmethod rtm-ros-robot-interface
-  (:save-log (fname) (send self :dataloggerservice_save :basename fname))
+  (:save-log
+   (fname)
+   "Save log files as [fname].[component_name]_[dataport_name].
+    This method corresponds to DataLogger save()."
+   (send self :dataloggerservice_save :basename fname))
   ;; start log by clearing log
-  (:start-log () (send self :dataloggerservice_clear))
+  (:start-log
+   ()
+   "Start logging.
+    This method corresponds to DataLogger clear()."
+   (send self :dataloggerservice_clear))
   (:set-log-maxlength
    (&optional (maxlength 4000))
+   "Set max log length.
+    This method corresponds to DataLogger maxLength()."
    (send self :dataloggerservice_maxlength :len maxlength))
   )
 
