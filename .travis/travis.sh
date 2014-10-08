@@ -10,9 +10,9 @@ fi
 
 function error {
     if [ $BUILDER == rosbuild -a -e ${HOME}/.ros/rosmake/ ]; then find ${HOME}/.ros/rosmake/ -type f -exec echo "=== {} ===" \; -exec cat {} \; ; fi
+    if [ $BUILDER == catkin ]; then find ~/ros/ws_$REPOSITORY_NAME/build -name LastTest.log -exec echo "==== {} ====" \; -exec cat {} \;  ; fi
     if [ -e ${HOME}/.ros/test_results ]; then find ${HOME}/.ros/test_results -type f -exec echo "=== {} ===" \; -exec cat {} \; ; fi
     for file in ${HOME}/.ros/log/rostest-*; do echo "=== $file ==="; cat $file; done
-    if [ $BUILDER == catkin ]; then find ~/ros/ws_$REPOSITORY_NAME/build -name LastTest.log -exec echo "==== {} ====" \; -exec cat {} \;  ; fi
     exit 1
 }
 
