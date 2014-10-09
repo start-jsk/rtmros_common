@@ -13,7 +13,7 @@ env:
   - ROS_DISTRO=groovy ROSWS=rosws  BUILDER=rosbuild  USE_DEB=true  EXTRA_DEB=ros-groovy-navigation
   - ROS_DISTRO=groovy ROSWS=rosws  BUILDER=rosbuild  USE_DEB=false EXTRA_DEB=ros-groovy-navigation
   - ROS_DISTRO=groovy ROSWS=wstool BUILDER=catkin    USE_DEB=true  EXTRA_DEB=ros-groovy-navigation
-  - ROS_DISTRO=groovy ROSWS=wstool BUILDER=catkin    USE_DEB=false EXTRA_DEB="ros-groovy-navigation ros-groovy-openrtm-aist"
+  - ROS_DISTRO=groovy ROSWS=wstool BUILDER=catkin    USE_DEB=false EXTRA_DEB="ros-groovy-navigation"
   - ROS_DISTRO=hydro  ROSWS=wstool BUILDER=catkin    USE_DEB=true
   - ROS_DISTRO=hydro  ROSWS=wstool BUILDER=catkin    USE_DEB=false
   - TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=hydro EXTRA_DEB="ros-hydro-roslint ros-hydro-robot-pose-ekf"
