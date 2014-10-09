@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.6 (2014-10-10)
+------------------
 * set time-limit to 300
 * (test-samplerobot.py) fix test case, since /clock is sync with hrpsys time, so we can use more strict settings
 * fix test code for changing 0.002

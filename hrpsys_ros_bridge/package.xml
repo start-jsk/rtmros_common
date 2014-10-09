@@ -1,6 +1,6 @@
 <package>
   <name>hrpsys_ros_bridge</name>
-  <version>1.2.5</version>
+  <version>1.2.6</version>
   <description>hrpsys_ros_bridge package provides basic functionalities to bind
   	<a href = "http://wiki.ros.org/hrpsys">hrpsys</a>, a 
   	<a href = "http://openrtm.org/">OpenRTM</a>-based controller, and ROS.<br /> 
