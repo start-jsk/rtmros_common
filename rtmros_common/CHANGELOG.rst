@@ -2,13 +2,16 @@
 Changelog for package rtmros_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.5 (2014-10-04)
 ------------------
 * Improvement on rtm-ros-robot-interface, datalogger-log-parser, samplerobot
 * Fix stamp of odom and imu
 * Improve dependency: robot_pose_ekf.launch, robot_pose_ekf
 * Add depend on std_msgs
-* Contributors: Kei Okada, Shunichi Nozawa, YoheiKakiuchi
+* Contributors: Kei Okada, Shunichi Nozawa, Yohei Kakiuchi
 
 1.2.4 (2014-09-08)
 ------------------
