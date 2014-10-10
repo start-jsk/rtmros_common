@@ -86,7 +86,7 @@ class TestSampleRobot(unittest.TestCase):
         ret = wait_interpolation()
         t2 = rospy.get_time()
         rospy.logwarn("waitInterpolation %f"%(t2-t1))
-        self.assertAlmostEqual(t2-t1, 10, delta=5)
+        self.assertAlmostEqual(t2-t1, 11, delta=2)
         #self.assertNotAlmostEqual(trans[1],0,2)
 
     def test_go_pos(self):

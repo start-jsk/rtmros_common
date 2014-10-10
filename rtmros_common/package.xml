@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>rtmros_common</name>
-  <version>1.2.5</version>
+  <version>1.2.6</version>
   <description>A package suite that provides all the capabilities for
     the ROS users to connect to the robots that run on
     <a href = "http://www.openrtm.org/openrtm/en/content/what-rt-middleware-0">RT Middleware</a>

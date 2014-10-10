@@ -2,6 +2,14 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.6 (2014-10-10)
+------------------
+* set time-limit to 300
+* (test-samplerobot.py) fix test case, since /clock is sync with hrpsys time, so we can use more strict settings
+* fix test code for changing 0.002
+* (rtm-ros-robot-interface) : Add documentation strings for state methods and rearrange it. Add logger documentation.
+* Contributors: Kei Okada, Shunichi Nozawa
+
 1.2.5 (2014-10-04)
 ------------------
 * Improvement on rtm-ros-robot-interface, datalogger-log-parser, samplerobot
