@@ -154,6 +154,19 @@
      (send robot :move-coords
            (make-coords :rot (ros::tf-quaternion->rot (send (cdr (assoc :imu robot-state)) :orientation)))
            (car (send robot :imu-sensors))))
+   (if (send self :parser-list "abc_q")
+       (send self :set-robot-state1
+             :auto-balancer-reference-vector
+             (map float-vector #'rad2deg (send (send self :parser-list "abc_q") :read-state))))
+   (if (send self :parser-list "abc_baseTformOut")
+       (send self :set-robot-state1
+             :auto-balancer-reference-root-coords
+             (send self :hrpsys-tform->coords (send (send self :parser-list "abc_baseTformOut") :read-state))))
+   )
+  (:hrpsys-tform->coords
+   (tform-vector)
+   (make-coords :pos (scale 1e3 (subseq tform-vector 0 3))
+                :rot (make-matrix 3 3 (list (subseq tform-vector 3 6) (subseq tform-vector 6 9) (subseq tform-vector 9))))
    )
   (:reference-worldcoords
    ()
@@ -161,6 +174,8 @@
          :transform
          (send (car (send robot :links)) :transformation robot))
    )
+  (:auto-balancer-reference-vector () (cdr (assoc :auto-balancer-reference-vector robot-state)))
+  (:auto-balancer-reference-root-coords () (cdr (assoc :auto-balancer-reference-root-coords robot-state)))
   ;; overwrite
   (:reference-vector () (cdr (assoc :reference-vector robot-state)))
   (:actual-vector () (send self :potentio-vector))
