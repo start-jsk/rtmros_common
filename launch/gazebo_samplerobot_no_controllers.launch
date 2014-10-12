@@ -1,17 +1,18 @@
 <launch>
   <arg name="gzname" default="gazebo"/>
-  <arg name="WORLD" default="SampleRobot.world"/>
+  <arg name="WORLD" default="$(find hrpsys_gazebo_general)/worlds/empty.world"/>
   <arg name="PAUSED" default="false"/>
   <arg name="SYNCHRONIZED" default="false" />
 
-  <include file="$(find hrpsys_gazebo_tutorials)/launch/gazebo_robot_no_controllers.launch">
+  <include file="$(find hrpsys_gazebo_general)/launch/gazebo_robot_no_controllers.launch">
     <arg name="ROBOT_TYPE" value="SampleRobot" />
+    <arg name="WORLD" value="$(arg WORLD)" />
+    <arg name="HRPSYS_GAZEBO_CONFIG" default="$(find hrpsys_gazebo_tutorials)/config/SampleRobot.yaml" />
+    <arg name="ROBOT_MODEL" default="$(find hrpsys_gazebo_tutorials)/robot_models/SampleRobot/SampleRobot.urdf.xacro" />
+
+    <arg name="PAUSED" value="$(arg PAUSED)"/>
+    <arg name="SYNCHRONIZED" value="$(arg SYNCHRONIZED)" />
     <arg name="USE_INSTANCE_NAME" value="true" />
     <arg name="gzname" value="$(arg gzname)" />
-    <arg name="WORLD" value="$(arg WORLD)" />
-    <arg name="PAUSED" value="$(arg PAUSED)"/>
-    <!-- <arg name="HRPSYS_GAZEBO_CONFIG" value="$(find hrpsys_gazebo_tutorials)/config/SampleRobot.yaml" /> -->
-    <!-- <arg name="ROBOT_MODEL" value="$(find hrpsys_gazebo_tutorials)/robot_models/SampleRobot/SampleRobot.urdf" /> -->
-    <arg name="SYNCHRONIZED" value="$(arg SYNCHRONIZED)" />
   </include>
 </launch>
