@@ -595,12 +595,18 @@
   (:set-gait-generator-param
    (&rest args &key default-orbit-type &allow-other-keys)
    (send* self :raw-set-gait-generator-param
-          :default-orbit-type (case default-orbit-type
-                                (:shuffling 0)
-                                (:cycloid 1)
-                                (:rectangle 2)
-                                (t default-orbit-type))
+          :default-orbit-type
+          (let ((ot (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE::*~A*" (string-downcase default-orbit-type)))))
+            (cond
+             ((null default-orbit-type) default-orbit-type)
+             ((boundp ot) (eval ot))
+             (t (error ";; no such :default-orbit-type ~A in :set-gait-generator-param~%" default-orbit-type))))
           args))
+  (:print-gait-generator-orbit-type
+   ()
+   (let ((cs (constants "" "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE")))
+     (mapcar #'(lambda (x) (format t ";; ~A => ~A~%" x (eval x))) cs)
+     t))
   ;; :get-auto-balancer-param and :set-auto-balancer-param is not defined by def-set-get-param-method yet.
   (:get-auto-balancer-param
    ()
