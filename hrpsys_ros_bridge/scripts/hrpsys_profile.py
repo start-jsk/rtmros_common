@@ -76,7 +76,7 @@ def hrpsys_profile() :
         if ( total_prof.count > 100000 ) :
             rospy.loginfo("eps.resetProfile()")
             eps.resetProfile()
-            
+
     pub.publish(diagnostic)
 
 
@@ -99,7 +99,7 @@ if __name__ == '__main__':
                 pass
 
             r.sleep()
-        
+
     except rospy.ROSInterruptException: pass
 
 
