@@ -49,7 +49,7 @@ def hrpsys_profile() :
         total_prof = eps.getProfile()
 
         if total_prof.count > 0 :
-            status = DiagnosticStatus(name = 'hrpEC Profile ('+component_name+')', level = DiagnosticStatus.OK)
+            status = DiagnosticStatus(name = 'hrpEC Profile (Summary)', level = DiagnosticStatus.OK)
             status.message = "Running : Average Period : %7.5f, Max Period : %7.5f" % (total_prof.avg_period*1000, total_prof.max_period*1000);
             status.values.append(KeyValue(key = "Max Period", value = str(total_prof.max_period*1000)))
             status.values.append(KeyValue(key = "Min Period", value = str(total_prof.min_period*1000)))
@@ -67,7 +67,7 @@ def hrpsys_profile() :
             status = DiagnosticStatus(name =  'hrpEC Profile (RTC: ' + component.name() + ')', level = DiagnosticStatus.OK)
             status.message = "Running : Average Process : %7.5f, Max Process : %7.5f" % (prof.avg_process*1000, prof.max_process*1000);
             status.values.append(KeyValue(key = "Max Process", value = str(prof.max_process*1000)))
-            status.values.append(KeyValue(key = "Avg Process", value = str(prof.avg_process*1000)))
+            status.values.append(KeyValue(key = "Average Process", value = str(prof.avg_process*1000)))
             status.values.append(KeyValue(key = "Count", value = str(prof.count)))
             diagnostic.status.append(status)
         except :
