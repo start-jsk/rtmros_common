@@ -37,6 +37,7 @@ def hrpsys_profile() :
     diagnostic.header.stamp = rospy.Time.now()
 
     components = ms.get_components()
+    eps_of_rh = narrow(findRTC(components[0].name()).owned_ecs[0], "ExecutionProfileService")
     for component in components :
         component_name = component.name()
         component_rtc = findRTC(component_name)
@@ -61,17 +62,16 @@ def hrpsys_profile() :
 
             diagnostic.status.append(status)
 
-        for c in components :
-            try:
-                prof = eps.getComponentProfile(c.ref)
-                status = DiagnosticStatus(name =  'hrpEC Profile (RTC: ' + c.name() + ')', level = DiagnosticStatus.OK)
-                status.message = "Running : Average Process : %7.5f, Max Process : %7.5f" % (prof.avg_process*1000, prof.max_process*1000);
-                status.values.append(KeyValue(key = "Max Process", value = str(prof.max_process*1000)))
-                status.values.append(KeyValue(key = "Avg Process", value = str(prof.avg_process*1000)))
-                status.values.append(KeyValue(key = "Count", value = str(prof.count)))
-                diagnostic.status.append(status)
-            except :
-                True
+        try:
+            prof = eps_of_rh.getComponentProfile(component.ref)
+            status = DiagnosticStatus(name =  'hrpEC Profile (RTC: ' + component.name() + ')', level = DiagnosticStatus.OK)
+            status.message = "Running : Average Process : %7.5f, Max Process : %7.5f" % (prof.avg_process*1000, prof.max_process*1000);
+            status.values.append(KeyValue(key = "Max Process", value = str(prof.max_process*1000)))
+            status.values.append(KeyValue(key = "Avg Process", value = str(prof.avg_process*1000)))
+            status.values.append(KeyValue(key = "Count", value = str(prof.count)))
+            diagnostic.status.append(status)
+        except :
+            True
 
         if ( total_prof.count > 100000 ) :
             rospy.loginfo("eps.resetProfile()")
