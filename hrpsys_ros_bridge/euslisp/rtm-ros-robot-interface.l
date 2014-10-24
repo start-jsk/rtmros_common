@@ -682,10 +682,20 @@
 ;; StabilizerService
 (def-set-get-param-method
   'hrpsys_ros_bridge::Openhrp_StabilizerService_stParam
-  :set-st-param :get-st-param
+  :raw-set-st-param :get-st-param
   :stabilizerservice_setparameter :stabilizerservice_getparameter)
 
 (defmethod rtm-ros-robot-interface
+  (:set-st-param
+   (&rest args &key st-algorithm &allow-other-keys)
+   (send* self :raw-set-st-param
+          :st-algorithm
+          (let ((sa (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_STABILIZERSERVICE_STALGORITHM::*~A*" (string-downcase st-algorithm)))))
+            (cond
+             ((null st-algorithm) st-algorithm)
+             ((boundp sa) (eval sa))
+             (t (error ";; no such :st-algorithm ~A in :set-st-param~%" st-algorithm))))
+          args))
   (:start-st
    ()
    (send self :stabilizerservice_startstabilizer)
