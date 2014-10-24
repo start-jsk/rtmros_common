@@ -26,13 +26,16 @@
 (init)
 (init-pose)
 
-(defun setup-gait-generator-param ()
-  (send *ri* :set-gait-generator-param
-        :default-step-height 0.20
-        :default-double-support-ratio 0.3
-        :default-step-time 1.2
-        :default-orbit-type :RECTANGLE
-        )
+(defun setup-gait-generator-param (&optional (use-rectangle t))
+  (send* *ri* :set-gait-generator-param
+         :default-double-support-ratio 0.3
+         :default-step-time 1.2
+         :swing-trajectory-delay-time-offset 0.2
+         (if use-rectangle
+             (list :default-orbit-type :RECTANGLE)
+           (list
+            :stair-trajectory-way-point-offset #f(0.04 0 0)
+            :default-orbit-type :STAIR)))
   )
 
 (defun stair-walk (&optional (stair-height (* 1e3 0.1524)))
@@ -42,6 +45,7 @@
         (init-step-z 0)
         (fs))
     (dolist (step-idx (list 1 2 3 4))
+      (setup-gait-generator-param (= (mod step-idx 2) 1))
       (setq fs (list (make-coords :pos (float-vector init-step-x -90 init-step-z) :name :rleg)
                      (make-coords :pos (float-vector (+ init-step-x stair-stride-x) 90 (+ init-step-z stair-height)) :name :lleg)))
       (send *ri* :set-foot-steps fs)
