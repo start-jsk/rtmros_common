@@ -729,7 +729,7 @@
   (format t "end_effectors:")
   (dolist (l '(:rarm :larm :rleg :lleg))
     (let ((rl (send (send (send rb l :root-link) :parent) :joint)))
-      (format t " ~A,~A,~A," l (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))
+      (format t " ~A,~A,~A," (string-downcase (string l)) (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))
       (let* ((dif (send (send rb l :end-coords :parent) :transformation (send rb l :end-coords)))
              (wp (scale 1e-3 (send dif :worldpos))) ;; [mm] -> [m]
              (wr (normalize-vector (matrix-log (send dif :worldrot))))
