@@ -34,6 +34,7 @@ endif()
 # setup global variables
 #
 macro(rtmbuild_init)
+  set(_extra_message_dependencies ${ARGV0})
   if(NOT use_catkin) ## rosbuild_init cleans all variable so we first defind project and call rosbuild_init later with ROSBUILD_DONT_REDEFINE_PROJECT=TRUE
     get_filename_component(_project ${CMAKE_SOURCE_DIR} NAME)
     project(${_project})
@@ -125,7 +126,7 @@ macro(rtmbuild_init)
   if(use_catkin)
     add_message_files(DIRECTORY msg FILES "${${PROJECT_NAME}_autogen_msg_files}")
     add_service_files(DIRECTORY srv FILES "${${PROJECT_NAME}_autogen_srv_files}")
-    generate_messages(DEPENDENCIES std_msgs)
+    generate_messages(DEPENDENCIES std_msgs ${_extra_message_dependencies})
   else()
     rosbuild_genmsg()
     rosbuild_gensrv()

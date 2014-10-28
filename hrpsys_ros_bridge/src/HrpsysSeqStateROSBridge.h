@@ -26,6 +26,7 @@
 #include "hrpsys_ros_bridge/MotorStates.h"
 #include "diagnostic_msgs/DiagnosticArray.h"
 #include "sensor_msgs/Imu.h"
+#include "hrpsys_ros_bridge/SetSensorTransformation.h"
 
 extern const char* hrpsysseqstaterosbridgeimpl_spec[];
 
@@ -46,8 +47,9 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void onFollowJointTrajectoryActionPreempt();
   void onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg);
   bool sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
-		dynamic_reconfigure::Reconfigure::Response &res);
-
+                dynamic_reconfigure::Reconfigure::Response &res);
+  bool setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
+                               hrpsys_ros_bridge::SetSensorTransformation::Response& res);
  private:
   ros::NodeHandle nh;
   ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, odom_pub, imu_pub;
@@ -56,6 +58,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> joint_trajectory_server;
   actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> follow_joint_trajectory_server;
   ros::ServiceServer sendmsg_srv;
+  ros::ServiceServer set_sensor_transformation_srv;
   bool interpolationp, use_sim_time, use_hrpsys_time;
 
   tf::TransformBroadcaster br;
@@ -67,6 +70,9 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   std::string rootlink_name;
 
   ros::Subscriber clock_sub;
+
+  std::map<std::string, geometry_msgs::Transform> sensor_transformations;
+  boost::mutex sensor_transformation_mutex;
 
   nav_msgs::Odometry prev_odom;
   bool prev_odom_acquired;

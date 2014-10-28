@@ -42,6 +42,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   follow_joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal, this));
   follow_joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt, this));
   sendmsg_srv = nh.advertiseService(std::string("sendmsg"), &HrpsysSeqStateROSBridge::sendMsg, this);
+  set_sensor_transformation_srv = nh.advertiseService("set_sensor_transformation", &HrpsysSeqStateROSBridge::setSensorTransformation, this);
   joint_state_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
   joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
   trajectory_command_sub = nh.subscribe("/fullbody_controller/command", 1, &HrpsysSeqStateROSBridge::onTrajectoryCommandCB, this);
@@ -207,6 +208,14 @@ void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt() {
 
 void HrpsysSeqStateROSBridge::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg) {
   onJointTrajectory(*msg);
+}
+
+bool HrpsysSeqStateROSBridge::setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
+                                                      hrpsys_ros_bridge::SetSensorTransformation::Response& res)
+{
+  boost::mutex::scoped_lock lock(sensor_transformation_mutex);
+  sensor_transformations[req.sensor_name] = req.transform;
+  return true;
 }
 
 bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
@@ -392,12 +401,22 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
     joint_state_pub.publish(joint_state);
     // sensors publish
-    std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
-    while ( its != sensor_info.end() ) {
-      br.sendTransform(tf::StampedTransform((*its).second.transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
-      ++its;
+    {
+      boost::mutex::scoped_lock lock(sensor_transformation_mutex);
+      std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
+      while ( its != sensor_info.end() ) {
+        if (sensor_transformations.find((*its).first) == sensor_transformations.end()) {
+          br.sendTransform(tf::StampedTransform((*its).second.transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
+        }
+        else {
+          geometry_msgs::Transform transform = sensor_transformations[(*its).first];
+          tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
+                                     tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
+          br.sendTransform(tf::StampedTransform(tf_transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
+        }
+        ++its;
+      }
     }
-
     m_mutex.unlock();
 
     if ( joint_trajectory_server.isActive() &&
