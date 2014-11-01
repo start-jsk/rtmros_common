@@ -336,40 +336,16 @@
    )
   )
 
+(def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_ImpedanceControllerService_impedanceParam
+  :raw-set-impedance-controller-param :raw-get-impedance-controller-param
+  :impedancecontrollerservice_setimpedancecontrollerparam :impedancecontrollerservice_getimpedancecontrollerparam
+  :optional-args (list :name 'name))
+
 ;; ImpedanceControllerService
 (defmethod rtm-ros-robot-interface
   ;;
   ;; usage:
   ;;   (send *ri* :start-impedance :rarm ..), (send *ri* :stop-impedance :rarm ..), (send *ri* :set-impedance-controller-param :rarm :M-p 200) ...
-  ;;
-  ;; set impedance controller param
-  ;;   params other than user-defined params are used in current parameter in ImpedanceController RTC by using getImpedanceControllerParam
-  ;;   original default parameters are defined in hrpsys-base/rtc/ImpedanceController/ImpedancControl.h
-  (:_set-impedance-controller-param
-   (&key name base-name target-name
-         M-p D-p K-p
-         M-r D-r K-r
-         ref-force ref-moment
-         force-gain moment-gain
-         sr-gain avoid-gain reference-gain manipulability-limit)
-   (let* ((current-imp-param (send self :get-impedance-controller-param name))
-          (param (instance hrpsys_ros_bridge::OpenHRP_ImpedanceControllerService_impedanceParam :init
-                            :name name :base_name base-name :target_name target-name
-                            :M_p (if M-p M-p (send current-imp-param :M_p))
-                            :D_p (if D-p D-p (send current-imp-param :D_p))
-                            :K_p (if K-p K-p (send current-imp-param :K_p))
-                            :M_r (if M-r M-r (send current-imp-param :M_r))
-                            :D_r (if D-r D-r (send current-imp-param :D_r))
-                            :K_r (if K-r K-r (send current-imp-param :K_r))
-                            :ref_force (if ref-force ref-force (send current-imp-param :ref_force))
-                            :ref_moment (if ref-moment ref-moment (send current-imp-param :ref_moment))
-                            :force_gain (if force-gain force-gain (send current-imp-param :force_gain))
-                            :moment_gain (if moment-gain moment-gain (send current-imp-param :moment_gain))
-                            :sr_gain (if sr-gain sr-gain (send current-imp-param :sr_gain))
-                            :avoid_gain (if avoid-gain avoid-gain (send current-imp-param :avoid_gain))
-                            :reference_gain (if reference-gain reference-gain (send current-imp-param :reference_gain))
-                            :manipulability_limit (if manipulability-limit manipulability-limit (send current-imp-param :manipulability_limit)))))
-     (send self :impedancecontrollerservice_setimpedancecontrollerparam :i_param param)))
   (:start-impedance
    (limb &rest args)
    (send* self :set-impedance-controller-param limb args))
@@ -382,21 +358,24 @@
          :stop-impedance))
   (:set-impedance-controller-param
    (limb &rest args)
-   (send* self :force-sensor-method
+   (send self :force-sensor-method
          limb
          #'(lambda (name base-name target-name &rest _args)
-             (send* self :_set-impedance-controller-param
-                    :name name
-                    :base-name base-name
-                    :target-name target-name _args))
-         :set-impedance-controller-param
-         args))
+             (send* self :raw-set-impedance-controller-param name :base-name base-name :target-name target-name args))
+         :set-impedance-controller-param))
   (:get-impedance-controller-param
    (limb)
    (send self :force-sensor-method
          limb
          #'(lambda (name base-name target-name &rest _args)
-             (send (send self :impedancecontrollerservice_getimpedancecontrollerparam :name name) :i_param))
+             (send (send self :raw-get-impedance-controller-param name) :i_param))
+         :get-impedance-controller-param))
+  (:get-impedance-controller-param
+   (limb)
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name base-name target-name &rest _args)
+             (send self :raw-get-impedance-controller-param name))
          :get-impedance-controller-param))
   (:force-sensor-method
    (limb method-func method-name &rest args)
