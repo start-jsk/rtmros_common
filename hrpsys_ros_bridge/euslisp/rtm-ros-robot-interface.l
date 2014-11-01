@@ -191,27 +191,6 @@
            )
           )
        )))
-  ;;
-  (:sendmsg
-   (strs &optional (service-name "sendmsg"))
-   (ros::service-call
-    service-name
-    (let ((req (instance dynamic_reconfigure::ReconfigureRequest :init)))
-      (send (send req :config) :strs
-	    (mapcar #'(lambda (str)
-			(instance dynamic_reconfigure::StrParameter :init :name service-name :value str))
-		    strs))
-      req)))
-  (:set-interpolation-mode (mode) (send self :sendmsg (list "setInterpolationMode" (format nil "~A" mode))))
-  ;; just for seq debug
-  (:wait-interpolation-for-seq-debug () (send self :sendmsg (list "waitInterpolation" "")))
-  (:angle-vector-for-seq-debug
-   (v tm)
-   (send self :sendmsg
-	 (list "setJointAngles"
-	       (let ((str""))
-		 (dotimes (i (length v)) (setq str (format nil "~A ~A" str (deg2rad (elt v i)))))
-		 (format nil "~A ~A" str (* 1e-3 tm))))))
   ;; dump pattern file for SequencePlayer
   ;;  rs-list : list of (list :time time0 :angle-vector av :root-coords rc ...)
   ;;  output-basename : output file (output-basename.pos, ...)
@@ -319,14 +298,6 @@
   (:stop-collision-detection
    ()
    (send self :collisiondetectorservice_disablecollisiondetection))
-  ;; deprecated
-  (:enableCollisionDetection
-   ()
-   (warning-message 1 ";; :enableCollisionDetection is deprecated!! Please use :start-collision-detection!!~%")
-   (send self :start-collision-detection))
-  (:disableCollisionDetection ()
-   (warning-message 1 ";; :disableCollisionDetection is deprecated!! Please use :stop-collision-detection!!~%")
-   (send self :stop-collision-detection))
   )
 
 ;; DataLoggerService
@@ -363,11 +334,6 @@
    ()
    (send self :robothardwareservice_calibrateInertiaSensor)
    )
-  ;; deprecated
-  (:setServoGainPercentage
-   (name percentage)
-   (warning-message 1 ";; :setServoGainPercentage is deprecated!! Please use :set-servo-gain-percentage!!~%")
-   (send self :set-servo-gain-percentage name percentage))
   )
 
 ;; ImpedanceControllerService
@@ -711,18 +677,6 @@
   'hrpsys_ros_bridge::Openhrp_KalmanFilterService_KalmanFilterParam
   :set-kalman-filter-param :get-kalman-filter-param
   :kalmanfilterservice_setkalmanfilterparam :kalmanfilterservice_getkalmanfilterparam)
-
-(defun print-abc-leg-offset-conf-from-robot
-  (rb)
-  (let ((pav (send rb :angle-vector))
-        (prc (send rb :copy-worldcoords)))
-    (format t "abc_leg_offset: ")
-    (let ((diff (scale (* 0.5 1e-3) (send (send (send rb :rleg :end-coords) :transformation (send rb :lleg :end-coords)) :worldpos))))
-      (format t "~A,~A,~A" (elt diff 0) (elt diff 1) (elt diff 2)))
-    (format t "~%")
-    (send rb :angle-vector pav)
-    (send rb :newcoords prc)
-    ))
 
 (defun print-end-effector-parameter-conf-from-robot
   (rb)
