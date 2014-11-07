@@ -191,14 +191,14 @@
            )
           )
        )))
-  ;; dump pattern file for SequencePlayer
-  ;;  rs-list : list of (list :time time0 :angle-vector av :root-coords rc ...)
-  ;;  output-basename : output file (output-basename.pos, ...)
-  (:dump-seq-pattern-file
-   (rs-list output-basename &key (initial-sync-time 3.0)) ;; [s]
-   (warn ";; :dump-seq-pattern-file is deprecated!! Please use (dump-seq-pattern-file) funciton!!~%")
-   (dump-seq-pattern-file rs-list output-basename :initial-sync-time initial-sync-time)
-   )
+  (:set-interpolation-mode
+   (interpolation-mode)
+   "Set interpolation mode for SequencePlayer."
+   (let ((im (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_SEQUENCEPLAYERSERVICE_INTERPOLATIONMODE::*~A*" (string-downcase interpolation-mode)))))
+     (cond
+      ((boundp im) (send self :sequenceplayerservice_setinterpolationmode :i_mode_ (eval im)))
+      (t (error ";; no such interpolation-mode ~A in :set-interpolation-mode~%" interpolation-mode)))
+     ))
   ;;
   ;; Calculate zmp from state [mm]
   ;; example ;; (progn (send *ri* :go-velocity 0 0 0) (objects (list (*ri* . robot))) (do-until-key (let ((zmp (send *ri* :calc-zmp-from-state))) (send *irtviewer* :draw-objects :flush nil) (send zmp :draw-on :flush t :size 300))))
