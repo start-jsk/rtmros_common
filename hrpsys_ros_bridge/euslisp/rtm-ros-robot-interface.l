@@ -303,10 +303,20 @@
 ;; DataLoggerService
 (defmethod rtm-ros-robot-interface
   (:save-log
-   (fname)
+   (fname &key (set-date-robot-name t))
    "Save log files as [fname].[component_name]_[dataport_name].
-    This method corresponds to DataLogger save()."
-   (send self :dataloggerservice_save :basename fname))
+    This method corresponds to DataLogger save().
+    If set-data-robot-name is t, filename includes date string and robot name. By default, set-data-robot-name is t."
+   (let* ((dt (unix:localtime))
+          (additional-string
+           (if set-data-robot-name
+               (format nil "_~A_~A~A~A"
+                       (send (send self :robot) :name)
+                       (digits-string (+ 1900 (aref dt 5)) 4)
+                       (digits-string (1+ (aref dt 4)) 2)
+                       (digits-string (aref dt 3) 2))
+             "")))
+     (send self :dataloggerservice_save :basename (format nil "~A~A" fname additional-string))))
   ;; start log by clearing log
   (:start-log
    ()
