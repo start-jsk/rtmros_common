@@ -309,7 +309,7 @@
     If set-data-robot-name is t, filename includes date string and robot name. By default, set-data-robot-name is t."
    (let* ((dt (unix:localtime))
           (additional-string
-           (if set-data-robot-name
+           (if set-date-robot-name
                (format nil "_~A_~A~A~A"
                        (send (send self :robot) :name)
                        (digits-string (+ 1900 (aref dt 5)) 4)
