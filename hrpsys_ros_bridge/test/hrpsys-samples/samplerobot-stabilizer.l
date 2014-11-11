@@ -1,24 +1,25 @@
 #!/usr/bin/env roseus
 
 ;; $ rtmlaunch hrpsys_ros_bridge_tutorials samplerobot.launch
-;; $ roseus samplerobot-stabilizer.l "(demo)"
+;; $ roseus samplerobot-stabilizer.l "(samplerobot-stabilizer-demo)"
 
 (load "package://hrpsys_ros_bridge_tutorials/euslisp/samplerobot-interface.l")
 
-(defun init ()
+(defun samplerobot-stabilizer-init ()
   (samplerobot-init)
-  )
-
-(defun demo ()
-  (init)
   (send *sr* :reset-pose)
   (send *ri* :angle-vector (send *sr* :angle-vector) 1000)
   (send *ri* :wait-interpolation)
+  t)
 
-  ;; 1. getParameter
+(defun samplerobot-stabilizer-demo0 ()
+  "1. getParameter"
   (pprint (send (send *ri* :get-st-param) :slots))
   (print "getParameter() => OK")
-  ;; 2. setParameter
+  t)
+
+(defun samplerobot-stabilizer-demo1 ()
+  "2. setParameter"
   (let ((k-tpcc-p (float-vector 0.2 0.2))
         (k-tpcc-x (float-vector 4.0 4.0))
         (k-brot-p (float-vector 0.0 0.0)))
@@ -30,11 +31,21 @@
              (eps-v= (send (send *ri* :get-st-param) :k_tpcc_x) k-tpcc-x)
              (eps-v= (send (send *ri* :get-st-param) :k_brot_p) k-brot-p))
         (print "setParameter() => OK")))
-  ;; 3. start and stop st
+  t)
+
+(defun samplerobot-stabilizer-demo2 ()
+  "3. start and stop st"
   (send *ri* :start-st)
   (send *ri* :go-pos 0.5 0.1 10)
   (send *ri* :stop-st)
   (print "Start and Stop Stabilizer => OK")
+  t)
+
+(defun samplerobot-stabilizer-demo ()
+  (samplerobot-stabilizer-init)
+  (samplerobot-stabilizer-demo0)
+  (samplerobot-stabilizer-demo1)
+  (samplerobot-stabilizer-demo2)
   )
 
-;;(demo)
+(warn ";; (samplerobot-stabilizer-demo)~%")
