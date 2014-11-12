@@ -194,10 +194,12 @@
   (:set-interpolation-mode
    (interpolation-mode)
    "Set interpolation mode for SequencePlayer."
-   (let ((im (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_SEQUENCEPLAYERSERVICE_INTERPOLATIONMODE::*~A*" (string-downcase interpolation-mode)))))
-     (cond
-      ((boundp im) (send self :sequenceplayerservice_setinterpolationmode :i_mode_ (eval im)))
-      (t (error ";; no such interpolation-mode ~A in :set-interpolation-mode~%" interpolation-mode)))
+   (if (integerp interpolation-mode)
+       interpolation-mode
+     (let ((im (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_SEQUENCEPLAYERSERVICE_INTERPOLATIONMODE::*~A*" (string-downcase interpolation-mode)))))
+       (if (boundp im)
+           (send self :sequenceplayerservice_setinterpolationmode :i_mode_ (eval im))
+         (error ";; no such interpolation-mode ~A in :set-interpolation-mode~%" interpolation-mode)))
      ))
   ;;
   ;; Calculate zmp from state [mm]
@@ -551,11 +553,13 @@
    (&rest args &key default-orbit-type &allow-other-keys)
    (send* self :raw-set-gait-generator-param
           :default-orbit-type
-          (let ((ot (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE::*~A*" (string-downcase default-orbit-type)))))
-            (cond
-             ((null default-orbit-type) default-orbit-type)
-             ((boundp ot) (eval ot))
-             (t (error ";; no such :default-orbit-type ~A in :set-gait-generator-param~%" default-orbit-type))))
+          (if (or (null default-orbit-type) (integerp default-orbit-type))
+              default-orbit-type
+            (let ((ot (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE::*~A*" (string-downcase default-orbit-type)))))
+              (if (boundp ot)
+                  (eval ot)
+                (error ";; no such :default-orbit-type ~A in :set-gait-generator-param~%" default-orbit-type))
+              ))
           args))
   (:print-gait-generator-orbit-type
    ()
@@ -645,11 +649,12 @@
    (&rest args &key st-algorithm &allow-other-keys)
    (send* self :raw-set-st-param
           :st-algorithm
-          (let ((sa (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_STABILIZERSERVICE_STALGORITHM::*~A*" (string-downcase st-algorithm)))))
-            (cond
-             ((null st-algorithm) st-algorithm)
-             ((boundp sa) (eval sa))
-             (t (error ";; no such :st-algorithm ~A in :set-st-param~%" st-algorithm))))
+          (if (or (null st-algorithm) (integerp st-algorithm))
+              st-algorithm
+            (let ((sa (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_STABILIZERSERVICE_STALGORITHM::*~A*" (string-downcase st-algorithm)))))
+              (if (boundp sa)
+                  (eval sa)
+                (error ";; no such :st-algorithm ~A in :set-st-param~%" st-algorithm))))
           args))
   (:start-st
    ()
