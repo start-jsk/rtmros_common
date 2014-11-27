@@ -2,6 +2,29 @@
 Changelog for package openrtm_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.6 (2014-10-10)
+------------------
+
+1.2.5 (2014-10-04)
+------------------
+* Add depend on std_msgs
+* Contributors: Kei Okada
+
+1.2.4 (2014-09-08)
+------------------
+
+1.2.3 (2014-09-03)
+------------------
+
+1.2.2 (2014-08-31)
+------------------
+
+1.2.1 (2014-06-23)
+------------------
+* (index.rst) Add usage api doc
+* (package.xml files) Update repository URLs
+* Contributors: Isaac IY Saito, Isaac Isao Saito
+
 1.2.0 (2014-05-14)
 ------------------
 

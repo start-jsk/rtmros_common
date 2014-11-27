@@ -2,6 +2,30 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.6 (2014-10-10)
+------------------
+
+1.2.5 (2014-10-04)
+------------------
+
+1.2.4 (2014-09-08)
+------------------
+
+1.2.3 (2014-09-03)
+------------------
+* fix rtmbuild.cmake
+* Contributors: terasawa
+
+1.2.2 (2014-08-31)
+------------------
+
+1.2.1 (2014-06-23)
+------------------
+* (idl2srv.py) : Check pointer or not ;; At previous revision, non-pointer variables are deleted
+* (idl2srv.py) : use random string for idl2srv generated file
+* (package.xml files) Update repository URLs
+* Contributors: Isaac Isao Saito, Kei Okada, Shunichi Nozawa
+
 1.2.0 (2014-05-14)
 ------------------
 

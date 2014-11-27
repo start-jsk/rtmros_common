@@ -91,7 +91,7 @@
      parser-list))
   (:eof-p () eof-p)
   (:update-robot-state
-   ()
+   (&key (wait-until-update nil))
    (setq eof-p (some #'null (send-all parser-list :proc)))
    (send self :set-robot-state1
          :reference-vector
@@ -109,27 +109,73 @@
          :reference-torque-vector
          (send (send self :parser-list "sh_tqOut") :read-state))
    (send self :set-robot-state1
-         :root-pos
+         :reference-root-pos
          (scale 1e3 (send (send self :parser-list "sh_basePosOut") :read-state)))
    (send self :set-robot-state1
-         :root-rpy
+         :reference-root-rpy
          (send (send self :parser-list "sh_baseRpyOut") :read-state))
    (send self :set-robot-state1
-         :root-coords
-         (make-coords :pos (cdr (assoc :root-pos robot-state))
-                      :rpy (cdr (assoc :root-rpy robot-state))))
-   (send robot :move-coords (cdr (assoc :root-coords robot-state)) (car (send robot :links)))
+         :reference-root-coords
+         (make-coords :pos (cdr (assoc :reference-root-pos robot-state))
+                      :rpy (cdr (assoc :reference-root-rpy robot-state))))
+   (if (send self :parser-list "sh_zmpOut")
+       (send self :set-robot-state1
+             :zmp
+             (send (send self :parser-list "sh_zmpOut") :read-state)))
    (dolist (f (send robot :force-sensors))
      (send self :set-robot-state1
            (send f :name)
-           (send (send self :parser-list (format nil "~A_~A" robothardware-name (send f :name))) :read-state)
-           ))
-   (dolist (i (send robot :imu-sensors))
+           (send (send self :parser-list (format nil "~A_~A" robothardware-name (send f :name))) :read-state))
      (send self :set-robot-state1
-           (send i :name)
-           (send (send self :parser-list (format nil "~A_~A" robothardware-name (send i :name))) :read-state)
-           ))
+           (read-from-string (format nil ":off-~A" (string-downcase (send f :name))))
+           (send (send self :parser-list (format nil "rmfo_off_~A" (send f :name))) :read-state)))
+   ;; (dolist (i (send robot :imu-sensors))
+   ;;   (send self :set-robot-state1
+   ;;         (send i :name)
+   ;;         (send (send self :parser-list (format nil "~A_~A" robothardware-name (send i :name))) :read-state)
+   ;;         ))
+   (when (send self :parser-list "kf_rpy")
+     (send self :set-robot-state1
+             :imu
+             (let* ((rpy (send (send self :parser-list "kf_rpy") :read-state))
+                    (qt (ros::rot->tf-quaternion (rpy-matrix (elt rpy 2) (elt rpy 1) (elt rpy 0)))))
+               (instance* sensor_msgs::Imu :init
+                          :orientation qt
+                          (append
+                           (if (send robot :imu-sensor "gsensor")
+                               (list :linear_acceleration
+                                     (let ((acc (send (send self :parser-list (format nil "~A_~A" robothardware-name "gsensor")) :read-state)))
+                                       (instance geometry_msgs::Vector3 :init :x (elt acc 0) :y (elt acc 1) :z (elt acc 2)))))
+                           (if (send robot :imu-sensor "gyrometer")
+                               (list :angular_velocity
+                                     (let ((gyro (send (send self :parser-list (format nil "~A_~A" robothardware-name "gyrometer")) :read-state)))
+                                       (instance geometry_msgs::Vector3 :init :x (elt gyro 0) :y (elt gyro 1) :z (elt gyro 2))))))
+                          )))
+     (send robot :move-coords
+           (make-coords :rot (ros::tf-quaternion->rot (send (cdr (assoc :imu robot-state)) :orientation)))
+           (car (send robot :imu-sensors))))
+   (if (send self :parser-list "abc_q")
+       (send self :set-robot-state1
+             :auto-balancer-reference-vector
+             (map float-vector #'rad2deg (send (send self :parser-list "abc_q") :read-state))))
+   (if (send self :parser-list "abc_baseTformOut")
+       (send self :set-robot-state1
+             :auto-balancer-reference-root-coords
+             (send self :hrpsys-tform->coords (send (send self :parser-list "abc_baseTformOut") :read-state))))
    )
+  (:hrpsys-tform->coords
+   (tform-vector)
+   (make-coords :pos (scale 1e3 (subseq tform-vector 0 3))
+                :rot (make-matrix 3 3 (list (subseq tform-vector 3 6) (subseq tform-vector 6 9) (subseq tform-vector 9))))
+   )
+  (:reference-worldcoords
+   ()
+   (send (send (cdr (assoc :reference-root-coords robot-state)) :copy-worldcoords)
+         :transform
+         (send (car (send robot :links)) :transformation robot))
+   )
+  (:auto-balancer-reference-vector () (cdr (assoc :auto-balancer-reference-vector robot-state)))
+  (:auto-balancer-reference-root-coords () (cdr (assoc :auto-balancer-reference-root-coords robot-state)))
   ;; overwrite
   (:reference-vector () (cdr (assoc :reference-vector robot-state)))
   (:actual-vector () (send self :potentio-vector))

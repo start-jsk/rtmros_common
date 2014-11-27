@@ -32,7 +32,6 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_rsangleIn("rsangle", m_rsangle),
     m_mcangleIn("mcangle", m_mcangle),
     m_baseTformIn("baseTform", m_baseTform),
-    m_basePosIn("basePos", m_basePos),
     m_baseRpyIn("baseRpy", m_baseRpy),
     m_rstorqueIn("rstorque", m_rstorque),
     m_servoStateIn("servoState", m_servoState),
@@ -57,7 +56,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("rsangle", m_rsangleIn);
   addInPort("mcangle", m_mcangleIn);
   addInPort("baseTform", m_baseTformIn);
-  addInPort("basePos", m_basePosIn);
   addInPort("baseRpy", m_baseRpyIn);
   addInPort("rstorque", m_rstorqueIn);
   addInPort("rszmp", m_rszmpIn);
@@ -137,7 +135,13 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
       hrp::Sensor* sensor = body->sensor(j, i);
       SensorInfo si;
       si.transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
-      hrp::Vector3 rpy = hrp::rpyFromRot(sensor->localR);
+      hrp::Vector3 rpy;
+      if ( hrp::Sensor::VISION == sensor->type )
+        // Rotate sensor->localR 180[deg] because OpenHRP3 camera -Z axis equals to ROS camera Z axis
+        // http://www.openrtp.jp/openhrp3/jp/create_model.html
+        rpy = hrp::rpyFromRot(sensor->localR * hrp::rodrigues(hrp::Vector3(1,0,0), M_PI));
+      else
+        rpy = hrp::rpyFromRot(sensor->localR);
       si.transform.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
       OpenHRP::LinkInfoSequence_var links = bodyinfo->links();
       for ( int k = 0; k < links->length(); k++ ) {
@@ -192,9 +196,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   int nacc = body->numSensors(hrp::Sensor::ACCELERATION);
   m_gsensor.resize(nacc);
   m_gsensorIn.resize(nacc);
+  m_gsensorName.resize(nacc);
   for (unsigned int i=0; i<nacc; i++){
     hrp::Sensor *s = body->sensor(hrp::Sensor::ACCELERATION, i);
     m_gsensorIn[i] = new InPort<TimedAcceleration3D>(s->name.c_str(), m_gsensor[i]);
+    m_gsensorName[i] = s->name.c_str();
     registerInPort(s->name.c_str(), *m_gsensorIn[i]);
     std::cerr << i << " acceleration sensor : " << s->name.c_str() << std::endl;
   }
@@ -202,9 +208,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   int ngyro = body->numSensors(hrp::Sensor::RATE_GYRO);
   m_gyrometer.resize(ngyro);
   m_gyrometerIn.resize(ngyro);
+  m_gyrometerName.resize(ngyro);
   for (unsigned int i=0; i<ngyro; i++){
     hrp::Sensor *s = body->sensor(hrp::Sensor::RATE_GYRO, i);
     m_gyrometerIn[i] = new InPort<TimedAngularVelocity3D>(s->name.c_str(), m_gyrometer[i]);
+    m_gyrometerName[i] = s->name.c_str();
     registerInPort(s->name.c_str(), *m_gyrometerIn[i]);
     std::cerr << i << " rate sensor : " << s->name.c_str() << std::endl;
   }
@@ -218,9 +226,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     hrp::Matrix33 R = hrp::rodrigues(axis, li.rotation[3]);
     hrp::Vector3 rpy = hrp::rpyFromRot(R);
 
-    m_basePos.data.x = li.translation[0];
-    m_basePos.data.y = li.translation[1];
-    m_basePos.data.z = li.translation[2];
     m_baseRpy.data.r = rpy[0];
     m_baseRpy.data.p = rpy[1];
     m_baseRpy.data.y = rpy[2];

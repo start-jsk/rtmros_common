@@ -15,6 +15,7 @@ if __name__ == '__main__':
     parser.add_argument('--port', help='corba name server port number')
     parser.add_argument('-i', help='interactive mode',  action='store_true')
     parser.add_argument('-c', help='execute command',  nargs='*')
+    parser.add_argument('--use-unstable-rtc', help='use unstable rtc', action='store_true')
     args, unknown = parser.parse_known_args()
 
     if args.i: # interactive
@@ -29,6 +30,8 @@ if __name__ == '__main__':
 
     # ipython ./hrpsys_tools_config.py -i -- --port 2809
     hcf = HrpsysConfigurator()
+    if args.use_unstable_rtc: # use Unstable RTC
+        hcf.getRTCList = hcf.getRTCListUnstable; sys.argv = [sys.argv[0]] + sys.argv[2:]
     if args.i or '__IPYTHON__' in vars(__builtins__):
         hcf.waitForModelLoader()
         if len(sys.argv) > 1 and not sys.argv[1].startswith('-'):

@@ -2,6 +2,54 @@
 Changelog for package rtmros_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.6 (2014-10-10)
+------------------
+
+1.2.5 (2014-10-04)
+------------------
+* Improvement on rtm-ros-robot-interface, datalogger-log-parser, samplerobot
+* Fix stamp of odom and imu
+* Improve dependency: robot_pose_ekf.launch, robot_pose_ekf
+* Add depend on std_msgs
+* Contributors: Kei Okada, Shunichi Nozawa, Yohei Kakiuchi
+
+1.2.4 (2014-09-08)
+------------------
+
+1.2.3 (2014-09-03)
+------------------
+
+1.2.2 (2014-08-31)
+------------------
+* (rtm-ros-robot-interface)
+
+  * Define Euslisp setter and getter from param slots names
+  * Update set-st-param for Stabilizer
+  * Add KalmanFilter ROS Bridge and euslisp interface to hrpsys_ros_bridge.launch
+  * Add calibrate-inertia-sensor
+  * Add new arguments for new st param
+  * Fix end-effector name (without colon) according to https://github.com/fkanehiro/hrpsys-base/pull/301
+  * Update abc and st euslisp interface according to idl update, `fkanehiro/hrpsys-base#239 <https://github.com/fkanehiro/hrpsys-base/issues/239>`_
+  * Access robot-state's imu in callback to fix https://github.com/start-jsk/rtmros_tutorials/issues/67
+* Use catkin_make -C to change direcotry (Fix `#523 <https://github.com/start-jsk/rtmros_common/issues/523>`_)
+* (datalogger-log-parser.l)
+
+  * Support https://github.com/jsk-ros-pkg/jsk_pr2eus/commit/3200b63dfcbd3c02b919fe6ad03c425e5057ee5c commit
+  * Support both reference worldcoords and actual worldcoords ;; StateHolder's value is reference and kf is actual.
+* added make-default-ForceCalibPosesForLegs to euslisp/calib-force-sensor-params.l
+* (Force sensor)
+
+  * fixed accessing to force sensor in calibration function
+  * fix AbsoluteForceSensorService -> RemoveForceSensorLinkOffsetService
+* (compile_robot_model.cmake, hrpsys.launch, hrpsys_tools_config.py) Add argument to use Unstable RTC List and configure it from cmake discussed in https://github.com/start-jsk/rtmros_gazebo/pull/61
+* (hrpsys.launch) : Add config_file setting for HGcontroller
+* Contributors: Kei Okada, Kunio Kojima, Shunichi Nozawa, Masaki Murooka, Isaac IY Saito
+
+1.2.1 (2014-06-23)
+------------------
+* (package.xml files) Update repository URLs
+* Contributors: Isaac Isao Saito
+
 1.2.0 (2014-05-14)
 ------------------
 

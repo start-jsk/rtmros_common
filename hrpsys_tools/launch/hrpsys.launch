@@ -32,8 +32,8 @@
   <!--   for hrpsys-simulator -->
   <arg unless="$(arg USE_RTCD)" name="hrpsys_periodic_rate" default="1000000"/>
   <!-- see http://code.google.com/p/hrpsys-base/issues/detail?id=14 for  exec_cxt.periodic.rate:100000 -->
-  <arg unless="$(arg USE_RTCD)" name="hrpsys_preload_rtc" default="HGcontroller.so"/>
   <arg unless="$(arg USE_RTCD)" name="hrpsys_precreate_rtc" default="HGcontroller"/>
+  <arg unless="$(arg USE_RTCD)" name="hrpsys_preload_rtc" default="$(arg hrpsys_precreate_rtc).so"/>
   <arg unless="$(arg USE_RTCD)" name="hrpsys_periodic_type" value="SynchExtTriggerEC" />
   <arg unless="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless " />
   <arg unless="$(arg GUI)" name="hrpsys_gui_args" value="-nodisplay" />
@@ -64,6 +64,8 @@
 -o "example.Stabilizer.config_file:$(arg CONF_FILE)"
 -o "example.CollisionDetector.config_file:$(arg CONF_FILE)"
 -o "example.SoftErrorLimiter.config_file:$(arg CONF_FILE)"
+-o "example.HGcontroller.config_file:$(arg CONF_FILE)"
+-o "example.PDcontroller.config_file:$(arg CONF_FILE)"
 -o "example.RobotHardware.config_file:$(arg RobotHardware_conf)"
     '/>
   <arg name="hrpsys_opt_rtc_config_args" default=''/>
@@ -82,6 +84,7 @@
   <!-- BEGIN:hrpsys.py setting -->
   <arg name="HRPSYS_PY_PKG" default="hrpsys_tools"/>
   <arg name="HRPSYS_PY_NAME" default="hrpsys_tools_config.py"/>
+  <arg name="HRPSYS_PY_ARGS" default='' />
   <arg name="LAUNCH_HRPSYSPY" default="true" />
   <!-- END:hrpsys.py setting -->
 
@@ -110,7 +113,7 @@
 
   <group if="$(arg LAUNCH_HRPSYSPY)">
     <node name="hrpsys_py" pkg="$(arg HRPSYS_PY_PKG)" type="$(arg HRPSYS_PY_NAME)" output="screen"
-          args='$(arg SIMULATOR_NAME) $(arg MODEL_FILE) $(arg omniorb_args)'
+          args='$(arg HRPSYS_PY_ARGS) $(arg SIMULATOR_NAME) $(arg MODEL_FILE) $(arg omniorb_args)'
           launch-prefix="$(arg PY_LAUNCH_PREFIX)" />
   </group>
 

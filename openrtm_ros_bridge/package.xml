@@ -1,6 +1,6 @@
 <package>
   <name>openrtm_ros_bridge</name>
-  <version>1.2.0</version>
+  <version>1.2.6</version>
   <description>openrtm_ros_bridge package provides basic functionalities to bind
     two robotics framework: <a href = "http://openrtm.org/">OpenRTM</a> and ROS.<br />
     By using this package, you can write your ROS packages that communicate with your
@@ -25,9 +25,11 @@
   <build_depend>roscpp</build_depend>
   <build_depend>rostest</build_depend>
   <build_depend>rtmbuild</build_depend>
+  <build_depend>std_msgs</build_depend>
 
   <run_depend>openrtm_tools</run_depend>
   <run_depend>roscpp</run_depend>
+  <run_depend>std_msgs</run_depend>
 
   <!-- <test_depend>openrtm_aist</test_depend> -->
   <!-- <test_depend>openrtm_tools</test_depend> -->

@@ -42,9 +42,13 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   follow_joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal, this));
   follow_joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt, this));
   sendmsg_srv = nh.advertiseService(std::string("sendmsg"), &HrpsysSeqStateROSBridge::sendMsg, this);
+  set_sensor_transformation_srv = nh.advertiseService("set_sensor_transformation", &HrpsysSeqStateROSBridge::setSensorTransformation, this);
   joint_state_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
   joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
+  trajectory_command_sub = nh.subscribe("/fullbody_controller/command", 1, &HrpsysSeqStateROSBridge::onTrajectoryCommandCB, this);
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
+  odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
+  imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1);
 
   // is use_sim_time is set and no one publishes clock, publish clock time
   use_sim_time = ros::Time::isSimTime();
@@ -200,6 +204,18 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt() {
 
 void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt() {
   follow_joint_trajectory_server.setPreempted();
+}
+
+void HrpsysSeqStateROSBridge::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg) {
+  onJointTrajectory(*msg);
+}
+
+bool HrpsysSeqStateROSBridge::setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
+                                                      hrpsys_ros_bridge::SetSensorTransformation::Response& res)
+{
+  boost::mutex::scoped_lock lock(sensor_transformation_mutex);
+  sensor_transformations[req.sensor_name] = req.transform;
+  return true;
 }
 
 bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
@@ -385,12 +401,22 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
     joint_state_pub.publish(joint_state);
     // sensors publish
-    std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
-    while ( its != sensor_info.end() ) {
-      br.sendTransform(tf::StampedTransform((*its).second.transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
-      ++its;
+    {
+      boost::mutex::scoped_lock lock(sensor_transformation_mutex);
+      std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
+      while ( its != sensor_info.end() ) {
+        if (sensor_transformations.find((*its).first) == sensor_transformations.end()) {
+          br.sendTransform(tf::StampedTransform((*its).second.transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
+        }
+        else {
+          geometry_msgs::Transform transform = sensor_transformations[(*its).first];
+          tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
+                                     tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
+          br.sendTransform(tf::StampedTransform(tf_transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
+        }
+        ++its;
+      }
     }
-
     m_mutex.unlock();
 
     if ( joint_trajectory_server.isActive() &&
@@ -464,72 +490,126 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   // m_baseTformIn
   if ( m_baseTformIn.isNew () ) {
     m_baseTformIn.read();
-    tf::Transform base;
+    // tf::Transform base;
     double *a = m_baseTform.data.get_buffer();
-    base.setOrigin( tf::Vector3(a[0], a[1], a[2]) );
+    
+    // base.setOrigin( tf::Vector3(a[0], a[1], a[2]) );
     hrp::Matrix33 R;
     hrp::getMatrix33FromRowMajorArray(R, a, 3);
+    
     hrp::Vector3 rpy = hrp::rpyFromRot(R);
-    base.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
-
-    // odom publish
-    ros::Time base_time = tm_on_execute;
+    tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));
+    nav_msgs::Odometry odom;
+    //odom.header.frame_id = rootlink_name;
+    odom.header.frame_id = "odom";
     if ( use_hrpsys_time ) {
-        base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
+      odom.header.stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
+    } else {
+      odom.header.stamp = tm_on_execute;
     }
-    br.sendTransform(tf::StampedTransform(base, base_time, "odom", rootlink_name));
+    //odom.child_frame_id = "/odom";
+    odom.pose.pose.position.x = a[0];
+    odom.pose.pose.position.y = a[1];
+    odom.pose.pose.position.z = a[2];
+    odom.pose.pose.orientation.x = q.getX();
+    odom.pose.pose.orientation.y = q.getY();
+    odom.pose.pose.orientation.z = q.getZ();
+    odom.pose.pose.orientation.w = q.getW();
+    
+    odom.pose.covariance[0] = 0.002 * 0.002;
+    odom.pose.covariance[7] = 0.002 * 0.002;
+    odom.pose.covariance[14] = 0.002 * 0.002;
+    odom.pose.covariance[21] = 0.002 * 0.002;
+    odom.pose.covariance[28] = 0.002 * 0.002;
+    odom.pose.covariance[35] = 0.002 * 0.002;
+    if (prev_odom_acquired) {
+      // calc velocity
+      double dt = (odom.header.stamp - prev_odom.header.stamp).toSec();
+      if (dt > 0) {
+        odom.twist.twist.linear.x = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
+        odom.twist.twist.linear.y = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
+        odom.twist.twist.linear.z = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;
+        odom.twist.twist.angular.x = (rpy(0) - prev_rpy(0)) / dt;
+        odom.twist.twist.angular.x = (rpy(1) - prev_rpy(1)) / dt;
+        odom.twist.twist.angular.x = (rpy(2) - prev_rpy(2)) / dt;
+        odom.twist.covariance = odom.pose.covariance;
+        odom_pub.publish(odom);
+      }
+      prev_odom = odom;
+      prev_rpy = rpy;
+      
+    }
+    else {
+      prev_odom = odom;
+      prev_rpy = rpy;
+      prev_odom_acquired = true;
+    }
   }  // end: m_baseTformIn
 
-  bool updateTfImu = false;
-  // m_basePosIn
-  if (m_basePosIn.isNew()){
-    m_basePosIn.read();
-    updateTfImu = true;
-  } // end: m_basePosIn
-
+  bool updateImu = false;
   // m_baseRpyIn
   if (m_baseRpyIn.isNew()){
     m_baseRpyIn.read();
-    updateTfImu = true;
+    updateImu = true;
   } // end: m_baseRpyIn
 
-  if (updateTfImu){
-    tf::Transform base;
-    base.setOrigin( tf::Vector3(m_basePos.data.x, m_basePos.data.y, m_basePos.data.z) );
-    base.setRotation( tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y));
-
-    // publish base_footprint calculated from IMU
-    ros::Time base_time = tm_on_execute;
-    if ( use_hrpsys_time ) {
-        base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
-    }
-    tf::Transform inv = base.inverse();
-#if ROS_VERSION_MINIMUM(1,8,0)
-    tf::Matrix3x3 m;
-#else
-    btMatrix3x3 m; // for electric
-#endif
-    m = inv.getBasis();
-    bool not_nan = true;
-    for (int i = 0; i < 3; ++i) {
-        if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
-            not_nan = false;
-    }
-    if (not_nan) {
-      std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
-      while ( its != sensor_info.end() ) {
-        if ( (*its).second.type_name == "RateGyro" ) {
-          br.sendTransform(tf::StampedTransform(inv, base_time, (*its).first, "imu_floor"));
-          break;
-        }
-        ++its;
+  for (unsigned int i = 0; i < m_gyrometerIn.size(); i++) {
+    if (m_gyrometerIn[i]->isNew()) {
+      m_gyrometerIn[i]->read();
+      if (i == 0) {
+        updateImu = true;
       }
-    } else {
-        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
-                         << m_baseRpy.data.r << ","
-                         << m_baseRpy.data.p << ","
-                         << m_baseRpy.data.y << ")");
+    }
   }
+
+  for (unsigned int i = 0; i < m_gsensorIn.size(); i++) {
+    if (m_gsensorIn[i]->isNew()) {
+      m_gsensorIn[i]->read();
+      if (i == 0) {
+        updateImu = true;
+      }
+    }
+  }
+  
+  if (updateImu){
+    sensor_msgs::Imu imu;
+    if (m_gyrometerName.size() > 0) {
+      imu.header.frame_id = m_gyrometerName[0];
+    }
+    else {
+      imu.header.frame_id = rootlink_name;
+    }
+    
+    if ( use_hrpsys_time ) {
+      imu.header.stamp = ros::Time(m_baseRpy.tm.sec, m_baseRpy.tm.nsec);
+    } else {
+      imu.header.stamp = tm_on_execute;
+    }
+    tf::Quaternion q = tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y);
+    imu.orientation.x = q.getX();
+    imu.orientation.y = q.getY();
+    imu.orientation.z = q.getZ();
+    imu.orientation.w = q.getW();
+    if (m_gyrometer.size() > 0) {
+      imu.angular_velocity.x = m_gyrometer[0].data.avx;
+      imu.angular_velocity.y = m_gyrometer[0].data.avy;
+      imu.angular_velocity.z = m_gyrometer[0].data.avz;
+    }
+    if (m_gsensor.size() > 0) {
+      imu.linear_acceleration.x = m_gsensor[0].data.ax;
+      imu.linear_acceleration.y = m_gsensor[0].data.ay;
+      imu.linear_acceleration.z = m_gsensor[0].data.az;
+    }
+    imu.orientation_covariance[0] = 2.89e-08;
+    imu.orientation_covariance[4] = 2.89e-08;
+    imu.orientation_covariance[8] = 2.89e-08;
+    imu.angular_velocity_covariance[0] = 0.000144;
+    imu.angular_velocity_covariance[4] = 0.000144;
+    imu.angular_velocity_covariance[8] = 0.000144;
+    imu.linear_acceleration_covariance[0] = 0.0096;
+    imu.linear_acceleration_covariance[4] = 0.0096;
+    imu.linear_acceleration_covariance[8] = 0.0096;
+    imu_pub.publish(imu);
   }
 
   // publish forces sonsors

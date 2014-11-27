@@ -2,6 +2,27 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.6 (2014-10-10)
+------------------
+
+1.2.5 (2014-10-04)
+------------------
+
+1.2.4 (2014-09-08)
+------------------
+
+1.2.3 (2014-09-03)
+------------------
+
+1.2.2 (2014-08-31)
+------------------
+
+1.2.1 (2014-06-23)
+------------------
+* (rtmlaunch.py) rtmlaunch should support unless attribute in group tag. the current implementation only takes into account if attribute of group tag. this commit adds supporting unless attribute.
+* (package.xml files) Update repository URLs
+* Contributors: Isaac Isao Saito, Ryohei Ueda
+
 1.2.0 (2014-05-14)
 ------------------
 

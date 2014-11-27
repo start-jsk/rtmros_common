@@ -1,14 +1,19 @@
 # hrpsys\_ros\_bridge
 ## Introduction
-hrpsys\_ros\_bridge is a package to connect OpenRTM system and ROS system.
+hrpsys\_ros\_bridge is a package to connect `hrpsys <http://wiki.ros.org/hrpsys>`_ (OpenRTM-based controller) system and ROS system.
 
-This package contains RosBridge, cmake_libraries, launch files, Euslisp interface, and examples.
+This package contains ROSBridge to `hrpsys`, cmake_libraries, launch files, Euslisp interface, and examples.
 
 ### ROSBridge
-  ROSBridge is a ROS node to bridge OpenRTM system and ROS system.
+  ROSBridge here is a ROS node to bridge `hrpsys` system and ROS system.
 
-  You can use OpenRTM resources from ROS like interface, e.g., 
-  use OpenRTM ``Data Ports`` through ROS ``Topic`` and OpenRTM ``Servie Ports`` through ROS ``Service``.
+    You might want to check other "bridging" software in ROS too such as:
+    
+    - `rosbridge_suite <http://wiki.ros.org/rosbridge_suite>`_ provides a JSON API to ROS functionality for non-ROS programs.
+    - `rtmbuild <http://wiki.ros.org/rtmbuild?distro=hydro>`_ Provides a ROS-like compile and launch script for `OpenRTM`.
+
+  You can use `OpenRTM` resources from ROS interface, e.g., 
+  use OpenRTM ``Data Ports`` through ROS ``Topic`` and OpenRTM ``Servie Ports`` through ROS ``Service``. The following table shows the corresponding concepts for the 2 worlds.
 
 | \ | ROS | OpenRTM |
 | --- | --- | --- |
@@ -23,11 +28,11 @@ This package contains RosBridge, cmake_libraries, launch files, Euslisp interfac
 
 2. Generated ROSBridges:
 
-   By default, ROS Bridge are generated in hrpsys\_ros\_bridge make.
+   `openrtm_ros_bridge` is the ROS bridge for example code in `openrtm_aist` and `hrpsys_ros_bridge` provides ROS bridge for `hrpsys` package.
 
    These bridges ROS service to OpenRTM service port.
 
-   Based on ``hrpsys_ros_bridge/idl/*.idl``, generated codes are in ``hrpsys_ros_bridge/src_gen/*.cpp`` and built binaries are in ``hrpsys_ros_bridge/[bin,lib]``. 
+   For example all idl files in `hrpsys` is coped to ``hrpsys_ros_bridge/idl/*.idl``, and it generates cpp codes in ``hrpsys_ros_bridge/src_gen/*.cpp`` and built binaries in ``hrpsys_ros_bridge/[bin,lib]``. 
    
 ### cmake libraries
    [``hrpsys_ros_bridge/cmake/compile_robot_model.cmake``] (https://github.com/start-jsk/rtmros_common/blob/master/hrpsys_ros_bridge/cmake/compile_robot_model.cmake) is a CMake file to convert robot model file format.

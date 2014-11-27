@@ -37,7 +37,7 @@
   (robot
    &key (base-time 1000)
         (limbs '(:rarm :larm))
-        (poses (makeForceCalibPoses))
+        (poses (make-default-ForceCalibPoses robot))
         (fname))
   (let ((pc (send robot :copy-worldcoords))
         (pav (send robot :angle-vector))
@@ -62,7 +62,7 @@
       (push
        (flatten
         (mapcar #'(lambda (a)
-                    (list a (copy-object (send (send robot :force-sensor a) :worldrot))))
+                    (list a (copy-object (send (car (send robot a :force-sensors)) :worldrot))))
                 limbs))
        rot-list)
       )
@@ -121,4 +121,22 @@
     (send robot :newcoords pc)
     (reverse poses)))
 
-
+(defun make-default-ForceCalibPosesForLegs
+  (robot &key (pose-method :reset-manip-pose))
+  (let ((pav (send robot :angle-vector))
+        (pc (send robot :copy-worldcoords))
+        poses)
+    (send robot :reset-manip-pose)
+    (let ((ps (list -30 0 30))
+          (rs (list -18 0 18)))
+      (dolist (lp ps)
+        (send robot :legs :ankle-p :joint-angle lp)
+        (dolist (lr rs)
+          (send robot :lleg :ankle-r :joint-angle lr)
+          (send robot :rleg :ankle-r :joint-angle (- lr))
+          (if *viewer* (send (send *viewer* :get :pickviewer) :draw-objects))
+          (unless nil;;(send robot :self-collision-check)
+            (push (send robot :angle-vector) poses))
+          )
+        ))
+    poses))

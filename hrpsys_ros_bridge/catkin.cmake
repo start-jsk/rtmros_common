@@ -3,16 +3,16 @@ cmake_minimum_required(VERSION 2.8.3)
 project(hrpsys_ros_bridge)
 
 # call catkin depends
-find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp rostest sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager hrpsys_tools image_transport dynamic_reconfigure hrpsys) # pr2_controllers_msgs robot_monitor
+find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp rostest sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager hrpsys_tools image_transport dynamic_reconfigure hrpsys nav_msgs geometry_msgs) # pr2_controllers_msgs robot_monitor geometry_msgs
 catkin_python_setup()
 
 # download pr2_controllers_msgs for git
 find_package(pr2_controllers_msgs QUIET)
 if(NOT pr2_controllers_msgs_FOUND)
-  download_pr2_controllers_msgs(hydro-devel)
+  download_pr2_controllers_msgs(hydro-devel) # even for Groovy, download hydro-devel that's wet.
   # catkin_make
   # rosmake pr2_controllers_msgs
-  execute_process(COMMAND cmake -E chdir ${CMAKE_SOURCE_DIR}/../ catkin_make --build /tmp/pr2_controllers --source ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs --pkg pr2_controllers_msgs OUTPUT_VARIABLE _compile_output RESULT_VARIABLE _compile_failed)
+  execute_process(COMMAND cmake -E chdir ${CMAKE_SOURCE_DIR}/../ catkin_make -C ${CMAKE_SOURCE_DIR}/../ --build /tmp/pr2_controllers --source ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs --pkg pr2_controllers_msgs OUTPUT_VARIABLE _compile_output RESULT_VARIABLE _compile_failed)
   message("compile pr2_controllers_msgs ${_compile_output}")
   if (_compile_failed)
     message(FATAL_ERROR "compile pr2_controllers_msgs failed : ${_compile_failed}")
@@ -66,14 +66,14 @@ unset(hrpsys_LIBRARIES CACHE) # remove not to add hrpsys_LIBRARIES to hrpsys_ros
 
 # define add_message_files before rtmbuild_init
 add_message_files(FILES MotorStates.msg)
-
+add_service_files(FILES SetSensorTransformation.srv)
 # initialize rtmbuild
-rtmbuild_init()
+rtmbuild_init(geometry_msgs)
 
 # call catkin_package, after rtmbuild_init, before rtmbuild_gen*
 catkin_package(
     DEPENDS hrpsys # TODO
-    CATKIN_DEPENDS rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure # pr2_controllers_msgs robot_monitor
+    CATKIN_DEPENDS rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure nav_msgs # pr2_controllers_msgs robot_monitor
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO
     CFG_EXTRAS compile_robot_model.cmake
@@ -142,7 +142,9 @@ if(NOT EXISTS ${_OPENHRP3_MODEL_DIR})
 endif()
 
 compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/PA10/pa10.main.wrl)
-compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/sample1.wrl SampleRobot)
+compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/sample1.wrl SampleRobot
+  --conf-dt-option "0.002"
+  --simulation-timestep-option "0.002")
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl" hrpsys_ros_bridge)
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample1.wrl" hrpsys_ros_bridge SampleRobot)
 execute_process(COMMAND sed -i s@pa10\(Robot\)0@HRP1\(Robot\)0@ ${PROJECT_SOURCE_DIR}/launch/pa10.launch)

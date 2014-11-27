@@ -382,6 +382,11 @@ macro(compile_collada_model daefile)
     endif()
     set(_collada2eus_exe ${euscollada_PREFIX}/lib/euscollada/collada2eus)
   endif()
+  if(${USE_ROSBUILD})
+    set(_collada2eus_option "")
+  else()
+    set(_collada2eus_option ROS_PACKAGE_PATH=${euscollada_PACKAGE_PATH}/..:$ENV{ROS_PACKAGE_PATH})
+  endif()
   # use collad_to_urdf
   if(${USE_ROSBUILD})
     rosbuild_find_ros_package(collada_tools)
@@ -413,11 +418,11 @@ macro(compile_collada_model daefile)
   else()
     if(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
-        COMMAND ${_collada2eus_exe} ${daefile} ${_yamlfile} ${_lispfile} ${_euscollada_option} ||  echo "[WARNING] ### Did not run collada2eus for ${_lispfile}"
+        COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${daefile} ${_yamlfile} ${_lispfile} ${_euscollada_option} ||  echo "[WARNING] ### Did not run collada2eus for ${_lispfile}"
         DEPENDS ${daefile} ${_euscollada_dep_files})
     else(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
-        COMMAND ${_collada2eus_exe} ${daefile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus $for {_lispfile}"
+        COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${daefile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus $for {_lispfile}"
         DEPENDS ${daefile} ${_euscollada_dep_files})
     endif(EXISTS ${_yamlfile})
   endif()
@@ -472,7 +477,7 @@ macro(compile_collada_model daefile)
   if(EXISTS ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator)
     set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
   elseif(EXISTS ${hrpsys_PREFIX}/lib/hrpsys/ProjectGenerator)
-    set(_gen_project_dep_files ${hrpsys_PREFIX}/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
+    set(_gen_project_dep_files ${hrpsys_PREFIX}/lib/hrpsys/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
   else()
     # when hrpsys is catkin installed
     set(_gen_project_dep_files)
@@ -564,11 +569,10 @@ macro (generate_default_launch_eusinterface_files wrlfile project_pkg_name)
   # generate files
   set(${_sname}_generated_launch_euslisp_files)
   #   generate hrpsys_config.py to use unstable RTCs
+  set(ROSBRIDGE_ARGS "    <arg name=\"BASE_LINK\" default=\"WAIST_LINK0\" />\n")
   if ("${ARGV3}" STREQUAL "--use-unstable-hrpsys-config")
-    configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_unstable_hrpsys_config.py.in ${PROJECT_SOURCE_DIR}/scripts/${_sname}_unstable_hrpsys_config.py)
-    list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/scripts/${_sname}_unstable_hrpsys_config.py)
-    set(ROSBRIDGE_ARGS "    <arg name=\"USE_WALKING\" default=\"true\" />\n    <arg name=\"USE_IMPEDANCECONTROLLER\" default=\"true\" />")
-    set(STARTUP_ARGS "    <arg name=\"HRPSYS_PY_PKG\" default=\"${PROJECT_PKG_NAME}\" />\n    <arg name=\"HRPSYS_PY_NAME\" default=\"${robot}_unstable_hrpsys_config.py\" />")
+    set(ROSBRIDGE_ARGS "    <arg name=\"USE_WALKING\" default=\"true\" />\n    <arg name=\"USE_IMPEDANCECONTROLLER\" default=\"true\" />${ROSBRIDGE_ARGS}")
+    set(STARTUP_ARGS "    <arg name=\"HRPSYS_PY_ARGS\" default=\"--use-unstable-rtc\" />")
   endif()
   #  generate startup.launch
   configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot_startup.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}_startup.launch)
