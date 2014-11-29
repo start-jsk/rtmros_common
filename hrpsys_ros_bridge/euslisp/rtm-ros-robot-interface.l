@@ -135,7 +135,7 @@
    (send robot :copy-worldcoords))
   (:accel-vector
    ()
-   "Returns acceleration [m/s^2] of the acceleration sensor."
+   "Returns acceleration [m/s2] of the acceleration sensor."
    (let ((acc (send (cdr (assoc :imu robot-state)) :linear_acceleration)))
      (float-vector (send acc :x) (send acc :y) (send acc :z))))
   (:gyro-vector
