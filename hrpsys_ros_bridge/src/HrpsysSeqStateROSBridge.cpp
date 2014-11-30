@@ -37,6 +37,9 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   HrpsysSeqStateROSBridgeImpl(manager), follow_action_initialized(false)
 {
   // ros
+  ros::NodeHandle pnh("~");
+  pnh.param("publish_sensor_transforms", publish_sensor_transforms, true);
+  
   joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
   joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
   follow_joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal, this));
@@ -401,7 +404,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
     joint_state_pub.publish(joint_state);
     // sensors publish
-    {
+    if (publish_sensor_transforms) {
       boost::mutex::scoped_lock lock(sensor_transformation_mutex);
       std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
       while ( its != sensor_info.end() ) {

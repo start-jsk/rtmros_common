@@ -20,6 +20,7 @@
   <arg name="USE_SOFTERRORLIMIT" default="true" />
   <arg name="USE_TORQUEFILTER" default="false" />
   <arg name="USE_IMAGESENSOR" default="false" />
+  <arg name="PUBLISH_SENSOR_TF" default="true" />
   <!--
       roslaunch hrpsys_ros_bridge sample.launch nameserver:=192.168.1.1
   -->
@@ -38,7 +39,9 @@
         pkg  = "hrpsys_ros_bridge"
         type = "HrpsysSeqStateROSBridge"
         args = "$(arg openrtm_args) -o model:$(arg MODEL_FILE) $(arg CONF_FILE_ARG)"
-        output = "$(arg OUTPUT)" />
+        output = "$(arg OUTPUT)">
+    <param name="publish_sensor_tf" value="$(arg PUBLISH_SENSOR_TF)" />
+  </node>
   <node name = "HrpsysJointTrajectoryBridge"
         pkg  = "hrpsys_ros_bridge"
         type = "HrpsysJointTrajectoryBridge"
