@@ -60,7 +60,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   ros::ServiceServer sendmsg_srv;
   ros::ServiceServer set_sensor_transformation_srv;
   bool interpolationp, use_sim_time, use_hrpsys_time;
-
+  bool publish_sensor_transforms;
   tf::TransformBroadcaster br;
 
   coil::Mutex m_mutex;
