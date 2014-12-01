@@ -41,7 +41,7 @@
         type = "HrpsysSeqStateROSBridge"
         args = "$(arg openrtm_args) -o model:$(arg MODEL_FILE) $(arg CONF_FILE_ARG)"
         output = "$(arg OUTPUT)">
-    <param name="publish_sensor_tf" value="$(arg PUBLISH_SENSOR_TF)" />
+    <param name="publish_sensor_transforms" value="$(arg PUBLISH_SENSOR_TF)" />
   </node>
   <node name = "HrpsysJointTrajectoryBridge"
         pkg  = "hrpsys_ros_bridge"
