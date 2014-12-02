@@ -20,6 +20,7 @@
   <arg name="USE_SOFTERRORLIMIT" default="true" />
   <arg name="USE_TORQUEFILTER" default="false" />
   <arg name="USE_IMAGESENSOR" default="false" />
+  <arg name="USE_HRPSYS_PROFILE" default="true" />
   <arg name="PUBLISH_SENSOR_TF" default="true" />
   <!--
       roslaunch hrpsys_ros_bridge sample.launch nameserver:=192.168.1.1
@@ -60,7 +61,8 @@
       <rosparam command="load" file="$(find hrpsys_ros_bridge)/scripts/diagnostics.yaml" />
     </node>
   </group>
-  <node pkg="hrpsys_ros_bridge" name="hrpsys_profile" type="hrpsys_profile.py" args="$(arg omniorb_args)"/>
+  <node pkg="hrpsys_ros_bridge" name="hrpsys_profile" type="hrpsys_profile.py" args="$(arg omniorb_args)"
+        if="$(arg USE_HRPSYS_PROFILE)"/>
 
   <node pkg="hrpsys_ros_bridge" name="sensor_ros_bridge_connect" type="sensor_ros_bridge_connect.py"
         args="$(arg MODEL_FILE) $(arg SIMULATOR_NAME) HrpsysSeqStateROSBridge0 $(arg nameserver) $(arg omniorb_args)" output="$(arg OUTPUT)"/>
