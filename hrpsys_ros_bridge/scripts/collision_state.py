@@ -41,9 +41,9 @@ def rtc_init () :
 
     co = None
     count = 0
-    while co  == None and count < 10:
+    while count < 10 and ( co == None or not co.isActive()) :
         co = rtm.findRTC(rospy.get_param('~comp_name', 'co'))
-        if co :
+        if co and co.isActive() :
             break
         rospy.logwarn("Could not found CollisionDetector, waiting...")
         time.sleep(1)
