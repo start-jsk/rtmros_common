@@ -46,11 +46,18 @@
     (format t "offset-removed force moment (lhsensor) ~A => ~A~%" lfm (< lfm 1e-2))
     (and (< rfm 1e-2) (< lfm 1e-2))))
 
+(defun samplerobot-remove-force-offset-demo3 ()
+  "4. dump and load parameter file"
+  (send *ri* :dump-forcemoment-offset-params "/tmp/test-rmfo" :set-robot-date-string nil)
+  (send *ri* :load-forcemoment-offset-params "/tmp/test-rmfo")
+  )
+
 (defun samplerobot-remove-force-offset-demo ()
   (samplerobot-remove-force-offset-init)
   (samplerobot-remove-force-offset-demo0)
   (samplerobot-remove-force-offset-demo1)
   (samplerobot-remove-force-offset-demo2)
+  (samplerobot-remove-force-offset-demo3)
   )
 
 (warn ";; (samplerobot-remove-force-offset-demo)~%")
