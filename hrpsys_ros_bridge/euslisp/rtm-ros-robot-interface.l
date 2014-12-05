@@ -214,6 +214,14 @@
          (mapcar #'(lambda (x) (send self :moment-vector x)) '(:rleg :lleg))
          :wrt wrt)
    )
+  (:get-robot-date-string
+   ()
+   (let* ((dt (unix:localtime)))
+     (format nil "~A_~A~A~A"
+             (send (send self :robot) :name)
+             (digits-string (+ 1900 (aref dt 5)) 4)
+             (digits-string (1+ (aref dt 4)) 2)
+             (digits-string (aref dt 3) 2))))
   )
 
 ;; define Euslisp setter and getter method
@@ -305,20 +313,11 @@
 ;; DataLoggerService
 (defmethod rtm-ros-robot-interface
   (:save-log
-   (fname &key (set-date-robot-name t))
+   (fname &key (set-robot-date-string t))
    "Save log files as [fname].[component_name]_[dataport_name].
     This method corresponds to DataLogger save().
-    If set-data-robot-name is t, filename includes date string and robot name. By default, set-data-robot-name is t."
-   (let* ((dt (unix:localtime))
-          (additional-string
-           (if set-date-robot-name
-               (format nil "_~A_~A~A~A"
-                       (send (send self :robot) :name)
-                       (digits-string (+ 1900 (aref dt 5)) 4)
-                       (digits-string (1+ (aref dt 4)) 2)
-                       (digits-string (aref dt 3) 2))
-             "")))
-     (send self :dataloggerservice_save :basename (format nil "~A~A" fname additional-string))))
+    If set-robot-date-string is t, filename includes date string and robot name. By default, set-robot-date-string is t."
+   (send self :dataloggerservice_save :basename (format nil "~A~A" fname (if set-robot-date-string (format nil "_~A" (send self :get-robot-date-string)) ""))))
   ;; start log by clearing log
   (:start-log
    ()
@@ -450,6 +449,19 @@
            (with-open-file
             (f fname :direction :input)
             (read f nil nil)))
+   )
+  (:load-forcemoment-offset-params
+   (filename)
+   "Load RMFO offset parameters from parameter file.
+    This method corresponds to RemoveForceSensorLinkOffset loadForceMomentOffsetParams()."
+   (send self :removeforcesensorlinkoffsetservice_loadforcemomentoffsetparams :filename filename)
+   )
+  (:dump-forcemoment-offset-params
+   (filename &key (set-robot-date-string t))
+   "Save all RMFO offset parameters.
+    This method corresponds to RemoveForceSensorLinkOffset dumpForceMomentOffsetParams().
+    If set-robot-date-string is t, filename includes date string and robot name. By default, set-robot-date-string is t."
+   (send self :removeforcesensorlinkoffsetservice_dumpforcemomentoffsetparams :filename (format nil "~A~A" filename (if set-robot-date-string (format nil "_~A" (send self :get-robot-date-string)) "")))
    )
   (:reset-force-moment-offset-arms
    ()
