@@ -54,16 +54,13 @@
       (unix:usleep base-time)
       ;;
       (send *ri* :state)
-      (send robot :angle-vector (send *ri* :potentio-vector))
-      (send robot :newcoords (send *ri* :imucoords))
-      (push (mapcar #'(lambda (x) (list x (send *ri* :force-vector x))) limbs) force-list)
-      (push (mapcar #'(lambda (x) (list x (send *ri* :moment-vector x))) limbs) moment-list)
+      (push (mapcar #'(lambda (x) (send *ri* :force-vector x)) limbs) force-list)
+      (push (mapcar #'(lambda (x) (send *ri* :moment-vector x)) limbs) moment-list)
       (if *viewer* (send (send *viewer* :get :pickviewer) :draw-objects))
       (push
-       (flatten
-        (mapcar #'(lambda (a)
-                    (list a (copy-object (send (car (send robot a :force-sensors)) :worldrot))))
-                limbs))
+       (mapcar #'(lambda (a)
+                   (copy-object (send (car (send (send *ri* :robot) a :force-sensors)) :worldrot)))
+               limbs)
        rot-list)
       )
     (send robot :angle-vector pav)
@@ -71,17 +68,18 @@
     (if *viewer* (send (send *viewer* :get :pickviewer) :draw-objects))
     (let* ((estimated-f-values
             (mapcar #'(lambda (a)
-                        (calc-mass-force-offset-from-forces
-                         (mapcar #'(lambda (x) (cadr (memq a x))) rot-list)
-                         (mapcar #'(lambda (x) (cadr (assoc a x))) force-list)
-                         ))
+                        (let ((idx (position a limbs)))
+                          (calc-mass-force-offset-from-forces
+                           (mapcar #'(lambda (x) (elt x idx)) rot-list)
+                           (mapcar #'(lambda (x) (elt x idx)) force-list))))
                     limbs))
            (estimated-m-values
             (mapcar #'(lambda (a em)
-                        (calc-com-moment-offset-from-moments
-                         (mapcar #'(lambda (x) (cadr (memq a x))) rot-list)
-                         (mapcar #'(lambda (x) (cadr (assoc a x))) moment-list)
-                         (elt em 3)))
+                        (let ((idx (position a limbs)))
+                          (calc-com-moment-offset-from-moments
+                           (mapcar #'(lambda (x) (elt x idx)) rot-list)
+                           (mapcar #'(lambda (x) (elt x idx)) moment-list)
+                           (elt em 3))))
                     limbs estimated-f-values))
            (ret (mapcar #'(lambda (ll ff mm)
                             (list ll
@@ -92,10 +90,18 @@
                         limbs
                         estimated-f-values
                         estimated-m-values)))
+      (format t ";; offset result is~%")
       (mapcar #'(lambda (l)
-                  (format t ";; ~A ~%" l))
+                  (format t ";;   ~A ~%" l))
               ret)
-      (if fname (dump-structure fname ret))
+      (when fname
+        (mapcar #'(lambda (l)
+                    (send* *ri* :set-forcemoment-offset-param
+                           (send (car (send robot (car l) :force-sensors)) :name)
+                           (cdr l)))
+                ret)
+        (format t ";; result file => ~A_[robot name]_[date string] in robot's pc.~%" fname)
+        (send *ri* :dump-forcemoment-offset-params fname))
       ret)))
 
 ;; example
