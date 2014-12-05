@@ -450,6 +450,19 @@
             (f fname :direction :input)
             (read f nil nil)))
    )
+  (:load-forcemoment-offset-params
+   (filename)
+   "Load RMFO offset parameters from parameter file.
+    This method corresponds to RemoveForceSensorLinkOffset loadForceMomentOffsetParams()."
+   (send self :removeforcesensorlinkoffsetservice_loadforcemomentoffsetparams :filename filename)
+   )
+  (:dump-forcemoment-offset-params
+   (filename &key (set-robot-date-string t))
+   "Save all RMFO offset parameters.
+    This method corresponds to RemoveForceSensorLinkOffset dumpForceMomentOffsetParams().
+    If set-robot-date-string is t, filename includes date string and robot name. By default, set-robot-date-string is t."
+   (send self :removeforcesensorlinkoffsetservice_dumpforcemomentoffsetparams :filename (format nil "~A~A" filename (if set-robot-date-string (format nil "_~A" (send self :get-robot-date-string)) "")))
+   )
   (:reset-force-moment-offset-arms
    ()
    (send self :reset-force-moment-offset '(:rarm :larm)))
