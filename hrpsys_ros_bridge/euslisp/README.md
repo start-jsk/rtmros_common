@@ -34,3 +34,27 @@ $ (send *log* :potentio-vector)
 $ (send *log* :force-vector)
           ...
 ```
+
+## calib-force-sensor-params.l
+  [``hrpsys_ros_bridge/euslisp/calib-force-sensor-params.l``] (https://github.com/start-jsk/rtmros_common/blob/master/hrpsys_ros_bridge/euslisp/calib-force-sensor-params.l)
+  is Euslisp program to calibrate RemoveForceSensorOffset RTC parameters. 
+  This program rotates end-links and gathers force sensor values. 
+  Then this program identifies parameters. 
+
+1. Make calibration pose  
+  Make calibration poses, which should include different force sensor orientations.  
+  ``(make-default-ForceCalibPoses *robot*)`` and ``(make-default-ForceCalibPosesLegs *robot*)`` functions are example.  
+  **Please be careful of robot's self collision.**
+
+2. Execute calibration pose, gather sensor values, and identify parameters  
+  Please execute ``(Forcecalib-For-Limbs *robot*)``.  
+  Then the real robot rotates end-links and gathers force sensor values.  
+  After all poses are executed, this program identifies parameters.  
+
+  If ``(Forcecalib-For-Limbs *robot* :fname "/tmp/test-calib")`` are executed, 
+  this program writes calibration results into "/tmp/test-calib-[robot name]-[date]".
+
+  If ``(Forcecalib-For-Limbs *robot* :limbs '(:rleg :lleg) :poses (make-default-ForceCalibPosesLegs *robot*))`` are executed, 
+  you can calibrate legs force sensors.
+  
+  This file can be read from loadForceMomentSensorOffset function, i.e., ``(send *ri* :load-forcemoment-offset-params "xxx")``.
