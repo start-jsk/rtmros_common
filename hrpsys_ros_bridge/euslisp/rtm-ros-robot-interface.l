@@ -21,7 +21,9 @@
                  (ros::subscribe (format nil "/~A" (string-downcase x)) geometry_msgs::WrenchStamped
                                  #'send self :rtmros-force-sensor-callback x :groupname groupname)
                  (ros::subscribe (format nil "/off_~A" (string-downcase x)) geometry_msgs::WrenchStamped
-                                 #'send self :rtmros-force-sensor-callback (read-from-string (format nil ":off-~A" (string-downcase x))) :groupname groupname))
+                                 #'send self :rtmros-force-sensor-callback (read-from-string (format nil ":off-~A" (string-downcase x))) :groupname groupname)
+                 (ros::subscribe (format nil "/ref_~A" (string-downcase x)) geometry_msgs::WrenchStamped
+                                 #'send self :rtmros-force-sensor-callback (read-from-string (format nil ":reference-~A" (string-downcase x))) :groupname groupname))
              (send-all (send robot :force-sensors) :name))
      (ros::subscribe "/zmp" geometry_msgs::PointStamped
                      #'send self :rtmros-zmp-callback :groupname groupname)
@@ -52,19 +54,19 @@
                          (send (send wrc :torque) :y)
                          (send (send wrc :torque) :z)))))
   (:tmp-force-moment-vector-for-limb
-   (f/m fsensor-name &optional (off nil))
-   (let ((key-name (if off
-                       (read-from-string (format nil ":~A-~A" off (string-downcase fsensor-name)))
+   (f/m fsensor-name &optional (topic-name-prefix nil)) ;; topic-name-prefix is "off" or "reference"
+   (let ((key-name (if topic-name-prefix
+                       (read-from-string (format nil ":~A-~A" topic-name-prefix (string-downcase fsensor-name)))
                      fsensor-name)))
      (subseq (cdr (assoc key-name robot-state))
              (if (eq f/m :force) 0 3)
              (if (eq f/m :force) 3 6))))
   (:tmp-force-moment-vector
-   (f/m &optional (limb) (off nil))
+   (f/m &optional (limb) (topic-name-prefix nil)) ;; topic-name-prefix is "off" or "reference"
    (if limb
-       (send self :tmp-force-moment-vector-for-limb f/m (send (car (send robot limb :force-sensors)) :name) off)
+       (send self :tmp-force-moment-vector-for-limb f/m (send (car (send robot limb :force-sensors)) :name) topic-name-prefix)
      (mapcar #'(lambda (x)
-                 (send self :tmp-force-moment-vector-for-limb f/m x off))
+                 (send self :tmp-force-moment-vector-for-limb f/m x topic-name-prefix))
              (send-all (send robot :force-sensors) :name))))
   (:force-vector
    (&optional (limb))
@@ -88,6 +90,18 @@
     This value corresponds to RemoveForceSensorLinkOffset RTC.
     If a limb argument is specified, returns a vector for the limb."
    (send self :tmp-force-moment-vector :moment limb "off"))
+  (:reference-force-vector
+   (&optional (limb))
+   "Returns reference force-vector [N] list for all limbs obtained by :state.
+    This value corresponds to StateHolder and SequencePlayer RTC.
+    If a limb argument is specified, returns a vector for the limb."
+   (send self :tmp-force-moment-vector :force limb "reference"))
+  (:reference-moment-vector
+   (&optional (limb))
+   "Returns reference moment-vector [Nm] list for all limbs obtained by :state.
+    This value corresponds to StateHolder and SequencePlayer RTC.
+    If a limb argument is specified, returns a vector for the limb."
+   (send self :tmp-force-moment-vector :moment limb "reference"))
   (:absolute-force-vector
    (&optional (limb))
    "Returns offset-removed :force-vector [N] list for all limbs in world frame obtained by :state.
