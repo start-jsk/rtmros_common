@@ -15,7 +15,7 @@ import OpenHRP
 
 program_name = '[sensor_ros_bridge_connect.py] '
 
-def connecSensorRosBridgePort(url, rh, bridge, vs, rmfo):
+def connecSensorRosBridgePort(url, rh, bridge, vs, rmfo, sh):
     for sen in hcf.getSensors(url):
         if sen.type in ['Acceleration', 'RateGyro', 'Force']:
             if rh.port(sen.name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
@@ -24,6 +24,9 @@ def connecSensorRosBridgePort(url, rh, bridge, vs, rmfo):
                 if sen.type == 'Force' and rmfo != None:
                     print program_name, "connect ", sen.name, rmfo.port("off_" + sen.name).get_port_profile().name, bridge.port("off_" + sen.name).get_port_profile().name
                     connectPorts(rmfo.port("off_" + sen.name), bridge.port("off_" + sen.name), "new") # for abs forces
+                if sen.type == 'Force' and sh.port(sen.name+"Out") and bridge.port("ref_" + sen.name):
+                    print program_name, "connect ", sen.name, sh.port(sen.name+"Out").get_port_profile().name, bridge.port("ref_" + sen.name).get_port_profile().name
+                    connectPorts(sh.port(sen.name+"Out"), bridge.port("ref_" + sen.name), "new") # for reference forces
         else:
             continue
     if vs != None:
@@ -41,7 +44,8 @@ def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name, managerho
         print program_name, " wait for ", rosbridge_name, " : ",bridge
     vs=rtm.findRTC('vs')
     rmfo=rtm.findRTC('rmfo')
-    connecSensorRosBridgePort(url, hcf.rh, bridge, vs, rmfo)
+    sh=rtm.findRTC('sh')
+    connecSensorRosBridgePort(url, hcf.rh, bridge, vs, rmfo, sh)
 
 if __name__ == '__main__':
     print program_name, "start"
