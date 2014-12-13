@@ -718,11 +718,18 @@
 ;; utility functions for seq
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  ;; dump pattern file for SequencePlayer
-  ;;  rs-list : list of (list :time time0 :angle-vector av :root-coords rc ...)
-  ;;  output-basename : output file (output-basename.pos, ...)
+  ;; 
+  ;;  
+  ;;  
 (defun dump-seq-pattern-file
   (rs-list output-basename &key (initial-sync-time 3.0)) ;; [s]
+  "Dump pattern file for SequencePlayer.
+     rs-list : list of (list :time time0 :angle-vector av :root-coords rc ...).
+               Fields other than :time and :angle-vector are optional.
+     output-basename : output file (output-basename.pos, ...).
+     root-coords : worldcoords for root link.
+     zmp : world zmp[mm].
+     wrench-list : world (list force-list moment-list) at end effector."
   (with-open-file
    (pf (format nil "~A.pos" output-basename) :direction :output) ;; pos file -> joint angles
    (dolist (l rs-list)
