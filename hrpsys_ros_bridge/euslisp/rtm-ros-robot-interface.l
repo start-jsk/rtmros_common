@@ -718,11 +718,18 @@
 ;; utility functions for seq
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  ;; dump pattern file for SequencePlayer
-  ;;  rs-list : list of (list :time time0 :angle-vector av :root-coords rc ...)
-  ;;  output-basename : output file (output-basename.pos, ...)
+  ;; 
+  ;;  
+  ;;  
 (defun dump-seq-pattern-file
   (rs-list output-basename &key (initial-sync-time 3.0)) ;; [s]
+  "Dump pattern file for SequencePlayer.
+     rs-list : list of (list :time time0 :angle-vector av :root-coords rc ...).
+               Fields other than :time and :angle-vector are optional.
+     output-basename : output file (output-basename.pos, ...).
+     root-coords : worldcoords for root link.
+     zmp : world zmp[mm].
+     wrench-list : world (list force-list moment-list) at end effector."
   (with-open-file
    (pf (format nil "~A.pos" output-basename) :direction :output) ;; pos file -> joint angles
    (dolist (l rs-list)
@@ -757,25 +764,42 @@
          (format wf "~%")
          ))) ;; with-open-file for .waist file
     )
-  (when (cadr (memq :zmp (car rs-list)))
+  (when (or (cadr (memq :root-local-zmp (car rs-list)))
+            (and (cadr (memq :root-coords (car rs-list))) (cadr (memq :zmp (car rs-list)))))
     (with-open-file
      (zf (format nil "~A.zmp" output-basename) :direction :output) ;; zmp file -> root-relative zmp[m]
      (dolist (l rs-list)
        ;; write zmp file
        (format zf "~A " (+ initial-sync-time (cadr (memq :time l))))
-       (let ((zp (scale 1e-3 (cadr (memq :zmp l))))) ;; [mm] -> [m]
+       (let ((zp (scale 1e-3
+                        (or (cadr (memq :root-local-zmp l))
+                            (send (cadr (memq :root-coords l)) :inverse-transform-vector (cadr (memq :zmp l))))
+                        ))) ;; [mm] -> [m]
          (format zf "~A ~A ~A " (elt zp 0) (elt zp 1) (elt zp 2))
          (format zf "~%")
          ))) ;; with-open-file for .zmp file
     )
-  (when (cadr (memq :wrenches (car rs-list)))
+  (when (or (cadr (memq :ee-local-wrench-list (car rs-list)))
+            (and (cadr (memq :end-coords-list (car rs-list))) (cadr (memq :wrench-list (car rs-list)))))
     (with-open-file
      (wrf (format nil "~A.wrenches" output-basename) :direction :output) ;; wrench file -> force and moment ;; 6 x force-sensor-num
      (dolist (l rs-list)
        ;; write wrenches file
        (format wrf "~A " (+ initial-sync-time (cadr (memq :time l))))
-       (let ((wr (cadr (memq :wrenches l))))
-         (dotimes (i (length wr)) (format wrf "~A " (elt wr i))))
+       (let ((wrl
+              (or (cadr (memq :ee-local-wrench-list l))
+                  (list
+                   (mapcar #'(lambda (ee ff)
+                               (send ee :inverse-rotate-vector ff))
+                           (cadr (memq :end-coords-list l)) (car (cadr (memq :wrench-list l))))
+                   (mapcar #'(lambda (ee mm)
+                               (send ee :inverse-rotate-vector mm))
+                           (cadr (memq :end-coords-list l)) (cadr (cadr (memq :wrench-list l))))))))
+         (dotimes (j (length (car wrl))) ;; j is limb index
+           (let ((f (elt (car wrl) j)) (m (elt (cadr wrl) j)))
+             (dotimes (i 3) (format wrf "~A " (elt f i))) ;; force
+             (dotimes (i 3) (format wrf "~A " (elt m i))) ;; moment
+             )))
        (format wrf "~%")
        )) ;; with-open-file for .wrenches file
     )
