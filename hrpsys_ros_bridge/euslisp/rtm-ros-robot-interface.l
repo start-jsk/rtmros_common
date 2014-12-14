@@ -718,9 +718,6 @@
 ;; utility functions for seq
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  ;; 
-  ;;  
-  ;;  
 (defun dump-seq-pattern-file
   (rs-list output-basename &key (initial-sync-time 3.0)) ;; [s]
   "Dump pattern file for SequencePlayer.
@@ -804,6 +801,61 @@
        )) ;; with-open-file for .wrenches file
     )
   )
+
+(defun load-from-seq-pattern-file (input-basename)
+  "Load from seq pattern file and generate robot state list."
+  (labels ((data-string-split ;; this function will be replaced by https://github.com/euslisp/EusLisp/issues/16
+            (str separator)
+            (let ((start-idx 0) (ret))
+              (dotimes (i (length str))
+                (when (= (elt str i) (elt separator 0))
+                  (push (subseq str start-idx i) ret)
+                  (setq start-idx (1+ i))))
+              (if (/= start-idx (length str)) (push (subseq str start-idx) ret))
+              (reverse ret)))
+           (data-str->data-list
+            (data-str)
+            (mapcar #'(lambda (x) (read-from-string x))
+                    (remove-if #'(lambda (x) (string= "" x)) (data-string-split data-str " ")))))
+    (let (rs-list)
+      ;; pos file
+      (let ((pln) (posfile (concatenate string input-basename ".pos")))
+        (with-open-file
+         (pf posfile :direction :input)
+         (while (setq pln (read-line pf nil))
+           (let ((dd (data-str->data-list pln)))
+             (push (list :angle-vector (map float-vector #'rad2deg (concatenate float-vector (cdr dd)))
+                         :time (car dd))
+                   rs-list)
+             ))))
+      (setq rs-list (reverse rs-list))
+      ;; waist file
+      (let ((wln) (waistfile (concatenate string input-basename ".waist")) (idx 0))
+        (if (probe-file waistfile)
+            (with-open-file
+             (wf waistfile :direction :input)
+             (while (setq wln (read-line wf nil))
+               (let ((dd (data-str->data-list wln)))
+                 (nconc (elt rs-list idx)
+                        (list :root-coords (make-coords :pos (float-vector (* 1e3 (elt dd 1)) (* 1e3 (elt dd 2)) (* 1e3 (elt dd 3))) ;; [m]->[mm]
+                                                        :rpy (list (elt dd 6) (elt dd 5) (elt dd 4))))) ;; rpy->ypr
+                 (incf idx)
+                 )))))
+      ;; zmp file
+      (let ((zln) (zmpfile (concatenate string input-basename ".zmp")) (idx 0))
+        (if (probe-file zmpfile)
+            (with-open-file
+             (zf zmpfile :direction :input)
+             (while (setq zln (read-line zf nil))
+               (let* ((dd (data-str->data-list zln))
+                      (root-local-zmp (float-vector (* 1e3 (elt dd 1)) (* 1e3 (elt dd 2)) (* 1e3 (elt dd 3))))) ;; [m]->[mm]
+                 (nconc (elt rs-list idx)
+                        (if (cadr (memq :root-coords (elt rs-list idx)))
+                            (list :zmp (send (cadr (memq :root-coords (elt rs-list idx))) :transform-vector root-local-zmp))
+                          (list :root-local-zmp root-local-zmp)))
+                 (incf idx)
+                 )))))
+      rs-list)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility functions for project generator generation
