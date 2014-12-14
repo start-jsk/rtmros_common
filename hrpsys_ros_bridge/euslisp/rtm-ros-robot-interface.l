@@ -800,6 +800,18 @@
        (format wrf "~%")
        )) ;; with-open-file for .wrenches file
     )
+  (when (cadr (memq :optional-data (car rs-list)))
+    (with-open-file
+     (opf (format nil "~A.optionaldata" output-basename) :direction :output) ;; optionaldata file
+     (let ((len (length (cadr (memq :optional-data (car rs-list))))))
+       (dolist (rs rs-list)
+         (let ((dd (cadr (memq :optional-data rs))))
+           (format opf "~A " (+ initial-sync-time (cadr (memq :time rs))))
+           (dotimes (i len) (format opf "~A " (elt dd i))))
+         (format opf "~%")
+         )
+       )) ;; with-open-file for .optionaldata
+    )
   )
 
 (defun load-from-seq-pattern-file (input-basename)
