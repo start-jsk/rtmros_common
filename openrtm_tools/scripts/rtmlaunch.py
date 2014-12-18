@@ -51,8 +51,18 @@ def check_connect(src_path, dest_path):
                 return True
     return False
 
-def rtconnect(nameserver, tags):
+def replace_arg_tag_by_env (input_path):
     import re
+    ret_str = input_path
+    if len(input_path.split("$(arg")) > 1:
+        arg_str = input_path.split("$(arg")[1].split(")")[0]
+        env_str = os.getenv(arg_str.replace(" ", ""))
+        if env_str != None:
+            # print >>sys.stderr, "[rtmlaunch] Replace arg tag in %s from [$(arg%s)] to [%s]"%(input_path, arg_str, env_str)
+            ret_str = re.sub("\$\(arg"+arg_str+"\)",env_str,input_path)
+    return ret_str
+
+def rtconnect(nameserver, tags):
     for tag in tags:
 
         # check if/unless attribute in rtconnect tags
@@ -70,8 +80,8 @@ def rtconnect(nameserver, tags):
 
         source_path = nameserver+"/"+tag.attributes.get("from").value
         dest_path   = nameserver+"/"+tag.attributes.get("to").value
-        source_path = re.sub("\$\(arg SIMULATOR_NAME\)",simulator,source_path);
-        dest_path = re.sub("\$\(arg SIMULATOR_NAME\)",simulator,dest_path);
+        source_path = replace_arg_tag_by_env(source_path)
+        dest_path = replace_arg_tag_by_env(dest_path)
         # print >>sys.stderr, "[rtmlaunch] Connecting from %s to %s"%(source_path,dest_path)
         source_full_path = path.cmd_path_to_full_path(source_path)
         dest_full_path = path.cmd_path_to_full_path(dest_path)
@@ -148,6 +158,7 @@ def rtactivate(nameserver, tags):
 
         cmd_path  = nameserver+"/"+tag.attributes.get("component").value
         full_path = path.cmd_path_to_full_path(cmd_path)
+        full_path = replace_arg_tag_by_env(full_path)
         # print >>sys.stderr, "[rtmlaunch] activate %s"%(full_path)
         try:
             state = wait_component(full_path)
@@ -170,7 +181,6 @@ def rtactivate(nameserver, tags):
     return 0
 
 def main():
-    global simulator
     usage = '''Usage: %prog [launchfile]'''
     if len(sys.argv) <= 1:
         print >>sys.stderr, usage
@@ -207,9 +217,8 @@ def main():
     else:
         nameserver = os.getenv("RTCTREE_NAMESERVERS")
 
-    simulator = os.getenv("SIMULATOR_NAME","Simulator")
     print >>sys.stderr, "[rtmlaunch] RTCTREE_NAMESERVERS", nameserver,  os.getenv("RTCTREE_NAMESERVERS")
-    print >>sys.stderr, "[rtmlaunch] SIMULATOR_NAME", simulator
+    print >>sys.stderr, "[rtmlaunch] SIMULATOR_NAME", os.getenv("SIMULATOR_NAME","Simulator")
     while 1:
         print >>sys.stderr, "[rtmlaunch] check connection/activation"
         rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
