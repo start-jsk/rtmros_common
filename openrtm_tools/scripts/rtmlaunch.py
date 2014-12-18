@@ -58,7 +58,7 @@ def replace_arg_tag_by_env (input_path):
         arg_str = input_path.split("$(arg")[1].split(")")[0]
         env_str = os.getenv(arg_str.replace(" ", ""))
         if env_str != None:
-            print >>sys.stderr, "[rtmlaunch] Replace arg tag in %s from [$(arg%s)] to [%s]"%(input_path, arg_str, env_str)
+            # print >>sys.stderr, "[rtmlaunch] Replace arg tag in %s from [$(arg%s)] to [%s]"%(input_path, arg_str, env_str)
             ret_str = re.sub("\$\(arg"+arg_str+"\)",env_str,input_path)
     return ret_str
 
