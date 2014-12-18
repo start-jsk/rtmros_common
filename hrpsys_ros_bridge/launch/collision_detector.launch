@@ -12,6 +12,7 @@
   <arg name="CONF_FILE" />
   <arg name="COLLISIONDETECTOR_INSTANCE_NAME" default="CollisionDetector0" />
   <env name="COLLISIONDETECTOR_INSTANCE_NAME" value="$(arg COLLISIONDETECTOR_INSTANCE_NAME)" />
+  <arg name="RUN_COLLISION_STATE" default="true" />
 
   <!-- launch collision detector -->
   <node pkg="hrpsys" name="CollisionDetectorComp"
@@ -25,7 +26,7 @@
 
   <!-- launch collision result publisher -->
   <node pkg="hrpsys_ros_bridge" name="collision_state" type="collision_state.py"
-        output="screen"
+        output="screen" if="$(arg RUN_COLLISION_STATE)"
         args="$(arg MODEL_FILE) $(arg omniorb_args)" >
     <param name="comp_name" type="string" value="$(arg COLLISIONDETECTOR_INSTANCE_NAME)" />
   </node>
