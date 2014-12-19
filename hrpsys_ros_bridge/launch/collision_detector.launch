@@ -10,7 +10,8 @@
   <arg name="openrtm_args" default='-o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type:PeriodicExecutionContext" -o "exec_cxt.periodic.rate:2000" -o "logger.file_name:/tmp/collision_detector%p.log"' />
   <arg name="MODEL_FILE" default="/opt/jsk/etc/HIRONX/model/main.wrl" />
   <arg name="CONF_FILE" />
-  <arg name="COLLISIONDETECTOR_INSTANCE_NAME" default="CollisionDetector0" />
+  <!-- <arg name="COLLISIONDETECTOR_INSTANCE_NAME" default="CollisionDetector0" /> -->
+  <arg name="COLLISIONDETECTOR_INSTANCE_NAME" default="co" />
   <env name="COLLISIONDETECTOR_INSTANCE_NAME" value="$(arg COLLISIONDETECTOR_INSTANCE_NAME)" />
   <arg name="RUN_COLLISION_STATE" default="true" />
 
