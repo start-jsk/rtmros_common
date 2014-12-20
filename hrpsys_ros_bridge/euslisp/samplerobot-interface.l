@@ -59,9 +59,9 @@
      (cons :joint-names (list "RARM_WRIST_R")))))
   )
 
-(defun samplerobot-init ()
+(defun samplerobot-init (&rest args)
   (if (not (boundp '*ri*))
-      (setq *ri* (instance samplerobot-interface :init)))
+      (setq *ri* (instance* samplerobot-interface :init args)))
   (if (not (boundp '*sr*))
       (setq *sr* (instance samplerobot-robot :init)))
   )
