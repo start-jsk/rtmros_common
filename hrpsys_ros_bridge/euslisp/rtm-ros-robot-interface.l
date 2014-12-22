@@ -308,6 +308,51 @@
   (send *ri* :set-jointangles-of-group "larm" (scale (/ pi 180.0) (send *robot* :larm :angle-vector)) 4.0)
   (send *ri* :waitinterpolation-of-group "larm")
 |#
+  (:set-ref-forces-moments
+   (force-list moment-list tm)
+   "Set reference wrenches. wrench-list is list of wrench ([N],[Nm]) for all end-effectors. tm is interpolation time [ms]."
+   (send self :sequenceplayerservice_setwrenches :wrenches (apply #'concatenate float-vector (mapcan #'(lambda (f m) (list f m)) force-list moment-list)) :tm (* 1e-3 tm)) ;; [ms]->[s]
+   )
+  (:set-ref-forces
+   (force-list tm &key (update-robot-state t))
+   "Set reference forces. force-list is list of force ([N]) for all end-effectors. tm is interpolation time [ms]."
+   (if update-robot-state (send self :state))
+   (send self :set-ref-forces-moments force-list (send self :reference-moment-vector) tm)
+   )
+  (:set-ref-moments
+   (moment-list tm &key (update-robot-state t))
+   "Set reference moments. moment-list is list of moment ([Nm]) for all end-effectors. tm is interpolation time [ms]."
+   (if update-robot-state (send self :state))
+   (send self :set-ref-forces-moments (send self :reference-force-vector) moment-list tm)
+   )
+  (:set-ref-force
+   (force tm &optional (limb :arms) &key (update-robot-state t))
+   (if update-robot-state (send self :state))
+   (let ((limbs (case limb
+                      (:arms (list :rarm :larm))
+                      (:legs (list :rleg :lleg))
+                      (t (list limb)))))
+     (send self :set-ref-forces
+           (mapcar #'(lambda (fs rfv)
+                       (if (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors)))) limbs)
+                           force rfv))
+                   (send robot :force-sensors) (send self :reference-force-vector))
+           tm)
+     ))
+  (:set-ref-moment
+   (moment tm &optional (limb :arms) &key (update-robot-state t))
+   (if update-robot-state (send self :state))
+   (let ((limbs (case limb
+                      (:arms (list :rarm :larm))
+                      (:legs (list :rleg :lleg))
+                      (t (list limb)))))
+     (send self :set-ref-moments
+           (mapcar #'(lambda (fs rfv)
+                       (if (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors)))) limbs)
+                           moment rfv))
+                   (send robot :force-sensors) (send self :reference-moment-vector))
+           tm)
+     ))
   )
 
 ;; CollisionDetectorService
@@ -410,14 +455,6 @@
             limb nil nil args))
     ((eq limb :legs) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rleg :lleg)))
     ((eq limb :arms) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rarm :larm)))
-    ((car (send robot limb :force-sensors))
-     (let ((fs (car (send robot limb :force-sensors)))
-           (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
-       (apply method-func
-              (string-downcase (send fs :name))
-              (if base-name base-name "")
-              (send (send (send fs :parent) :joint) :name)
-              args)))
     ((and (substringp ":v" (format nil "~A" limb))
           (find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
      (let ((rlimb (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
@@ -425,6 +462,14 @@
               (format nil "v~C~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor")))
               (send (send (send (send robot rlimb :root-link) :parent) :joint) :name)
               (send (send (send (send robot rlimb :end-coords) :parent) :joint) :name)
+              args)))
+    ((car (send robot limb :force-sensors))
+     (let ((fs (car (send robot limb :force-sensors)))
+           (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
+       (apply method-func
+              (string-downcase (send fs :name))
+              (if base-name base-name "")
+              (send (send (send fs :parent) :joint) :name)
               args)))
     (t ) ;; virtual force sensor is not supported in this file
     ))
