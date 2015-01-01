@@ -9,6 +9,7 @@
     <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
     <arg name="MODEL_FILE" value="@MODEL_FILE@" />
     <arg name="COLLADA_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.dae" />
+    <arg name="CONF_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.conf" />
     <arg name="corbaport" default="$(arg corbaport)" />
 @ROSBRIDGE_ARGS@
   </include>

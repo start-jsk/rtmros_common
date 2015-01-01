@@ -1,8 +1,8 @@
 <launch>
   <arg name="MODEL_FILE" />
   <arg name="COLLADA_FILE" />
+  <arg name="CONF_FILE" default="" />
   <arg name="BASE_LINK" default="BODY" />
-  <arg name="CONF_FILE_ARG" default="" />
   <arg name="SIMULATOR_NAME" default="RobotHardware0"/> <!-- please set $(arg ROBOT_NAME)(Robot) for simulation -->
   <arg name="INSTALL_ROBOT_DESCRIPTION" default="true" />
 
@@ -39,7 +39,7 @@
   <node name = "HrpsysSeqStateROSBridge"
         pkg  = "hrpsys_ros_bridge"
         type = "HrpsysSeqStateROSBridge"
-        args = "$(arg openrtm_args) -o model:$(arg MODEL_FILE) $(arg CONF_FILE_ARG)"
+        args = '$(arg openrtm_args) -o model:$(arg MODEL_FILE) -o example.HrpsysSeqStateROSBridge.config_file:$(arg CONF_FILE)'
         output = "$(arg OUTPUT)">
     <param name="publish_sensor_transforms" value="$(arg PUBLISH_SENSOR_TF)" />
   </node>
