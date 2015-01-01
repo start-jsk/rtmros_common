@@ -33,6 +33,8 @@ def connecSensorRosBridgePort(url, rh, bridge, vs, rmfo, sh):
         for vfp in filter(lambda x : str.find(x, 'v') >= 0 and str.find(x, 'sensor') >= 0, vs.ports.keys()):
             print program_name, "connect ", vfp, vs.port(vfp).get_port_profile().name, bridge.port(vfp).get_port_profile().name
             connectPorts(vs.port(vfp), bridge.port(vfp), "new")
+            print program_name, "connect ", vfp, sh.port(vfp+"Out").get_port_profile().name, bridge.port("ref_"+vfp).get_port_profile().name
+            connectPorts(sh.port(vfp+"Out"), bridge.port("ref_" + vfp), "new") # for reference forces
 
 def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name, managerhost):
     hcf.waitForModelLoader()
