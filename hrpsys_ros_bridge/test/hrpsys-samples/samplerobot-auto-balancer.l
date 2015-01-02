@@ -91,12 +91,35 @@
   )
 
 (defun samplerobot-auto-balancer-demo5 ()
+  "6. start stop check"
+  (send *ri* :set-auto-balancer-param :default-zmp-offsets (list (float-vector -50 50 0) (float-vector -50 50 0)))
+  (dolist (pose *pose-list*)
+    (send *sr* :angle-vector pose)
+    (send *ri* :angle-vector (send *sr* :angle-vector) 1000)
+    (send *ri* :wait-interpolation)
+    (send *ri* :start-auto-balancer)
+    (send *ri* :stop-auto-balancer)
+    )
+  (send *ri* :set-auto-balancer-param :default-zmp-offsets (list (float-vector 0 0 0) (float-vector 0 0 0)))
+  )
+
+(defun samplerobot-auto-balancer-demo6 ()
+  "7. balance against hand force"
+  (send *ri* :start-auto-balancer)
+  (send *ri* :set-ref-force (float-vector 0 0 -50) 1000 :rarm)
+  (send *ri* :wait-interpolation-seq)
+  (send *ri* :set-ref-force (float-vector 0 0 0) 1000 :rarm)
+  (send *ri* :wait-interpolation-seq)
+  (send *ri* :stop-auto-balancer)
+  )
+
+(defun samplerobot-auto-balancer-demo7 ()
   "1. goPos"
   (send *ri* :go-pos 0.1 0.05 20)
   (print "goPos()=>OK")
   t)
 
-(defun samplerobot-auto-balancer-demo6 ()
+(defun samplerobot-auto-balancer-demo8 ()
   "2. goVelocity and goStop"
   (send *ri* :go-velocity -0.1 -0.05 -20)
   (unix:sleep 1)
@@ -104,7 +127,7 @@
   (print "goVelocity()=>OK")
   t)
 
-(defun samplerobot-auto-balancer-demo7 ()
+(defun samplerobot-auto-balancer-demo9 ()
   "3. setFootSteps"
   (send *ri* :set-foot-steps
         (list (make-coords :pos (float-vector 0 -90 0) :name :rleg)
@@ -119,7 +142,7 @@
   (print "setFootSteps()=>OK")
   t)
 
-(defun samplerobot-auto-balancer-demo8 ()
+(defun samplerobot-auto-balancer-demo10 ()
   "4. change base height, base rot x, base rot y, and upper body while walking"
   (send *ri* :start-auto-balancer)
   (send *ri* :go-velocity 0 0 0)
@@ -128,13 +151,13 @@
   (send *ri* :stop-auto-balancer)
   t)
 
-(defun samplerobot-auto-balancer-demo9 ()
+(defun samplerobot-auto-balancer-demo11 ()
   "5. getGaitGeneratorParam"
   (pprint (send (send *ri* :get-gait-generator-param) :slots))
   (print "getGaitGeneratorParam() => OK")
   t)
 
-(defun samplerobot-auto-balancer-demo10 ()
+(defun samplerobot-auto-balancer-demo12 ()
   "6. setGaitGeneratorParam"
   (let ((org-gp (send *ri* :get-gait-generator-param))
         (default-step-time 0.7)
@@ -163,7 +186,7 @@
           )
     t))
 
-(defun samplerobot-auto-balancer-demo11 ()
+(defun samplerobot-auto-balancer-demo13 ()
   "7. non-default stride"
   (send *ri* :start-auto-balancer)
   (send *ri* :set-foot-steps
@@ -187,15 +210,17 @@
   (samplerobot-auto-balancer-demo2)
   (samplerobot-auto-balancer-demo3)
   (samplerobot-auto-balancer-demo4)
-
-  ;; sample for walk pattern generation by AutoBalancer RTC
   (samplerobot-auto-balancer-demo5)
   (samplerobot-auto-balancer-demo6)
+
+  ;; sample for walk pattern generation by AutoBalancer RTC
   (samplerobot-auto-balancer-demo7)
   (samplerobot-auto-balancer-demo8)
   (samplerobot-auto-balancer-demo9)
   (samplerobot-auto-balancer-demo10)
   (samplerobot-auto-balancer-demo11)
+  (samplerobot-auto-balancer-demo12)
+  (samplerobot-auto-balancer-demo13)
   )
 
 (warn ";; (samplerobot-auto-balancer-demo)~%")

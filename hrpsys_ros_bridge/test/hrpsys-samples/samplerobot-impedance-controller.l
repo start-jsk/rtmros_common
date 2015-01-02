@@ -28,14 +28,14 @@
 
 (defun samplerobot-impedance-controller-demo2 ()
   "3. set ref force and moment"
-  (send *ri* :set-impedance-controller-param :rarm :ref-force #f(10 10 -10))
-  (unix:sleep 2)
-  (send *ri* :set-impedance-controller-param :rarm :ref-force #f(0 0 0))
-  (unix:sleep 2)
-  (send *ri* :set-impedance-controller-param :rarm :ref-moment #f(0.2 0.2 -0.5))
-  (unix:sleep 2)
-  (send *ri* :set-impedance-controller-param :rarm :ref-moment #f(0 0 0))
-  (unix:sleep 2)
+  (send *ri* :set-ref-force (float-vector 10 10 -10) 2000 :rarm)
+  (send *ri* :wait-interpolation-seq)
+  (send *ri* :set-ref-force (float-vector 0 0 0) 2000 :rarm)
+  (send *ri* :wait-interpolation-seq)
+  (send *ri* :set-ref-moment (float-vector 0.2 0.2 -0.5) 2000 :rarm)
+  (send *ri* :wait-interpolation-seq)
+  (send *ri* :set-ref-moment (float-vector 0 0 0) 2000 :rarm)
+  (send *ri* :wait-interpolation-seq)
   t)
 
 (defun samplerobot-impedance-controller-demo3 ()
