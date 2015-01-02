@@ -303,6 +303,7 @@
    (groupname av tm)
    (send self :sequenceplayerservice_setjointanglesofgroup :gname groupname :jvs av :tm tm))
   (:load-pattern (basename &optional (tm 0.0)) (send self :sequenceplayerservice_loadpattern :basename basename :tm tm))
+  (:wait-interpolation-seq () (send self :sequenceplayerservice_waitinterpolation))
 #| ;; angle group sample
   (send *ri* :add-joint-group "larm" (send-all (send *robot* :larm :joint-list) :name))
   (send *ri* :set-jointangles-of-group "larm" (scale (/ pi 180.0) (send *robot* :larm :angle-vector)) 4.0)
@@ -367,6 +368,10 @@
   (:stop-collision-detection
    ()
    (send self :collisiondetectorservice_disablecollisiondetection))
+  (:get-collision-status
+   ()
+   (send (send self :collisiondetectorservice_getcollisionstatus) :cs)
+   )
   )
 
 ;; DataLoggerService
