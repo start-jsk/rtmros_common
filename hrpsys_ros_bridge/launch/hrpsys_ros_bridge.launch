@@ -1,8 +1,8 @@
 <launch>
   <arg name="MODEL_FILE" />
   <arg name="COLLADA_FILE" />
+  <arg name="CONF_FILE" default="" />
   <arg name="BASE_LINK" default="BODY" />
-  <arg name="CONF_FILE_ARG" default="" />
   <arg name="SIMULATOR_NAME" default="RobotHardware0"/> <!-- please set $(arg ROBOT_NAME)(Robot) for simulation -->
   <arg name="INSTALL_ROBOT_DESCRIPTION" default="true" />
 
@@ -20,6 +20,8 @@
   <arg name="USE_SOFTERRORLIMIT" default="true" />
   <arg name="USE_TORQUEFILTER" default="false" />
   <arg name="USE_IMAGESENSOR" default="false" />
+  <arg name="USE_HRPSYS_PROFILE" default="true" />
+  <arg name="PUBLISH_SENSOR_TF" default="true" />
   <!--
       roslaunch hrpsys_ros_bridge sample.launch nameserver:=192.168.1.1
   -->
@@ -37,8 +39,10 @@
   <node name = "HrpsysSeqStateROSBridge"
         pkg  = "hrpsys_ros_bridge"
         type = "HrpsysSeqStateROSBridge"
-        args = "$(arg openrtm_args) -o model:$(arg MODEL_FILE) $(arg CONF_FILE_ARG)"
-        output = "$(arg OUTPUT)" />
+        args = '$(arg openrtm_args) -o model:$(arg MODEL_FILE) -o example.HrpsysSeqStateROSBridge.config_file:$(arg CONF_FILE)'
+        output = "$(arg OUTPUT)">
+    <param name="publish_sensor_transforms" value="$(arg PUBLISH_SENSOR_TF)" />
+  </node>
   <node name = "HrpsysJointTrajectoryBridge"
         pkg  = "hrpsys_ros_bridge"
         type = "HrpsysJointTrajectoryBridge"
@@ -57,7 +61,8 @@
       <rosparam command="load" file="$(find hrpsys_ros_bridge)/scripts/diagnostics.yaml" />
     </node>
   </group>
-  <node pkg="hrpsys_ros_bridge" name="hrpsys_profile" type="hrpsys_profile.py" args="$(arg omniorb_args)"/>
+  <node pkg="hrpsys_ros_bridge" name="hrpsys_profile" type="hrpsys_profile.py" args="$(arg omniorb_args)"
+        if="$(arg USE_HRPSYS_PROFILE)"/>
 
   <node pkg="hrpsys_ros_bridge" name="sensor_ros_bridge_connect" type="sensor_ros_bridge_connect.py"
         args="$(arg MODEL_FILE) $(arg SIMULATOR_NAME) HrpsysSeqStateROSBridge0 $(arg nameserver) $(arg omniorb_args)" output="$(arg OUTPUT)"/>

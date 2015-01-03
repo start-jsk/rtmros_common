@@ -21,7 +21,9 @@
                  (ros::subscribe (format nil "/~A" (string-downcase x)) geometry_msgs::WrenchStamped
                                  #'send self :rtmros-force-sensor-callback x :groupname groupname)
                  (ros::subscribe (format nil "/off_~A" (string-downcase x)) geometry_msgs::WrenchStamped
-                                 #'send self :rtmros-force-sensor-callback (read-from-string (format nil ":off-~A" (string-downcase x))) :groupname groupname))
+                                 #'send self :rtmros-force-sensor-callback (read-from-string (format nil ":off-~A" (string-downcase x))) :groupname groupname)
+                 (ros::subscribe (format nil "/ref_~A" (string-downcase x)) geometry_msgs::WrenchStamped
+                                 #'send self :rtmros-force-sensor-callback (read-from-string (format nil ":reference-~A" (string-downcase x))) :groupname groupname))
              (send-all (send robot :force-sensors) :name))
      (ros::subscribe "/zmp" geometry_msgs::PointStamped
                      #'send self :rtmros-zmp-callback :groupname groupname)
@@ -52,19 +54,19 @@
                          (send (send wrc :torque) :y)
                          (send (send wrc :torque) :z)))))
   (:tmp-force-moment-vector-for-limb
-   (f/m fsensor-name &optional (off nil))
-   (let ((key-name (if off
-                       (read-from-string (format nil ":~A-~A" off (string-downcase fsensor-name)))
+   (f/m fsensor-name &optional (topic-name-prefix nil)) ;; topic-name-prefix is "off" or "reference"
+   (let ((key-name (if topic-name-prefix
+                       (read-from-string (format nil ":~A-~A" topic-name-prefix (string-downcase fsensor-name)))
                      fsensor-name)))
      (subseq (cdr (assoc key-name robot-state))
              (if (eq f/m :force) 0 3)
              (if (eq f/m :force) 3 6))))
   (:tmp-force-moment-vector
-   (f/m &optional (limb) (off nil))
+   (f/m &optional (limb) (topic-name-prefix nil)) ;; topic-name-prefix is "off" or "reference"
    (if limb
-       (send self :tmp-force-moment-vector-for-limb f/m (send (car (send robot limb :force-sensors)) :name) off)
+       (send self :tmp-force-moment-vector-for-limb f/m (send (car (send robot limb :force-sensors)) :name) topic-name-prefix)
      (mapcar #'(lambda (x)
-                 (send self :tmp-force-moment-vector-for-limb f/m x off))
+                 (send self :tmp-force-moment-vector-for-limb f/m x topic-name-prefix))
              (send-all (send robot :force-sensors) :name))))
   (:force-vector
    (&optional (limb))
@@ -88,6 +90,18 @@
     This value corresponds to RemoveForceSensorLinkOffset RTC.
     If a limb argument is specified, returns a vector for the limb."
    (send self :tmp-force-moment-vector :moment limb "off"))
+  (:reference-force-vector
+   (&optional (limb))
+   "Returns reference force-vector [N] list for all limbs obtained by :state.
+    This value corresponds to StateHolder and SequencePlayer RTC.
+    If a limb argument is specified, returns a vector for the limb."
+   (send self :tmp-force-moment-vector :force limb "reference"))
+  (:reference-moment-vector
+   (&optional (limb))
+   "Returns reference moment-vector [Nm] list for all limbs obtained by :state.
+    This value corresponds to StateHolder and SequencePlayer RTC.
+    If a limb argument is specified, returns a vector for the limb."
+   (send self :tmp-force-moment-vector :moment limb "reference"))
   (:absolute-force-vector
    (&optional (limb))
    "Returns offset-removed :force-vector [N] list for all limbs in world frame obtained by :state.
@@ -135,7 +149,7 @@
    (send robot :copy-worldcoords))
   (:accel-vector
    ()
-   "Returns acceleration [m/s^2] of the acceleration sensor."
+   "Returns acceleration [m/s2] of the acceleration sensor."
    (let ((acc (send (cdr (assoc :imu robot-state)) :linear_acceleration)))
      (float-vector (send acc :x) (send acc :y) (send acc :z))))
   (:gyro-vector
@@ -191,35 +205,16 @@
            )
           )
        )))
-  ;;
-  (:sendmsg
-   (strs &optional (service-name "sendmsg"))
-   (ros::service-call
-    service-name
-    (let ((req (instance dynamic_reconfigure::ReconfigureRequest :init)))
-      (send (send req :config) :strs
-	    (mapcar #'(lambda (str)
-			(instance dynamic_reconfigure::StrParameter :init :name service-name :value str))
-		    strs))
-      req)))
-  (:set-interpolation-mode (mode) (send self :sendmsg (list "setInterpolationMode" (format nil "~A" mode))))
-  ;; just for seq debug
-  (:wait-interpolation-for-seq-debug () (send self :sendmsg (list "waitInterpolation" "")))
-  (:angle-vector-for-seq-debug
-   (v tm)
-   (send self :sendmsg
-	 (list "setJointAngles"
-	       (let ((str""))
-		 (dotimes (i (length v)) (setq str (format nil "~A ~A" str (deg2rad (elt v i)))))
-		 (format nil "~A ~A" str (* 1e-3 tm))))))
-  ;; dump pattern file for SequencePlayer
-  ;;  rs-list : list of (list :time time0 :angle-vector av :root-coords rc ...)
-  ;;  output-basename : output file (output-basename.pos, ...)
-  (:dump-seq-pattern-file
-   (rs-list output-basename &key (initial-sync-time 3.0)) ;; [s]
-   (warn ";; :dump-seq-pattern-file is deprecated!! Please use (dump-seq-pattern-file) funciton!!~%")
-   (dump-seq-pattern-file rs-list output-basename :initial-sync-time initial-sync-time)
-   )
+  (:set-interpolation-mode
+   (interpolation-mode)
+   "Set interpolation mode for SequencePlayer."
+   (if (integerp interpolation-mode)
+       interpolation-mode
+     (let ((im (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_SEQUENCEPLAYERSERVICE_INTERPOLATIONMODE::*~A*" (string-downcase interpolation-mode)))))
+       (if (boundp im)
+           (send self :sequenceplayerservice_setinterpolationmode :i_mode_ (eval im))
+         (error ";; no such interpolation-mode ~A in :set-interpolation-mode~%" interpolation-mode)))
+     ))
   ;;
   ;; Calculate zmp from state [mm]
   ;; example ;; (progn (send *ri* :go-velocity 0 0 0) (objects (list (*ri* . robot))) (do-until-key (let ((zmp (send *ri* :calc-zmp-from-state))) (send *irtviewer* :draw-objects :flush nil) (send zmp :draw-on :flush t :size 300))))
@@ -233,6 +228,14 @@
          (mapcar #'(lambda (x) (send self :moment-vector x)) '(:rleg :lleg))
          :wrt wrt)
    )
+  (:get-robot-date-string
+   ()
+   (let* ((dt (unix:localtime)))
+     (format nil "~A_~A~A~A"
+             (send (send self :robot) :name)
+             (digits-string (+ 1900 (aref dt 5)) 4)
+             (digits-string (1+ (aref dt 4)) 2)
+             (digits-string (aref dt 3) 2))))
   )
 
 ;; define Euslisp setter and getter method
@@ -300,11 +303,57 @@
    (groupname av tm)
    (send self :sequenceplayerservice_setjointanglesofgroup :gname groupname :jvs av :tm tm))
   (:load-pattern (basename &optional (tm 0.0)) (send self :sequenceplayerservice_loadpattern :basename basename :tm tm))
+  (:wait-interpolation-seq () (send self :sequenceplayerservice_waitinterpolation))
 #| ;; angle group sample
   (send *ri* :add-joint-group "larm" (send-all (send *robot* :larm :joint-list) :name))
   (send *ri* :set-jointangles-of-group "larm" (scale (/ pi 180.0) (send *robot* :larm :angle-vector)) 4.0)
   (send *ri* :waitinterpolation-of-group "larm")
 |#
+  (:set-ref-forces-moments
+   (force-list moment-list tm)
+   "Set reference wrenches. wrench-list is list of wrench ([N],[Nm]) for all end-effectors. tm is interpolation time [ms]."
+   (send self :sequenceplayerservice_setwrenches :wrenches (apply #'concatenate float-vector (mapcan #'(lambda (f m) (list f m)) force-list moment-list)) :tm (* 1e-3 tm)) ;; [ms]->[s]
+   )
+  (:set-ref-forces
+   (force-list tm &key (update-robot-state t))
+   "Set reference forces. force-list is list of force ([N]) for all end-effectors. tm is interpolation time [ms]."
+   (if update-robot-state (send self :state))
+   (send self :set-ref-forces-moments force-list (send self :reference-moment-vector) tm)
+   )
+  (:set-ref-moments
+   (moment-list tm &key (update-robot-state t))
+   "Set reference moments. moment-list is list of moment ([Nm]) for all end-effectors. tm is interpolation time [ms]."
+   (if update-robot-state (send self :state))
+   (send self :set-ref-forces-moments (send self :reference-force-vector) moment-list tm)
+   )
+  (:set-ref-force
+   (force tm &optional (limb :arms) &key (update-robot-state t))
+   (if update-robot-state (send self :state))
+   (let ((limbs (case limb
+                      (:arms (list :rarm :larm))
+                      (:legs (list :rleg :lleg))
+                      (t (list limb)))))
+     (send self :set-ref-forces
+           (mapcar #'(lambda (fs rfv)
+                       (if (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors)))) limbs)
+                           force rfv))
+                   (send robot :force-sensors) (send self :reference-force-vector))
+           tm)
+     ))
+  (:set-ref-moment
+   (moment tm &optional (limb :arms) &key (update-robot-state t))
+   (if update-robot-state (send self :state))
+   (let ((limbs (case limb
+                      (:arms (list :rarm :larm))
+                      (:legs (list :rleg :lleg))
+                      (t (list limb)))))
+     (send self :set-ref-moments
+           (mapcar #'(lambda (fs rfv)
+                       (if (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors)))) limbs)
+                           moment rfv))
+                   (send robot :force-sensors) (send self :reference-moment-vector))
+           tm)
+     ))
   )
 
 ;; CollisionDetectorService
@@ -319,23 +368,20 @@
   (:stop-collision-detection
    ()
    (send self :collisiondetectorservice_disablecollisiondetection))
-  ;; deprecated
-  (:enableCollisionDetection
+  (:get-collision-status
    ()
-   (warning-message 1 ";; :enableCollisionDetection is deprecated!! Please use :start-collision-detection!!~%")
-   (send self :start-collision-detection))
-  (:disableCollisionDetection ()
-   (warning-message 1 ";; :disableCollisionDetection is deprecated!! Please use :stop-collision-detection!!~%")
-   (send self :stop-collision-detection))
+   (send (send self :collisiondetectorservice_getcollisionstatus) :cs)
+   )
   )
 
 ;; DataLoggerService
 (defmethod rtm-ros-robot-interface
   (:save-log
-   (fname)
+   (fname &key (set-robot-date-string t))
    "Save log files as [fname].[component_name]_[dataport_name].
-    This method corresponds to DataLogger save()."
-   (send self :dataloggerservice_save :basename fname))
+    This method corresponds to DataLogger save().
+    If set-robot-date-string is t, filename includes date string and robot name. By default, set-robot-date-string is t."
+   (send self :dataloggerservice_save :basename (format nil "~A~A" fname (if set-robot-date-string (format nil "_~A" (send self :get-robot-date-string)) ""))))
   ;; start log by clearing log
   (:start-log
    ()
@@ -363,47 +409,18 @@
    ()
    (send self :robothardwareservice_calibrateInertiaSensor)
    )
-  ;; deprecated
-  (:setServoGainPercentage
-   (name percentage)
-   (warning-message 1 ";; :setServoGainPercentage is deprecated!! Please use :set-servo-gain-percentage!!~%")
-   (send self :set-servo-gain-percentage name percentage))
   )
+
+(def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_ImpedanceControllerService_impedanceParam
+  :raw-set-impedance-controller-param :raw-get-impedance-controller-param
+  :impedancecontrollerservice_setimpedancecontrollerparam :impedancecontrollerservice_getimpedancecontrollerparam
+  :optional-args (list :name 'name))
 
 ;; ImpedanceControllerService
 (defmethod rtm-ros-robot-interface
   ;;
   ;; usage:
   ;;   (send *ri* :start-impedance :rarm ..), (send *ri* :stop-impedance :rarm ..), (send *ri* :set-impedance-controller-param :rarm :M-p 200) ...
-  ;;
-  ;; set impedance controller param
-  ;;   params other than user-defined params are used in current parameter in ImpedanceController RTC by using getImpedanceControllerParam
-  ;;   original default parameters are defined in hrpsys-base/rtc/ImpedanceController/ImpedancControl.h
-  (:_set-impedance-controller-param
-   (&key name base-name target-name
-         M-p D-p K-p
-         M-r D-r K-r
-         ref-force ref-moment
-         force-gain moment-gain
-         sr-gain avoid-gain reference-gain manipulability-limit)
-   (let* ((current-imp-param (send self :get-impedance-controller-param name))
-          (param (instance hrpsys_ros_bridge::OpenHRP_ImpedanceControllerService_impedanceParam :init
-                            :name name :base_name base-name :target_name target-name
-                            :M_p (if M-p M-p (send current-imp-param :M_p))
-                            :D_p (if D-p D-p (send current-imp-param :D_p))
-                            :K_p (if K-p K-p (send current-imp-param :K_p))
-                            :M_r (if M-r M-r (send current-imp-param :M_r))
-                            :D_r (if D-r D-r (send current-imp-param :D_r))
-                            :K_r (if K-r K-r (send current-imp-param :K_r))
-                            :ref_force (if ref-force ref-force (send current-imp-param :ref_force))
-                            :ref_moment (if ref-moment ref-moment (send current-imp-param :ref_moment))
-                            :force_gain (if force-gain force-gain (send current-imp-param :force_gain))
-                            :moment_gain (if moment-gain moment-gain (send current-imp-param :moment_gain))
-                            :sr_gain (if sr-gain sr-gain (send current-imp-param :sr_gain))
-                            :avoid_gain (if avoid-gain avoid-gain (send current-imp-param :avoid_gain))
-                            :reference_gain (if reference-gain reference-gain (send current-imp-param :reference_gain))
-                            :manipulability_limit (if manipulability-limit manipulability-limit (send current-imp-param :manipulability_limit)))))
-     (send self :impedancecontrollerservice_setimpedancecontrollerparam :i_param param)))
   (:start-impedance
    (limb &rest args)
    (send* self :set-impedance-controller-param limb args))
@@ -416,21 +433,24 @@
          :stop-impedance))
   (:set-impedance-controller-param
    (limb &rest args)
-   (send* self :force-sensor-method
+   (send self :force-sensor-method
          limb
          #'(lambda (name base-name target-name &rest _args)
-             (send* self :_set-impedance-controller-param
-                    :name name
-                    :base-name base-name
-                    :target-name target-name _args))
-         :set-impedance-controller-param
-         args))
+             (send* self :raw-set-impedance-controller-param name :base-name base-name :target-name target-name args))
+         :set-impedance-controller-param))
   (:get-impedance-controller-param
    (limb)
    (send self :force-sensor-method
          limb
          #'(lambda (name base-name target-name &rest _args)
-             (send (send self :impedancecontrollerservice_getimpedancecontrollerparam :name name) :i_param))
+             (send (send self :raw-get-impedance-controller-param name) :i_param))
+         :get-impedance-controller-param))
+  (:get-impedance-controller-param
+   (limb)
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name base-name target-name &rest _args)
+             (send self :raw-get-impedance-controller-param name))
          :get-impedance-controller-param))
   (:force-sensor-method
    (limb method-func method-name &rest args)
@@ -440,14 +460,6 @@
             limb nil nil args))
     ((eq limb :legs) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rleg :lleg)))
     ((eq limb :arms) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rarm :larm)))
-    ((car (send robot limb :force-sensors))
-     (let ((fs (car (send robot limb :force-sensors)))
-           (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
-       (apply method-func
-              (string-downcase (send fs :name))
-              (if base-name base-name "")
-              (send (send (send fs :parent) :joint) :name)
-              args)))
     ((and (substringp ":v" (format nil "~A" limb))
           (find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
      (let ((rlimb (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
@@ -455,6 +467,14 @@
               (format nil "v~C~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor")))
               (send (send (send (send robot rlimb :root-link) :parent) :joint) :name)
               (send (send (send (send robot rlimb :end-coords) :parent) :joint) :name)
+              args)))
+    ((car (send robot limb :force-sensors))
+     (let ((fs (car (send robot limb :force-sensors)))
+           (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
+       (apply method-func
+              (string-downcase (send fs :name))
+              (if base-name base-name "")
+              (send (send (send fs :parent) :joint) :name)
               args)))
     (t ) ;; virtual force sensor is not supported in this file
     ))
@@ -493,6 +513,19 @@
            (with-open-file
             (f fname :direction :input)
             (read f nil nil)))
+   )
+  (:load-forcemoment-offset-params
+   (filename)
+   "Load RMFO offset parameters from parameter file.
+    This method corresponds to RemoveForceSensorLinkOffset loadForceMomentOffsetParams()."
+   (send self :removeforcesensorlinkoffsetservice_loadforcemomentoffsetparams :filename filename)
+   )
+  (:dump-forcemoment-offset-params
+   (filename &key (set-robot-date-string t))
+   "Save all RMFO offset parameters.
+    This method corresponds to RemoveForceSensorLinkOffset dumpForceMomentOffsetParams().
+    If set-robot-date-string is t, filename includes date string and robot name. By default, set-robot-date-string is t."
+   (send self :removeforcesensorlinkoffsetservice_dumpforcemomentoffsetparams :filename (format nil "~A~A" filename (if set-robot-date-string (format nil "_~A" (send self :get-robot-date-string)) "")))
    )
   (:reset-force-moment-offset-arms
    ()
@@ -595,12 +628,20 @@
   (:set-gait-generator-param
    (&rest args &key default-orbit-type &allow-other-keys)
    (send* self :raw-set-gait-generator-param
-          :default-orbit-type (case default-orbit-type
-                                (:shuffling 0)
-                                (:cycloid 1)
-                                (:rectangle 2)
-                                (t default-orbit-type))
+          :default-orbit-type
+          (if (or (null default-orbit-type) (integerp default-orbit-type))
+              default-orbit-type
+            (let ((ot (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE::*~A*" (string-downcase default-orbit-type)))))
+              (if (boundp ot)
+                  (eval ot)
+                (error ";; no such :default-orbit-type ~A in :set-gait-generator-param~%" default-orbit-type))
+              ))
           args))
+  (:print-gait-generator-orbit-type
+   ()
+   (let ((cs (constants "" "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE")))
+     (mapcar #'(lambda (x) (format t ";; ~A => ~A~%" x (eval x))) cs)
+     t))
   ;; :get-auto-balancer-param and :set-auto-balancer-param is not defined by def-set-get-param-method yet.
   (:get-auto-balancer-param
    ()
@@ -676,10 +717,21 @@
 ;; StabilizerService
 (def-set-get-param-method
   'hrpsys_ros_bridge::Openhrp_StabilizerService_stParam
-  :set-st-param :get-st-param
+  :raw-set-st-param :get-st-param
   :stabilizerservice_setparameter :stabilizerservice_getparameter)
 
 (defmethod rtm-ros-robot-interface
+  (:set-st-param
+   (&rest args &key st-algorithm &allow-other-keys)
+   (send* self :raw-set-st-param
+          :st-algorithm
+          (if (or (null st-algorithm) (integerp st-algorithm))
+              st-algorithm
+            (let ((sa (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_STABILIZERSERVICE_STALGORITHM::*~A*" (string-downcase st-algorithm)))))
+              (if (boundp sa)
+                  (eval sa)
+                (error ";; no such :st-algorithm ~A in :set-st-param~%" st-algorithm))))
+          args))
   (:start-st
    ()
    (send self :stabilizerservice_startstabilizer)
@@ -696,24 +748,12 @@
   :set-kalman-filter-param :get-kalman-filter-param
   :kalmanfilterservice_setkalmanfilterparam :kalmanfilterservice_getkalmanfilterparam)
 
-(defun print-abc-leg-offset-conf-from-robot
-  (rb)
-  (let ((pav (send rb :angle-vector))
-        (prc (send rb :copy-worldcoords)))
-    (format t "abc_leg_offset: ")
-    (let ((diff (scale (* 0.5 1e-3) (send (send (send rb :rleg :end-coords) :transformation (send rb :lleg :end-coords)) :worldpos))))
-      (format t "~A,~A,~A" (elt diff 0) (elt diff 1) (elt diff 2)))
-    (format t "~%")
-    (send rb :angle-vector pav)
-    (send rb :newcoords prc)
-    ))
-
 (defun print-end-effector-parameter-conf-from-robot
   (rb)
   (format t "end_effectors:")
   (dolist (l '(:rarm :larm :rleg :lleg))
     (let ((rl (send (send (send rb l :root-link) :parent) :joint)))
-      (format t " ~A,~A,~A," l (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))
+      (format t " ~A,~A,~A," (string-downcase (string l)) (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))
       (let* ((dif (send (send rb l :end-coords :parent) :transformation (send rb l :end-coords)))
              (wp (scale 1e-3 (send dif :worldpos))) ;; [mm] -> [m]
              (wr (normalize-vector (matrix-log (send dif :worldrot))))
@@ -728,11 +768,15 @@
 ;; utility functions for seq
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  ;; dump pattern file for SequencePlayer
-  ;;  rs-list : list of (list :time time0 :angle-vector av :root-coords rc ...)
-  ;;  output-basename : output file (output-basename.pos, ...)
 (defun dump-seq-pattern-file
   (rs-list output-basename &key (initial-sync-time 3.0)) ;; [s]
+  "Dump pattern file for SequencePlayer.
+     rs-list : list of (list :time time0 :angle-vector av :root-coords rc ...).
+               Fields other than :time and :angle-vector are optional.
+     output-basename : output file (output-basename.pos, ...).
+     root-coords : worldcoords for root link.
+     zmp : world zmp[mm].
+     wrench-list : world (list force-list moment-list) at end effector."
   (with-open-file
    (pf (format nil "~A.pos" output-basename) :direction :output) ;; pos file -> joint angles
    (dolist (l rs-list)
@@ -767,29 +811,113 @@
          (format wf "~%")
          ))) ;; with-open-file for .waist file
     )
-  (when (cadr (memq :zmp (car rs-list)))
+  (when (or (cadr (memq :root-local-zmp (car rs-list)))
+            (and (cadr (memq :root-coords (car rs-list))) (cadr (memq :zmp (car rs-list)))))
     (with-open-file
      (zf (format nil "~A.zmp" output-basename) :direction :output) ;; zmp file -> root-relative zmp[m]
      (dolist (l rs-list)
        ;; write zmp file
        (format zf "~A " (+ initial-sync-time (cadr (memq :time l))))
-       (let ((zp (scale 1e-3 (cadr (memq :zmp l))))) ;; [mm] -> [m]
+       (let ((zp (scale 1e-3
+                        (or (cadr (memq :root-local-zmp l))
+                            (send (cadr (memq :root-coords l)) :inverse-transform-vector (cadr (memq :zmp l))))
+                        ))) ;; [mm] -> [m]
          (format zf "~A ~A ~A " (elt zp 0) (elt zp 1) (elt zp 2))
          (format zf "~%")
          ))) ;; with-open-file for .zmp file
     )
-  (when (cadr (memq :wrenches (car rs-list)))
+  (when (or (cadr (memq :ee-local-wrench-list (car rs-list)))
+            (and (cadr (memq :end-coords-list (car rs-list))) (cadr (memq :wrench-list (car rs-list)))))
     (with-open-file
      (wrf (format nil "~A.wrenches" output-basename) :direction :output) ;; wrench file -> force and moment ;; 6 x force-sensor-num
      (dolist (l rs-list)
        ;; write wrenches file
        (format wrf "~A " (+ initial-sync-time (cadr (memq :time l))))
-       (let ((wr (cadr (memq :wrenches l))))
-         (dotimes (i (length wr)) (format wrf "~A " (elt wr i))))
+       (let ((wrl
+              (or (cadr (memq :ee-local-wrench-list l))
+                  (list
+                   (mapcar #'(lambda (ee ff)
+                               (send ee :inverse-rotate-vector ff))
+                           (cadr (memq :end-coords-list l)) (car (cadr (memq :wrench-list l))))
+                   (mapcar #'(lambda (ee mm)
+                               (send ee :inverse-rotate-vector mm))
+                           (cadr (memq :end-coords-list l)) (cadr (cadr (memq :wrench-list l))))))))
+         (dotimes (j (length (car wrl))) ;; j is limb index
+           (let ((f (elt (car wrl) j)) (m (elt (cadr wrl) j)))
+             (dotimes (i 3) (format wrf "~A " (elt f i))) ;; force
+             (dotimes (i 3) (format wrf "~A " (elt m i))) ;; moment
+             )))
        (format wrf "~%")
        )) ;; with-open-file for .wrenches file
     )
+  (when (cadr (memq :optional-data (car rs-list)))
+    (with-open-file
+     (opf (format nil "~A.optionaldata" output-basename) :direction :output) ;; optionaldata file
+     (let ((len (length (cadr (memq :optional-data (car rs-list))))))
+       (dolist (rs rs-list)
+         (let ((dd (cadr (memq :optional-data rs))))
+           (format opf "~A " (+ initial-sync-time (cadr (memq :time rs))))
+           (dotimes (i len) (format opf "~A " (elt dd i))))
+         (format opf "~%")
+         )
+       )) ;; with-open-file for .optionaldata
+    )
   )
+
+(defun load-from-seq-pattern-file (input-basename)
+  "Load from seq pattern file and generate robot state list."
+  (labels ((data-string-split ;; this function will be replaced by https://github.com/euslisp/EusLisp/issues/16
+            (str separator)
+            (let ((start-idx 0) (ret))
+              (dotimes (i (length str))
+                (when (= (elt str i) (elt separator 0))
+                  (push (subseq str start-idx i) ret)
+                  (setq start-idx (1+ i))))
+              (if (/= start-idx (length str)) (push (subseq str start-idx) ret))
+              (reverse ret)))
+           (data-str->data-list
+            (data-str)
+            (mapcar #'(lambda (x) (read-from-string x))
+                    (remove-if #'(lambda (x) (string= "" x)) (data-string-split data-str " ")))))
+    (let (rs-list)
+      ;; pos file
+      (let ((pln) (posfile (concatenate string input-basename ".pos")))
+        (with-open-file
+         (pf posfile :direction :input)
+         (while (setq pln (read-line pf nil))
+           (let ((dd (data-str->data-list pln)))
+             (push (list :angle-vector (map float-vector #'rad2deg (concatenate float-vector (cdr dd)))
+                         :time (car dd))
+                   rs-list)
+             ))))
+      (setq rs-list (reverse rs-list))
+      ;; waist file
+      (let ((wln) (waistfile (concatenate string input-basename ".waist")) (idx 0))
+        (if (probe-file waistfile)
+            (with-open-file
+             (wf waistfile :direction :input)
+             (while (setq wln (read-line wf nil))
+               (let ((dd (data-str->data-list wln)))
+                 (nconc (elt rs-list idx)
+                        (list :root-coords (make-coords :pos (float-vector (* 1e3 (elt dd 1)) (* 1e3 (elt dd 2)) (* 1e3 (elt dd 3))) ;; [m]->[mm]
+                                                        :rpy (list (elt dd 6) (elt dd 5) (elt dd 4))))) ;; rpy->ypr
+                 (incf idx)
+                 )))))
+      ;; zmp file
+      (let ((zln) (zmpfile (concatenate string input-basename ".zmp")) (idx 0))
+        (if (probe-file zmpfile)
+            (with-open-file
+             (zf zmpfile :direction :input)
+             (while (setq zln (read-line zf nil))
+               (let* ((dd (data-str->data-list zln))
+                      (root-local-zmp (float-vector (* 1e3 (elt dd 1)) (* 1e3 (elt dd 2)) (* 1e3 (elt dd 3))))) ;; [m]->[mm]
+                 (nconc (elt rs-list idx)
+                        (if (cadr (memq :root-coords (elt rs-list idx)))
+                            (list :zmp (send (cadr (memq :root-coords (elt rs-list idx))) :transform-vector root-local-zmp))
+                          (list :root-local-zmp root-local-zmp)))
+                 (incf idx)
+                 )))))
+      rs-list)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility functions for project generator generation

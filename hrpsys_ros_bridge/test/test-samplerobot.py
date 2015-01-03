@@ -15,7 +15,7 @@ from numpy import *
 import rospy,rospkg, tf
 from geometry_msgs.msg import WrenchStamped
 from nav_msgs.msg import Odometry
-from hrpsys_ros_bridge.srv import OpenHRP_SequencePlayerService_loadPattern, OpenHRP_SequencePlayerService_waitInterpolation
+from hrpsys_ros_bridge.srv import *
 
 import actionlib
 
