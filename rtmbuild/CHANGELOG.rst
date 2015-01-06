@@ -2,8 +2,8 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.7 (2015-01-06)
+------------------
 * Update rtmbuild_init to specify dependency of generate_messages and
   add new service interface to HrpsysSeqStateROSBridge to specify transformation
   for each sensor

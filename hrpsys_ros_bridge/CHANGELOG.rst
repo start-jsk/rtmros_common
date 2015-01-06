@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.7 (2015-01-06)
+------------------
 * Add :reference-root-coords method for log
 * Update datalogger parser time parsing and robothardware naming
 * Add euslisp methods for seq wait interpolation and co get status
