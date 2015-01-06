@@ -2,6 +2,12 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* (_gen_project) : Add argument to specify highgain mode
+* (hrpsys.launch) : Support PDController setting for hrpsys.launch.
+* Contributors: Shunichi Nozawa
+
 1.2.6 (2014-10-10)
 ------------------
 

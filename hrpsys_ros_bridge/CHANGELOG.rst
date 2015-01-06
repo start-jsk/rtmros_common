@@ -2,6 +2,60 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add :reference-root-coords method for log
+* Update datalogger parser time parsing and robothardware naming
+* Add euslisp methods for seq wait interpolation and co get status
+* Enable virtual force setting. Read conf file in HrpsysSeqStateROSBridge and connect vfs ports if exists
+* Add set ref force and moment methods. Enable vforcesensors
+* change robot-init function to pass arguments to initializer
+* Set default name as co
+* Use segment name of body_info as collision detection frame_id
+* Add argument to select collision_state.py activation because collision_state.py can be launched in hrpsys_ros_bridge.launch
+* Enable to configure collision detector instance name
+* Use subscription_type as new to avoid influence on realtime process
+* (rtm-ros-robot-interface) : Add optionaldata for dump-seq-pattern-file
+* (rtm-ros-robot-interface) : Add function to load seq pattern file and euslisp list from it.
+* (rtm-ros-robot-interface) : Add documentation string for dump-seq-pattern-file
+* Fix frame of loadPattern
+* Add euslisp interface method for reference wrench
+* Publish reference wrench from StateHolder wrench data ports. Check existence of wrench ports because hrpsys-base 315.1.9 does not have wrench ports in Seq and Sh.
+* Add RMFO calib readme
+* Update RMFO calibration sequence. Use parameter file
+* Add load and dump rmfo param methods
+* Separate robot date string as method and fix :save-log default argument
+* on indigo, hrpsys is not ros-catkin package
+* fix for new packaging openrtm/hrpsys (compile package directoly from original repository)
+* Fix typo of hrpsys_ros_bridge.launch
+* Add USE_HRPSYS_PROFILE to toggle whether running hrpsys_profile
+* Add parameter ~publish_sensor_tf to HrpsysSeqStateROSBridge to toggle
+  publishing tf frames of the sensors
+* Fix unitsystem for documentation
+* Add directory to generate Euslisp documentation
+* Enable to set integer enum values
+* (rtm-ros-robot-interface) : Fix typo in save-log
+* (rtm-ros-robot-interface) : Add date string and robot name to Datalogger log name by default.
+* (rtm-ros-robot-interface) : Update seq methods. Revise set-interpolation-mode using defconst param and remove deprecated dump-seq parttern
+* Merge remote-tracking branch 'origin/master' into tmp_update_impedance_controller_methods
+* (rtm-ros-robot-interface) : Update impedance controller setter and getter
+* (rtm-ros-robot-interface) : Remove deprecated euslisp interface and functions.
+* Update rtmbuild_init to specify dependency of generate_messages and
+  add new service interface to HrpsysSeqStateROSBridge to specify transformation
+  for each sensor
+* Merge pull request #583 from eisoku9618/update-print-end-effector-parameter-conf-from-robot
+  Merged.
+* do not print a leading colon of :rarm
+* (rtm-ros-robot-interface) : Enable to set st algorithm as Euslisp symbol.
+* remove unnecessary white spaces
+* rename total time of 1 cycle from RobotHardware0 to Summary
+* add eps_of_rh variable in order to reduce unnecessary for loop
+* (test-samplerobot) : Import all srv files in test-samplerobot.py discussed in https://github.com/start-jsk/rtmros_common/issues/558
+* (default_robot*.launch.in) : Add argument for precreate controller
+* (rtm-ros-robot-interface) : Update :set-gait-generator-param method to use defconstant enum values and add printing method
+* (datalogger-log-parser) : Add abc baseTform reading
+* Contributors: Kei Okada, Ryohei Ueda, Shunichi Nozawa, Yohei Kakiuchi, Eisoku Kuroiwa
+
 1.2.6 (2014-10-10)
 ------------------
 * set time-limit to 300
