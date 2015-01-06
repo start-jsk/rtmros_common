@@ -433,18 +433,12 @@
          :stop-impedance))
   (:set-impedance-controller-param
    (limb &rest args)
-   (send self :force-sensor-method
-         limb
-         #'(lambda (name base-name target-name &rest _args)
-             (send* self :raw-set-impedance-controller-param name :base-name base-name :target-name target-name args))
-         :set-impedance-controller-param))
-  (:get-impedance-controller-param
-   (limb)
-   (send self :force-sensor-method
-         limb
-         #'(lambda (name base-name target-name &rest _args)
-             (send (send self :raw-get-impedance-controller-param name) :i_param))
-         :get-impedance-controller-param))
+   (send* self :force-sensor-method
+          limb
+          #'(lambda (name base-name target-name &rest _args)
+              (send* self :raw-set-impedance-controller-param name :base-name base-name :target-name target-name args))
+          :set-impedance-controller-param
+          args))
   (:get-impedance-controller-param
    (limb)
    (send self :force-sensor-method
@@ -455,9 +449,9 @@
   (:force-sensor-method
    (limb method-func method-name &rest args)
    (cond
-    ((stringp limb)
-     (apply method-func
-            limb nil nil args))
+    ;; ((stringp limb)
+    ;;  (apply method-func
+    ;;         limb nil nil args))
     ((eq limb :legs) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rleg :lleg)))
     ((eq limb :arms) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rarm :larm)))
     ((and (substringp ":v" (format nil "~A" limb))
@@ -476,7 +470,7 @@
               (if base-name base-name "")
               (send (send (send fs :parent) :joint) :name)
               args)))
-    (t ) ;; virtual force sensor is not supported in this file
+    (t )
     ))
   )
 
