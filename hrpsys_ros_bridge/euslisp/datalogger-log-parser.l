@@ -172,9 +172,13 @@
    (make-coords :pos (scale 1e3 (subseq tform-vector 0 3))
                 :rot (make-matrix 3 3 (list (subseq tform-vector 3 6) (subseq tform-vector 6 9) (subseq tform-vector 9))))
    )
+  (:reference-root-coords
+   ()
+   (cdr (assoc :reference-root-coords robot-state))
+   )
   (:reference-worldcoords
    ()
-   (send (send (cdr (assoc :reference-root-coords robot-state)) :copy-worldcoords)
+   (send (send (send self :reference-root-coords) :copy-worldcoords)
          :transform
          (send (car (send robot :links)) :transformation robot))
    )

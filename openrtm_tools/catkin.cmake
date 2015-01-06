@@ -4,7 +4,7 @@ project(openrtm_tools)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS rtshell rostest)
+find_package(catkin REQUIRED COMPONENTS rostest)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -53,7 +53,7 @@ unset(openrtm_aist_LIBRARIES CACHE) # remove not to add openrtm_aist_LIBRARIES t
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES openrtm_tools
-  CATKIN_DEPENDS rtshell
+  CATKIN_DEPENDS
   DEPENDS openrtm_aist
 )
 
