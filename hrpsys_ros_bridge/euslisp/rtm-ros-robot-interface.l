@@ -286,10 +286,30 @@
 (defmethod rtm-ros-robot-interface
   (:set-base-pose
    (&optional base-coords (tm 0.1))
+   (warn ";; :set-base-pose is deprecated. Use :set-base-coords~%")
    (unless base-coords
      (setq base-coords (send robot :worldcoords)))
    (send self :sequenceplayerservice_setbasepos :pos (scale 0.001 (send base-coords :pos)) :tm tm)
    (send self :sequenceplayerservice_setbaserpy :rpy (coerce (reverse (car (send base-coords :rpy-angle))) float-vector) :tm tm))
+  (:set-base-coords
+   (base-coords tm)
+   "Set base coordinates in the world frame.
+    base-coords is Euslisp coords and tm is [ms]."
+   (send self :set-base-pos (send base-coords :worldpos) tm)
+   (send self :set-base-rpy (coerce (reverse (car (rpy-angle (send base-coords :worldrot)))) float-vector) tm)
+   )
+  (:set-base-pos
+   (base-pos tm)
+   "Set base pos in the world frame.
+    base-pos is [mm] and tm is [ms]."
+   (send self :sequenceplayerservice_setbasepos :pos (scale 0.001 base-pos) :tm (* 0.001 tm)) ;; [mm]->[m], [ms]->[s]
+   )
+  (:set-base-rpy
+   (base-rpy tm)
+   "Set base rpy in the world frame.
+    base-rpy is [rad] and tm is [ms]."
+   (send self :sequenceplayerservice_setbaserpy :rpy base-rpy :tm (* 0.001 tm)) ;; [ms]->[s]
+   )
   (:wait-interpolation-of-group
    (groupname)
    (send self :sequenceplayerservice_waitinterpolationofgroup :gname groupname))
