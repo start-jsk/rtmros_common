@@ -36,3 +36,12 @@ msg/_.*\.py$
 
 # Catkin custom files
 CATKIN_IGNORE
+
+# Ignore setup.sh downloaded packages
+hrpsys/
+openhrp3/
+openrtm_aist/
+openrtm_aist_python/
+rtctree/
+rtshell/
+rtsprofile/
