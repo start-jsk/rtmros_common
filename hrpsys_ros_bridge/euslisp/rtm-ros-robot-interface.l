@@ -552,48 +552,59 @@
    )
   (:reset-force-moment-offset-arms
    ()
+   "Remove force and moment offset for :rarm and :larm"
    (send self :reset-force-moment-offset '(:rarm :larm)))
   (:reset-force-moment-offset
    (limbs)
+   "Remove force and moment offsets. limbs should be list of limb symbol name."
    (send self :_reset-force-moment-offset limbs :force)
    (send self :_reset-force-moment-offset limbs :moment)
    )
   (:_reset-force-moment-offset
    (limbs f/m &key (itr 10))
-   ;; f_ext = Rs * (s^f_s - s^f_off) - m_l * g
-   ;; n_ext = Rs * (s^n_s - s^n_off) - (Rs * c_l) x (m_l * g)
-   ;; s^f_off = s^f_s - Rs^T * (f_ext + m_l * g)
-   ;; s^n_off = s^n_s - Rs^T * (n_ext + (Rs * c_l) x (m_l * g))
-   (labels ((calc-off
-             (alimb)
-             (unix:usleep 10000)
-             (send self :state)
-             (let* ((abs-v (send self (read-from-string (format nil ":absolute-~A-vector" (string-downcase f/m))) alimb))
-                    (param (send self :get-forcemoment-offset-param alimb))
-                    (off (v+ (send param (if (eq f/m :force) :force_offset :moment_offset))
-                             (send (car (send robot alimb :force-sensors)) :inverse-rotate-vector abs-v))))
-               (list off abs-v))))
-     (mapcar #'(lambda (alimb)
-                 (let* ((ret (mapcar #'(lambda (x) (calc-off alimb)) (make-list itr)))
-                        (off (mapcar #'car ret))
-                        (abs-v (mapcar #'cadr ret)))
-                   (send self :set-forcemoment-offset-param alimb
-                         (if (eq f/m :force) :force-offset :moment-offset)
-                         (scale (/ 1.0 (length off)) (reduce #'v+ off)))
-                   (unix:usleep 10000)
-                   ;; check ;; compare sensor value before & after resetting
-                   (format t ";; ~A error of ~A ;; ~A[~A] -> ~A[~A]~%"
-                           (string-downcase f/m) alimb
-                           (norm (scale (/ 1.0 (length abs-v)) (reduce #'v+ abs-v)))
-                           (if (eq f/m :force) "N" "Nm")
-                           (norm
-                            (scale (/ 1.0 itr)
-                                   (reduce #'v+
-                                           (mapcar #'(lambda (x) (send self :state (read-from-string (format nil ":absolute-~A-vector" (string-downcase f/m))) alimb))
-                                                   (make-list itr)))))
-                           (if (eq f/m :force) "N" "Nm"))
-                   ))
-             limbs)))
+   (let* ((params (mapcar #'(lambda (alimb) (send self :get-forcemoment-offset-param alimb)) limbs))
+          (nominal-mgs (mapcar #'(lambda (param) (scale (* 1e-3 (send param :link_offset_mass)) *g-vec*)) params)))
+     (labels ((calc-off
+               (alimb param nominal-mg)
+               (v+ (send self (if (eq f/m :force) :force-vector :moment-vector) alimb)
+                   (if (eq f/m :force)
+                       (send (car (send robot alimb :force-sensors)) :inverse-rotate-vector nominal-mg)
+                     (v* (send param :link_offset_centroid) (send (car (send robot alimb :force-sensors)) :inverse-rotate-vector nominal-mg)))))
+              (get-avg-fm
+               ()
+               (let ((fm (mapcar #'(lambda (i)
+                                     (send self :state)
+                                     (mapcar #'(lambda (alimb) (send self (if (eq f/m :force) :off-force-vector :off-moment-vector) alimb)) limbs))
+                                 (make-list itr))))
+                 (mapcar #'(lambda (alimb)
+                             (let ((idx (position alimb limbs)))
+                               (vector-mean (mapcar #'(lambda (d) (elt d idx)) fm))))
+                         limbs))))
+       ;; estimate offsets
+       (let* ((tmp-fm-offsets (mapcar #'(lambda (i)
+                                          (send self :state)
+                                          (mapcar #'calc-off limbs params nominal-mgs))
+                                      (make-list itr)))
+              (new-fm-offsets (mapcar #'(lambda (alimb)
+                                          (let ((idx (position alimb limbs)))
+                                            (vector-mean (mapcar #'(lambda (d) (elt d idx)) tmp-fm-offsets))))
+                                      limbs))
+              (org-fm-list (get-avg-fm)))
+         ;; set offsets
+         (mapcar #'(lambda (alimb new-fm-offset)
+                     (send self :set-forcemoment-offset-param alimb
+                           (if (eq f/m :force) :force-offset :moment-offset)
+                           new-fm-offset))
+                 limbs new-fm-offsets)
+         (unix:usleep 10000)
+         ;; check ;; compare sensor value before & after resetting
+         (mapcar #'(lambda (alimb org-fm new-fm)
+                     (format t ";; ~A error of ~A ;; ~A[~A] -> ~A[~A]~%"
+                             (string-downcase f/m) alimb
+                             (norm org-fm) (if (eq f/m :force) "N" "Nm")
+                             (norm new-fm) (if (eq f/m :force) "N" "Nm")))
+                 limbs org-fm-list (get-avg-fm))
+         ))))
   )
 
 ;; AutoBalancerService
