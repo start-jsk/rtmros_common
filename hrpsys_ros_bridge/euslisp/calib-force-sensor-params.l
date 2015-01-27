@@ -97,7 +97,7 @@
       (when fname
         (mapcar #'(lambda (l)
                     (send* *ri* :set-forcemoment-offset-param
-                           (send (car (send robot (car l) :force-sensors)) :name)
+                           (car l)
                            (cdr l)))
                 ret)
         (format t ";; result file => ~A_[robot name]_[date string] in robot's pc.~%" fname)
