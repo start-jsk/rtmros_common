@@ -348,6 +348,8 @@
    )
   (:set-ref-force
    (force tm &optional (limb :arms) &key (update-robot-state t))
+   "Set reference force [N]. tm is interpolation time [ms].
+    limb should be limb symbol name such as :rarm, :larm, :rleg, :lleg, :arms, or :legs."
    (if update-robot-state (send self :state))
    (let ((limbs (case limb
                       (:arms (list :rarm :larm))
@@ -362,6 +364,8 @@
      ))
   (:set-ref-moment
    (moment tm &optional (limb :arms) &key (update-robot-state t))
+   "Set reference moment [Nm]. tm is interpolation time [ms].
+    limb should be limb symbol name such as :rarm, :larm, :rleg, :lleg, :arms, or :legs."
    (if update-robot-state (send self :state))
    (let ((limbs (case limb
                       (:arms (list :rarm :larm))
@@ -438,14 +442,15 @@
 
 ;; ImpedanceControllerService
 (defmethod rtm-ros-robot-interface
-  ;;
-  ;; usage:
-  ;;   (send *ri* :start-impedance :rarm ..), (send *ri* :stop-impedance :rarm ..), (send *ri* :set-impedance-controller-param :rarm :M-p 200) ...
   (:start-impedance
    (limb &rest args)
+   "Start impedance controller mode.
+    limb should be limb symbol name such as :rarm, :larm, :rleg, :lleg, :arms, or :legs."
    (send* self :set-impedance-controller-param limb args))
   (:stop-impedance
    (limb)
+   "Stop impedance controller mode.
+    limb should be limb symbol name such as :rarm, :larm, :rleg, :lleg, :arms, or :legs."
    (send self :force-sensor-method
          limb
          #'(lambda (name base-name target-name &rest _args)
@@ -453,6 +458,8 @@
          :stop-impedance))
   (:set-impedance-controller-param
    (limb &rest args)
+   "Set impedance controller parameter like (send *ri* :set-impedance-controller-param :rarm :K-p 400).
+    limb should be limb symbol name such as :rarm, :larm, :rleg, :lleg, :arms, or :legs."
    (send* self :force-sensor-method
           limb
           #'(lambda (name base-name target-name &rest _args)
@@ -461,6 +468,8 @@
           args))
   (:get-impedance-controller-param
    (limb)
+   "Get impedance controller parameter.
+    limb should be limb symbol name such as :rarm, :larm, :rleg, :lleg, :arms, or :legs."
    (send self :force-sensor-method
          limb
          #'(lambda (name base-name target-name &rest _args)
