@@ -94,6 +94,13 @@ macro(compile_openhrp_model wrlfile)
   set(_xmlfile "${_workdir}/${_name}.xml")
   set(_xmlfile_nosim "${_workdir}/${_name}_nosim.xml")
   set(_controller_config "${_workdir}/${_name}_controller_config.yaml")
+  # this command should depends on the LATEST compile_robots, in order to prevent
+  # parallel execution of rostest
+  if (compile_robots)
+    list(LENGTH compile_robots _compile_robot_length)
+    math(EXPR _compile_robot_latest_index "${_compile_robot_length} - 1")
+    list(GET compile_robots ${_compile_robot_latest_index} _latest_robot)
+  endif(compile_robots)
   if (EXISTS ${_controller_config})
     execute_process(COMMAND sh -c "grep 'auto generated' ${_controller_config} | wc -l" OUTPUT_VARIABLE _auto_generated)
     if (${_auto_generated} LESS 1)
@@ -236,11 +243,11 @@ macro(compile_openhrp_model wrlfile)
     if(${USE_ROSBUILD})
       add_custom_command(OUTPUT ${_daefile}
         COMMAND ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
-        DEPENDS ${wrlfile} ${_export_collada_exe})
+        DEPENDS ${wrlfile} ${_export_collada_exe} ${_latest_robot})
     else()                      #when catkin, appending LD_LIBRARY_PATH
       add_custom_command(OUTPUT ${_daefile}
         COMMAND LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CATKIN_DEVEL_PREFIX}/lib ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
-        DEPENDS ${wrlfile} ${_export_collada_exe})
+        DEPENDS ${wrlfile} ${_export_collada_exe} ${_latest_robot})
     endif()
   endif()
   # use _gen_project.launch
@@ -276,13 +283,6 @@ macro(compile_openhrp_model wrlfile)
     set(_gen_project_dep_files)
     message("assuming hrpsys/ProjectGenerator is already compiled")
   endif()
-  # this command should depends on the LATEST compile_robots, in order to prevent
-  # parallel execution of rostest
-  if (compile_robots)
-    list(LENGTH compile_robots _compile_robot_length)
-    math(EXPR _compile_robot_latest_index "${_compile_robot_length} - 1")
-    list(GET compile_robots ${_compile_robot_latest_index} _latest_robot)
-  endif(compile_robots)
   message("compile_openhrp3_model ${wrlfile}")
   message("  hrpsys_tools_PACKAGE_PATH = ${hrpsys_tools_PACKAGE_PATH}")
   message("  hrpsys_PACKAGE_PATH       = ${hrpsys_PACKAGE_PATH}")
@@ -298,7 +298,7 @@ macro(compile_openhrp_model wrlfile)
     COMMAND ${_rtm_naming_exe} ${_corba_port} || echo "fail to run rtm_naming, but try to continue"
     COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}"
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
-    DEPENDS ${daefile} ${_gen_project_dep_files} ${_latest_robot})
+    DEPENDS ${daefile} ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
     COMMAND ${_rtm_naming_exe} ${_corba_port} || echo "fail to run rtm_naming, but try to continue"
     COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option}"
