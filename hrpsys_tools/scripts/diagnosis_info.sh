@@ -11,7 +11,7 @@ FILENAME_LOG_ALL=/tmp/rtmros_diagnosisinfo_all_`date +"%Y%m%d-%H%M%S"`.tgz
 
 env |grep ROS | tee -a ${FILENAME_LOG_COMMANDS}
 ifconfig | tee -a ${FILENAME_LOG_COMMANDS}
-rosrun rtshell rtls ${CORBA_HOSTNAME}:${CORBA_HOST_PORT}/ | tee -a ${FILENAME_LOG_COMMANDS}
+rosrun rtshell rtls ${CORBA_HOSTNAME}:${CORBA_HOST_PORT}/ 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
 dpkg -p ros-hydro-hironx-ros-bridge | grep Ver  | tee -a ${FILENAME_LOG_COMMANDS}
 dpkg -p ros-hydro-rtmros-common | grep Ver  | tee -a ${FILENAME_LOG_COMMANDS}
 dpkg -p ros-hydro-hrpsys | grep Ver  | tee -a ${FILENAME_LOG_COMMANDS}
