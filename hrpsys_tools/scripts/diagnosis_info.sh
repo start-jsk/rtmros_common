@@ -12,11 +12,8 @@ FILENAME_LOG_ALL=/tmp/rtmros_diagnosisinfo_all_`date +"%Y%m%d-%H%M%S"`.tgz
 env |grep ROS | tee -a ${FILENAME_LOG_COMMANDS}
 ifconfig | tee -a ${FILENAME_LOG_COMMANDS}
 rosrun rtshell rtls ${CORBA_HOSTNAME}:${CORBA_HOST_PORT}/ 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
-dpkg -p ros-hydro-hironx-ros-bridge | grep Ver  | tee -a ${FILENAME_LOG_COMMANDS}
-dpkg -p ros-hydro-rtmros-common | grep Ver  | tee -a ${FILENAME_LOG_COMMANDS}
-dpkg -p ros-hydro-hrpsys | grep Ver  | tee -a ${FILENAME_LOG_COMMANDS}
-dpkg -p ros-hydro-openhrp3 | grep Ver  | tee -a ${FILENAME_LOG_COMMANDS}
-dpkg -p ros-hydro-openrtm-aist-core | grep Ver  | tee -a ${FILENAME_LOG_COMMANDS}
+# Get packages' version. Ref. http://askubuntu.com/a/347563/24203
+dpkg -l | grep '^ii' | grep ros- | awk '{print $2 "\t" $3}' 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
 
 tar -C ~/.ros/log -cvzf ${FILENAME_LOG_ROS} `cd ~/.ros/log; ls -d * | head -1`
 
