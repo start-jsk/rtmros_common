@@ -446,15 +446,26 @@
    (limb &rest args)
    "Start impedance controller mode.
     limb should be limb symbol name such as :rarm, :larm, :rleg, :lleg, :arms, or :legs."
-   (send* self :set-impedance-controller-param limb args))
+   (if args
+       (progn
+         (send* self :set-impedance-controller-param limb args)
+         (send self :raw-start-impedance limb))
+     (send self :raw-start-impedance limb)))
+  (:raw-start-impedance
+   (limb)
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name &rest _args)
+             (send self :impedancecontrollerservice_startimpedancecontroller :name name))
+         :raw-start-impedance))
   (:stop-impedance
    (limb)
    "Stop impedance controller mode.
     limb should be limb symbol name such as :rarm, :larm, :rleg, :lleg, :arms, or :legs."
    (send self :force-sensor-method
          limb
-         #'(lambda (name base-name target-name &rest _args)
-             (send self :impedancecontrollerservice_deleteimpedancecontroller :name name))
+         #'(lambda (name &rest _args)
+             (send self :impedancecontrollerservice_stopimpedancecontroller :name name))
          :stop-impedance))
   (:set-impedance-controller-param
    (limb &rest args)
@@ -462,8 +473,8 @@
     limb should be limb symbol name such as :rarm, :larm, :rleg, :lleg, :arms, or :legs."
    (send* self :force-sensor-method
           limb
-          #'(lambda (name base-name target-name &rest _args)
-              (send* self :raw-set-impedance-controller-param name :base-name base-name :target-name target-name args))
+          #'(lambda (name &rest _args)
+              (send* self :raw-set-impedance-controller-param name args))
           :set-impedance-controller-param
           args))
   (:get-impedance-controller-param
@@ -472,7 +483,7 @@
     limb should be limb symbol name such as :rarm, :larm, :rleg, :lleg, :arms, or :legs."
    (send self :force-sensor-method
          limb
-         #'(lambda (name base-name target-name &rest _args)
+         #'(lambda (name &rest _args)
              (send self :raw-get-impedance-controller-param name))
          :get-impedance-controller-param))
   (:force-sensor-method
@@ -488,16 +499,11 @@
      (let ((rlimb (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
        (apply method-func
               (format nil "v~C~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor")))
-              (send (send (send (send robot rlimb :root-link) :parent) :joint) :name)
-              (send (send (send (send robot rlimb :end-coords) :parent) :joint) :name)
               args)))
     ((car (send robot limb :force-sensors))
-     (let ((fs (car (send robot limb :force-sensors)))
-           (base-name (send (send (send (send robot limb :root-link) :parent) :joint) :name)))
+     (let ((fs (car (send robot limb :force-sensors))))
        (apply method-func
               (string-downcase (send fs :name))
-              (if base-name base-name "")
-              (send (send (send fs :parent) :joint) :name)
               args)))
     (t )
     ))
