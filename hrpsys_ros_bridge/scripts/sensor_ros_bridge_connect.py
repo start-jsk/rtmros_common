@@ -44,9 +44,13 @@ def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name, managerho
         time.sleep(1);
         bridge = rtm.findRTC(rosbridge_name)
         print program_name, " wait for ", rosbridge_name, " : ",bridge
+    sh = None
+    while sh == None :
+        time.sleep(1);
+        sh=rtm.findRTC('sh')
+        print program_name, " wait for 'sh' : ",sh
     vs=rtm.findRTC('vs')
     rmfo=rtm.findRTC('rmfo')
-    sh=rtm.findRTC('sh')
     connecSensorRosBridgePort(url, hcf.rh, bridge, vs, rmfo, sh)
 
 if __name__ == '__main__':
