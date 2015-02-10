@@ -15,8 +15,8 @@ else
     export PATH=`pkg-config rtshell --variable=prefix`/lib/rtshell:$PATH
 fi
 
-if [ -f `rospack find rtshell`/share/rtshell/shell_support ]; then
-    source `rospack find rtshell`/share/rtshell/shell_support
+if [ -f `rospack find rtshell`/shell_support ]; then
+    source `rospack find rtshell`/shell_support
 else
     echo -e "Warning : Failed to load shell_support, try rosmake openrtm_tools"
 fi
