@@ -11,14 +11,25 @@ if [ -e `rospack find rtshell`/bin ] ; then # if rosbuild
     export PYTHONPATH=`rospack find openrtm_aist_python`/${_PYTHON_DIR}:$PYTHONPATH
     export PATH=`rospack find rtshell`/bin:$PATH
     export PYTHONPATH=`rospack find rtshell`/${_PYTHON_DIR}:`rospack find rtctree`/${_PYTHON_DIR}:`rospack find rtsprofile`/${_PYTHON_DIR}:$PYTHONPATH
-else
-    export PATH=`pkg-config rtshell --variable=prefix`/lib/rtshell:$PATH
-fi
 
-if [ -f `rospack find rtshell`/shell_support ]; then
-    source `rospack find rtshell`/shell_support
+    if [ -f `rospack find rtshell`/share/rtshell/shell_support ]; then
+        source `rospack find rtshell`/share/rtshell/shell_support
+    else
+        echo -e "Warning : Failed to load shell_support, try rosmake openrtm_tools"
+    fi
 else
-    echo -e "Warning : Failed to load shell_support, try rosmake openrtm_tools"
+    IFS=':' read -ra PREFIX_PATH <<< "$CMAKE_PREFIX_PATH"
+    loop=true
+    for dir in "${PREFIX_PATH[@]}"; do
+        # process "$i"
+        if [ $loop = true -a -e  ${dir}/share/rtshell/shell_support ] ; then
+            source ${dir}/share/rtshell/shell_support
+            loop=false
+        fi
+    done
+    if [ loop = true ] ; then
+        echo -e "Warning : Failed to load shell_support"
+    fi
 fi
 
 export RTCTREE_NAMESERVERS=localhost:15005
