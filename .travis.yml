@@ -12,6 +12,7 @@ compiler:
 env:
   - ROS_DISTRO=hydro  ROSWS=wstool BUILDER=catkin    USE_DEB=true
   - ROS_DISTRO=hydro  ROSWS=wstool BUILDER=catkin    USE_DEB=false
+  - ROS_DISTRO=hydro  ROSWS=wstool BUILDER=catkin    USE_DEB=source
   - ROS_DISTRO=indigo ROSWS=wstool BUILDER=catkin    USE_DEB=true
   - TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=hydro EXTRA_DEB="ros-hydro-roslint ros-hydro-robot-pose-ekf"
   - TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=hydro EXTRA_DEB=ros-hydro-roslint
