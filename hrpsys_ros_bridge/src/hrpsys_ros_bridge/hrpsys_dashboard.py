@@ -196,6 +196,59 @@ class HrpsysServoMenu(MenuDashWidget):
                        QMessageBox.Ok, self.parent())
       mb.exec_()
 
+# MenuDashWidget for UnstableRTCs (not used by default)
+
+class AutoBalancerMenu(MenuDashWidget):
+    def __init__(self):
+        icons = [['bg-grey.svg', 'ic-runstop-off.svg'],
+                 ['bg-green.svg', 'ic-runstop-on.svg'],
+                 ['bg-red.svg', 'ic-runstop-off.svg']]
+        super(AutoBalancerMenu, self).__init__('AutoBalancer on/off', icons)
+        self.update_state(0)
+        self.add_action('start AutoBalancer', self.on_abc_on)
+        self.add_action('stop AutoBalancer', self.on_abc_off)
+        self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
+    def on_abc_on(self):
+         self.update_state(1)
+         execHrpsysConfiguratorCommand("hcf.startAutoBalancer()")
+    def on_abc_off(self):
+         self.update_state(2)
+         execHrpsysConfiguratorCommand("hcf.stopAutoBalancer()")
+
+class StabilizerMenu(MenuDashWidget):
+    def __init__(self):
+        icons = [['bg-grey.svg', 'ic-runstop-off.svg'],
+                 ['bg-green.svg', 'ic-runstop-on.svg'],
+                 ['bg-red.svg', 'ic-runstop-off.svg']]
+        super(StabilizerMenu, self).__init__('Stabilizer on/off', icons)
+        self.update_state(0)
+        self.add_action('start Stabilizer', self.on_st_on)
+        self.add_action('stop Stabilizer', self.on_st_off)
+        self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
+    def on_st_on(self):
+         self.update_state(1)
+         execHrpsysConfiguratorCommand("hcf.startStabilizer()")
+    def on_st_off(self):
+         self.update_state(2)
+         execHrpsysConfiguratorCommand("hcf.stopStabilizer()")
+
+class ImpedanceControllerMenu(MenuDashWidget):
+    def __init__(self):
+        icons = [['bg-grey.svg', 'ic-runstop-off.svg'],
+                 ['bg-green.svg', 'ic-runstop-on.svg'],
+                 ['bg-red.svg', 'ic-runstop-off.svg']]
+        super(ImpedanceControllerMenu, self).__init__('ImpedanceController on/off', icons)
+        self.update_state(0)
+        self.add_action('start ImpedanceController', self.on_imp_on)
+        self.add_action('stop ImpedanceController', self.on_imp_off)
+        self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
+    def on_imp_on(self):
+         self.update_state(1)
+         execHrpsysConfiguratorCommand("hcf.startImpedanceController()")
+    def on_imp_off(self):
+         self.update_state(2)
+         execHrpsysConfiguratorCommand("hcf.stopImpedanceController()")
+
 # HrpsysConfigurator setting
 
 #   Global variable for HrpsysConfigurator
