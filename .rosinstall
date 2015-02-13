@@ -1,4 +1,10 @@
 - git:
+    uri: https://github.com/tork-a/openrtm_aist-release
+    local-name: openrtm_aist
+- git:
+    uri: https://github.com/tork-a/openrtm_aist_python-release
+    local-name: openrtm_aist_python
+- git:
     uri: https://github.com/tork-a/openhrp3-release
     local-name: openhrp3
 - git:
