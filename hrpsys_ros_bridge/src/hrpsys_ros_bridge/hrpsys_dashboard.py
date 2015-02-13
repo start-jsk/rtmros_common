@@ -146,7 +146,7 @@ class HrpsysServoMenu(MenuDashWidget):
   """
   a button to servo on/off
   """
-  def __init__(self, start_command, stop_command):
+  def __init__(self, start_command, stop_command, use_hrpsys_configurator=False):
     icons = [['bg-grey.svg', 'ic-wireless-runstop-off.svg'],
              ['bg-green.svg', 'ic-wireless-runstop-on.svg'],
              ['bg-red.svg', 'ic-wireless-runstop-off.svg']]
@@ -154,6 +154,7 @@ class HrpsysServoMenu(MenuDashWidget):
     self.update_state(0)
     self.start_command = start_command
     self.stop_command = stop_command
+    self.use_hrpsys_configurator = use_hrpsys_configurator
     self.add_action('Servo On', self.on_servo_on)
     self.add_action('Servo Off', self.on_servo_off)
     self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
@@ -161,6 +162,8 @@ class HrpsysServoMenu(MenuDashWidget):
     try:
       if self.start_command:
         Popen(['bash', '-c', self.start_command])
+      elif self.use_hrpsys_configurator:
+        execHrpsysConfiguratorCommand("hcf.servoOn()")
       else:
         servo = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/servo", OpenHRP_RobotHardwareService_servo )
         power = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/power", OpenHRP_RobotHardwareService_power )
@@ -179,6 +182,8 @@ class HrpsysServoMenu(MenuDashWidget):
     try:
       if self.stop_command:
         Popen(['bash', '-c', self.stop_command])
+      elif self.use_hrpsys_configurator:
+        execHrpsysConfiguratorCommand("hcf.servoOff()")
       else:
         power = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/power", OpenHRP_RobotHardwareService_power )
         servo = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/servo", OpenHRP_RobotHardwareService_servo )
@@ -190,7 +195,38 @@ class HrpsysServoMenu(MenuDashWidget):
                        "Failed to servo off: %s"%(e),
                        QMessageBox.Ok, self.parent())
       mb.exec_()
-    
+
+# HrpsysConfigurator setting
+
+#   Global variable for HrpsysConfigurator
+hcf=None
+
+#   Functions used from MenuDashWidget classes
+def setupHrpsysConfigurator():
+    # Import robot dependent hrpsys_config.py
+    import sys
+    sys.path.append(rospy.get_param('hrpsys_config_path', None))
+    exec "from "+rospy.get_param('hrpsys_config_script_name', None)+" import *"
+    # Setup rtm.nshost
+    exec "rtm.nshost='"+rospy.get_param('hrpsys_nshost', None)+"'"
+    # Create HrpsysConfigurator instance and setup RTCs
+    exec "hcf="+rospy.get_param('hrpsys_configurator_class_name', None)+"()"
+    hcf.findComps()
+    hcf.waitForRobotHardware()
+    hcf.checkSimulationMode()
+    #print >>sys.stderr, "from "+rospy.get_param('hrpsys_config_script_name', None)+" import *"+"rtm.nshost='"+rospy.get_param('hrpsys_nshost', None)+"';hcf="+rospy.get_param('hrpsys_configurator_class_name', None)+"();hcf.findComps();hcf.waitForRobotHardware();hcf.checkSimulationMode()"
+    return hcf
+
+def execHrpsysConfiguratorCommand(command_str):
+    global hcf
+    try:
+        exec command_str
+    except:
+        print >>sys.stderr, "Button execution for ", command_str, "failed, perhaps because of CORBA connection. Retry it once after resetting HrpsysConfigurator."
+        hcf=setupHrpsysConfigurator()
+        exec command_str
+
+# HrpsysDashboard definition
 class HrpsysDashboard(Dashboard):
   """
   Dashbaord for hrpsys.
