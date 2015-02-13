@@ -626,19 +626,11 @@
    )
   (:set-foot-steps-no-wait
    (fs)
-   (let ((init-coords
-          (midcoords 0.5
-                     (send self :abc-footstep->eus-footstep (send (send self :get-foot-step-param) :rleg_coords))
-                     (send self :abc-footstep->eus-footstep (send (send self :get-foot-step-param) :lleg_coords)))))
-     (send self :autobalancerservice_setfootsteps
-           :fs
-           (mapcar #'(lambda (f)
-                       (let ((lf (send (send init-coords :copy-worldcoords)
-                                       :transform f)))
-                         (send lf :name (send f :name))
-                         (send self :eus-footstep->abc-footstep lf)))
-                   fs))
-     ))
+   (send self :autobalancerservice_setfootsteps
+         :fs
+         (mapcar #'(lambda (f)
+                     (send self :eus-footstep->abc-footstep f))
+                 fs)))
   (:set-foot-steps
    (fs)
    (send self :set-foot-steps-no-wait fs)
