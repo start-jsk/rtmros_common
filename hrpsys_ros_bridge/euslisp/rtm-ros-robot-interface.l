@@ -641,6 +641,21 @@
   (:go-stop
    ()
    (send self :autobalancerservice_goStop))
+  (:calc-go-velocity-param-from-velocity-center-offset
+   (ang velocity-center-offset)
+   "Calculate go-velocity velocities from rotation center and rotation angle.
+    ang is rotation angle [rad]. velocity-center-offset is velocity center offset [mm] from foot mid coords."
+   (let* ((default-step-time (send (send self :get-gait-generator-param) :default_step_time)) ;; [s]
+          (cen (make-cascoords :pos velocity-center-offset))
+          (cc (make-cascoords)))
+     (send cen :assoc cc)
+     (send cen :rotate (deg2rad ang) :z)
+     (let ((tf (send (make-coords) :transformation cc)))
+       (list
+        (/ (* 1e-3 (elt (send tf :worldpos) 0)) default-step-time) ;; velx [m/s]
+        (/ (* 1e-3 (elt (send tf :worldpos) 1)) default-step-time) ;; vely [m/s]
+        (/ ang default-step-time) ;; velth [rad/s]
+        ))))
   (:wait-foot-steps
    ()
    (send self :autobalancerservice_waitFootSteps))
