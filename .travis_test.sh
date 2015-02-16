@@ -51,6 +51,8 @@ if [ "$TEST_TYPE" == "work_with_downstream" ]; then
     sudo dpkg -r --force-depends ros-hydro-hrpsys-ros-bridge
     sudo dpkg -r --force-depends ros-hydro-hrpsys-tools
     sudo dpkg -r --force-depends ros-hydro-rtmbuild
+    # https://github.com/start-jsk/rtmros_hironx/issues/287
+    sudo sed -i s@test_tf_and_controller@_test_tf_and_controller@ /opt/ros/hydro/share/hironx_ros_bridge/test/test_hironx_ros_bridge.py
     catkin_make $ROS_PARALLEL_JOBS
     catkin_make install $ROS_PARALLEL_JOBS
 else
