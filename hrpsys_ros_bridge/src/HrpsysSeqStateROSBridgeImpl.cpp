@@ -117,16 +117,25 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   int nforce  = npforce + nvforce;
   m_rsforce.resize(nforce);
   m_rsforceIn.resize(nforce);
+  m_mcforce.resize(npforce/2+nvforce);
+  m_mcforceIn.resize(npforce/2+nvforce);
   for (unsigned int i=0; i<npforce/2; i++){
     hrp::Sensor *s = body->sensor(hrp::Sensor::FORCE, i);
+    // force and moment
     m_rsforceIn[i*2] = new InPort<TimedDoubleSeq>(s->name.c_str(), m_rsforce[i*2]);
     m_rsforce[i*2].data.length(6);
     registerInPort(s->name.c_str(), *m_rsforceIn[i*2]);
     m_rsforceName.push_back(s->name);
+    // off force and moment
     m_rsforceIn[i*2+1] = new InPort<TimedDoubleSeq>(std::string("off_" + s->name).c_str(), m_rsforce[i*2+1]);
     m_rsforce[i*2+1].data.length(6);
     registerInPort(s->name.c_str(), *m_rsforceIn[i*2+1]);
     m_rsforceName.push_back(std::string("off_" + s->name));
+    // ref force and moment
+    m_mcforceIn[i] = new InPort<TimedDoubleSeq>(std::string("ref_" + s->name).c_str(), m_mcforce[i]);
+    m_mcforce[i].data.length(6);
+    registerInPort(std::string("ref_" + s->name).c_str(), *m_mcforceIn[i]);
+    m_mcforceName.push_back(std::string("ref_" + s->name));
     std::cerr << i << " physical force sensor : " << s->name << std::endl;
   }
 
@@ -165,10 +174,17 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     for (int k = 0; k < 7; k++ ) {
         coil::stringTo(tr[k], virtual_force_sensor[j*10+3+k].c_str());
     }
+    // virtual force and moment
     m_rsforceIn[i] = new InPort<TimedDoubleSeq>(name.c_str(), m_rsforce[i]);
     m_rsforce[i].data.length(6);
     registerInPort(name.c_str(), *m_rsforceIn[i]);
     m_rsforceName.push_back(name);
+    // reference virtual force and moment
+    unsigned int j2 = j+npforce/2;
+    m_mcforceIn[j2] = new InPort<TimedDoubleSeq>(std::string("ref_"+name).c_str(), m_mcforce[j2]);
+    m_mcforce[j2].data.length(6);
+    registerInPort(std::string("ref_"+name).c_str(), *m_mcforceIn[j2]);
+    m_mcforceName.push_back(std::string("ref_"+name).c_str());
 
 	if ( ! body->link(base) ) {
 	  std::cerr << "ERROR : unknown link : " << base << std::endl;
