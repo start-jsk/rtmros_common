@@ -35,13 +35,15 @@ mkdir -p $WORKSPACE/src; wstool init $WORKSPACE/src
     exit 1
 fi
 
-for pkg in rtshell rtctree rtsprofile openrtm_aist openrtm_aist_python; do
-    cat <<EOF >> /tmp/rosinstall.$$
+if [ "$CI" != "true" ] ; then
+    for pkg in rtshell rtctree rtsprofile openrtm_aist openrtm_aist_python; do
+        cat <<EOF >> /tmp/rosinstall.$$
 - git:
     uri: http://github.com/tork-a/$pkg-release
     local-name: $pkg
 EOF
-done
+    done
+fi
 
 # update HISTORY-{en,ja}.txt, CMakeLists.txt(OPENHRP_VERSION) and ask kanehiro-san for set tag
 cat <<EOF >> /tmp/rosinstall.$$
