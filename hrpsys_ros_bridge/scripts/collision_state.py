@@ -59,7 +59,7 @@ def rtc_init () :
         mdlldr = obj._narrow(ModelLoader_idl._0_OpenHRP__POA.ModelLoader)
         rospy.loginfo("  bodyinfo URL = file://"+modelfile)
         body_info = mdlldr.getBodyInfo("file://"+modelfile)
-        root_link_name = body_info._get_links()[0].name
+        root_link_name = body_info._get_links()[0].segments[0].name
 
         root_link_offset = inverse_matrix(concatenate_matrices(translation_matrix(body_info._get_links()[0].translation),
                                                 rotation_matrix(body_info._get_links()[0].rotation[3],

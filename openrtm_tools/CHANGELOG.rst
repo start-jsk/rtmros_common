@@ -2,6 +2,13 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.2.7 (2015-01-06)
+------------------
+* remove openrtm_aist_python and rtshell from find_package
+* Hide print debug message of replacing of arg tag
+* Add function to replace arg tag by env. SIMULATOR_NAME is replaced by default.
+* Contributors: Kei Okada, Shunichi Nozawa
+
 1.2.6 (2014-10-10)
 ------------------
 

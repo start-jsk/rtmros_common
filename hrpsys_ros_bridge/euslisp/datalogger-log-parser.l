@@ -7,7 +7,8 @@
 
 (defmethod datalogger-log-parser
   (:init
-   (fname)
+   (fname &key (name))
+   (send-super :name name)
    (setq file (open fname))
    (setq index 0 count 0)
    )
@@ -37,8 +38,8 @@
      (setq index count)
 
      (setq read-state (read-from-string (format nil "#f(~A)" (string-left-trim ".0123456789" line))))
-     (let ((tm (data-string-split (car (data-string-split line " ")) ".")))
-       (setq time (instance ros::time :init :sec (read-from-string (car tm)) :nsec (* 1000 (read-from-string (cadr tm))))))
+     (let* ((tm (read-from-string (format nil "(~A)" (substitute (elt " " 0) (elt "." 0) (subseq line 0 (position (elt " " 0) line)))))))
+       (setq time (instance ros::time :init :sec (car tm) :nsec (* 1000 (cadr tm)))))
      t
      ))
   )
@@ -55,7 +56,7 @@
 
 (defclass datalogger-log-parser-controller
   :super rtm-ros-robot-interface
-  :slots (parser-list robothardware-name eof-p)
+  :slots (parser-list eof-p)
   )
 
 (defmethod datalogger-log-parser-controller
@@ -76,18 +77,21 @@
             (fname-candidate-list-with-valid-line-without-rh
              (mapcar #'cadr (remove-if-not #'(lambda (x) (= (car x) max-line)) fname-liens-without-rh))))
        (setq parser-list
-             (mapcar #'(lambda (x) (instance datalogger-log-parser :init (format nil "~A/~A" dir-str x)))
+             (mapcar #'(lambda (x)
+                         (instance datalogger-log-parser :init (format nil "~A/~A" dir-str x)
+                                   :name (let ((nm (pathname-type x)))
+                                           (read-from-string
+                                            (if (and (substringp "(" nm) (substringp ")" nm))
+                                                (format nil "RobotHardware0_~A" (cadr (data-string-split nm "_")))
+                                              nm)))))
                      (append (remove-if-not #'(lambda (x) (substringp "(" x)) fname-candidate-list)
                              fname-candidate-list-with-valid-line-without-rh)))
-       (cond
-        ((find-if #'(lambda (x) (substringp "(Robot)" x)) (send-all (send self :parser-list) :fname))
-         (setq robothardware-name (car (data-string-split (pathname-type (find-if #'(lambda (x) (substringp "(Robot)" x)) (send-all (send self :parser-list) :fname))) "_"))))
-        (t (setq robothardware-name "RobotHardware0")))
        )))
   (:parser-list
    (&optional (str))
    (if str
-       (find-if #'(lambda (x) (string= str (pathname-type (send x :fname)))) parser-list)
+       (let ((str-sym (read-from-string str)))
+         (find-if #'(lambda (x) (eq str-sym (send x :name))) parser-list))
      parser-list))
   (:eof-p () eof-p)
   (:update-robot-state
@@ -99,11 +103,11 @@
    (send self :set-robot-state1
          :potentio-vector
          (map float-vector #'rad2deg
-              (send (send self :parser-list (format nil "~A_q" robothardware-name)) :read-state)))
+              (send (send self :parser-list "RobotHardware0_q") :read-state)))
    (send robot :angle-vector (cdr (assoc :potentio-vector robot-state)))
    (send self :set-robot-state1
          :torque-vector
-         (send (send self :parser-list (format nil "~A_tau" robothardware-name)) :read-state))
+         (send (send self :parser-list "RobotHardware0_tau") :read-state))
    ;; (send robot :torque-vector (cdr (assoc :torque-vector robot-state)))
    (send self :set-robot-state1
          :reference-torque-vector
@@ -125,7 +129,7 @@
    (dolist (f (send robot :force-sensors))
      (send self :set-robot-state1
            (send f :name)
-           (send (send self :parser-list (format nil "~A_~A" robothardware-name (send f :name))) :read-state))
+           (send (send self :parser-list (format nil "RobotHardware0_~A" (send f :name))) :read-state))
      (send self :set-robot-state1
            (read-from-string (format nil ":off-~A" (string-downcase (send f :name))))
            (send (send self :parser-list (format nil "rmfo_off_~A" (send f :name))) :read-state)))
@@ -144,23 +148,42 @@
                           (append
                            (if (send robot :imu-sensor "gsensor")
                                (list :linear_acceleration
-                                     (let ((acc (send (send self :parser-list (format nil "~A_~A" robothardware-name "gsensor")) :read-state)))
+                                     (let ((acc (send (send self :parser-list "RobotHardware0_gsensor") :read-state)))
                                        (instance geometry_msgs::Vector3 :init :x (elt acc 0) :y (elt acc 1) :z (elt acc 2)))))
                            (if (send robot :imu-sensor "gyrometer")
                                (list :angular_velocity
-                                     (let ((gyro (send (send self :parser-list (format nil "~A_~A" robothardware-name "gyrometer")) :read-state)))
+                                     (let ((gyro (send (send self :parser-list "RobotHardware0_gyrometer") :read-state)))
                                        (instance geometry_msgs::Vector3 :init :x (elt gyro 0) :y (elt gyro 1) :z (elt gyro 2))))))
                           )))
      (send robot :move-coords
            (make-coords :rot (ros::tf-quaternion->rot (send (cdr (assoc :imu robot-state)) :orientation)))
            (car (send robot :imu-sensors))))
+   (if (send self :parser-list "abc_q")
+       (send self :set-robot-state1
+             :auto-balancer-reference-vector
+             (map float-vector #'rad2deg (send (send self :parser-list "abc_q") :read-state))))
+   (if (send self :parser-list "abc_baseTformOut")
+       (send self :set-robot-state1
+             :auto-balancer-reference-root-coords
+             (send self :hrpsys-tform->coords (send (send self :parser-list "abc_baseTformOut") :read-state))))
+   )
+  (:hrpsys-tform->coords
+   (tform-vector)
+   (make-coords :pos (scale 1e3 (subseq tform-vector 0 3))
+                :rot (make-matrix 3 3 (list (subseq tform-vector 3 6) (subseq tform-vector 6 9) (subseq tform-vector 9))))
+   )
+  (:reference-root-coords
+   ()
+   (cdr (assoc :reference-root-coords robot-state))
    )
   (:reference-worldcoords
    ()
-   (send (send (cdr (assoc :reference-root-coords robot-state)) :copy-worldcoords)
+   (send (send (send self :reference-root-coords) :copy-worldcoords)
          :transform
          (send (car (send robot :links)) :transformation robot))
    )
+  (:auto-balancer-reference-vector () (cdr (assoc :auto-balancer-reference-vector robot-state)))
+  (:auto-balancer-reference-root-coords () (cdr (assoc :auto-balancer-reference-root-coords robot-state)))
   ;; overwrite
   (:reference-vector () (cdr (assoc :reference-vector robot-state)))
   (:actual-vector () (send self :potentio-vector))

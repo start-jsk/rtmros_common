@@ -8,6 +8,8 @@ find_package(catkin REQUIRED COMPONENTS roscpp openrtm_tools rtmbuild rostest)
 # include rtmbuild
 if(EXISTS ${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
   include(${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
+elseif(EXISTS ${rtmbuild_SOURCE_PREFIX}/cmake/rtmbuild.cmake)
+  include(${rtmbuild_SOURCE_PREFIX}/cmake/rtmbuild.cmake)
 elseif(EXISTS ${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
   include(${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
 else()

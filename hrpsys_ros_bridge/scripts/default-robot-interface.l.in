@@ -10,8 +10,8 @@
   (:init (&rest args)
          (send-super* :init :robot @robot@-robot args)))
 
-(defun @robot@-init ()
+(defun @robot@-init (&rest args)
   (if (not (boundp '*ri*))
-      (setq *ri* (instance @robot@-interface :init)))
+      (setq *ri* (instance* @robot@-interface :init args)))
   (if (not (boundp '*@robot@*))
       (setq *@robot@* (instance @robot@-robot :init))))
