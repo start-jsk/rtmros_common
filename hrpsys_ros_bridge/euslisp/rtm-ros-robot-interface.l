@@ -456,7 +456,7 @@
    (send self :force-sensor-method
          limb
          #'(lambda (name &rest _args)
-             (send self :impedancecontrollerservice_startimpedancecontroller :name name))
+             (send self :impedancecontrollerservice_startimpedancecontroller :name (string-downcase name)))
          :raw-start-impedance))
   (:stop-impedance
    (limb)
@@ -465,7 +465,7 @@
    (send self :force-sensor-method
          limb
          #'(lambda (name &rest _args)
-             (send self :impedancecontrollerservice_stopimpedancecontroller :name name))
+             (send self :impedancecontrollerservice_stopimpedancecontroller :name (string-downcase name)))
          :stop-impedance))
   (:set-impedance-controller-param
    (limb &rest args)
@@ -474,7 +474,7 @@
    (send* self :force-sensor-method
           limb
           #'(lambda (name &rest _args)
-              (send* self :raw-set-impedance-controller-param name args))
+              (send* self :raw-set-impedance-controller-param (string-downcase name) args))
           :set-impedance-controller-param
           args))
   (:get-impedance-controller-param
@@ -484,28 +484,16 @@
    (send self :force-sensor-method
          limb
          #'(lambda (name &rest _args)
-             (send self :raw-get-impedance-controller-param name))
+             (send self :raw-get-impedance-controller-param (string-downcase name)))
          :get-impedance-controller-param))
   (:force-sensor-method
    (limb method-func method-name &rest args)
    (cond
-    ;; ((stringp limb)
-    ;;  (apply method-func
-    ;;         limb nil nil args))
     ((eq limb :legs) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rleg :lleg)))
     ((eq limb :arms) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rarm :larm)))
-    ((and (substringp ":v" (format nil "~A" limb))
-          (find-method robot (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
-     (let ((rlimb (read-from-string (format nil ":~A" (string-left-trim ":v" (format nil "~A" limb))))))
-       (apply method-func
-              (format nil "v~C~A" (elt (string-left-trim ":v" (format nil "~A" limb)) 0) (case rlimb ((:rarm :larm) "hsensor") (t "fsensor")))
-              args)))
-    ((car (send robot limb :force-sensors))
-     (let ((fs (car (send robot limb :force-sensors))))
-       (apply method-func
-              (string-downcase (send fs :name))
-              args)))
-    (t )
+    ((and (find-method robot limb) (car (send robot limb :force-sensors)))
+     (apply method-func limb args))
+    (t (error ";; No such limb or force sensor is defined for ~A~%." limb))
     ))
   )
 
@@ -638,19 +626,11 @@
    )
   (:set-foot-steps-no-wait
    (fs)
-   (let ((init-coords
-          (midcoords 0.5
-                     (send self :abc-footstep->eus-footstep (send (send self :get-foot-step-param) :rleg_coords))
-                     (send self :abc-footstep->eus-footstep (send (send self :get-foot-step-param) :lleg_coords)))))
-     (send self :autobalancerservice_setfootsteps
-           :fs
-           (mapcar #'(lambda (f)
-                       (let ((lf (send (send init-coords :copy-worldcoords)
-                                       :transform f)))
-                         (send lf :name (send f :name))
-                         (send self :eus-footstep->abc-footstep lf)))
-                   fs))
-     ))
+   (send self :autobalancerservice_setfootsteps
+         :fs
+         (mapcar #'(lambda (f)
+                     (send self :eus-footstep->abc-footstep f))
+                 fs)))
   (:set-foot-steps
    (fs)
    (send self :set-foot-steps-no-wait fs)
@@ -661,6 +641,21 @@
   (:go-stop
    ()
    (send self :autobalancerservice_goStop))
+  (:calc-go-velocity-param-from-velocity-center-offset
+   (ang velocity-center-offset)
+   "Calculate go-velocity velocities from rotation center and rotation angle.
+    ang is rotation angle [rad]. velocity-center-offset is velocity center offset [mm] from foot mid coords."
+   (let* ((default-step-time (send (send self :get-gait-generator-param) :default_step_time)) ;; [s]
+          (cen (make-cascoords :pos velocity-center-offset))
+          (cc (make-cascoords)))
+     (send cen :assoc cc)
+     (send cen :rotate (deg2rad ang) :z)
+     (let ((tf (send (make-coords) :transformation cc)))
+       (list
+        (/ (* 1e-3 (elt (send tf :worldpos) 0)) default-step-time) ;; velx [m/s]
+        (/ (* 1e-3 (elt (send tf :worldpos) 1)) default-step-time) ;; vely [m/s]
+        (/ ang default-step-time) ;; velth [rad/s]
+        ))))
   (:wait-foot-steps
    ()
    (send self :autobalancerservice_waitFootSteps))
