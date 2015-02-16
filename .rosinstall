@@ -1,15 +1,24 @@
+# - git:
+#     uri: https://github.com/tork-a/openrtm_aist-release
+#     local-name: openrtm_aist
+# - git:
+#     uri: https://github.com/tork-a/openrtm_aist_python-release
+#     local-name: openrtm_aist_python
 - git:
-    uri: https://github.com/start-jsk/openrtm_aist_core
-    local-name: rtm-ros-robotics/openrtm_common/openrtm_aist_core
+    uri: https://github.com/tork-a/openhrp3-release
+    local-name: openhrp3
 - git:
-    uri: https://github.com/start-jsk/openhrp3
-    local-name: rtm-ros-robotics/openrtm_common/openhrp3
-- git:
-    uri: https://github.com/start-jsk/hrpsys
-    local-name: rtm-ros-robotics/openrtm_common/hrpsys
-- git:
-    uri: https://github.com/start-jsk/rtshell_core 
-    local-name: rtm-ros-robotics/openrtm_common/rtshell_core
+    uri: https://github.com/tork-a/hrpsys-release
+    local-name: hrpsys
+# - git:
+#     uri: https://github.com/tork-a/rtshell-release
+#     local-name: rtshell
+# - git:
+#     uri: https://github.com/tork-a/rtsprofile-release
+#     local-name: rtsprofile
+# - git:
+#     uri: https://github.com/tork-a/rtctree-release
+#     local-name: rtctree
 - git:
     uri: https://github.com/start-jsk/rtmros_common
     local-name: rtm-ros-robotics/rtmros_common

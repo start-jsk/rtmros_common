@@ -15,7 +15,7 @@ from numpy import *
 import rospy,rospkg, tf
 from geometry_msgs.msg import WrenchStamped
 from nav_msgs.msg import Odometry
-from hrpsys_ros_bridge.srv import OpenHRP_SequencePlayerService_loadPattern, OpenHRP_SequencePlayerService_waitInterpolation
+from hrpsys_ros_bridge.srv import *
 
 import actionlib
 
@@ -86,7 +86,7 @@ class TestSampleRobot(unittest.TestCase):
         ret = wait_interpolation()
         t2 = rospy.get_time()
         rospy.logwarn("waitInterpolation %f"%(t2-t1))
-        self.assertAlmostEqual(t2-t1, 20, delta=5)
+        self.assertAlmostEqual(t2-t1, 11, delta=2)
         #self.assertNotAlmostEqual(trans[1],0,2)
 
     # send joint angles

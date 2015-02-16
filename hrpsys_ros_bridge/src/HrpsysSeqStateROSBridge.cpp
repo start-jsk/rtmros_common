@@ -37,11 +37,15 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   HrpsysSeqStateROSBridgeImpl(manager), follow_action_initialized(false)
 {
   // ros
+  ros::NodeHandle pnh("~");
+  pnh.param("publish_sensor_transforms", publish_sensor_transforms, true);
+  
   joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
   joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
   follow_joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal, this));
   follow_joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt, this));
   sendmsg_srv = nh.advertiseService(std::string("sendmsg"), &HrpsysSeqStateROSBridge::sendMsg, this);
+  set_sensor_transformation_srv = nh.advertiseService("set_sensor_transformation", &HrpsysSeqStateROSBridge::setSensorTransformation, this);
   joint_state_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
   joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
   trajectory_command_sub = nh.subscribe("/fullbody_controller/command", 1, &HrpsysSeqStateROSBridge::onTrajectoryCommandCB, this);
@@ -120,9 +124,12 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
 
   ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @Initilize name : " << getInstanceName() << " done");
 
-  fsensor_pub.resize(m_rsforceIn.size());
+  fsensor_pub.resize(m_rsforceIn.size()+m_mcforceIn.size());
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
     fsensor_pub[i] = nh.advertise<geometry_msgs::WrenchStamped>(m_rsforceName[i], 10);
+  }
+  for (unsigned int i=0; i<m_mcforceIn.size(); i++){
+    fsensor_pub[i+m_rsforceIn.size()] = nh.advertise<geometry_msgs::WrenchStamped>(m_mcforceName[i], 10);
   }
   zmp_pub = nh.advertise<geometry_msgs::PointStamped>("/zmp", 10);
 
@@ -207,6 +214,14 @@ void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt() {
 
 void HrpsysSeqStateROSBridge::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg) {
   onJointTrajectory(*msg);
+}
+
+bool HrpsysSeqStateROSBridge::setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
+                                                      hrpsys_ros_bridge::SetSensorTransformation::Response& res)
+{
+  boost::mutex::scoped_lock lock(sensor_transformation_mutex);
+  sensor_transformations[req.sensor_name] = req.transform;
+  return true;
 }
 
 bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
@@ -392,12 +407,22 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
     joint_state_pub.publish(joint_state);
     // sensors publish
-    std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
-    while ( its != sensor_info.end() ) {
-      br.sendTransform(tf::StampedTransform((*its).second.transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
-      ++its;
+    if (publish_sensor_transforms) {
+      boost::mutex::scoped_lock lock(sensor_transformation_mutex);
+      std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
+      while ( its != sensor_info.end() ) {
+        if (sensor_transformations.find((*its).first) == sensor_transformations.end()) {
+          br.sendTransform(tf::StampedTransform((*its).second.transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
+        }
+        else {
+          geometry_msgs::Transform transform = sensor_transformations[(*its).first];
+          tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
+                                     tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
+          br.sendTransform(tf::StampedTransform(tf_transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
+        }
+        ++its;
+      }
     }
-
     m_mutex.unlock();
 
     if ( joint_trajectory_server.isActive() &&
@@ -622,6 +647,36 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	}
     }
   } // end: publish forces sonsors
+
+  // publish reference forces sonsors
+  for (unsigned int i=0; i<m_mcforceIn.size(); i++){
+    if ( m_mcforceIn[i]->isNew() ) {
+      try {
+	m_mcforceIn[i]->read();
+	ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute " << m_mcforceName[i] << " size = " << m_mcforce[i].data.length() );
+	if ( m_mcforce[i].data.length() >= 6 ) {
+	  geometry_msgs::WrenchStamped fsensor;
+	  if ( use_hrpsys_time ) {
+	    fsensor.header.stamp = ros::Time(m_mcforce[i].tm.sec, m_mcforce[i].tm.nsec);
+	  }else{
+	    fsensor.header.stamp = tm_on_execute;
+	  }
+	  fsensor.header.frame_id = m_mcforceName[i];
+	  fsensor.wrench.force.x = m_mcforce[i].data[0];
+	  fsensor.wrench.force.y = m_mcforce[i].data[1];
+	  fsensor.wrench.force.z = m_mcforce[i].data[2];
+	  fsensor.wrench.torque.x = m_mcforce[i].data[3];
+	  fsensor.wrench.torque.y = m_mcforce[i].data[4];
+	  fsensor.wrench.torque.z = m_mcforce[i].data[5];
+	  fsensor_pub[i+m_rsforceIn.size()].publish(fsensor);
+	}
+      }
+      catch(const std::runtime_error &e)
+	{
+	  ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+	}
+    }
+  } // end: publish reference forces sonsors
 
   if ( m_rszmpIn.isNew() ) {
     try {

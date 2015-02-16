@@ -3,7 +3,13 @@ cmake_minimum_required(VERSION 2.8.3)
 project(hrpsys_ros_bridge)
 
 # call catkin depends
-find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp rostest sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager hrpsys_tools image_transport dynamic_reconfigure hrpsys nav_msgs) # pr2_controllers_msgs robot_monitor
+find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp rostest sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager hrpsys_tools image_transport dynamic_reconfigure nav_msgs geometry_msgs) # pr2_controllers_msgs robot_monitor geometry_msgs
+find_package(hrpsys QUIET) # on indigo, hrpsys is not ros package
+if(NOT ${hrpsys_FOUND})
+  find_package(PkgConfig)
+  pkg_check_modules(hrpsys hrpsys-base REQUIRED)
+endif()
+
 catkin_python_setup()
 
 # download pr2_controllers_msgs for git
@@ -24,6 +30,8 @@ endif()
 #include(${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
 if(EXISTS ${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
   include(${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
+elseif(EXISTS ${rtmbuild_SOURCE_PREFIX}/cmake/rtmbuild.cmake)
+  include(${rtmbuild_SOURCE_PREFIX}/cmake/rtmbuild.cmake)
 elseif(EXISTS ${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
   include(${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
 else()
@@ -66,9 +74,9 @@ unset(hrpsys_LIBRARIES CACHE) # remove not to add hrpsys_LIBRARIES to hrpsys_ros
 
 # define add_message_files before rtmbuild_init
 add_message_files(FILES MotorStates.msg)
-
+add_service_files(FILES SetSensorTransformation.srv)
 # initialize rtmbuild
-rtmbuild_init()
+rtmbuild_init(geometry_msgs)
 
 # call catkin_package, after rtmbuild_init, before rtmbuild_gen*
 catkin_package(
@@ -94,6 +102,14 @@ string(RANDOM _random_string)
 rtmbuild_add_executable(HrpsysSeqStateROSBridge src/HrpsysSeqStateROSBridgeImpl.cpp src/HrpsysSeqStateROSBridge.cpp src/HrpsysSeqStateROSBridgeComp.cpp)
 rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/ImageSensorROSBridgeComp.cpp)
 rtmbuild_add_executable(HrpsysJointTrajectoryBridge src/HrpsysJointTrajectoryBridge.cpp src/HrpsysJointTrajectoryBridgeComp.cpp)
+
+add_custom_command(
+  OUTPUT  ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_BIN_DESTINATION}/rtmlaunch ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_BIN_DESTINATION}/rtmtest
+  COMMAND cmake -E copy scripts/rtmlaunch ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_BIN_DESTINATION}/rtmlaunch
+  COMMAND cmake -E copy scripts/rtmtest   ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_BIN_DESTINATION}/rtmtest
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  DEPENDS scripts/rtmlaunch scripts/rtmtest)
+add_custom_target(copy_rtm_script ALL DEPENDS ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_BIN_DESTINATION}/rtmlaunch ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_BIN_DESTINATION}/rtmtest)
 
 install(PROGRAMS scripts/rtmlaunch scripts/rtmtest scripts/rtmstart.py
   DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})

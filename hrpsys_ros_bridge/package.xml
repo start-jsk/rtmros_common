@@ -1,6 +1,6 @@
 <package>
   <name>hrpsys_ros_bridge</name>
-  <version>1.2.5</version>
+  <version>1.2.7</version>
   <description>hrpsys_ros_bridge package provides basic functionalities to bind
   	<a href = "http://wiki.ros.org/hrpsys">hrpsys</a>, a 
   	<a href = "http://openrtm.org/">OpenRTM</a>-based controller, and ROS.<br /> 
@@ -60,7 +60,8 @@
   <build_depend>subversion</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>visualization_msgs</build_depend>
-  
+  <build_depend>geometry_msgs</build_depend>
+
   <run_depend>actionlib</run_depend>
   <run_depend>camera_info_manager</run_depend>
   <run_depend>collada_urdf</run_depend>
@@ -88,7 +89,7 @@
   <run_depend>sensor_msgs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>visualization_msgs</run_depend>
-
+  <run_depend>geometry_msgs</run_depend>
   <!-- <test_depend>hrpsys</test_depend> -->
   <!-- <test_depend>hrpsys_tools</test_depend> -->
   <!-- <test_depend>openrtm_tools</test_depend> -->
