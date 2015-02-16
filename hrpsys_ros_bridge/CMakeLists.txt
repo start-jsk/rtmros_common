@@ -129,7 +129,6 @@ endif()
 compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/PA10/pa10.main.wrl)
 compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/sample1.wrl SampleRobot
   --conf-file-option "abc_leg_offset: 0,0.09,0"
-  --conf-file-option "abc_stride_parameter: 0.15,0.05,10"
   --conf-file-option "end_effectors: rarm,RARM_WRIST_P,CHEST,0.0,-5.684342e-17,-0.12,9.813078e-18,1.0,0.0,1.5708, larm,LARM_WRIST_P,CHEST,0.0,5.684342e-17,-0.12,-9.813078e-18,1.0,0.0,1.5708, rleg,RLEG_ANKLE_R,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, lleg,LLEG_ANKLE_R,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0,"
   --conf-dt-option "0.002"
   --simulation-timestep-option "0.002")
