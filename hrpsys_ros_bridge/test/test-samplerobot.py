@@ -91,7 +91,10 @@ class TestSampleRobot(unittest.TestCase):
 
     def test_go_pos(self):
         # prepare
-        rospy.wait_for_service('/AutoBalancerServiceROSBridge/goPos')
+        try: # go-pos requires hrpsys > 315.2.8
+            rospy.wait_for_service('/AutoBalancerServiceROSBridge/goPos', timeout = 10)
+        except ROSException:
+            return
         go_pos = rospy.ServiceProxy('/AutoBalancerServiceROSBridge/goPos', OpenHRP_AutoBalancerService_goPos)
         rospy.wait_for_service('/AutoBalancerServiceROSBridge/waitFootSteps')
         wait_foot_steps = rospy.ServiceProxy('/AutoBalancerServiceROSBridge/waitFootSteps', OpenHRP_AutoBalancerService_waitFootSteps)
