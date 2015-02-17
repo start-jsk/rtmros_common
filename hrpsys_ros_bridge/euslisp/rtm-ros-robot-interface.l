@@ -508,16 +508,16 @@
    (limb &rest args)
    (send* self :force-sensor-method
          limb
-         #'(lambda (name base-name target-name &rest _args)
-             (send* self :raw-set-forcemoment-offset-param name _args))
+         #'(lambda (name &rest _args)
+             (send* self :raw-set-forcemoment-offset-param (send (car (send robot name :force-sensors)) :name) _args))
          :set-forcemoment-offset-param
          args))
   (:get-forcemoment-offset-param
    (limb)
    (send self :force-sensor-method
          limb
-         #'(lambda (name base-name target-name &rest _args)
-             (send self :raw-get-forcemoment-offset-param name))
+         #'(lambda (name &rest _args)
+             (send self :raw-get-forcemoment-offset-param (send (car (send robot name :force-sensors)) :name)))
          :get-forcemoment-offset-param))
   (:load-forcemoment-offset-param
    (fname &key (set-offset t))
