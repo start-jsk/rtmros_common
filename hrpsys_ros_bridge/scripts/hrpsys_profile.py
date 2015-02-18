@@ -30,16 +30,23 @@ def rtc_init () :
         ms = rtm.findRTCmanager(rtm.nshost)
         print "[hrpsys_profile.py] wait for RTCmanager : ",ms
 
+def get_component_names ():
+    global component_names
+    components = ms.get_components()
+    component_names = map (lambda x : x.name(), components)
+
 def hrpsys_profile() :
-    global ms, rh, eps
+    global ms, rh, eps, component_names
 
     diagnostic = DiagnosticArray()
     diagnostic.header.stamp = rospy.Time.now()
 
     components = ms.get_components()
+    if len(components) != len(component_names):
+        rospy.logerr("components and component_names length mismatch. Get component_names again.")
+        raise
     eps_of_rh = narrow(findRTC(components[0].name()).owned_ecs[0], "ExecutionProfileService")
-    for component in components :
-        component_name = component.name()
+    for component_name in component_names:
         component_rtc = findRTC(component_name)
         eps = narrow(component_rtc.owned_ecs[0], "ExecutionProfileService")
 
@@ -63,8 +70,8 @@ def hrpsys_profile() :
             diagnostic.status.append(status)
 
         try:
-            prof = eps_of_rh.getComponentProfile(component.ref)
-            status = DiagnosticStatus(name =  'hrpEC Profile (RTC: ' + component.name() + ')', level = DiagnosticStatus.OK)
+            prof = eps_of_rh.getComponentProfile(component_rtc.ref)
+            status = DiagnosticStatus(name =  'hrpEC Profile (RTC: ' + component_name + ')', level = DiagnosticStatus.OK)
             status.message = "Running : Average Process : %7.5f, Max Process : %7.5f" % (prof.avg_process*1000, prof.max_process*1000);
             status.values.append(KeyValue(key = "Max Process", value = str(prof.max_process*1000)))
             status.values.append(KeyValue(key = "Average Process", value = str(prof.avg_process*1000)))
@@ -89,13 +96,16 @@ if __name__ == '__main__':
 
         r = rospy.Rate(1) # 10hz
 
+        get_component_names()
         while not rospy.is_shutdown():
             try :
                 hrpsys_profile()
             except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE), e :
                 print "[hrpsys_profile.py] catch exception", e
                 rtc_init()
+                get_component_names()
             except Exception, e:
+                get_component_names()
                 pass
 
             r.sleep()
