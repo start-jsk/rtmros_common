@@ -786,7 +786,7 @@
 (defun print-end-effector-parameter-conf-from-robot
   (rb)
   (format t "end_effectors:")
-  (dolist (l '(:rarm :larm :rleg :lleg))
+  (dolist (l (remove-if-not #'(lambda (x) (send rb x)) '(:rarm :larm :rleg :lleg)))
     (let ((rl (send (send (send rb l :root-link) :parent) :joint)))
       (format t " ~A,~A,~A," (string-downcase (string l)) (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))
       (let* ((dif (send (send rb l :end-coords :parent) :transformation (send rb l :end-coords)))
