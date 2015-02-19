@@ -79,15 +79,16 @@ class TestSampleRobot(unittest.TestCase):
         load_pattern = rospy.ServiceProxy('/SequencePlayerServiceROSBridge/loadPattern', OpenHRP_SequencePlayerService_loadPattern)
         wait_interpolation = rospy.ServiceProxy('/SequencePlayerServiceROSBridge/waitInterpolation', OpenHRP_SequencePlayerService_waitInterpolation)
         basename = rospkg.RosPack().get_path('openhrp3')+'/share/OpenHRP-3.1/sample/controller/SampleController/etc/Sample'
-        tm = 1.0
-        ret = load_pattern(basename = basename, tm = tm)
-        t1 = rospy.get_time()
-        rospy.logwarn("loadPattern = %r %r"%(basename, tm))
-        ret = wait_interpolation()
-        t2 = rospy.get_time()
-        rospy.logwarn("waitInterpolation %f"%(t2-t1))
-        self.assertAlmostEqual(t2-t1, 11, delta=2)
-        #self.assertNotAlmostEqual(trans[1],0,2)
+        if os.path.exists(basename + ".pos")):
+            tm = 1.0
+            ret = load_pattern(basename = basename, tm = tm)
+            t1 = rospy.get_time()
+            rospy.logwarn("loadPattern = %r %r"%(basename, tm))
+            ret = wait_interpolation()
+            t2 = rospy.get_time()
+            rospy.logwarn("waitInterpolation %f"%(t2-t1))
+            self.assertAlmostEqual(t2-t1, 11, delta=2)
+            #self.assertNotAlmostEqual(trans[1],0,2)
 
     # send joint angles
     def test_joint_angles(self):
