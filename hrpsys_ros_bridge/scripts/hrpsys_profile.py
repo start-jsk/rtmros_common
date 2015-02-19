@@ -30,11 +30,7 @@ def rtc_init () :
         ms = rtm.findRTCmanager(rtm.nshost)
         print "[hrpsys_profile.py] wait for RTCmanager : ",ms
 
-def get_component_names ():
-    global component_names
-    components = ms.get_components()
-    component_names = map (lambda x : x.name(), components)
-
+component_names = dict()
 def hrpsys_profile() :
     global ms, rh, eps, component_names
 
@@ -42,11 +38,11 @@ def hrpsys_profile() :
     diagnostic.header.stamp = rospy.Time.now()
 
     components = ms.get_components()
-    if len(components) != len(component_names):
-        rospy.logerr("components and component_names length mismatch. Get component_names again.")
-        raise
     eps_of_rh = narrow(findRTC(components[0].name()).owned_ecs[0], "ExecutionProfileService")
-    for component_name in component_names:
+    for component in components:
+        if not component_names.has_key(component):
+            component_names[component] = component.name()
+        component_name = component_names[component]
         component_rtc = findRTC(component_name)
         eps = narrow(component_rtc.owned_ecs[0], "ExecutionProfileService")
 
@@ -96,16 +92,13 @@ if __name__ == '__main__':
 
         r = rospy.Rate(1) # 10hz
 
-        get_component_names()
         while not rospy.is_shutdown():
             try :
                 hrpsys_profile()
             except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE), e :
                 print "[hrpsys_profile.py] catch exception", e
                 rtc_init()
-                get_component_names()
             except Exception, e:
-                get_component_names()
                 pass
 
             r.sleep()
