@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 PKG = 'openrtm_tools'
-NAME = 'test-rthsell-setup'
+NAME = 'test_rthsell_setup'
 
 import unittest, os, sys
 import subprocess

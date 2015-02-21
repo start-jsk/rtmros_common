@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 PKG = 'openrtm_tools'
-NAME = 'test-rtmlaunch'
+NAME = 'test_rtmlaunch'
 
 import imp  ## for rosbuild
 try:
