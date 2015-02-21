@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 PKG = 'hrpsys_tools'
-NAME = 'test-hrpsys-config'
+NAME = 'test_hrpsys_config'
 
 import imp  ## for rosbuild
 try:
