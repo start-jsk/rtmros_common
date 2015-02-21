@@ -23,7 +23,8 @@ else
     for dir in "${PREFIX_PATH[@]}"; do
         # process "$i"
         if [ $loop = true -a -e  ${dir}/share/rtshell/shell_support ] ; then
-            source ${dir}/share/rtshell/shell_support
+            #source ${dir}/share/rtshell/shell_support
+            source ${dir}/share/rtshell/bash_completion
             loop=false
         fi
     done
