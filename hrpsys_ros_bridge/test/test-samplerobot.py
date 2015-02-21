@@ -9,7 +9,7 @@ try:
 except:
     import roslib; roslib.load_manifest(PKG)
 
-import argparse,unittest,rostest, time, sys, math
+import argparse,unittest,rostest, time, sys, math, os
 from numpy import *
 
 import rospy,rospkg, tf
@@ -79,7 +79,7 @@ class TestSampleRobot(unittest.TestCase):
         load_pattern = rospy.ServiceProxy('/SequencePlayerServiceROSBridge/loadPattern', OpenHRP_SequencePlayerService_loadPattern)
         wait_interpolation = rospy.ServiceProxy('/SequencePlayerServiceROSBridge/waitInterpolation', OpenHRP_SequencePlayerService_waitInterpolation)
         basename = rospkg.RosPack().get_path('openhrp3')+'/share/OpenHRP-3.1/sample/controller/SampleController/etc/Sample'
-        if os.path.exists(basename + ".pos")):
+        if os.path.exists(basename + ".pos"):
             tm = 1.0
             ret = load_pattern(basename = basename, tm = tm)
             t1 = rospy.get_time()
