@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 PKG = 'hrpsys_ros_bridge'
-NAME = 'test-samplerobot'
+NAME = 'test_pa10'
 
 import imp  ## for rosbuild
 try:

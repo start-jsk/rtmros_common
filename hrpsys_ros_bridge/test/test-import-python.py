@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 PKG = 'hrpsys_ros_bridge'
-NAME = 'test-import-python'
+NAME = 'test_import_python'
 
 import imp  ## for rosbuild
 try:
