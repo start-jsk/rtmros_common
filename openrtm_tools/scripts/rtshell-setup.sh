@@ -42,8 +42,12 @@ case "$CATKIN_SHELL" in
         ;;
 esac
 
-alias rtmlaunch=`rospack find hrpsys_ros_bridge`/scripts/rtmlaunch
-alias rtmtest=`rospack find hrpsys_ros_bridge`/scripts/rtmtest
+if [ ! "$(which rtmlaunch)" ]; then
+    alias rtmlaunch=`rospack find hrpsys_ros_bridge`/scripts/rtmlaunch
+fi
+if [ ! "$(which rtmtest)" ]; then
+    alias rtmtest=`rospack find hrpsys_ros_bridge`/scripts/rtmtest
+fi
 
 # these completion settings are copied from rosbash
 case "$CATKIN_SHELL" in
