@@ -662,6 +662,7 @@
   ;; wrap :set-gait-generator-param to use symbol for default-orbit-type
   (:set-gait-generator-param
    (&rest args &key default-orbit-type &allow-other-keys)
+   "Set AutoBalancer's GaitGenerator param."
    (send* self :raw-set-gait-generator-param
           :default-orbit-type
           (if (or (null default-orbit-type) (integerp default-orbit-type))
@@ -680,12 +681,14 @@
   ;; :get-auto-balancer-param and :set-auto-balancer-param is not defined by def-set-get-param-method yet.
   (:get-auto-balancer-param
    ()
+   "Get AutoBalancer params."
    (send (send self :autobalancerservice_getautobalancerparam) :i_param))
   (:set-auto-balancer-param
    (&key default-zmp-offsets move-base-gain
          graspless-manip-arm graspless-manip-mode
          graspless-manip-p-gain
          graspless-manip-reference-trans-pos graspless-manip-reference-trans-rot)
+   "Set AutoBalancer params."
    (let* ((current-param (send self :get-auto-balancer-param))
           (param (instance hrpsys_ros_bridge::Openhrp_AutoBalancerService_AutoBalancerParam
                            :init
@@ -713,6 +716,7 @@
      (send self :autobalancerservice_setautobalancerparam :i_param param)))
    (:get-auto-balancer-controller-mode
     ()
+    "Get AutoBalancer controller mode."
     (let* ((cm (constants "" "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_CONTROLLERMODE"))
            (mode (send (send self :get-auto-balancer-param) :controller_mode)))
       (find-if #'(lambda (tmp-cm) (= (eval tmp-cm) mode)) cm)))
@@ -778,6 +782,7 @@
 (defmethod rtm-ros-robot-interface
   (:set-st-param
    (&rest args &key st-algorithm &allow-other-keys)
+   "Set Stabilizer param."
    (send* self :raw-set-st-param
           :st-algorithm
           (if (or (null st-algorithm) (integerp st-algorithm))
@@ -789,14 +794,17 @@
           args))
   (:start-st
    ()
+   "Start Stabilizer."
    (send self :stabilizerservice_startstabilizer)
    )
   (:stop-st
    ()
+   "Stop Stabilizer."
    (send self :stabilizerservice_stopstabilizer)
    )
   (:get-st-controller-mode
    ()
+   "Get Stabilizer controller mode."
    (let* ((cm (constants "" "HRPSYS_ROS_BRIDGE::OPENHRP_STABILIZERSERVICE_CONTROLLERMODE"))
           (mode (send (send self :get-st-param) :controller_mode)))
      (find-if #'(lambda (tmp-cm) (= (eval tmp-cm) mode)) cm)))
