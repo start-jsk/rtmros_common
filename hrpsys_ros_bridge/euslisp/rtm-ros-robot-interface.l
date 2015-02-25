@@ -711,6 +711,11 @@
                              (send current-param :graspless_manip_reference_trans_rot))
                            )))
      (send self :autobalancerservice_setautobalancerparam :i_param param)))
+   (:get-auto-balancer-controller-mode
+    ()
+    (let* ((cm (constants "" "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_CONTROLLERMODE"))
+           (mode (send (send self :get-auto-balancer-param) :controller_mode)))
+      (find-if #'(lambda (tmp-cm) (= (eval tmp-cm) mode)) cm)))
   (:abc-footstep->eus-footstep
    (f)
    (make-coords :pos (scale 1e3 (send f :pos))
@@ -790,7 +795,12 @@
    ()
    (send self :stabilizerservice_stopstabilizer)
    )
-  )
+  (:get-st-controller-mode
+   ()
+   (let* ((cm (constants "" "HRPSYS_ROS_BRIDGE::OPENHRP_STABILIZERSERVICE_CONTROLLERMODE"))
+          (mode (send (send self :get-st-param) :controller_mode)))
+     (find-if #'(lambda (tmp-cm) (= (eval tmp-cm) mode)) cm)))
+   )
 
 ;; KalmanFilterService
 (def-set-get-param-method
