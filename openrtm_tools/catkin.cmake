@@ -6,6 +6,7 @@ project(openrtm_tools)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS rostest)
 
+catkin_python_setup()
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -121,6 +122,17 @@ include_directories(
 # )
 
 install(DIRECTORY scripts test DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION} USE_SOURCE_PERMISSIONS PATTERN ".svn" EXCLUDE)
+
+add_custom_command(
+  OUTPUT  ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_BIN_DESTINATION}/rtmlaunch ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_BIN_DESTINATION}/rtmtest
+  COMMAND cmake -E copy scripts/rtmlaunch ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_BIN_DESTINATION}/rtmlaunch
+  COMMAND cmake -E copy scripts/rtmtest   ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_BIN_DESTINATION}/rtmtest
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  DEPENDS scripts/rtmlaunch scripts/rtmtest)
+add_custom_target(copy_rtm_script ALL DEPENDS ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_BIN_DESTINATION}/rtmlaunch ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_BIN_DESTINATION}/rtmtest)
+
+install(PROGRAMS scripts/rtmlaunch scripts/rtmtest scripts/rtmstart.py
+  DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
 #############
 ## Testing ##
