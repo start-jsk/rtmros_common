@@ -682,7 +682,10 @@
    ()
    (send (send self :autobalancerservice_getautobalancerparam) :i_param))
   (:set-auto-balancer-param
-   (&key default-zmp-offsets move-base-gain)
+   (&key default-zmp-offsets move-base-gain
+         graspless-manip-arm graspless-manip-mode
+         graspless-manip-p-gain
+         graspless-manip-reference-trans-pos graspless-manip-reference-trans-rot)
    (let* ((current-param (send self :get-auto-balancer-param))
           (param (instance hrpsys_ros_bridge::Openhrp_AutoBalancerService_AutoBalancerParam
                            :init
@@ -694,7 +697,19 @@
                                                                                  default-zmp-offsets)))
                                  dzo)
                              (send current-param :default_zmp_offsets))
-                           :move_base_gain (if move-base-gain move-base-gain (send current-param :move_base_gain)))))
+                           :move_base_gain (if move-base-gain move-base-gain (send current-param :move_base_gain))
+                           :graspless_manip_mode (if graspless-manip-mode graspless-manip-mode (send current-param :graspless_manip_mode))
+                           :graspless_manip_arm (if graspless-manip-arm graspless-manip-arm (send current-param :graspless_manip_arm))
+                           :graspless_manip_p_gain (if graspless-manip-p-gain graspless-manip-p-gain (send current-param :graspless_manip_p_gain))
+                           :graspless_manip_reference_trans_pos
+                           (if graspless-manip-reference-trans-pos
+                               (scale 1e-3 graspless-manip-reference-trans-pos)
+                             (send current-param :graspless_manip_reference_trans_pos))
+                           :graspless_manip_reference_trans_rot
+                           (if graspless-manip-reference-trans-rot
+                               (matrix2quaternion graspless-manip-reference-trans-rot)
+                             (send current-param :graspless_manip_reference_trans_rot))
+                           )))
      (send self :autobalancerservice_setautobalancerparam :i_param param)))
   (:abc-footstep->eus-footstep
    (f)
