@@ -1,0 +1,18 @@
+#!/usr/bin/python
+
+cosnames = "omniNames"
+port_number = 15005
+
+import rtmstart
+from rostest import rostestmain
+
+p = rtmstart.start_cosname(cosnames, port_number)
+
+try:
+    rostestmain()
+finally:
+    # if omniName is invoked from this script, stop this
+    if p :
+        print "\033[34m[rtmtest] terminate", cosnames, "at port", port_number, "\033[0m"
+        p.terminate()
+

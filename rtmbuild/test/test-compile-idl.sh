@@ -4,6 +4,20 @@ trap 'exit 1' ERR
 set -x
 set -e
 
+echo $@
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --gtest_output=* )
+            OUTPUT=${1#--gtest_output=xml:}
+            ;;
+        --results-filename )
+            shift
+            OUTPUT=${CATKIN_RESULTS_TEST_DIR}/$1
+            ;;
+    esac
+    shift
+done
+
 #CATKIN_DIR=/tmp/test_compile_idl_$$
 CATKIN_DIR=/tmp/test_compile_idl
 rm -fr ${CATKIN_DIR}
@@ -34,4 +48,13 @@ rosrun rtmbuild_test MyServiceROSBridgeComp -o "corba.nameservers:localhost:9999
 PID=$!
 rosrun rtmbuild test-compile-idl.py $@
 kill -HUP $PID
+
+if [ "$OUTPUT" ]; then
+    echo "writing test results to ... $OUTPUT"
+    cat <<EOF > $OUTPUT
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite errors="0" failures="0" name="unittest.suite.TestSuite" tests="1" time="1.0">
+</testsuite>
+EOF
+fi
 
