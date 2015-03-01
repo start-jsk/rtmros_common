@@ -61,6 +61,7 @@ EOF
 
 wstool merge /tmp/rosinstall.$$ -t $WORKSPACE/src
 wstool info -t $WORKSPACE/src
+wstool update --abort-changed-uris -t $WORKSPACE/src
 
 echo "*** Done"
 
