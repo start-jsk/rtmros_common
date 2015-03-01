@@ -63,5 +63,7 @@ wstool merge /tmp/rosinstall.$$ -t $WORKSPACE/src
 wstool info -t $WORKSPACE/src
 wstool update --abort-changed-uris -t $WORKSPACE/src
 
+sed -i 's@option(ENABLE_DOXYGEN "Use Doxygen" ON)@option(ENABLE_DOXYGEN "Use Doxygen" OFF)@' $WORKSPACE/src/hrpsys/CMakeLists.txt
+
 echo "*** Done"
 
