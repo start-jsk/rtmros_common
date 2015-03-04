@@ -194,9 +194,16 @@ macro(compile_openhrp_model wrlfile)
     else()
       set(_mesh_prefix "file://${_workdir}/${_name}_meshes") ## set absolute file path
     endif()
+    #Depends on _lispfile in order to avoid parallel computation
+    # collada_to_urdf fails if it run in parallel
+    if(NOT EXISTS ${_collada2eus_exe})
+      set(_lisp_deps_for_urdf)
+    else(NOT EXISTS ${_collada2eus_exe})
+      set(_lisp_deps_for_urdf ${_lispfile})
+    endif(NOT EXISTS ${_collada2eus_exe})
     add_custom_command(OUTPUT ${_urdffile} ${_mesh_dir}
       COMMAND ${_collada_to_urdf_exe} ${_daefile} --output_file ${_urdffile} -G -A --mesh_output_dir ${_mesh_dir} --mesh_prefix ${_mesh_prefix}
-      DEPENDS ${_daefile})
+      DEPENDS ${_daefile} ${_lisp_deps_for_urdf})
   endif()
   if(_controller_config)
     if(EXISTS ${_controller_config_converter} AND EXISTS ${_yamlfile})
