@@ -2,8 +2,8 @@
 Changelog for package openrtm_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.8 (2015-03-09)
+------------------
 * [openrtm_ros_bridge] Fix path to rtmbuild cmake
 * Contributors: Ryohei Ueda
 

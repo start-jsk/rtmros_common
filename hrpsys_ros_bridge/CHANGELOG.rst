@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.8 (2015-03-09)
+------------------
 * [hrpsys_ros_bridge] Do not run collada_to_urdf parallel. In order to
   avoid parallel execution of collada_to_urdf, add tricky dependency
 * Add graspless manip mode euslisp interface
