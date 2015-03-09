@@ -2,6 +2,35 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [hrpsys_ros_bridge] Do not run collada_to_urdf parallel. In order to
+  avoid parallel execution of collada_to_urdf, add tricky dependency
+* Add graspless manip mode euslisp interface
+* [test-*.py] test name could not contain minus? any changet to underscore (http://answers.ros.org/question/197377/rostest-not-finding-the-actual-test/)
+* [test-samplerobot.py] fix syntax error on loadPattern
+* update for legged robot
+* Sample.pos is not installed via deb package, see https://github.com/fkanehiro/openhrp3/issues/46
+* Fix rmfo sensor argument
+* copy rtmlaunch,rtmtest to global_bin when compile
+* Add method to calculate go-velocity param from velocity center offset
+* Add menus for unstable rtcs (not used by default)
+* Add setting for HrpsysConfigurator in hrpsys dashboard and apply it to servoOn/Off menu (disabled by default).
+* Remove unused initial leg offsetting because this is implemented AutoBalancer's setFootSteps
+* [hrpsys_ros_bridge] Refactor compile_robot_model.cmake
+* Use ee name for impedance methods
+* [hrpsys_ros_bridge] collision_state.py:  need to wait for activate
+* [hrpsys_ros_bridge] sensor_ros_bridge_connect.py: wait for sh, sometimes we can not find them
+* Update impedance start/stop methods
+* [hrpsys_ros_bridge] Do not call export_collada in parallel
+* Update :reset-force-moment-offset funcs and add documents
+* Update documentation strings for ImpedanceController and Ref forces
+* [hrpsys_ros_bridge] Fix path for catkin build
+* pass :rarm instead of 'rhsensor' or 'rasensor' to :set-forcemoment-offset-param
+* Add seq base pos and rpy methods
+* Remove duplicated method and fix argument passing for imp methods
+* Contributors: Kei Okada, Ryohei Ueda, Shunichi Nozawa, Eisoku Kuroiwa
+
 1.2.7 (2015-01-06)
 ------------------
 * Add :reference-root-coords method for log

@@ -2,6 +2,14 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [test-*.py] test name could not contain minus? any changet to underscore (http://answers.ros.org/question/197377/rostest-not-finding-the-actual-test/)
+* [FIXME][rtshell-setup.sh] source bash_completion, since shell_suport is not working for now
+* search rtshell path from CMAKE_PREFIX_PATH
+* [openrtm_tools] rtshell-setup.sh: fix shell_support location
+* Contributors: Kei Okada
+
 1.2.7 (2015-01-06)
 ------------------
 * remove openrtm_aist_python and rtshell from find_package

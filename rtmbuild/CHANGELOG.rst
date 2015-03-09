@@ -2,6 +2,11 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix for when hrp_idldir is null, hope this solves indigo ros buildfirm problem
+* Contributors: Kei Okada
+
 1.2.7 (2015-01-06)
 ------------------
 * Update rtmbuild_init to specify dependency of generate_messages and

@@ -2,6 +2,16 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [test-*.py] test name could not contain minus? any changet to underscore (http://answers.ros.org/question/197377/rostest-not-finding-the-actual-test/)
+* (diagnosis info) Renamed a script to show respect for the great ROS ancestors.
+* (diagnosis info) Obtain package versions in a more generic way.
+* (diagnosis info) Catch error stream.
+* (diagnosis info) Variablize corba hostname and port.
+* Add a very simple tool for recording system diagnosis info.
+* Contributors: Isaac IY Saito, Kei Okada
+
 1.2.7 (2015-01-06)
 ------------------
 * (_gen_project) : Add argument to specify highgain mode
