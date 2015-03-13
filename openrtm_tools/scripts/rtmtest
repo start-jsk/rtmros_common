@@ -3,7 +3,7 @@
 cosnames = "omniNames"
 port_number = 15005
 
-import rtmstart
+from openrtm_tools import rtmstart
 from rostest import rostestmain
 
 p = rtmstart.start_cosname(cosnames, port_number)
