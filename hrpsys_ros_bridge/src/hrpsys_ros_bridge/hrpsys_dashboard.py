@@ -255,15 +255,28 @@ class ImpedanceControllerMenu(MenuDashWidget):
 hcf=None
 
 #   Functions used from MenuDashWidget classes
+hrpsys_config_path=None
+hrpsys_config_script_name=None
+hrpsys_nshost=None
+hrpsys_configurator_class_name=None
 def setupHrpsysConfigurator():
+    global hrpsys_config_path, hrpsys_config_script_name, hrpsys_nshost, hrpsys_configurator_class_name
     # Import robot dependent hrpsys_config.py
+    if hrpsys_config_path == None:
+        hrpsys_config_path = rospy.get_param('hrpsys_config_path', None)
+    if hrpsys_config_script_name == None:
+        hrpsys_config_script_name = rospy.get_param('hrpsys_config_script_name', None)
+    if hrpsys_nshost == None:
+        hrpsys_nshost = rospy.get_param('hrpsys_nshost', None)
+    if hrpsys_configurator_class_name == None:
+        hrpsys_configurator_class_name = rospy.get_param('hrpsys_configurator_class_name', None)
     import sys
-    sys.path.append(rospy.get_param('hrpsys_config_path', None))
-    exec "from "+rospy.get_param('hrpsys_config_script_name', None)+" import *"
+    sys.path.append(hrpsys_config_path)
+    exec "from "+hrpsys_config_script_name+" import *"
     # Setup rtm.nshost
-    exec "rtm.nshost='"+rospy.get_param('hrpsys_nshost', None)+"'"
+    exec "rtm.nshost='"+hrpsys_nshost+"'"
     # Create HrpsysConfigurator instance and setup RTCs
-    exec "hcf="+rospy.get_param('hrpsys_configurator_class_name', None)+"()"
+    exec "hcf="+hrpsys_configurator_class_name+"()"
     hcf.findComps()
     hcf.waitForRobotHardware()
     hcf.checkSimulationMode()
