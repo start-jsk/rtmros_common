@@ -973,6 +973,60 @@
       rs-list)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; utility functions for st
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun calculate-eefm-st-state-feedback-gain
+  (default-cog-height
+   &key (alpha -13.0) (beta -4.0)
+        ((:time-constant Tp) 0.04)
+        ((:print-mode pm) :euslisp))
+  "Calculate EEFMe st state feedback gain (k1, k2, k3) and print them.
+   default-cog-height is default COG height[mm].
+   alpha and beta are poles. -13.0 and -4.0 by default.
+   time-constant is time constant of ZMP tracking delay [s]. 0.04[s] by default.
+   When print-mode is :euslisp, print k1, k2, and k3 in Euslisp manner.
+   When print-mode is :python, print k1, k2, and k3 in python hrpsys_config manner."
+  (let* ((omega (sqrt (/ (* 1e-3 (elt *g-vec* 2)) (* 1e-3 default-cog-height))))
+         (gamma (- omega))
+         (omega2 (* omega omega))
+         (d1 (+ alpha beta gamma))
+         (d2 (+ (* alpha beta) (* beta gamma) (* gamma alpha)))
+         (d3 (* alpha beta gamma))
+         (k3 (- (* -1 Tp d1) 1))
+         (k2 (* Tp (+ -1 (* -1 (/ d2 omega2)))))
+         (k1 (- (* Tp (/ d3 omega2)) 1 k3)))
+    (case
+     pm
+     (:euslisp
+      (format t "(send *ri* :set-st-param :eefm-k1 #f(~A ~A))~%" k1 k1)
+      (format t "(send *ri* :set-st-param :eefm-k2 #f(~A ~A))~%" k2 k2)
+      (format t "(send *ri* :set-st-param :eefm-k3 #f(~A ~A))~%" k3 k3)
+      )
+     (:python
+      (format t "stp=hcf.st_svc.getParameter()~%")
+      (format t "stp.eefm_k1=[~A,~A]~%" k1 k1)
+      (format t "stp.eefm_k2=[~A,~A]~%" k2 k2)
+      (format t "stp.eefm_k3=[~A,~A]~%" k3 k3)
+      (format t "hcf.st_svc.setParameter(stp)~%")
+      )
+     (t))
+    t))
+
+(defun calculate-eefm-st-state-feedback-default-gain-from-robot
+  (robot
+   &key (alpha -13.0) (beta -4.0)
+        ((:time-constant Tp) 0.04)
+        ((:print-mode pm) :euslisp)
+        (exec-reset-pose-p t))
+  "Calculate EEFMe st state feedback gain (k1, k2, k3) from robot model and print them.
+   robot is robot model and calculate gains from reset-pose by default."
+  (if exec-reset-pose-p (send robot :reset-pose))
+  (calculate-eefm-st-state-feedback-gain
+   (elt (send (send robot :foot-midcoords) :inverse-transform-vector (send robot :centroid)) 2)
+   :alpha alpha :beta beta :time-constant Tp :print-mode pm)
+  )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility functions for project generator generation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
