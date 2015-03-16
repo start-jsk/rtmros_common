@@ -773,6 +773,8 @@
 (defmethod rtm-ros-robot-interface
   (:set-st-param
    (&rest args &key st-algorithm &allow-other-keys)
+   (unless (send self :get :default-st-param)
+     (send self :put :default-st-param (send self :get-st-param)))
    (send* self :raw-set-st-param
           :st-algorithm
           (if (or (null st-algorithm) (integerp st-algorithm))
@@ -782,6 +784,41 @@
                   (eval sa)
                 (error ";; no such :st-algorithm ~A in :set-st-param~%" st-algorithm))))
           args))
+  (:set-st-param-for-non-feedback-LIP-mode
+   ()
+   (send self :set-st-param
+         :eefm-body-attitude-control-gain #F(0 0)
+         :eefm-wrench-alpha-blending 1.0
+         :eefm-k1 #f(0 0)
+         :eefm-k2 #f(0 0)
+         :eefm-k3 #f(0 0))
+   )
+  (:set-default-st-param
+   ()
+   (unless (send self :get :default-st-param)
+     (send self :put :default-st-param (send self :get-st-param)))
+   (send self :stabilizerservice_setparameter :i_param (send self :get :default-st-param))
+   )
+  (:set-st-param-by-ratio
+   (state-feedback-gain-ratio
+    damping-control-gain-ratio
+    attitude-control-gain-ratio)
+   (unless (send self :get :default-st-param)
+     (send self :put :default-st-param (send self :get-st-param)))
+   (let ((stp (send self :get :default-st-param)))
+     (send self :set-st-param
+           ;; state feedback gain
+           :eefm-k1 (scale state-feedback-gain-ratio (send stp :eefm_k1))
+           :eefm-k2 (scale state-feedback-gain-ratio (send stp :eefm_k2))
+           :eefm-k3 (scale state-feedback-gain-ratio (send stp :eefm_k3))
+           ;; damping control gain
+           :eefm-pos-damping-gain (* damping-control-gain-ratio (send stp :eefm_pos_damping_gain))
+           :eefm-rot-damping-gain (* damping-control-gain-ratio (send stp :eefm_rot_damping_gain))
+           :eefm-pos-time-const-support (/ (send stp :eefm_pos_time_const_support) damping-control-gain-ratio)
+           :eefm-rot-time-const (/ (send stp :eefm_rot_time_const) damping-control-gain-ratio)
+           ;; body attitude control gain
+           :eefm-body-attitude-control-gain (scale attitude-control-gain-ratio (send stp :eefm_body_attitude_control_gain)))
+     ))
   (:start-st
    ()
    (send self :stabilizerservice_startstabilizer)
