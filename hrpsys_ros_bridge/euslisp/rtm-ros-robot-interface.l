@@ -773,6 +773,8 @@
 (defmethod rtm-ros-robot-interface
   (:set-st-param
    (&rest args &key st-algorithm &allow-other-keys)
+   "Set Stabilizer parameters.
+    To learn more about arguments, please see (pprint (find-method *ri* :raw-set-st-param))."
    (unless (send self :get :default-st-param)
      (send self :put :default-st-param (send self :get-st-param)))
    (send* self :raw-set-st-param
@@ -786,6 +788,8 @@
           args))
   (:set-st-param-for-non-feedback-LIP-mode
    ()
+   "Set Stabilizer parameters to make robot Linear Inverted Pendulum mode without state feedback.
+    By using this mode, robot feets adapt to ground surface."
    (send self :set-st-param
          :eefm-body-attitude-control-gain #F(0 0)
          :eefm-wrench-alpha-blending 1.0
@@ -795,6 +799,7 @@
    )
   (:set-default-st-param
    ()
+   "Set Stabilzier parameter by default parameters."
    (unless (send self :get :default-st-param)
      (send self :put :default-st-param (send self :get-st-param)))
    (send self :stabilizerservice_setparameter :i_param (send self :get :default-st-param))
@@ -803,6 +808,15 @@
    (state-feedback-gain-ratio
     damping-control-gain-ratio
     attitude-control-gain-ratio)
+   "Set Stabilzier parameter by ratio from default parameters.
+    state-feedback-gain-ratio is ratio for state feedback gain.
+    damping-control-gain-ratio is ratio for damping control gain.
+    attitude-control-gain-ratio is ratio for attitude control gain.
+    When ratio = 1, parameters are same as default parameters.
+    For state-feedback-gain-ratio and attitude-control-gain-ratio,
+    when ratio < 1 Stabilzier works less feedback control and less oscillation and when ratio > 1 more feedback and more oscillation.
+    For dampnig-control-gain-ratio,
+    when ratio > 1 feet behavior becomes hard and safe and when ratio < 1 soft and dangerous."
    (unless (send self :get :default-st-param)
      (send self :put :default-st-param (send self :get-st-param)))
    (let ((stp (send self :get :default-st-param)))
@@ -821,10 +835,12 @@
      ))
   (:start-st
    ()
+   "Start Stabilizer Mode."
    (send self :stabilizerservice_startstabilizer)
    )
   (:stop-st
    ()
+   "Stop Stabilizer Mode."
    (send self :stabilizerservice_stopstabilizer)
    )
   )
