@@ -800,19 +800,22 @@
 
 (defun print-end-effector-parameter-conf-from-robot
   (rb)
+  "Print end effector setting for hrpsys conf file."
   (format t "end_effectors:")
-  (dolist (l (remove-if-not #'(lambda (x) (send rb x)) '(:rarm :larm :rleg :lleg)))
-    (let ((rl (send (send (send rb l :root-link) :parent) :joint)))
-      (format t " ~A,~A,~A," (string-downcase (string l)) (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))
-      (let* ((dif (send (send rb l :end-coords :parent) :transformation (send rb l :end-coords)))
-             (wp (scale 1e-3 (send dif :worldpos))) ;; [mm] -> [m]
-             (wr (normalize-vector (matrix-log (send dif :worldrot))))
-             (wrn (norm (matrix-log (send dif :worldrot)))))
-         (format t "~A,~A,~A," (elt wp 0) (elt wp 1) (elt wp 2))
-         (format t "~A,~A,~A,~A," (elt wr 0) (elt wr 1) (elt wr 2) wrn)
-         )))
-  (format t "~%")
-  )
+  (let ((limb-list (mapcar #'(lambda (x) (find-if #'(lambda (l) (member x (send rb l :force-sensors))) '(:rleg :lleg :rarm :larm)))
+                           (send rb :force-sensors))))
+    (dolist (l limb-list)
+      (let ((rl (send (send (send rb l :root-link) :parent) :joint)))
+        (format t " ~A,~A,~A," (string-downcase (string l)) (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))
+        (let* ((dif (send (send rb l :end-coords :parent) :transformation (send rb l :end-coords)))
+               (wp (scale 1e-3 (send dif :worldpos))) ;; [mm] -> [m]
+               (wr (normalize-vector (matrix-log (send dif :worldrot))))
+               (wrn (norm (matrix-log (send dif :worldrot)))))
+          (format t "~A,~A,~A," (elt wp 0) (elt wp 1) (elt wp 2))
+          (format t "~A,~A,~A,~A," (elt wr 0) (elt wr 1) (elt wr 2) wrn)
+          )))
+    (format t "~%")
+    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility functions for seq
