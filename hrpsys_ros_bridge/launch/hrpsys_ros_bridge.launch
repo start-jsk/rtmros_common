@@ -5,6 +5,7 @@
   <arg name="BASE_LINK" default="BODY" />
   <arg name="SIMULATOR_NAME" default="RobotHardware0"/> <!-- please set $(arg ROBOT_NAME)(Robot) for simulation -->
   <arg name="INSTALL_ROBOT_DESCRIPTION" default="true" />
+  <arg name="DEBUG_HRPSYS" default="false" />
 
   <arg name="USE_DIAGNOSTICS" default="true" />
 
