@@ -773,6 +773,10 @@
 (defmethod rtm-ros-robot-interface
   (:set-st-param
    (&rest args &key st-algorithm &allow-other-keys)
+   "Set Stabilizer parameters.
+    To learn more about arguments, please see (pprint (find-method *ri* :raw-set-st-param))."
+   (unless (send self :get :default-st-param)
+     (send self :put :default-st-param (send self :get-st-param)))
    (send* self :raw-set-st-param
           :st-algorithm
           (if (or (null st-algorithm) (integerp st-algorithm))
@@ -782,12 +786,61 @@
                   (eval sa)
                 (error ";; no such :st-algorithm ~A in :set-st-param~%" st-algorithm))))
           args))
+  (:set-st-param-for-non-feedback-LIP-mode
+   ()
+   "Set Stabilizer parameters to make robot Linear Inverted Pendulum mode without state feedback.
+    By using this mode, robot feets adapt to ground surface."
+   (send self :set-st-param
+         :eefm-body-attitude-control-gain #F(0 0)
+         :eefm-wrench-alpha-blending 1.0
+         :eefm-k1 #f(0 0)
+         :eefm-k2 #f(0 0)
+         :eefm-k3 #f(0 0))
+   )
+  (:set-default-st-param
+   ()
+   "Set Stabilzier parameter by default parameters."
+   (unless (send self :get :default-st-param)
+     (send self :put :default-st-param (send self :get-st-param)))
+   (send self :stabilizerservice_setparameter :i_param (send self :get :default-st-param))
+   )
+  (:set-st-param-by-ratio
+   (state-feedback-gain-ratio
+    damping-control-gain-ratio
+    attitude-control-gain-ratio)
+   "Set Stabilzier parameter by ratio from default parameters.
+    state-feedback-gain-ratio is ratio for state feedback gain.
+    damping-control-gain-ratio is ratio for damping control gain.
+    attitude-control-gain-ratio is ratio for attitude control gain.
+    When ratio = 1, parameters are same as default parameters.
+    For state-feedback-gain-ratio and attitude-control-gain-ratio,
+    when ratio < 1 Stabilzier works less feedback control and less oscillation and when ratio > 1 more feedback and more oscillation.
+    For dampnig-control-gain-ratio,
+    when ratio > 1 feet behavior becomes hard and safe and when ratio < 1 soft and dangerous."
+   (unless (send self :get :default-st-param)
+     (send self :put :default-st-param (send self :get-st-param)))
+   (let ((stp (send self :get :default-st-param)))
+     (send self :set-st-param
+           ;; state feedback gain
+           :eefm-k1 (scale state-feedback-gain-ratio (send stp :eefm_k1))
+           :eefm-k2 (scale state-feedback-gain-ratio (send stp :eefm_k2))
+           :eefm-k3 (scale state-feedback-gain-ratio (send stp :eefm_k3))
+           ;; damping control gain
+           :eefm-pos-damping-gain (* damping-control-gain-ratio (send stp :eefm_pos_damping_gain))
+           :eefm-rot-damping-gain (* damping-control-gain-ratio (send stp :eefm_rot_damping_gain))
+           :eefm-pos-time-const-support (/ (send stp :eefm_pos_time_const_support) damping-control-gain-ratio)
+           :eefm-rot-time-const (/ (send stp :eefm_rot_time_const) damping-control-gain-ratio)
+           ;; body attitude control gain
+           :eefm-body-attitude-control-gain (scale attitude-control-gain-ratio (send stp :eefm_body_attitude_control_gain)))
+     ))
   (:start-st
    ()
+   "Start Stabilizer Mode."
    (send self :stabilizerservice_startstabilizer)
    )
   (:stop-st
    ()
+   "Stop Stabilizer Mode."
    (send self :stabilizerservice_stopstabilizer)
    )
   )
@@ -800,19 +853,22 @@
 
 (defun print-end-effector-parameter-conf-from-robot
   (rb)
+  "Print end effector setting for hrpsys conf file."
   (format t "end_effectors:")
-  (dolist (l (remove-if-not #'(lambda (x) (send rb x)) '(:rarm :larm :rleg :lleg)))
-    (let ((rl (send (send (send rb l :root-link) :parent) :joint)))
-      (format t " ~A,~A,~A," (string-downcase (string l)) (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))
-      (let* ((dif (send (send rb l :end-coords :parent) :transformation (send rb l :end-coords)))
-             (wp (scale 1e-3 (send dif :worldpos))) ;; [mm] -> [m]
-             (wr (normalize-vector (matrix-log (send dif :worldrot))))
-             (wrn (norm (matrix-log (send dif :worldrot)))))
-         (format t "~A,~A,~A," (elt wp 0) (elt wp 1) (elt wp 2))
-         (format t "~A,~A,~A,~A," (elt wr 0) (elt wr 1) (elt wr 2) wrn)
-         )))
-  (format t "~%")
-  )
+  (let ((limb-list (mapcar #'(lambda (x) (find-if #'(lambda (l) (member x (send rb l :force-sensors))) '(:rleg :lleg :rarm :larm)))
+                           (send rb :force-sensors))))
+    (dolist (l limb-list)
+      (let ((rl (send (send (send rb l :root-link) :parent) :joint)))
+        (format t " ~A,~A,~A," (string-downcase (string l)) (send (send (send rb l :end-coords :parent) :joint) :name) (if rl (send rl :name) "WAIST"))
+        (let* ((dif (send (send rb l :end-coords :parent) :transformation (send rb l :end-coords)))
+               (wp (scale 1e-3 (send dif :worldpos))) ;; [mm] -> [m]
+               (wr (normalize-vector (matrix-log (send dif :worldrot))))
+               (wrn (norm (matrix-log (send dif :worldrot)))))
+          (format t "~A,~A,~A," (elt wp 0) (elt wp 1) (elt wp 2))
+          (format t "~A,~A,~A,~A," (elt wr 0) (elt wr 1) (elt wr 2) wrn)
+          )))
+    (format t "~%")
+    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility functions for seq
@@ -968,6 +1024,60 @@
                  (incf idx)
                  )))))
       rs-list)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; utility functions for st
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun calculate-eefm-st-state-feedback-gain
+  (default-cog-height
+   &key (alpha -13.0) (beta -4.0)
+        ((:time-constant Tp) 0.04)
+        ((:print-mode pm) :euslisp))
+  "Calculate EEFMe st state feedback gain (k1, k2, k3) and print them.
+   default-cog-height is default COG height[mm].
+   alpha and beta are poles. -13.0 and -4.0 by default.
+   time-constant is time constant of ZMP tracking delay [s]. 0.04[s] by default.
+   When print-mode is :euslisp, print k1, k2, and k3 in Euslisp manner.
+   When print-mode is :python, print k1, k2, and k3 in python hrpsys_config manner."
+  (let* ((omega (sqrt (/ (* 1e-3 (elt *g-vec* 2)) (* 1e-3 default-cog-height))))
+         (gamma (- omega))
+         (omega2 (* omega omega))
+         (d1 (+ alpha beta gamma))
+         (d2 (+ (* alpha beta) (* beta gamma) (* gamma alpha)))
+         (d3 (* alpha beta gamma))
+         (k3 (- (* -1 Tp d1) 1))
+         (k2 (* Tp (+ -1 (* -1 (/ d2 omega2)))))
+         (k1 (- (* Tp (/ d3 omega2)) 1 k3)))
+    (case
+     pm
+     (:euslisp
+      (format t "(send *ri* :set-st-param :eefm-k1 #f(~A ~A))~%" k1 k1)
+      (format t "(send *ri* :set-st-param :eefm-k2 #f(~A ~A))~%" k2 k2)
+      (format t "(send *ri* :set-st-param :eefm-k3 #f(~A ~A))~%" k3 k3)
+      )
+     (:python
+      (format t "stp=hcf.st_svc.getParameter()~%")
+      (format t "stp.eefm_k1=[~A,~A]~%" k1 k1)
+      (format t "stp.eefm_k2=[~A,~A]~%" k2 k2)
+      (format t "stp.eefm_k3=[~A,~A]~%" k3 k3)
+      (format t "hcf.st_svc.setParameter(stp)~%")
+      )
+     (t))
+    t))
+
+(defun calculate-eefm-st-state-feedback-default-gain-from-robot
+  (robot
+   &key (alpha -13.0) (beta -4.0)
+        ((:time-constant Tp) 0.04)
+        ((:print-mode pm) :euslisp)
+        (exec-reset-pose-p t))
+  "Calculate EEFMe st state feedback gain (k1, k2, k3) from robot model and print them.
+   robot is robot model and calculate gains from reset-pose by default."
+  (if exec-reset-pose-p (send robot :reset-pose))
+  (calculate-eefm-st-state-feedback-gain
+   (elt (send (send robot :foot-midcoords) :inverse-transform-vector (send robot :centroid)) 2)
+   :alpha alpha :beta beta :time-constant Tp :print-mode pm)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility functions for project generator generation
