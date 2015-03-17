@@ -26,8 +26,10 @@
   <arg name="USE_RTCD" default="false" />
   <arg name="REALTIME" default="false" />
   <arg name="GUI" default="true" />
-  <arg name="RTCD_LAUNCH_PREFIX" default=""/>
-  <!--arg name="RTCD_LAUNCH_PREFIX" default="xterm -e gdb \-\-args"--> <!-- for debugging with gdb -->
+  <arg name="DEBUG_HRPSYS" default="false" />
+  <arg unless="$(arg DEBUG_HRPSYS)" name="RTCD_LAUNCH_PREFIX" default="" />
+  <arg     if="$(arg DEBUG_HRPSYS)" name="RTCD_LAUNCH_PREFIX"
+           default='xterm -e gdb -iex "set height 0" -ex run --args' /> <!-- for debugging with gdb -->
   <arg name="PY_LAUNCH_PREFIX" default=""/>
   <!--   for hrpsys-simulator -->
   <arg unless="$(arg USE_RTCD)" name="hrpsys_periodic_rate" default="1000000"/>
