@@ -10,11 +10,10 @@ import rospy
 from diagnostic_msgs.msg import *
 
 import os
-import hrpsys
 import rtm
 
-from rtm import *
-from OpenHRP import *
+from hrpsys import hrpsys_config
+import OpenHRP
 
 import socket
 import time
@@ -32,7 +31,7 @@ from tf.transformations import *
 def rtc_init () :
     global ms, co, co_svc, root_link_name, root_link_offset
 
-    initCORBA()
+    rtm.initCORBA()
     ms = rtm.findRTCmanager(rtm.nshost)
     while ms == None :
         time.sleep(1);
@@ -56,12 +55,13 @@ def rtc_init () :
     if co == None:
         rospy.logerr("Could not found CollisionDetector, exiting...")
         exit(0)
-    co_svc = narrow(co.service("service0"), "CollisionDetectorService")
+
+    co_svc = rtm.narrow(co.service("service0"), "CollisionDetectorService")
 
     if modelfile:
-        #import CosNaming
+        import CosNaming
         obj = rtm.rootnc.resolve([CosNaming.NameComponent('ModelLoader', '')])
-        mdlldr = obj._narrow(ModelLoader_idl._0_OpenHRP__POA.ModelLoader)
+        mdlldr = obj._narrow(OpenHRP.ModelLoader_idl._0_OpenHRP__POA.ModelLoader)
         rospy.loginfo("  bodyinfo URL = file://"+modelfile)
         body_info = mdlldr.getBodyInfo("file://"+modelfile)
         root_link_name = body_info._get_links()[0].segments[0].name
