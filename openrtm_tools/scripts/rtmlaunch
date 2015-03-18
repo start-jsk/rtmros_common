@@ -25,7 +25,7 @@ Here 3 things are happening:
 cosnames = "omniNames"
 port_number = 15005
 
-import rtmstart
+from openrtm_tools import rtmstart, rtmlaunch
 import roslaunch
 
 p = rtmstart.start_cosname(cosnames, port_number)

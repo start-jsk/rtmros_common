@@ -17,6 +17,10 @@ if [ -e `rospack find rtshell`/bin ] ; then # if rosbuild
     else
         echo -e "Warning : Failed to load shell_support, try rosmake openrtm_tools"
     fi
+
+    alias rtmlaunch=`rospack find hrpsys_ros_bridge`/scripts/rtmlaunch
+    alias rtmtest=`rospack find hrpsys_ros_bridge`/scripts/rtmtest
+
 else
     IFS=':' read -ra PREFIX_PATH <<< "$CMAKE_PREFIX_PATH"
     loop=true
@@ -41,9 +45,6 @@ case "$CATKIN_SHELL" in
         shopt -s expand_aliases
         ;;
 esac
-
-alias rtmlaunch=`rospack find hrpsys_ros_bridge`/scripts/rtmlaunch
-alias rtmtest=`rospack find hrpsys_ros_bridge`/scripts/rtmtest
 
 # these completion settings are copied from rosbash
 case "$CATKIN_SHELL" in

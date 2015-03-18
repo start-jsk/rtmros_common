@@ -1,0 +1,4 @@
+#!/bin/sh
+cd `rtm-config --rtm-exampledir`
+exec ./MyServiceConsumerComp $@
+
