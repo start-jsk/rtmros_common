@@ -231,6 +231,7 @@ def get_flag_from_argv(arg):
             return True if 'true' in a.split("=")[1] else False
 
 if __name__ == '__main__':
+    import signal
     signal.signal(signal.SIGINT, signal_handler)
     main()
 
