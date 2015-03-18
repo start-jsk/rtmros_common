@@ -230,11 +230,6 @@ def get_flag_from_argv(arg):
         if arg in a: # If "USE_WALKING" is in argv
             return True if 'true' in a.split("=")[1] else False
 
-if __name__ == '__main__':
-    import signal
-    signal.signal(signal.SIGINT, signal_handler)
-    main()
-
 
 
 
