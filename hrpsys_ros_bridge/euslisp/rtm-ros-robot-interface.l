@@ -205,6 +205,12 @@
            )
           )
        )))
+  (:get-idl-enum-values
+   (value ;; value is current enum value obtained from :get-xxx-param.
+    enum-type-string) ;; enum-type-string is HRPSYS_ROS_BRIDGE::OPENHRP_[RTC SERVICE NAME]_[ENUM TYPE NAME]. Please see idl files.
+   (let* ((str (find-if #'(lambda (x) (= (eval x) value)) (constants "" enum-type-string))))
+     (read-from-string (format nil ":~A" (string-right-trim "*" (string-left-trim "*" str))))
+     ))
   (:set-interpolation-mode
    (interpolation-mode)
    "Set interpolation mode for SequencePlayer."
@@ -677,6 +683,18 @@
    (let ((cs (constants "" "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE")))
      (mapcar #'(lambda (x) (format t ";; ~A => ~A~%" x (eval x))) cs)
      t))
+  (:get-gait-generator-orbit-type
+   ()
+   "Get GaitGenerator Orbit Type as Euslisp symbol."
+   (send self :get-idl-enum-values
+         (send (send self :get-gait-generator-param) :default_orbit_type)
+         "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE"))
+  (:get-auto-balancer-controller-mode
+   ()
+   "Get AutoBalancer ControllerMode as Euslisp symbol."
+   (send self :get-idl-enum-values
+         (send (send self :get-auto-balancer-param) :controller_mode)
+         "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_CONTROLLERMODE"))
   ;; :get-auto-balancer-param and :set-auto-balancer-param is not defined by def-set-get-param-method yet.
   (:get-auto-balancer-param
    ()
@@ -833,6 +851,18 @@
            ;; body attitude control gain
            :eefm-body-attitude-control-gain (scale attitude-control-gain-ratio (send stp :eefm_body_attitude_control_gain)))
      ))
+  (:get-st-controller-mode
+   ()
+   "Get Stabilizer ControllerMode as Euslisp symbol."
+   (send self :get-idl-enum-values
+         (send (send self :get-st-param) :controller_mode)
+         "HRPSYS_ROS_BRIDGE::OPENHRP_STABILIZERSERVICE_CONTROLLERMODE"))
+  (:get-st-algorithm
+   ()
+   "Get Stabilizer Algorithm as Euslisp symbol."
+   (send self :get-idl-enum-values
+         (send (send self :get-st-param) :st_algorithm)
+         "HRPSYS_ROS_BRIDGE::OPENHRP_STABILIZERSERVICE_STALGORITHM"))
   (:start-st
    ()
    "Start Stabilizer Mode."
@@ -850,6 +880,15 @@
   'hrpsys_ros_bridge::Openhrp_KalmanFilterService_KalmanFilterParam
   :set-kalman-filter-param :get-kalman-filter-param
   :kalmanfilterservice_setkalmanfilterparam :kalmanfilterservice_getkalmanfilterparam)
+
+(defmethod rtm-ros-robot-interface
+  (:get-kalman-filter-algorithm
+   ()
+   "Get KalmanFilter Algorithm as Euslisp symbol."
+   (send self :get-idl-enum-values
+         (send (send self :get-kalman-filter-param) :kf_algorithm)
+         "HRPSYS_ROS_BRIDGE::OPENHRP_KALMANFILTERSERVICE_KFALGORITHM"))
+)
 
 (defun print-end-effector-parameter-conf-from-robot
   (rb)
