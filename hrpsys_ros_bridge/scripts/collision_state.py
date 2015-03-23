@@ -6,6 +6,8 @@ except:
 
 import OpenRTM_aist.RTM_IDL # for catkin
 
+import omniORB
+
 import rospy
 from diagnostic_msgs.msg import *
 
@@ -185,7 +187,7 @@ if __name__ == '__main__':
         while not rospy.is_shutdown():
             try :
                 collision_state()
-            except (CORBA.OBJECT_NOT_EXIST, omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE), e :
+            except (omniORB.CORBA.OBJECT_NOT_EXIST, omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE), e :
                 rospy.logerr("[collision_state.py] catch exception, restart rtc_init.\nMake sure collision_pair is set in .conf file. See https://github.com/start-jsk/rtmros_common/issues/247\nOriginal exception: {}".format(e))
                 time.sleep(2)
                 rtc_init()
