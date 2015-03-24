@@ -18,8 +18,8 @@ if [ -e `rospack find rtshell`/bin ] ; then # if rosbuild
         echo -e "Warning : Failed to load shell_support, try rosmake openrtm_tools"
     fi
 
-    alias rtmlaunch=`rospack find hrpsys_ros_bridge`/scripts/rtmlaunch
-    alias rtmtest=`rospack find hrpsys_ros_bridge`/scripts/rtmtest
+    alias rtmlaunch=`rospack find openrtm_tools`/scripts/rtmlaunch
+    alias rtmtest=`rospack find openrtm_tools`/scripts/rtmtest
 
 else
     IFS=':' read -ra PREFIX_PATH <<< "$CMAKE_PREFIX_PATH"
