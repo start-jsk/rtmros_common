@@ -85,6 +85,9 @@ def collision_state() :
     now = rospy.Time.now()
     diagnostic.header.stamp = now
 
+    if not co.isActive():
+        rospy.loginfo("co is not activated")
+        return
     collision_status = co_svc.getCollisionStatus()
 
     if (now - last_collision_status > rospy.Duration(5.0)):
