@@ -626,9 +626,32 @@
    (xx yy th)
    (send self :go-pos-no-wait xx yy th)
    (send self :wait-foot-steps))
-  (:get-foot-step-param
+  (:raw-get-foot-step-param
    ()
-   (send (send self :autobalancerservice_getfootstepparam) :i_param)
+   (send (send self :autobalancerservice_getfootstepparam) :i_param))
+  (:get-foot-step-params
+   ()
+   "Get AutoBalancer foot step params."
+   (let ((param (send self :raw-get-foot-step-param)))
+     (append
+      (mapcan #'(lambda (meth param-name) (list param-name (send self :abc-footstep->eus-footstep (send param meth))))
+              '(:rleg_coords :lleg_coords :support_leg_coords :swing_leg_coords :swing_leg_src_coords :swing_leg_dst_coords :dst_foot_midcoords)
+              '(:rleg-coords :lleg-coords :support-leg-coords :swing-leg-coords :swing-leg-src-coords :swing-leg-dst-coords :dst-foot-midcoords))
+      (mapcan #'(lambda (meth param-name)
+                  (list param-name (send self :get-idl-enum-values
+                                         (send param meth)
+                                         "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_SUPPORTLEGSTATE")))
+              '(:support_leg :support_leg_with_both)
+              '(:support-leg :support-leg-with-both)))
+     ))
+  (:get-foot-step-param
+   (param-name)
+   "Get AutoBalancer foot step param by given name.
+    param-name is key word for parameters defined in IDL.
+    param-name should be :rleg-coords :lleg-coords :support-leg-coords :swing-leg-coords :swing-leg-src-coords :swing-leg-dst-coords :dst-foot-midcoords :support-leg :support-leg-with-both."
+   (if (memq param-name '(:rleg-coords :lleg-coords :support-leg-coords :swing-leg-coords :swing-leg-src-coords :swing-leg-dst-coords :dst-foot-midcoords :support-leg :support-leg-with-both))
+       (cadr (memq param-name (send self :get-foot-step-params)))
+     (error ";; no such abc footstep param ~A~%" param-name))
    )
   (:set-foot-steps-no-wait
    (fs)
