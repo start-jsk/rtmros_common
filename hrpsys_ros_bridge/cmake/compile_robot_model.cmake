@@ -18,6 +18,13 @@ macro(get_export_collada_option _export_collada_option_ret)
   set(${_export_collada_option_ret} ${_export_collada_option})
 endmacro(get_export_collada_option _export_collada_option_ret)
 
+macro(compile_robot_set_parent_if_possible name val)
+  get_directory_property(has_parent PARENT_DIRECTORY)
+  if(has_parent)
+    set(${name} ${val} PARENT_SCOPE)
+  endif()
+endmacro(compile_robot_set_parent_if_possiblee name val)
+
 macro(get_option_from_args _option_ret _option_name _separator _quater _ret_add_str)
   set(_arg_list ${ARGV})
   set(_arg_list2 ${ARGV})
@@ -312,7 +319,7 @@ macro(compile_openhrp_model wrlfile)
   set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
     "${_workdir}/${_name}.conf;${_workdir}/${_name}.RobotHardware.conf;${_workdir}/${_name}_nosim.conf;${_workdir}/${_name}_nosim.RobotHardware.conf;${_current_directory_properties}")
   list(APPEND compile_robots ${_sname}_${PROJECT_NAME}_compile_all)
-  set(compile_robots ${compile_robots} PARENT_SCOPE)
+  compile_robot_set_parent_if_possible(compile_robots ${compile_robots})
 endmacro(compile_openhrp_model)
 
 # get path, option and dependending files to collada2eus 
@@ -430,7 +437,7 @@ macro(compile_collada_model daefile)
   else()
     if(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
-        COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${daefile} ${_yamlfile} ${_lispfile} ${_euscollada_option} ||  echo "[WARNING] ### Did not run collada2eus for ${_lispfile}"
+        COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${daefile} ${_yamlfile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus for ${_lispfile}"
         DEPENDS ${daefile} ${_euscollada_dep_files})
     else(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
@@ -548,7 +555,7 @@ macro(compile_collada_model daefile)
   set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
     "${_workdir}/${_name}.conf;${_workdir}/${_name}.RobotHardware.conf;${_workdir}/${_name}_nosim.conf;${_workdir}/${_name}_nosim.RobotHardware.conf;${_current_directory_properties}")
   list(APPEND compile_robots ${_sname}_${PROJECT_NAME}_compile_all)
-  set(compile_robots ${compile_robots} PARENT_SCOPE)
+  compile_robot_set_parent_if_possible(compile_robots ${compile_robots})
 endmacro(compile_collada_model daefile)
 
 macro (generate_default_launch_eusinterface_files wrlfile project_pkg_name)
