@@ -187,12 +187,14 @@ macro(compile_openhrp_model wrlfile)
     if(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
         COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${_daefile} ${_yamlfile} ${_lispfile}
-        DEPENDS ${_daefile} ${_yamlfile} ${_euscollada_dep_files})
+        DEPENDS ${_daefile} ${_yamlfile} ${_euscollada_dep_files} ${compile_robots})
     else(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
         COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${_daefile} ${_lispfile}
-        DEPENDS ${_daefile} ${_euscollada_dep_files})
+        DEPENDS ${_daefile} ${_euscollada_dep_files} ${compile_robots})
     endif(EXISTS ${_yamlfile})
+    list(APPEND compile_robots ${_lispfile})
+    compile_robot_set_parent_if_possible(compile_robots ${compile_robots})
   endif()
   if(NOT EXISTS ${_collada_to_urdf_exe})
     message(AUTHOR_WARNING "-- ${_collada_to_urdf_exe} not found")
@@ -236,6 +238,8 @@ macro(compile_openhrp_model wrlfile)
         COMMAND LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CATKIN_DEVEL_PREFIX}/lib ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
         DEPENDS ${wrlfile} ${_export_collada_exe} ${_latest_robot})
     endif()
+    list(APPEND compile_robots ${_daefile})
+    compile_robot_set_parent_if_possible(compile_robots ${compile_robots})
   endif()
   # use _gen_project.launch
   if(${USE_ROSBUILD})
