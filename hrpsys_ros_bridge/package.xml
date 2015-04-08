@@ -41,7 +41,8 @@
   <build_depend>nav_msgs</build_depend>
   <build_depend>net-tools</build_depend>
   <build_depend>pkg-config</build_depend>
-  <build_depend>pr2_controllers</build_depend> <!-- groovy does not have catkin pr2_controllers package -->
+  <build_depend>pr2_controllers_msgs</build_depend>
+  <build_depend>pr2_msgs</build_depend>
   <build_depend>procps</build_depend>
   <build_depend>python-rosdep</build_depend>
   <build_depend>robot_pose_ekf</build_depend>
@@ -74,7 +75,8 @@
   <run_depend>hrpsys_tools</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>nav_msgs</run_depend>
-  <run_depend>pr2_controllers</run_depend> <!-- groovy does not have catkin pr2_controllers package -->
+  <run_depend>pr2_controllers_msgs</run_depend>
+  <run_depend>pr2_msgs</run_depend>
   <run_depend>python-psutil</run_depend>
   <run_depend>robot_pose_ekf</run_depend>
   <run_depend>robot_state_publisher</run_depend>
