@@ -187,12 +187,14 @@ macro(compile_openhrp_model wrlfile)
     if(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
         COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${_daefile} ${_yamlfile} ${_lispfile}
-        DEPENDS ${_daefile} ${_yamlfile} ${_euscollada_dep_files})
+        DEPENDS ${_daefile} ${_yamlfile} ${_euscollada_dep_files} ${compile_robots})
     else(EXISTS ${_yamlfile})
       add_custom_command(OUTPUT ${_lispfile}
         COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${_daefile} ${_lispfile}
-        DEPENDS ${_daefile} ${_euscollada_dep_files})
+        DEPENDS ${_daefile} ${_euscollada_dep_files} ${compile_robots})
     endif(EXISTS ${_yamlfile})
+    list(APPEND compile_robots ${_lispfile})
+    compile_robot_set_parent_if_possible(compile_robots ${compile_robots})
   endif()
   if(NOT EXISTS ${_collada_to_urdf_exe})
     message(AUTHOR_WARNING "-- ${_collada_to_urdf_exe} not found")
@@ -227,15 +229,21 @@ macro(compile_openhrp_model wrlfile)
   # use export-collada
   get_export_collada_exe(_export_collada_exe)
   if(EXISTS ${_export_collada_exe})
+    # dae_robots is a global variable to store all the output collada file from
+    # export_collada.
     if(${USE_ROSBUILD})
       add_custom_command(OUTPUT ${_daefile}
         COMMAND ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
-        DEPENDS ${wrlfile} ${_export_collada_exe} ${_latest_robot})
+        DEPENDS ${wrlfile} ${_export_collada_exe} ${_latest_robot} ${dae_robots})
     else()                      #when catkin, appending LD_LIBRARY_PATH
       add_custom_command(OUTPUT ${_daefile}
         COMMAND LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CATKIN_DEVEL_PREFIX}/lib ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
-        DEPENDS ${wrlfile} ${_export_collada_exe} ${_latest_robot})
+        DEPENDS ${wrlfile} ${_export_collada_exe} ${_latest_robot} ${dae_robots})
     endif()
+    list(APPEND compile_robots ${_daefile})
+    list(APPEND dae_robots ${_daefile})
+    compile_robot_set_parent_if_possible(compile_robots ${compile_robots})
+    compile_robot_set_parent_if_possible(dae_robots ${dae_robots})
   endif()
   # use _gen_project.launch
   if(${USE_ROSBUILD})
@@ -285,12 +293,12 @@ macro(compile_openhrp_model wrlfile)
     COMMAND ${_rtm_naming_exe} ${_corba_port} || echo "fail to run rtm_naming, but try to continue"
     COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option} ${_simulation_joint_properties_option}"
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
-    DEPENDS ${daefile} ${_gen_project_dep_files})
+    DEPENDS ${_daefile} ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
     COMMAND ${_rtm_naming_exe} ${_corba_port} || echo "fail to run rtm_naming, but try to continue"
     COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option} ${_simulation_joint_properties_option}"
     COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
-    DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
+    DEPENDS ${_daefile} ${_gen_project_dep_files} ${_xmlfile})
   if(_controller_config)
     list(APPEND _depends_files ${_xmlfile} ${_xmlfile_nosim} ${_controller_config})
   else()
