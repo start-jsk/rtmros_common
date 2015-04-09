@@ -492,6 +492,18 @@
          #'(lambda (name &rest _args)
              (send self :raw-get-impedance-controller-param (string-downcase name)))
          :get-impedance-controller-param))
+  (:get-impedance-controller-controller-mode
+   (name)
+   "Get ImpedanceController ControllerMode as Euslisp symbol."
+   (let ((param (send self :get-impedance-controller-param name)))
+     (labels ((get-euslisp-prm
+               (prm)
+               (send self :get-idl-enum-values (send prm :controller_mode)
+                     "HRPSYS_ROS_BRIDGE::OPENHRP_IMPEDANCECONTROLLERSERVICE_CONTROLLERMODE")))
+       (if (atom param)
+           (get-euslisp-prm param)
+         (mapcar #'get-euslisp-prm param))
+       )))
   (:force-sensor-method
    (limb method-func method-name &rest args)
    (cond
