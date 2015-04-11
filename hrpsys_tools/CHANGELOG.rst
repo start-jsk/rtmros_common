@@ -2,8 +2,8 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.9 (2015-04-11)
+------------------
 * [hrpsys_tools/hrpsys.launch] support DEBUG_HRPSYS argument to run rtcd with gdb
 * Contributors: Kei Okada
 
