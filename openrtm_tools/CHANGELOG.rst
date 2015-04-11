@@ -2,6 +2,16 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [openrtm_tools/scripts/rtshell-setup.sh] modify rtmlaunch alias
+* [openrtm_tools/rtmlaunch.py] disable execute bit and remove __main__, we have script/rtmluanch.py for this purpose
+* [src/openrtm_tools/rtmlaunch.py] forget to import signal
+* [openrtm_tools/scripts/rtmluanch.py] forget to import sys
+* [openrtm_tools] create openrtm example program under openrtm_examles to use rosrun command in test code
+* move rtmlaunch/rtmtest from hrpsys_ros_bridge to openrtm_tools, add envhook for catkin users
+* Contributors: Kei Okada, Kunio Kojima
+
 1.2.8 (2015-03-09)
 ------------------
 * [test-*.py] test name could not contain minus? any changet to underscore (http://answers.ros.org/question/197377/rostest-not-finding-the-actual-test/)
