@@ -326,7 +326,6 @@ macro(compile_openhrp_model wrlfile)
   get_directory_property(_current_directory_properties ADDITIONAL_MAKE_CLEAN_FILES)
   set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
     "${_workdir}/${_name}.conf;${_workdir}/${_name}.RobotHardware.conf;${_workdir}/${_name}_nosim.conf;${_workdir}/${_name}_nosim.RobotHardware.conf;${_current_directory_properties}")
-  list(APPEND compile_robots ${_sname}_${PROJECT_NAME}_compile_all)
   compile_robot_set_parent_if_possible(compile_robots ${compile_robots})
 endmacro(compile_openhrp_model)
 
