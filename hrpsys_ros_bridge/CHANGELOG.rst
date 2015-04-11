@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.9 (2015-04-11)
+------------------
 * [package.xml] remove pr2_controllers, add pr2_controller_msgs, pr2_msgs, control_msgs package.xml
 
 * [collision_state] fix to work collision state

@@ -2,8 +2,8 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.9 (2015-04-11)
+------------------
 * [openrtm_tools/scripts/rtshell-setup.sh] modify rtmlaunch alias
 * [openrtm_tools/rtmlaunch.py] disable execute bit and remove __main__, we have script/rtmluanch.py for this purpose
 * [src/openrtm_tools/rtmlaunch.py] forget to import signal
