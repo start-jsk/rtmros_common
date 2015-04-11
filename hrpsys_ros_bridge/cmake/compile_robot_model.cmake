@@ -50,7 +50,7 @@ macro(get_option_from_args _option_ret _option_name _separator _quater _ret_add_
     set(_tmp_option "${_ret_add_str}\\\"${_tmp_option}\\\"")
   endif (NOT "${_tmp_option}" STREQUAL "" AND NOT "${_ret_add_str}" STREQUAL "")
   set(${_option_ret} "${_tmp_option}")
-endmacro(get_option_from_args _option_ret _option_name)
+endmacro(get_option_from_args _option_ret _option_name _separator _quater _ret_add_str)
 
 macro(get_conf_file_option _conf_file_option_ret _robothardware_conf_file_option_ret _conf_dt_option_ret _simulation_timestep_option_ret _simulation_joint_properties_option_ret)
   get_option_from_args(${_conf_file_option_ret} "--conf-file-option" "--conf-file-option\ " ' "CONF_FILE_OPTION:=" ${ARGV})
