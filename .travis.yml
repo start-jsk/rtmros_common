@@ -14,6 +14,8 @@ env:
   - ROS_DISTRO=hydro  ROSWS=wstool BUILDER=catkin    USE_DEB=false      NOT_TEST_INSTALL=true
   - ROS_DISTRO=hydro  ROSWS=wstool BUILDER=catkin    USE_DEB=source      NOT_TEST_INSTALL=true
   - ROS_DISTRO=indigo ROSWS=wstool BUILDER=catkin    USE_DEB=true
+  - TEST_TYPE=work_with_downstream  TEST_PACKAGE=hrpsys-ros-bridge ROS_DISTRO=hydro EXTRA_DEB="ros-hydro-roslint ros-hydro-robot-pose-ekf"
+  - TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hrpsys-ros-bridge ROS_DISTRO=hydro EXTRA_DEB=ros-hydro-roslint
   - TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=hydro EXTRA_DEB="ros-hydro-roslint ros-hydro-robot-pose-ekf"
   - TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=hydro EXTRA_DEB=ros-hydro-roslint
 matrix:
