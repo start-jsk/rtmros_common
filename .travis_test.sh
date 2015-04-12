@@ -82,11 +82,11 @@ else
     catkin_make $ROS_PARALLEL_JOBS --only-pkg-with-deps `echo $pkg | sed s/-/_/g`
     catkin_make install $ROS_PARALLEL_JOBS
     # make sure to kill test
-    for _pkg in hrpsys_ros_bridge hrpsys_tools rtmbuild; do
-	rm -fr install/lib/${_pkg}
-	rm -fr install/share/${_pkg}
-	rm -fr install/lib/python2.7/dist-packages/${_pkg}*
-    done
+#    for _pkg in hrpsys_ros_bridge hrpsys_tools rtmbuild; do
+#	rm -fr install/lib/${_pkg}
+#	rm -fr install/share/${_pkg}
+#	rm -fr install/lib/python2.7/dist-packages/${_pkg}*
+#    done
 
 fi
 
