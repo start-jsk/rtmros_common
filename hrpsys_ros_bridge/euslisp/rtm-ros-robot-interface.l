@@ -1106,14 +1106,16 @@
   (default-cog-height
    &key (alpha -13.0) (beta -4.0)
         ((:time-constant Tp) 0.04)
+        ((:gravitational-acceleration ga) (* 1e-3 (elt *g-vec* 2)))
         ((:print-mode pm) :euslisp))
   "Calculate EEFMe st state feedback gain (k1, k2, k3) and print them.
    default-cog-height is default COG height[mm].
    alpha and beta are poles. -13.0 and -4.0 by default.
    time-constant is time constant of ZMP tracking delay [s]. 0.04[s] by default.
+   gravitational-acceleration is gravitational acceleration [m/s^2].
    When print-mode is :euslisp, print k1, k2, and k3 in Euslisp manner.
    When print-mode is :python, print k1, k2, and k3 in python hrpsys_config manner."
-  (let* ((omega (sqrt (/ (* 1e-3 (elt *g-vec* 2)) (* 1e-3 default-cog-height))))
+  (let* ((omega (sqrt (/ ga (* 1e-3 default-cog-height))))
          (gamma (- omega))
          (omega2 (* omega omega))
          (d1 (+ alpha beta gamma))
@@ -1143,6 +1145,7 @@
   (robot
    &key (alpha -13.0) (beta -4.0)
         ((:time-constant Tp) 0.04)
+        ((:gravitational-acceleration ga) (* 1e-3 (elt *g-vec* 2)))
         ((:print-mode pm) :euslisp)
         (exec-reset-pose-p t))
   "Calculate EEFMe st state feedback gain (k1, k2, k3) from robot model and print them.
@@ -1150,7 +1153,7 @@
   (if exec-reset-pose-p (send robot :reset-pose))
   (calculate-eefm-st-state-feedback-gain
    (elt (send (send robot :foot-midcoords) :inverse-transform-vector (send robot :centroid)) 2)
-   :alpha alpha :beta beta :time-constant Tp :print-mode pm)
+   :alpha alpha :beta beta :time-constant Tp :print-mode pm :gravitational-acceleration ga)
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
