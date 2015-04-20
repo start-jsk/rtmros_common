@@ -330,6 +330,29 @@
    (send self :sequenceplayerservice_setjointanglesofgroup :gname groupname :jvs av :tm tm))
   (:load-pattern (basename &optional (tm 0.0)) (send self :sequenceplayerservice_loadpattern :basename basename :tm tm))
   (:wait-interpolation-seq () (send self :sequenceplayerservice_waitinterpolation))
+  (:sync-controller
+   (controller &optional (interpolation-time 5000) (blockp t))
+   (let* ((controller-info (car (send self controller)))
+          (groupname (cdr (assoc :group-name controller-info)))
+          (jointnames (cdr (assoc :joint-names controller-info)))
+          (current-reference (send self :state :reference-vector)))
+     (unless current-reference
+       (error ";; cannot get reference-vector in :sync-controller~%")
+       )
+     (warn "sync controller ~A~%" controller)
+     (send self :angle-vector current-reference interpolation-time controller)
+     (when blockp
+       (send self :wait-interpolation)
+       )
+     (send self :angle-vector current-reference interpolation-time :default-controller)
+     (when blockp
+       (send self :wait-interpolation)
+       )
+     (send self :remove-joint-group groupname)
+     (send self :wait-interpolation) ;; wait until removing
+     (send self :add-joint-group groupname jointnames)
+     )
+   )
 #| ;; angle group sample
   (send *ri* :add-joint-group "larm" (send-all (send *robot* :larm :joint-list) :name))
   (send *ri* :set-jointangles-of-group "larm" (scale (/ pi 180.0) (send *robot* :larm :angle-vector)) 4.0)
