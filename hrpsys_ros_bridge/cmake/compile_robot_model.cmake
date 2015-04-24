@@ -124,8 +124,8 @@ macro(compile_openhrp_model wrlfile)
   add_custom_target(${_sname}_${PROJECT_NAME}_compile_urdf DEPENDS ${_urdffile} ${_mesh_dir})
     list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_urdf)
 
-  if(EXISTS "${_yamlfile}" AND _controller_config)
-    # output controller config (yaml -> config)
+  if(_controller_config)
+    # output controller config (yaml -> config) if yaml is not found write dummy files
     add_custom_command(OUTPUT ${_controller_config}
       COMMAND ${_controller_config_converter} ${_yamlfile} ${_controller_config}
       DEPENDS ${_yamlfile})
