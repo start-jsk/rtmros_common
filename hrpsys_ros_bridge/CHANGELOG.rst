@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.10 (2015-04-24)
+-------------------
 * add rewrited version of compile_robot_model.cmake
 
   * [compile_robot_model.cmake] generate controller_config even if yaml is not found
