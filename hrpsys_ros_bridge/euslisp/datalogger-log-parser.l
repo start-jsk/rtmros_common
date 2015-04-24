@@ -73,7 +73,7 @@
              (mapcar #'(lambda (f)
                          (list (read-from-string (car (data-string-split (car (piped-fork-returns-list (format nil "LANG=C wc -l ~A/~A" dir-str f))) " "))) f))
                      (remove-if #'(lambda (x) (substringp "(" x)) fname-candidate-list)))
-            (max-line (reduce #'(lambda (x y) (max x y)) (mapcar #'car fname-liens-without-rh)))
+            (max-line (car (find-if #'(lambda (x) (substringp "sh_qOut" (cadr x))) fname-liens-without-rh)))
             (fname-candidate-list-with-valid-line-without-rh
              (mapcar #'cadr (remove-if-not #'(lambda (x) (= (car x) max-line)) fname-liens-without-rh))))
        (setq parser-list
