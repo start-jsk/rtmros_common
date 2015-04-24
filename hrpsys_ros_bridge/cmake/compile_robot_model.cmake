@@ -1,133 +1,46 @@
-##
-## define macros
-##
-macro(get_export_collada_option _export_collada_option_ret)
-  set(_arg_list ${ARGV})
-  set(_export_collada_option "")
-  foreach(anarg ${ARGV})
-    # for collada manipulator
-    if ("${anarg}" STREQUAL "-a")
-      if (NOT DEFINED _export_collada_option)
-        set(_export_collada_option ${ARGV1})
-      endif (NOT DEFINED _export_collada_option)
-      list(GET _arg_list 1 _collada_arg_manipulator)
-      set(_export_collada_option ${_export_collada_option} -a ${_collada_arg_manipulator})
-    endif ("${anarg}" STREQUAL "-a")
-    list(REMOVE_AT _arg_list 0)
-  endforeach(anarg ${ARGV})
-  set(${_export_collada_option_ret} ${_export_collada_option})
-endmacro(get_export_collada_option _export_collada_option_ret)
+###
+### load old cmake
+find_program(_export_collada_exe openhrp-export-collada)
+find_program(_project_generator_exe openhrp-project-generator)
 
-macro(compile_robot_set_parent_if_possible name val)
-  get_directory_property(has_parent PARENT_DIRECTORY)
-  if(has_parent)
-    set(${name} ${val} PARENT_SCOPE)
-  endif()
-endmacro(compile_robot_set_parent_if_possiblee name val)
-
-macro(get_option_from_args _option_ret _option_name _separator _quater _ret_add_str)
-  set(_arg_list ${ARGV})
-  set(_arg_list2 ${ARGV})
-  # remove arguments of this macro
-  list(REMOVE_AT _arg_list 0 1 2)
-  list(REMOVE_AT _arg_list2 0 1 2)
-  set(_tmp_option "")
-  foreach(anarg ${_arg_list2})
-    if ("${anarg}" STREQUAL "${_option_name}")
-      if (NOT "${_tmp_option}" STREQUAL "")
-        list(GET _arg_list 1 _tmp_option2)
-        string(REPLACE " " "\\\\ " _tmp_option2 ${_tmp_option2})
-        set(_tmp_option "${_tmp_option}\ ${_separator}${_tmp_option2}")
-      else(NOT "${_tmp_option}" STREQUAL "")
-        list(GET _arg_list 1 _tmp_option2)
-        string(REPLACE " " "\\\\ " _tmp_option2 ${_tmp_option2})
-        set(_tmp_option "${_separator}${_tmp_option2}")
-      endif (NOT "${_tmp_option}" STREQUAL "")
-    endif ("${anarg}" STREQUAL "${_option_name}")
-    list(REMOVE_AT _arg_list 0)
-  endforeach(anarg ${_arg_list2})
-  if (NOT "${_tmp_option}" STREQUAL "" AND NOT "${_ret_add_str}" STREQUAL "")
-    set(_tmp_option "${_ret_add_str}\\\"${_tmp_option}\\\"")
-  endif (NOT "${_tmp_option}" STREQUAL "" AND NOT "${_ret_add_str}" STREQUAL "")
-  set(${_option_ret} "${_tmp_option}")
-endmacro(get_option_from_args _option_ret _option_name _separator _quater _ret_add_str)
-
-macro(get_conf_file_option _conf_file_option_ret _robothardware_conf_file_option_ret _conf_dt_option_ret _simulation_timestep_option_ret _simulation_joint_properties_option_ret)
-  get_option_from_args(${_conf_file_option_ret} "--conf-file-option" "--conf-file-option\ " ' "CONF_FILE_OPTION:=" ${ARGV})
-  get_option_from_args(${_robothardware_conf_file_option_ret} "--robothardware-conf-file-option" "--robothardware-conf-file-option\ " ' "ROBOTHARDWARE_CONF_FILE_OPTION:=" ${ARGV})
-  get_option_from_args(${_conf_dt_option_ret} "--conf-dt-option" "--dt\ " ' "CONF_DT_OPTION:=" ${ARGV})
-  get_option_from_args(${_simulation_timestep_option_ret} "--simulation-timestep-option" "--timestep\ " ' "SIMULATION_TIMESTEP_OPTION:=" ${ARGV})
-  get_option_from_args(${_simulation_joint_properties_option_ret} "--simulation-joint-properties-option" "--joint-properties\ " ' "SIMULATION_JOINT_PROPERTIES_OPTION:=" ${ARGV})
-endmacro()
-
-macro(get_proj_file_root_option _proj_file_root_option_ret)
-  get_option_from_args(${_proj_file_root_option_ret} "--proj-file-root-option" "" "" "," ${ARGV})
-endmacro()
-
-macro(get_euscollada_option _euscollada_option_ret)
-  get_option_from_args(${_euscollada_option_ret} "--euscollada-option" "" "" "" ${ARGV})
-endmacro()
-
-# this code removes generated .xml files since every time we call cmake, it changes the corb_port and custom_commnad(OUTPUT robot.xml) has changed. This lead to removing robot.xml when cmake is inovked, this is why we use cache to keep previous variable
-if (_corba_port_${PROJECT_NAME})
-  set(_corba_port ${_corba_port_${PROJECT_NAME}})
-  message(STATUS "using corba port ${_corba_port} (using cache _corba_port_${PROJECT_NAME})")
-else()
-  set(_corba_port 2890)
-  string(RANDOM LENGTH 1 ALPHABET 123456789 _corba_port_offset)
-  math(EXPR _corba_port "${_corba_port}+${_corba_port_offset}*10") ## set start point randomly
-  message(STATUS "using corba port ${_corba_port} (using offset ${_corba_port_offset})")
-  set(_corba_port_${PROJECT_NAME} ${_corba_port} CACHE _corba_port_${PROJECT_NAME} ${_corba_port})
-endif()
-
-# helper macros
-
-# get_rtm_naming_exe
-# set path of rtm-naming to _rtm_naming_exe variable
-macro(get_rtm_naming_exe _rtm_naming_exe)
-  if(${USE_ROSBUILD})
-    rosbuild_find_ros_package(openrtm_aist)
-    set(ENV{PKG_CONFIG_PATH} ${openrtm_aist_PACKAGE_PATH}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH})
-  endif()
-  if (EXISTS ${openrtm_aist_PACKAGE_PATH}/bin/rtm-naming)
-    set(${_rtm_naming_exe} ${openrtm_aist_PACKAGE_PATH}/bin/rtm-naming)
+if(NOT (EXISTS ${_export_collada_exe} AND EXISTS ${_project_generator_exe}))
+  message(WARNING "[compile_robot_model.cmake] Using deprecated compile_robot_model.cmake program")
+  if(EXISTS ${PROJECT_SOURCE_DIR}/cmake/compile_robot_model_old.cmake) # for hrpsys_ros_bridge
+    include(${PROJECT_SOURCE_DIR}/cmake/compile_robot_model_old.cmake)
   else()
-    find_package(PkgConfig)
-    pkg_check_modules(openrtm_aist openrtm-aist REQUIRED)
-    set(openrtm_aist_PACKAGE_PATH ${openrtm_aist_SOURCE_DIR})
-    if (EXISTS ${openrtm_aist_PREFIX}/lib/openrtm_aist/bin/rtm-naming)
-      set(${_rtm_naming_exe} ${openrtm_aist_PREFIX}/lib/openrtm_aist/bin/rtm-naming)
+    find_package(hrpsys_ros_bridge REQUIRED)
+    if(hrpsys_ros_bridge_SOURCE_PREFIX)
+      include(${hrpsys_ros_bridge_SOURCE_PREFIX}/cmake/compile_robot_model_old.cmake)
     else()
-      set(${_rtm_naming_exe} ${openrtm_aist_PREFIX}/bin/rtm-naming)
+      include(${hrpsys_ros_bridge_PREFIX}/share/hrpsys_ros_bridge/cmake/compile_robot_model_old.cmake)
     endif()
   endif()
-endmacro(get_rtm_naming_exe)
+  return()
+endif()
+###
 
-macro(get_controller_config_converter _controller_config_converter)
-    if(${USE_ROSBUILD})
-    rosbuild_find_ros_package(hrpsys_ros_bridge)
-  else()
-    find_package(hrpsys_ros_bridge)
-    if(hrpsys_ros_bridge_SOURCE_DIR)
-      set(hrpsys_ros_bridge_PACKAGE_PATH ${hrpsys_ros_bridge_SOURCE_DIR})
-    elseif(hrpsys_ros_bridge_SOURCE_PREFIX)
-      set(hrpsys_ros_bridge_PACKAGE_PATH ${hrpsys_ros_bridge_SOURCE_PREFIX})
-    else(hrpsys_ros_bridge_SOURCE_PREFIX)
-      set(hrpsys_ros_bridge_PACKAGE_PATH ${hrpsys_ros_bridge_PREFIX}/share/hrpsys_ros_bridge)
-    endif()
-  endif()
-  set(${_controller_config_converter}
-    ${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/controller_config_converter.py)
-endmacro(get_controller_config_converter _controller_config_converter)
+###
+### convert OpenHRP3 vrml file into collada file, urdf+mesh file and euslisp file
+###
+macro(compile_collada_model daefile)
+  # dummy set to wrl
+  get_filename_component(_dae_dir_name ${daefile} DIRECTORY)
+  get_filename_component(_dae_file_name ${daefile} NAME_WE)
+  compile_openhrp_model(${_dae_dir_name}/${_dae_file_name}.dae)
+endmacro()
 
-# convert OpenHRP3 vrml file into collada file, urdf+mesh file and euslisp file
 macro(compile_openhrp_model wrlfile)
-  math(EXPR _corba_port "${_corba_port}+1")
-  message("compile openhrp model ${wrlfile} at port ${_corba_port}")
+  message(STATUS "[compile_robot_model.cmake] compile_openhrp_model(${wrlfile} ${ARGV})")
+
+  # setup basic libraries
+  include(FindPkgConfig)
+  pkg_check_modules(openhrp3 REQUIRED openhrp3.1)
+  # create output directory
   set(_workdir ${PROJECT_SOURCE_DIR}/models)
   if(NOT EXISTS ${_workdir})
     file(MAKE_DIRECTORY ${_workdir})
   endif(NOT EXISTS ${_workdir})
+  # parse agrument
   if("${ARGN}" STREQUAL "")
     get_filename_component(_name ${wrlfile} NAME_WE)
     set(_export_collada_option "")
@@ -141,430 +54,112 @@ macro(compile_openhrp_model wrlfile)
     get_export_collada_option(_export_collada_option ${ARGV})
     get_conf_file_option(_conf_file_option _robothardware_conf_file_option _conf_dt_option _simulation_timestep_option _simulation_joint_properties_option ${ARGV})
   endif()
+  string(TOLOWER ${_name} _sname)
   set(_daefile "${_workdir}/${_name}.dae")
   set(_xmlfile "${_workdir}/${_name}.xml")
   set(_xmlfile_nosim "${_workdir}/${_name}_nosim.xml")
   set(_controller_config "${_workdir}/${_name}_controller_config.yaml")
-  # this command should depends on the LATEST compile_robots, in order to prevent
-  # parallel execution of rostest
-  if (compile_robots)
-    list(LENGTH compile_robots _compile_robot_length)
-    math(EXPR _compile_robot_latest_index "${_compile_robot_length} - 1")
-    list(GET compile_robots ${_compile_robot_latest_index} _latest_robot)
-  endif(compile_robots)
-  if (EXISTS ${_controller_config})
-    execute_process(COMMAND sh -c "grep 'auto generated' ${_controller_config} | wc -l" OUTPUT_VARIABLE _auto_generated)
-    if (${_auto_generated} LESS 1)
-      unset(_controller_config)
-    endif()
-  endif()
-  string(TOLOWER ${_name} _sname)
   set(_yamlfile "${_workdir}/${_sname}.yaml")
   set(_lispfile "${_workdir}/${_sname}.l")
   set(_urdffile "${_workdir}/${_name}.urdf")
-  # rtm-naming
-  get_rtm_naming_exe(_rtm_naming_exe)
+
+  # if yaml is not found, we do not use them
+  if(NOT EXISTS ${_yamlfile})
+    set(_yamlfile)
+  endif()
+  # if controller ocnfig is not augoteneretead, do not overwrite
+  if(EXISTS ${_controller_config})
+    file(READ ${_controller_config} _controller_config_text)
+    string(REGEX MATCH "auto generate" _controller_config_auto_generated ${_controller_config_text})
+    if(NOT _controller_config_auto_generated)
+      set(_controller_config)
+    endif()
+  endif()
+
+  # if wrl is not present, we stat from dae (in this case wrlfile and _daefile is same), see compile_collada_model daefile
+  if(${wrlfile} STREQUAL ${_daefile})
+    set(_wrlfile)
+  else()
+    set(_wrlfile ${wrlfile})
+  endif()
+
   # use euscollada
-  get_collada2eus(_collada2eus_exe _collada2eus_option _euscollada_dep_files)
-  # use collad_to_urdf
-  get_collada_to_urdf(_collada_to_urdf_exe)
+  get_collada2eus(_collada2eus_exe)
   # use controller_config_converter
   get_controller_config_converter(_controller_config_converter)
-  # check if binary exists
-  if(NOT EXISTS ${_rtm_naming_exe})
-    message(FATAL_ERROR "-- ${_rtm_naming_exe} not found")
-  endif()
-  if(NOT EXISTS ${_collada2eus_exe})
-    message(AUTHOR_WARNING "-- ${_collada2eus_exe} not found")
-  else()
-    #
-    set(_euscollada_dep_files ${_collada2eus_exe} ${euscollada_PACKAGE_PATH}/src/euscollada-robot.l)
-    if(${USE_ROSBUILD})
-      set(_collada2eus_option "")
-    else()
-      set(_collada2eus_option ROS_PACKAGE_PATH=${euscollada_PACKAGE_PATH}/..:$ENV{ROS_PACKAGE_PATH})
-    endif()
-    if(EXISTS ${_yamlfile})
-      add_custom_command(OUTPUT ${_lispfile}
-        COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${_daefile} ${_yamlfile} ${_lispfile}
-        DEPENDS ${_daefile} ${_yamlfile} ${_euscollada_dep_files} ${compile_robots})
-    else(EXISTS ${_yamlfile})
-      add_custom_command(OUTPUT ${_lispfile}
-        COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${_daefile} ${_lispfile}
-        DEPENDS ${_daefile} ${_euscollada_dep_files} ${compile_robots})
-    endif(EXISTS ${_yamlfile})
-    list(APPEND compile_robots ${_lispfile})
-    compile_robot_set_parent_if_possible(compile_robots ${compile_robots})
-  endif()
-  if(NOT EXISTS ${_collada_to_urdf_exe})
-    message(AUTHOR_WARNING "-- ${_collada_to_urdf_exe} not found")
-  else()
-    set(_mesh_dir "${_workdir}/${_name}_meshes")
-    if(PROJECT_NAME)
-      set(_mesh_prefix "package://${PROJECT_NAME}/models/${_name}_meshes")
-    else()
-      set(_mesh_prefix "file://${_workdir}/${_name}_meshes") ## set absolute file path
-    endif()
-    #Depends on _lispfile in order to avoid parallel computation
-    # collada_to_urdf fails if it run in parallel
-    if(NOT EXISTS ${_collada2eus_exe})
-      set(_lisp_deps_for_urdf)
-    else(NOT EXISTS ${_collada2eus_exe})
-      set(_lisp_deps_for_urdf ${_lispfile})
-    endif(NOT EXISTS ${_collada2eus_exe})
-    add_custom_command(OUTPUT ${_urdffile} ${_mesh_dir}
-      COMMAND ${_collada_to_urdf_exe} ${_daefile} --output_file ${_urdffile} -G -A --mesh_output_dir ${_mesh_dir} --mesh_prefix ${_mesh_prefix}
-      DEPENDS ${_daefile} ${_lisp_deps_for_urdf})
-  endif()
-  if(_controller_config)
-    if(EXISTS ${_controller_config_converter} AND EXISTS ${_yamlfile})
-      add_custom_command(OUTPUT ${_controller_config}
-        COMMAND ${_controller_config_converter} ${_yamlfile} ${_controller_config}
-        DEPENDS ${_yamlfile})
-    else()
-      add_custom_command(OUTPUT ${_controller_config}
-        COMMAND ${_controller_config_converter} ${_controller_config})
-    endif()
-  endif()
-  # use export-collada
-  get_export_collada_exe(_export_collada_exe)
-  if(EXISTS ${_export_collada_exe})
-    # dae_robots is a global variable to store all the output collada file from
-    # export_collada.
-    if(${USE_ROSBUILD})
-      add_custom_command(OUTPUT ${_daefile}
-        COMMAND ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
-        DEPENDS ${wrlfile} ${_export_collada_exe} ${_latest_robot} ${dae_robots})
-    else()                      #when catkin, appending LD_LIBRARY_PATH
-      add_custom_command(OUTPUT ${_daefile}
-        COMMAND LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CATKIN_DEVEL_PREFIX}/lib ${_export_collada_exe} -i ${wrlfile} -o ${_daefile} ${_export_collada_option}
-        DEPENDS ${wrlfile} ${_export_collada_exe} ${_latest_robot} ${dae_robots})
-    endif()
-    list(APPEND compile_robots ${_daefile})
-    list(APPEND dae_robots ${_daefile})
-    compile_robot_set_parent_if_possible(compile_robots ${compile_robots})
-    compile_robot_set_parent_if_possible(dae_robots ${dae_robots})
-  endif()
-  # use _gen_project.launch
-  if(${USE_ROSBUILD})
-    rosbuild_find_ros_package(hrpsys)
-    rosbuild_find_ros_package(hrpsys_tools)
-  else()
-    find_package(hrpsys_tools)
-    if(EXISTS ${openhrp3_SOURCE_DIR})
-      set(openhrp3_PACKAGE_PATH ${openhrp3_SOURCE_DIR})
-    else()
-      set(openhrp3_PACKAGE_PATH ${openhrp3_PREFIX}/share/openhrp3)
-    endif()
-    if(EXISTS ${hrpsys_SOURCE_DIR})
-      set(hrpsys_PACKAGE_PATH ${hrpsys_SOURCE_DIR})
-    else()
-      set(hrpsys_PACKAGE_PATH ${hrpsys_PREFIX}/share/hrpsys)
-    endif()
-    if(EXISTS ${hrpsys_tools_SOURCE_DIR})
-      set(hrpsys_tools_PACKAGE_PATH ${hrpsys_tools_SOURCE_DIR})
-    elseif(EXISTS ${hrpsys_tools_SOURCE_PREFIX})
-      set(hrpsys_tools_PACKAGE_PATH ${hrpsys_tools_SOURCE_PREFIX})
-    else()
-      set(hrpsys_tools_PACKAGE_PATH ${hrpsys_tools_PREFIX}/share/hrpsys_tools)
-    endif()
-  endif()
-  if(EXISTS ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator)
-    set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
-  elseif(EXISTS ${hrpsys_PREFIX}/lib/hrpsys/ProjectGenerator)
-    set(_gen_project_dep_files ${hrpsys_PREFIX}/lib/hrpsys/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
-  else()
-    # when hrpsys is catkin installed
-    set(_gen_project_dep_files)
-    message("assuming hrpsys/ProjectGenerator is already compiled")
-  endif()
-  message("compile_openhrp3_model ${wrlfile}")
-  message("  hrpsys_tools_PACKAGE_PATH = ${hrpsys_tools_PACKAGE_PATH}")
-  message("  hrpsys_PACKAGE_PATH       = ${hrpsys_PACKAGE_PATH}")
-  message("  openhrp3_PACKAGE_PATH     = ${openhrp3_PACKAGE_PATH}")
-  set(_CMAKE_PREFIX_PATH "")
-  foreach(_PATH ${CMAKE_PREFIX_PATH})
-    set(_CMAKE_PREFIX_PATH "${_CMAKE_PREFIX_PATH}:${_PATH}")
-  endforeach()
-  if(EXISTS ${openhrp3_PREFIX}/share/OpenHRP-3.1/sample/model/longfloor.wrl)
-    set(_conf_file_option "${_conf_file_option} OBJECT_MODELS:=${openhrp3_PREFIX}/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,0,0,1,0")
-  endif()
-  add_custom_command(OUTPUT ${_xmlfile}
-    COMMAND ${_rtm_naming_exe} ${_corba_port} || echo "fail to run rtm_naming, but try to continue"
-    COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option} ${_simulation_joint_properties_option}"
-    COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
-    DEPENDS ${_daefile} ${_gen_project_dep_files})
-  add_custom_command(OUTPUT ${_xmlfile_nosim}
-    COMMAND ${_rtm_naming_exe} ${_corba_port} || echo "fail to run rtm_naming, but try to continue"
-    COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${wrlfile} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option} ${_simulation_joint_properties_option}"
-    COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
-    DEPENDS ${_daefile} ${_gen_project_dep_files} ${_xmlfile})
-  if(_controller_config)
-    list(APPEND _depends_files ${_xmlfile} ${_xmlfile_nosim} ${_controller_config})
-  else()
-    list(APPEND _depends_files ${_xmlfile} ${_xmlfile_nosim})
-  endif()
-  if(EXISTS ${_export_collada_exe})
-    list(APPEND _depends_files ${_daefile})
-    if(EXISTS ${_collada2eus_exe})
-      list(APPEND _depends_files ${_lispfile})
-    endif()
-    if(EXISTS ${_collada_to_urdf_exe})
-      list(APPEND _depends_files ${_urdffile})
-    endif()
-  endif()
-  add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_depends_files})
-  ## make sure to kill nameserver
-  add_custom_command(OUTPUT ${_sname}_${PROJECT_NAME}_compile_cleanup
-    COMMAND echo "pkill -KILL -f omniNames -start ${_corba_port} for compile_openhrp_model"
-    COMMAND echo "pkill -KILL -f omniNames\\ -start\\ ${_corba_port}" >  ./pkill-omninames-${_corba_port}.sh
-    COMMAND sh ./pkill-omninames-${_corba_port}.sh || echo "no process to kill"
-    COMMAND ps -C omniNames || true
-    DEPENDS  ${_sname}_${PROJECT_NAME}_compile
-    VERBATIM)
-  add_custom_target(${_sname}_${PROJECT_NAME}_compile_all ALL DEPENDS ${_sname}_${PROJECT_NAME}_compile_cleanup)
-  get_directory_property(_current_directory_properties ADDITIONAL_MAKE_CLEAN_FILES)
-  set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
-    "${_workdir}/${_name}.conf;${_workdir}/${_name}.RobotHardware.conf;${_workdir}/${_name}_nosim.conf;${_workdir}/${_name}_nosim.RobotHardware.conf;${_current_directory_properties}")
-  list(APPEND compile_robots ${_sname}_${PROJECT_NAME}_compile_all)
-  compile_robot_set_parent_if_possible(compile_robots ${compile_robots})
-endmacro(compile_openhrp_model)
-
-# get path, option and dependending files to collada2eus 
-macro(get_collada2eus _collada2eus_exe _collada2eus_option _euscollada_dep_files)
-  if(${USE_ROSBUILD})
-    rosbuild_find_ros_package(euscollada)
-    set(${_collada2eus_exe} ${euscollada_PACKAGE_PATH}/bin/collada2eus)
-    set(${_euscollada_dep_files} ${euscollada_PACKAGE_PATH}/bin/collada2eus ${euscollada_PACKAGE_PATH}/src/euscollada-robot.l)
-  else()
-    find_package(euscollada)
-    if(euscollada_SOURCE_DIR)
-      set(euscollada_PACKAGE_PATH ${euscollada_SOURCE_DIR})
-    elseif(euscollada_SOURCE_PREFIX)
-      set(euscollada_PACKAGE_PATH ${euscollada_SOURCE_PREFIX})
-    else()
-      set(euscollada_PACKAGE_PATH ${euscollada_PREFIX}/share/euscollada)
-    endif()
-    set(${_collada2eus_exe} ${euscollada_PREFIX}/lib/euscollada/collada2eus)
-  endif()
-  if(${USE_ROSBUILD})
-    set(${_collada2eus_option} "")
-  else()
-    set(${_collada2eus_option} ROS_PACKAGE_PATH=${euscollada_PACKAGE_PATH}/..:$ENV{ROS_PACKAGE_PATH})
-  endif()
-endmacro(get_collada2eus _collada2eus_exe _collada2eus_option _euscollada_dep_files)
-
-# get path to collada_to_urdf
-macro(get_collada_to_urdf _collada_to_urdf_exe)
-  if(${USE_ROSBUILD})
-    rosbuild_find_ros_package(collada_tools)
-    set(${_collada_to_urdf_exe} ${collada_tools_PACKAGE_PATH}/bin/collada_to_urdf)
-  else()
-    find_package(collada_urdf)
-    set(${_collada_to_urdf_exe} ${collada_urdf_PREFIX}/lib/collada_urdf/collada_to_urdf)
-  endif()
-endmacro(get_collada_to_urdf _collada_to_urdf_exe)
-
-macro(get_export_collada_exe _export_collada_exe)
-  if(${USE_ROSBUILD})
-    rosbuild_find_ros_package(openhrp3)
-    set(ENV{PKG_CONFIG_PATH} ${openhrp3_PACKAGE_PATH}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH})
-  endif()
-  if (EXISTS ${openhrp3_PACKAGE_PATH}/bin/export-collada)
-    set(${_export_collada_exe} ${openhrp3_PACKAGE_PATH}/bin/export-collada)
-  else()
-    find_package(openhrp3 QUIET)
-    if(NOT openhrp3_FOUND)
-      find_package(PkgConfig)
-      pkg_check_modules(openhrp3 openhrp3.1 REQUIRED)
-    endif()
-    set(openhrp3_PACKAGE_PATH ${openhrp3_SOURCE_DIR})
-    if(EXISTS ${openhrp3_PREFIX}/bin/export-collada)
-      set(${_export_collada_exe} ${openhrp3_PREFIX}/bin/export-collada)
-    else()
-      set(${_export_collada_exe} ${openhrp3_PREFIX}/lib/openhrp3/export-collada)
-    endif()
-  endif()
-  if(EXISTS ${${_export_collada_exe}})
-    message("using export-collada to convert models ${${_export_collada_exe}}")
-  else()
-    # when openhrp3 is catkin installed
-    message(FATAL_ERROR "assuming export-collada(${${_export_collada_exe}}) is already compiled")
-    set(${_export_collada_exe})
-  endif()
-endmacro(get_export_collada_exe _export_collada_exe)
-
-macro(compile_collada_model daefile)
-  math(EXPR _corba_port "${_corba_port}+1")
-  message("compile collada model ${daefile} at port ${_corba_port}")
-  set(_workdir ${PROJECT_SOURCE_DIR}/models)
-  if(NOT EXISTS ${_workdir})
-    file(MAKE_DIRECTORY ${_workdir})
-  endif(NOT EXISTS ${_workdir})
-  get_filename_component(_name ${daefile} NAME_WE)
-  if("${ARGN}" STREQUAL "")
-    set(_conf_file_option "")
-    set(_robothardware_conf_file_option "")
-    set(_conf_dt_option "")
-    set(_simulation_timestep_option "")
-    set(_simulation_joint_properties_option "")
-    set(_proj_file_root_option "")
-    set(_euscollada_option "")
-  else()
-    get_conf_file_option(_conf_file_option _robothardware_conf_file_option _conf_dt_option _simulation_timestep_option _simulation_joint_properties_option ${ARGV})
-    get_proj_file_root_option(_proj_file_root_option ${ARGV})
-    get_euscollada_option(_euscollada_option ${ARGV})
-  endif()
-  set(_xmlfile "${_workdir}/${_name}.xml")
-  set(_xmlfile_nosim "${_workdir}/${_name}_nosim.xml")
-  set(_controller_config "${_workdir}/${_name}_controller_config.yaml")
-  if (EXISTS ${_controller_config})
-    execute_process(COMMAND sh -c "grep 'auto generated' ${_controller_config} | wc -l" OUTPUT_VARIABLE _auto_generated)
-    if (${_auto_generated} LESS 1)
-      unset(_controller_config)
-    endif()
-  endif()
-  string(TOLOWER ${_name} _sname)
-  set(_yamlfile "${_workdir}/${_sname}.yaml")
-  set(_lispfile "${_workdir}/${_sname}.l")
-  set(_urdffile "${_workdir}/${_name}.urdf")
-  # rtm-naming
-  get_rtm_naming_exe(_rtm_naming_exe)
-  # use collada2eus
-  get_collada2eus(_collada2eus_exe _collada2eus_option _euscollada_dep_files)
-  # use collad_to_urdf
+  # get path to collada_to_urdf
   get_collada_to_urdf(_collada_to_urdf_exe)
-  # use controller_config_converter
-  get_controller_config_converter(_controller_config_converter)
-  # check if binary exists
-  if(NOT EXISTS ${_rtm_naming_exe})
-    message(FATAL_ERROR "-- ${_rtm_naming_exe} not found")
-  endif()
-  if(NOT EXISTS ${_collada2eus_exe})
-    message(AUTHOR_WARNING "-- ${_collada2eus_exe} not found")
-  else()
-    if(EXISTS ${_yamlfile})
-      add_custom_command(OUTPUT ${_lispfile}
-        COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${daefile} ${_yamlfile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus for ${_lispfile}"
-        DEPENDS ${daefile} ${_euscollada_dep_files})
-    else(EXISTS ${_yamlfile})
-      add_custom_command(OUTPUT ${_lispfile}
-        COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${daefile} ${_lispfile} ${_euscollada_option} || echo "[WARNING] ### Did not run collada2eus $for {_lispfile}"
-        DEPENDS ${daefile} ${_euscollada_dep_files})
-    endif(EXISTS ${_yamlfile})
-  endif()
-  if(NOT EXISTS ${_collada_to_urdf_exe})
-    message(AUTHOR_WARNING "-- ${_collada_to_urdf_exe} not found")
-  else()
-    set(_mesh_dir "${_workdir}/${_name}_meshes")
-    if(PROJECT_NAME)
-      set(_mesh_prefix "package://${PROJECT_NAME}/models/${_name}_meshes")
-    else()
-      set(_mesh_prefix "file://${_workdir}/${_name}_meshes") ## set absolute file path
-    endif()
-    add_custom_command(OUTPUT ${_urdffile} ${_mesh_dir}
-      COMMAND ${_collada_to_urdf_exe} ${daefile} --output_file ${_urdffile} -G -A --mesh_output_dir ${_mesh_dir} --mesh_prefix ${_mesh_prefix}
-      DEPENDS ${daefile})
-  endif()
-  if(_controller_config)
-    if(EXISTS ${_controller_config_converter} AND EXISTS ${_yamlfile})
-      add_custom_command(OUTPUT ${_controller_config}
-        COMMAND ${_controller_config_converter} ${_yamlfile} ${_controller_config}
-        DEPENDS ${_yamlfile})
-    else()
-      add_custom_command(OUTPUT ${_controller_config}
-        COMMAND ${_controller_config_converter} ${_controller_config})
-    endif()
-  endif()
-  # use _gen_project.launch
-  if(${USE_ROSBUILD})
-    rosbuild_find_ros_package(hrpsys)
-    rosbuild_find_ros_package(hrpsys_tools)
-  else()
-    find_package(hrpsys)
-    find_package(hrpsys_tools)
-    if(EXISTS ${openhrp3_SOURCE_DIR})
-      set(openhrp3_PACKAGE_PATH ${openhrp3_SOURCE_DIR})
-    else()
-      set(openhrp3_PACKAGE_PATH ${openhrp3_PREFIX}/share/openhrp3)
-    endif()
-    if(EXISTS ${hrpsys_SOURCE_DIR})
-      set(hrpsys_PACKAGE_PATH ${hrpsys_SOURCE_DIR})
-    else()
-      set(hrpsys_PACKAGE_PATH ${hrpsys_PREFIX}/share/hrpsys)
-    endif()
-    if(EXISTS ${hrpsys_tools_SOURCE_DIR})
-      set(hrpsys_tools_PACKAGE_PATH ${hrpsys_tools_SOURCE_DIR})
-    elseif(EXISTS ${hrpsys_tools_SOURCE_PREFIX})
-      set(hrpsys_tools_PACKAGE_PATH ${hrpsys_tools_SOURCE_PREFIX})
-    else()
-      set(hrpsys_tools_PACKAGE_PATH ${hrpsys_tools_PREFIX}/share/hrpsys_tools)
-    endif()
-  endif()
-  if(EXISTS ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator)
-    set(_gen_project_dep_files ${hrpsys_PACKAGE_PATH}/bin/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
-  elseif(EXISTS ${hrpsys_PREFIX}/lib/hrpsys/ProjectGenerator)
-    set(_gen_project_dep_files ${hrpsys_PREFIX}/lib/hrpsys/ProjectGenerator ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch)
-  else()
-    # when hrpsys is catkin installed
-    set(_gen_project_dep_files)
-    message("assuming hrpsys/ProjectGenerator is already compiled")
-  endif()
-  # this command should depends on the LATEST compile_robots, in order to prevent
-  # parallel execution of rostest
-  if (compile_robots)
-    list(LENGTH compile_robots _compile_robot_length)
-    math(EXPR _compile_robot_latest_index "${_compile_robot_length} - 1")
-    list(GET compile_robots ${_compile_robot_latest_index} _latest_robot)
-  endif(compile_robots)
-  message("compile_collada_model ${daefile}")
-  message("  hrpsys_tools_PACKAGE_PATH = ${hrpsys_tools_PACKAGE_PATH}")
-  message("  hrpsys_PACKAGE_PATH       = ${hrpsys_PACKAGE_PATH}")
-  message("  openhrp3_PACKAGE_PATH     = ${openhrp3_PACKAGE_PATH}")
-  set(_CMAKE_PREFIX_PATH "")
-  foreach(_PATH ${CMAKE_PREFIX_PATH})
-    set(_CMAKE_PREFIX_PATH "${_CMAKE_PREFIX_PATH}:${_PATH}")
-  endforeach()
-  if(EXISTS ${openhrp3_PREFIX}/share/OpenHRP-3.1/sample/model/longfloor.wrl)
-    set(_conf_file_option "${_conf_file_option} OBJECT_MODELS:=${openhrp3_PREFIX}/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,0,0,1,0")
-  endif()
-  add_custom_command(OUTPUT ${_xmlfile}
-    COMMAND ${_rtm_naming_exe} ${_corba_port} || echo "fail to run rtm_naming, but try to continue"
-    COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option} ${_simulation_joint_properties_option}"
-    COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
-    DEPENDS ${daefile} ${_gen_project_dep_files} ${_latest_robot})
-  add_custom_command(OUTPUT ${_xmlfile_nosim}
-    COMMAND ${_rtm_naming_exe} ${_corba_port} || echo "fail to run rtm_naming, but try to continue"
-    COMMAND sh -c "CMAKE_PREFIX_PATH=${_CMAKE_PREFIX_PATH} ROS_PACKAGE_PATH=${hrpsys_tools_PACKAGE_PATH}:${hrpsys_PACKAGE_PATH}:${openhrp3_PACKAGE_PATH}:$ENV{ROS_PACKAGE_PATH} rostest -t ${hrpsys_tools_PACKAGE_PATH}/launch/_gen_project.launch CORBA_PORT:=${_corba_port} INPUT:=${daefile}${_proj_file_root_option} OUTPUT:=${_xmlfile_nosim} INTEGRATE:=false ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option} ${_simulation_joint_properties_option}"
-    COMMAND pkill -KILL -f "omniNames -start ${_corba_port}" || echo "no process to kill"
-    DEPENDS ${daefile} ${_gen_project_dep_files} ${_xmlfile})
-  if(_controller_config)
-    list(APPEND _depends_files ${_xmlfile} ${_xmlfile_nosim} ${_controller_config})
-  else()
-    list(APPEND _depends_files ${_xmlfile} ${_xmlfile_nosim})
-  endif()
+
+  # ready to go
+  message(STATUS " wrl file ${_wrlfile}")
+  message(STATUS "yaml file ${_yamlfile}")
+  message(STATUS " dae file ${_daefile}")
+  message(STATUS "urdf file ${_urdffile}")
+  message(STATUS "lisp file ${_lispfile}")
+  message(STATUS " xml file ${_xmlfile}")
+  message(STATUS "          ${_xmlfile_nosim}")
+  message(STATUS "config file ${_controller_config}")
+  #message(STATUS "Found ${_export_collada_exe}")
+  #message(STATUS "Found ${_project_generator_exe}")
+  #message(STATUS "Found ${_collada2eus_exe}")
+  #message(STATUS "Found ${_collada_to_urdf_exe}")
+  #message(STATUS "Found ${_controller_config_converter}")
+
+  # output euslisp files (dae, yaml -> euslisp)
+  set(${_sname}_${PROJECT_NAME}_compile_all_target)
   if(EXISTS ${_collada2eus_exe})
-    list(APPEND _depends_files ${_lispfile})
+    add_custom_command(OUTPUT ${_lispfile}
+      COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${_daefile} ${_yamlfile} ${_lispfile}
+      DEPENDS ${_daefile} ${_yamlfile} ${_euscollada_dep_files})
+    add_custom_target(${_sname}_${PROJECT_NAME}_compile_lisp DEPENDS ${_lispfile})
+    list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_lisp)
   endif()
-  if(EXISTS ${_collada_to_urdf_exe})
-    list(APPEND _depends_files ${_urdffile})
+
+  # output urdf files (collada -> urdf)
+  set(_mesh_dir "${_workdir}/${_name}_meshes")
+  set(_mesh_prefix "package://${PROJECT_NAME}/models/${_name}_meshes")
+  add_custom_command(OUTPUT ${_urdffile} ${_mesh_dir}
+    COMMAND ${_collada_to_urdf_exe} ${_daefile} --output_file ${_urdffile} -G -A --mesh_output_dir ${_mesh_dir} --mesh_prefix ${_mesh_prefix}
+    DEPENDS ${_daefile} ${_lisp_deps_for_urdf})
+  add_custom_target(${_sname}_${PROJECT_NAME}_compile_urdf DEPENDS ${_urdffile} ${_mesh_dir})
+    list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_urdf)
+
+  if(_controller_config)
+    # output controller config (yaml -> config) if yaml is not found write dummy files
+    add_custom_command(OUTPUT ${_controller_config}
+      COMMAND ${_controller_config_converter} ${_yamlfile} ${_controller_config}
+      DEPENDS ${_yamlfile})
+    add_custom_target(${_sname}_${PROJECT_NAME}_compile_conf DEPENDS ${_controller_config})
+    list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_conf)
   endif()
-  add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_depends_files})
-  ## make sure to kill nameserver
-  add_custom_command(OUTPUT ${_sname}_${PROJECT_NAME}_compile_cleanup
-    COMMAND echo "pkill -KILL -f omniNames -start ${_corba_port} for compile_collada_model"
-    COMMAND echo "pkill -KILL -f omniNames\\ -start\\ ${_corba_port}" >  ./pkill-omninames-${_corba_port}.sh
-    COMMAND sh ./pkill-omninames-${_corba_port}.sh || echo "no process to kill"
-    COMMAND ps -C omniNames || true
-    DEPENDS  ${_sname}_${PROJECT_NAME}_compile
-    VERBATIM)
-  add_custom_target(${_sname}_${PROJECT_NAME}_compile_all ALL DEPENDS ${_sname}_${PROJECT_NAME}_compile_cleanup)
-  get_directory_property(_current_directory_properties ADDITIONAL_MAKE_CLEAN_FILES)
-  set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
-    "${_workdir}/${_name}.conf;${_workdir}/${_name}.RobotHardware.conf;${_workdir}/${_name}_nosim.conf;${_workdir}/${_name}_nosim.RobotHardware.conf;${_current_directory_properties}")
-  list(APPEND compile_robots ${_sname}_${PROJECT_NAME}_compile_all)
-  compile_robot_set_parent_if_possible(compile_robots ${compile_robots})
-endmacro(compile_collada_model daefile)
+
+  # project generator (collada -> xml)
+  add_custom_command(OUTPUT ${_xmlfile}
+    COMMAND ${_project_generator_exe} ${_wrlfile} ${openhrp3_PREFIX}/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,0,0,1,0 --integrate true --output ${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option} ${_simulation_joint_properties_option}
+    DEPENDS ${daefile} ${_gen_project_dep_files})
+  add_custom_command(OUTPUT ${_xmlfile_nosim}
+    COMMAND ${_project_generator_exe} ${_wrlfile} ${openhrp3_PREFIX}/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,0,0,1,0 --integrate false --output ${_xmlfile_nosim} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option} ${_simulation_joint_properties_option}
+    DEPENDS ${daefile} ${_gen_project_dep_files})
+  add_custom_target(${_sname}_${PROJECT_NAME}_compile_xml DEPENDS ${_xmlfile} ${_xmlfile_nosim})
+  list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_xml)
+
+  # output collada (wrl -> collada )
+  if(EXISTS ${_wrlfile})
+    add_custom_command(OUTPUT ${_daefile}
+      COMMAND ${_export_collada_exe} -i ${_wrlfile} -o ${_daefile} ${_export_collada_option}
+      DEPENDS ${_wrlfile} ${_export_collada_exe} ${_latest_robot})
+    add_custom_target(${_sname}_${PROJECT_NAME}_compile_dae DEPENDS ${_daefile})
+    list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_dae)
+  endif()
+
+  # run all target
+  add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${${_sname}_${PROJECT_NAME}_compile_all_target})
+  add_custom_target(${_sname}_${PROJECT_NAME}_compile_all ALL DEPENDS ${_sname}_${PROJECT_NAME}_compile)
+
+  ### JUST FOR BACKWORD COMPATIBILITY https://github.com/start-jsk/rtmros_tutorials/blob/a84d63f599acc442a8dd2ad679b04bb6dc4e70c7/hrpsys_ros_bridge_tutorials/CMakeLists.txt#L102
+  set(compile_robots ${${_sname}_${PROJECT_NAME}_compile_all_target})
+
+endmacro(compile_openhrp_model)
 
 macro (generate_default_launch_eusinterface_files wrlfile project_pkg_name)
   if("${ARGN}" STREQUAL "")
@@ -577,15 +172,11 @@ macro (generate_default_launch_eusinterface_files wrlfile project_pkg_name)
   set(MODEL_FILE ${wrlfile})
   set(ROBOT ${_name})
   set(robot ${_sname})
-  if(${USE_ROSBUILD})
-    rosbuild_find_ros_package(hrpsys_ros_bridge)
-  elseif(EXISTS ${hrpsys_ros_bridge_SOURCE_DIR}/scripts)
-    set(hrpsys_ros_bridge_PACKAGE_PATH ${hrpsys_ros_bridge_SOURCE_DIR})
-  elseif(EXISTS ${hrpsys_ros_bridge_PREFIX}/share/hrpsys_ros_bridge/scripts)
-    set(hrpsys_ros_bridge_PACKAGE_PATH ${hrpsys_ros_bridge_PREFIX}/share/hrpsys_ros_bridge)
+  find_package(hrpsys_ros_bridge REQUIRED)
+  if(hrpsys_ros_bridge_SOURCE_PREFIX)
+    set(hrpsys_ros_bridge_PACKAGE_PATH ${hrpsys_ros_bridge_SOURCE_PREFIX})
   else()
-    execute_process(COMMAND rospack find hrpsys_ros_bridge OUTPUT_VARIABLE hrpsys_ros_bridge_PACKAGE_PATH
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(hrpsys_ros_bridge_PACKAGE_PATH ${hrpsys_ros_bridge_PREFIX}/share/hrpsys_ros_bridge)
   endif()
   message("Generate launch files for ${ROBOT}")
   message("  PROJECT_PKG_NAME = ${PROJECT_PKG_NAME}")
@@ -606,22 +197,122 @@ macro (generate_default_launch_eusinterface_files wrlfile project_pkg_name)
   endif()
   #  generate startup.launch
   configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot_startup.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}_startup.launch)
-  list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}_startup.launch)
   #  generate ros_bridge.launch
   configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot_ros_bridge.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}_ros_bridge.launch)
-  list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}_ros_bridge.launch)
+  add_custom_target(${_sname}_${PROJECT_NAME}_compile_launch DEPENDS ${PROJECT_SOURCE_DIR}/launch/${_sname}_startup.launch ${PROJECT_SOURCE_DIR}/launch/${_sname}_ros_bridge.launch)
   #  generate toplevel launch which includes ros_bridge.launch and startup.launch
   if (NOT "${ARGV3}" STREQUAL "--no-toplevel-launch")
     configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}.launch)
     configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot_nosim.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}_nosim.launch)
-    list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}.launch)
-    list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/launch/${_sname}_nosim.launch)
+    add_custom_target(${_sname}_${PROJECT_NAME}_compile_top_launch DEPENDS ${PROJECT_SOURCE_DIR}/launch/${_sname}.launch ${PROJECT_SOURCE_DIR}/launch/${_sname}_nosim.launch)
+    add_dependencies(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_sname}_${PROJECT_NAME}_compile_top_launch)
   endif()
   #  generate euslisp robot-interface file
   if (NOT "${ARGV3}" STREQUAL "--no-euslisp")
     configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default-robot-interface.l.in ${PROJECT_SOURCE_DIR}/build/${_sname}-interface.l)
-    list(APPEND ${_sname}_generated_launch_euslisp_files ${PROJECT_SOURCE_DIR}/build/${_sname}-interface.l)
+    message(STATUS "Output ${PROJECT_SOURCE_DIR}/build/${_sname}-interface.l")
+    add_custom_target(${_sname}_${PROJECT_NAME}_compile_eusif DEPENDS ${PROJECT_SOURCE_DIR}/build/${_sname}-interface.l)
+    add_dependencies(${_sname}_${PROJECT_NAME}_compile DEPENDS ${_sname}_${PROJECT_NAME}_compile_eusif)
   endif()
-  get_directory_property(_current_directory_properties ADDITIONAL_MAKE_CLEAN_FILES)
-  set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${${_sname}_generated_launch_euslisp_files};${_current_directory_properties}")
 endmacro ()
+
+
+###
+### utilities
+###
+macro(get_option_from_args _option_ret _option_name _separator)
+  set(_arg_list ${ARGV})
+  set(_arg_list2 ${ARGV})
+  # remove arguments of this macro
+  list(REMOVE_AT _arg_list 0 1 2)
+  list(REMOVE_AT _arg_list2 0 1 2)
+  set(_tmp_option "")
+  foreach(anarg ${_arg_list2})
+    if ("${anarg}" STREQUAL "${_option_name}")
+      if (NOT "${_tmp_option}" STREQUAL "")
+        list(GET _arg_list 1 _tmp_option2)
+        set(_tmp_option "${_tmp_option};${_separator};${_tmp_option2}")
+      else(NOT "${_tmp_option}" STREQUAL "")
+        list(GET _arg_list 1 _tmp_option2)
+        #string(REPLACE " " "\\\\ " _tmp_option2 ${_tmp_option2})
+        set(_tmp_option "${_separator};${_tmp_option2}")
+      endif (NOT "${_tmp_option}" STREQUAL "")
+    endif ("${anarg}" STREQUAL "${_option_name}")
+    list(REMOVE_AT _arg_list 0)
+  endforeach(anarg ${_arg_list2})
+  set(${_option_ret} "${_tmp_option}")
+endmacro(get_option_from_args _option_ret _option_name)
+
+macro(get_conf_file_option _conf_file_option_ret _robothardware_conf_file_option_ret _conf_dt_option_ret _simulation_timestep_option_ret _simulation_joint_properties_option_ret)
+  # set user valur
+  get_option_from_args(${_conf_file_option_ret} --conf-file-option --conf-file-option ${ARGV})
+  get_option_from_args(${_robothardware_conf_file_option_ret} --robothardware-conf-file-option --robothardware-conf-file-option ${ARGV})
+  get_option_from_args(${_conf_dt_option_ret} --conf-dt-option --dt  ${ARGV})
+  get_option_from_args(${_simulation_timestep_option_ret} --simulation-timestep-option --timestep ${ARGV})
+  get_option_from_args(${_simulation_joint_properties_option_ret} --simulation-joint-properties-option --joint-properties ${ARGV})
+  # set default value
+  if(NOT EXISTS ${openhrp3_PREFIX}/share/OpenHRP-3.1/sample/model/longfloor.wrl)
+    message(FATAL_ERROR "could not find ${openhrp3_PREFIX}/share/OpenHRP-3.1/sample/model/longfloor.wrl")
+  endif()
+  set(_conf_file_option_ret "${_conf_file_option_ret} OBJECT_MODELS:=${openhrp3_PREFIX}/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,0,0,1,0")
+endmacro()
+
+macro(get_export_collada_option _export_collada_option_ret)
+  set(_arg_list ${ARGV})
+  set(_export_collada_option "")
+  foreach(anarg ${ARGV})
+    # for collada manipulator
+    if ("${anarg}" STREQUAL "-a")
+      if (NOT DEFINED _export_collada_option)
+        set(_export_collada_option ${ARGV1})
+      endif (NOT DEFINED _export_collada_option)
+      list(GET _arg_list 1 _collada_arg_manipulator)
+      set(_export_collada_option ${_export_collada_option} -a ${_collada_arg_manipulator})
+    endif ("${anarg}" STREQUAL "-a")
+    list(REMOVE_AT _arg_list 0)
+  endforeach(anarg ${ARGV})
+  set(${_export_collada_option_ret} ${_export_collada_option})
+endmacro(get_export_collada_option _export_collada_option_ret)
+
+macro(get_proj_file_root_option _proj_file_root_option_ret)
+  get_option_from_args(${_proj_file_root_option_ret} "--proj-file-root-option" "" "" "," ${ARGV})
+endmacro()
+
+macro(get_euscollada_option _euscollada_option_ret)
+  get_option_from_args(${_euscollada_option_ret} "--euscollada-option" "" "" "" ${ARGV})
+endmacro()
+
+###
+### get executables
+###
+# get path, option and dependending files to collada2eus
+macro(get_collada2eus _collada2eus_exe)
+  find_package(euscollada)
+  set(${_collada2eus_exe} ${euscollada_PREFIX}/lib/euscollada/collada2eus)
+  if(NOT EXISTS ${${_collada2eus_exe}})
+    message(WARNING "could not find ${${_collada2eus_exe}}")
+  endif()
+endmacro()
+
+# use controller_config_converter
+macro(get_controller_config_converter _controller_config_converter)
+  find_package(hrpsys_ros_bridge REQUIRED)
+  if(hrpsys_ros_bridge_SOURCE_PREFIX)
+    set(${_controller_config_converter} ${hrpsys_ros_bridge_SOURCE_PREFIX}/scripts/controller_config_converter.py)
+  else()
+    set(${_controller_config_converter} ${hrpsys_ros_bridge_PREFIX}/share/hrpsys_ros_bridge/scripts/controller_config_converter.py)
+  endif()
+  if(NOT EXISTS ${${_controller_config_converter}})
+    message(FATAL_ERROR "could not find ${${_controller_config_converter}}")
+  endif()
+endmacro()
+
+# get path to collada_to_urdf
+macro(get_collada_to_urdf _collada_to_urdf_exe)
+  find_package(collada_urdf REQUIRED)
+  set(${_collada_to_urdf_exe} ${collada_urdf_PREFIX}/lib/collada_urdf/collada_to_urdf)
+  if(NOT EXISTS ${${_collada_to_urdf_exe}})
+    message(FATAL_ERROR "could not find ${${_collada_to_urdf_exe}}")
+  endif()
+endmacro(get_collada_to_urdf _collada_to_urdf_exe)
+
