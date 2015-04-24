@@ -171,6 +171,8 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   } SensorInfo;
   std::map<std::string, SensorInfo> sensor_info;
 
+  double dt;
+
  private:
 };
 

@@ -269,6 +269,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   hrpsys_ros_bridge::MotorStates mot_states;
   mot_states.header.stamp = tm_on_execute;
 
+  static int count_all = 0;
+  static int count_read = 0; // inc only when data is arrived
+  static int count_drop = 0; // inc only when data is dropped
+  count_all ++;
+
   // servoStateIn
   if ( m_servoStateIn.isNew () ) {
     try {
@@ -441,15 +446,23 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
     ros::spinOnce();
 
-    //
-    static int count = 0;
+    // diagnostics
     tm.tack();
     if ( tm.interval() > 1 ) {
-      ROS_INFO_STREAM("[" << getInstanceName() << "] @onExecutece " << ec_id << " is working at " << count << "[Hz]");
+      ROS_INFO_STREAM("[" << getInstanceName() << "] @onExecutece " << ec_id << " is working at " << count_read << "[Hz] (exec " << count_all << " Hz, dropped " << count_drop << ")");
       tm.tick();
-      count = 0;
+      count_read = 0;
+      count_all = 0;
+      count_drop = 0;
     }
-    count ++;
+    static ros::Time t0, t1;
+    t1 = ros::Time(m_rsangle.tm.sec,m_rsangle.tm.nsec);
+    if ( (t1 - t0).toSec() < dt * 0.9 || dt * 1.1 < (t1 - t0).toSec() ){
+      ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecutece " << ec_id << " may drop communication. " << (t1 - t0).toSec() << "[sec] (" << dt << ")");
+      count_drop ++;
+    }
+    t0 = t1;
+    count_read ++;
   } else { //m_in_rsangleIn
     double interval = 5;
     tm.tack();

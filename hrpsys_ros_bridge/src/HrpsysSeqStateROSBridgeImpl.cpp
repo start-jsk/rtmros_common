@@ -79,6 +79,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
 
   RTC::Properties& prop = getProperties();
 
+  dt = 0;
+  coil::stringTo(dt, prop["dt"].c_str());
+
   body = hrp::BodyPtr(new hrp::Body());
 
   RTC::Manager& rtcManager = RTC::Manager::instance();
