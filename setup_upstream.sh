@@ -63,8 +63,10 @@ wstool merge /tmp/rosinstall.$$ -t $WORKSPACE/src
 wstool info -t $WORKSPACE/src
 wstool update --abort-changed-uris -t $WORKSPACE/src
 
+echo "Updaging openhrp3 CMakeLists.txt"
 sed -i 's@option(ENABLE_DOXYGEN "Use Doxygen" ON)@option(ENABLE_DOXYGEN "Use Doxygen" OFF)@' $WORKSPACE/src/openhrp3/CMakeLists.txt
+
+echo "Updaging hrpsys CMakeLists.txt"
 sed -i 's@option(ENABLE_DOXYGEN "Use Doxygen" ON)@option(ENABLE_DOXYGEN "Use Doxygen" OFF)@' $WORKSPACE/src/hrpsys/CMakeLists.txt
 
 echo "*** Done"
-
