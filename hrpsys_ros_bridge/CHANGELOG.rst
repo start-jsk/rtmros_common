@@ -2,6 +2,26 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add rewrited version of compile_robot_model.cmake
+
+  * [compile_robot_model.cmake] generate controller_config even if yaml is not found
+  * [compile_robot_model.cmake] use add_custom_target/command for eusif and launch, set PROJECT_PKG_NAME
+  * [compile_robot_model.cmake] rewrite everything from scratch
+
+* euslisp
+
+  * [rtm-ros-robot-interface.l] Add method to align footsteps    with roll or pitch angle
+  * [datalogger-log-parser.l] change max-line count method
+  * [rtm-ros-robot-interface.l] Add sync-controller method, which preserve limb-controller angle before remove-joint-group is called.
+  * [rtm-ros-robot-interface.l] Enable to set gravitational acceleration for calculating st parameter
+
+* [HrpsysSeqStateROSBridgeImpl.{cpp,h}] display more debug info for diagnostics
+* [cmake/compile_robot_model.cmake] Revert "compile_robot contains output files, not targets"
+* [hrpsys_ros_bridge/package.xml] Limits dependent pkg version to avoid critical error in downstream (tork-a/rtmros_nextage/#160)
+* Contributors: Eisoku Kuroiwa, Isaac IY Saito, Kei Okada, Shunichi Nozawa, Iori Kumagai
+
 1.2.9 (2015-04-11)
 ------------------
 * [package.xml] remove pr2_controllers, add pr2_controller_msgs, pr2_msgs, control_msgs package.xml
