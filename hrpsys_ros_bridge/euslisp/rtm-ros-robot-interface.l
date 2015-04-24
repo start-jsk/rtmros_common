@@ -699,6 +699,22 @@
    (fs)
    (send self :set-foot-steps-no-wait fs)
    (send self :wait-foot-steps))
+  (:set-foot-steps-with-param-no-wait
+   (fs sh)
+   (send self :autobalancerservice_setfootstepswithparam
+         :fs
+         (mapcar #'(lambda (f)
+                     (send self :eus-footstep->abc-footstep f))
+                 fs)
+         :sps
+         (mapcar #'(lambda (h)
+                     (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparam :init :step_height (* h 1e-3)))
+                 sh)
+         ))
+  (:set-foot-steps-with-param
+   (fs sh)
+   (send self :set-foot-steps-with-param-no-wait fs sh)
+   (send self :wait-foot-steps))
   (:set-foot-steps-roll-pitch
    (angle &key (axis :x))
    "Set foot steps with roll or pitch orientation.
@@ -1192,6 +1208,21 @@
    (elt (send (send robot :foot-midcoords) :inverse-transform-vector (send robot :centroid)) 2)
    :alpha alpha :beta beta :time-constant Tp :print-mode pm :gravitational-acceleration ga)
   )
+
+(defun calculate-toe-heel-pos-offsets
+  (robot &key ((:print-mode pm) :euslisp))
+  (let* ((sp-vertices (send (car (send robot :support-polygons)) :vertices))
+         (toe-pos (elt (find-extream sp-vertices #'(lambda (x) (elt x 0)) #'>) 0))
+         (heel-pos (abs (elt (find-extream sp-vertices #'(lambda (x) (elt x 0)) #'<) 0))))
+    (case
+        pm
+      (:euslisp
+       (format t "(send *ri* :set-gait-generator-param :toe-pos-offset-x (* 1e-3 ~A) :heel-pos-offset-x (* 1e-3 ~A))~%" toe-pos heel-pos))
+      (:python
+       (format t "ggp=hcf.abc_svc.getGaitGeneratorParam();")
+       (format t "ggp.toe_pos_offset_x = 1e-3*~A;ggp.heel_pos_offset_x = 1e-3*~A;" toe-pos heel-pos)))
+    (list toe-pos heel-pos)
+    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility functions for project generator generation
