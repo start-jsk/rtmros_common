@@ -105,24 +105,34 @@ macro(compile_openhrp_model wrlfile)
   #message(STATUS "Found ${_collada_to_urdf_exe}")
   #message(STATUS "Found ${_controller_config_converter}")
 
-  # output euslisp files (dae, yaml -> euslisp)
-  set(${_sname}_${PROJECT_NAME}_compile_all_target)
-  if(EXISTS ${_collada2eus_exe})
-    add_custom_command(OUTPUT ${_lispfile}
-      COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${_daefile} ${_yamlfile} ${_lispfile}
-      DEPENDS ${_daefile} ${_yamlfile} ${_euscollada_dep_files})
-    add_custom_target(${_sname}_${PROJECT_NAME}_compile_lisp DEPENDS ${_lispfile})
-    list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_lisp)
+  # output collada (wrl -> collada )
+  if(EXISTS ${_wrlfile})
+    add_custom_command(OUTPUT ${_daefile}
+      COMMAND ${_export_collada_exe} -i ${_wrlfile} -o ${_daefile} ${_export_collada_option}
+      DEPENDS ${_wrlfile} ${_export_collada_exe})
   endif()
+  add_custom_target(${_sname}_${PROJECT_NAME}_compile_dae DEPENDS ${_daefile})
+  list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_dae)
 
   # output urdf files (collada -> urdf)
   set(_mesh_dir "${_workdir}/${_name}_meshes")
   set(_mesh_prefix "package://${PROJECT_NAME}/models/${_name}_meshes")
   add_custom_command(OUTPUT ${_urdffile} ${_mesh_dir}
     COMMAND ${_collada_to_urdf_exe} ${_daefile} --output_file ${_urdffile} -G -A --mesh_output_dir ${_mesh_dir} --mesh_prefix ${_mesh_prefix}
-    DEPENDS ${_daefile} ${_lisp_deps_for_urdf})
+    DEPENDS ${_sname}_${PROJECT_NAME}_compile_dae)
   add_custom_target(${_sname}_${PROJECT_NAME}_compile_urdf DEPENDS ${_urdffile} ${_mesh_dir})
-    list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_urdf)
+  list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_urdf)
+
+  # output euslisp files (dae, yaml -> euslisp)
+  set(${_sname}_${PROJECT_NAME}_compile_all_target)
+  if(EXISTS ${_collada2eus_exe})
+    add_custom_command(OUTPUT ${_lispfile}
+      COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${_daefile} ${_yamlfile} ${_lispfile}
+      DEPENDS ${_sname}_${PROJECT_NAME}_compile_dae ${_yamlfile})
+    add_custom_target(${_sname}_${PROJECT_NAME}_compile_lisp DEPENDS ${_lispfile})
+    list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_lisp)
+  endif()
+
 
   if(_controller_config)
     # output controller config (yaml -> config) if yaml is not found write dummy files
@@ -136,25 +146,18 @@ macro(compile_openhrp_model wrlfile)
   # project generator (collada -> xml)
   add_custom_command(OUTPUT ${_xmlfile}
     COMMAND ${_project_generator_exe} ${_wrlfile} ${openhrp3_PREFIX}/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,0,0,1,0 --integrate true --output ${_xmlfile} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option} ${_simulation_joint_properties_option}
-    DEPENDS ${daefile} ${_gen_project_dep_files})
+    DEPENDS ${_sname}_${PROJECT_NAME}_compile_dae ${_gen_project_dep_files})
   add_custom_command(OUTPUT ${_xmlfile_nosim}
     COMMAND ${_project_generator_exe} ${_wrlfile} ${openhrp3_PREFIX}/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,0,0,1,0 --integrate false --output ${_xmlfile_nosim} ${_conf_file_option} ${_robothardware_conf_file_option} ${_conf_dt_option} ${_simulation_timestep_option} ${_simulation_joint_properties_option}
-    DEPENDS ${daefile} ${_gen_project_dep_files})
+    DEPENDS ${_sname}_${PROJECT_NAME}_compile_dae ${_gen_project_dep_files})
   add_custom_target(${_sname}_${PROJECT_NAME}_compile_xml DEPENDS ${_xmlfile} ${_xmlfile_nosim})
   list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_xml)
 
-  # output collada (wrl -> collada )
-  if(EXISTS ${_wrlfile})
-    add_custom_command(OUTPUT ${_daefile}
-      COMMAND ${_export_collada_exe} -i ${_wrlfile} -o ${_daefile} ${_export_collada_option}
-      DEPENDS ${_wrlfile} ${_export_collada_exe} ${_latest_robot})
-    add_custom_target(${_sname}_${PROJECT_NAME}_compile_dae DEPENDS ${_daefile})
-    list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_dae)
-  endif()
-
   # run all target
-  add_custom_target(${_sname}_${PROJECT_NAME}_compile DEPENDS ${${_sname}_${PROJECT_NAME}_compile_all_target})
-  add_custom_target(${_sname}_${PROJECT_NAME}_compile_all ALL DEPENDS ${_sname}_${PROJECT_NAME}_compile)
+  add_custom_target(${_sname}_${PROJECT_NAME}_compile)
+  add_custom_target(${_sname}_${PROJECT_NAME}_compile_all ALL)
+  add_dependencies(${_sname}_${PROJECT_NAME}_compile_all ${_sname}_${PROJECT_NAME}_compile)
+  add_dependencies(${_sname}_${PROJECT_NAME}_compile ${${_sname}_${PROJECT_NAME}_compile_all_target})
 
   ### JUST FOR BACKWORD COMPATIBILITY https://github.com/start-jsk/rtmros_tutorials/blob/a84d63f599acc442a8dd2ad679b04bb6dc4e70c7/hrpsys_ros_bridge_tutorials/CMakeLists.txt#L102
   set(compile_robots ${${_sname}_${PROJECT_NAME}_compile_all_target})
