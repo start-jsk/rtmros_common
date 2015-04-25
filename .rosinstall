@@ -4,12 +4,16 @@
 # - git:
 #     uri: https://github.com/tork-a/openrtm_aist_python-release
 #     local-name: openrtm_aist_python
-#- git:
-#    uri: https://github.com/tork-a/openhrp3-release
-#    local-name: openhrp3
-#- git:
-#    uri: https://github.com/tork-a/hrpsys-release
-#    local-name: hrpsys
+
+###
+### latest source is checked with use_deb==source, so we're ok with released source in here
+###
+- git:
+    uri: https://github.com/tork-a/openhrp3-release
+    local-name: openhrp3
+- git:
+    uri: https://github.com/tork-a/hrpsys-release
+    local-name: hrpsys
 # - git:
 #     uri: https://github.com/tork-a/rtshell-release
 #     local-name: rtshell
@@ -19,9 +23,9 @@
 # - git:
 #     uri: https://github.com/tork-a/rtctree-release
 #     local-name: rtctree
-- git:
-    uri: https://github.com/fkanehiro/openhrp3
-    local-name: openhrp3
-- git:
-    uri: https://github.com/start-jsk/rtmros_tutorials
-    local-name: rtm-ros-robotics/rtmros_tutorials
+#- git:
+#    uri: https://github.com/fkanehiro/openhrp3
+#    local-name: openhrp3
+#- git:
+#    uri: https://github.com/fkanehiro/hrpsys-base
+#    local-name: hrpsys-base
