@@ -2,6 +2,14 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
+* [catkin.cmake] add depend to pr2_controllers_msgs in catpkin_package
+* [cmake/compile_robot_model.cmake] fix dependency add_custom_depend need to DEPEND to other target
+* [euslisp/rtm-ros-robot-interface.l] Add calculate-toe-heel-pos-offsets and set-foot-steps-with-param
+* Contributors: Kei Okada, Shunichi Nozawa
+
 1.2.10 (2015-04-24)
 -------------------
 * add rewrited version of compile_robot_model.cmake
