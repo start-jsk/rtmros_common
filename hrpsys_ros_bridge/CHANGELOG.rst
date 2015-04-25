@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.11 (2015-04-25)
+-------------------
 
 * [catkin.cmake] add depend to pr2_controllers_msgs in catpkin_package
 * [cmake/compile_robot_model.cmake] fix dependency add_custom_depend need to DEPEND to other target
