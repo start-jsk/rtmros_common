@@ -1209,20 +1209,40 @@
    :alpha alpha :beta beta :time-constant Tp :print-mode pm :gravitational-acceleration ga)
   )
 
-(defun calculate-toe-heel-pos-offsets
-  (robot &key ((:print-mode pm) :euslisp))
-  (let* ((sp-vertices (send (car (send robot :support-polygons)) :vertices))
+(defun calculate-toe-heel-offsets
+  (robot &key ((:print-mode pm) :euslisp) (pos-or-zmp :pos))
+  (let* ((sp-vertices (mapcar #'(lambda (x) (send robot :rleg :end-coords :inverse-transform-vector x)) (send (send robot :support-polygon :rleg) :vertices)))
          (toe-pos (elt (find-extream sp-vertices #'(lambda (x) (elt x 0)) #'>) 0))
-         (heel-pos (abs (elt (find-extream sp-vertices #'(lambda (x) (elt x 0)) #'<) 0))))
+         (heel-pos (elt (find-extream sp-vertices #'(lambda (x) (elt x 0)) #'<) 0)))
     (case
         pm
       (:euslisp
-       (format t "(send *ri* :set-gait-generator-param :toe-pos-offset-x (* 1e-3 ~A) :heel-pos-offset-x (* 1e-3 ~A))~%" toe-pos heel-pos))
+       (format t "(send *ri* :set-gait-generator-param :toe-~A-offset-x (* 1e-3 ~A) :heel-~A-offset-x (* 1e-3 ~A))~%"
+               (string-downcase pos-or-zmp) toe-pos (string-downcase pos-or-zmp) heel-pos))
       (:python
-       (format t "ggp=hcf.abc_svc.getGaitGeneratorParam();")
-       (format t "ggp.toe_pos_offset_x = 1e-3*~A;ggp.heel_pos_offset_x = 1e-3*~A;" toe-pos heel-pos)))
+       (format t "ggp=hcf.abc_svc.getGaitGeneratorParam()[1];~%")
+       (format t "ggp.toe_~A_offset_x = 1e-3*~A;ggp.heel_~A_offset_x = 1e-3*~A;~%"
+               (string-downcase pos-or-zmp) toe-pos (string-downcase pos-or-zmp) heel-pos)
+       (format t "hcf.abc_svc.setGaitGeneratorParam(ggp);~%")))
     (list toe-pos heel-pos)
     ))
+
+(defun calculate-toe-heel-pos-offsets
+  (robot &key ((:print-mode pm) :euslisp))
+  "Calculate toe and heel position offset in ee frame for toe heel contact used in GaitGenerator in AutoBalancer.
+   robot is robot model.
+   When print-mode is :euslisp, print parameters in Euslisp style.
+   When print-mode is :python, print parameters in Python hrpsys_config style."
+  (calculate-toe-heel-offsets robot :print-mode pm))
+
+(defun calculate-toe-heel-zmp-offsets
+  (robot &key ((:print-mode pm) :euslisp))
+  "Calculate toe and heel zmp offset in ee frame for toe heel contact used in GaitGenerator in AutoBalancer.
+   robot is robot model.
+   When print-mode is :euslisp, print parameters in Euslisp style.
+   When print-mode is :python, print parameters in Python hrpsys_config style."
+  (calculate-toe-heel-offsets robot :print-mode pm :pos-or-zmp :zmp))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility functions for project generator generation
