@@ -2,6 +2,12 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [euslisp/rtm-ros-robot-interface.l] Update function to calculate toe heel offset. Support both pos and zmp and add documentation
+* [hrpsys_ros_bridge/cmake/compile_robot_model.cmake] fix for --conf option with comment
+* Contributors: Kei Okada, Shunichi Nozawa
+
 1.2.11 (2015-04-25)
 -------------------
 
