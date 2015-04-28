@@ -261,22 +261,26 @@
                ,(if optional-args (list (cadr optional-args)) (list ))
                (send (send self ,get-param-idl-name ,@optional-args) :i_param))))
          ;; generate defmethod like
-         ;;  (:set-xx-param (&key yy-zz)
+         ;;  (:set-xx-param (&rest args &key yy-zz)
          ;;   (let ((current-param (send self :get-xx-param))
-         ;;         (param (instance ww :init (if yy-zz yy-zz (send current-param :yy_zz))))
+         ;;         (param (instance ww :init (if (memq :yy-zz args) (cadr (memq :yy-zz args)) (send current-param :yy_zz))))
          ;;      (send self :aaService_setParameter :i_param param)))
          (setter-defmethod-macro
            `(defmethod rtm-ros-robot-interface
               (,set-param-method-name
-               ,(append (if optional-args (list (cadr optional-args))) (list '&key) (mapcar #'(lambda (x) (read-from-string (substitute (elt "-" 0) (elt "_" 0) x))) param-slots-list)) ;; replace _ => - for Euslisp friendly argument
+               ,(append (if optional-args (list (cadr optional-args))) (list '&rest 'args '&key) (mapcar #'(lambda (x) (read-from-string (substitute (elt "-" 0) (elt "_" 0) x))) param-slots-list)) ;; replace _ => - for Euslisp friendly argument
                (let* ((current-param ,(append (list 'send 'self get-param-method-name) (if optional-args (list (cadr optional-args)))))
                       (param (instance ,param-class
                                        :init
                                        ,@(apply #'append
                                                 (mapcar #'(lambda (x)
-                                                            (let ((eus-sym (read-from-string (substitute (elt "-" 0) (elt "_" 0) x)))
-                                                                  (param-sym (read-from-string (format nil ":~A" x))))
-                                                              (list param-sym (list 'if eus-sym eus-sym (list 'send 'current-param param-sym)))))
+                                                            (let* ((eus-sym (read-from-string (substitute (elt "-" 0) (elt "_" 0) x)))
+                                                                   (eus-keyword (read-from-string (format nil ":~A" eus-sym)))
+                                                                   (param-sym (read-from-string (format nil ":~A" x))))
+                                                              (list param-sym (list 'if
+                                                                                    (list 'memq eus-keyword 'args)
+                                                                                    (list 'cadr (list 'memq eus-keyword 'args))
+                                                                                    (list 'send 'current-param param-sym)))))
                                                         param-slots-list))
                                        )))
                  (send self ,set-param-idl-name :i_param param ,@optional-args)
@@ -757,15 +761,17 @@
   (:set-gait-generator-param
    (&rest args &key default-orbit-type &allow-other-keys)
    (send* self :raw-set-gait-generator-param
-          :default-orbit-type
-          (if (or (null default-orbit-type) (integerp default-orbit-type))
-              default-orbit-type
-            (let ((ot (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE::*~A*" (string-downcase default-orbit-type)))))
-              (if (boundp ot)
-                  (eval ot)
-                (error ";; no such :default-orbit-type ~A in :set-gait-generator-param~%" default-orbit-type))
-              ))
-          args))
+          (append
+           (if (memq :default-orbit-type args)
+               (list :default-orbit-type
+                     (if (or (null default-orbit-type) (integerp default-orbit-type))
+                         default-orbit-type
+                       (let ((ot (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE::*~A*" (string-downcase default-orbit-type)))))
+                         (if (boundp ot)
+                             (eval ot)
+                           (error ";; no such :default-orbit-type ~A in :set-gait-generator-param~%" default-orbit-type))
+                         ))))
+           args)))
   (:print-gait-generator-orbit-type
    ()
    (let ((cs (constants "" "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE")))
@@ -884,14 +890,16 @@
    (unless (send self :get :default-st-param)
      (send self :put :default-st-param (send self :get-st-param)))
    (send* self :raw-set-st-param
-          :st-algorithm
-          (if (or (null st-algorithm) (integerp st-algorithm))
-              st-algorithm
-            (let ((sa (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_STABILIZERSERVICE_STALGORITHM::*~A*" (string-downcase st-algorithm)))))
-              (if (boundp sa)
-                  (eval sa)
-                (error ";; no such :st-algorithm ~A in :set-st-param~%" st-algorithm))))
-          args))
+          (append
+           (if (memq :st-algorithm args)
+               (list :st-algorithm
+                     (if (or (null st-algorithm) (integerp st-algorithm))
+                         st-algorithm
+                       (let ((sa (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_STABILIZERSERVICE_STALGORITHM::*~A*" (string-downcase st-algorithm)))))
+                         (if (boundp sa)
+                             (eval sa)
+                           (error ";; no such :st-algorithm ~A in :set-st-param~%" st-algorithm))))))
+           args)))
   (:set-st-param-for-non-feedback-LIP-mode
    ()
    "Set Stabilizer parameters to make robot Linear Inverted Pendulum mode without state feedback.
