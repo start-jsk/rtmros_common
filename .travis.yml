@@ -46,4 +46,6 @@ script:
   - if [ "${TEST_TYPE}" == "" ] ; then source .travis/travis.sh; else source ./.travis_test.sh ; fi
 after_success:
   - TRAVIS_JOB_SUBNUMBER="${TRAVIS_JOB_NUMBER##*.}"
-  - if [ "$TRAVIS_JOB_SUBNUMBER" == 8 -a "$TRAVIS_BRANCH" == "master" ]; then ${CI_SOURCE_PATH}/.travis/upload-docs.sh; fi
+  # begin hot fix
+  - if [ "$TRAVIS_JOB_SUBNUMBER" == 8 -a "$TRAVIS_BRANCH" == "master" -a "${TRAVIS_SECURE_ENV_VARS}" == "true" ]; then sudo wget https://raw.githubusercontent.com/euslisp/EusLisp/master/lib/llib/documentation.l -O /opt/ros/$ROS_DISTRO/share/euslisp/jskeus/eus/lib/llib/documentation.l; fi # hot fix unitl 9.12.2 is relesed
+  - if [ "$TRAVIS_JOB_SUBNUMBER" == 8 -a "$TRAVIS_BRANCH" == "master" -a "${TRAVIS_SECURE_ENV_VARS}" == "true" ]; then ${CI_SOURCE_PATH}/.travis/upload-docs.sh; fi
