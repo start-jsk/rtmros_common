@@ -196,3 +196,8 @@ add_rostest(test/test-samplerobot.test)
 add_rostest(test/test-pa10.test)
 add_rostest(test/test-import-python.test)
 
+# call catkin depends
+find_package(catkin COMPONENTS roseus  QUIET)
+if(roseus_FOUND)
+  generate_eusdoc(euslisp/rtm-ros-robot-interface.l)
+endif()
