@@ -237,11 +237,14 @@
   (:get-robot-date-string
    ()
    (let* ((dt (unix:localtime)))
-     (format nil "~A_~A~A~A"
+     (format nil "~A_~A~A~A~A~A~A"
              (send (send self :robot) :name)
              (digits-string (+ 1900 (aref dt 5)) 4)
              (digits-string (1+ (aref dt 4)) 2)
-             (digits-string (aref dt 3) 2))))
+             (digits-string (aref dt 3) 2)
+             (digits-string (aref dt 2) 2)
+             (digits-string (aref dt 1) 2)
+             (digits-string (aref dt 0) 2))))
   )
 
 ;; define Euslisp setter and getter method
