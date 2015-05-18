@@ -16,29 +16,31 @@ from rtshell import path
 from rtshell import state_control_base
 from rtshell import rts_exceptions
 
-def alive_component(path):
-    tree=rtctree.tree.RTCTree()
+def alive_component(path, tree):
     if tree.has_path(path) and tree.is_component(path):
         node = tree.get_node(path)
         return node.plain_state_string
     else:
+        tree._root._remove_all_children() # reflesh
+        tree.load_servers_from_env()
         return False
 
-def wait_component(cmd_path):
+def wait_component(cmd_path, tree):
     count=0
     path = rtctree.path.parse_path(cmd_path)[0]
-    node = alive_component(path)
-    while not node and count < 30:
-        node = alive_component(path)
-        print >>sys.stderr, "\033[33m[rtmlaunch] Wait for ",cmd_path," ",count,"/30\033[0m"
-        count += 1
-        time.sleep(1)
+    node = alive_component(path, tree)
     if not node:
+        while count < 30:
+            print >>sys.stderr, "\033[33m[rtmlaunch] Wait for ",cmd_path," ",count,"/30\033[0m"
+            node = alive_component(path, tree)
+            if node:
+                return node
+            count += 1
+            time.sleep(1)
         raise rts_exceptions.NoSuchObjectError(cmd_path)
     return node
 
-def check_connect(src_path, dest_path):
-    tree=rtctree.tree.RTCTree()
+def check_connect(src_path, dest_path, tree):
     src_path, src_port = rtctree.path.parse_path(src_path)
     dest_path, dest_port = rtctree.path.parse_path(dest_path)
     src_node = tree.get_node(src_path)
@@ -62,7 +64,7 @@ def replace_arg_tag_by_env (input_path):
             ret_str = re.sub("\$\(arg"+arg_str+"\)",env_str,input_path)
     return ret_str
 
-def rtconnect(nameserver, tags):
+def rtconnect(nameserver, tags, tree):
     for tag in tags:
 
         # check if/unless attribute in rtconnect tags
@@ -96,9 +98,9 @@ def rtconnect(nameserver, tags):
             push_policy = 'all'
         # wait for proess
         try:
-            wait_component(source_full_path)
-            wait_component(dest_full_path)
-            if check_connect(source_full_path,dest_full_path):
+            wait_component(source_full_path, tree)
+            wait_component(dest_full_path, tree)
+            if check_connect(source_full_path,dest_full_path, tree):
                 continue
         except Exception, e:
             print >>sys.stderr, '\033[31m[rtmlaunch] [ERROR] Could not Connect (', source_full_path, ',', dest_full_path, '): ', e,'\033[0m'
@@ -120,10 +122,10 @@ def rtconnect(nameserver, tags):
             print >>sys.stderr, "[rtmlaunch]             to",dest_path
             print >>sys.stderr, "[rtmlaunch]           with",options
             try :
-                rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, tree=None)
+                rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, tree=tree)
             except Exception, e_1_1_0: # openrtm 1.1.0
                 try:
-                    rtcon.connect_ports([(source_path,source_full_path), (dest_path, dest_full_path)], options, tree=None)
+                    rtcon.connect_ports([(source_path,source_full_path), (dest_path, dest_full_path)], options, tree=tree)
                 except Exception, e_1_0_0: # openrtm 1.0.0
                     print >>sys.stderr, '\033[31m[rtmlaunch] {0} did not work on both OpenRTM 1.0.0 and 1.1.0'.format(os.path.basename(sys.argv[1])),'\033[0m'
                     print >>sys.stderr, '\033[31m[rtmlaunch]    OpenRTM 1.0.0 {0}'.format(e_1_0_0),'\033[0m'
@@ -138,7 +140,7 @@ def rtconnect(nameserver, tags):
             print >>sys.stderr, '\033[31m[rtmlaunch] {0}: {1}'.format(os.path.basename(sys.argv[1]), e),'\033[0m'
     return 0
 
-def rtactivate(nameserver, tags):
+def rtactivate(nameserver, tags, tree):
     def activate_action(object, ec_index):
         object.activate_in_ec(ec_index)
     for tag in tags:
@@ -161,7 +163,7 @@ def rtactivate(nameserver, tags):
         full_path = replace_arg_tag_by_env(full_path)
         # print >>sys.stderr, "[rtmlaunch] activate %s"%(full_path)
         try:
-            state = wait_component(full_path)
+            state = wait_component(full_path, tree)
             if state == 'Active':
                 continue
             else:
@@ -172,9 +174,9 @@ def rtactivate(nameserver, tags):
         try:
             options = optparse.Values({"ec_index": 0, 'verbose': False})
             try :
-                state_control_base.alter_component_state(activate_action, cmd_path, full_path, options, None)
+                state_control_base.alter_component_state(activate_action, cmd_path, full_path, options, tree=tree)
             except Exception, e: # openrtm 1.1.0
-                state_control_base.alter_component_states(activate_action, [(cmd_path, full_path)], options, None)
+                state_control_base.alter_component_states(activate_action, [(cmd_path, full_path)], options, tree=tree)
         except Exception, e:
             print >>sys.stderr, '[rtmlaunch] {0}: {1}'.format(os.path.basename(sys.argv[0]), e)
             return 1
@@ -219,10 +221,12 @@ def main():
 
     print >>sys.stderr, "[rtmlaunch] RTCTREE_NAMESERVERS", nameserver,  os.getenv("RTCTREE_NAMESERVERS")
     print >>sys.stderr, "[rtmlaunch] SIMULATOR_NAME", os.getenv("SIMULATOR_NAME","Simulator")
+
+    tree = rtctree.tree.RTCTree()
     while 1:
         print >>sys.stderr, "[rtmlaunch] check connection/activation"
-        rtconnect(nameserver, parser.getElementsByTagName("rtconnect"))
-        rtactivate(nameserver, parser.getElementsByTagName("rtactivate"))
+        rtconnect(nameserver, parser.getElementsByTagName("rtconnect"), tree)
+        rtactivate(nameserver, parser.getElementsByTagName("rtactivate"), tree)
         time.sleep(10)
 
 def get_flag_from_argv(arg):
