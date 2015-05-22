@@ -215,6 +215,23 @@ class AutoBalancerMenu(MenuDashWidget):
          self.update_state(2)
          execHrpsysConfiguratorCommand("hcf.stopAutoBalancer()")
 
+class DefaultUnstableControllersMenu(MenuDashWidget):
+    def __init__(self):
+        icons = [['bg-grey.svg', 'ic-runstop-off.svg'],
+                 ['bg-green.svg', 'ic-runstop-on.svg'],
+                 ['bg-red.svg', 'ic-runstop-off.svg']]
+        super(DefaultUnstableControllersMenu, self).__init__('st abc(legs) ic(arms) on/off', icons)
+        self.update_state(0)
+        self.add_action('start DefaultUnstableController', self.on_st_abc_ic_on)
+        self.add_action('stop DefaultUnstableController', self.on_st_abc_ic_off)
+        self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
+    def on_st_abc_ic_on(self):
+         self.update_state(1)
+         execHrpsysConfiguratorCommand("hcf.startDefaultUnstableControllers()")
+    def on_st_abc_ic_off(self):
+         self.update_state(2)
+         execHrpsysConfiguratorCommand("hcf.stopDefaultUnstableControllers()")
+
 class StabilizerMenu(MenuDashWidget):
     def __init__(self):
         icons = [['bg-grey.svg', 'ic-runstop-off.svg'],
