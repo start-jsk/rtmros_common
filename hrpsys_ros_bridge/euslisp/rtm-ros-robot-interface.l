@@ -494,6 +494,13 @@
          #'(lambda (name &rest _args)
              (send self :impedancecontrollerservice_startimpedancecontroller :name (string-downcase name)))
          :raw-start-impedance))
+  (:start-impedance-no-wait
+   (limb)
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name &rest _args)
+             (send self :impedancecontrollerservice_startimpedancecontrollernowait :name (string-downcase name)))
+         :start-impedance-no-wait))
   (:stop-impedance
    (limb)
    "Stop impedance controller mode.
@@ -503,6 +510,20 @@
          #'(lambda (name &rest _args)
              (send self :impedancecontrollerservice_stopimpedancecontroller :name (string-downcase name)))
          :stop-impedance))
+  (:stop-impedance-no-wait
+   (limb)
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name &rest _args)
+             (send self :impedancecontrollerservice_stopimpedancecontrollernowait :name (string-downcase name)))
+         :stop-impedance-no-wait))
+  (:wait-impedance-controller-transition
+   (limb)
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name &rest _args)
+             (send self :impedancecontrollerservice_waitImpedanceControllerTransition :name (string-downcase name)))
+         :wait-impedance-controller-transition))
   (:set-impedance-controller-param
    (limb &rest args)
    "Set impedance controller parameter like (send *ri* :set-impedance-controller-param :rarm :K-p 400).
@@ -987,6 +1008,31 @@
    (send self :get-idl-enum-values
          (send (send self :get-kalman-filter-param) :kf_algorithm)
          "HRPSYS_ROS_BRIDGE::OPENHRP_KALMANFILTERSERVICE_KFALGORITHM"))
+)
+
+(defmethod rtm-ros-robot-interface
+  (:start-default-unstable-controllers
+   (&key (ic-limbs '(:rarm :larm) (abc-limbs '(:rleg :lleg))))
+   "Start default unstable RTCs controller mode.
+    Currently Stabilzier, AutoBalancer, and ImpedanceController are started."
+   (send self :start-st)
+   (dolist (limb ic-limbs)
+     (send self :start-impedance-no-wait limb))
+   (send self :start-auto-balancer :limbs ic-limbs)
+   (dolist (limb ic-limbs)
+     (send self :wait-impedance-controller-transition limb))
+   )
+  (:stop-default-unstable-controllers
+   (&key (ic-limbs '(:rarm :larm)))
+   "Stop default unstable RTCs controller mode.
+    Currently Stabilzier, AutoBalancer, and ImpedanceController are stopped."
+   (send self :stop-st)
+   (dolist (limb ic-limbs)
+     (send self :stop-impedance-no-wait limb))
+   (send self :stop-auto-balancer)
+   (dolist (limb ic-limbs)
+     (send self :wait-impedance-controller-transition limb))
+   )
 )
 
 (defun print-end-effector-parameter-conf-from-robot
