@@ -507,16 +507,19 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   } // end: m_mcangleIn
 
   // m_baseTformIn
+  bool is_base_valid = false;
+  tf::Transform base;
   if ( m_baseTformIn.isNew () ) {
     m_baseTformIn.read();
+    is_base_valid = true;
     // tf::Transform base;
     double *a = m_baseTform.data.get_buffer();
-    
-    // base.setOrigin( tf::Vector3(a[0], a[1], a[2]) );
+    base.setOrigin( tf::Vector3(a[0], a[1], a[2]) );
     hrp::Matrix33 R;
     hrp::getMatrix33FromRowMajorArray(R, a, 3);
     
     hrp::Vector3 rpy = hrp::rpyFromRot(R);
+    base.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)));
     tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));
     nav_msgs::Odometry odom;
     //odom.header.frame_id = rootlink_name;
@@ -629,6 +632,40 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     imu.linear_acceleration_covariance[4] = 0.0096;
     imu.linear_acceleration_covariance[8] = 0.0096;
     imu_pub.publish(imu);
+
+    // Publish imu_floor frame in tf
+    if (is_base_valid) {
+      ros::Time base_time = tm_on_execute;
+      //base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
+      base.setRotation(tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y));
+      tf::Transform inv = base.inverse();
+#if ROS_VERSION_MINIMUM(1,8,0)
+      tf::Matrix3x3 m;
+#else
+      btMatrix3x3 m; // for electric
+#endif
+      m = inv.getBasis();
+      bool not_nan = true;
+      for (int i = 0; i < 3; ++i) {
+        if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
+          not_nan = false;
+      }
+      if (not_nan) {
+        std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
+        while ( its != sensor_info.end() ) {
+          if ( (*its).second.type_name == "RateGyro" ) {
+            br.sendTransform(tf::StampedTransform(inv, base_time, (*its).first, "imu_floor"));
+            break;
+          }
+          ++its;
+        }
+      } else {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
+                         << m_baseRpy.data.r << ","
+                         << m_baseRpy.data.p << ","
+                         << m_baseRpy.data.y << ")");
+      }
+    }
   }
 
   // publish forces sonsors
