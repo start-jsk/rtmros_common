@@ -1018,7 +1018,7 @@
    (send self :start-st)
    (dolist (limb ic-limbs)
      (send self :start-impedance-no-wait limb))
-   (send self :start-auto-balancer :limbs ic-limbs)
+   (send self :start-auto-balancer :limbs abc-limbs)
    (dolist (limb ic-limbs)
      (send self :wait-impedance-controller-transition limb))
    )
