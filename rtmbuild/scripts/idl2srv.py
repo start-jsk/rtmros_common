@@ -503,7 +503,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         #  make ROS bridge functions in .cpp
         compsrc = open(tmpdir + '/' + module_name + '.cpp').read()
 
-        port_name_src = """  ros::NodeHandle nh("~");
+        port_name_src = """  nh = ros::NodeHandle("~");
   std::string port_name = "service0";
   nh.getParam("service_port", port_name);"""
         compsrc = addline(port_name_src, compsrc, 'Set service consumers to Ports')
@@ -515,12 +515,21 @@ RTC::ReturnCode_t %s::onExecute(RTC::UniqueId ec_id) {
   return RTC::RTC_OK;
 }\n\n""" % module_name
 
-        compsrc += convert_functions + self.convertFunctionCode(interface)
-
+        compsrc += "RTC::ReturnCode_t %s::onActivated(RTC::UniqueId ec_id) {\n" % module_name
         for i in range(len(operations)):
             name = operations[i].identifier()
-            srvinst = '  _srv%d = nh.advertiseService("%s", &%s::%s, this);' % (i, name, module_name, name)
-            compsrc = addline(srvinst, compsrc, 'Bind variables and configuration variable')
+            compsrc += '  _srv%d = nh.advertiseService("%s", &%s::%s, this);\n' % (i, name, module_name, name)
+        compsrc +="  return RTC::RTC_OK;\n}\n\n"""
+
+        compsrc += "RTC::ReturnCode_t %s::onDeactivated(RTC::UniqueId ec_id) {\n" % module_name
+        for i in range(len(operations)):
+            name = operations[i].identifier()
+            srvinst = '  _srv%d.shutdown();' % i
+            compsrc = addline(srvinst, compsrc, 'Unadvertise service')
+        compsrc +="  return RTC::RTC_OK;\n}\n\n"""
+
+        compsrc += convert_functions + self.convertFunctionCode(interface)
+
         for op in operations:
             compsrc += self.ServiceBridgeFunction(op, module_name, pkgname)
         open(wd + '/' + module_name + '.cpp', 'w').write(compsrc)
@@ -538,12 +547,15 @@ RTC::ReturnCode_t %s::onExecute(RTC::UniqueId ec_id) {
         compsrc = addline(incs, compsrc, '#define')
 
         compsrc = '\n'.join([ (a.replace('//','') if ('RTC::ReturnCode_t onExecute' in a) else a) for a in compsrc.split('\n')])
+        compsrc = '\n'.join([ (a.replace('//','') if ('RTC::ReturnCode_t onActivated' in a) else a) for a in compsrc.split('\n')])
+        compsrc = '\n'.join([ (a.replace('//','') if ('RTC::ReturnCode_t onDeactivated' in a) else a) for a in compsrc.split('\n')])
 
         srvfunc = ['  bool %s(%s::%s::Request &req, %s::%s::Response &res);' % (op.identifier(), pkgname, self.getCppTypeText(op,full=ROS_FULL), pkgname, self.getCppTypeText(op,full=ROS_FULL)) for op in operations]
         srvfunc = '\n'.join(srvfunc)
         compsrc = addline(srvfunc, compsrc, 'public:')
 
-        defsrv = "  ros::ServiceServer " + ', '.join(['_srv%d' % i for i in range(len(operations))]) + ';'
+        defsrv = "  ros::NodeHandle nh;\n";
+        defsrv += "  ros::ServiceServer " + ', '.join(['_srv%d' % i for i in range(len(operations))]) + ';'
         compsrc = addline(defsrv, compsrc, 'private:')
 
         open(wd + '/' + module_name + '.h', 'w').write(compsrc)
