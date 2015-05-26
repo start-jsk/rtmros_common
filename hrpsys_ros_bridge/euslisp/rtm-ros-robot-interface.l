@@ -757,6 +757,13 @@
                                                                  :translate (scale -1 off))
                                                    :name :rleg)))
      ))
+  (:set-foot-steps-with-base-height
+   (fs av-list time-list)
+   (send self :set-foot-steps-no-wait fs)
+   (send self :angle-vector-sequence av-list time-list)
+   (send self :wait-interpolation)
+   (send self :wait-foot-steps)
+   )
   (:go-velocity
    (vx vy vth)
    (send self :autobalancerservice_goVelocity :vx vx :vy vy :vth vth))
