@@ -338,7 +338,7 @@
   (:load-pattern (basename &optional (tm 0.0)) (send self :sequenceplayerservice_loadpattern :basename basename :tm tm))
   (:wait-interpolation-seq () (send self :sequenceplayerservice_waitinterpolation))
   (:sync-controller
-   (controller &optional (interpolation-time 5000) (blockp t))
+   (controller &optional (interpolation-time 1000) (blockp t))
    (let* ((controller-info (car (send self controller)))
           (groupname (cdr (assoc :group-name controller-info)))
           (jointnames (cdr (assoc :joint-names controller-info)))
