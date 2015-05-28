@@ -194,4 +194,22 @@
    )
   )
 
+(defun dump-seq-pattern-file-from-datalogger-log
+  (fname &key (logger-instance *log*))
+  "Dump SequencePlayer pattern file from data logger log.
+   fname is basename for SequencePlayer pattern file."
+  (let ((init-tm) (ret))
+    (do-until-key-with-check
+     (progn (null-output (send logger-instance :state)) (if (find-method logger-instance :eof-p) (not (send logger-instance :eof-p))))
+     (unless init-tm
+       (setq init-tm (send logger-instance :time)))
+     (push (list :angle-vector (send logger-instance :reference-vector)
+                 :time (+ (- (send (send logger-instance :time) :sec) (send init-tm :sec))
+                          (/ (- (send (send logger-instance :time) :nsec) (send init-tm :nsec)) 1000000000.0)))
+           ret))
+    (dump-seq-pattern-file
+     (reverse ret)
+     fname)
+    ))
+
 ;; (progn (setq *log* (instance datalogger-log-parser-controller :init "/tmp/testlog.sh_qOut")) (send *log* :state) (send *log* :potentio-vector))
