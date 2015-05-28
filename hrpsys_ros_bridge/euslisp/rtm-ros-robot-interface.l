@@ -573,6 +573,10 @@
   :optional-args (list :name 'name))
 
 (defmethod rtm-ros-robot-interface
+  (:zero-set-forcemoment-offset-param
+   (limb)
+   (send self :set-forcemoment-offset-param limb :force-offset #f(0 0 0) :moment-offset #f(0 0 0) :link-offset-centroid #f(0 0 0) :link-offset-mass 0)
+   )
   (:set-forcemoment-offset-param
    (limb &rest args)
    (send* self :force-sensor-method
