@@ -42,6 +42,7 @@
   (let ((pc (send robot :copy-worldcoords))
         (pav (send robot :angle-vector))
         rot-list force-list moment-list)
+    (dolist (limb limbs) (send *ri* :zero-set-forcemoment-offset-param limb))
     (if *viewer* (send (send *viewer* :get :pickviewer) :draw-objects))
     (send robot :angle-vector (car poses))
     (send *ri* :angle-vector (send robot :angle-vector) (* base-time 5))
