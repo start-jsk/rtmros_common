@@ -199,9 +199,12 @@
        `(defmethod rtm-ros-robot-interface
           (,new-method-name
            ,(cadr init-method)
+           (or
            (ros::service-call
             ,(format nil "/~AROSBridge/~A" rtc-name meth-name)
             (instance ,(eval srv-request) :init ,@(mapcan #'(lambda (x) (list (caar x) (cadar x))) (cdadr init-method))))
+           (error ";; service call failed (~A)" ,new-method-name)
+           )
            )
           )
        )))
