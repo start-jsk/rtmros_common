@@ -771,6 +771,13 @@
    (send self :wait-interpolation)
    (send self :wait-foot-steps)
    )
+  (:adjust-foot-steps
+   (rfoot-coords lfoot-coords)
+   "Adjust current footsteps during autobalancer mode and not walking.
+    rfoot-coords and lfoot-coords are end-coords for new foot steps."
+   (send self :autobalancerservice_adjustfootsteps
+         :rfootstep (send self :eus-footstep->abc-footstep rfoot-coords)
+         :lfootstep (send self :eus-footstep->abc-footstep lfoot-coords)))
   (:go-velocity
    (vx vy vth)
    (send self :autobalancerservice_goVelocity :vx vx :vy vy :vth vth))
