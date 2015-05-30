@@ -735,20 +735,20 @@
    (send self :set-foot-steps-no-wait fs)
    (send self :wait-foot-steps))
   (:set-foot-steps-with-param-no-wait
-   (fs sh)
+   (fs sh ta ha)
    (send self :autobalancerservice_setfootstepswithparam
          :fs
          (mapcar #'(lambda (f)
                      (send self :eus-footstep->abc-footstep f))
                  fs)
          :sps
-         (mapcar #'(lambda (h)
-                     (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparam :init :step_height (* h 1e-3)))
-                 sh)
+         (mapcar #'(lambda (h tt hh)
+                     (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparam :init :step_height (* h 1e-3) :toe_angle tt :heel_angle hh))
+                 sh ta ha)
          ))
   (:set-foot-steps-with-param
-   (fs sh)
-   (send self :set-foot-steps-with-param-no-wait fs sh)
+   (fs sh ta ha)
+   (send self :set-foot-steps-with-param-no-wait fs sh ta ha)
    (send self :wait-foot-steps))
   (:set-foot-steps-roll-pitch
    (angle &key (axis :x))
