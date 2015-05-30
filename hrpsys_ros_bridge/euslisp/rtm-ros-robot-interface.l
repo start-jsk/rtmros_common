@@ -843,7 +843,10 @@
    (&key default-zmp-offsets move-base-gain
          graspless-manip-arm graspless-manip-mode
          graspless-manip-p-gain
-         graspless-manip-reference-trans-pos graspless-manip-reference-trans-rot)
+         graspless-manip-reference-trans-pos graspless-manip-reference-trans-rot
+         transition-time
+         zmp-transition-time
+         adjust-footstep-transition-time)
    (let* ((current-param (send self :get-auto-balancer-param))
           (param (instance hrpsys_ros_bridge::Openhrp_AutoBalancerService_AutoBalancerParam
                            :init
@@ -867,6 +870,18 @@
                            (if graspless-manip-reference-trans-rot
                                (matrix2quaternion graspless-manip-reference-trans-rot)
                              (send current-param :graspless_manip_reference_trans_rot))
+                           :transition_time
+                           (if transition-time
+                               transition-time
+                             (send current-param :transition_time))
+                           :zmp_transition_time
+                           (if zmp-transition-time
+                               zmp-transition-time
+                             (send current-param :zmp_transition_time))
+                           :adjust_footstep_transition_time
+                           (if adjust-footstep-transition-time
+                               adjust-footstep-transition-time
+                             (send current-param :adjust_footstep_transition_time))
                            )))
      (send self :autobalancerservice_setautobalancerparam :i_param param)))
   (:abc-footstep->eus-footstep
