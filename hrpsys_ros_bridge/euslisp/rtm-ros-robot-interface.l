@@ -755,12 +755,13 @@
    "Set foot steps with roll or pitch orientation.
     angle is roll or pitch angle [deg].
     axis is :x (roll) or :y (pitch)."
-   (let ((off (cadr (memq :default-half-offset (send robot :footstep-parameter)))))
+   (let ((off (cadr (memq :default-half-offset (send robot :footstep-parameter))))
+         (fmcoords (midcoords 0.5 (send self :get-foot-step-param :rleg-coords) (send self :get-foot-step-param :lleg-coords))))
      (send self :set-foot-steps (list (make-coords :coords (send self :get-foot-step-param :rleg-coords) :name :rleg)
-                                      (make-coords :coords (send (send (make-coords :pos (send (send self :get-foot-step-param :dst-foot-midcoords) :worldpos)) :rotate (deg2rad angle) axis)
+                                      (make-coords :coords (send (send (make-coords :pos (copy-object (send fmcoords :worldpos))) :rotate (deg2rad angle) axis)
                                                                  :translate off)
                                                    :name :lleg)
-                                      (make-coords :coords (send (send (make-coords :pos (send (send self :get-foot-step-param :dst-foot-midcoords) :worldpos)) :rotate (deg2rad angle) axis)
+                                      (make-coords :coords (send (send (make-coords :pos (copy-object (send fmcoords :worldpos))) :rotate (deg2rad angle) axis)
                                                                  :translate (scale -1 off))
                                                    :name :rleg)))
      ))
