@@ -24,7 +24,11 @@ endif()
 ###
 macro(compile_collada_model daefile)
   # dummy set to wrl
-  get_filename_component(_dae_dir_name ${daefile} DIRECTORY)
+  if(${CMAKE_VERSION} VERSION_LESS "2.8.12")
+    get_filename_component(_dae_dir_name ${daefile} PATH)
+  else()
+    get_filename_component(_dae_dir_name ${daefile} DIRECTORY)
+  endif()
   get_filename_component(_dae_file_name ${daefile} NAME_WE)
   compile_openhrp_model(${_dae_dir_name}/${_dae_file_name}.dae)
 endmacro()
