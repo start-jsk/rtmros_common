@@ -1064,7 +1064,7 @@
 
 (defmethod rtm-ros-robot-interface
   (:start-default-unstable-controllers
-   (&key (ic-limbs '(:rarm :larm) (abc-limbs '(:rleg :lleg))))
+   (&key (ic-limbs '(:rarm :larm)) (abc-limbs '(:rleg :lleg)))
    "Start default unstable RTCs controller mode.
     Currently Stabilzier, AutoBalancer, and ImpedanceController are started."
    (send self :start-st)
