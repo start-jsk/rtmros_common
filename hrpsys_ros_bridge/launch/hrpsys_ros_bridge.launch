@@ -8,7 +8,7 @@
   <arg name="DEBUG_HRPSYS" default="false" />
 
   <arg name="USE_DIAGNOSTICS" default="true" />
-
+  <arg name="USE_ROBOT_POSE_EKF" default="true" />
   <!-- Set these values false when using HIRO -->
   <arg name="USE_COMMON" default="true" />
   <arg name="USE_ROBOTHARDWARE" default="false" />
@@ -232,7 +232,8 @@
 
   <!-- END:openrtm connection -->
 
-  <include file="$(find hrpsys_ros_bridge)/launch/robot_pose_ekf.launch" >
+  <include file="$(find hrpsys_ros_bridge)/launch/robot_pose_ekf.launch" 
+           if="$(arg USE_ROBOT_POSE_EKF)">
     <arg name="base_link" value="$(arg BASE_LINK)"/>
   </include>
 </launch>
