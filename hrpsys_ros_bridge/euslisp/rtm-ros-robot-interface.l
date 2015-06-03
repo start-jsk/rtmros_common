@@ -779,6 +779,21 @@
    (send self :autobalancerservice_adjustfootsteps
          :rfootstep (send self :eus-footstep->abc-footstep rfoot-coords)
          :lfootstep (send self :eus-footstep->abc-footstep lfoot-coords)))
+  (:adjust-foot-steps-roll-pitch
+   (angle &key (axis :x))
+   "Adjust foot steps with roll or pitch orientation.
+    angle is roll or pitch angle [deg].
+    axis is :x (roll) or :y (pitch)."
+   (let ((off (cadr (memq :default-half-offset (send robot :footstep-parameter))))
+         (fmcoords (midcoords 0.5 (send self :get-foot-step-param :rleg-coords) (send self :get-foot-step-param :lleg-coords))))
+     (send self :adjust-foot-steps
+           (make-coords :coords (send (send (make-coords :pos (copy-object (send fmcoords :worldpos))) :rotate (deg2rad angle) axis)
+                                      :translate (scale -1 off))
+                        :name :rleg)
+           (make-coords :coords (send (send (make-coords :pos (copy-object (send fmcoords :worldpos))) :rotate (deg2rad angle) axis)
+                                      :translate off)
+                        :name :lleg))
+     ))
   (:go-velocity
    (vx vy vth)
    (send self :autobalancerservice_goVelocity :vx vx :vy vy :vth vth))
