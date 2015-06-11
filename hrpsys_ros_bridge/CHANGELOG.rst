@@ -2,6 +2,31 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [launch/hrpsys_ros_bridge.launch] Add USE_ROBOT_POSE_EKF
+* [euslisp/rtm-ros-robot-interface.l] fix typo
+* [euslisp/rtm-ros-robot-interface.l] Add :adjust-foot-steps-roll-pitch to reset current foot steps
+* [euslisp/rtm-ros-robot-interface.l] Add toe heel angle for :set-foot-steps-with-param-no-wait
+* [euslisp/rtm-ros-robot-interface.l] Add argument for transition times
+* [euslisp/rtm-ros-robot-interface.l] Use current foot midcoords of rleg and lleg in roll pitch method
+* [euslisp/rtm-ros-robot-interface.l] Add adjust footsteps euslisp interface
+* [euslisp/datalogger-log-parser.l] Add function to dump seq pattern file from datalogger log
+* [euslisp/rtm-ros-robot-interface.l,uslisp/rtm-ros-robot-interface.l] Add force moment param zerosettin method and use it in calib program
+* [euslisp/rtm-ros-robot-interface.l] raise error when bridged service call failed
+* [euslisp/rtm-ros-robot-interface.l] Make interpolation-time in sync-controller shorter
+* [euslisp/rtm-ros-robot-interface.l] Add :set-foot-steps-with-base-height
+* [euslisp/rtm-ros-robot-interface.l] Fix typo in start method. Start auto balancer by legs.
+* [euslisp/rtm-ros-robot-interface.l] Add euslisp methods for default unstable controllers
+* [src/HrpsysSeqStateROSBridge.cpp] imu_floor again
+* [src/hrpsys_ros_bridge/hrpsys_dashboard.py] add st/abc/ic start at once button
+* [hrpsys_ros_bridge/cmake/compile_robot_model.cmake] Enable to specify robot specific hrpsys_config.py
+* [launch/hrpsys_ros_bridge.launch] Add argument to specify periodic rate of seq ros bridge
+* [euslisp/rtm-ros-robot-interface.l] add hours, minutes and seconds for :save-log
+* [.travis.yaml, hrpsys_ros_bridge/catkin.cmake] add eusdoc
+* [euslisp/rtm-ros-robot-interface.l] Support t or nil in setter arguments
+* Contributors: Eisoku Kuroiwa, Kei Okada, Ryohei Ueda, Shunichi Nozawa, Yohei Kakiuchi, Iori Kumagai
+
 1.2.12 (2015-04-27)
 -------------------
 * [euslisp/rtm-ros-robot-interface.l] Update function to calculate toe heel offset. Support both pos and zmp and add documentation
