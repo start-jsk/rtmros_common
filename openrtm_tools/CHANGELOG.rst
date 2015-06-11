@@ -2,8 +2,8 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.13 (2015-06-11)
+-------------------
 * [src/openrtm_tools/rtmlaunch.py] keep one RTCTree() instance and reflesh when needed, to speedup
 * Contributors: Kei Okada
 

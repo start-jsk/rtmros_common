@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.13 (2015-06-11)
+-------------------
 * [launch/hrpsys_ros_bridge.launch] Add USE_ROBOT_POSE_EKF
 * [euslisp/rtm-ros-robot-interface.l] fix typo
 * [euslisp/rtm-ros-robot-interface.l] Add :adjust-foot-steps-roll-pitch to reset current foot steps
