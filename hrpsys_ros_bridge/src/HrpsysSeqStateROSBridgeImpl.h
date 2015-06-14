@@ -173,6 +173,12 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   } SensorInfo;
   std::map<std::string, SensorInfo> sensor_info;
 
+  typedef struct  {
+    double cop_offset_z;
+    std::string link_name;
+  } COPLinkInfo;
+  std::map<std::string, COPLinkInfo> cop_link_info;
+
   double dt;
 
  private:

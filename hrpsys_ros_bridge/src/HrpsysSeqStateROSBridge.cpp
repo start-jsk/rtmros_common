@@ -761,6 +761,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       m_rsCOPInfoIn.read();
       //ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute " << m_rsforceName[i] << " size = " << m_rsforce[i].data.length() );
       for (size_t i = 0; i < m_mcforceIn.size(); i++) {
+        std::string tmpname = m_mcforceName[i]; // "ref_xx"
+        tmpname.erase(0,4); // Remove "ref_"
+        if (cop_link_info.find(tmpname) == cop_link_info.end()) continue;
         double fz = m_rsCOPInfo.data[i*3+2];
         if (fz < 1e-3) continue; // If fz is small, do not publish COP.
         geometry_msgs::PointStamped copv;
@@ -769,12 +772,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         }else{
           copv.header.stamp = tm_on_execute;
         }
-        std::string tmpname = m_mcforceName[i]; // "ref_xx"
-        tmpname.erase(0,4); // Remove "ref_"
-        copv.header.frame_id = tmpname;
+        copv.header.frame_id = cop_link_info[tmpname].link_name;
         copv.point.x = m_rsCOPInfo.data[i*3+1]/fz; // copx = my / fz
         copv.point.y = m_rsCOPInfo.data[i*3]/fz; // copy = mx / fz
-        copv.point.z = 0; // copz is assumed to be equal to ee z position.
+        copv.point.z = cop_link_info[tmpname].cop_offset_z; // cop z position is static.
         cop_pub[i].publish(copv);
       }
     }
