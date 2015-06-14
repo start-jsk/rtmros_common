@@ -36,6 +36,7 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_rstorqueIn("rstorque", m_rstorque),
     m_servoStateIn("servoState", m_servoState),
     m_rszmpIn("rszmp", m_rszmp),
+    m_rsCOPInfoIn("rsCOPInfo", m_rsCOPInfo),
     m_mctorqueOut("mctorque", m_mctorque),
     m_SequencePlayerServicePort("SequencePlayerService")
 
@@ -60,6 +61,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("rstorque", m_rstorqueIn);
   addInPort("rszmp", m_rszmpIn);
   addInPort("servoState", m_servoStateIn);
+  addInPort("rsCOPInfo", m_rsCOPInfoIn);
 
   // Set OutPort buffer
   addOutPort("mctorque", m_mctorqueOut);

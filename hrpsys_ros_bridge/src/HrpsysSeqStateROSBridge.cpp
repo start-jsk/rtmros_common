@@ -132,6 +132,12 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
     fsensor_pub[i+m_rsforceIn.size()] = nh.advertise<geometry_msgs::WrenchStamped>(m_mcforceName[i], 10);
   }
   zmp_pub = nh.advertise<geometry_msgs::PointStamped>("/zmp", 10);
+  cop_pub.resize(m_mcforceName.size());
+  for (unsigned int i=0; i<m_mcforceName.size(); i++){
+    std::string tmpname(m_mcforceName[i]); // "ref_xx"
+    tmpname.erase(0,4); // Remove "ref_"
+    cop_pub[i] = nh.advertise<geometry_msgs::PointStamped>(tmpname+"_cop", 10);
+  }
 
   return RTC::RTC_OK;
 }
@@ -743,6 +749,34 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       zmpv.point.y = m_rszmp.data.y;
       zmpv.point.z = m_rszmp.data.z;
       zmp_pub.publish(zmpv);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+  if ( m_rsCOPInfoIn.isNew() ) {
+    try {
+      m_rsCOPInfoIn.read();
+      //ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute " << m_rsforceName[i] << " size = " << m_rsforce[i].data.length() );
+      for (size_t i = 0; i < m_mcforceIn.size(); i++) {
+        double fz = m_rsCOPInfo.data[i*3+2];
+        if (fz < 1e-3) continue; // If fz is small, do not publish COP.
+        geometry_msgs::PointStamped copv;
+        if ( use_hrpsys_time ) {
+          copv.header.stamp = ros::Time(m_rsCOPInfo.tm.sec, m_rsCOPInfo.tm.nsec);
+        }else{
+          copv.header.stamp = tm_on_execute;
+        }
+        std::string tmpname = m_mcforceName[i]; // "ref_xx"
+        tmpname.erase(0,4); // Remove "ref_"
+        copv.header.frame_id = tmpname;
+        copv.point.x = m_rsCOPInfo.data[i*3+1]/fz; // copx = my / fz
+        copv.point.y = m_rsCOPInfo.data[i*3]/fz; // copy = mx / fz
+        copv.point.z = 0; // copz is assumed to be equal to ee z position.
+        cop_pub[i].publish(copv);
+      }
     }
     catch(const std::runtime_error &e)
       {
