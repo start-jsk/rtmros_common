@@ -134,6 +134,8 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   InPort<OpenHRP::TimedLongSeqSeq> m_servoStateIn;
   TimedPoint3D m_rszmp;
   InPort<TimedPoint3D> m_rszmpIn;
+  TimedDoubleSeq m_rsCOPInfo;
+  InPort<TimedDoubleSeq> m_rsCOPInfoIn;
 
   // </rtc-template>
 
@@ -170,6 +172,12 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
     tf::Transform transform;
   } SensorInfo;
   std::map<std::string, SensorInfo> sensor_info;
+
+  typedef struct  {
+    double cop_offset_z;
+    std::string link_name;
+  } COPLinkInfo;
+  std::map<std::string, COPLinkInfo> cop_link_info;
 
   double dt;
 

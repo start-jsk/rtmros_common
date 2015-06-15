@@ -36,6 +36,7 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_rstorqueIn("rstorque", m_rstorque),
     m_servoStateIn("servoState", m_servoState),
     m_rszmpIn("rszmp", m_rszmp),
+    m_rsCOPInfoIn("rsCOPInfo", m_rsCOPInfo),
     m_mctorqueOut("mctorque", m_mctorque),
     m_SequencePlayerServicePort("SequencePlayerService")
 
@@ -60,6 +61,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("rstorque", m_rstorqueIn);
   addInPort("rszmp", m_rszmpIn);
   addInPort("servoState", m_servoStateIn);
+  addInPort("rsCOPInfo", m_rsCOPInfoIn);
 
   // Set OutPort buffer
   addOutPort("mctorque", m_mctorqueOut);
@@ -248,6 +250,53 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     m_baseRpy.data.r = rpy[0];
     m_baseRpy.data.p = rpy[1];
     m_baseRpy.data.y = rpy[2];
+  }
+
+  // End effector setting from conf file
+  // rleg,TARGET_LINK,BASE_LINK,x,y,z,rx,ry,rz,rth #<=pos + rot (axis+angle)
+  coil::vstring end_effectors_str = coil::split(prop["end_effectors"], ",");
+  if (end_effectors_str.size() > 0) {
+    size_t prop_num = 10;
+    size_t num = end_effectors_str.size()/prop_num;
+    for (size_t i = 0; i < num; i++) {
+      // Parse end-effector information from conf
+      std::string ee_name, ee_target, ee_base;
+      coil::stringTo(ee_name, end_effectors_str[i*prop_num].c_str());
+      coil::stringTo(ee_target, end_effectors_str[i*prop_num+1].c_str());
+      coil::stringTo(ee_base, end_effectors_str[i*prop_num+2].c_str());
+      hrp::Vector3 eep;
+      for (size_t j = 0; j < 3; j++) {
+        coil::stringTo(eep(j), end_effectors_str[i*prop_num+3+j].c_str());
+      }
+      std::cerr << "[" << m_profile.instance_name << "] End Effector [" << ee_name << "]" << ee_target << " " << ee_base << std::endl;
+      // Find pair between end-effector information and force sensor name
+      bool is_sensor_exists = false;
+      std::string sensor_name;
+      for (size_t ii = 0; ii < m_mcforceName.size(); ii++) {
+        std::string tmpname = m_mcforceName[ii];
+        tmpname.erase(0,4);
+        hrp::ForceSensor* sensor = body->sensor<hrp::ForceSensor>(tmpname);
+        hrp::Link* alink = body->link(ee_target);
+        while (alink != NULL && alink->name != ee_base && !is_sensor_exists) {
+          if ( alink->name == sensor->link->name ) {
+            is_sensor_exists = true;
+            sensor_name = tmpname;
+          }
+          alink = alink->parent;
+        }
+      }
+      if (!is_sensor_exists) {
+        std::cerr << "[" << m_profile.instance_name << "]   No force sensors found [" << ee_target << "]" << std::endl;
+        continue;
+      }
+      // Set cop_link_info
+      COPLinkInfo ci;
+      ci.link_name = sensor_info[sensor_name].link_name; // Link name for tf frame
+      ci.cop_offset_z = eep(2);
+      cop_link_info.insert(std::pair<std::string, COPLinkInfo>(sensor_name, ci));
+      std::cerr << "[" << m_profile.instance_name << "]   target = " << ci.link_name << ", sensor_name = " << sensor_name << std::endl;
+      std::cerr << "[" << m_profile.instance_name << "]   localPos = " << eep.format(Eigen::IOFormat(Eigen::StreamPrecision, 0, ", ", ", ", "", "", "    [", "]")) << "[m]" << std::endl;
+    }
   }
 
   // </rtc-template>
