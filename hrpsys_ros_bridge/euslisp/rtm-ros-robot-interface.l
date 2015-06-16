@@ -794,6 +794,31 @@
                                       :translate off)
                         :name :lleg))
      ))
+  (:get-remaining-foot-step-sequence
+   ()
+   "Get remaining foot steps from GaitGenerator.
+   Return is (list current-support-foot-coords remaining-swing-dst-coords-0 ... )."
+   (mapcar #'(lambda (fs)
+               (send self :abc-footstep->eus-footstep fs))
+           (send (send self :autobalancerservice_getRemainingFootstepSequence) :o_footstep))
+   )
+  (:draw-remaining-foot-step-sequence
+   (vwer
+    &key (flush) (rleg-color #f(1 0 0)) (lleg-color #f(0 1 0))
+         (change-support-leg-color t) (support-leg-color #f(1 1 1)))
+   "Draw remaining foot steps."
+   (let ((fs (send self :get-remaining-foot-step-sequence)))
+     (mapcar #'(lambda (f)
+                 (let* ((leg (send f :name))
+                        (fc (instance face :init
+                                    :vertices
+                                    (mapcar #'(lambda (x) (send f :transform-vector (send robot leg :end-coords :inverse-transform-vector x))) (butlast (send (send robot :support-polygon leg) :vertices))))))
+                 (if (and change-support-leg-color (= (position f fs) 0))
+                     (send fc :draw-on :color support-leg-color)
+                   (send fc :draw-on :color (case (send f :name) (:rleg rleg-color) (:lleg lleg-color))))))
+             fs)
+     (if flush (send vwer :viewsurface :flush))
+     ))
   (:go-velocity
    (vx vy vth)
    (send self :autobalancerservice_goVelocity :vx vx :vy vy :vth vth))
@@ -902,7 +927,8 @@
   (:abc-footstep->eus-footstep
    (f)
    (make-coords :pos (scale 1e3 (send f :pos))
-                :rot (quaternion2matrix (send f :rot)))
+                :rot (quaternion2matrix (send f :rot))
+                :name (read-from-string (format nil ":~A" (send f :leg))))
    )
   (:eus-footstep->abc-footstep
    (f)
