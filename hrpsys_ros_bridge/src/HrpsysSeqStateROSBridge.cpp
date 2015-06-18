@@ -645,6 +645,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       //base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
       base.setRotation(tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y));
       tf::Transform inv = base.inverse();
+      inv.setOrigin(tf::Vector3(0, 0, 0));
 #if ROS_VERSION_MINIMUM(1,8,0)
       tf::Matrix3x3 m;
 #else
