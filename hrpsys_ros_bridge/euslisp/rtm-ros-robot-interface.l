@@ -824,7 +824,12 @@
    (send self :autobalancerservice_goVelocity :vx vx :vy vy :vth vth))
   (:go-stop
    ()
+   "Stop stepping."
    (send self :autobalancerservice_goStop))
+  (:emergency-walking-stop
+   ()
+   "Stop stepping immediately."
+   (send self :autobalancerservice_emergencyStop))
   (:calc-go-velocity-param-from-velocity-center-offset
    (ang velocity-center-offset)
    "Calculate go-velocity velocities from rotation center and rotation angle.
@@ -842,6 +847,7 @@
         ))))
   (:wait-foot-steps
    ()
+   "Wait for whole footsteps are executed."
    (send self :autobalancerservice_waitFootSteps))
   ;; wrap :set-gait-generator-param to use symbol for default-orbit-type
   (:set-gait-generator-param
