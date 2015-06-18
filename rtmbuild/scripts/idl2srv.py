@@ -395,7 +395,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
                     req_code += '  convert(req.%s, %s);\n' % (var, var)
 
         code += '\n'
-        code += '  ROS_INFO_STREAM("%s::%s()");\n' % (ifname, op.identifier())
+        code += '  ROS_INFO_STREAM("%s::%s() called");\n' % (ifname, op.identifier())
 
         code += '\n' + req_code + '\n'
 
@@ -442,6 +442,8 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         code += '  }\n'
 
         code += res_code
+
+        code += '  ROS_INFO_STREAM("%s::%s() succeeded");\n' % (ifname, op.identifier())
 
         return """bool %s::%s(%s::%s::Request &req, %s::%s::Response &res){\n%s\n  return true;\n};\n\n""" % (ifname, op.identifier(), pkgname, self.getCppTypeText(op,full=ROS_FULL), pkgname, self.getCppTypeText(op,full=ROS_FULL), code)
 
