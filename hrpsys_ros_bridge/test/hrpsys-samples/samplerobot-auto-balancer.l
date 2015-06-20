@@ -252,6 +252,44 @@
       (send *ri* :wait-interpolation))
     t))
 
+(defun samplerobot-auto-balancer-demo18 ()
+  (print "12. Change step param with setFootSteps")
+  (send *ri* :get-gait-generator-param)
+  ;; Dummy settting just for testing
+  (send *ri* :set-gait-generator-param :toe-angle 50 :heel-angle 50 :default-step-time 4.0 :default-step-height 0.0)
+  ;; Step time change
+  (send *ri* :set-foot-steps-with-param
+        (list (make-coords :coords (send *sr* :rleg :end-coords :copy-worldcoords) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 100 0 0)) :name :lleg)
+              (make-coords :coords (send (send *sr* :rleg :end-coords :copy-worldcoords) :translate (float-vector 200 0 0)) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 200 0 0)) :name :lleg))
+        (list 0 50 50 50)
+        (list 1.0 2.0 1.0 2.0)
+        (list 0 0 0 0)
+        (list 0 0 0 0))
+  ;; Step height change
+  (send *ri* :set-foot-steps-with-param
+        (list (make-coords :coords (send *sr* :rleg :end-coords :copy-worldcoords) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 100 0 0)) :name :lleg)
+              (make-coords :coords (send (send *sr* :rleg :end-coords :copy-worldcoords) :translate (float-vector 200 0 0)) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 200 0 0)) :name :lleg))
+        (list 0 100 50 100)
+        (list 1.0 1.0 1.0 1.0)
+        (list 0 0 0 0)
+        (list 0 0 0 0))
+  ;; Toe heel change
+  (send *ri* :set-foot-steps-with-param
+        (list (make-coords :coords (send *sr* :rleg :end-coords :copy-worldcoords) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 100 0 0)) :name :lleg)
+              (make-coords :coords (send (send *sr* :rleg :end-coords :copy-worldcoords) :translate (float-vector 200 0 0)) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 200 0 0)) :name :lleg))
+        (list 0 50 50 50)
+        (list 1.0 1.0 1.0 1.0)
+        (list 0 0 20 10)
+        (list 0 0 50 10))
+  (send *ri* :set-gait-generator-param :toe-angle 0 :heel-angle 0 :default-step-time 1.0 :default-step-height 0.05)
+  )
+
 (defun samplerobot-auto-balancer-demo ()
   (samplerobot-auto-balancer-init)
 
@@ -276,6 +314,7 @@
   (samplerobot-auto-balancer-demo15)
   (samplerobot-auto-balancer-demo16)
   (samplerobot-auto-balancer-demo17)
+  (samplerobot-auto-balancer-demo18)
   )
 
 (warn ";; (samplerobot-auto-balancer-demo)~%")
