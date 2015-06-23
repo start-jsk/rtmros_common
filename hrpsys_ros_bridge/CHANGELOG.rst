@@ -2,6 +2,19 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [hrpsys_ros_bridge] Add splash screen to hrpsys dashboard
+* Enable to set step time for each foot steps and update documentation
+* Add emergency walking stop and update documentations
+* [hrpsys_ros_bridge] set position of imu_floor zero
+* Add method to get remaining foot steps and displaying method
+* [cmake_compile_robot_model.cmake] get_filename_component DIRECTORY is only available > cmake 2.8.12
+* Publish cop position in end link frame
+* Publish COP for each end effectors. COPInfo is provided by Stabilizer.
+* Add --use-robot-hrpsys-config argument to compile robot old (added to compile robot in 54e64bf3c4131fc907c6b7c0a34d728f82948e76)
+* Contributors: Kei Okada, Ryohei Ueda, Shunichi Nozawa
+
 1.2.13 (2015-06-11)
 -------------------
 * [launch/hrpsys_ros_bridge.launch] Add USE_ROBOT_POSE_EKF
