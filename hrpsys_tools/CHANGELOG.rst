@@ -2,8 +2,8 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.14 (2015-06-23)
+-------------------
 * Add EmergencyStopper setting to hrpsys.launch
 * Contributors: Shunichi Nozawa
 

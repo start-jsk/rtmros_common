@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.14 (2015-06-23)
+-------------------
 * [hrpsys_ros_bridge] Add splash screen to hrpsys dashboard
 * Enable to set step time for each foot steps and update documentation
 * Add emergency walking stop and update documentations

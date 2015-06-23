@@ -2,8 +2,8 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.14 (2015-06-23)
+-------------------
 * [rtmbuild/scripts/idl2srv.py] print when service is called and returned
 * Contributors: Kei Okada
 
