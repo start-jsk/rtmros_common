@@ -27,10 +27,21 @@ from rqt_robot_dashboard.console_dash_widget import ConsoleDashWidget
 from rqt_robot_dashboard.widgets import MenuDashWidget
 
 from python_qt_binding.QtCore import QSize
-from python_qt_binding.QtGui import QMessageBox
+from python_qt_binding.QtCore import Qt
+from python_qt_binding.QtGui import (QMessageBox, QSplashScreen,
+                                     QPixmap, QApplication)
 
 from subprocess import check_call, Popen
 
+class HrpsysSplashScreen():
+    def __init__(self, img):
+        splash_pix = QPixmap(img)
+        self.splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
+        self.splash.setMask(splash_pix.mask())
+        self.splash.show()
+        QApplication.processEvents()
+    def kill(self):
+        self.splash.close()
 # subclasses required for hrpsys_dasboard
 class HrpsysLogMenu(MenuDashWidget):
   """
@@ -310,6 +321,13 @@ class HrpsysDashboard(Dashboard):
     * ros_bridge
     * battery
   """
+  def __init__(self, context):
+    splash_image = rospy.get_param('hrpsys_splash_image', None)
+    if splash_image:
+        self.splash = HrpsysSplashScreen(splash_image)
+    else:
+        self.splash = None
+    super(HrpsysDashboard, self).__init__(context)
   def setup(self, context):
     self.name = "hrpsys dashbaord"
     self._console = ConsoleDashWidget(self.context, minimal=False)
