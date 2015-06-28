@@ -1396,6 +1396,29 @@
    When print-mode is :python, print parameters in Python hrpsys_config style."
   (calculate-toe-heel-offsets robot :print-mode pm :pos-or-zmp :zmp))
 
+(defun calculate-sole-margin-params
+  (robot &key ((:print-mode pm) :euslisp) (margin-ratio 1.0))
+  "Calculate sole edge margin in Stabilizer.
+   robot is robot model.
+   margin-ratio is multiplied by values (1.0 by default).
+   When print-mode is :euslisp, print parameters in Euslisp style.
+   When print-mode is :python, print parameters in Python hrpsys_config style."
+  (let* ((sp-vertices (mapcar #'(lambda (x) (send robot :rleg :end-coords :inverse-transform-vector x)) (send (send robot :support-polygon :rleg) :vertices)))
+         (front-margin (* margin-ratio (elt (find-extream sp-vertices #'(lambda (x) (elt x 0)) #'>) 0)))
+         (rear-margin (* margin-ratio (abs (elt (find-extream sp-vertices #'(lambda (x) (elt x 0)) #'<) 0))))
+         (inside-margin (* margin-ratio (elt (find-extream sp-vertices #'(lambda (x) (elt x 1)) #'>) 1)))
+         (outside-margin (* margin-ratio (abs (elt (find-extream sp-vertices #'(lambda (x) (elt x 1)) #'<) 1)))))
+    (case
+        pm
+      (:euslisp
+       (format t "(send *ri* :set-st-param :eefm-leg-front-margin (* 1e-3 ~A) :eefm-leg-rear-margin (* 1e-3 ~A) :eefm-leg-inside-margin (* 1e-3 ~A) :eefm-leg-outside-margin (* 1e-3 ~A))~%"
+               front-margin rear-margin inside-margin outside-margin))
+      (:python
+       (format t "stp=hcf.st_svc.getParameter()[1];~%")
+       (format t "stp.eefm_leg_front_margin=1e-3*~A;stp.eefm_leg_rear_margin=1e-3*~A;stp.eefm_leg_inside_margin=1e-3*~A;stp.eefm_leg_outside_margin=1e-3*~A;~%"
+               front-margin rear-margin inside-margin outside-margin)
+       (format t "hcf.st_svc.setParameter(stp);~%")))
+    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility functions for project generator generation
