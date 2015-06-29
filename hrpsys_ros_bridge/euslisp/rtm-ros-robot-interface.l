@@ -198,10 +198,10 @@
            nil)
        `(defmethod rtm-ros-robot-interface
           (,new-method-name
-           ,(cadr init-method)
+           ,(append (cadr init-method) (list (list 'rosbridge-name (format nil "~AROSBridge" rtc-name))))
            (or
            (ros::service-call
-            ,(format nil "/~AROSBridge/~A" rtc-name meth-name)
+            (format nil "/~A/~A" rosbridge-name ,meth-name)
             (instance ,(eval srv-request) :init ,@(mapcan #'(lambda (x) (list (caar x) (cadar x))) (cdadr init-method))))
            (error ";; service call failed (~A)" ,new-method-name)
            )
@@ -1105,6 +1105,22 @@
          (send (send self :get-kalman-filter-param) :kf_algorithm)
          "HRPSYS_ROS_BRIDGE::OPENHRP_KALMANFILTERSERVICE_KFALGORITHM"))
 )
+
+;; EmergencyStopperService
+(defmethod rtm-ros-robot-interface
+  (:emergency-stop-motion
+   ()
+   (send self :emergencystopperservice_stopmotion))
+  (:hard-emergency-stop-motion
+   ()
+   (send self :emergencystopperservice_stopmotion :rosbridge-name "/HardEmergencyStopperServiceROSBridge"))
+  (:emergency-release-motion
+   ()
+   (send self :emergencystopperservice_releasemotion))
+  (:hard-emergency-release-motion
+   ()
+   (send self :emergencystopperservice_releasemotion :rosbridge-name "/HardEmergencyStopperServiceROSBridge"))
+  )
 
 (defmethod rtm-ros-robot-interface
   (:start-default-unstable-controllers

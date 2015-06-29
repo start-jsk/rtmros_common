@@ -199,10 +199,10 @@ macro (generate_default_launch_eusinterface_files wrlfile project_pkg_name)
   #   generate hrpsys_config.py to use unstable RTCs
   set(ROSBRIDGE_ARGS "    <arg name=\"BASE_LINK\" default=\"WAIST_LINK0\" />\n")
   if ("${ARGV3}" STREQUAL "--use-unstable-hrpsys-config")
-    set(ROSBRIDGE_ARGS "    <arg name=\"USE_WALKING\" default=\"true\" />\n    <arg name=\"USE_IMPEDANCECONTROLLER\" default=\"true\" />${ROSBRIDGE_ARGS}")
+    set(ROSBRIDGE_ARGS "    <arg name=\"USE_WALKING\" default=\"true\" />\n    <arg name=\"USE_IMPEDANCECONTROLLER\" default=\"true\" />\n    <arg name=\"USE_EMERGENCYSTOPPER\" default=\"true\" />${ROSBRIDGE_ARGS}")
     set(STARTUP_ARGS "    <arg name=\"HRPSYS_PY_ARGS\" default=\"--use-unstable-rtc\" />")
   elseif ("${ARGV3}" STREQUAL "--use-robot-hrpsys-config")
-    set(ROSBRIDGE_ARGS "    <arg name=\"USE_WALKING\" default=\"true\" />\n    <arg name=\"USE_IMPEDANCECONTROLLER\" default=\"true\" />${ROSBRIDGE_ARGS}")
+    set(ROSBRIDGE_ARGS "    <arg name=\"USE_WALKING\" default=\"true\" />\n    <arg name=\"USE_IMPEDANCECONTROLLER\" default=\"true\" />\n    <arg name=\"USE_EMERGENCYSTOPPER\" default=\"true\" />${ROSBRIDGE_ARGS}")
     set(STARTUP_ARGS "    <arg name=\"HRPSYS_PY_PKG\" default=\"${PROJECT_PKG_NAME}\" />\n    <arg name=\"HRPSYS_PY_NAME\" default=\"${_sname}_hrpsys_config.py\" />")
   endif()
   #  generate startup.launch
