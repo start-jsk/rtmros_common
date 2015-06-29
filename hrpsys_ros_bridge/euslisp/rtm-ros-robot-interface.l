@@ -1106,6 +1106,22 @@
          "HRPSYS_ROS_BRIDGE::OPENHRP_KALMANFILTERSERVICE_KFALGORITHM"))
 )
 
+;; EmergencyStopperService
+(defmethod rtm-ros-robot-interface
+  (:emergency-stop-motion
+   ()
+   (send self :emergencystopperservice_stopmotion))
+  (:hard-emergency-stop-motion
+   ()
+   (send self :emergencystopperservice_stopmotion :rosbridge-name "/HardEmergencyStopperServiceROSBridge"))
+  (:emergency-release-motion
+   ()
+   (send self :emergencystopperservice_releasemotion))
+  (:hard-emergency-release-motion
+   ()
+   (send self :emergencystopperservice_releasemotion :rosbridge-name "/HardEmergencyStopperServiceROSBridge"))
+  )
+
 (defmethod rtm-ros-robot-interface
   (:start-default-unstable-controllers
    (&key (ic-limbs '(:rarm :larm)) (abc-limbs '(:rleg :lleg)))
