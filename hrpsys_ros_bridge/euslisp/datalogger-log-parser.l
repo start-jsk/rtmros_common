@@ -56,7 +56,7 @@
 
 (defclass datalogger-log-parser-controller
   :super rtm-ros-robot-interface
-  :slots (parser-list eof-p)
+  :slots (parser-list eof-p limb-list)
   )
 
 (defmethod datalogger-log-parser-controller
@@ -64,6 +64,8 @@
    (fname &key ((:robot r)))
    (setq robot (cond ((derivedp r metaclass) (instance r :init))
                      (t r)))
+   (setq limb-list (mapcar #'(lambda (x) (find-if #'(lambda (l) (member x (send robot l :force-sensors))) '(:rleg :lleg :rarm :larm)))
+                           (send robot :force-sensors)))
    ;;(send-super :init :robot r)
    (let* ((dir-str (format nil "/~A" (reduce #'(lambda (x y) (format nil "~A/~A" x y)) (cdr (pathname-directory fname)))))
           (fname-prefix (pathname-name fname)))
@@ -125,11 +127,8 @@
      (send robot :move-coords (send self :auto-balancer-reference-root-coords) (car (send robot :links)))
      (send robot :update-descendants)
      (send self :set-robot-state1 :auto-balancer-abs-zmp (send (car (send robot :links)) :transform-vector (send self :auto-balancer-zmp)))
-     (let ((limb-list ;; aling limb list in force sensor order
-            (mapcar #'(lambda (x) (find-if #'(lambda (l) (member x (send robot l :force-sensors))) '(:rleg :lleg :rarm :larm)))
-                    (send robot :force-sensors))))
-       (send self :set-robot-state1 :auto-balancer-end-coords-list
-             (mapcar #'(lambda (x) (send robot x :end-coords :copy-worldcoords)) limb-list))))
+     (send self :set-robot-state1 :auto-balancer-end-coords-list
+           (mapcar #'(lambda (x) (send robot x :end-coords :copy-worldcoords)) limb-list)))
    ;; Stabilizer parameter
    (let ((rsd (send self :parser-list "st_originRefCogVel")))
      (if rsd (send self :set-robot-state1 :stabilizer-reference-cogvel (send rsd :read-state))))
