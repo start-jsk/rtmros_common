@@ -56,7 +56,7 @@
 
 (defclass datalogger-log-parser-controller
   :super rtm-ros-robot-interface
-  :slots (parser-list eof-p)
+  :slots (parser-list eof-p limb-list)
   )
 
 (defmethod datalogger-log-parser-controller
@@ -64,6 +64,8 @@
    (fname &key ((:robot r)))
    (setq robot (cond ((derivedp r metaclass) (instance r :init))
                      (t r)))
+   (setq limb-list (mapcar #'(lambda (x) (find-if #'(lambda (l) (member x (send robot l :force-sensors))) '(:rleg :lleg :rarm :larm)))
+                           (send robot :force-sensors)))
    ;;(send-super :init :robot r)
    (let* ((dir-str (format nil "/~A" (reduce #'(lambda (x y) (format nil "~A/~A" x y)) (cdr (pathname-directory fname)))))
           (fname-prefix (pathname-name fname)))
@@ -97,6 +99,58 @@
   (:update-robot-state
    (&key (wait-until-update nil))
    (setq eof-p (some #'null (send-all parser-list :proc)))
+   ;; AutoBalancer parameter
+   (if (send self :parser-list "abc_q")
+       (send self :set-robot-state1
+             :auto-balancer-reference-vector
+             (map float-vector #'rad2deg (send (send self :parser-list "abc_q") :read-state))))
+   (if (send self :parser-list "abc_baseTformOut")
+       (send self :set-robot-state1
+             :auto-balancer-reference-root-coords
+             (send self :hrpsys-tform->coords (send (send self :parser-list "abc_baseTformOut") :read-state))))
+   (let ((rsd (send self :parser-list "abc_controlSwingSupportTime")))
+     (if rsd (send self :set-robot-state1 :auto-balancer-control-swing-support-time (send rsd :read-state))))
+   (let ((rsd (send self :parser-list "abc_contactStates")))
+     (if rsd (send self :set-robot-state1 :auto-balancer-contact-states (send rsd :read-state))))
+   (let ((rsd (send self :parser-list "abc_zmpOut")))
+     (if rsd (send self :set-robot-state1 :auto-balancer-zmp (scale 1e3 (send rsd :read-state)))))
+   (let ((rsd (send self :parser-list "abc_cogOut")))
+     (if rsd (send self :set-robot-state1 :auto-balancer-cog (scale 1e3 (send rsd :read-state)))))
+   (dolist (f (send robot :force-sensors))
+     (let ((rsd (send self :parser-list (format nil "abc_limbCOPOffset_~A" (send f :name)))))
+       (if rsd (send self :set-robot-state1 (read-from-string (format nil ":auto-balancer-~A-COP-off"
+                                                                      (find-if #'(lambda (x) (equal f (car (send robot x :force-sensors)))) '(:rleg :lleg :rarm :larm))))
+                     (send rsd :read-state)))))
+   (when (and (send self :auto-balancer-reference-vector) (send self :auto-balancer-reference-root-coords))
+     ;; Set robot state from AutoBalancer reference
+     (send robot :angle-vector (send self :auto-balancer-reference-vector))
+     (send robot :move-coords (send self :auto-balancer-reference-root-coords) (car (send robot :links)))
+     (send robot :update-descendants)
+     (send self :set-robot-state1 :auto-balancer-abs-zmp (send (car (send robot :links)) :transform-vector (send self :auto-balancer-zmp)))
+     (send self :set-robot-state1 :auto-balancer-end-coords-list
+           (mapcar #'(lambda (x) (send robot x :end-coords :copy-worldcoords)) limb-list)))
+   ;; Stabilizer parameter
+   (let ((rsd (send self :parser-list "st_originRefCogVel")))
+     (if rsd (send self :set-robot-state1 :stabilizer-reference-cogvel (send rsd :read-state))))
+   (let ((rsd (send self :parser-list "st_originActCogVel")))
+     (if rsd (send self :set-robot-state1 :stabilizer-cogvel (send rsd :read-state))))
+   (let ((rsd (send self :parser-list "st_originRefZmp")))
+     (if rsd (send self :set-robot-state1 :stabilizer-reference-zmp (scale 1e3 (send rsd :read-state)))))
+   (let ((rsd (send self :parser-list "st_originActZmp")))
+     (if rsd (send self :set-robot-state1 :stabilizer-zmp (scale 1e3 (send rsd :read-state)))))
+   (let ((rsd (send self :parser-list "st_originNewZmp")))
+     (if rsd (send self :set-robot-state1 :stabilizer-newzmp (scale 1e3 (send rsd :read-state)))))
+   (let ((rsd (send self :parser-list "st_originRefCog")))
+     (if rsd (send self :set-robot-state1 :stabilizer-reference-cog (scale 1e3 (send rsd :read-state)))))
+   (let ((rsd (send self :parser-list "st_originActCog")))
+     (if rsd (send self :set-robot-state1 :stabilizer-cog (scale 1e3 (send rsd :read-state)))))
+   (let ((rsd (send self :parser-list "st_actBaseRpy")))
+     (if rsd (send self :set-robot-state1 :stabilizer-act-base-rpy (map float-vector #'rad2deg (send rsd :read-state)))))
+   (let ((rsd (send self :parser-list "st_currentBaseRpy")))
+     (if rsd (send self :set-robot-state1 :stabilizer-current-base-rpy (map float-vector #'rad2deg (send rsd :read-state)))))
+   (let ((rsd (send self :parser-list "st_debugData")))
+     (if rsd (send self :set-robot-state1 :stabilizer-debug-data (send rsd :read-state))))
+   ;; Set stable rtc data
    (send self :set-robot-state1
          :reference-vector
          (map float-vector #'rad2deg (send (send self :parser-list "sh_qOut") :read-state)))
@@ -158,14 +212,6 @@
      (send robot :move-coords
            (make-coords :rot (ros::tf-quaternion->rot (send (cdr (assoc :imu robot-state)) :orientation)))
            (car (send robot :imu-sensors))))
-   (if (send self :parser-list "abc_q")
-       (send self :set-robot-state1
-             :auto-balancer-reference-vector
-             (map float-vector #'rad2deg (send (send self :parser-list "abc_q") :read-state))))
-   (if (send self :parser-list "abc_baseTformOut")
-       (send self :set-robot-state1
-             :auto-balancer-reference-root-coords
-             (send self :hrpsys-tform->coords (send (send self :parser-list "abc_baseTformOut") :read-state))))
    )
   (:hrpsys-tform->coords
    (tform-vector)
@@ -184,6 +230,22 @@
    )
   (:auto-balancer-reference-vector () (cdr (assoc :auto-balancer-reference-vector robot-state)))
   (:auto-balancer-reference-root-coords () (cdr (assoc :auto-balancer-reference-root-coords robot-state)))
+  (:auto-balancer-control-swing-support-time () (cdr (assoc :auto-balancer-control-swing-support-time robot-state)))
+  (:auto-balancer-contact-states () (cdr (assoc :auto-balancer-contact-states robot-state)))
+  (:auto-balancer-zmp () (cdr (assoc :auto-balancer-zmp robot-state)))
+  (:auto-balancer-abs-zmp () (cdr (assoc :auto-balancer-abs-zmp robot-state)))
+  (:auto-balancer-cog () (cdr (assoc :auto-balancer-cog robot-state)))
+  (:auto-balancer-end-coords-list () (cdr (assoc :auto-balancer-end-coords-list robot-state)))
+  (:stabilizer-reference-cog () (cdr (assoc :stabilizer-reference-cog robot-state)))
+  (:stabilizer-cog () (cdr (assoc :stabilizer-cog robot-state)))
+  (:stabilizer-reference-zmp () (cdr (assoc :stabilizer-reference-zmp robot-state)))
+  (:stabilizer-zmp () (cdr (assoc :stabilizer-zmp robot-state)))
+  (:stabilizer-newzmp () (cdr (assoc :stabilizer-newzmp robot-state)))
+  (:stabilizer-cogvel () (cdr (assoc :stabilizer-cogvel robot-state)))
+  (:stabilizer-reference-cogvel () (cdr (assoc :stabilizer-reference-cogvel robot-state)))
+  (:stabilizer-act-base-rpy () (cdr (assoc :stabilizer-act-base-rpy robot-state)))
+  (:stabilizer-current-base-rpy () (cdr (assoc :stabilizer-current-base-rpy robot-state)))
+  (:stabilizer-debug-data () (cdr (assoc :stabilizer-debug-data robot-state)))
   ;; overwrite
   (:reference-vector () (cdr (assoc :reference-vector robot-state)))
   (:actual-vector () (send self :potentio-vector))
