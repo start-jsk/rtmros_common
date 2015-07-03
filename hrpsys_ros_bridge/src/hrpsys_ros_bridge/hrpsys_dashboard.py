@@ -39,7 +39,9 @@ class HrpsysSplashScreen():
         self.splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
         self.splash.setMask(splash_pix.mask())
         self.splash.show()
-        QApplication.processEvents()
+        for i in range(100):
+            time.sleep(0.01)
+            QApplication.processEvents()
     def kill(self):
         self.splash.close()
 # subclasses required for hrpsys_dasboard
