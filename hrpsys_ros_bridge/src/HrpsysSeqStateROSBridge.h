@@ -15,6 +15,7 @@
 // ros
 #include "ros/ros.h"
 #include "rosgraph_msgs/Clock.h"
+#include "std_msgs/Int32.h"
 #include "sensor_msgs/JointState.h"
 #include "nav_msgs/Odometry.h"
 #include "geometry_msgs/WrenchStamped.h"
@@ -52,7 +53,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
                                hrpsys_ros_bridge::SetSensorTransformation::Response& res);
  private:
   ros::NodeHandle nh;
-  ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, odom_pub, imu_pub;
+  ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, odom_pub, imu_pub, em_mode_pub;
   ros::Subscriber trajectory_command_sub;
   std::vector<ros::Publisher> fsensor_pub, cop_pub;
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> joint_trajectory_server;

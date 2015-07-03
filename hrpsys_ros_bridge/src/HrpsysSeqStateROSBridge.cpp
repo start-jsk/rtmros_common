@@ -138,6 +138,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
     tmpname.erase(0,4); // Remove "ref_"
     cop_pub[i] = nh.advertise<geometry_msgs::PointStamped>(tmpname+"_cop", 10);
   }
+  em_mode_pub = nh.advertise<std_msgs::Int32>("emergency_mode", 10);
 
   return RTC::RTC_OK;
 }
@@ -779,6 +780,20 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         copv.point.z = cop_link_info[tmpname].cop_offset_z; // cop z position is static.
         cop_pub[i].publish(copv);
       }
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+  if ( m_emergencyModeIn.isNew() ) {
+    try {
+      m_emergencyModeIn.read();
+      //ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute" << "  emergencyMode: " << m_emergencyMode.data);
+      std_msgs::Int32 em_mode;
+      em_mode.data = m_emergencyMode.data;
+      em_mode_pub.publish(em_mode);
     }
     catch(const std::runtime_error &e)
       {
