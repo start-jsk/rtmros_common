@@ -227,6 +227,7 @@
           output="screen" args ="$(arg openrtm_args)" />
     <node pkg="hrpsys_ros_bridge" name="HardEmergencyStopperServiceROSBridge" type="EmergencyStopperServiceROSBridgeComp"
           output="screen" args ="$(arg openrtm_args)" />
+    <rtconnect from="es.rtc:emergencyMode" to="HrpsysSeqStateROSBridge0.rtc:emergencyMode" subscription_type="new"/>
     <rtconnect from="EmergencyStopperServiceROSBridge.rtc:EmergencyStopperService" to="es.rtc:EmergencyStopperService"  subscription_type="new"/>
     <rtconnect from="HardEmergencyStopperServiceROSBridge.rtc:EmergencyStopperService" to="hes.rtc:EmergencyStopperService"  subscription_type="new"/>
     <rtactivate component="EmergencyStopperServiceROSBridge.rtc" />
