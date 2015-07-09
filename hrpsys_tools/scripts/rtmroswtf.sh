@@ -17,7 +17,7 @@ dpkg -l | grep '^ii' | grep ros- | awk '{print $2 "\t" $3}' 2>&1 | tee -a ${FILE
 
 tar -C ~/.ros/log -cvzf ${FILENAME_LOG_ROS} `cd ~/.ros/log; ls -d * | head -1`
 
-tar cfvz ${FILENAME_LOG_ALL} ${FILENAME_LOG_COMMANDS} ${FILENAME_LOG_ROS}
+tar cfz ${FILENAME_LOG_ALL} ${FILENAME_LOG_COMMANDS} ${FILENAME_LOG_ROS}
 
 echo "=== All diagnostic info recorded into a tarball: ${FILENAME_LOG_ALL}"
 echo "=== Ask at rtm-ros-robotics@googlegroups.com"
