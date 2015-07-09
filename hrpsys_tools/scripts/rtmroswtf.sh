@@ -14,6 +14,8 @@ ifconfig | tee -a ${FILENAME_LOG_COMMANDS}
 rosrun rtshell rtls ${CORBA_HOSTNAME}:${CORBA_HOST_PORT}/ 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
 # Get packages' version. Ref. http://askubuntu.com/a/347563/24203
 dpkg -l | grep '^ii' | grep ros- | awk '{print $2 "\t" $3}' 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
+# Get rosversion of the same packages
+dpkg -l | grep '^ii' | grep ros- | awk '{print $2}' | sed 's/ros-\([a-zA-Z]*\)-//' | tr '-' '_' | xargs -d '\n' -n1 rosversion
 
 tar -C ~/.ros/log -cvzf ${FILENAME_LOG_ROS} `cd ~/.ros/log; ls -d * | head -1`
 
