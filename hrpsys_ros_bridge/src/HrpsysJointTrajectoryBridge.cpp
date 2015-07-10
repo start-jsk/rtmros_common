@@ -41,6 +41,9 @@
 #include "hrpsys_ros_bridge/idl/ExecutionProfileService.hh"
 #include "hrpsys_ros_bridge/idl/RobotHardwareService.hh"
 
+// Version
+#include "HrpsysROSBridgeUtil.h"
+
 // Module specification
 // <rtc-template block="module_spec">
 static const char* hrpsysjointtrajectorybridge_spec[] = {"implementation_id", "HrpsysJointTrajectoryBridge",
@@ -185,6 +188,8 @@ RTC::ReturnCode_t HrpsysJointTrajectoryBridge::onActivated(RTC::UniqueId ec_id)
   {
     ROS_WARN_STREAM("param: " << config_name << ", param does not exist.");
   }
+
+  hrpsys_version = GetHrpsysVersion(m_SequencePlayerServicePort);
 
   return RTC::RTC_OK;
 }
@@ -493,13 +498,23 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
   {
     if (groupname.length() > 0)
     { // group
-      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] playPatternGroup: " << groupname);
-      parent->m_service0->playPatternOfGroup(groupname.c_str(), angles, duration);
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] setJointAnglesOfGroup: " << groupname);
+      // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
+      if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+        parent->m_service0->playPatternOfGroup(groupname.c_str(), angles, duration);
+      } else {
+        parent->m_service0->setJointAnglesSequenceOfGroup(groupname.c_str(), angles, duration);
+      }
     }
     else
-    {
-      OpenHRP::dSequenceSequence rpy, zmp;
-      parent->m_service0->playPattern(angles, rpy, zmp, duration);
+    { // fullbody
+      // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
+      if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+        OpenHRP::dSequenceSequence rpy, zmp;
+        parent->m_service0->playPattern(angles, rpy, zmp, duration);
+      } else {
+        parent->m_service0->setJointAnglesSequence(angles, duration);
+      }
     }
   }
 
@@ -527,6 +542,26 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryAct
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryActionPreempt()");
   joint_trajectory_server->setPreempted();
+  if (groupname.length() > 0)
+  { // group
+    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAnglesOfGroup: " << groupname);
+    // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
+    if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+      parent->m_service0->clearOfGroup(groupname.c_str(), 0.05);
+    } else {
+      parent->m_service0->clearJointAnglesOfGroup(groupname.c_str());
+    }
+  }
+  else
+  { // fullbody
+    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAngles ");
+    // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
+    if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+      parent->m_service0->clear();
+    } else {
+      parent->m_service0->clearJointAngles();
+    }
+  }
 }
 #endif
 
@@ -534,6 +569,25 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTraject
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onFollowJointTrajectoryActionPreempt()");
   follow_joint_trajectory_server->setPreempted();
+
+  if (groupname.length() > 0)
+  { // group
+    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAnglesOfGroup: " << groupname);
+    if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+      parent->m_service0->clearOfGroup(groupname.c_str(), 0.05);
+    } else {
+      parent->m_service0->clearJointAnglesOfGroup(groupname.c_str());
+    }
+  }
+  else
+  { // fullbody
+    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAngles ");
+    if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+      parent->m_service0->clearJointAngles();
+    } else {
+      parent->m_service0->clear();
+    }
+  }
 }
 
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg)

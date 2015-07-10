@@ -126,6 +126,8 @@ protected:
   RTC::CorbaPort m_SequencePlayerServicePort;
   RTC::CorbaConsumer<OpenHRP::SequencePlayerService> m_service0;
 
+  std::string hrpsys_version;
+
 protected:
   hrp::BodyPtr body;
   OpenHRP::BodyInfo_var bodyinfo;

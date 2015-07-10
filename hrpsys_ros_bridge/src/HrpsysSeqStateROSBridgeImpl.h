@@ -36,6 +36,9 @@
 
 // </rtc-template>
 
+// version
+#include "HrpsysROSBridgeUtil.h"
+
 #include "tf/transform_broadcaster.h"
 using namespace RTC;
 

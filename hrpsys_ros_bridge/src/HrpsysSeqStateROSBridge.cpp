@@ -215,8 +215,13 @@ void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory
   if ( duration.length() == 1 ) {
     m_service0->setJointAngles(angles[0], duration[0]);
   } else {
-    OpenHRP::dSequenceSequence rpy, zmp;
-    m_service0->playPattern(angles, rpy, zmp, duration);
+    // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
+    if (LessThanVersion(hrpsys_version, std::string("315.5.0"))) {
+      OpenHRP::dSequenceSequence rpy, zmp;
+      m_service0->playPattern(angles, rpy, zmp, duration);
+    } else {
+      m_service0->setJointAnglesSequence(angles, duration);
+    }
   }
 
   interpolationp = true;
@@ -238,11 +243,23 @@ void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal() {
 #ifdef USE_PR2_CONTROLLERS_MSGS
 void HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt() {
   joint_trajectory_server.setPreempted();
+  // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
+  if (LessThanVersion(hrpsys_version, std::string("315.5.0"))) {
+    m_service0->clear();
+  } else {
+    m_service0->clearJointAngles();
+  }
 }
 #endif
 
 void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt() {
   follow_joint_trajectory_server.setPreempted();
+  // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
+  if (LessThanVersion(hrpsys_version, std::string("315.5.0"))) {
+    m_service0->clear();
+  } else {
+    m_service0->clearJointAngles();
+  }
 }
 
 void HrpsysSeqStateROSBridge::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg) {
