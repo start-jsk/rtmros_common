@@ -18,12 +18,19 @@ res_dpkg=$(dpkg -l | grep '^ii' | grep ros- | awk '{print $2 " " $3}')
 IFS=$'\n'  # http://askubuntu.com/questions/344407/how-to-read-complete-line-in-for-loop-with-spaces
 for i in ${res_dpkg}
 do 
-  printf "%s $i "
+  printf "%s $i " 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
   p_underscore=$(echo ${i} | awk '{print $1}' | sed 's/ros-\([a-zA-Z]*\)-//' | tr '-' '_');
-  printf "%s ${p_underscore} "
+  printf "%s ${p_underscore} " 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
   rospackfind_result=$(rospack -q find ${p_underscore})
-  printf "%s ${rospackfind_result} "
-  echo "${rospackfind_result}" | grep -o '[^/]*$' | xargs rosversion
+  printf "%s ${rospackfind_result} " 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
+  echo "${rospackfind_result}" | grep -o '[^/]*$' | xargs rosversion 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
+  if [[ -z "$rospackfind_result" ]]; then
+    continue;
+  fi
+  # git status
+  cd "${rospackfind_result}"; git_result=$(git status || false)
+  echo $git_result 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
+  cd $OLDPWD
 done
 
 tar -C ~/.ros/log -cvzf ${FILENAME_LOG_ROS} `cd ~/.ros/log; ls -d * | head -1`
