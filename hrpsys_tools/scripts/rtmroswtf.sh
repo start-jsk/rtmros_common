@@ -58,9 +58,25 @@ do
   if [[ -z "$rospackfind_result" ]]; then
     continue;
   fi
+done
+
+res_dpkg=$(rospack list)
+IFS=$'\n'  # http://askubuntu.com/questions/344407/how-to-read-complete-line-in-for-loop-with-spaces
+for i in ${res_dpkg}
+do
+  p_packagename=$(echo ${i} | awk '{print $1}');
+  printf "* %s ${p_packagename} " 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
+  rospackfind_result=$(rospack -q find ${p_packagename})
+  printf "%s ${rospackfind_result} " 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
+  echo "${rospackfind_result}" | grep -o '[^/]*$' | xargs rosversion 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
+  if [[ -z "$rospackfind_result" ]]; then
+    continue;
+  fi
   # git status
-  cd "${rospackfind_result}"; git_result=$(git status || false)
-  echo $git_result 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
+  cd "${rospackfind_result}";
+  if [ `git diff 2> /dev/null | wc -l` != "0" ]; then
+      git status | tee -a ${FILENAME_LOG_COMMANDS}
+  fi
   cd $OLDPWD
 done
 
