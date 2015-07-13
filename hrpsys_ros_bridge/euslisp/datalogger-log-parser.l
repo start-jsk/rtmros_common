@@ -78,6 +78,8 @@
             (max-line (car (find-if #'(lambda (x) (substringp "sh_qOut" (cadr x))) fname-liens-without-rh)))
             (fname-candidate-list-with-valid-line-without-rh
              (mapcar #'cadr (remove-if-not #'(lambda (x) (= (car x) max-line)) fname-liens-without-rh))))
+       (unless fname-candidate-list-with-valid-line-without-rh
+         (warning-message 1 "Failed to find candidate files, have you specified wrong path?: ~A~%" fname))
        (setq parser-list
              (mapcar #'(lambda (x)
                          (instance datalogger-log-parser :init (format nil "~A/~A" dir-str x)
