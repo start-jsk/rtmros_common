@@ -29,6 +29,8 @@
                      #'send self :rtmros-zmp-callback :groupname groupname)
      (ros::subscribe "/imu" sensor_msgs::Imu
                      #'send self :rtmros-imu-callback :groupname groupname)
+     (ros::subscribe "/emergency_mode" std_msgs::Int32
+                     #'send self :rtmros-emergency-mode-callback :groupname groupname)
      ))
   (:rtmros-motor-states-callback
    (msg)
@@ -53,6 +55,11 @@
                          (send (send wrc :torque) :x)
                          (send (send wrc :torque) :y)
                          (send (send wrc :torque) :z)))))
+  (:rtmros-emergency-mode-callback
+   (msg)
+   (let ((m (send msg :data)))
+     (send self :set-robot-state1 :emergency-mode m))
+   )
   (:tmp-force-moment-vector-for-limb
    (f/m fsensor-name &optional (topic-name-prefix nil)) ;; topic-name-prefix is "off" or "reference"
    (let ((key-name (if topic-name-prefix
@@ -1120,6 +1127,11 @@
   (:hard-emergency-release-motion
    ()
    (send self :emergencystopperservice_releasemotion :rosbridge-name "/HardEmergencyStopperServiceROSBridge"))
+  (:emergency-mode
+   ()
+   "Returns emergency mode."
+   (cdr (assoc :emergency-mode robot-state))
+   )
   )
 
 (defmethod rtm-ros-robot-interface
