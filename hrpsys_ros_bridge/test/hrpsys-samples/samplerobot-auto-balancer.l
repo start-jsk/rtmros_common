@@ -290,6 +290,46 @@
   (send *ri* :set-gait-generator-param :toe-angle 0 :heel-angle 0 :default-step-time 1.0 :default-step-height 0.05)
   )
 
+(defun samplerobot-auto-balancer-demo19 ()
+  (print "13. Overwrite footsteps during walking.")
+  (send *ri* :set-foot-steps-no-wait
+        (list (make-coords :coords (send *sr* :rleg :end-coords :copy-worldcoords) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 100 0 0)) :name :lleg)
+              (make-coords :coords (send (send *sr* :rleg :end-coords :copy-worldcoords) :translate (float-vector 200 0 0)) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 200 100 0)) :name :lleg)
+              (make-coords :coords (send (send *sr* :rleg :end-coords :copy-worldcoords) :translate (float-vector 200 100 0)) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 200 100 0)) :name :lleg)
+              ))
+  ;; used for waiting
+  (send *ri* :angle-vector (send *sr* :angle-vector) 2000)
+  (send *ri* :wait-interpolation)
+  ;; overwriting
+  (send *ri* :set-foot-steps-no-wait
+        (list (make-coords :coords (send *sr* :rleg :end-coords :copy-worldcoords) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 100 0 0)) :name :lleg)
+              (make-coords :coords (send (send *sr* :rleg :end-coords :copy-worldcoords) :translate (float-vector 200 0 0)) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 200 100 0)) :name :lleg)
+              (make-coords :coords (send (send *sr* :rleg :end-coords :copy-worldcoords) :translate (float-vector 200 100 0)) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 200 100 0)) :name :lleg)
+              ))
+  ;; used for waiting
+  (send *ri* :angle-vector (send *sr* :angle-vector) 2000)
+  (send *ri* :wait-interpolation)
+  ;; overwrite
+  (send *ri* :set-foot-steps-no-wait
+        (list (make-coords :coords (send *sr* :rleg :end-coords :copy-worldcoords) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 100 0 0)) :name :lleg)
+              (make-coords :coords (send (send *sr* :rleg :end-coords :copy-worldcoords) :translate (float-vector 200 0 0)) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 200 100 0)) :name :lleg)
+              (make-coords :coords (send (send *sr* :rleg :end-coords :copy-worldcoords) :translate (float-vector 200 100 0)) :name :rleg)
+              (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 200 100 0)) :name :lleg)
+              ))
+  (send *ri* :wait-foot-steps)
+  ;; memo
+  ;; Current support leg is obtained by (send *ri* :get-foot-step-param :support-leg) and current support leg coords is obtained by (send *ri* :get-foot-step-param :support-leg-coords)
+  ;; In normal case, next support leg is obtained (case (send *ri* :get-foot-step-param :support-leg) (:rleg :lleg) (:lleg :rleg)) and next support leg coords is obtained by (send *ri* :get-foot-step-param :swing-leg-dst-coords)
+  )
+
 (defun samplerobot-auto-balancer-demo ()
   (samplerobot-auto-balancer-init)
 
