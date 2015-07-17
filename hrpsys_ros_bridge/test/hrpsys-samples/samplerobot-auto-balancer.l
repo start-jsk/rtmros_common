@@ -355,6 +355,7 @@
   (samplerobot-auto-balancer-demo16)
   (samplerobot-auto-balancer-demo17)
   (samplerobot-auto-balancer-demo18)
+  (samplerobot-auto-balancer-demo19)
   )
 
 (warn ";; (samplerobot-auto-balancer-demo)~%")
