@@ -330,6 +330,71 @@
   ;; In normal case, next support leg is obtained (case (send *ri* :get-foot-step-param :support-leg) (:rleg :lleg) (:lleg :rleg)) and next support leg coords is obtained by (send *ri* :get-foot-step-param :swing-leg-dst-coords)
   )
 
+(defun samplerobot-auto-balancer-demo19 (&key (overwrite-offset-idx 1))
+  (print "13. Overwrite footsteps during walking.")
+  (send *ri* :start-auto-balancer)
+  (samplerobot-auto-balancer-demo19-base :x overwrite-offset-idx t)
+  (send *ri* :angle-vector (send *sr* :angle-vector) (* 1000 overwrite-offset-idx))
+  (send *ri* :wait-interpolation)
+  (samplerobot-auto-balancer-demo19-base :y overwrite-offset-idx t)
+  (send *ri* :angle-vector (send *sr* :angle-vector) (* 1000 overwrite-offset-idx))
+  (send *ri* :wait-interpolation)
+  (samplerobot-auto-balancer-demo19-base :x overwrite-offset-idx t)
+  (send *ri* :angle-vector (send *sr* :angle-vector) (* 1000 overwrite-offset-idx))
+  (send *ri* :wait-interpolation)
+  (send *ri* :wait-foot-steps)
+  )
+
+(defun samplerobot-auto-balancer-demo19-base (axis overwrite-offset-idx init-fs)
+  (when init-fs
+    (send *ri* :set-foot-steps-no-wait
+          (list (make-coords :coords (send *sr* :rleg :end-coords :copy-worldcoords) :name :rleg)
+                (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 100 0 0)) :name :lleg)
+                (make-coords :coords (send (send *sr* :rleg :end-coords :copy-worldcoords) :translate (float-vector 200 0 0)) :name :rleg)
+                (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 300 0 0)) :name :lleg)
+                (make-coords :coords (send (send *sr* :rleg :end-coords :copy-worldcoords) :translate (float-vector 400 0 0)) :name :rleg)
+                (make-coords :coords (send (send *sr* :lleg :end-coords :copy-worldcoords) :translate (float-vector 400 0 0)) :name :lleg)
+                )))
+  (print ";;   Overwrite footsteps")
+  (let* ((ret (send *ri* :get-remaining-foot-step-sequence-current-index))
+         (remain-fs (car ret))
+         (current-index (cadr ret)))
+    (format t ";;    Remaining legs = ~A~%" (send-all remain-fs :name))
+    (format t ";;    Remaining idx = ~A~%" (let ((idx -1)) (mapcar #'(lambda (x) (+ current-index (incf idx))) remain-fs)))
+    (let* ((overwrite-footstep-index (+ current-index overwrite-offset-idx))
+           (support-fs (elt remain-fs (- overwrite-offset-idx 1))) ;; support fs before ovewritten fs
+           (pos-offset1) (pos-offset2))
+      (format t ";;    Overwrite index = ~A, leg = ~A, current index = ~A~%"
+              overwrite-footstep-index (send (elt remain-fs overwrite-offset-idx) :name)
+              current-index)
+      (case axis
+            (:x
+             (setq pos-offset1 (float-vector 100 0 0) pos-offset2 (float-vector 200 0 0)))
+            (t
+             (setq pos-offset1 (float-vector 0 (case (send support-fs :name) (:rleg 100) (:lleg -100)) 0)
+                   pos-offset2 pos-offset1)))
+      (let ((new-foot-steps
+             (list
+              (make-coords :coords (send support-fs :copy-worldcoords) :name (send support-fs :name))
+              (make-coords :coords (send (send support-fs :copy-worldcoords)
+                                         :translate (v+ pos-offset1 (float-vector 0 (case (send support-fs :name) (:rleg (* 2 90)) (:lleg (* 2 -90))) 0)))
+                           :name (case (send support-fs :name) (:rleg :lleg) (:lleg :rleg)))
+              (make-coords :coords (send (send support-fs :copy-worldcoords)
+                                         :translate pos-offset1)
+                           :name (send support-fs :name))
+              (make-coords :coords (send (send support-fs :copy-worldcoords)
+                                         :translate (v+ pos-offset2 (float-vector 0 (case (send support-fs :name) (:rleg (* 2 90)) (:lleg (* 2 -90))) 0)))
+                           :name (case (send support-fs :name) (:rleg :lleg) (:lleg :rleg)))
+              (make-coords :coords (send (send support-fs :copy-worldcoords)
+                                         :translate pos-offset2)
+                           :name (send support-fs :name)))))
+        (send *ri* :set-foot-steps-no-wait
+              new-foot-steps :overwrite-footstep-index overwrite-footstep-index))))
+  ;; memo
+  ;; Current support leg is obtained by (send *ri* :get-foot-step-param :support-leg) and current support leg coords is obtained by (send *ri* :get-foot-step-param :support-leg-coords)
+  ;; In normal case, next support leg is obtained (case (send *ri* :get-foot-step-param :support-leg) (:rleg :lleg) (:lleg :rleg)) and next support leg coords is obtained by (send *ri* :get-foot-step-param :swing-leg-dst-coords)
+  )
+
 (defun samplerobot-auto-balancer-demo ()
   (samplerobot-auto-balancer-init)
 
@@ -356,6 +421,7 @@
   (samplerobot-auto-balancer-demo17)
   (samplerobot-auto-balancer-demo18)
   (samplerobot-auto-balancer-demo19)
+  (samplerobot-auto-balancer-demo19 :overwrite-offset-idx 2)
   )
 
 (warn ";; (samplerobot-auto-balancer-demo)~%")
