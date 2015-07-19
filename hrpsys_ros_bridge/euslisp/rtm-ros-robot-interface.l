@@ -731,22 +731,25 @@
      (error ";; no such abc footstep param ~A~%" param-name))
    )
   (:set-foot-steps-no-wait
-   (foot-step-list)
+   (foot-step-list &key (overwrite-footstep-index 0))
    "Set foot step by default parameters and do not wait for step finish.
-    foot-step-list is list of footsteps."
+    foot-step-list is list of footsteps.
+    overwrite-footstep-index is index to be overwritten. overwrite_fs_idx is used only in walking."
    (send self :autobalancerservice_setfootsteps
          :fs
          (mapcar #'(lambda (f)
                      (send self :eus-footstep->abc-footstep f))
-                 foot-step-list)))
+                 foot-step-list)
+         :overwrite_fs_idx overwrite-footstep-index))
   (:set-foot-steps
-   (foot-step-list)
+   (foot-step-list &key (overwrite-footstep-index 0))
    "Set foot step by default parameters and wait for step finish.
-    foot-step-list is list of footsteps."
-   (send self :set-foot-steps-no-wait foot-step-list)
+    foot-step-list is list of footsteps.
+    overwrite-footstep-index is index to be overwritten. overwrite_fs_idx is used only in walking."
+   (send self :set-foot-steps-no-wait foot-step-list :overwrite-footstep-index overwrite-footstep-index)
    (send self :wait-foot-steps))
   (:set-foot-steps-with-param-no-wait
-   (foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list)
+   (foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list &key (overwrite-footstep-index 0))
    "Set foot step with step parameter and do not wait for step finish.
     foot-step-list is list of footsteps.
     step-height-list is list of step height.
@@ -762,12 +765,13 @@
          (mapcar #'(lambda (sh st ta ha)
                      (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparam :init :step_height (* sh 1e-3) :step_time st :toe_angle ta :heel_angle ha))
                  step-height-list step-time-list toe-angle-list heel-angle-list)
+         :overwrite_fs_idx overwrite-footstep-index
          ))
   (:set-foot-steps-with-param
-   (foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list)
+   (foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list &key (overwrite-footstep-index 0))
    "Set foot step with step parameter and wait for step finish.
     For arguments, please see :set-foot-steps-with-param-no-wait documentation."
-   (send self :set-foot-steps-with-param-no-wait foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list)
+   (send self :set-foot-steps-with-param-no-wait foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list :overwrite-footstep-index overwrite-footstep-index)
    (send self :wait-foot-steps))
   (:set-foot-steps-roll-pitch
    (angle &key (axis :x))
@@ -813,14 +817,24 @@
                                       :translate off)
                         :name :lleg))
      ))
+  (:get-remaining-foot-step-sequence-current-index
+   ()
+   "Get remaining foot steps from GaitGenerator and current index.
+   Return is (list (list current-support-foot-coords remaining-swing-dst-coords-0 ... ) current-index)."
+   (let ((ret (send self :autobalancerservice_getRemainingFootstepSequence)))
+     (list (mapcar #'(lambda (fs)
+                       (send self :abc-footstep->eus-footstep fs))
+                   (send ret :o_footstep))
+           (send ret :o_current_fs_idx))
+     ))
+  (:get-current-footstep-index
+   ()
+   (cadr (send self :get-remaining-foot-step-sequence-current-index)))
   (:get-remaining-foot-step-sequence
    ()
    "Get remaining foot steps from GaitGenerator.
    Return is (list current-support-foot-coords remaining-swing-dst-coords-0 ... )."
-   (mapcar #'(lambda (fs)
-               (send self :abc-footstep->eus-footstep fs))
-           (send (send self :autobalancerservice_getRemainingFootstepSequence) :o_footstep))
-   )
+   (car (send self :get-remaining-foot-step-sequence-current-index)))
   (:draw-remaining-foot-step-sequence
    (vwer
     &key (flush) (rleg-color #f(1 0 0)) (lleg-color #f(0 1 0))
