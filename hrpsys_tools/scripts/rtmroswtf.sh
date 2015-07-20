@@ -40,7 +40,7 @@ FILENAME_LOG_COMMANDS=/tmp/rtmros_diagnosisinfo_commands_`date +"%Y%m%d-%H%M%S"`
 FILENAME_LOG_ROS=/tmp/rtmros_diagnosisinfo_ros_`date +"%Y%m%d-%H%M%S"`.tgz
 FILENAME_LOG_ALL=/tmp/rtmros_diagnosisinfo_all_`date +"%Y%m%d-%H%M%S"`.tgz
 
-env |grep ROS | tee -a ${FILENAME_LOG_COMMANDS}
+env | grep -E '(ROS|PATH)' | sort | tee -a ${FILENAME_LOG_COMMANDS}
 ifconfig | tee -a ${FILENAME_LOG_COMMANDS}
 rtls ${CORBA_HOSTNAME}:${CORBA_HOST_PORT}/ 2>&1 | tee -a ${FILENAME_LOG_COMMANDS}
 ## Get packages' version. Ref. http://askubuntu.com/a/347563/24203
