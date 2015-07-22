@@ -48,6 +48,8 @@ hrpsys_ros_bridge.launch : hrpsys and ROS bridge software core launch script, th
   <depend package="image_transport" />
   <depend package="dynamic_reconfigure" />
   <depend package="diagnostic_aggregator" />
+  <depend package="diagnostic_updater" />
+  <depend package="diagnostic_msgs" />
 
   <!-- dashboard -->
   <depend package="rqt_robot_dashboard" />
