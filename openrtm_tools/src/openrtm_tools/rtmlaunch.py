@@ -228,6 +228,7 @@ def main():
         rtconnect(nameserver, parser.getElementsByTagName("rtconnect"), tree)
         rtactivate(nameserver, parser.getElementsByTagName("rtactivate"), tree)
         time.sleep(10)
+        tree.add_name_server(nameserver, [])
 
 def get_flag_from_argv(arg):
     for a in sys.argv:
