@@ -28,6 +28,8 @@
 #include "diagnostic_msgs/DiagnosticArray.h"
 #include "sensor_msgs/Imu.h"
 #include "hrpsys_ros_bridge/SetSensorTransformation.h"
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
 
 extern const char* hrpsysseqstaterosbridgeimpl_spec[];
 
@@ -51,6 +53,8 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
                 dynamic_reconfigure::Reconfigure::Response &res);
   bool setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
                                hrpsys_ros_bridge::SetSensorTransformation::Response& res);
+  void updateEmergencyModeDiagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat);
+
  private:
   ros::NodeHandle nh;
   ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, odom_pub, imu_pub, em_mode_pub;
@@ -63,6 +67,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   bool interpolationp, use_sim_time, use_hrpsys_time;
   bool publish_sensor_transforms;
   tf::TransformBroadcaster br;
+  boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
 
   coil::Mutex m_mutex;
   coil::TimeMeasure tm;
@@ -81,6 +86,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void clock_cb(const rosgraph_msgs::ClockPtr& str) {};
 
   bool follow_action_initialized;
+  bool emergency_mode;
 };
 
 

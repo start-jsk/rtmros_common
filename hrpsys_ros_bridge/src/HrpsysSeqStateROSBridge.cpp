@@ -34,7 +34,8 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   use_sim_time(false), use_hrpsys_time(false),
   joint_trajectory_server(nh, "fullbody_controller/joint_trajectory_action", false),
   follow_joint_trajectory_server(nh, "fullbody_controller/follow_joint_trajectory_action", false),
-  HrpsysSeqStateROSBridgeImpl(manager), follow_action_initialized(false)
+  HrpsysSeqStateROSBridgeImpl(manager), follow_action_initialized(false),
+  diagnostic_updater_(new diagnostic_updater::Updater)
 {
   // ros
   ros::NodeHandle pnh("~");
@@ -84,6 +85,9 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   }
   joint_trajectory_server.start();
   follow_joint_trajectory_server.start();
+  diagnostic_updater_->setHardwareID("none");
+  diagnostic_updater_->add("Emergency Mode", this, 
+                           &HrpsysSeqStateROSBridge::updateEmergencyModeDiagnostics);
 }
 
 HrpsysSeqStateROSBridge::~HrpsysSeqStateROSBridge() {
@@ -229,6 +233,16 @@ bool HrpsysSeqStateROSBridge::setSensorTransformation(hrpsys_ros_bridge::SetSens
   boost::mutex::scoped_lock lock(sensor_transformation_mutex);
   sensor_transformations[req.sensor_name] = req.transform;
   return true;
+}
+
+void HrpsysSeqStateROSBridge::updateEmergencyModeDiagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat)
+{
+  if (emergency_mode) {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "EmergencyMode");
+  }
+  else {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "ReleaseMode");
+  }
 }
 
 bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
@@ -794,12 +808,18 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       std_msgs::Int32 em_mode;
       em_mode.data = m_emergencyMode.data;
       em_mode_pub.publish(em_mode);
+      if(m_emergencyMode.data == 0) {
+        emergency_mode = false;
+      } else {
+        emergency_mode = true;
+      }
     }
     catch(const std::runtime_error &e)
       {
         ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
   }
+  diagnostic_updater_->update();
 
   //
   return RTC::RTC_OK;
