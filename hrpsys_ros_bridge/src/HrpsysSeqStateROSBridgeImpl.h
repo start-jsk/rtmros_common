@@ -138,6 +138,8 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   InPort<TimedDoubleSeq> m_rsCOPInfoIn;
   TimedLong m_emergencyMode;
   InPort<TimedLong> m_emergencyModeIn;
+  TimedDoubleSeq m_qHand;
+  InPort<TimedDoubleSeq> m_qHandIn;
 
   // </rtc-template>
 

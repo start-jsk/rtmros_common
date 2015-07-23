@@ -139,7 +139,17 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
     cop_pub[i] = nh.advertise<geometry_msgs::PointStamped>(tmpname+"_cop", 10);
   }
   em_mode_pub = nh.advertise<std_msgs::Int32>("emergency_mode", 10);
-
+  joint_state_hand_pub = nh.advertise<sensor_msgs::JointState>("joint_states_hand", 10);
+  if( nh.hasParam("hand_joint_name") ) {
+    XmlRpc::XmlRpcValue hand_joint_name_param;
+    nh.getParam("hand_joint_name", hand_joint_name_param);
+    if (hand_joint_name_param.getType() == XmlRpc::XmlRpcValue::TypeArray) {
+      for(int s = 0; s < hand_joint_name_param.size(); s++) {
+        std::string n = hand_joint_name_param[s];
+        hand_joint_name.push_back(n);
+      }
+    }
+  }
   return RTC::RTC_OK;
 }
 
@@ -801,6 +811,34 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
   }
 
+  if ( m_qHandIn.isNew() ) {
+    try {
+      m_qHandIn.read();
+    }
+    catch(const std::runtime_error &e)
+    {
+      ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+    }
+    if ( m_qHand.data.length() == hand_joint_name.size() ) {
+      sensor_msgs::JointState joint_state;
+      // convert openrtm time to ros time
+      if ( use_hrpsys_time ) {
+        joint_state.header.stamp = ros::Time(m_qHand.tm.sec, m_qHand.tm.nsec);
+      } else {
+        joint_state.header.stamp = tm_on_execute;
+      }
+      // joint state publish
+      for ( int i = 0; i < m_qHand.data.length(); i++ ) {
+        joint_state.name.push_back(hand_joint_name[i]);
+        joint_state.position.push_back(m_qHand.data[i]);
+      }
+      joint_state.velocity.resize(joint_state.name.size());
+      joint_state.effort.resize(joint_state.name.size());
+      joint_state_hand_pub.publish(joint_state);
+    } else {
+      ROS_WARN_STREAM("size of hand name (" << hand_joint_name.size() << ")  and potentio (" << m_qHand.data.length() << ") is not same");
+    }
+  }
   //
   return RTC::RTC_OK;
 }
