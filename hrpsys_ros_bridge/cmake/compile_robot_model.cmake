@@ -109,6 +109,8 @@ macro(compile_openhrp_model wrlfile)
   #message(STATUS "Found ${_collada_to_urdf_exe}")
   #message(STATUS "Found ${_controller_config_converter}")
 
+  set(${_sname}_${PROJECT_NAME}_compile_all_target)
+
   # output collada (wrl -> collada )
   if(EXISTS ${_wrlfile})
     add_custom_command(OUTPUT ${_daefile}
@@ -128,7 +130,6 @@ macro(compile_openhrp_model wrlfile)
   list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_urdf)
 
   # output euslisp files (dae, yaml -> euslisp)
-  set(${_sname}_${PROJECT_NAME}_compile_all_target)
   if(EXISTS ${_collada2eus_exe})
     add_custom_command(OUTPUT ${_lispfile}
       COMMAND ${_collada2eus_option} ${_collada2eus_exe} ${_daefile} ${_yamlfile} ${_lispfile}
@@ -136,7 +137,6 @@ macro(compile_openhrp_model wrlfile)
     add_custom_target(${_sname}_${PROJECT_NAME}_compile_lisp DEPENDS ${_lispfile})
     list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_lisp)
   endif()
-
 
   if(_controller_config)
     # output controller config (yaml -> config) if yaml is not found write dummy files
