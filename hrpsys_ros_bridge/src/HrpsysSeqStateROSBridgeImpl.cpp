@@ -36,6 +36,7 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_rstorqueIn("rstorque", m_rstorque),
     m_servoStateIn("servoState", m_servoState),
     m_rszmpIn("rszmp", m_rszmp),
+    m_rscpIn("rscp", m_rscp),
     m_rsCOPInfoIn("rsCOPInfo", m_rsCOPInfo),
     m_emergencyModeIn("emergencyMode", m_emergencyMode),
     m_mctorqueOut("mctorque", m_mctorque),
@@ -61,6 +62,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("baseRpy", m_baseRpyIn);
   addInPort("rstorque", m_rstorqueIn);
   addInPort("rszmp", m_rszmpIn);
+  addInPort("rscp", m_rscpIn);
   addInPort("servoState", m_servoStateIn);
   addInPort("rsCOPInfo", m_rsCOPInfoIn);
   addInPort("emergencyMode", m_emergencyModeIn);
