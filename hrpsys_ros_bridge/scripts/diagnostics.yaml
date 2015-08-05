@@ -13,7 +13,7 @@ analyzers:
   hrpsys:
     type: diagnostic_aggregator/GenericAnalyzer
     path: 'Hrpsys'
-    contains: ['hrpEC']
+    contains: ['hrpEC', 'Emergency Mode']
   mode:
     type: diagnostic_aggregator/GenericAnalyzer
     path: 'Mode'

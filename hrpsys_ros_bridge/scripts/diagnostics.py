@@ -8,7 +8,7 @@ except:
 import rospy
 import time
 import copy
-from std_msgs.msg import String
+from std_msgs.msg import String, Int32
 from diagnostic_msgs.msg import *
 from hrpsys_ros_bridge.msg import MotorStates
 
@@ -29,7 +29,7 @@ servo_alarm = {
 
 diagnostic = None
 def states_cb(msg) :
-    global diagnostic
+    global diagnostic, emergency_mode
     diagnostic = DiagnosticArray()
     diagnostic.header.stamp = msg.header.stamp
 
@@ -65,15 +65,30 @@ def states_cb(msg) :
             status.level   = DiagnosticStatus.WARN
     diagnostic.status.append(status)
 
+    # emergency mode
+    if not (emergency_mode is None):
+        if emergency_mode == 0:
+            status = DiagnosticStatus(name = 'Emergency Mode', level = DiagnosticStatus.OK, message = "ReleaseMode")
+        else:
+            status = DiagnosticStatus(name = 'Emergency Mode', level = DiagnosticStatus.WARN, message = "EmergencyMode")
+        diagnostic.status.append(status)
+
     return diagnostic
 
+def emergency_mode_cb(msg) :
+    global emergency_mode
+    emergency_mode = msg.data
+
 if __name__ == '__main__':
+    global emergency_mode
     try:
         last_message_stamp = 0
         rospy.init_node('operation_mode_diagnostics')
         sub = rospy.Subscriber('motor_states', MotorStates, states_cb)
+        sub_emergency_mode = rospy.Subscriber('emergency_mode', Int32, emergency_mode_cb)
         pub = rospy.Publisher('diagnostics', DiagnosticArray)
         r = rospy.Rate(10)
+        emergency_mode = None
         while not rospy.is_shutdown():
             if diagnostic and diagnostic.header.stamp != last_message_stamp :
                 last_message_stamp = copy.copy(diagnostic.header.stamp)
