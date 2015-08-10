@@ -1,20 +1,19 @@
 // -*- C++ -*-
 /*!
- * @file  ImageSensorROSBridge.h * @brief openhrp image - ros bridge * @date  $Date$ 
+ * @file  RangeSensorROSBridge.h * @brief openhrp image - ros bridge * @date  $Date$ 
  *
  * $Id$ 
  */
-#ifndef IMAGESENSORROSBRIDGE_H
-#define IMAGESENSORROSBRIDGE_H
+#ifndef RANGESENSORROSBRIDGE_H
+#define RANGESENSORROSBRIDGE_H
 
 #include <rtm/idl/BasicDataTypeSkel.h>
+#include <rtm/idl/InterfaceDataTypes.hh>
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
 #include <rtm/CorbaPort.h>
 #include <rtm/DataInPort.h>
 #include <rtm/DataOutPort.h>
-
-#include <hrpsys/idl/Img.hh>
 
 // Service implementation headers
 // <rtc-template block="service_impl_h">
@@ -29,19 +28,15 @@
 
 // ros
 #include "ros/ros.h"
-#include "sensor_msgs/Image.h"
-#include "sensor_msgs/image_encodings.h"
-#include "sensor_msgs/CameraInfo.h"
-#include "camera_info_manager/camera_info_manager.h"
-#include "image_transport/image_transport.h"
+#include "sensor_msgs/LaserScan.h"
 
 using namespace RTC;
 
-class ImageSensorROSBridge  : public RTC::DataFlowComponentBase
+class RangeSensorROSBridge  : public RTC::DataFlowComponentBase
 {
  public:
-  ImageSensorROSBridge(RTC::Manager* manager);
-  ~ImageSensorROSBridge();
+  RangeSensorROSBridge(RTC::Manager* manager);
+  ~RangeSensorROSBridge();
 
   // The initialize action (on CREATED->ALIVE transition)
   // formaer rtc_init_entry() 
@@ -100,11 +95,9 @@ class ImageSensorROSBridge  : public RTC::DataFlowComponentBase
 
   // DataInPort declaration
   // <rtc-template block="inport_declare">
-  TimedLongSeq m_image;
-  InPort<TimedLongSeq> m_imageIn;
 
-  Img::TimedCameraImage m_timage;
-  InPort<Img::TimedCameraImage> m_timageIn;
+  RTC::RangeData m_range;
+  RTC::InPort<RTC::RangeData> m_rangeIn;
 
   // </rtc-template>
 
@@ -130,14 +123,12 @@ class ImageSensorROSBridge  : public RTC::DataFlowComponentBase
 
  private:
   ros::NodeHandle node;
-  image_transport::ImageTransport it;
 
-  image_transport::Publisher pub;
-  ros::Publisher info_pub;
+  ros::Publisher range_pub;
 
   unsigned int pair_id;
   ros::Time capture_time;
-  std::string frame;
+  std::string _frame_id;
 
   coil::TimeMeasure tm;
 };
@@ -145,8 +136,7 @@ class ImageSensorROSBridge  : public RTC::DataFlowComponentBase
 
 extern "C"
 {
-  DLL_EXPORT void ImageSensorROSBridgeInit(RTC::Manager* manager);
+  DLL_EXPORT void RangeSensorROSBridgeInit(RTC::Manager* manager);
 };
 
-#endif // IMAGESENSORROSBRIDGE_H
-
+#endif // RANGESENSORROSBRIDGE_H

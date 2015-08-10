@@ -1,6 +1,6 @@
 // -*- C++ -*-
 /*!
- * @file ImageSensorROSBridgeComp.cpp
+ * @file PointCloudROSBridgeComp.cpp
  * @brief Standalone component
  * @date $Date$ 
  *
@@ -9,15 +9,16 @@
 #include <rtm/Manager.h>
 #include <iostream>
 #include <string>
-#include "ImageSensorROSBridge.h"
+#include "PointCloudROSBridge.h"
 
 void MyModuleInit(RTC::Manager* manager)
 {
-  ImageSensorROSBridgeInit(manager);
+  PointCloudROSBridgeInit(manager);
   RTC::RtcBase* comp;
 
   // Create a component
-  comp = manager->createComponent(std::string("ImageSensorROSBridge?instance_name="+ros::this_node::getName().substr(ros::this_node::getNamespace().length())).c_str());
+  comp = manager->createComponent("PointCloudROSBridge");
+
 
   // Example
   // The following procedure is examples how handle RT-Components.
@@ -66,7 +67,7 @@ int main (int argc, char** argv)
 {
   RTC::Manager* manager;
   manager = RTC::Manager::init(argc, argv);
-  ros::init(argc, argv, "ImageSensorROSBridgeComp", ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, "PointCloudROSBridgeComp", ros::init_options::NoSigintHandler);
 
   // Initialize manager
   manager->init(argc, argv);
