@@ -30,6 +30,7 @@ ImageSensorROSBridge::ImageSensorROSBridge(RTC::Manager* manager)
     // <rtc-template block="initializer">
   : RTC::DataFlowComponentBase(manager),
     m_imageIn("image", m_image),
+    m_timageIn("timedImage", m_timage),
     // </rtc-template>
     it(node)
 {
@@ -46,6 +47,7 @@ RTC::ReturnCode_t ImageSensorROSBridge::onInitialize()
   // <rtc-template block="registration">
   // Set InPort buffers
   addInPort("image", m_imageIn);
+  addInPort("timedImage", m_timageIn);
 
   // Set OutPort buffer
 
@@ -179,7 +181,78 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
       tm.tick();
     }
     count ++;
-  } else {  // m_image
+  } else if (m_timageIn.isNew()) { //
+    ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", timedImage:" << m_timageIn.isNew ());
+    //
+    sensor_msgs::ImagePtr image(new sensor_msgs::Image);
+    sensor_msgs::CameraInfoPtr info(new sensor_msgs::CameraInfo);
+
+    m_timageIn.read();
+
+    image->width  = m_timage.data.image.width;
+    image->height = m_timage.data.image.height;
+
+    switch(m_timage.data.image.format) {
+    case Img::CF_GRAY:
+      image->encoding = sensor_msgs::image_encodings::MONO8;
+      image->step = 1 * m_timage.data.image.width;
+      break;
+    case Img::CF_RGB:
+      image->encoding = sensor_msgs::image_encodings::RGB8;
+      image->step = 3 * m_timage.data.image.width;
+      break;
+    }
+
+    //m_timage.tm;
+    //m_timage.data.captured_time;
+    image->header.stamp = capture_time; // TODO: FIX with simulation time
+    image->header.stamp = ros::Time(m_timage.tm.sec, m_timage.tm.nsec);
+    //std::cerr << m_timage.tm.sec << " " << m_timage.tm.nsec << " / ";
+    //std::cerr << m_timage.data.captured_time.sec << " " << m_timage.data.captured_time.nsec << std::endl;
+    image->header.seq = pair_id;
+    image->header.frame_id = frame;
+
+    image->data.resize(m_timage.data.image.raw_data.length());
+    std::copy(m_timage.data.image.raw_data.get_buffer(),
+              m_timage.data.image.raw_data.get_buffer() + m_timage.data.image.raw_data.length(), 
+              image->data.begin());
+    //for(int i=0; i<m_image.data.length();i++){
+    //image->data[i] = m_timage.data.image.raw_data[i];
+    //}
+
+    pub.publish(image);
+
+    info->width  = image->width;
+    info->height = image->height;
+
+    info->distortion_model = "plumb_bob";
+    boost::array<double, 9> K;
+    K[0] = 700; K[1] =   0; K[2] = image->width/2;
+    K[3] =   0; K[4] = 700; K[5] = image->height/2;
+    K[6] =   0; K[7] =   0; K[8] = 1;
+    info->K = K;
+    boost::array<double, 12> P;
+    P[0] = 700; P[1] =   0; P[2] = image->width/2;  P[3] = 0;
+    P[4] =   0; P[5] = 700; P[6] = image->height/2; P[7] = 0;
+    P[8] =   0; P[9] =   0; P[10] = 1;              P[11] = 0;
+    info->P = P;
+    // TODO using parameters below;
+    //m_timage.data.intrinsic.matrix_element;
+    //m_timage.data.intrinsic.distortion_coefficient;
+    //m_timage.data.extrinsic
+    info->header = image->header;
+    info_pub.publish(info);
+
+    ++pair_id;
+
+    static int count = 0;
+    tm.tack();
+    if ( tm.interval() > 1 ) {
+      ROS_INFO_STREAM("[" << getInstanceName() << "] @onExecutece " << ec_id << " is working at " << count << "[Hz]");
+      tm.tick();
+    }
+    count ++;
+  }else {  // m_image
     double interval = 5;
     tm.tack();
     if ( tm.interval() > interval ) {

@@ -1,11 +1,11 @@
 // -*- C++ -*-
 /*!
- * @file  ImageSensorROSBridge.h * @brief openhrp image - ros bridge * @date  $Date$ 
+ * @file  PointCloudROSBridge.h * @brief openhrp image - ros bridge * @date  $Date$ 
  *
  * $Id$ 
  */
-#ifndef IMAGESENSORROSBRIDGE_H
-#define IMAGESENSORROSBRIDGE_H
+#ifndef POINTCLOUDROSBRIDGE_H
+#define POINTCLOUDROSBRIDGE_H
 
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/Manager.h>
@@ -14,7 +14,7 @@
 #include <rtm/DataInPort.h>
 #include <rtm/DataOutPort.h>
 
-#include <hrpsys/idl/Img.hh>
+#include <hrpsys/idl/pointcloud.hh>
 
 // Service implementation headers
 // <rtc-template block="service_impl_h">
@@ -29,19 +29,19 @@
 
 // ros
 #include "ros/ros.h"
+#include "sensor_msgs/PointCloud2.h"
 #include "sensor_msgs/Image.h"
 #include "sensor_msgs/image_encodings.h"
-#include "sensor_msgs/CameraInfo.h"
-#include "camera_info_manager/camera_info_manager.h"
-#include "image_transport/image_transport.h"
 
+#include <algorithm>
+#include <string.h>
 using namespace RTC;
 
-class ImageSensorROSBridge  : public RTC::DataFlowComponentBase
+class PointCloudROSBridge  : public RTC::DataFlowComponentBase
 {
  public:
-  ImageSensorROSBridge(RTC::Manager* manager);
-  ~ImageSensorROSBridge();
+  PointCloudROSBridge(RTC::Manager* manager);
+  ~PointCloudROSBridge();
 
   // The initialize action (on CREATED->ALIVE transition)
   // formaer rtc_init_entry() 
@@ -100,11 +100,9 @@ class ImageSensorROSBridge  : public RTC::DataFlowComponentBase
 
   // DataInPort declaration
   // <rtc-template block="inport_declare">
-  TimedLongSeq m_image;
-  InPort<TimedLongSeq> m_imageIn;
 
-  Img::TimedCameraImage m_timage;
-  InPort<Img::TimedCameraImage> m_timageIn;
+  PointCloudTypes::PointCloud m_points;
+  RTC::InPort<PointCloudTypes::PointCloud> m_pointsIn;
 
   // </rtc-template>
 
@@ -130,23 +128,23 @@ class ImageSensorROSBridge  : public RTC::DataFlowComponentBase
 
  private:
   ros::NodeHandle node;
-  image_transport::ImageTransport it;
 
-  image_transport::Publisher pub;
-  ros::Publisher info_pub;
+  ros::Publisher points_pub;
+  ros::Publisher depth_image_pub;
+  //ros::Publisher color_image_pub;
 
   unsigned int pair_id;
   ros::Time capture_time;
-  std::string frame;
-
+  std::string _frame_id;
+  bool publish_depth;
+  //bool publish_color;
   coil::TimeMeasure tm;
 };
 
 
 extern "C"
 {
-  DLL_EXPORT void ImageSensorROSBridgeInit(RTC::Manager* manager);
+  DLL_EXPORT void PointCloudROSBridgeInit(RTC::Manager* manager);
 };
 
-#endif // IMAGESENSORROSBRIDGE_H
-
+#endif // PPOINTCLOUDROSBRIDGE_H
