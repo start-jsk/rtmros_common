@@ -67,6 +67,10 @@ RTC::ReturnCode_t PointCloudROSBridge::onInitialize()
   pair_id = 0;
   ros::param::param<std::string>("~frame_id", _frame_id, "camera");
   ros::param::param<bool>("~publish_depth", publish_depth, false);
+  // OpenHRP3 camera, front direction is -Z axis, ROS camera is Z axis
+  // http://www.openrtp.jp/openhrp3/jp/create_model.html
+  // transformed_camera_frame should be true, when sensor frame has rotated
+  ros::param::param<bool>("~transformed_camera_frame", transformed_frame, false);
 
   if(publish_depth) {
     depth_image_pub = node.advertise<sensor_msgs::Image>("depth", 1);
@@ -139,7 +143,7 @@ RTC::ReturnCode_t PointCloudROSBridge::onExecute(RTC::UniqueId ec_id)
       pc.fields[i].count     = 1; // m_points.fields[i].count;
     }
 #endif
-    // now this is very dirty code...
+    // now this is very dirty code..., expected point with rgb, and without normal
     pc.fields.resize(4);
     pc.fields[0].name      = "x";
     pc.fields[0].offset    = 0;
@@ -158,10 +162,30 @@ RTC::ReturnCode_t PointCloudROSBridge::onExecute(RTC::UniqueId ec_id)
     pc.fields[3].datatype  = sensor_msgs::PointField::FLOAT32;
     pc.fields[3].count     = 1;
 
-    pc.data.resize(m_points.data.length());
-    std::copy(m_points.data.get_buffer(),
-              m_points.data.get_buffer() + m_points.data.length(),
-              pc.data.begin());
+    if (transformed_frame) {
+      // now this is very dirty code..., expected point with rgb, and without normal
+      pc.data.resize(m_points.data.length());
+      float *src_ptr = (float *)m_points.data.get_buffer();
+      float *dst_ptr = (float *)pc.data.data();
+      for(int n = 0; n < m_points.data.length() / (4 * sizeof(float)); n++) {
+        *dst_ptr++ = src_ptr[0]; //x
+        *dst_ptr++ = - src_ptr[1]; //y
+        *dst_ptr++ = - src_ptr[2]; //z
+        char *rgb  = (char *)((float *)&src_ptr[3]);
+        char *nrgb = (char *)dst_ptr; dst_ptr++;
+        nrgb[0] = rgb[2];
+        nrgb[1] = rgb[1];
+        nrgb[2] = rgb[0];
+        nrgb[3] = 0;
+        src_ptr += 4;
+      }
+    } else {
+      // now this is very dirty code..., expected point with rgb, and without normal
+      pc.data.resize(m_points.data.length());
+      std::copy(m_points.data.get_buffer(),
+                m_points.data.get_buffer() + m_points.data.length(),
+                pc.data.begin());
+    }
 
 #if 0
     pc.data.resize(pc.row_step * pc.height);
@@ -199,6 +223,8 @@ RTC::ReturnCode_t PointCloudROSBridge::onExecute(RTC::UniqueId ec_id)
           break;
         }
       }
+      int invert = 1;
+      if(transformed_frame) invert = -1;
       if(z_offset >= 0) {
         int p_step = m_points.point_step;
         int r_step = m_points.row_step;
@@ -209,7 +235,7 @@ RTC::ReturnCode_t PointCloudROSBridge::onExecute(RTC::UniqueId ec_id)
         for(int y = 0; y < im.height; y++) {
           unsigned int pos = r_step * y;
           for (int x = 0; x < im.width; x++) {
-            *dst_ptr++ = *(float *)(&src_ptr[pos + (x * p_step) + z_offset]);
+            *dst_ptr++ = invert * *(float *)(&src_ptr[pos + (x * p_step) + z_offset]);
           }
         }
         depth_image_pub.publish(im);
