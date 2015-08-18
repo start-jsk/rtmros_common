@@ -70,8 +70,35 @@ RTC::ReturnCode_t ImageSensorROSBridge::onInitialize()
   ROS_INFO_STREAM("[ImageSensorROSBridge] @Initilize name : " << getInstanceName());
 
   pair_id = 0;
+  // camera_param K
+  K[0] = 700; K[1] =   0; K[2] = 160;
+  K[3] =   0; K[4] = 700; K[5] = 120;
+  K[6] =   0; K[7] =   0; K[8] = 1;
+  // camera_param P
+  P[0] = 700; P[1] =   0; P[2] = 160; P[3] = 0;
+  P[4] =   0; P[5] = 700; P[6] = 120; P[7] = 0;
+  P[8] =   0; P[9] =   0; P[10] = 1;  P[11] = 0;
   ros::param::param<std::string>("~frame_id", frame, "camera");
-
+  if(ros::param::has("~camera_param_K")) {
+    XmlRpc::XmlRpcValue param_list;
+    if (ros::param::get("~camera_param_K", param_list)) {
+      if(param_list.getType() == XmlRpc::XmlRpcValue::TypeArray) {
+        for (int i = 0; i < param_list.size(); i++){
+          if(i < 9) K[i] =  (double)param_list[i];
+        }
+      }
+    }
+  }
+  if(ros::param::has("~camera_param_P")) {
+    XmlRpc::XmlRpcValue param_list;
+    if (ros::param::get("~camera_param_P", param_list)) {
+      if(param_list.getType() == XmlRpc::XmlRpcValue::TypeArray) {
+        for (int i = 0; i < param_list.size(); i++){
+          if(i < 12) P[i] =  (double)param_list[i];
+        }
+      }
+    }
+  }
   tm.tick();
   return RTC::RTC_OK;
 }
@@ -164,9 +191,7 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
     info->width  = image->width;
     info->height = image->height;
     info->distortion_model = "plumb_bob";
-    boost::array<double, 9> K = {700.0, 0.0, 160.0, 0.0, 700.0, 120.0, 0.0, 0.0, 1.0}; // TODO fieldOfView       0.785398
     info->K = K;
-    boost::array<double, 12> P = {700, 0, 160, 0, 0, 700, 120, 0, 0, 0, 1, 0};
     info->P = P;
     info->header.stamp = capture_time;
     info->header.frame_id = frame;
@@ -203,9 +228,6 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
       break;
     }
 
-    //m_timage.tm;
-    //m_timage.data.captured_time;
-    image->header.stamp = capture_time; // TODO: FIX with simulation time
     image->header.stamp = ros::Time(m_timage.tm.sec, m_timage.tm.nsec);
     //std::cerr << m_timage.tm.sec << " " << m_timage.tm.nsec << " / ";
     //std::cerr << m_timage.data.captured_time.sec << " " << m_timage.data.captured_time.nsec << std::endl;
@@ -216,25 +238,13 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
     std::copy(m_timage.data.image.raw_data.get_buffer(),
               m_timage.data.image.raw_data.get_buffer() + m_timage.data.image.raw_data.length(), 
               image->data.begin());
-    //for(int i=0; i<m_image.data.length();i++){
-    //image->data[i] = m_timage.data.image.raw_data[i];
-    //}
 
     pub.publish(image);
 
     info->width  = image->width;
     info->height = image->height;
-
     info->distortion_model = "plumb_bob";
-    boost::array<double, 9> K;
-    K[0] = 700; K[1] =   0; K[2] = image->width/2;
-    K[3] =   0; K[4] = 700; K[5] = image->height/2;
-    K[6] =   0; K[7] =   0; K[8] = 1;
     info->K = K;
-    boost::array<double, 12> P;
-    P[0] = 700; P[1] =   0; P[2] = image->width/2;  P[3] = 0;
-    P[4] =   0; P[5] = 700; P[6] = image->height/2; P[7] = 0;
-    P[8] =   0; P[9] =   0; P[10] = 1;              P[11] = 0;
     info->P = P;
     // TODO using parameters below;
     //m_timage.data.intrinsic.matrix_element;
