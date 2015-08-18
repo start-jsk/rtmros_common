@@ -24,6 +24,7 @@
 
   <!-- BEGIN:setting for hrpsys-simulator or rtcd -->
   <arg name="USE_RTCD" default="false" />
+  <arg name="USE_CHOREONOID" default="false" />
   <arg name="REALTIME" default="false" />
   <arg name="GUI" default="true" />
   <arg name="DEBUG_HRPSYS" default="false" />
@@ -107,11 +108,19 @@
         name="hrpsys" pkg="openrtm_aist" type="rtcd" respawn="$(arg RESPAWN_RTCD)" output="$(arg OUTPUT)"
         launch-prefix="$(arg RTCD_LAUNCH_PREFIX)"
         args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_args)" />
-  <node unless="$(arg USE_RTCD)"
+  <group unless="$(arg USE_RTCD)">
+  <node unless="$(arg USE_CHOREONOID)"
         name="hrpsys" pkg="hrpsys" type="hrpsys-simulator" respawn="$(arg RESPAWN_SIMULATOR)" output="$(arg OUTPUT)"
         launch-prefix="$(arg RTCD_LAUNCH_PREFIX)"
         args="$(arg PROJECT_FILE) -o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_gui_args) $(arg hrpsys_opt_args) $(arg hrpsys_args)" />
-
+  <include if="$(arg USE_CHOREONOID)"
+           file="$(find hrpsys_choreonoid)/launch/choreonoid.launch" >
+    <arg name="PROJECT_FILE" value="$(arg PROJECT_FILE)" />
+    <arg name="RTC_ARGS" value="-o manager.is_master:YES $(arg openrtm_args) $(arg hrpsys_gui_args) $(arg hrpsys_opt_args) $(arg hrpsys_args)" />
+    <arg name="RESPAWN_SIMULATOR" value="$(arg RESPAWN_SIMULATOR)" />
+    <arg name="OUTPUT" value="$(arg OUTPUT)" />
+  </include>
+  </group>
   <!-- node name="rtcgraph" pkg="openrtm" type="rtcgraph" output="screen"/ -->
 
   <group if="$(arg LAUNCH_HRPSYSPY)">
