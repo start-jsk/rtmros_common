@@ -706,9 +706,10 @@
 
 (defmethod rtm-ros-robot-interface
   (:start-auto-balancer
-   (&key (limbs '(:rleg :lleg)))
+   (&key (limbs '(:rleg :lleg)) (legs '(:rleg :lleg)))
    (send self :autobalancerservice_startAutoBalancer
-         :limbs (mapcar #'(lambda (x) (format nil "~A" (string-downcase x))) limbs)))
+         :limbs (mapcar #'(lambda (x) (format nil "~A" (string-downcase x))) limbs)
+         :legs (mapcar #'(lambda (x) (format nil "~A" (string-downcase x))) legs)))
   (:stop-auto-balancer () (send self :autobalancerservice_stopAutoBalancer))
   (:go-pos-no-wait
    (xx yy th)
