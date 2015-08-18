@@ -137,6 +137,7 @@ class PointCloudROSBridge  : public RTC::DataFlowComponentBase
   ros::Time capture_time;
   std::string _frame_id;
   bool publish_depth;
+  bool transformed_frame;
   //bool publish_color;
   coil::TimeMeasure tm;
 };
