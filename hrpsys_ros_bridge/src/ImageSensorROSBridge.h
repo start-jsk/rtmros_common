@@ -139,6 +139,9 @@ class ImageSensorROSBridge  : public RTC::DataFlowComponentBase
   ros::Time capture_time;
   std::string frame;
 
+  boost::array<double, 9> K;
+  boost::array<double, 12> P;
+
   coil::TimeMeasure tm;
 };
 
