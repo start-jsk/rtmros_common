@@ -158,6 +158,15 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
         // Rotate sensor->localR 180[deg] because OpenHRP3 camera -Z axis equals to ROS camera Z axis
         // http://www.openrtp.jp/openhrp3/jp/create_model.html
         rpy = hrp::rpyFromRot(sensor->localR * hrp::rodrigues(hrp::Vector3(1,0,0), M_PI));
+      else if ( hrp::Sensor::RANGE == sensor->type )
+        {
+          // OpenHRP3 range sensor, front direction is -Z axis, and detected plane is XZ plane
+          // ROS LaserScan, front direction is X axis, and detected plane is XY plane
+          // http://www.openrtp.jp/openhrp3/jp/create_model.html
+          hrp::Matrix33 m;
+          m << 0, -1, 0, 0, 0, 1, -1, 0, 0;
+          rpy = hrp::rpyFromRot(sensor->localR * m);
+        }
       else
         rpy = hrp::rpyFromRot(sensor->localR);
       si.transform.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
