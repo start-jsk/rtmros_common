@@ -123,7 +123,8 @@ RTC::ReturnCode_t RangeSensorROSBridge::onExecute(RTC::UniqueId ec_id)
     ls.angle_max = m_range.config.maxAngle;
     ls.angle_increment = m_range.config.angularRes;
     //m_range.config.rangeRes; ??
-    ls.time_increment = 1 / m_range.config.frequency; //??
+    //ls.time_increment = 1 / m_range.config.frequency * (ls.angle_max - ls.angle_min) / PI / m_range.ranges.length(); // ???
+    ls.time_increment = 0.0;
     ls.scan_time = 1 / m_range.config.frequency;
     ls.range_min = m_range.config.minRange;
     ls.range_max = m_range.config.maxRange;
