@@ -939,7 +939,8 @@
          graspless-manip-reference-trans-pos graspless-manip-reference-trans-rot
          transition-time
          zmp-transition-time
-         adjust-footstep-transition-time)
+         adjust-footstep-transition-time
+         leg-names)
    (let* ((current-param (send self :get-auto-balancer-param))
           (param (instance hrpsys_ros_bridge::Openhrp_AutoBalancerService_AutoBalancerParam
                            :init
@@ -975,6 +976,10 @@
                            (if adjust-footstep-transition-time
                                adjust-footstep-transition-time
                              (send current-param :adjust_footstep_transition_time))
+                           :leg_names
+                           (if leg-names
+                               (mapcar #'(lambda (x) (format nil "~A" (string-downcase x))) leg-names)
+                             (send current-param :leg_names))
                            )))
      (send self :autobalancerservice_setautobalancerparam :i_param param)))
   (:abc-footstep->eus-footstep
