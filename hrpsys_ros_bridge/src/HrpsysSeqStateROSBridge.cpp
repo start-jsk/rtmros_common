@@ -556,18 +556,25 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       // calc velocity
       double dt = (odom.header.stamp - prev_odom.header.stamp).toSec();
       if (dt > 0) {
-        odom.twist.twist.linear.x = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
-        odom.twist.twist.linear.y = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
-        odom.twist.twist.linear.z = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;
-        odom.twist.twist.angular.x = (rpy(0) - prev_rpy(0)) / dt;
-        odom.twist.twist.angular.x = (rpy(1) - prev_rpy(1)) / dt;
-        odom.twist.twist.angular.x = (rpy(2) - prev_rpy(2)) / dt;
+        hrp::Matrix33 prev_R = hrp::rotFromRpy(prev_rpy[0], prev_rpy[1], prev_rpy[2]);
+        hrp::Vector3 omega = (R * hrp::omegaFromRot(R * prev_R.transpose())) / dt; // R = exp(omega*dt) * prev_R, omegaFromRot returns matrix_log
+        odom.twist.twist.angular.x = omega[0];
+        odom.twist.twist.angular.y = omega[1];
+        odom.twist.twist.angular.z = omega[2];
+        // calculate velocity (not strict linear twist from odom)
+        hrp::Vector3 velocity;
+        velocity[0] = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
+        velocity[1] = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
+        velocity[2] = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;        
+        odom.twist.twist.linear.x = velocity[0];
+        odom.twist.twist.linear.y = velocity[1];
+        odom.twist.twist.linear.z = velocity[2];
+        
         odom.twist.covariance = odom.pose.covariance;
         odom_pub.publish(odom);
       }
       prev_odom = odom;
       prev_rpy = rpy;
-      
     }
     else {
       prev_odom = odom;
@@ -585,6 +592,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   for (unsigned int i = 0; i < m_gyrometerIn.size(); i++) {
     if (m_gyrometerIn[i]->isNew()) {
+
       m_gyrometerIn[i]->read();
       if (i == 0) {
         updateImu = true;
