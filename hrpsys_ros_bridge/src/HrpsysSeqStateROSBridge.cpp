@@ -132,7 +132,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
     fsensor_pub[i+m_rsforceIn.size()] = nh.advertise<geometry_msgs::WrenchStamped>(m_mcforceName[i], 10);
   }
   zmp_pub = nh.advertise<geometry_msgs::PointStamped>("/zmp", 10);
-  cp_pub = nh.advertise<geometry_msgs::PointStamped>("/capture_point", 10);
+  ref_cp_pub = nh.advertise<geometry_msgs::PointStamped>("/ref_capture_point", 10);
+  act_cp_pub = nh.advertise<geometry_msgs::PointStamped>("/act_capture_point", 10);
   cop_pub.resize(m_mcforceName.size());
   for (unsigned int i=0; i<m_mcforceName.size(); i++){
     std::string tmpname(m_mcforceName[i]); // "ref_xx"
@@ -759,20 +760,41 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
   }
 
-  if ( m_rscpIn.isNew() ) {
+  if ( m_rsrefCPIn.isNew() ) {
     try {
-      m_rscpIn.read();
-      geometry_msgs::PointStamped cpv;
+      m_rsrefCPIn.read();
+      geometry_msgs::PointStamped refCPv;
       if ( use_hrpsys_time ) {
-        cpv.header.stamp = ros::Time(m_rscp.tm.sec, m_rscp.tm.nsec);
+        refCPv.header.stamp = ros::Time(m_rsrefCP.tm.sec, m_rsrefCP.tm.nsec);
       }else{
-        cpv.header.stamp = tm_on_execute;
+        refCPv.header.stamp = tm_on_execute;
       }
-      cpv.header.frame_id = rootlink_name;
-      cpv.point.x = m_rscp.data.x;
-      cpv.point.y = m_rscp.data.y;
-      cpv.point.z = m_rscp.data.z;
-      cp_pub.publish(cpv);
+      refCPv.header.frame_id = rootlink_name;
+      refCPv.point.x = m_rsrefCP.data.x;
+      refCPv.point.y = m_rsrefCP.data.y;
+      refCPv.point.z = m_rsrefCP.data.z;
+      ref_cp_pub.publish(refCPv);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+  if ( m_rsactCPIn.isNew() ) {
+    try {
+      m_rsactCPIn.read();
+      geometry_msgs::PointStamped actCPv;
+      if ( use_hrpsys_time ) {
+        actCPv.header.stamp = ros::Time(m_rsactCP.tm.sec, m_rsactCP.tm.nsec);
+      }else{
+        actCPv.header.stamp = tm_on_execute;
+      }
+      actCPv.header.frame_id = rootlink_name;
+      actCPv.point.x = m_rsactCP.data.x;
+      actCPv.point.y = m_rsactCP.data.y;
+      actCPv.point.z = m_rsactCP.data.z;
+      act_cp_pub.publish(actCPv);
     }
     catch(const std::runtime_error &e)
       {
