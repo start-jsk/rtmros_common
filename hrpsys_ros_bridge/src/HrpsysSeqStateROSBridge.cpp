@@ -572,11 +572,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         
         odom.twist.covariance = odom.pose.covariance;
         odom_pub.publish(odom);
+        prev_odom = odom;
+        prev_rpy = rpy;
       }
-      prev_odom = odom;
-      prev_rpy = rpy;
-    }
-    else {
+    } else {
       prev_odom = odom;
       prev_rpy = rpy;
       prev_odom_acquired = true;
