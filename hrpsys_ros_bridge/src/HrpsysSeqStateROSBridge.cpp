@@ -551,7 +551,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       double dt = (odom.header.stamp - prev_odom.header.stamp).toSec();
       if (dt > 0) {
         hrp::Matrix33 prev_R = hrp::rotFromRpy(prev_rpy[0], prev_rpy[1], prev_rpy[2]);
-        hrp::Vector3 omega = (R * hrp::omegaFromRot(R * prev_R.transpose())) / dt; // R = exp(omega*dt) * prev_R, omegaFromRot returns matrix_log
+        // R = exp(omega*dt) * prev_R
+        // omega is described in global coordinates in relationships of twist transformation
+        hrp::Vector3 omega = hrp::omegaFromRot(R * prev_R.transpose()) / dt;  // omegaFromRot returns matrix_log
         odom.twist.twist.angular.x = omega[0];
         odom.twist.twist.angular.y = omega[1];
         odom.twist.twist.angular.z = omega[2];
