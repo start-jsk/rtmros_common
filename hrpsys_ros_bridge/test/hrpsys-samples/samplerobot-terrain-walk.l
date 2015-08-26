@@ -1,17 +1,17 @@
 #!/usr/bin/env roseus
 
 ;; for SlopeUpDown
-;; $ rtmlaunch hrpsys_ros_bridge_tutorials samplerobot.launch PROJECT_FILE:=`rospack find hrpsys`/share/hrpsys/samples/SampleRobot/SampleRobot.TerrainFloor.SlopeUpDown.xml
+;; $ rtmlaunch hrpsys_ros_bridge samplerobot.launch PROJECT_FILE:=`rospack find hrpsys`/share/hrpsys/samples/SampleRobot/SampleRobot.TerrainFloor.SlopeUpDown.xml
 ;; $ roseus samplerobot-terrain-walk.l "(demo-slope-updown)"
 ;; for StairUp
-;; $ rtmlaunch hrpsys_ros_bridge_tutorials samplerobot.launch PROJECT_FILE:=`rospack find hrpsys`/share/hrpsys/samples/SampleRobot/SampleRobot.TerrainFloor.StairUp.xml
+;; $ rtmlaunch hrpsys_ros_bridge samplerobot.launch PROJECT_FILE:=`rospack find hrpsys`/share/hrpsys/samples/SampleRobot/SampleRobot.TerrainFloor.StairUp.xml
 ;; $ roseus samplerobot-terrain-walk.l "(demo-stair-up)"
 ;; for StairDown
-;; $ rtmlaunch hrpsys_ros_bridge_tutorials samplerobot.launch PROJECT_FILE:=`rospack find hrpsys`/share/hrpsys/samples/SampleRobot/SampleRobot.TerrainFloor.StairDown.xml
+;; $ rtmlaunch hrpsys_ros_bridge samplerobot.launch PROJECT_FILE:=`rospack find hrpsys`/share/hrpsys/samples/SampleRobot/SampleRobot.TerrainFloor.StairDown.xml
 ;; $ roseus samplerobot-terrain-walk.l "(demo-stair-down)"
 
 
-(load "package://hrpsys_ros_bridge_tutorials/euslisp/samplerobot-interface.l")
+(load "package://hrpsys_ros_bridge/euslisp/samplerobot-interface.l")
 
 (defun init ()
   (samplerobot-init)
