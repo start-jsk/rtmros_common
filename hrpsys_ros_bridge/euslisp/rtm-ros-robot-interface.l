@@ -979,7 +979,9 @@
                                (let ((dzo (copy-object (send current-param :default_zmp_offsets))))
                                  (setq (dzo . ros::_data)
                                        (apply #'concatenate float-vector (mapcar #'(lambda (x) (scale 1e-3 x))
-                                                                                 default-zmp-offsets)))
+                                                                                 (append default-zmp-offsets
+                                                                                         (make-list (- 4 (length default-zmp-offsets))
+                                                                                                    :initial-element (float-vector 0 0 0))))))
                                  dzo)
                              (send current-param :default_zmp_offsets))
                            :move_base_gain (if move-base-gain move-base-gain (send current-param :move_base_gain))
