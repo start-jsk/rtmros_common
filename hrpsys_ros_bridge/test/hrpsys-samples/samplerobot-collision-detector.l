@@ -1,9 +1,9 @@
 #!/usr/bin/env roseus
 
-;; $ rtmlaunch hrpsys_ros_bridge_tutorials samplerobot.launch
+;; $ rtmlaunch hrpsys_ros_bridge samplerobot.launch
 ;; $ roseus samplerobot-collision-detector.l "(samplerobot-collision-detector-demo)"
 
-(load "package://hrpsys_ros_bridge_tutorials/euslisp/samplerobot-interface.l")
+(load "package://hrpsys_ros_bridge/euslisp/samplerobot-interface.l")
 
 (defun samplerobot-collision-detector-init ()
   (samplerobot-init)
