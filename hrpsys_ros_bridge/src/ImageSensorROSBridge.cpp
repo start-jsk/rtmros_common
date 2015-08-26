@@ -78,13 +78,21 @@ RTC::ReturnCode_t ImageSensorROSBridge::onInitialize()
   P[0] = 700; P[1] =   0; P[2] = 160; P[3] = 0;
   P[4] =   0; P[5] = 700; P[6] = 120; P[7] = 0;
   P[8] =   0; P[9] =   0; P[10] = 1;  P[11] = 0;
+  overwrite_P = overwrite_K = false;
   ros::param::param<std::string>("~frame_id", frame, "camera");
   if(ros::param::has("~camera_param_K")) {
     XmlRpc::XmlRpcValue param_list;
     if (ros::param::get("~camera_param_K", param_list)) {
+      overwrite_K = true;
       if(param_list.getType() == XmlRpc::XmlRpcValue::TypeArray) {
-        for (int i = 0; i < param_list.size(); i++){
-          if(i < 9) K[i] =  (double)param_list[i];
+        for (int i = 0; i < param_list.size(); i++) {
+          double k;
+          if(param_list[i].getType() == XmlRpc::XmlRpcValue::TypeInt) {
+            k = (int)param_list[i];
+          } else if(param_list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble) {
+            k = (double)param_list[i];
+          }
+          if(i < 9) K[i] =  k;
         }
       }
     }
@@ -92,9 +100,16 @@ RTC::ReturnCode_t ImageSensorROSBridge::onInitialize()
   if(ros::param::has("~camera_param_P")) {
     XmlRpc::XmlRpcValue param_list;
     if (ros::param::get("~camera_param_P", param_list)) {
+      overwrite_P = true;
       if(param_list.getType() == XmlRpc::XmlRpcValue::TypeArray) {
         for (int i = 0; i < param_list.size(); i++){
-          if(i < 12) P[i] =  (double)param_list[i];
+          double p;
+          if(param_list[i].getType() == XmlRpc::XmlRpcValue::TypeInt) {
+            p = (int)param_list[i];
+          } else if(param_list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble) {
+            p = (double)param_list[i];
+          }
+          if(i < 12) P[i] = p;
         }
       }
     }
@@ -193,6 +208,7 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
     info->distortion_model = "plumb_bob";
     info->K = K;
     info->P = P;
+    info->R[0] = info->R[4] = info->R[8] = 1;
     info->header.stamp = capture_time;
     info->header.frame_id = frame;
     info_pub.publish(info);
@@ -245,12 +261,38 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
     info->width  = image->width;
     info->height = image->height;
     info->distortion_model = "plumb_bob";
-    info->K = K;
-    info->P = P;
-    // TODO using parameters below;
-    //m_timage.data.intrinsic.matrix_element;
-    //m_timage.data.intrinsic.distortion_coefficient;
-    //m_timage.data.extrinsic
+    if (m_timage.data.intrinsic.distortion_coefficient.length() > 0) {
+      info->D.resize(m_timage.data.intrinsic.distortion_coefficient.length());
+      for(int n = 0; n < m_timage.data.intrinsic.distortion_coefficient.length(); n++) {
+        info->D[n] = m_timage.data.intrinsic.distortion_coefficient[n];
+      }
+    }
+    if (overwrite_K) {
+      info->K = K;
+    } else {
+      info->K[0] = m_timage.data.intrinsic.matrix_element[0];
+      info->K[1] = m_timage.data.intrinsic.matrix_element[1];
+      info->K[2] = m_timage.data.intrinsic.matrix_element[2];
+      info->K[3] = m_timage.data.intrinsic.matrix_element[1];
+      info->K[4] = m_timage.data.intrinsic.matrix_element[3];
+      info->K[5] = m_timage.data.intrinsic.matrix_element[4];
+      info->K[6] = info->K[7] = 0.0; info->K[8] = 1.0;
+    }
+    if (overwrite_P) {
+      info->P = P;
+    } else {
+      // TODO using parameters
+      // P = K * m_timage.data.extrinsic ???
+      info->P[0] = m_timage.data.intrinsic.matrix_element[0];
+      info->P[1] = m_timage.data.intrinsic.matrix_element[1];
+      info->P[2] = m_timage.data.intrinsic.matrix_element[2];
+      info->P[4] = m_timage.data.intrinsic.matrix_element[1];
+      info->P[5] = m_timage.data.intrinsic.matrix_element[3];
+      info->P[6] = m_timage.data.intrinsic.matrix_element[4];
+      info->P[3] = info->P[7] = info->P[8] = info->P[9] = info->P[11] = 0.0;
+      info->P[10] = 1.0;
+    }
+    info->R[0] = info->R[4] = info->R[8] = 1;
     info->header = image->header;
     info_pub.publish(info);
 
