@@ -757,37 +757,57 @@
   (:set-foot-steps-no-wait
    (foot-step-list &key (overwrite-footstep-index 0))
    "Set foot step by default parameters and do not wait for step finish.
-    foot-step-list is list of footsteps.
+    foot-step-list is list of footstep (only biped) or list of list of footstep.
     overwrite-footstep-index is index to be overwritten. overwrite_fs_idx is used only in walking."
+   (unless (listp (car foot-step-list))
+     (setq foot-step-list (mapcar #'(lambda (fs) (list fs)) foot-step-list)))
    (send self :autobalancerservice_setfootsteps
-         :fs
-         (mapcar #'(lambda (f)
-                     (send self :eus-footstep->abc-footstep f))
+         :fss
+         (mapcar #'(lambda (fs)
+                     (instance hrpsys_ros_bridge::openhrp_autobalancerservice_footsteps :init
+                               :fs
+                               (mapcar #'(lambda (f)
+                                           (send self :eus-footstep->abc-footstep f))
+                                       fs)))
                  foot-step-list)
          :overwrite_fs_idx overwrite-footstep-index))
   (:set-foot-steps
    (foot-step-list &key (overwrite-footstep-index 0))
    "Set foot step by default parameters and wait for step finish.
-    foot-step-list is list of footsteps.
+    foot-step-list is list of footstep (only biped) or list of list of footstep.
     overwrite-footstep-index is index to be overwritten. overwrite_fs_idx is used only in walking."
    (send self :set-foot-steps-no-wait foot-step-list :overwrite-footstep-index overwrite-footstep-index)
    (send self :wait-foot-steps))
   (:set-foot-steps-with-param-no-wait
    (foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list &key (overwrite-footstep-index 0))
    "Set foot step with step parameter and do not wait for step finish.
-    foot-step-list is list of footsteps.
-    step-height-list is list of step height.
-    step-time-list is list of step time.
-    toe-angle-list is list of toe angle.
-    heel-angle-list is list of heel angle."
+    foot-step-list is list of footstep (only biped) or list of list of footstep.
+    step-height-list is list of step height (only biped) or list of list of step height.
+    step-time-list is list of step time (only biped) or list of list of step time.
+    toe-angle-list is list of toe angle (only biped) or list of list of toe angle.
+    heel-angle-list is list of heel angle (only biped) or list of list of heel angle."
+   (unless (listp (car foot-step-list))
+     (setq foot-step-list (mapcar #'(lambda (fs) (list fs)) foot-step-list)
+           step-height-list (mapcar #'(lambda (sh) (list sh)) step-height-list)
+           step-time-list (mapcar #'(lambda (st) (list st)) step-time-list)
+           toe-angle-list (mapcar #'(lambda (ta) (list ta)) toe-angle-list)
+           heel-angle-list (mapcar #'(lambda (ha) (list ha)) heel-angle-list)))
    (send self :autobalancerservice_setfootstepswithparam
-         :fs
-         (mapcar #'(lambda (f)
-                     (send self :eus-footstep->abc-footstep f))
+         :fss
+         (mapcar #'(lambda (fs)
+                     (instance hrpsys_ros_bridge::openhrp_autobalancerservice_footsteps :init
+                               :fs
+                               (mapcar #'(lambda (f)
+                                           (send self :eus-footstep->abc-footstep f))
+                                       fs)))
                  foot-step-list)
-         :sps
-         (mapcar #'(lambda (sh st ta ha)
-                     (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparam :init :step_height (* sh 1e-3) :step_time st :toe_angle ta :heel_angle ha))
+         :spss
+         (mapcar #'(lambda (shs sts tas has)
+                     (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparams :init
+                               :sps
+                               (mapcar #'(lambda (sh st ta ha)
+                                           (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparam :init :step_height (* sh 1e-3) :step_time st :toe_angle ta :heel_angle ha))
+                                       shs sts tas has)))
                  step-height-list step-time-list toe-angle-list heel-angle-list)
          :overwrite_fs_idx overwrite-footstep-index
          ))
