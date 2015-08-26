@@ -1,5 +1,4 @@
 idl/
-models/
 msg/Img_CameraCaptureService.msg
 msg/OpenHRP_*
 msg/OpenRTM_*
