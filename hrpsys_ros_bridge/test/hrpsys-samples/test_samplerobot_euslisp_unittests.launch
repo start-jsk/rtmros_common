@@ -1,0 +1,23 @@
+<!-- =*- mode: xml -*- -->
+<launch>
+  <arg name="NOSIM" default="false" />
+  <arg name="GUI" default="false" />
+  <arg name="RUN_RVIZ" default="false" />
+
+  <!-- setup xx_startup.launch and xx_ros_bridge.launch -->
+  <include file="$(find hrpsys_ros_bridge)/launch/samplerobot.launch" >
+    <arg name="NOSIM" default="$(arg NOSIM)" />
+    <arg name="GUI" default="$(arg GUI)" />
+    <arg name="RUN_RVIZ" default="$(arg RUN_RVIZ)" />
+    <arg name="corbaport" default="2809" />
+  </include>
+
+  <test test-name="test_samplerobot_0_data_logger" pkg="roseus" type="roseus"
+        args="$(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-unittest.l $(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-data-logger.l"
+        time-limit="300"
+        retry="1" />
+  <test test-name="test_samplerobot_1_sequence_player" pkg="roseus" type="roseus"
+        args="$(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-unittest.l $(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-sequence-player.l"
+        time-limit="300"
+        retry="1" />
+</launch>
