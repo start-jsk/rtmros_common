@@ -970,6 +970,7 @@
          transition-time
          zmp-transition-time
          adjust-footstep-transition-time
+         pos-ik-thre rot-ik-thre
          leg-names)
    (let* ((current-param (send self :get-auto-balancer-param))
           (param (instance hrpsys_ros_bridge::Openhrp_AutoBalancerService_AutoBalancerParam
@@ -1010,6 +1011,8 @@
                            (if leg-names
                                (mapcar #'(lambda (x) (format nil "~A" (string-downcase x))) leg-names)
                              (send current-param :leg_names))
+                           :pos_ik_thre (if pos-ik-thre pos-ik-thre (send current-param :pos_ik_thre))
+                           :rot_ik_thre (if rot-ik-thre rot-ik-thre (send current-param :rot_ik_thre))
                            )))
      (send self :autobalancerservice_setautobalancerparam :i_param param)))
   (:abc-footstep->eus-footstep
