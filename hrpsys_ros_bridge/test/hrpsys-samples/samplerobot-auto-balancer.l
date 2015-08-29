@@ -246,8 +246,9 @@
   (let ((fs-list (send *ri* :get-remaining-foot-step-sequence)))
     (while fs-list
       (setq fs-list (send *ri* :get-remaining-foot-step-sequence))
-      (send *irtviewer* :draw-objects :flush nil)
-      (send *ri* :draw-remaining-foot-step-sequence (send *irtviewer* :viewer) :flush t)
+      (unless (or (null x::*display*) (= x::*display* 0))
+        (send *irtviewer* :draw-objects :flush nil)
+        (send *ri* :draw-remaining-foot-step-sequence (send *irtviewer* :viewer) :flush t))
       (send *ri* :angle-vector (send *sr* :angle-vector) (* 1e3 (send (send *ri* :get-gait-generator-param) :default_step_time)))
       (send *ri* :wait-interpolation))
     t))
@@ -290,7 +291,7 @@
   (send *ri* :set-gait-generator-param :toe-angle 0 :heel-angle 0 :default-step-time 1.0 :default-step-height 0.05)
   )
 
-(defun samplerobot-auto-balancer-demo19 ()
+(defun samplerobot-auto-balancer-demo19-old ()
   (print "13. Overwrite footsteps during walking.")
   (send *ri* :set-foot-steps-no-wait
         (list (make-coords :coords (send *sr* :rleg :end-coords :copy-worldcoords) :name :rleg)
