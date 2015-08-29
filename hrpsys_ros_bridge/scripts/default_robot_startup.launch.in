@@ -8,6 +8,7 @@
   <arg name="PROJECT_FILE" default="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.xml" unless="$(arg NOSIM)"/>
   <arg name="corbaport" default="15005" />
   <arg name="hrpsys_precreate_rtc" default="HGcontroller"/>
+  <arg name="USE_UNSTABLE_RTC" default="@USE_UNSTABLE_RTC@"/>
   <param name="use_sim_time" value="true" />
   <include file="$(find hrpsys_tools)/launch/hrpsys.launch">
     <arg name="PROJECT_FILE" value="$(arg PROJECT_FILE)"/>
