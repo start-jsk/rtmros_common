@@ -1,6 +1,7 @@
 <launch>
   <arg name="RUN_RVIZ" default="true" />
   <arg name="SIMULATOR_NAME" default="@ROBOT@(Robot)0" />
+  <arg name="USE_UNSTABLE_RTC" default="@USE_UNSTABLE_RTC@"/>
   <rosparam command="load"
             file="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@_controller_config.yaml" />
 
@@ -11,7 +12,11 @@
     <arg name="COLLADA_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.dae" />
     <arg name="CONF_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.conf" />
     <arg name="corbaport" default="$(arg corbaport)" />
+    <arg name="USE_WALKING" default="true" if="$(arg USE_UNSTABLE_RTC)"/>
+    <arg name="USE_IMPEDANCECONTROLLER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
+    <arg name="USE_EMERGENCYSTOPPER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
 @ROSBRIDGE_ARGS@
+
   </include>
 
   <group if="$(arg RUN_RVIZ)" >
