@@ -129,6 +129,8 @@ class RangeSensorROSBridge  : public RTC::DataFlowComponentBase
   unsigned int pair_id;
   ros::Time capture_time;
   std::string _frame_id;
+  bool use_intensities;
+  double initial_intensity;
 
   coil::TimeMeasure tm;
 };
