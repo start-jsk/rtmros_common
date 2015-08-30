@@ -36,8 +36,10 @@ class SampleRobotHrpsysConfigurator(HrpsysConfigurator):
         stp.eefm_k1=[-1.39899,-1.39899]
         stp.eefm_k2=[-0.386111,-0.386111]
         stp.eefm_k3=[-0.175068,-0.175068]
-        stp.eefm_rot_damping_gain=20*1.6*10 # Stiff parameter for simulation
-        stp.eefm_pos_damping_gain=[3500*50, 3500*50, 3500*1.0*5] # Stiff parameter for simulation
+        tmp_rot_damping_gain = [20*1.6*10, 20*1.6*10, 1e5] # Stiff parameter for simulation
+        tmp_pos_damping_gain = [3500*50, 3500*50, 3500*1.0*5] # Stiff parameter for simulation
+        stp.eefm_rot_damping_gain=[tmp_rot_damping_gain, tmp_rot_damping_gain, tmp_rot_damping_gain, tmp_rot_damping_gain]
+        stp.eefm_pos_damping_gain=[tmp_pos_damping_gain, tmp_pos_damping_gain, tmp_pos_damping_gain, tmp_pos_damping_gain]
         #   tpcc st params
         stp.k_tpcc_p=[0.2, 0.2]
         stp.k_tpcc_x=[4.0, 4.0]
