@@ -81,7 +81,15 @@
 -o "manager.components.precreate:$(arg hrpsys_precreate_rtc)"
 -o "exec_cxt.periodic.type:$(arg hrpsys_periodic_type)"
  $(arg hrpsys_rtc_config_args) $(arg hrpsys_opt_rtc_config_args)
-' />
+' unless="$(arg USE_CHOREONOID)" />
+  <arg name="hrpsys_args" default='
+-o "manager.shutdown_onrtcs:NO"
+-o "manager.modules.load_path:$(arg hrpsys_load_path)"
+-o "manager.modules.preload:$(arg hrpsys_preload_rtc)"
+-o "manager.components.precreate:$(arg hrpsys_precreate_rtc)"
+ $(arg hrpsys_rtc_config_args) $(arg hrpsys_opt_rtc_config_args)
+' if="$(arg USE_CHOREONOID)" />
+
   <arg name="openrtm_openhrp_server_start" default="true"/>
   <!-- END:setting for hrpsys-simulator or rtcd -->
 
