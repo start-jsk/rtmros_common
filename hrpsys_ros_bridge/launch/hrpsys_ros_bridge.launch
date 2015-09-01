@@ -23,6 +23,7 @@
   <arg name="USE_IMAGESENSOR" default="false" />
   <arg name="USE_EMERGENCYSTOPPER" default="false" />
   <arg name="USE_HRPSYS_PROFILE" default="true" />
+  <arg name="USE_VELOCITY_OUTPUT" default="false" />
   <arg name="PUBLISH_SENSOR_TF" default="true" />
   <!--
       roslaunch hrpsys_ros_bridge sample.launch nameserver:=192.168.1.1
@@ -93,6 +94,7 @@
           output="screen" args ="$(arg openrtm_args)" />
 
     <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="HrpsysSeqStateROSBridge0.rtc:rsangle" subscription_type="new"/>
+    <rtconnect from="$(arg SIMULATOR_NAME).rtc:dq" to="HrpsysSeqStateROSBridge0.rtc:rsvel" subscription_type="new" if="$(arg USE_VELOCITY_OUTPUT)" />
     <rtconnect from="$(arg SIMULATOR_NAME).rtc:tau" to="HrpsysSeqStateROSBridge0.rtc:rstorque" subscription_type="new" unless="$(arg USE_TORQUEFILTER)"/>
     <rtconnect from="StateHolderServiceROSBridge.rtc:StateHolderService" to="sh.rtc:StateHolderService"  subscription_type="new"/>
     <rtconnect from="sh.rtc:baseTformOut" to="HrpsysSeqStateROSBridge0.rtc:baseTform" subscription_type="new" unless="$(arg USE_WALKING)"/>
