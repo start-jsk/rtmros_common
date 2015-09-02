@@ -809,6 +809,13 @@
    (send self :wait-interpolation)
    (send self :wait-foot-steps)
    )
+  (:set-foot-steps-with-param-and-base-height
+   (fs-params av-list time-list)
+   (send self :set-foot-steps-with-param-no-wait fs-params)
+   (send self :angle-vector-sequence av-list time-list)
+   (send self :wait-interpolation)
+   (send self :wait-foot-steps)
+   )
   (:adjust-foot-steps
    (rfoot-coords lfoot-coords)
    "Adjust current footsteps during autobalancer mode and not walking.
