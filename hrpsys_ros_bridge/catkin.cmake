@@ -156,7 +156,7 @@ compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/sample1.wrl SampleRobot
   --conf-file-option "abc_leg_offset: 0,0.09,0"
   --conf-file-option "end_effectors: lleg,LLEG_ANKLE_R,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, rleg,RLEG_ANKLE_R,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, larm,LARM_WRIST_P,CHEST,0.0,0,-0.12,0,1.0,0.0,1.5708, rarm,RARM_WRIST_P,CHEST,0.0,0,-0.12,0,1.0,0.0,1.5708,"
   --conf-file-option "collision_pair: RARM_WRIST_P:WAIST LARM_WRIST_P:WAIST RARM_WRIST_P:RLEG_HIP_R LARM_WRIST_P:LLEG_HIP_R RARM_WRIST_R:RLEG_HIP_R LARM_WRIST_R:LLEG_HIP_R"
-  --conf-file-option "pdgains_sim.file_name: ${hrpsys_PREFIX}/share/hrpsys/samples/SampleRobot/SampleRobot.PDgain.dat"
+  --conf-file-option "pdgains_sim_file_name: ${hrpsys_PREFIX}/share/hrpsys/samples/SampleRobot/SampleRobot.PDgain.dat"
   )
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl" hrpsys_ros_bridge)
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample1.wrl" hrpsys_ros_bridge SampleRobot)
