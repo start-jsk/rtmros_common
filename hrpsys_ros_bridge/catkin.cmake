@@ -152,7 +152,12 @@ endif()
 compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/PA10/pa10.main.wrl)
 compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/sample1.wrl SampleRobot
   --conf-dt-option "0.002"
-  --simulation-timestep-option "0.002")
+  --simulation-timestep-option "0.002"
+  --conf-file-option "abc_leg_offset: 0,0.09,0"
+  --conf-file-option "end_effectors: lleg,LLEG_ANKLE_R,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, rleg,RLEG_ANKLE_R,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, larm,LARM_WRIST_P,CHEST,0.0,0,-0.12,0,1.0,0.0,1.5708, rarm,RARM_WRIST_P,CHEST,0.0,0,-0.12,0,1.0,0.0,1.5708,"
+  --conf-file-option "collision_pair: RARM_WRIST_P:WAIST LARM_WRIST_P:WAIST RARM_WRIST_P:RLEG_HIP_R LARM_WRIST_P:LLEG_HIP_R RARM_WRIST_R:RLEG_HIP_R LARM_WRIST_R:LLEG_HIP_R"
+  --conf-file-option "pdgains_sim.file_name: ${hrpsys_PREFIX}/share/hrpsys/samples/SampleRobot/SampleRobot.PDgain.dat"
+  )
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl" hrpsys_ros_bridge)
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample1.wrl" hrpsys_ros_bridge SampleRobot)
 execute_process(COMMAND sed -i s@pa10\(Robot\)0@HRP1\(Robot\)0@ ${PROJECT_SOURCE_DIR}/launch/pa10.launch)
@@ -201,5 +206,10 @@ add_rostest(test/test-import-python.test)
 # call catkin depends
 find_package(catkin COMPONENTS roseus  QUIET)
 if(roseus_FOUND)
-  generate_eusdoc(euslisp/rtm-ros-robot-interface.l)
+  if ("true" STREQUAL "$ENV{IS_EUSLISP_TRAVIS_TEST}")
+    message("Execute rostest for euslisp unittest")
+    add_rostest(test/hrpsys-samples/test_samplerobot_euslisp_unittests.launch)
+  else()
+    generate_eusdoc(euslisp/rtm-ros-robot-interface.l)
+  endif()
 endif()

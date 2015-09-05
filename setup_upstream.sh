@@ -47,12 +47,15 @@ EOF
     done
 fi
 
-# update HISTORY-{en,ja}.txt, CMakeLists.txt(OPENHRP_VERSION) and ask kanehiro-san for set tag
-cat <<EOF >> /tmp/rosinstall.$$
+if [ "$IS_EUSLISP_TRAVIS_TEST" != "true" ] ; then
+#    wstool remove openhrp3
+    # update HISTORY-{en,ja}.txt, CMakeLists.txt(OPENHRP_VERSION) and ask kanehiro-san for set tag
+    cat <<EOF >> /tmp/rosinstall.$$
 - git:
     uri: http://github.com/fkanehiro/openhrp3
     local-name: openhrp3
 EOF
+fi
 
 # update package.xml, CMakeLists.txt(CMAKE_PACKAGE_VERSION) and ask kanehiro-san for set tag
 cat <<EOF >> /tmp/rosinstall.$$

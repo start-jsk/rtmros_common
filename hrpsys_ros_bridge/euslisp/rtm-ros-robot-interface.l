@@ -31,8 +31,10 @@
                      #'send self :rtmros-imu-callback :groupname groupname)
      (ros::subscribe "/emergency_mode" std_msgs::Int32
                      #'send self :rtmros-emergency-mode-callback :groupname groupname)
-     (ros::subscribe "/capture_point" geometry_msgs::PointStamped
-                     #'send self :rtmros-capture-point-callback :groupname groupname)
+     (mapcar #'(lambda (x)
+                 (ros::subscribe (format nil "/~A_capture_point" x) geometry_msgs::PointStamped
+                                 #'send self :rtmros-capture-point-callback (read-from-string (format nil ":~A-capture-point" x)) :groupname groupname))
+             '(ref act))
      ))
   (:rtmros-motor-states-callback
    (msg)
@@ -63,9 +65,9 @@
      (send self :set-robot-state1 :emergency-mode m))
    )
   (:rtmros-capture-point-callback
-   (msg)
+   (ref-act msg)
    (let ((p (send msg :point)))
-     (send self :set-robot-state1 :capture-point (float-vector (send p :x) (send p :y) (send p :z)))))
+     (send self :set-robot-state1 ref-act (float-vector (send p :x) (send p :y) (send p :z)))))
   (:tmp-force-moment-vector-for-limb
    (f/m fsensor-name &optional (topic-name-prefix nil)) ;; topic-name-prefix is "off" or "reference"
    (let ((key-name (if topic-name-prefix
@@ -143,11 +145,19 @@
      (case wrt
        (:local zmp)
        (:world (send (car (send robot :links)) :transform-vector zmp)))))
-  (:capture-point-vector
+  (:ref-capture-point-vector
    (&optional (wrt :local))
-   "Returns capture-point vector [mm].
-    If wrt is :local, returns capture-point in the base-link frame. If wrt is :world, returns capture-point in the world frame."
-   (let ((cp (scale 1e3 (cdr (assoc :capture-point robot-state))))) ;; [m] -> [mm]
+   "Returns ref-capture-point vector [mm].
+    If wrt is :local, returns ref-capture-point in the base-link frame. If wrt is :world, returns ref-capture-point in the world frame."
+   (let ((cp (scale 1e3 (cdr (assoc :ref-capture-point robot-state))))) ;; [m] -> [mm]
+     (case wrt
+       (:local cp)
+       (:world (send (car (send robot :links)) :transform-vector cp)))))
+  (:act-capture-point-vector
+   (&optional (wrt :local))
+   "Returns act-capture-point vector [mm].
+    If wrt is :local, returns act-capture-point in the base-link frame. If wrt is :world, returns act-capture-point in the world frame."
+   (let ((cp (scale 1e3 (cdr (assoc :act-capture-point robot-state))))) ;; [m] -> [mm]
      (case wrt
        (:local cp)
        (:world (send (car (send robot :links)) :transform-vector cp)))))
@@ -747,37 +757,57 @@
   (:set-foot-steps-no-wait
    (foot-step-list &key (overwrite-footstep-index 0))
    "Set foot step by default parameters and do not wait for step finish.
-    foot-step-list is list of footsteps.
+    foot-step-list is list of footstep (only biped) or list of list of footstep.
     overwrite-footstep-index is index to be overwritten. overwrite_fs_idx is used only in walking."
+   (unless (listp (car foot-step-list))
+     (setq foot-step-list (mapcar #'(lambda (fs) (list fs)) foot-step-list)))
    (send self :autobalancerservice_setfootsteps
-         :fs
-         (mapcar #'(lambda (f)
-                     (send self :eus-footstep->abc-footstep f))
+         :fss
+         (mapcar #'(lambda (fs)
+                     (instance hrpsys_ros_bridge::openhrp_autobalancerservice_footsteps :init
+                               :fs
+                               (mapcar #'(lambda (f)
+                                           (send self :eus-footstep->abc-footstep f))
+                                       fs)))
                  foot-step-list)
          :overwrite_fs_idx overwrite-footstep-index))
   (:set-foot-steps
    (foot-step-list &key (overwrite-footstep-index 0))
    "Set foot step by default parameters and wait for step finish.
-    foot-step-list is list of footsteps.
+    foot-step-list is list of footstep (only biped) or list of list of footstep.
     overwrite-footstep-index is index to be overwritten. overwrite_fs_idx is used only in walking."
    (send self :set-foot-steps-no-wait foot-step-list :overwrite-footstep-index overwrite-footstep-index)
    (send self :wait-foot-steps))
   (:set-foot-steps-with-param-no-wait
    (foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list &key (overwrite-footstep-index 0))
    "Set foot step with step parameter and do not wait for step finish.
-    foot-step-list is list of footsteps.
-    step-height-list is list of step height.
-    step-time-list is list of step time.
-    toe-angle-list is list of toe angle.
-    heel-angle-list is list of heel angle."
+    foot-step-list is list of footstep (only biped) or list of list of footstep.
+    step-height-list is list of step height (only biped) or list of list of step height.
+    step-time-list is list of step time (only biped) or list of list of step time.
+    toe-angle-list is list of toe angle (only biped) or list of list of toe angle.
+    heel-angle-list is list of heel angle (only biped) or list of list of heel angle."
+   (unless (listp (car foot-step-list))
+     (setq foot-step-list (mapcar #'(lambda (fs) (list fs)) foot-step-list)
+           step-height-list (mapcar #'(lambda (sh) (list sh)) step-height-list)
+           step-time-list (mapcar #'(lambda (st) (list st)) step-time-list)
+           toe-angle-list (mapcar #'(lambda (ta) (list ta)) toe-angle-list)
+           heel-angle-list (mapcar #'(lambda (ha) (list ha)) heel-angle-list)))
    (send self :autobalancerservice_setfootstepswithparam
-         :fs
-         (mapcar #'(lambda (f)
-                     (send self :eus-footstep->abc-footstep f))
+         :fss
+         (mapcar #'(lambda (fs)
+                     (instance hrpsys_ros_bridge::openhrp_autobalancerservice_footsteps :init
+                               :fs
+                               (mapcar #'(lambda (f)
+                                           (send self :eus-footstep->abc-footstep f))
+                                       fs)))
                  foot-step-list)
-         :sps
-         (mapcar #'(lambda (sh st ta ha)
-                     (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparam :init :step_height (* sh 1e-3) :step_time st :toe_angle ta :heel_angle ha))
+         :spss
+         (mapcar #'(lambda (shs sts tas has)
+                     (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparams :init
+                               :sps
+                               (mapcar #'(lambda (sh st ta ha)
+                                           (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparam :init :step_height (* sh 1e-3) :step_time st :toe_angle ta :heel_angle ha))
+                                       shs sts tas has)))
                  step-height-list step-time-list toe-angle-list heel-angle-list)
          :overwrite_fs_idx overwrite-footstep-index
          ))
@@ -946,16 +976,21 @@
          graspless-manip-reference-trans-pos graspless-manip-reference-trans-rot
          transition-time
          zmp-transition-time
-         adjust-footstep-transition-time)
+         adjust-footstep-transition-time
+         pos-ik-thre rot-ik-thre
+         leg-names)
    (let* ((current-param (send self :get-auto-balancer-param))
           (param (instance hrpsys_ros_bridge::Openhrp_AutoBalancerService_AutoBalancerParam
                            :init
                            :default_zmp_offsets
                            (if default-zmp-offsets
-                               (let ((dzo (copy-object (send current-param :default_zmp_offsets))))
+                               (let ((dzo (copy-object (send current-param :default_zmp_offsets)))
+                                     (lnum (length (remove-if-not #'(lambda (x) (send robot x)) '(:rarm :larm :rleg :lleg)))))
                                  (setq (dzo . ros::_data)
                                        (apply #'concatenate float-vector (mapcar #'(lambda (x) (scale 1e-3 x))
-                                                                                 default-zmp-offsets)))
+                                                                                 (append default-zmp-offsets
+                                                                                         (make-list (- lnum (length default-zmp-offsets))
+                                                                                                    :initial-element (float-vector 0 0 0))))))
                                  dzo)
                              (send current-param :default_zmp_offsets))
                            :move_base_gain (if move-base-gain move-base-gain (send current-param :move_base_gain))
@@ -982,6 +1017,12 @@
                            (if adjust-footstep-transition-time
                                adjust-footstep-transition-time
                              (send current-param :adjust_footstep_transition_time))
+                           :leg_names
+                           (if leg-names
+                               (mapcar #'(lambda (x) (format nil "~A" (string-downcase x))) leg-names)
+                             (send current-param :leg_names))
+                           :pos_ik_thre (if pos-ik-thre pos-ik-thre (send current-param :pos_ik_thre))
+                           :rot_ik_thre (if rot-ik-thre rot-ik-thre (send current-param :rot_ik_thre))
                            )))
      (send self :autobalancerservice_setautobalancerparam :i_param param)))
   (:abc-footstep->eus-footstep

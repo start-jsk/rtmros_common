@@ -66,7 +66,11 @@ RTC::ReturnCode_t RangeSensorROSBridge::onInitialize()
 
   pair_id = 0;
   ros::param::param<std::string>("~frame_id", _frame_id, "range");
-
+  use_intensities = false;
+  if(ros::param::has("~intensity")) {
+    use_intensities = true;
+    ros::param::get("~intensity", initial_intensity);
+  }
   tm.tick();
   return RTC::RTC_OK;
 }
@@ -129,11 +133,14 @@ RTC::ReturnCode_t RangeSensorROSBridge::onExecute(RTC::UniqueId ec_id)
     ls.range_min = m_range.config.minRange;
     ls.range_max = m_range.config.maxRange;
     ls.ranges.resize(m_range.ranges.length());
-    //ls.intensities.resize(m_range.ranges.size());
-    //m_range.ranges.get_buffer();
+    if (use_intensities) {
+      ls.intensities.resize(m_range.ranges.length());
+    }
     for(int i = 0; i < ls.ranges.size(); i++) {
       ls.ranges[i] = m_range.ranges[i];
-      //ls.intensities[i] = 0.0;
+      if (use_intensities) {
+        ls.intensities[i] = initial_intensity;
+      }
     }
     range_pub.publish(ls);
 
@@ -142,6 +149,7 @@ RTC::ReturnCode_t RangeSensorROSBridge::onExecute(RTC::UniqueId ec_id)
     if ( tm.interval() > 1 ) {
       ROS_INFO_STREAM("[" << getInstanceName() << "] @onExecutece " << ec_id << " is working at " << count << "[Hz]");
       tm.tick();
+      count = 0;
     }
     count ++;
   } else {  // m_range

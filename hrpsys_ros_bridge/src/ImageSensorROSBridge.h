@@ -141,6 +141,8 @@ class ImageSensorROSBridge  : public RTC::DataFlowComponentBase
 
   boost::array<double, 9> K;
   boost::array<double, 12> P;
+  bool overwrite_K;
+  bool overwrite_P;
 
   coil::TimeMeasure tm;
 };

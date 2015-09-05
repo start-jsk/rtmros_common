@@ -1,0 +1,40 @@
+<!-- =*- mode: xml -*- -->
+<launch>
+  <arg name="NOSIM" default="false" />
+  <arg name="GUI" default="false" />
+  <arg name="RUN_RVIZ" default="false" />
+
+  <!-- setup xx_startup.launch and xx_ros_bridge.launch -->
+  <include file="$(find hrpsys_ros_bridge)/launch/samplerobot.launch" >
+    <arg name="NOSIM" default="$(arg NOSIM)" />
+    <arg name="GUI" default="$(arg GUI)" />
+    <arg name="RUN_RVIZ" default="$(arg RUN_RVIZ)" />
+    <arg name="corbaport" default="2809" />
+    <arg name="USE_UNSTABLE_RTC" default="true"/>
+  </include>
+
+  <test test-name="test_samplerobot_0_data_logger" pkg="roseus" type="roseus"
+        args="$(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-unittest.l $(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-data-logger.l"
+        time-limit="300"
+        retry="1" />
+  <test test-name="test_samplerobot_1_sequence_player" pkg="roseus" type="roseus"
+        args="$(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-unittest.l $(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-sequence-player.l"
+        time-limit="300"
+        retry="1" />
+  <test test-name="test_samplerobot_2_collision_detector" pkg="roseus" type="roseus"
+        args="$(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-unittest.l $(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-collision-detector.l"
+        time-limit="300"
+        retry="1" />
+  <test test-name="test_samplerobot_3_remove_force_sensor_offset" pkg="roseus" type="roseus"
+        args="$(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-unittest.l $(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-remove-force-offset.l"
+        time-limit="300"
+        retry="1" />
+  <test test-name="test_samplerobot_4_impedance_controller" pkg="roseus" type="roseus"
+        args="$(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-unittest.l $(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-impedance-controller.l"
+        time-limit="300"
+        retry="1" />
+  <test test-name="test_samplerobot_5_auto_balancer" pkg="roseus" type="roseus"
+        args="$(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-unittest.l $(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-auto-balancer.l"
+        time-limit="300"
+        retry="1" />
+</launch>

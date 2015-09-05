@@ -132,7 +132,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
     fsensor_pub[i+m_rsforceIn.size()] = nh.advertise<geometry_msgs::WrenchStamped>(m_mcforceName[i], 10);
   }
   zmp_pub = nh.advertise<geometry_msgs::PointStamped>("/zmp", 10);
-  cp_pub = nh.advertise<geometry_msgs::PointStamped>("/capture_point", 10);
+  ref_cp_pub = nh.advertise<geometry_msgs::PointStamped>("/ref_capture_point", 10);
+  act_cp_pub = nh.advertise<geometry_msgs::PointStamped>("/act_capture_point", 10);
   cop_pub.resize(m_mcforceName.size());
   for (unsigned int i=0; i<m_mcforceName.size(); i++){
     std::string tmpname(m_mcforceName[i]); // "ref_xx"
@@ -348,6 +349,16 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
   }  // end: rstorqueIn
 
+  // rsvelIn
+  if ( m_rsvelIn.isNew () ) {
+    try {
+      m_rsvelIn.read();
+      //for ( unsigned int i = 0; i < m_rstorque.data.length() ; i++ ) std::cerr << m_rstorque.data[i] << " "; std::cerr << std::endl;
+    } catch(const std::runtime_error &e) {
+      ROS_ERROR_STREAM("[" << getInstanceName() << "] m_rsvelIn failed with " << e.what());
+    }
+  }  // end: rsvelIn
+
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
     sensor_msgs::JointState joint_state;
@@ -409,7 +420,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
       ++it;
     }
-    joint_state.velocity.resize(joint_state.name.size());
+    // set velocity if m_rsvel is available
+    if (m_rsvel.data.length() == body->joints().size()) {
+      for (unsigned int i = 0; i < body->joints().size(); i++) {
+        joint_state.velocity.push_back(m_rsvel.data[i]);
+      }
+    } else {
+      joint_state.velocity.resize(joint_state.name.size());
+    }
     // set effort if m_rstorque is available
     if (m_rstorque.data.length() == body->joints().size()) {
       for ( unsigned int i = 0; i < body->joints().size() ; i++ ){
@@ -546,30 +564,88 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     odom.pose.pose.orientation.z = q.getZ();
     odom.pose.pose.orientation.w = q.getW();
     
-    odom.pose.covariance[0] = 0.002 * 0.002;
-    odom.pose.covariance[7] = 0.002 * 0.002;
-    odom.pose.covariance[14] = 0.002 * 0.002;
-    odom.pose.covariance[21] = 0.002 * 0.002;
-    odom.pose.covariance[28] = 0.002 * 0.002;
-    odom.pose.covariance[35] = 0.002 * 0.002;
     if (prev_odom_acquired) {
       // calc velocity
       double dt = (odom.header.stamp - prev_odom.header.stamp).toSec();
       if (dt > 0) {
-        odom.twist.twist.linear.x = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
-        odom.twist.twist.linear.y = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
-        odom.twist.twist.linear.z = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;
-        odom.twist.twist.angular.x = (rpy(0) - prev_rpy(0)) / dt;
-        odom.twist.twist.angular.x = (rpy(1) - prev_rpy(1)) / dt;
-        odom.twist.twist.angular.x = (rpy(2) - prev_rpy(2)) / dt;
-        odom.twist.covariance = odom.pose.covariance;
+        hrp::Matrix33 prev_R = hrp::rotFromRpy(prev_rpy[0], prev_rpy[1], prev_rpy[2]);
+        // R = exp(omega*dt) * prev_R
+        // omega is described in global coordinates in relationships of twist transformation
+        hrp::Vector3 omega = hrp::omegaFromRot(R * prev_R.transpose()) / dt;  // omegaFromRot returns matrix_log
+        odom.twist.twist.angular.x = omega[0];
+        odom.twist.twist.angular.y = omega[1];
+        odom.twist.twist.angular.z = omega[2];
+        // calculate velocity (not strict linear twist from odom)
+        hrp::Vector3 velocity;
+        velocity[0] = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
+        velocity[1] = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
+        velocity[2] = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;        
+        odom.twist.twist.linear.x = velocity[0];
+        odom.twist.twist.linear.y = velocity[1];
+        odom.twist.twist.linear.z = velocity[2];
+        
+        // calculate covariance
+        // assume dx, dy >> dz, dgamma >> dalpha, dbeta and use 2d odometry update equation
+        hrp::Vector3 local_velocity = R.transpose() * velocity; // global -> local
+        hrp::Vector3 sigma(0.5, 0.5, 0.05); // velocitis(vx, vy, omega) are assumed to have constant standard deviations
+        if (std::abs(local_velocity[0]) < 0.01) {
+          sigma[0] = 0.001; // trust "stop" state in x
+        }
+        if (std::abs(local_velocity[1]) < 0.01) {
+          sigma[1] = 0.001; // trust "stop" state in y
+        }
+        if (std::abs(omega[2]) < 0.01) {
+          sigma[2] = 0.001; // trust "stop" state in theta
+        }
+        hrp::Matrix33 prev_pose_cov;
+        prev_pose_cov <<
+          prev_odom.pose.covariance[0], prev_odom.pose.covariance[1], prev_odom.pose.covariance[5], // xx, xy, xt
+          prev_odom.pose.covariance[6], prev_odom.pose.covariance[7], prev_odom.pose.covariance[11], // yx, yy, yt
+          prev_odom.pose.covariance[30], prev_odom.pose.covariance[31], prev_odom.pose.covariance[35]; // tx, ty, tt
+        hrp::Matrix33 twist_cov; // each values are assumed to be independent 
+        twist_cov <<
+          sigma[0] * sigma[0], 0.0, 0.0,
+          0.0, sigma[1] * sigma[1], 0.0,
+          0.0, 0.0, sigma[2] * sigma[2];
+        // update covariance according to the relationships from definition of variance: V(x) = E[(x-u) * (x-u)^T]
+        hrp::Matrix33 jacobi_pose;
+        jacobi_pose <<
+          1.0, 0.0, (-local_velocity[0] * sin(rpy(2)) - local_velocity[1] * cos(rpy(2))) * dt,
+          0.0, 1.0, (local_velocity[0] * cos(rpy(2)) - local_velocity[1] * sin(rpy(2))) * dt,
+          0.0, 0.0, 1.0;
+        hrp::Matrix33 jacobi_velocity;
+        jacobi_velocity <<
+          cos(rpy(2)) * dt, -sin(rpy(2)) * dt, 0.0,
+          sin(rpy(2)) * dt, cos(rpy(2)) * dt, 0.0,
+          0.0, 0.0, dt;
+        hrp::Matrix33 pose_cov = jacobi_pose * prev_pose_cov * jacobi_pose.transpose() + jacobi_velocity * twist_cov * jacobi_velocity.transpose();
+
+        odom.pose.covariance[0] = pose_cov(0, 0); // xx
+        odom.pose.covariance[1] = pose_cov(0, 1); // xy
+        odom.pose.covariance[5] = pose_cov(0, 2); // xt
+        odom.pose.covariance[6] = pose_cov(1, 0); // yx
+        odom.pose.covariance[7] = pose_cov(1, 1); // yy
+        odom.pose.covariance[11] = pose_cov(1, 2); // yt
+        odom.pose.covariance[14] = 0.002 * 0.002; // zz (const)
+        odom.pose.covariance[30] = pose_cov(2, 0); // tx
+        odom.pose.covariance[31] = pose_cov(2, 1); // ty
+        odom.pose.covariance[21] = 0.002 * 0.002; // rr (const)
+        odom.pose.covariance[28] = 0.002 * 0.002; // pp (const)
+        odom.pose.covariance[35] = pose_cov(2, 2); // tt
+
+        odom.twist.covariance[0] = twist_cov(0, 0); // xx
+        odom.twist.covariance[7] = twist_cov(1, 1); // yy
+        odom.twist.covariance[14] = 0.001 * 0.001; // zz
+        odom.twist.covariance[21] = 0.001 * 0.001; // rr
+        odom.twist.covariance[28] = 0.001 * 0.001; // pp
+        odom.twist.covariance[35] = twist_cov(2, 2); // tt
+        // odom.twist.covariance = odom.pose.covariance;
+
         odom_pub.publish(odom);
+        prev_odom = odom;
+        prev_rpy = rpy;
       }
-      prev_odom = odom;
-      prev_rpy = rpy;
-      
-    }
-    else {
+    } else {
       prev_odom = odom;
       prev_rpy = rpy;
       prev_odom_acquired = true;
@@ -585,6 +661,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   for (unsigned int i = 0; i < m_gyrometerIn.size(); i++) {
     if (m_gyrometerIn[i]->isNew()) {
+
       m_gyrometerIn[i]->read();
       if (i == 0) {
         updateImu = true;
@@ -759,20 +836,41 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
   }
 
-  if ( m_rscpIn.isNew() ) {
+  if ( m_rsrefCPIn.isNew() ) {
     try {
-      m_rscpIn.read();
-      geometry_msgs::PointStamped cpv;
+      m_rsrefCPIn.read();
+      geometry_msgs::PointStamped refCPv;
       if ( use_hrpsys_time ) {
-        cpv.header.stamp = ros::Time(m_rscp.tm.sec, m_rscp.tm.nsec);
+        refCPv.header.stamp = ros::Time(m_rsrefCP.tm.sec, m_rsrefCP.tm.nsec);
       }else{
-        cpv.header.stamp = tm_on_execute;
+        refCPv.header.stamp = tm_on_execute;
       }
-      cpv.header.frame_id = rootlink_name;
-      cpv.point.x = m_rscp.data.x;
-      cpv.point.y = m_rscp.data.y;
-      cpv.point.z = m_rscp.data.z;
-      cp_pub.publish(cpv);
+      refCPv.header.frame_id = rootlink_name;
+      refCPv.point.x = m_rsrefCP.data.x;
+      refCPv.point.y = m_rsrefCP.data.y;
+      refCPv.point.z = m_rsrefCP.data.z;
+      ref_cp_pub.publish(refCPv);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+  if ( m_rsactCPIn.isNew() ) {
+    try {
+      m_rsactCPIn.read();
+      geometry_msgs::PointStamped actCPv;
+      if ( use_hrpsys_time ) {
+        actCPv.header.stamp = ros::Time(m_rsactCP.tm.sec, m_rsactCP.tm.nsec);
+      }else{
+        actCPv.header.stamp = tm_on_execute;
+      }
+      actCPv.header.frame_id = rootlink_name;
+      actCPv.point.x = m_rsactCP.data.x;
+      actCPv.point.y = m_rsactCP.data.y;
+      actCPv.point.z = m_rsactCP.data.z;
+      act_cp_pub.publish(actCPv);
     }
     catch(const std::runtime_error &e)
       {

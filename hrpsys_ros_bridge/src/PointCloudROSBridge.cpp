@@ -264,6 +264,7 @@ RTC::ReturnCode_t PointCloudROSBridge::onExecute(RTC::UniqueId ec_id)
     if ( tm.interval() > 1 ) {
       ROS_INFO_STREAM("[" << getInstanceName() << "] @onExecutece " << ec_id << " is working at " << count << "[Hz]");
       tm.tick();
+      count = 0;
     }
     count ++;
   } else {  // m_points
