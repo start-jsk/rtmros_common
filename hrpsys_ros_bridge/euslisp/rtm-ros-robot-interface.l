@@ -839,6 +839,13 @@
    (send self :wait-interpolation)
    (send self :wait-foot-steps)
    )
+  (:set-foot-steps-with-param-and-base-height
+   (fs-params av-list time-list)
+   (send self :set-foot-steps-with-param-no-wait fs-params)
+   (send self :angle-vector-sequence av-list time-list)
+   (send self :wait-interpolation)
+   (send self :wait-foot-steps)
+   )
   (:adjust-foot-steps
    (rfoot-coords lfoot-coords)
    "Adjust current footsteps during autobalancer mode and not walking.
@@ -970,16 +977,20 @@
          transition-time
          zmp-transition-time
          adjust-footstep-transition-time
+         pos-ik-thre rot-ik-thre
          leg-names)
    (let* ((current-param (send self :get-auto-balancer-param))
           (param (instance hrpsys_ros_bridge::Openhrp_AutoBalancerService_AutoBalancerParam
                            :init
                            :default_zmp_offsets
                            (if default-zmp-offsets
-                               (let ((dzo (copy-object (send current-param :default_zmp_offsets))))
+                               (let ((dzo (copy-object (send current-param :default_zmp_offsets)))
+                                     (lnum (length (remove-if-not #'(lambda (x) (send robot x)) '(:rarm :larm :rleg :lleg)))))
                                  (setq (dzo . ros::_data)
                                        (apply #'concatenate float-vector (mapcar #'(lambda (x) (scale 1e-3 x))
-                                                                                 default-zmp-offsets)))
+                                                                                 (append default-zmp-offsets
+                                                                                         (make-list (- lnum (length default-zmp-offsets))
+                                                                                                    :initial-element (float-vector 0 0 0))))))
                                  dzo)
                              (send current-param :default_zmp_offsets))
                            :move_base_gain (if move-base-gain move-base-gain (send current-param :move_base_gain))
@@ -1010,6 +1021,8 @@
                            (if leg-names
                                (mapcar #'(lambda (x) (format nil "~A" (string-downcase x))) leg-names)
                              (send current-param :leg_names))
+                           :pos_ik_thre (if pos-ik-thre pos-ik-thre (send current-param :pos_ik_thre))
+                           :rot_ik_thre (if rot-ik-thre rot-ik-thre (send current-param :rot_ik_thre))
                            )))
      (send self :autobalancerservice_setautobalancerparam :i_param param)))
   (:abc-footstep->eus-footstep

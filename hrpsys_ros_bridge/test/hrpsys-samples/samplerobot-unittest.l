@@ -21,12 +21,20 @@
           (assert (,func)))))
 
 ;; Test demos
-(dolist (funcs (remove-if-not #'(lambda (x) ;; find demo functions
-                                  (and (substringp (format nil "~A-demo" *test-prefix*) (string-downcase x))
-                                       (not (string= (format nil "~A-demo" *test-prefix*) (string-downcase x)))))
-                              (functions)))
-  (eval `(deftest ,(read-from-string (format nil "test-~A" funcs))
-           (assert (,funcs)))))
+;; Test function should be
+;;   [test-prefix]-demo[number]
+;;   for example, samplerobot-sequence-player-demo5
+(let* ((demo-func-name (format nil "~A-demo" *test-prefix*))
+       (funcs (remove-if-not #'(lambda (x) ;; find demo functions
+                                 (and (substringp demo-func-name (string-downcase x))
+                                      (not (string= demo-func-name (string-downcase x))) ;; "[test-prefix]-demo" is total demo.
+                                      (numberp (read-from-string (subseq (string-downcase x) (length demo-func-name)))) ;; Find numbered-demo functions like "samplerobot-sequence-player-demo5"
+                                      ))
+                             (functions))))
+  (dolist (funcs (sort funcs #'< #'(lambda (x) (read-from-string (subseq (string-downcase x) (length demo-func-name)))))) ;; Sort by demo number
+    (eval `(deftest ,(read-from-string (format nil "test-~A" funcs))
+             (assert (,funcs))))
+    ))
 
 (run-all-tests)
 (exit 0)

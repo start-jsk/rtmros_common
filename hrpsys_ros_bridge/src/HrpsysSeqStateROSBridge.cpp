@@ -349,6 +349,16 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
   }  // end: rstorqueIn
 
+  // rsvelIn
+  if ( m_rsvelIn.isNew () ) {
+    try {
+      m_rsvelIn.read();
+      //for ( unsigned int i = 0; i < m_rstorque.data.length() ; i++ ) std::cerr << m_rstorque.data[i] << " "; std::cerr << std::endl;
+    } catch(const std::runtime_error &e) {
+      ROS_ERROR_STREAM("[" << getInstanceName() << "] m_rsvelIn failed with " << e.what());
+    }
+  }  // end: rsvelIn
+
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
     sensor_msgs::JointState joint_state;
@@ -410,7 +420,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
       ++it;
     }
-    joint_state.velocity.resize(joint_state.name.size());
+    // set velocity if m_rsvel is available
+    if (m_rsvel.data.length() == body->joints().size()) {
+      for (unsigned int i = 0; i < body->joints().size(); i++) {
+        joint_state.velocity.push_back(m_rsvel.data[i]);
+      }
+    } else {
+      joint_state.velocity.resize(joint_state.name.size());
+    }
     // set effort if m_rstorque is available
     if (m_rstorque.data.length() == body->joints().size()) {
       for ( unsigned int i = 0; i < body->joints().size() ; i++ ){
