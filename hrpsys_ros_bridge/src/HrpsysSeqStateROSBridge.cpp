@@ -587,7 +587,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         // calculate covariance
         // assume dx, dy >> dz, dgamma >> dalpha, dbeta and use 2d odometry update equation
         hrp::Vector3 local_velocity = R.transpose() * velocity; // global -> local
-        hrp::Vector3 sigma(0.5, 0.5, 0.05); // velocitis(vx, vy, omega) are assumed to have constant standard deviations
+        Eigen::VectorXd sigma(6);
+        sigma << 1.0, 1.0, 0.001, 0.001, 0.001, 0.1; // velocitis are assumed to have constant standard deviations
         if (std::abs(local_velocity[0]) < 0.01) {
           sigma[0] = 0.001; // trust "stop" state in x
         }
@@ -595,51 +596,30 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
           sigma[1] = 0.001; // trust "stop" state in y
         }
         if (std::abs(omega[2]) < 0.01) {
-          sigma[2] = 0.001; // trust "stop" state in theta
+          sigma[5] = 0.001; // trust "stop" state in theta
         }
-        hrp::Matrix33 prev_pose_cov;
-        prev_pose_cov <<
-          prev_odom.pose.covariance[0], prev_odom.pose.covariance[1], prev_odom.pose.covariance[5], // xx, xy, xt
-          prev_odom.pose.covariance[6], prev_odom.pose.covariance[7], prev_odom.pose.covariance[11], // yx, yy, yt
-          prev_odom.pose.covariance[30], prev_odom.pose.covariance[31], prev_odom.pose.covariance[35]; // tx, ty, tt
-        hrp::Matrix33 twist_cov; // each values are assumed to be independent 
-        twist_cov <<
-          sigma[0] * sigma[0], 0.0, 0.0,
-          0.0, sigma[1] * sigma[1], 0.0,
-          0.0, 0.0, sigma[2] * sigma[2];
+        Eigen::Matrix<double,6,6> prev_pose_cov;
+        for(int i = 0; i < 6; i++) { // index in col
+          for (int j = 0; j < 6; j++) { // index in raw
+            prev_pose_cov(i, j) = prev_odom.pose.covariance[6 * i + j];
+          }
+        }
+        // each variance are assumed to be independent        
+        Eigen::VectorXd sigma2(6);
+        for (int i = 0; i < 6; i++) {
+          sigma2[i] = sigma[i] * sigma[i];
+        }
+        Eigen::Matrix<double,6,6> twist_cov = sigma2.asDiagonal();
         // update covariance according to the relationships from definition of variance: V(x) = E[(x-u) * (x-u)^T]
-        hrp::Matrix33 jacobi_pose;
-        jacobi_pose <<
-          1.0, 0.0, (-local_velocity[0] * sin(rpy(2)) - local_velocity[1] * cos(rpy(2))) * dt,
-          0.0, 1.0, (local_velocity[0] * cos(rpy(2)) - local_velocity[1] * sin(rpy(2))) * dt,
-          0.0, 0.0, 1.0;
-        hrp::Matrix33 jacobi_velocity;
-        jacobi_velocity <<
-          cos(rpy(2)) * dt, -sin(rpy(2)) * dt, 0.0,
-          sin(rpy(2)) * dt, cos(rpy(2)) * dt, 0.0,
-          0.0, 0.0, dt;
-        hrp::Matrix33 pose_cov = jacobi_pose * prev_pose_cov * jacobi_pose.transpose() + jacobi_velocity * twist_cov * jacobi_velocity.transpose();
-
-        odom.pose.covariance[0] = pose_cov(0, 0); // xx
-        odom.pose.covariance[1] = pose_cov(0, 1); // xy
-        odom.pose.covariance[5] = pose_cov(0, 2); // xt
-        odom.pose.covariance[6] = pose_cov(1, 0); // yx
-        odom.pose.covariance[7] = pose_cov(1, 1); // yy
-        odom.pose.covariance[11] = pose_cov(1, 2); // yt
-        odom.pose.covariance[14] = 0.002 * 0.002; // zz (const)
-        odom.pose.covariance[30] = pose_cov(2, 0); // tx
-        odom.pose.covariance[31] = pose_cov(2, 1); // ty
-        odom.pose.covariance[21] = 0.002 * 0.002; // rr (const)
-        odom.pose.covariance[28] = 0.002 * 0.002; // pp (const)
-        odom.pose.covariance[35] = pose_cov(2, 2); // tt
-
-        odom.twist.covariance[0] = twist_cov(0, 0); // xx
-        odom.twist.covariance[7] = twist_cov(1, 1); // yy
-        odom.twist.covariance[14] = 0.001 * 0.001; // zz
-        odom.twist.covariance[21] = 0.001 * 0.001; // rr
-        odom.twist.covariance[28] = 0.001 * 0.001; // pp
-        odom.twist.covariance[35] = twist_cov(2, 2); // tt
-        // odom.twist.covariance = odom.pose.covariance;
+        Eigen::Matrix<double,6,6> jacobi_velocity = Eigen::Matrix<double,6,6>::Identity() * dt;
+        Eigen::Matrix<double,6,6> pose_cov = prev_pose_cov + jacobi_velocity * twist_cov * jacobi_velocity.transpose();
+        // insert covariance
+        for(int i = 0; i < 6; i++) { // index in col
+          for (int j = 0; j < 6; j++) { // index in raw
+            odom.pose.covariance[6 * i + j] = pose_cov(i, j);
+            odom.twist.covariance[6 * i + j] = twist_cov(i, j);
+          }
+        }
 
         odom_pub.publish(odom);
         prev_odom = odom;
