@@ -158,6 +158,17 @@ compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/sample1.wrl SampleRobot
   --conf-file-option "collision_pair: RARM_WRIST_P:WAIST LARM_WRIST_P:WAIST RARM_WRIST_P:RLEG_HIP_R LARM_WRIST_P:LLEG_HIP_R RARM_WRIST_R:RLEG_HIP_R LARM_WRIST_R:LLEG_HIP_R"
   --conf-file-option "pdgains_sim_file_name: ${hrpsys_PREFIX}/share/hrpsys/samples/SampleRobot/SampleRobot.PDgain.dat"
   )
+if(EXISTS ${_OPENHRP3_MODEL_DIR}/sample_4leg_robot.wrl)
+compile_openhrp_model(
+  ${_OPENHRP3_MODEL_DIR}/sample_4leg_robot.wrl Sample4LegRobot
+  --conf-dt-option "0.002"
+  --simulation-timestep-option "0.002"
+  --conf-file-option "abc_leg_offset: 0,0.19,0"
+  --conf-file-option "end_effectors: rleg,RLEG_JOINT5,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, lleg,LLEG_JOINT5,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, rarm,RARM_JOINT5,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, larm,LARM_JOINT5,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0,"
+  --conf-file-option "pdgains_sim_file_name: ${hrpsys_PREFkIX}/share/hrpsys/samples/Sample4LegRobot/Sample4LegRobot.PDgain.dat"
+  )
+generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample_4leg_robot.wrl" hrpsys_ros_bridge Sample4LegRobot)
+endif(EXISTS ${_OPENHRP3_MODEL_DIR}/sample_4leg_robot.wrl)
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl" hrpsys_ros_bridge)
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample1.wrl" hrpsys_ros_bridge SampleRobot)
 execute_process(COMMAND sed -i s@pa10\(Robot\)0@HRP1\(Robot\)0@ ${PROJECT_SOURCE_DIR}/launch/pa10.launch)
