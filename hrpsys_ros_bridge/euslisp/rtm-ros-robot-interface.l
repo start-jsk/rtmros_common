@@ -713,6 +713,10 @@
   'hrpsys_ros_bridge::Openhrp_AutoBalancerService_GaitGeneratorParam
   :raw-set-gait-generator-param :get-gait-generator-param
   :autobalancerservice_setgaitgeneratorparam :autobalancerservice_getgaitgeneratorparam)
+(def-set-get-param-method
+  'hrpsys_ros_bridge::Openhrp_AutoBalancerService_AutoBalancerParam
+  :raw-set-auto-balancer-param :get-auto-balancer-param
+  :autobalancerservice_setAutoBalancerparam :autobalancerservice_getAutoBalancerparam)
 
 (defmethod rtm-ros-robot-interface
   (:start-auto-balancer
@@ -970,61 +974,30 @@
    ()
    (send (send self :autobalancerservice_getautobalancerparam) :i_param))
   (:set-auto-balancer-param
-   (&key default-zmp-offsets move-base-gain
-         graspless-manip-arm graspless-manip-mode
-         graspless-manip-p-gain
-         graspless-manip-reference-trans-pos graspless-manip-reference-trans-rot
-         transition-time
-         zmp-transition-time
-         adjust-footstep-transition-time
-         pos-ik-thre rot-ik-thre
-         leg-names)
-   (let* ((current-param (send self :get-auto-balancer-param))
-          (param (instance hrpsys_ros_bridge::Openhrp_AutoBalancerService_AutoBalancerParam
-                           :init
-                           :default_zmp_offsets
-                           (if default-zmp-offsets
-                               (let ((dzo (copy-object (send current-param :default_zmp_offsets)))
-                                     (lnum (length (remove-if-not #'(lambda (x) (send robot x)) '(:rarm :larm :rleg :lleg)))))
-                                 (setq (dzo . ros::_data)
-                                       (apply #'concatenate float-vector (mapcar #'(lambda (x) (scale 1e-3 x))
-                                                                                 (append default-zmp-offsets
-                                                                                         (make-list (- lnum (length default-zmp-offsets))
-                                                                                                    :initial-element (float-vector 0 0 0))))))
-                                 dzo)
-                             (send current-param :default_zmp_offsets))
-                           :move_base_gain (if move-base-gain move-base-gain (send current-param :move_base_gain))
-                           :graspless_manip_mode (if graspless-manip-mode graspless-manip-mode (send current-param :graspless_manip_mode))
-                           :graspless_manip_arm (if graspless-manip-arm graspless-manip-arm (send current-param :graspless_manip_arm))
-                           :graspless_manip_p_gain (if graspless-manip-p-gain graspless-manip-p-gain (send current-param :graspless_manip_p_gain))
-                           :graspless_manip_reference_trans_pos
-                           (if graspless-manip-reference-trans-pos
-                               (scale 1e-3 graspless-manip-reference-trans-pos)
-                             (send current-param :graspless_manip_reference_trans_pos))
-                           :graspless_manip_reference_trans_rot
-                           (if graspless-manip-reference-trans-rot
-                               (matrix2quaternion graspless-manip-reference-trans-rot)
-                             (send current-param :graspless_manip_reference_trans_rot))
-                           :transition_time
-                           (if transition-time
-                               transition-time
-                             (send current-param :transition_time))
-                           :zmp_transition_time
-                           (if zmp-transition-time
-                               zmp-transition-time
-                             (send current-param :zmp_transition_time))
-                           :adjust_footstep_transition_time
-                           (if adjust-footstep-transition-time
-                               adjust-footstep-transition-time
-                             (send current-param :adjust_footstep_transition_time))
-                           :leg_names
-                           (if leg-names
-                               (mapcar #'(lambda (x) (format nil "~A" (string-downcase x))) leg-names)
-                             (send current-param :leg_names))
-                           :pos_ik_thre (if pos-ik-thre pos-ik-thre (send current-param :pos_ik_thre))
-                           :rot_ik_thre (if rot-ik-thre rot-ik-thre (send current-param :rot_ik_thre))
-                           )))
-     (send self :autobalancerservice_setautobalancerparam :i_param param)))
+   (&rest args
+    &key leg-names
+         default-zmp-offsets ;; [mm]
+         graspless-manip-reference-trans-pos ;; [mm]
+         graspless-manip-reference-trans-rot ;; rotation-matrix
+    &allow-other-keys)
+   (send* self :raw-set-auto-balancer-param
+          (append
+           (if (and (memq :leg-names args) leg-names)
+               (list :leg-names (mapcar #'(lambda (x) (format nil "~A" (string-downcase x))) leg-names)))
+           (if (and (memq :default-zmp-offsets args) default-zmp-offsets)
+               (let ((dzo (copy-object (send (send self :get-auto-balancer-param) :default_zmp_offsets)))
+                     (lnum (length (remove-if-not #'(lambda (x) (send robot x)) '(:rarm :larm :rleg :lleg)))))
+                 (setq (dzo . ros::_data)
+                       (apply #'concatenate float-vector (mapcar #'(lambda (x) (scale 1e-3 x))
+                                                                 (append default-zmp-offsets
+                                                                         (make-list (- lnum (length default-zmp-offsets))
+                                                                                    :initial-element (float-vector 0 0 0))))))
+                 (list :default-zmp-offsets dzo)))
+           (if (and (memq :graspless-manip-reference-trans-pos args) graspless-manip-reference-trans-pos)
+               (list :graspless-manip-reference-trans-pos (scale 1e-3 graspless-manip-reference-trans-pos)))
+           (if (and (memq :graspless-manip-reference-trans-rot args) graspless-manip-reference-trans-rot)
+               (list :graspless-manip-reference-trans-rot (matrix2quaternion graspless-manip-reference-trans-rot)))
+           args)))
   (:abc-footstep->eus-footstep
    (f)
    (make-coords :pos (scale 1e3 (send f :pos))
@@ -1087,22 +1060,42 @@
 
 (defmethod rtm-ros-robot-interface
   (:set-st-param
-   (&rest args &key st-algorithm &allow-other-keys)
+   (&rest args
+    &key st-algorithm
+         eefm-pos-damping-gain eefm-rot-damping-gain eefm-pos-time-const-support eefm-rot-time-const
+    &allow-other-keys)
    "Set Stabilizer parameters.
     To learn more about arguments, please see (pprint (find-method *ri* :raw-set-st-param))."
    (unless (send self :get :default-st-param)
      (send self :put :default-st-param (send self :get-st-param)))
-   (send* self :raw-set-st-param
-          (append
-           (if (memq :st-algorithm args)
-               (list :st-algorithm
-                     (if (or (null st-algorithm) (integerp st-algorithm))
-                         st-algorithm
-                       (let ((sa (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_STABILIZERSERVICE_STALGORITHM::*~A*" (string-downcase st-algorithm)))))
-                         (if (boundp sa)
-                             (eval sa)
-                           (error ";; no such :st-algorithm ~A in :set-st-param~%" st-algorithm))))))
-           args)))
+   (let ((prm (send self :get-st-param)))
+     (send* self :raw-set-st-param
+            (append
+             (if (memq :st-algorithm args)
+                 (list :st-algorithm
+                       (if (or (null st-algorithm) (integerp st-algorithm))
+                           st-algorithm
+                         (let ((sa (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_STABILIZERSERVICE_STALGORITHM::*~A*" (string-downcase st-algorithm)))))
+                           (if (boundp sa)
+                               (eval sa)
+                             (error ";; no such :st-algorithm ~A in :set-st-param~%" st-algorithm))))))
+             (if (and (memq :eefm-pos-damping-gain args) eefm-pos-damping-gain)
+                 (let ((tmp (send prm :eefm_pos_damping_gain)))
+                   (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-pos-damping-gain))
+                   (list :eefm-pos-damping-gain tmp)))
+             (if (and (memq :eefm-rot-damping-gain args) eefm-rot-damping-gain)
+                 (let ((tmp (send prm :eefm_rot_damping_gain)))
+                   (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-rot-damping-gain))
+                   (list :eefm-rot-damping-gain tmp)))
+             (if (and (memq :eefm-rot-time-const args) eefm-rot-time-const)
+                 (let ((tmp (send prm :eefm_rot_time_const)))
+                   (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-rot-time-const))
+                   (list :eefm-rot-time-const tmp)))
+             (if (and (memq :eefm-pos-time-const-support args) eefm-pos-time-const-support)
+                 (let ((tmp (send prm :eefm_pos_time_const_support)))
+                   (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-pos-time-const-support))
+                   (list :eefm-pos-time-const-support tmp)))
+             args))))
   (:set-st-param-for-non-feedback-LIP-mode
    ()
    "Set Stabilizer parameters to make robot Linear Inverted Pendulum mode without state feedback.
