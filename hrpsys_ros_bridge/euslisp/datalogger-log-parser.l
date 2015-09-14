@@ -211,9 +211,16 @@
                                      (let ((gyro (send (send self :parser-list "RobotHardware0_gyrometer") :read-state)))
                                        (instance geometry_msgs::Vector3 :init :x (elt gyro 0) :y (elt gyro 1) :z (elt gyro 2))))))
                           )))
-     (send robot :move-coords
-           (make-coords :rot (ros::tf-quaternion->rot (send (cdr (assoc :imu robot-state)) :orientation)))
-           (car (send robot :imu-sensors))))
+     (let* ((imu-relative-to-body (send (send (car (send robot :links)) :worldcoords) :transformation (send (car (send robot :imu-sensors)) :worldcoords) :local))
+            (body-relative-to-world (send (send self :auto-balancer-reference-root-coords) :copy-worldcoords))
+            (imu-relative-to-world (send imu-relative-to-body :transform body-relative-to-world :world)))
+       (send robot :move-coords
+             (make-coords :pos (send imu-relative-to-world :worldpos)
+                          :rot (ros::tf-quaternion->rot (send (cdr (assoc :imu robot-state)) :orientation)))
+             (car (send robot :imu-sensors))))
+     (send self :set-robot-state1
+           :stabilizer-end-coords-list
+           (mapcar #'(lambda (x) (send robot x :end-coords :copy-worldcoords)) limb-list)))
    )
   (:hrpsys-tform->coords
    (tform-vector)
@@ -248,6 +255,7 @@
   (:stabilizer-act-base-rpy () (cdr (assoc :stabilizer-act-base-rpy robot-state)))
   (:stabilizer-current-base-rpy () (cdr (assoc :stabilizer-current-base-rpy robot-state)))
   (:stabilizer-debug-data () (cdr (assoc :stabilizer-debug-data robot-state)))
+  (:stabilizer-end-coords-list () (cdr (assoc :stabilizer-end-coords-list robot-state)))
   ;; overwrite
   (:reference-vector () (cdr (assoc :reference-vector robot-state)))
   (:actual-vector () (send self :potentio-vector))
