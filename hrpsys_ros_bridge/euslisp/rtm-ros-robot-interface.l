@@ -1347,6 +1347,93 @@
     )
   )
 
+(defun add-optional-data-from-rs-list
+  (rs-list robot
+  &key (all-limbs
+        (mapcar #'(lambda (fs)
+                    (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors)))) '(:rleg :lleg :rarm :larm)))
+                (send robot :force-sensors)))
+       (limbs
+        (remove nil
+                (mapcar #'(lambda (fs)
+                    (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors))))
+                             (case (length (cadr (memq :contact-state (car rs-list))))
+                                   (2 '(:rleg :lleg))
+                                   (4 '(:rleg :lleg :rarm :larm)))))
+                (send robot :force-sensors))))
+       (add-optional-data-p t))
+  "Add optionalData from rs-list.
+   all-limbs is all limbs with ForceSensor in VRML.
+   limbs is all limbs included in rs-list.
+   If add-optional-data-p is nil, return contact state and swing support time list.
+   :contact-state is required in rs-list.
+   :support = 1.0, :swing = 0.0"
+  ;; Get contact-state list
+  (let ((cs-list
+         (mapcar #'(lambda (rs)
+                     (mapcar #'(lambda (l)
+                                 (cond
+                                  ((not (memq l limbs)) 0.0)
+                                  ((eq (elt (cadr (memq :contact-state rs)) (position l limbs)) :support) 1.0)
+                                  (t 0.0)))
+                             all-limbs))
+                 rs-list)))
+    ;; Add remain time for contact-states
+    (let* ((dt (- (cadr (memq :time (cadr rs-list))) (cadr (memq :time (car rs-list)))))
+           (prev-cs (cadr (memq :contact-state (car rs-list))))
+           (contact-change-time-list (make-list (length limbs)))
+           (count-time-list (make-list (length limbs) :initial-element 0))
+           (limb-idx-list (let ((cnt -1)) (mapcar #'(lambda (x) (incf cnt)) (make-list (length limbs)))))
+           (all-limb-idx-list (let ((cnt -1)) (mapcar #'(lambda (x) (incf cnt)) (make-list (length all-limbs)))))
+           (swing-support-time-list)
+           (default-swing-support-time 1.0)) ;; [s]
+      ;; Get time count when contac state changes
+      (dolist (rs rs-list)
+        (let ((cs (cadr (memq :contact-state rs))))
+          (mapcar #'(lambda (idx)
+                      (incf (elt count-time-list idx))
+                      (when (not (eq (elt cs idx) (elt prev-cs idx)))
+                        (push (elt count-time-list idx) (elt contact-change-time-list idx))
+                        (setf (elt count-time-list idx) 0)))
+                  limb-idx-list)
+          (setq prev-cs cs)
+          ))
+      (setq contact-change-time-list (mapcar #'(lambda (x) (reverse x)) contact-change-time-list))
+      (setq contact-change-time-list (mapcar #'(lambda (l)
+                                                 (if (memq l limbs)
+                                                     (elt contact-change-time-list (position l limbs))))
+                                             all-limbs))
+      ;; Calc remain time
+      (setq count-time-list
+            (mapcar #'(lambda (idx)
+                        (if (elt contact-change-time-list idx)
+                            (car (elt contact-change-time-list idx))
+                          (round (/ default-swing-support-time dt))))
+                    all-limb-idx-list))
+      (dolist (rs rs-list)
+        (push (mapcar #'(lambda (idx)
+                          (if (elt contact-change-time-list idx)
+                              (progn
+                                (if (= (elt count-time-list idx) 1) ;; Contact change
+                                    (progn
+                                      (pop (elt contact-change-time-list idx))
+                                      (setf (elt count-time-list idx) (car (elt contact-change-time-list idx)))) ;; Reset count
+                                  (setf (elt count-time-list idx) (- (elt count-time-list idx) 1)))
+                                ;; Return count => time [s]
+                                (if (elt count-time-list idx)
+                                    (* dt (elt count-time-list idx))
+                                  default-swing-support-time))
+                            default-swing-support-time))
+                      all-limb-idx-list)
+              swing-support-time-list)
+        )
+      ;; Add contact state and swing support time to rs-list as optionalData
+      (mapcar #'(lambda (rs cs sstime)
+                  (append rs (list :optional-data
+                                   (concatenate float-vector cs sstime))))
+              rs-list cs-list (reverse swing-support-time-list))
+      )))
+
 (defun load-from-seq-pattern-file (input-basename)
   "Load from seq pattern file and generate robot state list."
   (labels ((data-string-split ;; this function will be replaced by https://github.com/euslisp/EusLisp/issues/16
