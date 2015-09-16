@@ -1,0 +1,6 @@
+idl/
+models/
+msg/SimpleService_MyService.msg
+*.pyc
+src_gen
+srv
