@@ -590,7 +590,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         // calculate covariance
         // assume dx, dy >> dz, dgamma >> dalpha, dbeta and use 2d odometry update equation
         Eigen::VectorXd sigma(6);
-        sigma << 1.0, 1.0, 0.001, 0.001, 0.001, 0.1; // velocitis are assumed to have constant standard deviations
+        sigma << 1.0, 1.0, 0.001, 0.001, 0.001, 0.1; // velocitis are assumed to have constant standard deviations and they are described in base_link local coordinates
         if (std::abs(local_velocity[0]) < 0.01) {
           sigma[0] = 0.001; // trust "stop" state in x
         }
@@ -611,10 +611,18 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         for (int i = 0; i < 6; i++) {
           sigma2[i] = sigma[i] * sigma[i];
         }
-        Eigen::Matrix<double,6,6> twist_cov = sigma2.asDiagonal();
+        Eigen::Matrix<double,6,6> twist_transformation = Eigen::Matrix<double,6,6>::Zero(); // matrix [[R, 0], [0, R]] to convert twist from local to global
+        for (int i = 0; i < 3; i++) {
+          for (int j = 0; j < 3; j++) {
+            twist_transformation(i, j) = R(i, j);
+            twist_transformation(i + 3, j + 3) = R(i, j);
+          }
+        }
+        Eigen::Matrix<double,6,6> twist_cov = sigma2.asDiagonal(); // twist is described as base_link local coordinates
         // update covariance according to the relationships from definition of variance: V(x) = E[(x-u) * (x-u)^T]
+        // jacovian is described in world coordinates: x(t+dt) = f(x(t), v(t)), x is in world coordinates
         Eigen::Matrix<double,6,6> jacobi_velocity = Eigen::Matrix<double,6,6>::Identity() * dt;
-        Eigen::Matrix<double,6,6> pose_cov = prev_pose_cov + jacobi_velocity * twist_cov * jacobi_velocity.transpose();
+        Eigen::Matrix<double,6,6> pose_cov = prev_pose_cov + jacobi_velocity * (twist_transformation.transpose() * twist_cov * twist_transformation) * jacobi_velocity.transpose();
         // insert covariance
         for(int i = 0; i < 6; i++) { // index in col
           for (int j = 0; j < 6; j++) { // index in raw
