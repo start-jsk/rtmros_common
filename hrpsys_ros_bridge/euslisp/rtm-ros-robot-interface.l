@@ -1252,7 +1252,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun dump-seq-pattern-file
-  (rs-list output-basename &key (initial-sync-time 3.0)) ;; [s]
+  (rs-list output-basename &key (initial-sync-time 3.0) (robot)) ;; [s]
   "Dump pattern file for SequencePlayer.
      rs-list : list of (list :time time0 :angle-vector av :root-coords rc ...).
                Fields other than :time and :angle-vector are optional.
@@ -1333,6 +1333,8 @@
        (format wrf "~%")
        )) ;; with-open-file for .wrenches file
     )
+  (if (and (cadr (memq :contact-state (car rs-list))) robot)
+      (setq rs-list (add-optional-data-from-rs-list rs-list robot)))
   (when (cadr (memq :optional-data (car rs-list)))
     (with-open-file
      (opf (format nil "~A.optionaldata" output-basename) :direction :output) ;; optionaldata file
