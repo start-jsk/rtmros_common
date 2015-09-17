@@ -555,7 +555,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     } else {
       odom.header.stamp = tm_on_execute;
     }
-    //odom.child_frame_id = "/odom";
+    // odom.child_frame_id = "/odom";
+    odom.child_frame_id = rootlink_name;
     odom.pose.pose.position.x = a[0];
     odom.pose.pose.position.y = a[1];
     odom.pose.pose.position.z = a[2];
@@ -569,24 +570,25 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       double dt = (odom.header.stamp - prev_odom.header.stamp).toSec();
       if (dt > 0) {
         hrp::Matrix33 prev_R = hrp::rotFromRpy(prev_rpy[0], prev_rpy[1], prev_rpy[2]);
-        // R = exp(omega*dt) * prev_R
-        // omega is described in global coordinates in relationships of twist transformation
-        hrp::Vector3 omega = hrp::omegaFromRot(R * prev_R.transpose()) / dt;  // omegaFromRot returns matrix_log
+        // R = exp(omega_w*dt) * prev_R
+        // omega_w is described in global coordinates in relationships of twist transformation.
+        // omega in twist.angular is transformed into rootlink coords because twist should be described in child_frame_id.
+        hrp::Vector3 omega = R.transpose() * hrp::omegaFromRot(R * prev_R.transpose()) / dt;  // omegaFromRot returns matrix_log
         odom.twist.twist.angular.x = omega[0];
         odom.twist.twist.angular.y = omega[1];
         odom.twist.twist.angular.z = omega[2];
         // calculate velocity (not strict linear twist from odom)
-        hrp::Vector3 velocity;
+        hrp::Vector3 velocity, local_velocity;
         velocity[0] = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
         velocity[1] = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
-        velocity[2] = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;        
-        odom.twist.twist.linear.x = velocity[0];
-        odom.twist.twist.linear.y = velocity[1];
-        odom.twist.twist.linear.z = velocity[2];
+        velocity[2] = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;
+        local_velocity = R.transpose() * velocity; // global -> local
+        odom.twist.twist.linear.x = local_velocity[0];
+        odom.twist.twist.linear.y = local_velocity[1];
+        odom.twist.twist.linear.z = local_velocity[2];
         
         // calculate covariance
         // assume dx, dy >> dz, dgamma >> dalpha, dbeta and use 2d odometry update equation
-        hrp::Vector3 local_velocity = R.transpose() * velocity; // global -> local
         Eigen::VectorXd sigma(6);
         sigma << 1.0, 1.0, 0.001, 0.001, 0.001, 0.1; // velocitis are assumed to have constant standard deviations
         if (std::abs(local_velocity[0]) < 0.01) {
