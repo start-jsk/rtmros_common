@@ -1203,6 +1203,51 @@
    )
   )
 
+;; GraspControllserService
+(defmethod rtm-ros-robot-interface
+  ;; To use GraspControllserService, please define
+  ;;  1. :get-hand-config-list
+  ;;  2. :start-grasp's target-error and gain-percentage
+  (:get-hand-config-list
+   ()
+   (error ";; :get-hand-config-list should be defined in subclass of (~A)~%" (class self))
+   )
+  (:start-grasp
+   (limb &key (target-error) (gain-percentage))
+   (unless (and target-error gain-percentage)
+     (error ";; :start-grasp target-error and gain-percentage should be defined in subclass of (~A)~%" (class self)))
+   (case limb
+     (:larm
+      (send self :set-servo-gain-percentage
+            (caddr (assoc :larm (send self :get-hand-config-list))) gain-percentage)
+      (send self :graspcontrollerservice_startgrasp
+            :name (cadr (assoc :larm (send self :get-hand-config-list))) :target_error target-error))
+     (:rarm
+      (send self :set-servo-gain-percentage
+            (caddr (assoc :rarm (send self :get-hand-config-list))) gain-percentage)
+      (send self :graspcontrollerservice_startgrasp
+            :name (cadr (assoc :rarm (send self :get-hand-config-list))) :target_error target-error))
+     (:arms
+      (send self :start-grasp :rarm :target-error target-error :gain-percentage gain-percentage)
+      (send self :start-grasp :larm :target-error target-error :gain-percentage gain-percentage))
+     )
+   )
+  (:stop-grasp
+   (limb)
+   (case limb
+     (:larm
+      (send self :set-servo-gain-percentage (caddr (assoc :larm (send self :get-hand-config-list))) 100)
+      (send self :graspcontrollerservice_stopgrasp :name (cadr (assoc :larm (send self :get-hand-config-list)))))
+     (:rarm
+      (send self :set-servo-gain-percentage (caddr (assoc :rarm (send self :get-hand-config-list))) 100)
+      (send self :graspcontrollerservice_stopgrasp :name (cadr (assoc :rarm (send self :get-hand-config-list)))))
+     (:arms
+      (send self :stop-grasp :rarm)
+      (send self :stop-grasp :larm))
+     )
+   )
+  )
+
 (defmethod rtm-ros-robot-interface
   (:start-default-unstable-controllers
    (&key (ic-limbs '(:rarm :larm)) (abc-limbs '(:rleg :lleg)))
