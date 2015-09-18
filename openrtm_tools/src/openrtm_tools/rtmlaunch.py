@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import rospy
 import roslib
 roslib.load_manifest('openrtm_tools')
 
@@ -187,6 +188,7 @@ def main():
     if len(sys.argv) <= 1:
         print >>sys.stderr, usage
         return 1
+    rospy.init_node('rtmlaunch')
     fullpathname = sys.argv[1]
     print >>sys.stderr, "[rtmlaunch] starting... ",fullpathname
     try:
@@ -229,6 +231,10 @@ def main():
         rtactivate(nameserver, parser.getElementsByTagName("rtactivate"), tree)
         time.sleep(10)
         tree.add_name_server(nameserver, [])
+        if rospy.get_param('~rtc_connection_check_once', False):
+            print >>sys.stderr, "[rtmlaunch] break from rtmlaunch main loop."
+            print >>sys.stderr, "[rtmlaunch] If you check the rtc connection in the while loop, real-time loop becomes slow."
+            break
 
 def get_flag_from_argv(arg):
     for a in sys.argv:
