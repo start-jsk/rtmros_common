@@ -233,6 +233,7 @@ def main():
         tree.add_name_server(nameserver, [])
         if rospy.get_param('~rtc_connection_check_once', False):
             print >>sys.stderr, "[rtmlaunch] break from rtmlaunch main loop."
+            print >>sys.stderr, "[rtmlaunch] If you check the rtc connection in the while loop, real-time loop becomes slow."
             break
 
 def get_flag_from_argv(arg):
