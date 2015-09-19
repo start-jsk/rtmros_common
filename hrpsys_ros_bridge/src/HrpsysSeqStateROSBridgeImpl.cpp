@@ -41,6 +41,8 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_rsactCPIn("rsactCapturePoint", m_rsactCP),
     m_rsCOPInfoIn("rsCOPInfo", m_rsCOPInfo),
     m_emergencyModeIn("emergencyMode", m_emergencyMode),
+    m_refContactStatesIn("refContactStates", m_refContactStates),
+    m_actContactStatesIn("actContactStates", m_actContactStates),
     m_mctorqueOut("mctorque", m_mctorque),
     m_SequencePlayerServicePort("SequencePlayerService")
 
@@ -70,6 +72,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("servoState", m_servoStateIn);
   addInPort("rsCOPInfo", m_rsCOPInfoIn);
   addInPort("emergencyMode", m_emergencyModeIn);
+  addInPort("refContactStates", m_refContactStatesIn);
+  addInPort("actContactStates", m_actContactStatesIn);
+
 
   // Set OutPort buffer
   addOutPort("mctorque", m_mctorqueOut);
