@@ -229,7 +229,10 @@ def main():
         rtactivate(nameserver, parser.getElementsByTagName("rtactivate"), tree)
         time.sleep(10)
         tree.add_name_server(nameserver, [])
-
+        if os.getenv("RTC_CONNECTION_CHECK_ONCE") and os.getenv("RTC_CONNECTION_CHECK_ONCE").lower() == "true":
+            print >>sys.stderr, "[rtmlaunch] break from rtmlaunch main loop."
+            print >>sys.stderr, "[rtmlaunch] If you check the rtc connection in the while loop, real-time loop becomes slow."
+            break
 def get_flag_from_argv(arg):
     for a in sys.argv:
         if arg in a: # If "USE_WALKING" is in argv
