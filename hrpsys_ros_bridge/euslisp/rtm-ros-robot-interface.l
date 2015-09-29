@@ -939,7 +939,10 @@
    (send self :autobalancerservice_waitFootSteps))
   ;; wrap :set-gait-generator-param to use symbol for default-orbit-type
   (:set-gait-generator-param
-   (&rest args &key default-orbit-type &allow-other-keys)
+   (&rest args
+    &key default-orbit-type
+         leg-default-translate-pos ;; [mm]
+    &allow-other-keys)
    (send* self :raw-set-gait-generator-param
           (append
            (if (memq :default-orbit-type args)
@@ -951,6 +954,10 @@
                              (eval ot)
                            (error ";; no such :default-orbit-type ~A in :set-gait-generator-param~%" default-orbit-type))
                          ))))
+           (if (memq :leg-default-translate-pos args)
+               (let ((lo (copy-object (send (send self :get-gait-generator-param) :leg_default_translate_pos))))
+                 (setq (lo . ros::_data) (scale 1e-3 (apply #'concatenate float-vector leg-default-translate-pos)))
+                 (list :leg-default-translate-pos lo)))
            args)))
   (:print-gait-generator-orbit-type
    ()
