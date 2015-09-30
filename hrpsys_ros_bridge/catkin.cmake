@@ -169,6 +169,17 @@ compile_openhrp_model(
   )
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample_4leg_robot.wrl" hrpsys_ros_bridge Sample4LegRobot)
 endif(EXISTS ${_OPENHRP3_MODEL_DIR}/sample_4leg_robot.wrl)
+if(EXISTS ${_OPENHRP3_MODEL_DIR}/sample_special_joint_robot.wrl)
+compile_openhrp_model(
+  ${_OPENHRP3_MODEL_DIR}/sample_special_joint_robot.wrl SampleSpecialJointRobot
+  --conf-dt-option "0.002"
+  --simulation-timestep-option "0.002"
+  --conf-file-option "abc_leg_offset: 0,0.09,0"
+  --conf-file-option "end_effectors: rleg,RLEG_TOE_P,WAIST,-0.08,0.0,-0.01,0.0,0.0,0.0,0.0, lleg,LLEG_TOE_P,WAIST,-0.08,0.0,-0.01,0.0,0.0,0.0,0.0,"
+  --conf-file-option "pdgains_sim_file_name: ${hrpsys_PREFkIX}/share/hrpsys/samples/SampleSpecialJointRobot/SampleSpecialJointRobot.PDgain.dat"
+  )
+generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample_special_joint_robot.wrl" hrpsys_ros_bridge SampleSpecialJointRobot)
+endif(EXISTS ${_OPENHRP3_MODEL_DIR}/sample_special_joint_robot.wrl)
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/PA10/pa10.main.wrl" hrpsys_ros_bridge)
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample1.wrl" hrpsys_ros_bridge SampleRobot)
 execute_process(COMMAND sed -i s@pa10\(Robot\)0@HRP1\(Robot\)0@ ${PROJECT_SOURCE_DIR}/launch/pa10.launch)
