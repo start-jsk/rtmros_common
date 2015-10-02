@@ -639,7 +639,8 @@
          (axis (float-vector 0 0 -1))
          (max-time 4000.0)
          (max-ref-force)
-         (detect-time-offset 2000.0))
+         (detect-time-offset 2000.0)
+         (set-ref-force-time 2000.0))
    "Set object turnaround reference force.
     axis is resultant force direction.
     max-time is max time [msec].
@@ -665,7 +666,7 @@
          (format t ";; Detected (force moment = ~A)~%" fm-ret)
          (send self :set-ref-force
                (car (car fm-ret))
-               max-time
+               set-ref-force-time
                (if (= (length limbs) 1) (car limbs) :arms))))
      (send self :wait-interpolation-seq)
      ))
