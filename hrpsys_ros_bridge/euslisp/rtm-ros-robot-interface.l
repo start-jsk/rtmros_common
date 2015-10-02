@@ -600,6 +600,77 @@
     ))
   )
 
+;; ImpedanceController's ObjectTurnaroundDetector
+(def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_ImpedanceControllerService_objectTurnaroundDetectorParam
+  :set-object-turnaround-detector-param :get-object-turnaround-detector-param
+  :impedancecontrollerservice_setObjectTurnaroundDetectorParam
+  :impedancecontrollerservice_getObjectTurnaroundDetectorParam)
+(defmethod rtm-ros-robot-interface
+  (:start-object-turnaround-detection
+   (&key (ref-diff-wrench) (max-time) (limbs))
+   "Start ObjectTurnaroundDetection mode.
+    ref-diff-wrench is final reference wrench (scalar).
+    max-time is max time [msec].
+    limbs is limb list to be used."
+   (send self :impedancecontrollerservice_startObjectTurnaroundDetection
+         :i_ref_diff_wrench ref-diff-wrench :i_max_time max-time :i_ee_names (mapcar #'string-downcase limbs)))
+  (:check-object-turnaround-detection
+   ()
+   "Check object turnaround detection.
+   If t, detected. Otherwise, not detected."
+   (send (send self :impedancecontrollerservice_checkObjectTurnaroundDetection) :operation_return))
+  (:get-otd-object-forces-moments
+   ()
+   "Get ObjectTurnaroundDetector's curernt forces and moments for used limbs.
+    Return value is (list force-list moment-list)."
+   (labels ((split-vector
+             (vec &optional (dim 3))
+             (let ((vret))
+               (dotimes (i (/ (length vec) dim))
+                 (push (subseq vec (* i 3) (+ (* i 3) 3)) vret))
+               (reverse vret))))
+     (let ((ret (send self :impedancecontrollerservice_getObjectForcesMoments)))
+       (list (split-vector (send (send ret :o_forces) :data)) (split-vector (send (send ret :o_moments) :data)))
+       ))
+   )
+  ;; !!Currently for resultant forces!!
+  (:set-object-turnaround-ref-force
+   (&key (limbs '(:rarm :larm))
+         (axis (float-vector 0 0 -1))
+         (max-time 4000.0)
+         (max-ref-force)
+         (detect-time-offset 2000.0))
+   "Set object turnaround reference force.
+    axis is resultant force direction.
+    max-time is max time [msec].
+    detect-time-offset is additional checking time [msec]."
+   (format t ";; Start object turnaround detection~%")
+   (send self :set-object-turnaround-detector-param :axis axis)
+   (send self :set-ref-force
+         (scale (/ max-ref-force (length limbs)) axis)
+         max-time
+         (if (= (length limbs) 1) (car limbs) :arms))
+   (send self :start-object-turnaround-detection
+         :ref-diff-wrench max-ref-force
+         :max-time (* 1e-3 (+ detect-time-offset max-time))
+         :limbs limbs)
+   (let ((detected-p))
+     (do-until-key-with-check
+      (not detected-p)
+      (setq detected-p (send self :check-object-turnaround-detection))
+      (format t ";;   Detecting... (detected-p = ~A, current force moment = ~A)~%" detected-p (send self :get-otd-object-forces-moments))
+      (unix:usleep (* 1000 500)))
+     (when detected-p
+       (let ((fm-ret (send self :get-otd-object-forces-moments)))
+         (format t ";; Detected (force moment = ~A)~%" fm-ret)
+         (send self :set-ref-force
+               (car (car fm-ret))
+               max-time
+               (if (= (length limbs) 1) (car limbs) :arms))))
+     (send self :wait-interpolation-seq)
+     ))
+  )
+
 ;; RemoveForceSensorLinkOffset
 (def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_RemoveForceSensorLinkOffsetService_ForceMomentOffsetParam
   :raw-set-forcemoment-offset-param :raw-get-forcemoment-offset-param
