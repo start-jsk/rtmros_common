@@ -640,7 +640,8 @@
          (max-time 4000.0)
          (max-ref-force)
          (detect-time-offset 2000.0)
-         (set-ref-force-time 2000.0))
+         (set-ref-force-time 2000.0)
+         (set-ref-force-p t))
    "Set object turnaround reference force.
     axis is resultant force direction.
     max-time is max time [msec].
@@ -655,20 +656,33 @@
          :ref-diff-wrench max-ref-force
          :max-time (* 1e-3 (+ detect-time-offset max-time))
          :limbs limbs)
-   (let ((detected-p))
+   (let ((detected-p) (fm-ret))
      (do-until-key-with-check
       (not detected-p)
       (setq detected-p (send self :check-object-turnaround-detection))
       (format t ";;   Detecting... (detected-p = ~A, current force moment = ~A)~%" detected-p (send self :get-otd-object-forces-moments))
       (unix:usleep (* 1000 500)))
-     (when detected-p
-       (let ((fm-ret (send self :get-otd-object-forces-moments)))
-         (format t ";; Detected (force moment = ~A)~%" fm-ret)
-         (send self :set-ref-force
-               (car (car fm-ret))
-               set-ref-force-time
-               (if (= (length limbs) 1) (car limbs) :arms))))
+     (if detected-p
+         (progn
+           (setq fm-ret (send self :get-otd-object-forces-moments))
+           (format t ";; Detected (force moment = ~A)~%" fm-ret)
+           (if set-ref-force-p
+               (send self :set-ref-force
+                     (car (car fm-ret))
+                     set-ref-force-time
+                     (if (= (length limbs) 1) (car limbs) :arms))
+             (send self :set-ref-force
+                   (float-vector 0 0 0)
+                   set-ref-force-time
+                   (if (= (length limbs) 1) (car limbs) :arms))))
+       (send self :set-ref-force
+             (float-vector 0 0 0)
+             set-ref-force-time
+             (if (= (length limbs) 1) (car limbs) :arms))
+       )
      (send self :wait-interpolation-seq)
+     (if detected-p
+         (car fm-ret))
      ))
   )
 
