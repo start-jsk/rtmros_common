@@ -618,7 +618,9 @@
    ()
    "Check object turnaround detection.
    If t, detected. Otherwise, not detected."
-   (send (send self :impedancecontrollerservice_checkObjectTurnaroundDetection) :operation_return))
+   (send self :get-idl-enum-values
+         (send (send self :impedancecontrollerservice_checkObjectTurnaroundDetection) :operation_return)
+         "HRPSYS_ROS_BRIDGE::OPENHRP_IMPEDANCECONTROLLERSERVICE_DETECTORMODE"))
   (:get-otd-object-forces-moments
    ()
    "Get ObjectTurnaroundDetector's curernt forces and moments for used limbs.
@@ -656,13 +658,13 @@
          :ref-diff-wrench max-ref-force
          :max-time (* 1e-3 (+ detect-time-offset max-time))
          :limbs limbs)
-   (let ((detected-p) (fm-ret))
+   (let ((detector-mode :mode_detector_idle) (fm-ret))
      (do-until-key-with-check
-      (not detected-p)
-      (setq detected-p (send self :check-object-turnaround-detection))
-      (format t ";;   Detecting... (detected-p = ~A, current force moment = ~A)~%" detected-p (send self :get-otd-object-forces-moments))
+      (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
+      (setq detector-mode (send self :check-object-turnaround-detection))
+      (format t ";;   Detecting... (detector-mode = ~A, current force moment = ~A)~%" detector-mode (send self :get-otd-object-forces-moments))
       (unix:usleep (* 1000 500)))
-     (if detected-p
+     (if (eq detector-mode :mode_detected)
          (progn
            (setq fm-ret (send self :get-otd-object-forces-moments))
            (format t ";; Detected (force moment = ~A)~%" fm-ret)
@@ -675,13 +677,16 @@
                    (float-vector 0 0 0)
                    set-ref-force-time
                    (if (= (length limbs) 1) (car limbs) :arms))))
-       (send self :set-ref-force
-             (float-vector 0 0 0)
-             set-ref-force-time
-             (if (= (length limbs) 1) (car limbs) :arms))
+       (progn
+         (format t ";; Not detected (~A)~%" detector-mode)
+         (send self :set-ref-force
+               (float-vector 0 0 0)
+               set-ref-force-time
+               (if (= (length limbs) 1) (car limbs) :arms))
+         )
        )
      (send self :wait-interpolation-seq)
-     (if detected-p
+     (if (eq detector-mode :mode_detected)
          (car fm-ret))
      ))
   )
