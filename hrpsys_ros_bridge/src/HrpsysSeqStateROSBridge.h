@@ -25,7 +25,7 @@
 #include "pr2_controllers_msgs/JointTrajectoryControllerState.h"
 #include "dynamic_reconfigure/Reconfigure.h"
 #include "hrpsys_ros_bridge/MotorStates.h"
-#include "hrpsys_ros_bridge/ContactStates.h"
+#include "hrpsys_ros_bridge/ContactStatesStamped.h"
 #include "diagnostic_msgs/DiagnosticArray.h"
 #include "sensor_msgs/Imu.h"
 #include "hrpsys_ros_bridge/SetSensorTransformation.h"

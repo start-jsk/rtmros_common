@@ -134,8 +134,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   zmp_pub = nh.advertise<geometry_msgs::PointStamped>("/zmp", 10);
   ref_cp_pub = nh.advertise<geometry_msgs::PointStamped>("/ref_capture_point", 10);
   act_cp_pub = nh.advertise<geometry_msgs::PointStamped>("/act_capture_point", 10);
-  ref_contact_states_pub = nh.advertise<hrpsys_ros_bridge::ContactStates>("/ref_contact_states", 10);
-  act_contact_states_pub = nh.advertise<hrpsys_ros_bridge::ContactStates>("/act_contact_states", 10);
+  ref_contact_states_pub = nh.advertise<hrpsys_ros_bridge::ContactStatesStamped>("/ref_contact_states", 10);
+  act_contact_states_pub = nh.advertise<hrpsys_ros_bridge::ContactStatesStamped>("/act_contact_states", 10);
   cop_pub.resize(m_mcforceName.size());
   for (unsigned int i=0; i<m_mcforceName.size(); i++){
     std::string tmpname(m_mcforceName[i]); // "ref_xx"
@@ -873,16 +873,23 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_refContactStatesIn.isNew() ) {
     try {
       m_refContactStatesIn.read();
-      hrpsys_ros_bridge::ContactStates refCSs;
+      hrpsys_ros_bridge::ContactStatesStamped refCSs;
       if ( use_hrpsys_time ) {
         refCSs.header.stamp = ros::Time(m_refContactStates.tm.sec, m_refContactStates.tm.nsec);
       }else{
         refCSs.header.stamp = tm_on_execute;
       }
       int limb_size = m_refContactStates.data.length();
-      refCSs.contact_state.resize(limb_size);
+      refCSs.states.resize(limb_size);
       for ( unsigned int i = 0; i < limb_size ; i++ ){
-        refCSs.contact_state[i] = m_refContactStates.data[i];
+        hrpsys_ros_bridge::ContactState s;
+        if (m_refContactStates.data[i]) {
+          s.state = s.ON;
+        } else {
+          s.state = s.OFF;
+        }
+        refCSs.states[i].header = refCSs.header;
+        refCSs.states[i].state = s;
       }
       ref_contact_states_pub.publish(refCSs);
     }
@@ -895,16 +902,23 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_actContactStatesIn.isNew() ) {
     try {
       m_actContactStatesIn.read();
-      hrpsys_ros_bridge::ContactStates actCSs;
+      hrpsys_ros_bridge::ContactStatesStamped actCSs;
       if ( use_hrpsys_time ) {
         actCSs.header.stamp = ros::Time(m_actContactStates.tm.sec, m_actContactStates.tm.nsec);
       }else{
         actCSs.header.stamp = tm_on_execute;
       }
       int limb_size = m_actContactStates.data.length();
-      actCSs.contact_state.resize(limb_size);
+      actCSs.states.resize(limb_size);
       for ( unsigned int i = 0; i < limb_size ; i++ ){
-        actCSs.contact_state[i] = m_actContactStates.data[i];
+        hrpsys_ros_bridge::ContactState s;
+        if (m_actContactStates.data[i]) {
+          s.state = s.ON;
+        } else {
+          s.state = s.OFF;
+        }
+        actCSs.states[i].header = actCSs.header;
+        actCSs.states[i].state = s;
       }
       act_contact_states_pub.publish(actCSs);
     }
