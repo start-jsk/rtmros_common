@@ -35,6 +35,10 @@
                  (ros::subscribe (format nil "/~A_capture_point" x) geometry_msgs::PointStamped
                                  #'send self :rtmros-capture-point-callback (read-from-string (format nil ":~A-capture-point" x)) :groupname groupname))
              '(ref act))
+     (mapcar #'(lambda (x)
+                 (ros::subscribe (format nil "/~A_contact_states" x) hrpsys_ros_bridge::ContactStatesStamped
+                                 #'send self :rtmros-contact-states-callback (read-from-string (format nil ":~A-contact-states" x)) :groupname groupname))
+             '(ref act))
      ))
   (:rtmros-motor-states-callback
    (msg)
@@ -68,6 +72,10 @@
    (ref-act msg)
    (let ((p (send msg :point)))
      (send self :set-robot-state1 ref-act (float-vector (send p :x) (send p :y) (send p :z)))))
+  (:rtmros-contact-states-callback
+   (ref-act msg)
+   (let ((ss (send-all (send msg :states) :state :state)))
+     (send self :set-robot-state1 ref-act ss)))
   (:tmp-force-moment-vector-for-limb
    (f/m fsensor-name &optional (topic-name-prefix nil)) ;; topic-name-prefix is "off" or "reference"
    (let ((key-name (if topic-name-prefix
@@ -161,6 +169,14 @@
      (case wrt
        (:local cp)
        (:world (send (car (send robot :links)) :transform-vector cp)))))
+  (:ref-contact-states
+   ()
+   "Returns contact states from AutoBalancer."
+   (cdr (assoc :ref-contact-states robot-state)))
+  (:act-contact-states
+   ()
+   "Returns contact states from Stabilizer."
+   (cdr (assoc :act-contact-states robot-state)))
   (:temperature-vector
    ()
    "Returns temperature vector."
