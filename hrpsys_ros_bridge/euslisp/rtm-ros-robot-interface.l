@@ -1156,6 +1156,20 @@
    (ros::unsubscribe "cmd_vel")
    (print ";; stop cmd-vel mode done.")
    )
+  (:calc-dvel-with-velocity-center-offset
+   (ang velocity-center-offset)
+   "ang : [deg], offset vector [mm]"
+   (let* ((default-step-time (send (send self :get-gait-generator-param) :default_step_time))
+          (cen (make-cascoords :pos velocity-center-offset))
+          (cc (make-cascoords)))
+     (send cen :assoc cc)
+     (send cen :rotate (deg2rad ang) :z)
+     (let ((tf (send (make-coords) :transformation cc)))
+       (list
+        (/ (* 1e-3 (elt (send tf :worldpos) 0)) default-step-time)
+        (/ (* 1e-3 (elt (send tf :worldpos) 1)) default-step-time)
+        (/ ang default-step-time)
+        ))))
   )
 
 ;; SoftErrorLimiterService
