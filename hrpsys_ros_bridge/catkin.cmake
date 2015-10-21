@@ -165,7 +165,7 @@ compile_openhrp_model(
   --simulation-timestep-option "0.002"
   --conf-file-option "abc_leg_offset: 0,0.19,0"
   --conf-file-option "end_effectors: rleg,RLEG_JOINT5,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, lleg,LLEG_JOINT5,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, rarm,RARM_JOINT5,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, larm,LARM_JOINT5,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0,"
-  --conf-file-option "pdgains_sim_file_name: ${hrpsys_PREFkIX}/share/hrpsys/samples/Sample4LegRobot/Sample4LegRobot.PDgain.dat"
+  --conf-file-option "pdgains_sim_file_name: ${hrpsys_PREFIX}/share/hrpsys/samples/Sample4LegRobot/Sample4LegRobot.PDgain.dat"
   )
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample_4leg_robot.wrl" hrpsys_ros_bridge Sample4LegRobot)
 endif(EXISTS ${_OPENHRP3_MODEL_DIR}/sample_4leg_robot.wrl)
@@ -176,7 +176,7 @@ compile_openhrp_model(
   --simulation-timestep-option "0.002"
   --conf-file-option "abc_leg_offset: 0,0.09,0"
   --conf-file-option "end_effectors: rleg,RLEG_TOE_P,WAIST,-0.08,0.0,-0.01,0.0,0.0,0.0,0.0, lleg,LLEG_TOE_P,WAIST,-0.08,0.0,-0.01,0.0,0.0,0.0,0.0,"
-  --conf-file-option "pdgains_sim_file_name: ${hrpsys_PREFkIX}/share/hrpsys/samples/SampleSpecialJointRobot/SampleSpecialJointRobot.PDgain.dat"
+  --conf-file-option "pdgains_sim_file_name: ${hrpsys_PREFIX}/share/hrpsys/samples/SampleSpecialJointRobot/SampleSpecialJointRobot.PDgain.dat"
   )
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample_special_joint_robot.wrl" hrpsys_ros_bridge SampleSpecialJointRobot)
 endif(EXISTS ${_OPENHRP3_MODEL_DIR}/sample_special_joint_robot.wrl)
