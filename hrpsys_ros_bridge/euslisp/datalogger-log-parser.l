@@ -98,6 +98,14 @@
          (find-if #'(lambda (x) (eq str-sym (send x :name))) parser-list))
      parser-list))
   (:eof-p () eof-p)
+  (:fix-unitsystem-of-angle-vector
+   (read-state &key (joint-list (send robot :joint-list)))
+   (let ((vec (instantiate float-vector (length read-state))))
+     (dotimes (i (length read-state))
+       (setf (elt vec i) (if (derivedp (elt joint-list i) rotational-joint)
+                             (rad2deg (elt read-state i))
+                           (* 1e3 (elt read-state i)))))
+     vec))
   (:update-robot-state
    (&key (wait-until-update nil))
    (setq eof-p (some #'null (send-all parser-list :proc)))
@@ -105,7 +113,7 @@
    (if (send self :parser-list "abc_q")
        (send self :set-robot-state1
              :auto-balancer-reference-vector
-             (map float-vector #'rad2deg (send (send self :parser-list "abc_q") :read-state))))
+             (send self :fix-unitsystem-of-angle-vector (send (send self :parser-list "abc_q") :read-state))))
    (if (send self :parser-list "abc_baseTformOut")
        (send self :set-robot-state1
              :auto-balancer-reference-root-coords
@@ -155,11 +163,10 @@
    ;; Set stable rtc data
    (send self :set-robot-state1
          :reference-vector
-         (map float-vector #'rad2deg (send (send self :parser-list "sh_qOut") :read-state)))
+         (send self :fix-unitsystem-of-angle-vector (send (send self :parser-list "sh_qOut") :read-state)))
    (send self :set-robot-state1
          :potentio-vector
-         (map float-vector #'rad2deg
-              (send (send self :parser-list "RobotHardware0_q") :read-state)))
+         (send self :fix-unitsystem-of-angle-vector (send (send self :parser-list "RobotHardware0_q") :read-state)))
    (send robot :angle-vector (cdr (assoc :potentio-vector robot-state)))
    (send self :set-robot-state1
          :torque-vector
