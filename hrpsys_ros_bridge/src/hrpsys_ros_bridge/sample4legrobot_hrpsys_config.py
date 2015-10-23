@@ -28,6 +28,7 @@ class Sample4LegRobotHrpsysConfigurator(HrpsysConfigurator):
         hcf.abc_svc.setAutoBalancerParam(abcp)
         ggp = hcf.abc_svc.getGaitGeneratorParam()[1]
         ggp.zmp_weight_map = [1.0]*4
+        ggp.default_step_height = 0.009 # see https://github.com/fkanehiro/hrpsys-base/issues/801
         hcf.abc_svc.setGaitGeneratorParam(ggp)
         stp_org = hcf.st_svc.getParameter()
         # for tpcc
@@ -39,6 +40,18 @@ class Sample4LegRobotHrpsysConfigurator(HrpsysConfigurator):
         stp_org.eefm_leg_outside_margin=71.12*1e-3
         stp_org.eefm_leg_front_margin=182.0*1e-3
         stp_org.eefm_leg_rear_margin=72.0*1e-3
+        stp_org.st_algorithm=OpenHRP.StabilizerService.EEFMQPCOP
+        rleg_vertices = [OpenHRP.StabilizerService.TwoDimensionVertex(pos=[stp_org.eefm_leg_front_margin, stp_org.eefm_leg_inside_margin]),
+                         OpenHRP.StabilizerService.TwoDimensionVertex(pos=[stp_org.eefm_leg_front_margin, -1*stp_org.eefm_leg_outside_margin]),
+                         OpenHRP.StabilizerService.TwoDimensionVertex(pos=[-1*stp_org.eefm_leg_rear_margin, -1*stp_org.eefm_leg_outside_margin]),
+                         OpenHRP.StabilizerService.TwoDimensionVertex(pos=[-1*stp_org.eefm_leg_rear_margin, stp_org.eefm_leg_inside_margin])]
+        lleg_vertices = [OpenHRP.StabilizerService.TwoDimensionVertex(pos=[stp_org.eefm_leg_front_margin, stp_org.eefm_leg_outside_margin]),
+                         OpenHRP.StabilizerService.TwoDimensionVertex(pos=[stp_org.eefm_leg_front_margin, -1*stp_org.eefm_leg_inside_margin]),
+                         OpenHRP.StabilizerService.TwoDimensionVertex(pos=[-1*stp_org.eefm_leg_rear_margin, -1*stp_org.eefm_leg_inside_margin]),
+                         OpenHRP.StabilizerService.TwoDimensionVertex(pos=[-1*stp_org.eefm_leg_rear_margin, stp_org.eefm_leg_outside_margin])]
+        rarm_vertices = rleg_vertices
+        larm_vertices = lleg_vertices
+        stp_org.eefm_support_polygon_vertices_sequence = map (lambda x : OpenHRP.StabilizerService.SupportPolygonVertices(vertices=x), [lleg_vertices, rleg_vertices, larm_vertices, rarm_vertices])
         stp_org.eefm_k1=[-1.39899,-1.39899]
         stp_org.eefm_k2=[-0.386111,-0.386111]
         stp_org.eefm_k3=[-0.175068,-0.175068]
@@ -47,7 +60,8 @@ class Sample4LegRobotHrpsysConfigurator(HrpsysConfigurator):
         stp_org.is_ik_enable = [True]*4
         stp_org.is_feedback_control_enable = [True]*4
         stp_org.is_zmp_calc_enable = [True]*4
-        stp_org.st_algorithm=OpenHRP.StabilizerService.EEFMQP
+        stp_org.eefm_use_force_difference_control=False
+        stp_org.st_algorithm=OpenHRP.StabilizerService.EEFMQPCOP
         hcf.st_svc.setParameter(stp_org)
 
     def __init__(self, robotname=""):
