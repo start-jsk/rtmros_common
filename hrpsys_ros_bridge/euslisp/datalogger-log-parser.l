@@ -173,6 +173,11 @@
          (send (send self :parser-list "RobotHardware0_tau") :read-state))
    ;; (send robot :torque-vector (cdr (assoc :torque-vector robot-state)))
    (send self :set-robot-state1
+         :servo-state
+         (map float-vector #'(lambda (intval)
+                               (let ((str (make-string 4))) (sys::poke intval str 0 :integer) (sys::peek str 0 :float)))
+              (mapcar #'ceiling (coerce (send (send self :parser-list "RobotHardware0_servoState") :read-state) cons))))
+   (send self :set-robot-state1
          :reference-torque-vector
          (send (send self :parser-list "sh_tqOut") :read-state))
    (send self :set-robot-state1
