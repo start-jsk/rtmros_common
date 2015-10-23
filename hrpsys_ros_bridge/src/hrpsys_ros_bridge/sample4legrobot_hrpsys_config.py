@@ -13,7 +13,7 @@ class Sample4LegRobotHrpsysConfigurator(HrpsysConfigurator):
     def init (self, robotname="Sample4LegRobot", url=""):
         HrpsysConfigurator.init(self, robotname, url)
         print "initialize rtc parameters"
-#        self.setStAbcParameters()
+        self.setStAbcParameters()
 
     def defJointGroups (self):
         rleg_6dof_group = ['rleg', ['RLEG_JOINT0', 'RLEG_JOINT1', 'RLEG_JOINT2', 'RLEG_JOINT3', 'RLEG_JOINT4', 'RLEG_JOINT5']]
