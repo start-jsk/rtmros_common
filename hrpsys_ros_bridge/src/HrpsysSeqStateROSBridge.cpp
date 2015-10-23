@@ -888,7 +888,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         } else {
           s.state = s.OFF;
         }
-        refCSs.states[i].header = refCSs.header;
+        refCSs.states[i].header.stamp = refCSs.header.stamp;
+        refCSs.states[i].header.frame_id = m_rsforceName[i*2];
         refCSs.states[i].state = s;
       }
       ref_contact_states_pub.publish(refCSs);
@@ -917,7 +918,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         } else {
           s.state = s.OFF;
         }
-        actCSs.states[i].header = actCSs.header;
+        actCSs.states[i].header.stamp = actCSs.header.stamp;
+        actCSs.states[i].header.frame_id = m_rsforceName[i*2];
         actCSs.states[i].state = s;
       }
       act_contact_states_pub.publish(actCSs);
