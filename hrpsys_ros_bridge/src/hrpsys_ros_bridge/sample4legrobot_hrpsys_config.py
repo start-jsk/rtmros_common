@@ -23,6 +23,11 @@ class Sample4LegRobotHrpsysConfigurator(HrpsysConfigurator):
         self.Groups = [rleg_6dof_group, lleg_6dof_group, rarm_6dof_group, larm_6dof_group]
 
     def setStAbcParameters (self):
+        # TL parameters
+        tlp=self.tl_svc.getParameter()[1]
+        tlp.debug_print_freq = int(10 / 0.002)
+        tlp.alarmRatio = 1.0
+        self.tl_svc.setParameter(tlp)
         abcp=hcf.abc_svc.getAutoBalancerParam()[1]
         abcp.leg_names = ['rleg', 'lleg', 'rarm', 'larm']
         hcf.abc_svc.setAutoBalancerParam(abcp)
