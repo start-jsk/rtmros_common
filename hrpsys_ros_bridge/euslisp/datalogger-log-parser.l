@@ -86,7 +86,7 @@
                                    :name (let ((nm (pathname-type x)))
                                            (read-from-string
                                             (if (and (substringp "(" nm) (substringp ")" nm))
-                                                (format nil "RobotHardware0_~A" (cadr (data-string-split nm "_")))
+                                                (format nil "RobotHardware0_~A" (car (last (data-string-split nm "_"))))
                                               nm)))))
                      (append (remove-if-not #'(lambda (x) (substringp "(" x)) fname-candidate-list)
                              fname-candidate-list-with-valid-line-without-rh)))
