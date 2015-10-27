@@ -249,7 +249,8 @@
            (or
            (ros::service-call
             (format nil "/~A/~A" rosbridge-name ,meth-name)
-            (instance ,(eval srv-request) :init ,@(mapcan #'(lambda (x) (list (caar x) (cadar x))) (cdadr init-method))))
+            (instance ,(eval srv-request) :init ,@(mapcan #'(lambda (x) (list (caar x) (cadar x))) (cdadr init-method)))
+            t)
            (error ";; service call failed (~A)" ,new-method-name)
            )
            )
