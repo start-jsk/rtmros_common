@@ -268,6 +268,7 @@
   (:stabilizer-current-base-rpy () (cdr (assoc :stabilizer-current-base-rpy robot-state)))
   (:stabilizer-debug-data () (cdr (assoc :stabilizer-debug-data robot-state)))
   (:stabilizer-end-coords-list () (cdr (assoc :stabilizer-end-coords-list robot-state)))
+  (:servo-state () (cdr (assoc :servo-state robot-state)))
   ;; overwrite
   (:reference-vector () (cdr (assoc :reference-vector robot-state)))
   (:actual-vector () (send self :potentio-vector))
