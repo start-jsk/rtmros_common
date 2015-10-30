@@ -25,6 +25,11 @@ class SampleRobotHrpsysConfigurator(HrpsysConfigurator):
         self.Groups = [rleg_6dof_group, lleg_6dof_group, torso_group, head_group, rarm_group, larm_group]
 
     def setStAbcParameters (self):
+        # TL parameters
+        tlp=self.tl_svc.getParameter()[1]
+        tlp.debug_print_freq = int(10 / 0.002)
+        tlp.alarmRatio = 1.0
+        self.tl_svc.setParameter(tlp)
         # ST parameters
         stp=self.st_svc.getParameter()
         stp.st_algorithm=OpenHRP.StabilizerService.EEFMQP
