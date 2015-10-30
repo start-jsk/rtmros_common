@@ -62,6 +62,8 @@
   <build_depend>tf</build_depend>
   <build_depend>visualization_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>roseus</build_depend>
+  <build_depend>pr2eus</build_depend>
 
   <run_depend>actionlib</run_depend>
   <run_depend>camera_info_manager</run_depend>
@@ -92,6 +94,8 @@
   <run_depend>tf</run_depend>
   <run_depend>visualization_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <build_depend>roseus</build_depend>
+  <build_depend>pr2eus</build_depend>
   <!-- <test_depend>hrpsys</test_depend> -->
   <!-- <test_depend>hrpsys_tools</test_depend> -->
   <!-- <test_depend>openrtm_tools</test_depend> -->
