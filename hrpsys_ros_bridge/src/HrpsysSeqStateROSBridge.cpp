@@ -870,9 +870,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
   }
 
-  if ( m_refContactStatesIn.isNew() ) {
+  if ( m_refContactStatesIn.isNew() && m_controlSwingSupportTimeIn.isNew() ) {
     try {
       m_refContactStatesIn.read();
+      m_controlSwingSupportTimeIn.read();
       hrpsys_ros_bridge::ContactStatesStamped refCSs;
       if ( use_hrpsys_time ) {
         refCSs.header.stamp = ros::Time(m_refContactStates.tm.sec, m_refContactStates.tm.nsec);
@@ -888,6 +889,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         } else {
           s.state = s.OFF;
         }
+        s.remaining_time = m_controlSwingSupportTime.data[i];
         refCSs.states[i].header.stamp = refCSs.header.stamp;
         refCSs.states[i].header.frame_id = m_rsforceName[i*2];
         refCSs.states[i].state = s;

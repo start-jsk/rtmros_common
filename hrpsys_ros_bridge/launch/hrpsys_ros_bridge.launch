@@ -134,6 +134,7 @@
           output="screen" args ="$(arg openrtm_args)" />
     <rtconnect from="abc.rtc:baseTformOut" to="HrpsysSeqStateROSBridge0.rtc:baseTform" subscription_type="new"/>
     <rtconnect from="abc.rtc:contactStates" to="HrpsysSeqStateROSBridge0.rtc:refContactStates" subscription_type="new"/>
+    <rtconnect from="abc.rtc:controlSwingSupportTime" to="HrpsysSeqStateROSBridge0.rtc:controlSwingSupportTime" subscription_type="new"/>
     <rtconnect from="kf.rtc:rpy" to="HrpsysSeqStateROSBridge0.rtc:baseRpy" subscription_type="new"/>
     <rtconnect from="st.rtc:zmp" to="HrpsysSeqStateROSBridge0.rtc:rszmp" subscription_type="new"/>
     <rtconnect from="st.rtc:refCapturePoint" to="HrpsysSeqStateROSBridge0.rtc:rsrefCapturePoint" subscription_type="new"/>
