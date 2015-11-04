@@ -145,6 +145,8 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   InPort<TimedLong> m_emergencyModeIn;
   TimedBooleanSeq m_refContactStates, m_actContactStates;
   InPort<TimedBooleanSeq> m_refContactStatesIn, m_actContactStatesIn;
+  TimedDoubleSeq m_controlSwingSupportTime;
+  InPort<TimedDoubleSeq> m_controlSwingSupportTimeIn;
 
   // </rtc-template>
 
