@@ -1381,10 +1381,10 @@
    (&key (ic-limbs '(:rarm :larm)) (abc-limbs '(:rleg :lleg)))
    "Start default unstable RTCs controller mode.
     Currently Stabilzier, AutoBalancer, and ImpedanceController are started."
-   (send self :start-st)
+   (send self :start-auto-balancer :limbs abc-limbs)
    (dolist (limb ic-limbs)
      (send self :start-impedance-no-wait limb))
-   (send self :start-auto-balancer :limbs abc-limbs)
+   (send self :start-st)
    (dolist (limb ic-limbs)
      (send self :wait-impedance-controller-transition limb))
    )
