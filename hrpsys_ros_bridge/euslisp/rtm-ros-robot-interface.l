@@ -1311,6 +1311,11 @@
 )
 
 ;; EmergencyStopperService
+(def-set-get-param-method
+  'hrpsys_ros_bridge::Openhrp_EmergencyStopperService_EmergencyStopperParam
+  :set-emergency-stopper-param :get-emergency-stopper-param
+  :emergencystopperservice_setemergencystopperparam :emergencystopperservice_getemergencystopperparam)
+
 (defmethod rtm-ros-robot-interface
   (:emergency-stop-motion
    ()
