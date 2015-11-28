@@ -789,7 +789,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	  }else{
 	    fsensor.header.stamp = tm_on_execute;
 	  }
-	  fsensor.header.frame_id = m_mcforceName[i];
+	  fsensor.header.frame_id = m_mcforceName[i].substr(std::string("ref_").size());
 	  fsensor.wrench.force.x = m_mcforce[i].data[0];
 	  fsensor.wrench.force.y = m_mcforce[i].data[1];
 	  fsensor.wrench.force.z = m_mcforce[i].data[2];
