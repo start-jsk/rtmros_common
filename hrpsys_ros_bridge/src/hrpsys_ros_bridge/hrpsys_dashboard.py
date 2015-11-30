@@ -11,6 +11,7 @@ except:
     import roslib; roslib.load_manifest('hrpsys_ros_bridge')
 
 import diagnostic_msgs.msg
+import std_msgs.msg
 
 import rospy
 
@@ -18,6 +19,7 @@ import hrpsys_ros_bridge
 from hrpsys_ros_bridge.srv import *
 import time
 import re
+import subprocess
 
 ####### rqt
 
@@ -279,6 +281,27 @@ class ImpedanceControllerMenu(MenuDashWidget):
          self.update_state(2)
          execHrpsysConfiguratorCommand("hcf.stopImpedanceController()")
 
+# for SLAM
+class MapButtonMenu(MenuDashWidget):
+    def __init__(self, map_node_name="gmapping_node"):
+        icons = [['bg-grey.svg', 'ic-runstop-off.svg'],
+                 ['bg-green.svg', 'ic-runstop-on.svg'],
+                 ['bg-red.svg', 'ic-runstop-off.svg']]
+        super(MapButtonMenu, self).__init__('set MAP', icons)
+        self.map_node_name = map_node_name
+        self.update_state(0)
+        self.add_action("reset map", self.on_map_reset)
+        self.add_action("reset odom", self.on_odom_reset)
+        self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
+        self.odom_init_pub = rospy.Publisher("/odom_init_trigger", std_msgs.msg.Empty, queue_size = 1)
+    def on_map_reset(self):
+        subprocess.call("gnome-terminal --tab -x \"" + os.environ.get("SHELL") + "\" -c \"rosnode kill " + self.map_node_name + "\"", shell=True)
+        # reset heightmap too
+        srv = rospy.ServiceProxy("/accumulated_heightmap/reset", std_msgs.msg.Empty)
+        srv()
+    def on_odom_reset(self):
+        self.odom_init_pub.publish(std_msgs.msg.Empty())
+
 # HrpsysConfigurator setting
 
 #   Global variable for HrpsysConfigurator
@@ -410,4 +433,3 @@ class HrpsysDashboard(Dashboard):
   def restore_settings(self, plugin_settings, instance_settings):
     self._console.restore_settings(plugin_settings, instance_settings)
     self._monitor.restore_settings(plugin_settings, instance_settings)
-
