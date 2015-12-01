@@ -604,8 +604,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         // }
         sigma << 0.1, 0.1, 0.001, 0.001, 0.001, 0.05; // velocities assumed to be have velocity propotional sigma
         for(int i = 0; i < 3; i++) {
-          sigma[i] *= local_velocity[i];
-          sigma[i + 3] *= omega[i];
+          sigma[i] = std::max(local_velocity[i] * sigma[i], 0.001);
+          sigma[i + 3] = std::max(omega[i] * sigma[i + 3], 0.001);
         }
 
         Eigen::Matrix<double,6,6> prev_pose_cov;
