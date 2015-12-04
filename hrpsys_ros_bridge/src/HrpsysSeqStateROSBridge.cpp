@@ -602,7 +602,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         // if (std::abs(omega[2]) < 0.01) {
         //   sigma[5] = 0.001; // trust "stop" state in theta
         // }
-        sigma << 0.1, 0.1, 0.001, 0.001, 0.001, 0.05; // velocities assumed to be have velocity propotional sigma
+        sigma << 0.3, 0.5, 0.001, 0.001, 0.001, 0.5; // velocities assumed to be have velocity propotional sigma
         for(int i = 0; i < 3; i++) {
           sigma[i] = std::max(local_velocity[i] * sigma[i], 0.001);
           sigma[i + 3] = std::max(omega[i] * sigma[i + 3], 0.001);
