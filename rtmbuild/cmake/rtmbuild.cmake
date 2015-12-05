@@ -80,6 +80,7 @@ macro(rtmbuild_init)
 
   execute_process(COMMAND pkg-config openrtm-aist --variable=rtm_idlc     OUTPUT_VARIABLE rtm_idlc     OUTPUT_STRIP_TRAILING_WHITESPACE)
   execute_process(COMMAND pkg-config openrtm-aist --variable=rtm_idlflags OUTPUT_VARIABLE rtm_idlflags OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set(rtm_idlflags "${rtm_idlflags} -Wbuse_quotes") # IDLs in hrpsys-base needs this option because of https://github.com/start-jsk/rtmros_common/issues/861. We can remove this after openrtm-aist.pc is updated.
   execute_process(COMMAND pkg-config openrtm-aist --variable=rtm_idldir   OUTPUT_VARIABLE rtm_idldir   OUTPUT_STRIP_TRAILING_WHITESPACE)
   execute_process(COMMAND pkg-config openrtm-aist --variable=rtm_cxx      OUTPUT_VARIABLE rtm_cxx      OUTPUT_STRIP_TRAILING_WHITESPACE)
   execute_process(COMMAND pkg-config openrtm-aist --variable=rtm_cflags   OUTPUT_VARIABLE rtm_cflags   OUTPUT_STRIP_TRAILING_WHITESPACE)
