@@ -52,7 +52,7 @@
 
 (defun samplerobot-auto-balancer-demo0 ()
   (print "1. AutoBalancer mode by fixing feet")
-  (send *ri* :start-auto-balancer)
+  (send *ri* :start-auto-balancer :limbs '(:rleg :lleg))
   (test-pose-list (list *arm-front-pose*) *initial-pose*)
   (send *ri* :stop-auto-balancer)
   (print "  Start and Stop AutoBalancer by fixing feet=>OK")
@@ -60,7 +60,7 @@
 
 (defun samplerobot-auto-balancer-demo1 ()
   (print "2. AutoBalancer mode by fixing hands and feet")
-  (send *ri* :start-auto-balancer :limbs '(:rleg :lleg :rarm :larm))
+  (send *ri* :start-auto-balancer)
   (test-pose-list (list *arm-front-pose*) *initial-pose*)
   (send *ri* :stop-auto-balancer)
   (print "  Start and Stop AutoBalancer by fixing hands and feet=>OK")
@@ -80,14 +80,14 @@
       (if (and (eps-v= (car zmpoff) (scale 1e3 (subseq dd 0 3))) (eps-v= (cadr zmpoff) (scale 1e3 (subseq dd 3)))) ;; [m] => [mm]
           (print "  setAutoBalancerParam() => OK"))))
   (print "  default_zmp_offsets setting check in start and stop")
-  (send *ri* :start-auto-balancer)
+  (send *ri* :start-auto-balancer :limbs '(:rleg :lleg))
   (send *ri* :stop-auto-balancer)
   (send *ri* :set-auto-balancer-param :default-zmp-offsets (list (float-vector 0 0 0) (float-vector 0 0 0)))
   t)
 
 (defun samplerobot-auto-balancer-demo4 ()
   (print "5. change base height, base rot x, base rot y, and upper body while AutoBalancer mode")
-  (send *ri* :start-auto-balancer)
+  (send *ri* :start-auto-balancer :limbs '(:rleg :lleg))
   (test-pose-list *pose-list* *initial-pose*)
   (send *ri* :stop-auto-balancer)
   )
@@ -99,7 +99,7 @@
     (send *sr* :angle-vector pose)
     (send *ri* :angle-vector (send *sr* :angle-vector) 1000)
     (send *ri* :wait-interpolation)
-    (send *ri* :start-auto-balancer)
+    (send *ri* :start-auto-balancer :limbs '(:rleg :lleg))
     (send *ri* :stop-auto-balancer)
     )
   (send *ri* :set-auto-balancer-param :default-zmp-offsets (list (float-vector 0 0 0) (float-vector 0 0 0)))
@@ -109,7 +109,7 @@
 
 (defun samplerobot-auto-balancer-demo6 ()
   (print "7. balance against hand force")
-  (send *ri* :start-auto-balancer)
+  (send *ri* :start-auto-balancer :limbs '(:rleg :lleg))
   (send *ri* :set-ref-force (float-vector 0 0 -50) 1000 :rarm)
   (send *ri* :wait-interpolation-seq)
   (send *ri* :set-ref-force (float-vector 0 0 0) 1000 :rarm)
