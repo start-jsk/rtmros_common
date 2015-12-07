@@ -827,7 +827,12 @@
 
 (defmethod rtm-ros-robot-interface
   (:start-auto-balancer
-   (&key (limbs '(:rleg :lleg)))
+   (&key (limbs (if (not (every #'null (send robot :arms)))
+                    '(:rleg :lleg :rarm :larm)
+                  '(:rleg :lleg))))
+   "startAutoBalancer.
+    If robot with arms, start auto balancer with legs and arms ik by default.
+    Otherwise, start auto balancer with legs ik by default."
    (send self :autobalancerservice_startAutoBalancer
          :limbs (mapcar #'(lambda (x) (format nil "~A" (string-downcase x))) limbs)))
   (:stop-auto-balancer () (send self :autobalancerservice_stopAutoBalancer))
@@ -1378,7 +1383,10 @@
 
 (defmethod rtm-ros-robot-interface
   (:start-default-unstable-controllers
-   (&key (ic-limbs '(:rarm :larm)) (abc-limbs '(:rleg :lleg)))
+   (&key (ic-limbs '(:rarm :larm))
+         (abc-limbs (if (not (every #'null (send robot :arms)))
+                        '(:rleg :lleg :rarm :larm)
+                      '(:rleg :lleg))))
    "Start default unstable RTCs controller mode.
     Currently Stabilzier, AutoBalancer, and ImpedanceController are started."
    (send self :start-st)
