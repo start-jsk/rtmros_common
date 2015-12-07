@@ -26,6 +26,8 @@ class TestSampleRobot(unittest.TestCase):
     listener = None
     lfsensor = None
     rfsensor = None
+    off_lfsensor = None
+    ref_lfsensor = None
     odom = None
     def lfsensor_cb(self, sensor):
         self.lfsensor = sensor
@@ -34,10 +36,16 @@ class TestSampleRobot(unittest.TestCase):
         self.rfsensor = sensor
     def odom_cb(self, odom):
         self.odom = odom
+    def off_lfsensor_cb(self, sensor):
+        self.off_lfsensor = sensor
+    def ref_lfsensor_cb(self, sensor):
+        self.ref_lfsensor = sensor
     def setUp(self):
         rospy.init_node('TestSampleRobot')
         rospy.Subscriber('/lfsensor', WrenchStamped, self.lfsensor_cb)
         rospy.Subscriber('/rfsensor', WrenchStamped, self.rfsensor_cb)
+        rospy.Subscriber('/off_lfsensor', WrenchStamped, self.off_lfsensor_cb)
+        rospy.Subscriber('/ref_lfsensor', WrenchStamped, self.ref_lfsensor_cb)
         rospy.Subscriber('/odom', Odometry, self.odom_cb)
         self.listener = tf.TransformListener()
 
@@ -72,6 +80,18 @@ class TestSampleRobot(unittest.TestCase):
             rospy.logwarn("wait for sensor...")
         rospy.logwarn("sensor = %r %r"%(self.lfsensor, self.rfsensor))
         self.assertAlmostEqual(self.lfsensor.wrench.force.z+self.rfsensor.wrench.force.z, 1300, delta=200)
+
+    def test_off_force_sensor(self):
+        while self.off_lfsensor == None:
+            time.sleep(1)
+            rospy.logwarn("wait for off_lfsensor...")
+        self.assertEqual(self.off_lfsensor.header.frame_id, "lfsensor")
+
+    def test_ref_force_sensor(self):
+        while self.ref_lfsensor == None:
+            time.sleep(1)
+            rospy.logwarn("wait for ref_lfsensor...")
+        self.assertEqual(self.ref_lfsensor.header.frame_id, "lfsensor")
 
     # send walk motion
     def test_load_pattern(self):
