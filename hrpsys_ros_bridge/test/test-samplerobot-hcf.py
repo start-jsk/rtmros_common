@@ -9,12 +9,36 @@ import OpenHRP
 
 import samplerobot_hrpsys_config
 
+import rospy
 import unittest, rostest, os, rospkg, sys
+from geometry_msgs.msg import WrenchStamped
 
 class TestSampleRobotHcf(unittest.TestCase):
+    off_lfsensor = None
+    ref_lfsensor = None
+
+    def off_lfsensor_cb(self, sensor):
+        self.off_lfsensor = sensor
+    def ref_lfsensor_cb(self, sensor):
+        self.ref_lfsensor = sensor
 
     def setUp(self):
+        rospy.init_node('TestSampleRobot')
+        rospy.Subscriber('/off_lfsensor', WrenchStamped, self.off_lfsensor_cb)
+        rospy.Subscriber('/ref_lfsensor', WrenchStamped, self.ref_lfsensor_cb)
         pass
+
+    def test_off_force_sensor(self):
+        while self.off_lfsensor == None:
+            time.sleep(1)
+            rospy.logwarn("wait for off_lfsensor...")
+        self.assertEqual(self.off_lfsensor.header.frame_id, "lfsensor")
+
+    def test_ref_force_sensor(self):
+        while self.ref_lfsensor == None:
+            time.sleep(1)
+            rospy.logwarn("wait for ref_lfsensor...")
+        self.assertEqual(self.ref_lfsensor.header.frame_id, "lfsensor")
 
     def test_hcf_init(self):
         hcf = samplerobot_hrpsys_config.SampleRobotHrpsysConfigurator()
