@@ -2,6 +2,130 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* deb release only targeting to indigo
+
+* [.travis.yml, hrpsys_ros_bridge/catkin.cmake] Enable travis euslisp test using USE_DEB=source and reducing make jobs and loads `#806 <https://github.com/start-jsk/rtmros_common/issues/806>`_
+
+* Bug Fixes
+
+  * [hrpsys_ros_bridge/euslisp/datalogger-log-parser.l] modify string conversion in RobotHardware0 (for robot name containing '_') `#848 <https://github.com/start-jsk/rtmros_common/issues/848>`_
+  * [hrpsys_ros_bridge/euslisp/datalogger-log-parser.l] Add RobotHardware0_servoState data to robot state `#853 <https://github.com/start-jsk/rtmros_common/issues/853>`_
+  * [hrpsys_ros_bridge/euslisp/datalogger-log-parser.l] Update unitsysetm conversion of angle-vector (rad->deg, m->mm) `#845 <https://github.com/start-jsk/rtmros_common/issues/845>`_
+  * [hrpsys_ros_bridge/catkin.cmake] Fix typo for hrpsys_PREFIX `#843 <https://github.com/start-jsk/rtmros_common/issues/843>`_
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Return detection mode. `#841 <https://github.com/start-jsk/rtmros_common/issues/841>`_
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Update set force method. Add reset force. `#840 <https://github.com/start-jsk/rtmros_common/issues/840>`_
+  * [hrpsys_ros_bridge/catkin.cmake] Update PDgain conf property name `#816 <https://github.com/start-jsk/rtmros_common/issues/816>`_
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Fix for pos and rot ik thre `#803 <https://github.com/start-jsk/rtmros_common/issues/803>`_
+  * [cmake/compile_robot_model.cmake] move location of set variable (compile_all_target) `#779 <https://github.com/start-jsk/rtmros_common/issues/779>`_
+  * [src/hrpsys_ros_bridge/hrpsys_dashboard.py] Run event loop for 1 sec after showing splashwindow to force to load image immediately `#762 <https://github.com/start-jsk/rtmros_common/issues/762>`_
+  * [euslisp/datalogger-log-parser.l] Warn message if wrong path is specified `#767 <https://github.com/start-jsk/rtmros_common/issues/767>`_
+  * [euslisp/datalogger-log-parser.l]  Add limb-list first, Add st and abc properties to datalogger log parser `#761 <https://github.com/start-jsk/rtmros_common/issues/761>`_
+
+* /off_xxsensor and /xxsensor
+
+  * [hrpsys_ros_bridge/src/HrpsysSeqStateROSBridge.cpp] fix  /off_xxsensor frame_id `#867 <https://github.com/start-jsk/rtmros_common/issues/867>`_
+  * [hrpsys_ros_bridge/src/HrpsysSeqStateROSBridge.cpp] fix frame_id of off_xxsensor `#855 <https://github.com/start-jsk/rtmros_common/issues/855>`_
+
+* euslisp/rtm-ros-robot-interface.l : add/modify interfaces for new/updated rtc
+
+  * [hrpsys_ros_bridge/test/hrpsys-samples/samplerobot-auto-balancer.l] Use 4limbs in startAutoBalancer when Groups has rarm and larm and  update sample. `#866 <https://github.com/start-jsk/rtmros_common/issues/866>`_
+  * add reference remaining_time in /ref_contact_states `#857 <https://github.com/start-jsk/rtmros_common/issues/857>`_
+  * Add method of servo-state `#853 <https://github.com/start-jsk/rtmros_common/issues/853>`_
+  * Add calc velocity from velocity offset `#842 <https://github.com/start-jsk/rtmros_common/issues/842>`_
+  * Add euslisp style argument for leg_default_translate_pos `#836 <https://github.com/start-jsk/rtmros_common/issues/836>`_
+  * Add grasp controller interface methods.l `#831 <https://github.com/start-jsk/rtmros_common/issues/831>`_
+  * Enable to set optional-data from robot and contact-state `#831 <https://github.com/start-jsk/rtmros_common/issues/831>`_
+  * Add optionalData from euslisp rs-list `#822 <https://github.com/start-jsk/rtmros_common/issues/822>`_
+  * add stabilizer-end-coords-list `#820 <https://github.com/start-jsk/rtmros_common/issues/820>`_
+  * Update setter methods `#818 <https://github.com/start-jsk/rtmros_common/issues/818>`_
+  * Add ":set-foot-steps-with-param-and-base-height" method in order to specify footstep with params and base height `#811 <https://github.com/start-jsk/rtmros_common/issues/811>`_
+  * update default-zmp-offsets interface according to hrpsys-base change `#808 <https://github.com/start-jsk/rtmros_common/issues/808>`_
+  * add an interface for multi legs footsteps `#795 <https://github.com/start-jsk/rtmros_common/issues/795>`_
+  * get ref-capture-point from Stabilizer rtco `#794 <https://github.com/start-jsk/rtmros_common/issues/794>`_
+  * update AutoBalancerParam according to https://github.com/fkanehiro/hrpsys-base/pull/750 `#786 <https://github.com/start-jsk/rtmros_common/issues/786>`_
+  * get cp from Stabilizer rtc `#781 <https://github.com/start-jsk/rtmros_common/issues/781>`_
+  * Update footstep methods to enable overwriting `#775 <https://github.com/start-jsk/rtmros_common/issues/775>`_
+  * get emergency-mode from robot-interface `#772 <https://github.com/start-jsk/rtmros_common/issues/772>`_
+  * Add calculation of sole edge `#759 <https://github.com/start-jsk/rtmros_common/issues/759>`_
+
+* Add PointCloudROSBridge and RangeSensorROSBridge, and modify ImageSensorROSBridge `#785 <https://github.com/start-jsk/rtmros_common/issues/785>`_
+
+  * [src/RangeSensorROSBridge.cpp] add intensity parameter for adding intensities `#802 <https://github.com/start-jsk/rtmros_common/issues/802>`_
+  * [src/ImageSensorROSBridge.cpp] fix parsing camera parameter `#798 <https://github.com/start-jsk/rtmros_common/issues/798>`_
+  * [src/ImageSensorROSBridge.cpp] fix bug / reset debug counter `#797 <https://github.com/start-jsk/rtmros_common/issues/797>`_
+  * [hrpsys_ros_bridge/cmake/compile_robot_model.cmake] Use collada_urdf_jsk_patch in order to convert dae into urdf which can be used in gazebo `#793 <https://github.com/start-jsk/rtmros_common/issues/793>`_
+  * [src/ImageSensorROSBridge.cpp] add camera param setter by ros parameter `#791 <https://github.com/start-jsk/rtmros_common/issues/791>`_
+  * [src/PointCloudROSBridge.cpp] fix PointCloudROSBridge, color and frame `#790 <https://github.com/start-jsk/rtmros_common/issues/790>`_
+  * [src/RangeSensorROSBridge.cpp] fix RangeSensorROSBridge / time_increment is zero `#788 <https://github.com/start-jsk/rtmros_common/issues/788>`_
+  * [src/RangeSensorROSBridge.cpp] fix frame of RangeSensor `#789 <https://github.com/start-jsk/rtmros_common/issues/789>`_
+
+* Add rsvel port (`#807 <https://github.com/start-jsk/rtmros_common/issues/807>`_)
+
+  * [src/HrpsysSeqStateROSBridge.cpp, launch/hrpsys_ros_bridge.launch] add rsvel port to HrpSeqStateROSBridge read dq in order to add velocity values to joint_states
+  * [hrpsys_ros_bridge/launch/hrpsys_ros_bridge.launch] add USE_VELOCITY_OUTPUT to arguments of rtmlaunch `#821 <https://github.com/start-jsk/rtmros_common/issues/821>`_
+
+* Add ObjectTurnaroundDetector methods `#838 <https://github.com/start-jsk/rtmros_common/issues/838>`_
+
+  * [src/hrpsys_ros_bridge/samplerobot_hrpsys_config.py] Update latest st parameter for torque control
+  * [euslisp/rtm-ros-robot-interface.l] Add set-ref-force time `#838 <https://github.com/start-jsk/rtmros_common/issues/838>`_
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add ObjectTurnaroundDetector methods
+  * [test/hrpsys-samples/samplerobot-carry-object.l] Add carry object euslisp sample `#838 <https://github.com/start-jsk/rtmros_common/issues/838>`_
+
+* SLAM support
+
+  * [hrpsys_ros_bridge/src/hrpsys_ros_bridge/hrpsys_dashboard.py] Add MapButton for SLAM and odometry `#869 <https://github.com/start-jsk/rtmros_common/issues/869>`_
+  * [src/HrpsysSeqStateROSBridge.cpp] Transform twist from local to global in pose covarance calculation because pose is in global `#830 <https://github.com/start-jsk/rtmros_common/issues/830>`_
+  * [src/HrpsysSeqStateROSBridge.cpp] Set root_link as child_frame_id and describe twist in child_frame_id coordinate `#828 <https://github.com/start-jsk/rtmros_common/issues/828>`_
+  * [src/HrpsysSeqStateROSBridge.cpp] Fix covariance calculation in HrpsysSeqStateROSBridge: previous verision calculation only can be applied in nonhoronomic robot `#812 <https://github.com/start-jsk/rtmros_common/issues/812>`_
+  * [src/HrpsysSeqStateROSBridge.cpp] Fix coordinate representation: omega in twist is global
+  * [src/HrpsysSeqStateROSBridge.cpp] Calculate covariance of odometry in HrpsysSeqStateROSBridge
+  * [src/HrpsysSeqStateROSBridge.cpp] update prev_odom only when odom is successfully updated in dt > 0
+  * [src/HrpsysSeqStateROSBridge.cpp] Calculate angular twist
+
+* Special joint support `#837 <https://github.com/start-jsk/rtmros_common/issues/837>`_
+
+  * [models/samplespecialjointrobot.yaml, catkin.cmake] Add cmake setting and euscollada yaml for special joint robot
+
+* add ContactState.msg, ContactStateStamped.msg, ContactStatesStamped.msg `#834 <https://github.com/start-jsk/rtmros_common/issues/834>`_
+
+  * [msg/ContactState.msg] Add frame_id to contact states messages
+  * [launch/hrpsys_ros_bridge.launch, src/HrpsysSeqStateROSBridge{,cpp,.h,Impl.cpp,Impl.h}] separate ContactStates.msg into ContactState.msg, ContactStateStamped.msg and ContactStatesStamped.msg
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add euslisp interface to get contact states
+  * [hrpsys_ros_bridge/src/HrpsysSeqStateROSBridge.cpp] add contact states publisher of AutoBalancer and Stabilizer
+  * [msg/ContactState.msg] add ContactStates.msg for legged robots
+
+* Sample codes
+
+  * [src/hrpsys_ros_bridge/sample4legrobot_hrpsys_config.py, src/hrpsys_ros_bridge/sample4legrobot_hrpsys_config.py] set ThermoLimiter parameters to decrease debug messages `#849 <https://github.com/start-jsk/rtmros_common/issues/849>`_
+  * [src/hrpsys_ros_bridge/sample4legrobot_hrpsys_config.py] update sample4legrobot st and abc parameters, set st and abc parameters `#847 <https://github.com/start-jsk/rtmros_common/issues/847>`_
+  * [hrpsys_ros_bridge/src/hrpsys_ros_bridge/samplerobot_hrpsys_config.py] Update st vertices setting `#819 <https://github.com/start-jsk/rtmros_common/issues/819>`_
+  * [src/hrpsys_ros_bridge/sample4legrobot_hrpsys_config.py,  models/sample4legrobot.yaml, euslisp/sample4legrobot-interface.l,  catkin.cmake] Add sample4legrobot generation if exists `#817 <https://github.com/start-jsk/rtmros_common/issues/817>`_
+  * [euslisp/sample4legrobot-interface.l] Update path hrpsys_ros_bridge_tutorials -> hrpsys_ros_bridge `#817 <https://github.com/start-jsk/rtmros_common/issues/817>`_
+  * [catkin.cmake] Add check for sample_4leg_robot existence `#817 <https://github.com/start-jsk/rtmros_common/issues/817>`_
+  * [hrpsys_ros_bridge/src/hrpsys_ros_bridge/samplerobot_hrpsys_config.py] Update st damping parameters `#809 <https://github.com/start-jsk/rtmros_common/issues/809>`_
+  * [hrpsys_ros_bridge/catkin.cmake, src/hrpsys_ros_bridge/samplerobot_hrpsys_config.py, test/hrpsys-samples/test_samplerobot_euslisp_unittests.launch]  Enable euslisp unittest for unstable rtcs `#806 <https://github.com/start-jsk/rtmros_common/issues/806>`_
+  * [scripts/default*.launch.in,,cmake/compile_robot_model.cmake] Use arguments to specify whether unstable or not `#806 <https://github.com/start-jsk/rtmros_common/issues/806>`_
+  * [hrpsys_ros_bridge/test/hrpsys-samples/samplerobot-unittest.l, samplerobot-auto-balancer.l] Update auto-balancer test functions and update unittest order `#806 <https://github.com/start-jsk/rtmros_common/issues/806>`_
+  * [hrpsys_ros_bridge/test/hrpsys-samples/test_samplerobot_euslisp_unittests.launch] Add collision detector test `#805 <https://github.com/start-jsk/rtmros_common/issues/805>`_
+
+* Move euslisp sample code from roseus_tutorials `#800 <https://github.com/start-jsk/rtmros_common/issues/800>`_
+
+  * [hrpsys_ros_bridge/test/hrpsys-samples/test_samplerobot_euslisp_unittests.launch] Add rostest launch file for euslisp unittest and use .launch instead of .test.
+  * [hrpsys_ros_bridge/test/hrpsys-samples, hrpsys_ros_bridge/euslisp/samplerobot-interface.l] Fix package name for sample robot euslisp files (hrpsys_ros_bridge_tutorials -> hrpsys_ros_bridge)
+
+* Use emergency stopper by default for unstable rtc robots  `#760 <https://github.com/start-jsk/rtmros_common/issues/760>`_
+
+  * [hrpsys_ros_bridge/cmake/compile_robot_model.cmake] Use emergency stopper by default for unstable rtc robots
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add method for emergency stop methods
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Enable to set rosbridge name for idl srv methods.
+  * [hrpsys_ros_bridge/launch/hrpsys_ros_bridge.launch] Add emergency stopper ROSBridges
+  * [scripts/diagnostics.py] publish diagnostic of emergency_mode from diagnostics.py `#780 <https://github.com/start-jsk/rtmros_common/issues/780>`_
+  * [src/HrpsysSeqStateROSBridge{,cpp,.h,Impl.cpp,Impl.h}] publish emergency_mode from EmergencyStopper rtc `#763 <https://github.com/start-jsk/rtmros_common/issues/763>`_
+
+* Contributors: Eisoku Kuroiwa, Kei Okada, Masaki Murooka, Ryohei Ueda, Shunichi Nozawa, Tatsuya Ishikawa, Yohei Kakiuchi, Yuta Kojio, Iori Kumagai
+
 1.2.14 (2015-06-23)
 -------------------
 * [hrpsys_ros_bridge] Add splash screen to hrpsys dashboard

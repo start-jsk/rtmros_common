@@ -2,6 +2,10 @@
 Changelog for package rosnode_rtc
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* deb release only targeting to indigo
+
 1.2.14 (2015-06-23)
 -------------------
 

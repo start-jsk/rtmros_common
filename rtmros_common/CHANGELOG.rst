@@ -2,6 +2,10 @@
 Changelog for package rtmros_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* deb release only targeting to indigo
+
 1.2.14 (2015-06-23)
 -------------------
 
