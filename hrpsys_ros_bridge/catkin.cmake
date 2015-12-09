@@ -94,6 +94,13 @@ rtmbuild_genidl()
 rtmbuild_genbridge()
 
 ##
+## [  9%] Generating /home/travis/ros/ws_rtmros_common/devel/lib/libStabilizerServiceStub.so, /home/travis/ros/ws_rtmros_common/devel/lib/libStabilizerServiceSkel.so
+## In file included from /home/travis/ros/ws_rtmros_common/devel/include/hrpsys_ros_bridge/idl/StabilizerServiceStub.h:30:0,
+##                  from /home/travis/ros/ws_rtmros_common/devel/include/hrpsys_ros_bridge/idl/StabilizerServiceStub.cpp:12:
+## /home/travis/ros/ws_rtmros_common/devel/include/hrpsys_ros_bridge/idl/StabilizerService.hh:23:34: fatal error: AutoBalancerService.hh: No such file or directory
+add_dependencies(RTMBUILD_hrpsys_ros_bridge_StabilizerService_genrpc RTMBUILD_hrpsys_ros_bridge_AutoBalancerService_genrpc)
+
+##
 ## hrpsys ros bridge tools
 ##
 # pr2_controller_msgs is not catkinized
