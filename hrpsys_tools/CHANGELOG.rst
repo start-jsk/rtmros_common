@@ -2,8 +2,8 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.0 (2015-12-09)
+------------------
 * deb release only targeting to indigo
 
 * bug fixes

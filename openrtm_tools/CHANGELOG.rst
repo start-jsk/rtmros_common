@@ -2,8 +2,8 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.0 (2015-12-09)
+------------------
 * deb release only targeting to indigo
 
 * [src/openrtm_tools/rtmlaunch.py] check rtc connection once in rtmlaunch.py when "RTC_CONNECTION_CHECK_ONCE" env is set `#834 <https://github.com/start-jsk/rtmros_common/pull/835>`_

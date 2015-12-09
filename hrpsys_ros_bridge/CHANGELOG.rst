@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.0 (2015-12-09)
+------------------
 * deb release only targeting to indigo
 
 * [.travis.yml, hrpsys_ros_bridge/catkin.cmake] Enable travis euslisp test using USE_DEB=source and reducing make jobs and loads `#806 <https://github.com/start-jsk/rtmros_common/issues/806>`_
