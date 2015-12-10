@@ -9,6 +9,9 @@ python:
   - "2.7"
 compiler:
   - gcc
+cache:
+  - ccache
+  - apt
 env:
   global:
     - ROSWS=wstool
@@ -45,6 +48,7 @@ before_script:
 script:
   - if [ "${IS_EUSLISP_TRAVIS_TEST}" != "true" ] ; then export ROS_PARALLEL_JOBS="-j2 -l2" ; fi
   - if [ "${TEST_TYPE}" == "" ] ; then source .travis/travis.sh; else source ./.travis_test.sh ; fi
+  - ccache -s
 after_success:
   - TRAVIS_JOB_SUBNUMBER="${TRAVIS_JOB_NUMBER##*.}"
   # begin hot fix

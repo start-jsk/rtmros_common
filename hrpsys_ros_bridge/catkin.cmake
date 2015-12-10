@@ -72,6 +72,13 @@ endif()
 
 unset(hrpsys_LIBRARIES CACHE) # remove not to add hrpsys_LIBRARIES to hrpsys_ros_bridgeConfig.cmake
 
+# Use ccache if installed to make it fast to generate object files
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND AND "$ENV{CI}" STREQUAL "true" )
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
+
 # define add_message_files before rtmbuild_init
 add_message_files(FILES MotorStates.msg ContactState.msg ContactStateStamped.msg ContactStatesStamped.msg)
 add_service_files(FILES SetSensorTransformation.srv)
@@ -92,6 +99,13 @@ rtmbuild_genidl()
 
 # generate bridge
 rtmbuild_genbridge()
+
+##
+## [  9%] Generating /home/travis/ros/ws_rtmros_common/devel/lib/libStabilizerServiceStub.so, /home/travis/ros/ws_rtmros_common/devel/lib/libStabilizerServiceSkel.so
+## In file included from /home/travis/ros/ws_rtmros_common/devel/include/hrpsys_ros_bridge/idl/StabilizerServiceStub.h:30:0,
+##                  from /home/travis/ros/ws_rtmros_common/devel/include/hrpsys_ros_bridge/idl/StabilizerServiceStub.cpp:12:
+## /home/travis/ros/ws_rtmros_common/devel/include/hrpsys_ros_bridge/idl/StabilizerService.hh:23:34: fatal error: AutoBalancerService.hh: No such file or directory
+add_dependencies(RTMBUILD_hrpsys_ros_bridge_StabilizerService_genrpc RTMBUILD_hrpsys_ros_bridge_AutoBalancerService_genrpc)
 
 ##
 ## hrpsys ros bridge tools
