@@ -143,6 +143,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
     cop_pub[i] = nh.advertise<geometry_msgs::PointStamped>(tmpname+"_cop", 10);
   }
   em_mode_pub = nh.advertise<std_msgs::Int32>("emergency_mode", 10);
+  vital_sign_pub = nh.advertise<std_msgs::Time>("hrpsys_ros_bridge_vital_sign", 10);
 
   return RTC::RTC_OK;
 }
@@ -270,6 +271,10 @@ bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 {
+  std_msgs::Time vital_sign;
+  vital_sign.data = ros::Time::now();
+  vital_sign_pub.publish(vital_sign);
+
   ros::Time tm_on_execute = ros::Time::now();
   pr2_controllers_msgs::JointTrajectoryControllerState joint_controller_state;
   joint_controller_state.header.stamp = tm_on_execute;
