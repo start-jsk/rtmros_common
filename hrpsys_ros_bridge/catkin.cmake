@@ -170,6 +170,8 @@ compile_openhrp_model(${_OPENHRP3_MODEL_DIR}/sample1.wrl SampleRobot
   --conf-file-option "abc_leg_offset: 0,0.09,0"
   --conf-file-option "end_effectors: lleg,LLEG_ANKLE_R,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, rleg,RLEG_ANKLE_R,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, larm,LARM_WRIST_P,CHEST,0.0,0,-0.12,0,1.0,0.0,1.5708, rarm,RARM_WRIST_P,CHEST,0.0,0,-0.12,0,1.0,0.0,1.5708,"
   --conf-file-option "collision_pair: RARM_WRIST_P:WAIST LARM_WRIST_P:WAIST RARM_WRIST_P:RLEG_HIP_R LARM_WRIST_P:LLEG_HIP_R RARM_WRIST_R:RLEG_HIP_R LARM_WRIST_R:LLEG_HIP_R"
+  --conf-file-option "# SequencePlayer optional data (contactStates x 4 + controlSwingTime x 4 (4 is lfsensor, rfsensor, lhsensor, rhsensor)"
+  --conf-file-option "seq_optional_data_dim: 8"
   --conf-file-option "pdgains_sim_file_name: ${hrpsys_PREFIX}/share/hrpsys/samples/SampleRobot/SampleRobot.PDgain.dat"
   )
 if(EXISTS ${_OPENHRP3_MODEL_DIR}/sample_4leg_robot.wrl)
@@ -179,6 +181,8 @@ compile_openhrp_model(
   --simulation-timestep-option "0.002"
   --conf-file-option "abc_leg_offset: 0,0.19,0"
   --conf-file-option "end_effectors: rleg,RLEG_JOINT5,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, lleg,LLEG_JOINT5,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, rarm,RARM_JOINT5,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0, larm,LARM_JOINT5,WAIST,0.0,0.0,-0.07,0.0,0.0,0.0,0.0,"
+  --conf-file-option "# SequencePlayer optional data (contactStates x 4 + controlSwingTime x 4 (4 is rfsensor, lfsensor, rhsensor, lhsensor)"
+  --conf-file-option "seq_optional_data_dim: 8"
   --conf-file-option "pdgains_sim_file_name: ${hrpsys_PREFIX}/share/hrpsys/samples/Sample4LegRobot/Sample4LegRobot.PDgain.dat"
   )
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample_4leg_robot.wrl" hrpsys_ros_bridge Sample4LegRobot)
@@ -190,6 +194,8 @@ compile_openhrp_model(
   --simulation-timestep-option "0.002"
   --conf-file-option "abc_leg_offset: 0,0.09,0"
   --conf-file-option "end_effectors: rleg,RLEG_TOE_P,WAIST,-0.08,0.0,-0.01,0.0,0.0,0.0,0.0, lleg,LLEG_TOE_P,WAIST,-0.08,0.0,-0.01,0.0,0.0,0.0,0.0,"
+  --conf-file-option "# SequencePlayer optional data (contactStates x 2 + controlSwingTime x 2 (2 is rfsensor, lfsensor)"
+  --conf-file-option "seq_optional_data_dim: 4"
   --conf-file-option "pdgains_sim_file_name: ${hrpsys_PREFIX}/share/hrpsys/samples/SampleSpecialJointRobot/SampleSpecialJointRobot.PDgain.dat"
   )
 generate_default_launch_eusinterface_files("\$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample_special_joint_robot.wrl" hrpsys_ros_bridge SampleSpecialJointRobot)
