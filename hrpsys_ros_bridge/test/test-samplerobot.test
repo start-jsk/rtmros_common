@@ -9,7 +9,7 @@
   </include>
 
   <!-- check if tf is published -->       
-  <param name="hztest_tf/topic" value="/odom" />
+  <param name="hztest_tf/topic" value="/joint_states" />
   <param name="hztest_tf/wait_time" value="100" />
   <param name="hztest_tf/hz" value="500.0" />
   <param name="hztest_tf/hzerror" value="50.0" />
