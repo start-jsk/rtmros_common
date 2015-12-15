@@ -10,10 +10,10 @@
 
   <!-- check if tf is published -->       
   <param name="hztest_tf/topic" value="/joint_states" />
-  <param name="hztest_tf/wait_time" value="100" />
+  <param name="hztest_tf/wait_time" value="240" />
   <param name="hztest_tf/hz" value="500.0" />
   <param name="hztest_tf/hzerror" value="50.0" />
-  <param name="hztest_tf/test_duration" value="5.0" />
+  <param name="hztest_tf/test_duration" value="30.0" />
   <test test-name="hztest_tf" pkg="rostest" type="hztest" name="hztest_tf" retry="4" />
 
   <test test-name="samplerobot" pkg="hrpsys_ros_bridge" type="test-samplerobot.py" retry="4" time-limit="300"/>
