@@ -15,6 +15,6 @@
   <param name="hztest_tf/wait_time" value="240" />
   <param name="hztest_tf/hz" value="500.0" />
   <param name="hztest_tf/hzerror" value="50.0" />
-  <param name="hztest_tf/test_duration" value="30.0" />
-  <test test-name="hztest_tf" pkg="rostest" type="hztest" name="hztest_tf" retry="0" />
+  <param name="hztest_tf/test_duration" value="120.0" />
+  <test test-name="hztest_tf" pkg="rostest" type="hztest" name="hztest_tf" retry="0" time-limit="600" />
 </launch>
