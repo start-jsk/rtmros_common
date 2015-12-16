@@ -39,12 +39,12 @@ def connecSensorRosBridgePort(url, rh, bridge, vs, rmfo, sh):
 def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name, managerhost):
     hcf.waitForModelLoader()
     hcf.waitForRTCManagerAndRoboHardware(simulator_name, managerhost)
-    bridge = None
+    bridge = rtm.findRTC(rosbridge_name)
     while bridge == None :
         time.sleep(1);
         bridge = rtm.findRTC(rosbridge_name)
         print program_name, " wait for ", rosbridge_name, " : ",bridge
-    sh = None
+    sh=rtm.findRTC('sh')
     while sh == None :
         time.sleep(1);
         sh=rtm.findRTC('sh')

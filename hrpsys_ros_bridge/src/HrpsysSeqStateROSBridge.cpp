@@ -34,7 +34,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   use_sim_time(false), use_hrpsys_time(false),
   joint_trajectory_server(nh, "fullbody_controller/joint_trajectory_action", false),
   follow_joint_trajectory_server(nh, "fullbody_controller/follow_joint_trajectory_action", false),
-  HrpsysSeqStateROSBridgeImpl(manager), follow_action_initialized(false)
+  HrpsysSeqStateROSBridgeImpl(manager), follow_action_initialized(false), prev_odom_acquired(false)
 {
   // ros
   ros::NodeHandle pnh("~");
