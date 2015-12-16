@@ -2,6 +2,33 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* deb release only targeting to indigo
+
+* Fix for travis testing
+
+  * [hrpsys_ros_bridge/test/test-samplerobot.test] Use joint_states instead of odom to check tf because joint_states is more related with tf and [Hz] printing. than odom `#880 <https://github.com/start-jsk/rtmros_common/pull/880>`_
+  * [hrpsys_ros_bridge/test/test-samplerobot.test] Increase hzerror according to https://github.com/start-jsk/rtmros_common/issues/877#issuecomment-164669534. Current worst travis hz seem to be more than 300[Hz], so set 200[Hz] error. `#879 <https://github.com/start-jsk/rtmros_common/pull/879>`_
+  * catkin.cmake: use ccache only for CI environment `#872 <https://github.com/start-jsk/rtmros_common/pull/872>`_
+  * add depends from AutoBalancerService.hh to StabilizerService.hh `#872 <https://github.com/start-jsk/rtmros_common/pull/872>`_
+  * [hrpsys_ros_bridge/test/hrpsys-samples/test_samplerobot_euslisp_unittests.launch] Increase time-limit for autobalancer euslisp test `#879 <https://github.com/start-jsk/rtmros_common/pull/879>`_
+
+* Fasten script excution
+
+  * [hrpsys_ros_bridge/scripts/sensor_ros_bridge_connect.py] Reduce unnecessary waiting for sensor port rosbridge connection. `#879 <https://github.com/start-jsk/rtmros_common/pull/879>`_
+
+* Bug fix
+
+  * [hrpsys_ros_bridge/src/HrpsysSeqStateROSBridge.cpp] Initialize prev_odom_acquired flag. `#879 <https://github.com/start-jsk/rtmros_common/pull/879>`_
+
+* Add euslisp new example and update for example conf setting
+
+  * [hrpsys_ros_bridge/test/hrpsys-samples/samplerobot-stabilizer.l] Add Stabilizer + loadPattern example for euslisp interface. `#875 <https://github.com/start-jsk/rtmros_common/pull/875>`_
+  * [hrpsys_ros_bridge/catkin.cmake] Add Sequencer's optionalData setting for sample conf files. `#875 <https://github.com/start-jsk/rtmros_common/pull/875>`_
+
+* Contributors: Kei Okada, Shunichi Nozawa
+
 1.3.0 (2015-12-09)
 ------------------
 * deb release only targeting to indigo
