@@ -443,18 +443,17 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     if (publish_sensor_transforms) {
       boost::mutex::scoped_lock lock(sensor_transformation_mutex);
       std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
+      std::vector<geometry_msgs::TransformStamped> tf_transforms;
       while ( its != sensor_info.end() ) {
-        if (sensor_transformations.find((*its).first) == sensor_transformations.end()) {
-          br.sendTransform(tf::StampedTransform((*its).second.transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
-        }
-        else {
-          geometry_msgs::Transform transform = sensor_transformations[(*its).first];
-          tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
-                                     tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
-          br.sendTransform(tf::StampedTransform(tf_transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
-        }
+        geometry_msgs::TransformStamped transform;
+        transform.transform = sensor_transformations[(*its).first];
+        transform.header.stamp = joint_state.header.stamp;
+        transform.header.frame_id = std::string((*its).second.link_name);
+        transform.child_frame_id = its->first;
+        tf_transforms.push_back(transform);
         ++its;
       }
+      br.sendTransform(tf_transforms);
     }
     m_mutex.unlock();
 
