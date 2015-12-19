@@ -82,6 +82,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void clock_cb(const rosgraph_msgs::ClockPtr& str) {};
 
   bool follow_action_initialized;
+  bool publish_imu_floor;
 };
 
 
