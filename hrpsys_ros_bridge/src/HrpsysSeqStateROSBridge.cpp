@@ -592,16 +592,22 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         // calculate covariance
         // assume dx, dy >> dz, dgamma >> dalpha, dbeta and use 2d odometry update equation
         Eigen::VectorXd sigma(6);
-        sigma << 1.0, 1.0, 0.001, 0.001, 0.001, 0.1; // velocitis are assumed to have constant standard deviations and they are described in base_link local coordinates
-        if (std::abs(local_velocity[0]) < 0.01) {
-          sigma[0] = 0.001; // trust "stop" state in x
+        // sigma << 1.0, 1.0, 0.001, 0.001, 0.001, 0.1; // velocitis are assumed to have constant standard deviations and they are described in base_link local coordinates
+        // if (std::abs(local_velocity[0]) < 0.01) {
+        //   sigma[0] = 0.001; // trust "stop" state in x
+        // }
+        // if (std::abs(local_velocity[1]) < 0.01) {
+        //   sigma[1] = 0.001; // trust "stop" state in y
+        // }
+        // if (std::abs(omega[2]) < 0.01) {
+        //   sigma[5] = 0.001; // trust "stop" state in theta
+        // }
+        sigma << 0.3, 0.5, 0.001, 0.001, 0.001, 0.5; // velocities assumed to be have velocity propotional sigma
+        for(int i = 0; i < 3; i++) {
+          sigma[i] = std::max(local_velocity[i] * sigma[i], 0.001);
+          sigma[i + 3] = std::max(omega[i] * sigma[i + 3], 0.001);
         }
-        if (std::abs(local_velocity[1]) < 0.01) {
-          sigma[1] = 0.001; // trust "stop" state in y
-        }
-        if (std::abs(omega[2]) < 0.01) {
-          sigma[5] = 0.001; // trust "stop" state in theta
-        }
+
         Eigen::Matrix<double,6,6> prev_pose_cov;
         for(int i = 0; i < 6; i++) { // index in col
           for (int j = 0; j < 6; j++) { // index in raw
