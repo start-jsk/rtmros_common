@@ -397,8 +397,9 @@
   ;; In normal case, next support leg is obtained (case (send *ri* :get-foot-step-param :support-leg) (:rleg :lleg) (:lleg :rleg)) and next support leg coords is obtained by (send *ri* :get-foot-step-param :swing-leg-dst-coords)
   )
 
-(defun samplerobot-auto-balancer-demo20 ()
+(defun samplerobot-auto-balancer-demo20 (&key (reset-standing-pos nil))
   (print ";; 15. Overwrite current footstep")
+  (if reset-standing-pos (demo-reset-standing-pos))
   (send *ri* :angle-vector (send *sr* :angle-vector) 1000)
   (send *ri* :wait-interpolation)
   (send *ri* :start-auto-balancer)
@@ -509,6 +510,10 @@
       (send *ri* :wait-interpolation)
       )))
 
+(defun demo-reset-standing-pos ()
+  (send *ri* :go-pos 0 0 -45)
+  (send *ri* :go-pos 0 -1.0 0)))
+
 (defun samplerobot-auto-balancer-demo ()
   (samplerobot-auto-balancer-init)
 
@@ -536,6 +541,9 @@
   (samplerobot-auto-balancer-demo18)
   (samplerobot-auto-balancer-demo19)
   (samplerobot-auto-balancer-demo19 :overwrite-offset-idx 2)
+  (samplerobot-auto-balancer-demo20 :reset-standing-pos t)
+  (samplerobot-auto-balancer-demo21)
+  (samplerobot-auto-balancer-demo22)
   )
 
 (warn ";; (samplerobot-auto-balancer-demo)~%")
