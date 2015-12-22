@@ -8,6 +8,7 @@
 #include "rtm/idl/RTC.hh"
 #include "hrpsys_ros_bridge/idl/ExecutionProfileService.hh"
 #include "hrpsys_ros_bridge/idl/RobotHardwareService.hh"
+#include <eigen_conversions/eigen_msg.h>
 #include <boost/format.hpp>
 
 // Module specification
@@ -540,108 +541,18 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_baseTformIn.isNew () ) {
     m_baseTformIn.read();
     is_base_valid = true;
-    // tf::Transform base;
+    // calculate base transform
     double *a = m_baseTform.data.get_buffer();
-    base.setOrigin( tf::Vector3(a[0], a[1], a[2]) );
+    hrp::Vector3 base_origin = hrp::Vector3(a[0], a[1], a[2]);
+    base.setOrigin(tf::Vector3(base_origin[0], base_origin[1], base_origin[2]));
+    // calculate pose quaternion
     hrp::Matrix33 R;
     hrp::getMatrix33FromRowMajorArray(R, a, 3);
-    
     hrp::Vector3 rpy = hrp::rpyFromRot(R);
-    base.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)));
     tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));
-    nav_msgs::Odometry odom;
-    //odom.header.frame_id = rootlink_name;
-    odom.header.frame_id = "odom";
-    if ( use_hrpsys_time ) {
-      odom.header.stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
-    } else {
-      odom.header.stamp = tm_on_execute;
-    }
-    // odom.child_frame_id = "/odom";
-    odom.child_frame_id = rootlink_name;
-    odom.pose.pose.position.x = a[0];
-    odom.pose.pose.position.y = a[1];
-    odom.pose.pose.position.z = a[2];
-    odom.pose.pose.orientation.x = q.getX();
-    odom.pose.pose.orientation.y = q.getY();
-    odom.pose.pose.orientation.z = q.getZ();
-    odom.pose.pose.orientation.w = q.getW();
+    base.setRotation(q);
     
-    if (prev_odom_acquired) {
-      // calc velocity
-      double dt = (odom.header.stamp - prev_odom.header.stamp).toSec();
-      if (dt > 0) {
-        hrp::Matrix33 prev_R = hrp::rotFromRpy(prev_rpy[0], prev_rpy[1], prev_rpy[2]);
-        // R = exp(omega_w*dt) * prev_R
-        // omega_w is described in global coordinates in relationships of twist transformation.
-        // omega in twist.angular is transformed into rootlink coords because twist should be described in child_frame_id.
-        hrp::Vector3 omega = R.transpose() * hrp::omegaFromRot(R * prev_R.transpose()) / dt;  // omegaFromRot returns matrix_log
-        odom.twist.twist.angular.x = omega[0];
-        odom.twist.twist.angular.y = omega[1];
-        odom.twist.twist.angular.z = omega[2];
-        // calculate velocity (not strict linear twist from odom)
-        hrp::Vector3 velocity, local_velocity;
-        velocity[0] = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
-        velocity[1] = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
-        velocity[2] = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;
-        local_velocity = R.transpose() * velocity; // global -> local
-        odom.twist.twist.linear.x = local_velocity[0];
-        odom.twist.twist.linear.y = local_velocity[1];
-        odom.twist.twist.linear.z = local_velocity[2];
-        
-        // calculate covariance
-        // assume dx, dy >> dz, dgamma >> dalpha, dbeta and use 2d odometry update equation
-        Eigen::VectorXd sigma(6);
-        sigma << 1.0, 1.0, 0.001, 0.001, 0.001, 0.1; // velocitis are assumed to have constant standard deviations and they are described in base_link local coordinates
-        if (std::abs(local_velocity[0]) < 0.01) {
-          sigma[0] = 0.001; // trust "stop" state in x
-        }
-        if (std::abs(local_velocity[1]) < 0.01) {
-          sigma[1] = 0.001; // trust "stop" state in y
-        }
-        if (std::abs(omega[2]) < 0.01) {
-          sigma[5] = 0.001; // trust "stop" state in theta
-        }
-        Eigen::Matrix<double,6,6> prev_pose_cov;
-        for(int i = 0; i < 6; i++) { // index in col
-          for (int j = 0; j < 6; j++) { // index in raw
-            prev_pose_cov(i, j) = prev_odom.pose.covariance[6 * i + j];
-          }
-        }
-        // each variance are assumed to be independent        
-        Eigen::VectorXd sigma2(6);
-        for (int i = 0; i < 6; i++) {
-          sigma2[i] = sigma[i] * sigma[i];
-        }
-        Eigen::Matrix<double,6,6> twist_transformation = Eigen::Matrix<double,6,6>::Zero(); // matrix [[R, 0], [0, R]] to convert twist from local to global
-        for (int i = 0; i < 3; i++) {
-          for (int j = 0; j < 3; j++) {
-            twist_transformation(i, j) = R(i, j);
-            twist_transformation(i + 3, j + 3) = R(i, j);
-          }
-        }
-        Eigen::Matrix<double,6,6> twist_cov = sigma2.asDiagonal(); // twist is described as base_link local coordinates
-        // update covariance according to the relationships from definition of variance: V(x) = E[(x-u) * (x-u)^T]
-        // jacovian is described in world coordinates: x(t+dt) = f(x(t), v(t)), x is in world coordinates
-        Eigen::Matrix<double,6,6> jacobi_velocity = Eigen::Matrix<double,6,6>::Identity() * dt;
-        Eigen::Matrix<double,6,6> pose_cov = prev_pose_cov + jacobi_velocity * (twist_transformation.transpose() * twist_cov * twist_transformation) * jacobi_velocity.transpose();
-        // insert covariance
-        for(int i = 0; i < 6; i++) { // index in col
-          for (int j = 0; j < 6; j++) { // index in raw
-            odom.pose.covariance[6 * i + j] = pose_cov(i, j);
-            odom.twist.covariance[6 * i + j] = twist_cov(i, j);
-          }
-        }
-
-        odom_pub.publish(odom);
-        prev_odom = odom;
-        prev_rpy = rpy;
-      }
-    } else {
-      prev_odom = odom;
-      prev_rpy = rpy;
-      prev_odom_acquired = true;
-    }
+    updateOdometry(base_origin, R, tm_on_execute);
   }  // end: m_baseTformIn
 
   bool updateImu = false;
@@ -977,6 +888,121 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   //
   return RTC::RTC_OK;
+}
+
+void HrpsysSeqStateROSBridge::updateOdometry(hrp::Vector3 &trans, hrp::Matrix33 &R, ros::Time &stamp)
+{
+  hrp::Vector3 rpy = hrp::rpyFromRot(R);
+  tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));
+  nav_msgs::Odometry odom;
+  
+  odom.header.frame_id = "odom";
+  if ( use_hrpsys_time ) {
+    odom.header.stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
+  } else {
+    odom.header.stamp = stamp;
+  }
+  // odom.child_frame_id = "/odom";
+  odom.child_frame_id = rootlink_name;
+  odom.pose.pose.position.x = trans[0];
+  odom.pose.pose.position.y = trans[1];
+  odom.pose.pose.position.z = trans[2];
+  odom.pose.pose.orientation.x = q.getX();
+  odom.pose.pose.orientation.y = q.getY();
+  odom.pose.pose.orientation.z = q.getZ();
+  odom.pose.pose.orientation.w = q.getW();
+    
+  if (prev_odom_acquired) {
+    // calc velocity
+    double dt = (odom.header.stamp - prev_odom.header.stamp).toSec();
+    if (dt > 0) {
+      hrp::Matrix33 prev_R = hrp::rotFromRpy(prev_rpy[0], prev_rpy[1], prev_rpy[2]);
+      // R = exp(omega_w*dt) * prev_R
+      // omega_w is described in global coordinates in relationships of twist transformation.
+      // omega in twist.angular is transformed into rootlink coords because twist should be described in child_frame_id.
+      hrp::Vector3 omega = R.transpose() * hrp::omegaFromRot(R * prev_R.transpose()) / dt;  // omegaFromRot returns matrix_log
+      odom.twist.twist.angular.x = omega[0];
+      odom.twist.twist.angular.y = omega[1];
+      odom.twist.twist.angular.z = omega[2];
+      // calculate velocity (not strict linear twist from odom)
+      hrp::Vector3 velocity, local_velocity;
+      velocity[0] = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
+      velocity[1] = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
+      velocity[2] = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;
+      local_velocity = R.transpose() * velocity; // global -> local
+      odom.twist.twist.linear.x = local_velocity[0];
+      odom.twist.twist.linear.y = local_velocity[1];
+      odom.twist.twist.linear.z = local_velocity[2];
+        
+      // calculate covariance
+      // assume dx, dy >> dz, dgamma >> dalpha, dbeta and use 2d odometry update equation
+      Eigen::VectorXd sigma(6);
+      sigma << 1.0, 1.0, 0.001, 0.001, 0.001, 0.1; // velocitis are assumed to have constant standard deviations and they are described in base_link local coordinates
+      if (std::abs(local_velocity[0]) < 0.01) {
+        sigma[0] = 0.001; // trust "stop" state in x
+      }
+      if (std::abs(local_velocity[1]) < 0.01) {
+        sigma[1] = 0.001; // trust "stop" state in y
+      }
+      if (std::abs(omega[2]) < 0.01) {
+        sigma[5] = 0.001; // trust "stop" state in theta
+      }
+      Eigen::Matrix<double,6,6> prev_pose_cov;
+      for(int i = 0; i < 6; i++) { // index in col
+        for (int j = 0; j < 6; j++) { // index in raw
+          prev_pose_cov(i, j) = prev_odom.pose.covariance[6 * i + j];
+        }
+      }
+      // each variance are assumed to be independent        
+      Eigen::VectorXd sigma2(6);
+      for (int i = 0; i < 6; i++) {
+        sigma2[i] = sigma[i] * sigma[i];
+      }
+      Eigen::Matrix<double,6,6> twist_transformation = Eigen::Matrix<double,6,6>::Zero(); // matrix [[R, 0], [0, R]] to convert twist from local to global
+      for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          twist_transformation(i, j) = R(i, j);
+          twist_transformation(i + 3, j + 3) = R(i, j);
+        }
+      }
+      Eigen::Matrix<double,6,6> twist_cov = sigma2.asDiagonal(); // twist is described as base_link local coordinates
+      // update covariance according to the relationships from definition of variance: V(x) = E[(x-u) * (x-u)^T]
+      // jacovian is described in world coordinates: x(t+dt) = f(x(t), v(t)), x is in world coordinates
+      Eigen::Matrix<double,6,6> jacobi_velocity = Eigen::Matrix<double,6,6>::Identity() * dt;
+      Eigen::Matrix<double,6,6> pose_cov = prev_pose_cov + jacobi_velocity * (twist_transformation.transpose() * twist_cov * twist_transformation) * jacobi_velocity.transpose();
+      // insert covariance
+      for(int i = 0; i < 6; i++) { // index in col
+        for (int j = 0; j < 6; j++) { // index in raw
+          odom.pose.covariance[6 * i + j] = pose_cov(i, j);
+          odom.twist.covariance[6 * i + j] = twist_cov(i, j);
+        }
+      }
+      // publish odometry
+      odom_pub.publish(odom);
+
+      // preserve old values
+      prev_odom = odom;
+      prev_rpy = rpy;
+
+      // make affine3d matrix from pose message in odom
+      tf::poseMsgToEigen(odom.pose.pose, odom_pose_matrix);
+
+      // publish transformations
+      std::vector<geometry_msgs::TransformStamped> tf_transforms;
+      geometry_msgs::TransformStamped ros_odom_to_body_coords;
+      ros_odom_to_body_coords.header.stamp = odom.header.stamp;
+      ros_odom_to_body_coords.header.frame_id = "/odom";
+      ros_odom_to_body_coords.child_frame_id = rootlink_name;
+      tf::transformEigenToMsg(odom_pose_matrix, ros_odom_to_body_coords.transform);
+      tf_transforms.push_back(ros_odom_to_body_coords);
+      br.sendTransform(tf_transforms);
+    }
+  } else {
+    // previous values are needed to calculate velocity
+    prev_odom = odom;
+    prev_rpy = rpy;
+    prev_odom_acquired = true;
+  }
 }
 
 extern "C"

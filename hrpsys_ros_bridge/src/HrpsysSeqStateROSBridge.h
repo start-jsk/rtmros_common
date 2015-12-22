@@ -82,6 +82,9 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void clock_cb(const rosgraph_msgs::ClockPtr& str) {};
 
   bool follow_action_initialized;
+
+  void updateOdometry(hrp::Vector3 &trans, hrp::Matrix33 &R, ros::Time &stamp);
+  Eigen::Affine3d odom_pose_matrix;
 };
 
 
