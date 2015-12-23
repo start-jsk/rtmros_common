@@ -1038,9 +1038,9 @@ void HrpsysSeqStateROSBridge::updateOdomInit(Eigen::Affine3d &odom_pose_matrix, 
     // ignore z height and roll/pitch angle transform from odom assuming odom_init is on the flat ground
     double odom_init_yaw = atan2(odom_pose_matrix(1,0), odom_pose_matrix(0,0)); // ref: pcl::getEulerAngles
     odom_init_transform_matrix = (Eigen::Translation3d(odom_pose_matrix.translation()[0],
-                                                            odom_pose_matrix.translation()[1],
-                                                            0.0) *
-                                       Eigen::AngleAxisd(odom_init_yaw, Eigen::Vector3d::UnitZ()));
+                                                       odom_pose_matrix.translation()[1],
+                                                       0.0) *
+                                  Eigen::AngleAxisd(odom_init_yaw, Eigen::Vector3d::UnitZ()));
     // transform (not be affected by invert_odom_init_tf)
     ros_odom_init_coords.header.stamp = stamp;
     ros_odom_init_coords.header.frame_id = "/odom";
@@ -1073,14 +1073,14 @@ void HrpsysSeqStateROSBridge::publishOdometryTransforms(Eigen::Affine3d &odom_po
     if (invert_odom_init_tf) {
       ros_odom_init_coords.header.frame_id ="/odom_init";
       ros_odom_init_coords.child_frame_id =  "/odom";
-      tf::transformEigenToMsg(odom_init_transform_matrix.inverse(), ros_odom_init_coords.transform); // odom_init_transform_matrix is preserved as a instance valiable
+      tf::transformEigenToMsg(odom_init_transform_matrix.inverse(), ros_odom_init_coords.transform);
     } else {
       ros_odom_init_coords.header.frame_id = "/odom";
       ros_odom_init_coords.child_frame_id = "/odom_init";
-      tf::transformEigenToMsg(odom_init_transform_matrix, ros_odom_init_coords.transform); // odom_init_transform_matrix is preserved as a instance valiable
+      tf::transformEigenToMsg(odom_init_transform_matrix, ros_odom_init_coords.transform);
     }
+    tf_transforms.push_back(ros_odom_init_coords);
   }
-  tf_transforms.push_back(ros_odom_init_coords);
   br.sendTransform(tf_transforms);
 }
 
