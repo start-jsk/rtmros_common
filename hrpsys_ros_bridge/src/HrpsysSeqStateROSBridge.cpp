@@ -59,7 +59,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1);
   odom_init_pose_stamped_pub = nh.advertise<geometry_msgs::PoseStamped>("/odom_init_pose_stamped", 1, true);
   odom_init_transform_pub = nh.advertise<geometry_msgs::TransformStamped>("/odom_init_transform", 1, true);
-  odom_init_pose_matrix = Eigen::Affine3d::Identity();
+  odom_init_transform_matrix = Eigen::Affine3d::Identity();
   // is use_sim_time is set and no one publishes clock, publish clock time
   use_sim_time = ros::Time::isSimTime();
   clock_sub = nh.subscribe("/clock", 1, &HrpsysSeqStateROSBridge::clock_cb, this);
@@ -1031,23 +1031,21 @@ void HrpsysSeqStateROSBridge::updateOdomInit(Eigen::Affine3d &odom_pose_matrix, 
 {
   boost::mutex::scoped_lock lock(odom_init_mutex);
   if (update_odom_init_flag) {
-    // update odom_init_pose
-    odom_init_pose_matrix = odom_pose_matrix;
-    
     // publish odom_init topics
     // whether invert_odom_init is true or not odom_init_pose_stamped and odom_init_transform is described in odom coordinates.
     geometry_msgs::TransformStamped ros_odom_init_coords;
     geometry_msgs::PoseStamped ros_odom_init_pose_stamped;
+    // ignore z height and roll/pitch angle transform from odom assuming odom_init is on the flat ground
     double odom_init_yaw = atan2(odom_pose_matrix(1,0), odom_pose_matrix(0,0)); // ref: pcl::getEulerAngles
-    Eigen::Affine3d odom_init_pose = (Eigen::Translation3d(odom_init_pose_matrix.translation()[0],
-                                                           odom_init_pose_matrix.translation()[1],
-                                                           0.0) * 
-                                      Eigen::AngleAxisd(odom_init_yaw, Eigen::Vector3d::UnitZ()));
+    odom_init_transform_matrix = (Eigen::Translation3d(odom_pose_matrix.translation()[0],
+                                                            odom_pose_matrix.translation()[1],
+                                                            0.0) *
+                                       Eigen::AngleAxisd(odom_init_yaw, Eigen::Vector3d::UnitZ()));
     // transform (not be affected by invert_odom_init_tf)
     ros_odom_init_coords.header.stamp = stamp;
     ros_odom_init_coords.header.frame_id = "/odom";
     ros_odom_init_coords.child_frame_id = "/odom_init";
-    tf::transformEigenToMsg(odom_init_pose, ros_odom_init_coords.transform);
+    tf::transformEigenToMsg(odom_init_transform_matrix, ros_odom_init_coords.transform);
     odom_init_transform_pub.publish(ros_odom_init_coords);
     // pose stamped
     ros_odom_init_pose_stamped.header = ros_odom_init_coords.header;
@@ -1075,11 +1073,11 @@ void HrpsysSeqStateROSBridge::publishOdometryTransforms(Eigen::Affine3d &odom_po
     if (invert_odom_init_tf) {
       ros_odom_init_coords.header.frame_id ="/odom_init";
       ros_odom_init_coords.child_frame_id =  "/odom";
-      tf::transformEigenToMsg(odom_init_pose_matrix.inverse(), ros_odom_init_coords.transform); // odom_init_pose_matrix is preserved as a instance valiable
+      tf::transformEigenToMsg(odom_init_transform_matrix.inverse(), ros_odom_init_coords.transform); // odom_init_transform_matrix is preserved as a instance valiable
     } else {
       ros_odom_init_coords.header.frame_id = "/odom";
       ros_odom_init_coords.child_frame_id = "/odom_init";
-      tf::transformEigenToMsg(odom_init_pose_matrix, ros_odom_init_coords.transform); // odom_init_pose_matrix is preserved as a instance valiable
+      tf::transformEigenToMsg(odom_init_transform_matrix, ros_odom_init_coords.transform); // odom_init_transform_matrix is preserved as a instance valiable
     }
   }
   tf_transforms.push_back(ros_odom_init_coords);

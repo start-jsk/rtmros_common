@@ -91,7 +91,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void publishOdometryTransforms(Eigen::Affine3d &odom_pose_matrix, ros::Time &stamp);
   void odomInitTriggerCB(const std_msgs::Empty &trigger);
   boost::mutex odom_init_mutex;
-  Eigen::Affine3d odom_init_pose_matrix;
+  Eigen::Affine3d odom_init_transform_matrix;
   bool update_odom_init_flag;
   bool prev_lfoot_contact_state;
   bool prev_rfoot_contact_state;
