@@ -41,6 +41,8 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   // ros
   ros::NodeHandle pnh("~");
   pnh.param("publish_sensor_transforms", publish_sensor_transforms, true);
+  pnh.param("publish_odom_init_transform", publish_odom_init_transform, true);
+  pnh.param("invert_odom_init_tf", invert_odom_init_tf, true);
   
   joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
   joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
@@ -1041,7 +1043,7 @@ void HrpsysSeqStateROSBridge::updateOdomInit(Eigen::Affine3d &odom_pose_matrix, 
                                                            odom_init_pose_matrix.translation()[1],
                                                            0.0) * 
                                       Eigen::AngleAxisd(odom_init_yaw, Eigen::Vector3d::UnitZ()));
-    // transform
+    // transform (not be affected by invert_odom_init_tf)
     ros_odom_init_coords.header.stamp = stamp;
     ros_odom_init_coords.header.frame_id = "/odom";
     ros_odom_init_coords.child_frame_id = "/odom_init";
@@ -1066,13 +1068,19 @@ void HrpsysSeqStateROSBridge::publishOdometryTransforms(Eigen::Affine3d &odom_po
   ros_odom_to_body_coords.header.frame_id = "/odom";
   ros_odom_to_body_coords.child_frame_id = rootlink_name;
   tf::transformEigenToMsg(odom_pose_matrix, ros_odom_to_body_coords.transform);
-  tf_transforms.push_back(ros_odom_to_body_coords); 
-  {
+  tf_transforms.push_back(ros_odom_to_body_coords);
+  if (publish_odom_init_transform) {
     boost::mutex::scoped_lock lock(odom_init_mutex);
     ros_odom_init_coords.header.stamp = stamp; // odom_init
-    ros_odom_init_coords.header.frame_id = "/odom";
-    ros_odom_init_coords.child_frame_id = "/odom_init";
-    tf::transformEigenToMsg(odom_init_pose_matrix, ros_odom_init_coords.transform); // odom_init_pose_matrix is preserved as a instance valiable
+    if (invert_odom_init_tf) {
+      ros_odom_init_coords.header.frame_id ="/odom_init";
+      ros_odom_init_coords.child_frame_id =  "/odom";
+      tf::transformEigenToMsg(odom_init_pose_matrix.inverse(), ros_odom_init_coords.transform); // odom_init_pose_matrix is preserved as a instance valiable
+    } else {
+      ros_odom_init_coords.header.frame_id = "/odom";
+      ros_odom_init_coords.child_frame_id = "/odom_init";
+      tf::transformEigenToMsg(odom_init_pose_matrix, ros_odom_init_coords.transform); // odom_init_pose_matrix is preserved as a instance valiable
+    }
   }
   tf_transforms.push_back(ros_odom_init_coords);
   br.sendTransform(tf_transforms);

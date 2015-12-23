@@ -95,6 +95,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   bool update_odom_init_flag;
   bool prev_lfoot_contact_state;
   bool prev_rfoot_contact_state;
+  bool publish_odom_init_transform, invert_odom_init_tf;
 };
 
 
