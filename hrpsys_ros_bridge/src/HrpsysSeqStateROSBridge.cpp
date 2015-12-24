@@ -44,6 +44,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   ros::NodeHandle pnh("~");
   pnh.param("publish_sensor_transforms", publish_sensor_transforms, true);
   pnh.param("publish_odom_init_transform", publish_odom_init_transform, true);
+  pnh.param("publish_ground_transform", publish_ground_transform, true);
   pnh.param("invert_odom_init_tf", invert_odom_init_tf, true);
   pnh.param("check_robot_is_on_ground", check_robot_is_on_ground, true);
   
@@ -562,7 +563,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));
     base.setRotation(q);
     
-    updateOdometry(base_origin, R, tm_on_execute);
+    updateOdometry(base, tm_on_execute);
   }  // end: m_baseTformIn
 
   bool updateImu = false;
@@ -909,10 +910,13 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   return RTC::RTC_OK;
 }
 
-void HrpsysSeqStateROSBridge::updateOdometry(hrp::Vector3 &trans, hrp::Matrix33 &R, ros::Time &stamp)
+void HrpsysSeqStateROSBridge::updateOdometry(tf::Transform &base, ros::Time &stamp)
 {
-  hrp::Vector3 rpy = hrp::rpyFromRot(R);
-  tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));
+  tf::Vector3 trans = base.getOrigin();
+  tf::Quaternion q = base.getRotation();
+  hrp::Matrix33 R;
+  tf::matrixTFToEigen(base.getBasis(), R); // TODO: It is not good to assume hrp::Matrix33 is typedef of Eigen::Matrix3d implicitly (cf. EigenTypes.h)
+  hrp::Vector3 rpy = hrp::rpyFromRot(R); 
   nav_msgs::Odometry odom;
   
   odom.header.frame_id = "odom";
@@ -1133,7 +1137,7 @@ void HrpsysSeqStateROSBridge::publishOdometryTransforms(Eigen::Affine3d &odom_po
     tf_transforms.push_back(ros_odom_init_coords);
   }
   // ground
-  if (isLeggedRobot()) {
+  if (isLeggedRobot() && publish_ground_transform) {
     ros_ground_coords.header.stamp = stamp;
     ros_ground_coords.header.frame_id = rootlink_name;
     ros_ground_coords.child_frame_id = "/ground";
