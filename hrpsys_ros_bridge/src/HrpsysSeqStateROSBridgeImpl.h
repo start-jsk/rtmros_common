@@ -189,6 +189,12 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
     std::string link_name;
   } COPLinkInfo;
   std::map<std::string, COPLinkInfo> cop_link_info;
+  
+  typedef struct  {
+    std::string name, target, base;
+    tf::Transform transform;
+  } EndEffectorInfo;
+  std::map<std::string, EndEffectorInfo> ee_info;
 
   double dt;
 

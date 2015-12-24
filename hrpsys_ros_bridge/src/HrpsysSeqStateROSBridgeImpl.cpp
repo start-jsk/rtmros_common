@@ -5,6 +5,7 @@
  * $Id$ 
  */
 #include "HrpsysSeqStateROSBridgeImpl.h"
+#include <tf_conversions/tf_eigen.h>
 
 // Module specification
 // <rtc-template block="module_spec">
@@ -278,20 +279,38 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   // End effector setting from conf file
   // rleg,TARGET_LINK,BASE_LINK,x,y,z,rx,ry,rz,rth #<=pos + rot (axis+angle)
   coil::vstring end_effectors_str = coil::split(prop["end_effectors"], ",");
+  std::cerr << " end effector size : " << end_effectors_str.size() << std::endl;
   if (end_effectors_str.size() > 0) {
     size_t prop_num = 10;
     size_t num = end_effectors_str.size()/prop_num;
     for (size_t i = 0; i < num; i++) {
       // Parse end-effector information from conf
       std::string ee_name, ee_target, ee_base;
+      tf::Transform ee_transform;
+      EndEffectorInfo tmp_ee_info;
       coil::stringTo(ee_name, end_effectors_str[i*prop_num].c_str());
       coil::stringTo(ee_target, end_effectors_str[i*prop_num+1].c_str());
       coil::stringTo(ee_base, end_effectors_str[i*prop_num+2].c_str());
+      // make end-effector-info
       hrp::Vector3 eep;
       for (size_t j = 0; j < 3; j++) {
         coil::stringTo(eep(j), end_effectors_str[i*prop_num+3+j].c_str());
       }
+      double eerot[4]; // rotation in VRML is represented by axis + angle
+      for (int j = 0; j < 4; j++ ) {
+        coil::stringTo(eerot[j], end_effectors_str[i*prop_num+6+j].c_str());
+      }
+      Eigen::Affine3d ee_transform_matrix = (Eigen::Translation3d(eep(0), eep(1), eep(2)) *
+                                             Eigen::AngleAxisd(eerot[3], hrp::Vector3(eerot[0], eerot[1], eerot[2])));
+      tmp_ee_info.name = ee_name;
+      tmp_ee_info.target = ee_target;
+      tmp_ee_info.base = ee_base;
+      tf::transformEigenToTF(ee_transform_matrix, tmp_ee_info.transform);
+      ee_info.insert(std::pair<std::string, EndEffectorInfo>(ee_name , tmp_ee_info));
       std::cerr << "[" << m_profile.instance_name << "] End Effector [" << ee_name << "]" << ee_target << " " << ee_base << std::endl;
+      std::cerr << "[" << m_profile.instance_name << "]   translation = " << tmp_ee_info.transform.getOrigin().x() << ", " << tmp_ee_info.transform.getOrigin().y() << ", " << tmp_ee_info.transform.getOrigin().z() << std::endl;
+      std::cerr << "[" << m_profile.instance_name << "]   rotation = " <<  tmp_ee_info.transform.getRotation().getAxis().x() << ", " << tmp_ee_info.transform.getRotation().getAxis().y() << ", "
+                << tmp_ee_info.transform.getRotation().getAxis().z() << ", " << tmp_ee_info.transform.getRotation().getAngle() << std::endl;
       // Find pair between end-effector information and force sensor name
       bool is_sensor_exists = false;
       std::string sensor_name;
