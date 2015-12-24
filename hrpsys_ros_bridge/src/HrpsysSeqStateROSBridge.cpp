@@ -61,6 +61,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
   odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
   imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1);
+  imu_rootlink_pub = nh.advertise<sensor_msgs::Imu>("/imu_rootlink", 1);
   odom_init_pose_stamped_pub = nh.advertise<geometry_msgs::PoseStamped>("/odom_init_pose_stamped", 1, true);
   odom_init_transform_pub = nh.advertise<geometry_msgs::TransformStamped>("/odom_init_transform", 1, true);
   odom_init_transform_matrix = Eigen::Affine3d::Identity();
@@ -566,11 +567,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     updateOdometry(base, tm_on_execute);
   }  // end: m_baseTformIn
 
-  bool updateImu = false;
+  bool imu_updated = false;
   // m_baseRpyIn
   if (m_baseRpyIn.isNew()){
     m_baseRpyIn.read();
-    updateImu = true;
+    imu_updated = true;
   } // end: m_baseRpyIn
 
   for (unsigned int i = 0; i < m_gyrometerIn.size(); i++) {
@@ -578,7 +579,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
       m_gyrometerIn[i]->read();
       if (i == 0) {
-        updateImu = true;
+        imu_updated = true;
       }
     }
   }
@@ -587,85 +588,13 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     if (m_gsensorIn[i]->isNew()) {
       m_gsensorIn[i]->read();
       if (i == 0) {
-        updateImu = true;
+        imu_updated = true;
       }
     }
   }
   
-  if (updateImu){
-    sensor_msgs::Imu imu;
-    if (m_gyrometerName.size() > 0) {
-      imu.header.frame_id = m_gyrometerName[0];
-    }
-    else {
-      imu.header.frame_id = rootlink_name;
-    }
-    
-    if ( use_hrpsys_time ) {
-      imu.header.stamp = ros::Time(m_baseRpy.tm.sec, m_baseRpy.tm.nsec);
-    } else {
-      imu.header.stamp = tm_on_execute;
-    }
-    tf::Quaternion q = tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y);
-    imu.orientation.x = q.getX();
-    imu.orientation.y = q.getY();
-    imu.orientation.z = q.getZ();
-    imu.orientation.w = q.getW();
-    if (m_gyrometer.size() > 0) {
-      imu.angular_velocity.x = m_gyrometer[0].data.avx;
-      imu.angular_velocity.y = m_gyrometer[0].data.avy;
-      imu.angular_velocity.z = m_gyrometer[0].data.avz;
-    }
-    if (m_gsensor.size() > 0) {
-      imu.linear_acceleration.x = m_gsensor[0].data.ax;
-      imu.linear_acceleration.y = m_gsensor[0].data.ay;
-      imu.linear_acceleration.z = m_gsensor[0].data.az;
-    }
-    imu.orientation_covariance[0] = 2.89e-08;
-    imu.orientation_covariance[4] = 2.89e-08;
-    imu.orientation_covariance[8] = 2.89e-08;
-    imu.angular_velocity_covariance[0] = 0.000144;
-    imu.angular_velocity_covariance[4] = 0.000144;
-    imu.angular_velocity_covariance[8] = 0.000144;
-    imu.linear_acceleration_covariance[0] = 0.0096;
-    imu.linear_acceleration_covariance[4] = 0.0096;
-    imu.linear_acceleration_covariance[8] = 0.0096;
-    imu_pub.publish(imu);
-
-    // Publish imu_floor frame in tf
-    if (is_base_valid) {
-      ros::Time base_time = tm_on_execute;
-      //base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
-      base.setRotation(tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y));
-      tf::Transform inv = base.inverse();
-      inv.setOrigin(tf::Vector3(0, 0, 0));
-#if ROS_VERSION_MINIMUM(1,8,0)
-      tf::Matrix3x3 m;
-#else
-      btMatrix3x3 m; // for electric
-#endif
-      m = inv.getBasis();
-      bool not_nan = true;
-      for (int i = 0; i < 3; ++i) {
-        if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
-          not_nan = false;
-      }
-      if (not_nan) {
-        std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
-        while ( its != sensor_info.end() ) {
-          if ( (*its).second.type_name == "RateGyro" ) {
-            br.sendTransform(tf::StampedTransform(inv, base_time, (*its).first, "imu_floor"));
-            break;
-          }
-          ++its;
-        }
-      } else {
-        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
-                         << m_baseRpy.data.r << ","
-                         << m_baseRpy.data.p << ","
-                         << m_baseRpy.data.y << ")");
-      }
-    }
+  if (imu_updated){
+    updateImu(base, is_base_valid, tm_on_execute);
   }
 
   // publish forces sonsors
@@ -1152,6 +1081,144 @@ void HrpsysSeqStateROSBridge::odomInitTriggerCB(const std_msgs::Empty &trigger)
 {
   boost::mutex::scoped_lock lock(odom_init_mutex);
   update_odom_init_flag = true; // forcely update odom_init
+}
+
+void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid, ros::Time &stamp)
+{
+  sensor_msgs::Imu imu;
+  if (m_gyrometerName.size() > 0) {
+    imu.header.frame_id = m_gyrometerName[0];
+  } else {
+    imu.header.frame_id = rootlink_name;
+  }
+    
+  if ( use_hrpsys_time ) {
+    imu.header.stamp = ros::Time(m_baseRpy.tm.sec, m_baseRpy.tm.nsec);
+  } else {
+    imu.header.stamp = stamp;
+  }
+
+  // original imu values
+  tf::Quaternion q = tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y);
+  imu.orientation.x = q.getX();
+  imu.orientation.y = q.getY();
+  imu.orientation.z = q.getZ();
+  imu.orientation.w = q.getW();
+  if (m_gyrometer.size() > 0) {
+    imu.angular_velocity.x = m_gyrometer[0].data.avx;
+    imu.angular_velocity.y = m_gyrometer[0].data.avy;
+    imu.angular_velocity.z = m_gyrometer[0].data.avz;
+  }
+  if (m_gsensor.size() > 0) {
+    imu.linear_acceleration.x = m_gsensor[0].data.ax;
+    imu.linear_acceleration.y = m_gsensor[0].data.ay;
+    imu.linear_acceleration.z = m_gsensor[0].data.az;
+  }
+  imu.orientation_covariance[0] = 2.89e-08;
+  imu.orientation_covariance[4] = 2.89e-08;
+  imu.orientation_covariance[8] = 2.89e-08;
+  imu.angular_velocity_covariance[0] = 0.000144;
+  imu.angular_velocity_covariance[4] = 0.000144;
+  imu.angular_velocity_covariance[8] = 0.000144;
+  imu.linear_acceleration_covariance[0] = 0.0096;
+  imu.linear_acceleration_covariance[4] = 0.0096;
+  imu.linear_acceleration_covariance[8] = 0.0096;
+  imu_pub.publish(imu);
+
+  // transformed imu values
+  sensor_msgs::Imu imu_rootlink;
+  SensorInfo imu_sensor_info;
+  std::string imu_sensor_info_name;
+  bool found_imu_sensor_info = false;
+  std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
+  while (its != sensor_info.end()) {
+    if ((*its).second.type_name == "RateGyro") {
+      imu_sensor_info_name = (*its).first;
+      imu_sensor_info = (*its).second;
+      found_imu_sensor_info = true;
+      break;
+    }
+    ++its;
+  }
+  if (found_imu_sensor_info) {
+    // joint angles are assumed to be already updated
+    tf::vectorTFToEigen(base.getOrigin(), body->rootLink()->p);
+    tf::matrixTFToEigen(base.getBasis(), body->rootLink()->R);
+    body->calcForwardKinematics();
+    // calculate current gyrometer coords
+    hrp::Link* gyrometer_link = body->link(imu_sensor_info.link_name);
+    Eigen::Affine3d gyrometer_matrix = Eigen::Translation3d(gyrometer_link->p) * gyrometer_link->R;
+    tf::Transform gyrometer_transform;
+    tf::transformEigenToTF(gyrometer_matrix, gyrometer_transform);
+    tf::Transform root_relative_gyrometer_transform = base.inverse() * gyrometer_transform;
+    tf::Transform root_relative_imu_transform = root_relative_gyrometer_transform * imu_sensor_info.transform;
+    // make rootlink relative imu msg
+    sensor_msgs::Imu imu_rootlink;
+    imu_rootlink.header = imu.header;
+    // orientation
+    tf::Transform imu_transform = tf::Transform(q, tf::Vector3(0, 0, 0));
+    tf::Quaternion root_relative_imu_orientation = (root_relative_imu_transform * imu_transform).getRotation();
+    imu_rootlink.orientation.x = root_relative_imu_orientation.getX();
+    imu_rootlink.orientation.y = root_relative_imu_orientation.getY();
+    imu_rootlink.orientation.z = root_relative_imu_orientation.getZ();
+    imu_rootlink.orientation.w = root_relative_imu_orientation.getW();
+    tf::Matrix3x3 orientation_cov_matrix = tf::Matrix3x3(imu.orientation_covariance[0], imu.orientation_covariance[1], imu.orientation_covariance[2],
+                                                         imu.orientation_covariance[0], imu.orientation_covariance[1], imu.orientation_covariance[2],
+                                                         imu.orientation_covariance[0], imu.orientation_covariance[1], imu.orientation_covariance[2]);
+    tf::Matrix3x3 root_relative_orientation_cov_matrix = root_relative_imu_transform.getBasis().transpose() * orientation_cov_matrix * root_relative_imu_transform.getBasis();
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        imu_rootlink.orientation_covariance[3 * i + j] = orientation_cov_matrix[i][j];
+      }
+    }
+    // angular velocity
+    if (m_gyrometer.size() > 0) {
+      tf::Vector3 root_relative_imu_angular_velocity = root_relative_imu_transform.getBasis() * tf::Vector3(m_gyrometer[0].data.avx, m_gyrometer[0].data.avy, m_gyrometer[0].data.avz);
+      imu_rootlink.angular_velocity.x = root_relative_imu_angular_velocity[0];
+      imu_rootlink.angular_velocity.y = root_relative_imu_angular_velocity[1];
+      imu_rootlink.angular_velocity.z = root_relative_imu_angular_velocity[2];
+    }
+    // acceleration
+    if (m_gsensor.size() > 0) {
+      tf::Vector3 root_relative_imu_acceleration = root_relative_imu_transform.getBasis() * tf::Vector3(m_gsensor[0].data.ax, m_gsensor[0].data.ay, m_gsensor[0].data.az);
+      imu_rootlink.linear_acceleration.x = root_relative_imu_acceleration[0];
+      imu_rootlink.linear_acceleration.y = root_relative_imu_acceleration[1];
+      imu_rootlink.linear_acceleration.z = root_relative_imu_acceleration[2];
+    }
+    imu_rootlink.angular_velocity_covariance = imu.angular_velocity_covariance;
+    imu_rootlink.linear_acceleration_covariance = imu.linear_acceleration_covariance;
+    imu_rootlink_pub.publish(imu);
+  }
+
+  // Publish imu_floor frame in tf
+  if (is_base_valid) {
+    ros::Time base_time = stamp;
+    //base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
+    base.setRotation(tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y));
+    tf::Transform inv = base.inverse();
+    inv.setOrigin(tf::Vector3(0, 0, 0));
+#if ROS_VERSION_MINIMUM(1,8,0)
+    tf::Matrix3x3 m;
+#else
+    btMatrix3x3 m; // for electric
+#endif
+    m = inv.getBasis();
+    bool not_nan = true;
+    for (int i = 0; i < 3; ++i) {
+      if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
+        not_nan = false;
+    }
+    if (not_nan) {
+      if (found_imu_sensor_info) {
+        br.sendTransform(tf::StampedTransform(inv, base_time, imu_sensor_info_name, "imu_floor"));
+      }
+    } else {
+      ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
+                       << m_baseRpy.data.r << ","
+                       << m_baseRpy.data.p << ","
+                       << m_baseRpy.data.y << ")");
+    }
+  }  
 }
 
 extern "C"
