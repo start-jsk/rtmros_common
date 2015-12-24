@@ -37,13 +37,14 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   follow_joint_trajectory_server(nh, "fullbody_controller/follow_joint_trajectory_action", false),
   HrpsysSeqStateROSBridgeImpl(manager), follow_action_initialized(false), prev_odom_acquired(false),
   update_odom_init_flag(false), prev_lfoot_contact_state(false), prev_rfoot_contact_state(false),
-  is_robot_on_ground(true)
+  is_robot_on_ground(false)
 {
   // ros
   ros::NodeHandle pnh("~");
   pnh.param("publish_sensor_transforms", publish_sensor_transforms, true);
   pnh.param("publish_odom_init_transform", publish_odom_init_transform, true);
   pnh.param("invert_odom_init_tf", invert_odom_init_tf, true);
+  pnh.param("check_robot_is_on_ground", check_robot_is_on_ground, true);
   
   joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
   joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
@@ -1020,17 +1021,19 @@ void HrpsysSeqStateROSBridge::updateOdometry(hrp::Vector3 &trans, hrp::Matrix33 
 
 bool HrpsysSeqStateROSBridge::checkFootContactState(bool lfoot_contact_state, bool rfoot_contact_state)
 {
-  if ((!prev_lfoot_contact_state && lfoot_contact_state)
-      or (!prev_rfoot_contact_state && rfoot_contact_state)) {
-    if (!is_robot_on_ground) {
-      is_robot_on_ground = true;
-      update_odom_init_flag = true; // update odom_init when robot stands on the ground
+  if (check_robot_is_on_ground) { // this function does nothing when check_robot_is_on_ground is false
+    if ((!prev_lfoot_contact_state && lfoot_contact_state)
+        or (!prev_rfoot_contact_state && rfoot_contact_state)) {
+      if (!is_robot_on_ground) {
+        is_robot_on_ground = true;
+        update_odom_init_flag = true; // update odom_init when robot stands on the ground
+      }
+    } else if (!lfoot_contact_state && !rfoot_contact_state && is_robot_on_ground) {
+      is_robot_on_ground = false;
     }
-  } else if (!lfoot_contact_state && !rfoot_contact_state && is_robot_on_ground) {
-    is_robot_on_ground = false;
+    prev_lfoot_contact_state = lfoot_contact_state;
+    prev_rfoot_contact_state = rfoot_contact_state;
   }
-  prev_lfoot_contact_state = lfoot_contact_state;
-  prev_rfoot_contact_state = rfoot_contact_state;
 }
 
 void HrpsysSeqStateROSBridge::updateOdomInit(Eigen::Affine3d &odom_pose_matrix, ros::Time &stamp)

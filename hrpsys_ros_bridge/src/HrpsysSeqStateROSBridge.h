@@ -96,7 +96,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   bool prev_lfoot_contact_state;
   bool prev_rfoot_contact_state;
   bool is_robot_on_ground;
-  bool publish_odom_init_transform, invert_odom_init_tf;
+  bool publish_odom_init_transform, invert_odom_init_tf, check_robot_is_on_ground;
 };
 
 
