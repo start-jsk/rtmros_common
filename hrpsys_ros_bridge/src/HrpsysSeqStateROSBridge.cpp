@@ -36,7 +36,8 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   joint_trajectory_server(nh, "fullbody_controller/joint_trajectory_action", false),
   follow_joint_trajectory_server(nh, "fullbody_controller/follow_joint_trajectory_action", false),
   HrpsysSeqStateROSBridgeImpl(manager), follow_action_initialized(false), prev_odom_acquired(false),
-  update_odom_init_flag(false), prev_lfoot_contact_state(false), prev_rfoot_contact_state(false)
+  update_odom_init_flag(false), prev_lfoot_contact_state(false), prev_rfoot_contact_state(false),
+  is_robot_on_ground(true)
 {
   // ros
   ros::NodeHandle pnh("~");
@@ -829,8 +830,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         actCSs.header.stamp = tm_on_execute;
       }
       int limb_size = m_actContactStates.data.length();
-      bool lfoot_cs = false;
-      bool rfoot_cs = false;
+      bool lfoot_cs = prev_lfoot_contact_state;
+      bool rfoot_cs = prev_rfoot_contact_state;
       actCSs.states.resize(limb_size);
       for ( unsigned int i = 0; i < limb_size ; i++ ){
         hrpsys_ros_bridge::ContactState s;
@@ -844,9 +845,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         actCSs.states[i].state = s;
         // check contact states for robot leg sensors (TODO: do not hard-code sensor name)
         if (actCSs.states[i].header.frame_id == "lfsensor") {
-          lfoot_cs = (actCSs.states[i].state.state == s.ON);
+          lfoot_cs = m_actContactStates.data[i];
         } else if (actCSs.states[i].header.frame_id == "rfsensor") {
-          rfoot_cs = (actCSs.states[i].state.state == s.ON);
+          rfoot_cs = m_actContactStates.data[i];
         }
       }
       checkFootContactState(lfoot_cs, rfoot_cs); // check does robot stand on the ground and set update_odom_init_flag
@@ -1019,9 +1020,14 @@ void HrpsysSeqStateROSBridge::updateOdometry(hrp::Vector3 &trans, hrp::Matrix33 
 
 bool HrpsysSeqStateROSBridge::checkFootContactState(bool lfoot_contact_state, bool rfoot_contact_state)
 {
-  if ((prev_lfoot_contact_state == false and lfoot_contact_state == true)
-      or (prev_rfoot_contact_state == false and rfoot_contact_state == true)) {
-    update_odom_init_flag = true; // update odom_init when robot stands on the ground
+  if ((!prev_lfoot_contact_state && lfoot_contact_state)
+      or (!prev_rfoot_contact_state && rfoot_contact_state)) {
+    if (!is_robot_on_ground) {
+      is_robot_on_ground = true;
+      update_odom_init_flag = true; // update odom_init when robot stands on the ground
+    }
+  } else if (!lfoot_contact_state && !rfoot_contact_state && is_robot_on_ground) {
+    is_robot_on_ground = false;
   }
   prev_lfoot_contact_state = lfoot_contact_state;
   prev_rfoot_contact_state = rfoot_contact_state;
