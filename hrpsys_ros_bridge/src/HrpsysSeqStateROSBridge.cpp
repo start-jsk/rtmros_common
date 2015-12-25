@@ -1146,47 +1146,49 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
     body->calcForwardKinematics();
     // calculate current gyrometer coords
     hrp::Link* gyrometer_link = body->link(imu_sensor_info.link_name);
-    Eigen::Affine3d gyrometer_matrix = Eigen::Translation3d(gyrometer_link->p) * gyrometer_link->R;
-    tf::Transform gyrometer_transform;
-    tf::transformEigenToTF(gyrometer_matrix, gyrometer_transform);
-    tf::Transform root_relative_gyrometer_transform = base.inverse() * gyrometer_transform;
-    tf::Transform root_relative_imu_transform = root_relative_gyrometer_transform * imu_sensor_info.transform;
-    // make rootlink relative imu msg
-    sensor_msgs::Imu imu_rootlink;
-    imu_rootlink.header = imu.header;
-    // orientation
-    tf::Transform imu_transform = tf::Transform(q, tf::Vector3(0, 0, 0));
-    tf::Quaternion root_relative_imu_orientation = (root_relative_imu_transform * imu_transform).getRotation();
-    imu_rootlink.orientation.x = root_relative_imu_orientation.getX();
-    imu_rootlink.orientation.y = root_relative_imu_orientation.getY();
-    imu_rootlink.orientation.z = root_relative_imu_orientation.getZ();
-    imu_rootlink.orientation.w = root_relative_imu_orientation.getW();
-    tf::Matrix3x3 orientation_cov_matrix = tf::Matrix3x3(imu.orientation_covariance[0], imu.orientation_covariance[1], imu.orientation_covariance[2],
-                                                         imu.orientation_covariance[0], imu.orientation_covariance[1], imu.orientation_covariance[2],
-                                                         imu.orientation_covariance[0], imu.orientation_covariance[1], imu.orientation_covariance[2]);
-    tf::Matrix3x3 root_relative_orientation_cov_matrix = root_relative_imu_transform.getBasis().transpose() * orientation_cov_matrix * root_relative_imu_transform.getBasis();
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        imu_rootlink.orientation_covariance[3 * i + j] = orientation_cov_matrix[i][j];
+    if(gyrometer_link != NULL) {
+      Eigen::Affine3d gyrometer_matrix = Eigen::Translation3d(gyrometer_link->p) * gyrometer_link->R;
+      tf::Transform gyrometer_transform;
+      tf::transformEigenToTF(gyrometer_matrix, gyrometer_transform);
+      tf::Transform root_relative_gyrometer_transform = base.inverse() * gyrometer_transform;
+      tf::Transform root_relative_imu_transform = root_relative_gyrometer_transform * imu_sensor_info.transform;
+      // make rootlink relative imu msg
+      sensor_msgs::Imu imu_rootlink;
+      imu_rootlink.header = imu.header;
+      // orientation
+      tf::Transform imu_transform = tf::Transform(q, tf::Vector3(0, 0, 0));
+      tf::Quaternion root_relative_imu_orientation = (root_relative_imu_transform * imu_transform).getRotation();
+      imu_rootlink.orientation.x = root_relative_imu_orientation.getX();
+      imu_rootlink.orientation.y = root_relative_imu_orientation.getY();
+      imu_rootlink.orientation.z = root_relative_imu_orientation.getZ();
+      imu_rootlink.orientation.w = root_relative_imu_orientation.getW();
+      tf::Matrix3x3 orientation_cov_matrix = tf::Matrix3x3(imu.orientation_covariance[0], imu.orientation_covariance[1], imu.orientation_covariance[2],
+                                                           imu.orientation_covariance[0], imu.orientation_covariance[1], imu.orientation_covariance[2],
+                                                           imu.orientation_covariance[0], imu.orientation_covariance[1], imu.orientation_covariance[2]);
+      tf::Matrix3x3 root_relative_orientation_cov_matrix = root_relative_imu_transform.getBasis().transpose() * orientation_cov_matrix * root_relative_imu_transform.getBasis();
+      for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          imu_rootlink.orientation_covariance[3 * i + j] = orientation_cov_matrix[i][j];
+        }
       }
+      // angular velocity
+      if (m_gyrometer.size() > 0) {
+        tf::Vector3 root_relative_imu_angular_velocity = root_relative_imu_transform.getBasis() * tf::Vector3(m_gyrometer[0].data.avx, m_gyrometer[0].data.avy, m_gyrometer[0].data.avz);
+        imu_rootlink.angular_velocity.x = root_relative_imu_angular_velocity[0];
+        imu_rootlink.angular_velocity.y = root_relative_imu_angular_velocity[1];
+        imu_rootlink.angular_velocity.z = root_relative_imu_angular_velocity[2];
+      }
+      // acceleration
+      if (m_gsensor.size() > 0) {
+        tf::Vector3 root_relative_imu_acceleration = root_relative_imu_transform.getBasis() * tf::Vector3(m_gsensor[0].data.ax, m_gsensor[0].data.ay, m_gsensor[0].data.az);
+        imu_rootlink.linear_acceleration.x = root_relative_imu_acceleration[0];
+        imu_rootlink.linear_acceleration.y = root_relative_imu_acceleration[1];
+        imu_rootlink.linear_acceleration.z = root_relative_imu_acceleration[2];
+      }
+      imu_rootlink.angular_velocity_covariance = imu.angular_velocity_covariance;
+      imu_rootlink.linear_acceleration_covariance = imu.linear_acceleration_covariance;
+      imu_rootlink_pub.publish(imu);
     }
-    // angular velocity
-    if (m_gyrometer.size() > 0) {
-      tf::Vector3 root_relative_imu_angular_velocity = root_relative_imu_transform.getBasis() * tf::Vector3(m_gyrometer[0].data.avx, m_gyrometer[0].data.avy, m_gyrometer[0].data.avz);
-      imu_rootlink.angular_velocity.x = root_relative_imu_angular_velocity[0];
-      imu_rootlink.angular_velocity.y = root_relative_imu_angular_velocity[1];
-      imu_rootlink.angular_velocity.z = root_relative_imu_angular_velocity[2];
-    }
-    // acceleration
-    if (m_gsensor.size() > 0) {
-      tf::Vector3 root_relative_imu_acceleration = root_relative_imu_transform.getBasis() * tf::Vector3(m_gsensor[0].data.ax, m_gsensor[0].data.ay, m_gsensor[0].data.az);
-      imu_rootlink.linear_acceleration.x = root_relative_imu_acceleration[0];
-      imu_rootlink.linear_acceleration.y = root_relative_imu_acceleration[1];
-      imu_rootlink.linear_acceleration.z = root_relative_imu_acceleration[2];
-    }
-    imu_rootlink.angular_velocity_covariance = imu.angular_velocity_covariance;
-    imu_rootlink.linear_acceleration_covariance = imu.linear_acceleration_covariance;
-    imu_rootlink_pub.publish(imu);
   }
 
   // Publish imu_floor frame in tf
