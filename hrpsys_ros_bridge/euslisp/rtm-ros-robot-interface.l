@@ -1181,8 +1181,9 @@
   (:set-default-step-time-with-the-same-swing-time
    (default-step-time)
    "Set default step time with the same swing time."
-   (let* ((prev-default-step-time (send (send self :get-gait-generator-param) :default_step_time))
-          (prev-default-double-support-ratio (send (send self :get-gait-generator-param) :default_double_support_ratio))
+   (let* ((ggp (send self :get-gait-generator-param))
+          (prev-default-step-time (send ggp :default_step_time))
+          (prev-default-double-support-ratio (send ggp :default_double_support_ratio))
           (swing-time (* (- 1.0 prev-default-double-support-ratio) prev-default-step-time))
           (new-default-double-support-ratio (- 1.0 (/ swing-time default-step-time))))
      (send self :set-gait-generator-param
