@@ -1186,6 +1186,8 @@
           (prev-default-double-support-ratio (send ggp :default_double_support_ratio))
           (swing-time (* (- 1.0 prev-default-double-support-ratio) prev-default-step-time))
           (new-default-double-support-ratio (- 1.0 (/ swing-time default-step-time))))
+     (if (>= swing-time default-step-time)
+         (error ";; default step time(~A[s]) should be greater than swing time(~A[s])~%" default-step-time swing-time))
      (send self :set-gait-generator-param
            :default-step-time default-step-time
            :default-double-support-ratio new-default-double-support-ratio)
