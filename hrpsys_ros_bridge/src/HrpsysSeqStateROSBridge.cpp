@@ -1017,9 +1017,8 @@ void HrpsysSeqStateROSBridge::updateGroundTransform(const tf::Transform &odom_po
   std::vector<std::string> leg_names;
   if (isLeggedRobot()) {
     // joint angles are assumed to be already updated
-    hrp::Vector3 body_p;
     tf::vectorTFToEigen(odom_pose_transform.getOrigin(), body->rootLink()->p);
-    tf::matrixTFToEigen(tf::Matrix3x3(odom_pose_transform.getRotation()), body->rootLink()->R);
+    tf::matrixTFToEigen(odom_pose_transform.getBasis(), body->rootLink()->R);
     body->calcForwardKinematics();
     // TODO: do not hard-code leg link name
     leg_names.push_back("lleg"); 
