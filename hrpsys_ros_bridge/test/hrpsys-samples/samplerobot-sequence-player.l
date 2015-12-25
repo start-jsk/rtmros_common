@@ -36,8 +36,7 @@
   (send *ri* :wait-interpolation)
   (let ((limbs '(:rarm :larm :torso :rleg :lleg :rhand :lhand)))
     ;; Add joint group just for test
-    (mapcar #'(lambda (l) (send *ri* :add-joint-group l (cdr (assoc :joint-names (car (send *rI* (read-from-string (format nil "~A-controller" l))))))))
-            limbs)
+    (mapcar #'(lambda (l) (send *ri* :add-joint-group l)) limbs)
     (let ((ret (mapcar
               #'(lambda (limb)
                   (let ((dif-ja 0.5) ;; [deg]
@@ -75,6 +74,7 @@
   (samplerobot-sequence-player-init)
   (samplerobot-sequence-player-demo0)
   (samplerobot-sequence-player-demo1)
+  (samplerobot-sequence-player-demo2)
   )
 
 (warn ";; (samplerobot-sequence-player-demo)~%")

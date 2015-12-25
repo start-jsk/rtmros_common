@@ -398,10 +398,19 @@
    (groupname)
    (send self :sequenceplayerservice_waitinterpolationofgroup :gname groupname))
   (:add-joint-group
-   (groupname jnames)
+   (groupname &optional (jnames
+                         (if (find-method self (read-from-string (format nil ":~A-controller" (string-downcase groupname))))
+                             (cdr (assoc :joint-names (car (send self (read-from-string (format nil ":~A-controller" (string-downcase groupname))))))))))
+   "Add joint group for SequencePlayer.
+    groupname is joint group name such as rarm or lleg.
+    jnames is list of joint name."
+   (unless jnames
+     (error ";; jnames argument is require in :add-joint-group~%"))
    (send self :sequenceplayerservice_addjointgroup :gname groupname :jnames jnames))
   (:remove-joint-group
    (groupname)
+   "Remove joint group for SequencePlayer.
+    groupname is joint group name such as rarm or lleg."
    (send self :sequenceplayerservice_removejointgroup :gname groupname))
   (:set-joint-angles-of-group
    (groupname av tm)
