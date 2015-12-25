@@ -86,16 +86,16 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   bool follow_action_initialized;
 
   // odometry relatives
-  void updateOdometry(tf::Transform &base, ros::Time &stamp);
+  void updateOdometry(const tf::Transform &base, const ros::Time &stamp);
   bool checkFootContactState(bool lfoot_contact_state, bool rfoot_contact_state);
-  void updateOdomInit(Eigen::Affine3d &odom_pose_matrix, ros::Time &stamp);
-  void publishOdometryTransforms(Eigen::Affine3d &odom_pose_matrix, ros::Time &stamp);
+  void updateOdomInit(const tf::Transform &odom_pose_transform, const ros::Time &stamp);
+  void publishOdometryTransforms(const tf::Transform &odom_pose_transform, const ros::Time &stamp);
   void odomInitTriggerCB(const std_msgs::Empty &trigger);
   bool isLeggedRobot();
-  void updateGroundTransform(Eigen::Affine3d &odom_pose_matrix);
-  void updateImu(tf::Transform &base, bool is_base_valid, ros::Time &stamp);
+  void updateGroundTransform(const tf::Transform &odom_pose_transform);
+  void updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp);
   boost::mutex odom_init_mutex;
-  Eigen::Affine3d odom_init_transform_matrix, ground_transform_matrix;
+  tf::Transform odom_init_transform, ground_transform;
   bool update_odom_init_flag;
   bool prev_lfoot_contact_state;
   bool prev_rfoot_contact_state;
