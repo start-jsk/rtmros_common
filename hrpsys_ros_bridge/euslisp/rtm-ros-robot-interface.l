@@ -295,6 +295,27 @@
              (digits-string (aref dt 2) 2)
              (digits-string (aref dt 1) 2)
              (digits-string (aref dt 0) 2))))
+  ;; Method for define limb controller method using defmethod
+  ;; If debugp t, we can see defmethod s-expressions.
+  (:def-limb-controller-method
+    (limb &key (debugp nil))
+    "Method to add limb controller action by default setting.
+     Currently, FollowJointTrajectoryAction is used."
+    (let ((sexp `(defmethod ,(send (class self):name)
+                   (,(read-from-string (format nil "~A-controller" limb))
+                    ()
+                    (list
+                     (list
+                      (cons :group-name ,(string-downcase limb))
+                      (cons :controller-action ,(format nil "~A_controller/follow_joint_trajectory_action" (string-downcase limb)))
+                      (cons :controller-state ,(format nil "~A_controller/state" (string-downcase limb)))
+                      (cons :action-type control_msgs::FollowJointTrajectoryAction)
+                      (cons :joint-names (list ,@(send-all (send robot limb :joint-list) :name))))
+                     )))))
+      (if debugp
+          (pprint (macroexpand sexp)))
+      (eval sexp)
+      ))
   )
 
 ;; define Euslisp setter and getter method
