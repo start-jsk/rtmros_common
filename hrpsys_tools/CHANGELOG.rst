@@ -2,6 +2,38 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.3.1 (2015-12-16)
+------------------
+* deb release only targeting to indigo
+
+1.3.0 (2015-12-09)
+------------------
+* deb release only targeting to indigo
+
+* bug fixes
+
+  * [hrpsys_tools/samples/pa10.launch] Fix VRML path for pa10  hrpsys_tools test (hrpsys_tools/samples/pa10.launch)  `#829 <https://github.com/start-jsk/rtmros_common/issues/829>`_
+
+* Chorenoid support (launch/hrpsys.launch )
+
+  * fix hrpsys.launch because choreonoid do not need options for   periodic_rate and context_type `#810 <https://github.com/start-jsk/rtmros_common/issues/810>`_
+
+   * add USE_CHOREONOID argument to hrpsys.launch for using choreonoid instead of hrpsys-simulator `#787 <https://github.com/start-jsk/rtmros_common/issues/787>`_
+
+* scripts/rtmroswtf.sh updates `#764 <https://githbub.com/start-jsk/rtmros_common/issues/764>`_
+
+  * [scripts/rtmroswtf.sh] disply LD_LIBRARY_PATH too
+  * [scripts/rtmroswtf.sh] rtls is now global bin
+  * [scripts/rtmroswtf.sh] check all package with git status
+  * [rtmroswtf] Copyrights
+  * [rtmroswtf] Add printing git status
+  * [rtmroswtf] Add printing pkg path
+  * [rtmroswtf] Add printing rosversion
+  * [rtmroswtf] Remove verbose from tar that confuses users to
+    sendback which tarball
+
+* Contributors: Isaac IY Saito, Kei Okada, Shunichi Nozawa, YoheiKakiuchi
+
 1.2.14 (2015-06-23)
 -------------------
 * Add EmergencyStopper setting to hrpsys.launch

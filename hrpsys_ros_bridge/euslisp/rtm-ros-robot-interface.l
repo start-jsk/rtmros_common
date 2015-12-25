@@ -1096,6 +1096,7 @@
    (&rest args
     &key leg-names
          default-zmp-offsets ;; [mm]
+         graspless-manip-arm
          graspless-manip-reference-trans-pos ;; [mm]
          graspless-manip-reference-trans-rot ;; rotation-matrix
     &allow-other-keys)
@@ -1112,6 +1113,8 @@
                                                                          (make-list (- lnum (length default-zmp-offsets))
                                                                                     :initial-element (float-vector 0 0 0))))))
                  (list :default-zmp-offsets dzo)))
+           (if (and (memq :graspless-manip-arm args) graspless-manip-arm)
+               (list :graspless-manip-arm (string-downcase graspless-manip-arm)))
            (if (and (memq :graspless-manip-reference-trans-pos args) graspless-manip-reference-trans-pos)
                (list :graspless-manip-reference-trans-pos (scale 1e-3 graspless-manip-reference-trans-pos)))
            (if (and (memq :graspless-manip-reference-trans-rot args) graspless-manip-reference-trans-rot)
@@ -1187,6 +1190,39 @@
            :default-double-support-ratio new-default-double-support-ratio)
      )
    )
+  (:start-graspless-manip-mode
+   (robot arm)
+   "Start graspless manip mode while walking.
+    robot is robot instance which angle-vector is for graspless manip.
+    arm is used arm (:rarm, :larm, :arms)."
+   (let ((crds (if (eq arm :arms)
+                   (send self :calc-hand-trans-coords-dual-arms robot)
+                 (send self :calc-hand-trans-coords-single-arm robot arm)
+                 )))
+     (send self :set-auto-balancer-param
+           :graspless-manip-arm arm
+           :graspless-manip-mode t :is-hand-fix-mode t
+           :graspless-manip-reference-trans-rot (send crds :worldrot)
+           :graspless-manip-reference-trans-pos (send crds :worldpos)
+           )))
+  (:stop-graspless-manip-mode
+   ()
+   "Stop graspless manip mode while walking."
+   (send self :set-auto-balancer-param :graspless-manip-mode nil))
+  (:calc-hand-trans-coords-dual-arms
+   (robot)
+   (let* ((fc (send robot :foot-midcoords))
+          (arm-pos (mapcar #'(lambda (x) (send fc :inverse-transform-vector (send robot x :end-coords :worldpos))) '(:larm :rarm)))
+          (yy (apply #'v- arm-pos)))
+     (setf (elt yy 2) 0)
+     (setq yy (normalize-vector yy))
+     (make-coords :pos (apply #'midpoint 0.5 arm-pos)
+                  :rot (transpose (make-matrix 3 3 (list (v* yy (float-vector 0 0 1))
+                                                         yy
+                                                         (float-vector 0 0 1)))))))
+  (:calc-hand-trans-coords-single-arm
+   (robot arm)
+   (send (send robot :foot-midcoords) :transformation (send robot arm :end-coords)))
   )
 
 ;; SoftErrorLimiterService

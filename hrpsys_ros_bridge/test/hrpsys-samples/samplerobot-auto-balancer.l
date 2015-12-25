@@ -7,6 +7,7 @@
 
 (defun samplerobot-auto-balancer-init ()
   (samplerobot-init)
+  (setq *robot* *sr*)
   (initialize-pose-list)
   t)
 
@@ -396,6 +397,123 @@
   ;; In normal case, next support leg is obtained (case (send *ri* :get-foot-step-param :support-leg) (:rleg :lleg) (:lleg :rleg)) and next support leg coords is obtained by (send *ri* :get-foot-step-param :swing-leg-dst-coords)
   )
 
+(defun samplerobot-auto-balancer-demo20 (&key (reset-standing-pos nil))
+  (print ";; 15. Overwrite current footstep")
+  (if reset-standing-pos (demo-reset-standing-pos))
+  (send *ri* :angle-vector (send *sr* :angle-vector) 1000)
+  (send *ri* :wait-interpolation)
+  (send *ri* :start-auto-balancer)
+  (send *ri* :set-gait-generator-param :overwritable-footstep-index-offset 0 :default-orbit-type :rectangle)
+  (send *ri* :go-velocity 0 0 0)
+  (send *ri* :angle-vector (send *sr* :angle-vector) 2000) (send *ri* :wait-interpolation) ;; wait 2 step using dummy waitInterpolation
+  (send *ri* :go-velocity 0.1 0 0)
+  (send *ri* :angle-vector (send *sr* :angle-vector) 2000) (send *ri* :wait-interpolation) ;; wait 2 step using dummy waitInterpolation
+  (send *ri* :go-velocity 0 0.1 0)
+  (send *ri* :angle-vector (send *sr* :angle-vector) 2000) (send *ri* :wait-interpolation) ;; wait 2 step using dummy waitInterpolation
+  (send *ri* :go-stop)
+  (send *ri* :set-gait-generator-param :overwritable-footstep-index-offset 1 :default-orbit-type :cycloiddelay)
+  )
+
+(defun samplerobot-auto-balancer-demo21 ()
+  (print ";; 16. goPos overwriting")
+  (send *ri* :start-auto-balancer)
+  (print ";;  Overwrite goPos by goPos")
+  (let ((goalx 0.3) (goaly 0.1) (goalth 15.0))
+    (send *ri* :go-pos-no-wait 0.2 -0.1 -5) ;; initial gopos
+    (send *ri* :angle-vector (send *sr* :angle-vector) 2000) (send *ri* :wait-interpolation) ;; wait 2 step using dummy waitInterpolation
+    (send *ri* :go-pos-no-wait goalx goaly goalth) ;; overwrite gopos
+    (send *ri* :wait-foot-steps)
+    )
+  (print ";;  Overwrite setFootSteps by goPos")
+  (let ((goalx 0.3) (goaly 0.1) (goalth 15.0))
+    (send *ri* :set-foot-steps-no-wait
+          (list (make-coords :coords (send *robot* :rleg :end-coords :copy-worldcoords) :name :rleg)
+                (make-coords :coords (send (send *robot* :lleg :end-coords :copy-worldcoords) :translate (float-vector 100 0 0)) :name :lleg)
+                (make-coords :coords (send (send *robot* :rleg :end-coords :copy-worldcoords) :translate (float-vector 200 0 0)) :name :rleg)
+                (make-coords :coords (send (send *robot* :lleg :end-coords :copy-worldcoords) :translate (float-vector 300 0 0)) :name :lleg)
+                (make-coords :coords (send (send *robot* :rleg :end-coords :copy-worldcoords) :translate (float-vector 300 0 0)) :name :rleg)))
+    (send *ri* :angle-vector (send *sr* :angle-vector) 2000) (send *ri* :wait-interpolation) ;; wait 2 step using dummy waitInterpolation
+    (send *ri* :go-pos-no-wait goalx goaly goalth) ;; overwrite gopos
+    (send *ri* :wait-foot-steps)
+    )
+  )
+
+(defun samplerobot-auto-balancer-demo22 ()
+  (print ";; 17. Graspless manip mode")
+  (labels ((ik-pose-gen
+            (rarm-target-coords larm-target-coords)
+            (send *robot* :reset-manip-pose)
+            (send *robot* :fix-leg-to-coords (make-coords))
+            (send *robot* :fullbody-inverse-kinematics
+                  (list rarm-target-coords larm-target-coords
+                        (send *robot* :rleg :end-coords :copy-worldcoords)
+                        (send *robot* :lleg :end-coords :copy-worldcoords))
+                  :move-target (mapcar #'(lambda (x) (send *robot* x :end-coords)) '(:rarm :larm :rleg :lleg))
+                  :link-list (mapcar #'(lambda (x) (send *robot* :link-list (send *robot* x :end-coords :parent))) '(:rarm :larm :rleg :lleg)))))
+    ;; gen pose
+    (let ((dualarm-push-pose) (av-fwd) (av-bwd) (av-left) (av-right) (av-lturn) (av-rturn))
+      (let ((r-handle-coords (make-coords :pos (float-vector 480 -220 870) :rpy (list 0 0 pi/2)))
+            (l-handle-coords (make-coords :pos (float-vector 480  220 870) :rpy (list 0 0 -pi/2))))
+        (ik-pose-gen
+         (make-coords :pos (float-vector 480 -220 870) :rpy (list 0 0 pi/2))
+         (make-coords :pos (float-vector 480  220 870) :rpy (list 0 0 -pi/2)))
+        (setq dualarm-push-pose (send *robot* :angle-vector))
+        (ik-pose-gen
+         (make-coords :pos (float-vector (+ 50 480) -220 870) :rpy (list 0 0 pi/2))
+         (make-coords :pos (float-vector (+ 50 480)  220 870) :rpy (list 0 0 -pi/2)))
+        (setq av-fwd (send *robot* :angle-vector))
+        (ik-pose-gen
+         (make-coords :pos (float-vector (+ -50 480) -220 870) :rpy (list 0 0 pi/2))
+         (make-coords :pos (float-vector (+ -50 480)  220 870) :rpy (list 0 0 -pi/2)))
+        (setq av-bwd (send *robot* :angle-vector))
+        (ik-pose-gen
+         (make-coords :pos (float-vector 480 (+ 50 -220) 870) :rpy (list 0 0 pi/2))
+         (make-coords :pos (float-vector 480 (+ 50  220) 870) :rpy (list 0 0 -pi/2)))
+        (setq av-left (send *robot* :angle-vector))
+        (ik-pose-gen
+         (make-coords :pos (float-vector 480 (+ -50 -220) 870) :rpy (list 0 0 pi/2))
+         (make-coords :pos (float-vector 480 (+ -50  220) 870) :rpy (list 0 0 -pi/2)))
+        (setq av-right (send *robot* :angle-vector))
+        (let* ((rc (make-cascoords :pos (float-vector 480 -220 870) :rpy (list 0 0 pi/2)))
+               (lc (make-cascoords :pos (float-vector 480  220 870) :rpy (list 0 0 -pi/2)))
+               (mc (make-cascoords :pos (midpoint 0.5 (send rc :worldpos) (send lc :worldpos)))))
+          (dolist (cc (list rc lc)) (send mc :assoc cc))
+          (send mc :rotate (deg2rad 10) :z)
+          (ik-pose-gen rc lc)
+          (setq av-lturn (send *robot* :angle-vector))
+          (send mc :rotate (deg2rad -20) :z)
+          (ik-pose-gen rc lc)
+          (setq av-rturn (send *robot* :angle-vector))
+          (dolist (cc (list rc lc)) (send mc :dissoc cc))
+          ))
+      (send *ri* :start-auto-balancer)
+      (send *robot* :angle-vector dualarm-push-pose)
+      (send *ri* :angle-vector (send *robot* :angle-vector) 500)
+      (send *ri* :wait-interpolation)
+      (send *ri* :stop-collision-detection)
+      (send *ri* :start-graspless-manip-mode *robot* :arms)
+      (send *ri* :set-auto-balancer-param :graspless-manip-p-gain #f(1 1 1))
+      (send *ri* :wait-foot-steps)
+      (mapcar #'(lambda (av)
+                  (send *ri* :go-velocity 0 0 0)
+                  (send *robot* :angle-vector av)
+                  (send *ri* :angle-vector (send *robot* :angle-vector) 400)
+                  (send *ri* :wait-interpolation)
+                  ;; dummy 2step
+                  (send *ri* :angle-vector (send *robot* :angle-vector) 1600)
+                  (send *ri* :wait-interpolation)
+                  (send *ri* :go-stop))
+              (list av-fwd av-bwd av-left av-right av-lturn av-rturn))
+      (send *ri* :start-collision-detection)
+      (send *robot* :angle-vector dualarm-push-pose)
+      (send *ri* :angle-vector (send *robot* :angle-vector) 0.5)
+      (send *ri* :wait-interpolation)
+      )))
+
+(defun demo-reset-standing-pos ()
+  (send *ri* :go-pos 0 0 -45)
+  (send *ri* :go-pos 0 -1.0 0)))
+
 (defun samplerobot-auto-balancer-demo ()
   (samplerobot-auto-balancer-init)
 
@@ -423,6 +541,9 @@
   (samplerobot-auto-balancer-demo18)
   (samplerobot-auto-balancer-demo19)
   (samplerobot-auto-balancer-demo19 :overwrite-offset-idx 2)
+  (samplerobot-auto-balancer-demo20 :reset-standing-pos t)
+  (samplerobot-auto-balancer-demo21)
+  (samplerobot-auto-balancer-demo22)
   )
 
 (warn ";; (samplerobot-auto-balancer-demo)~%")

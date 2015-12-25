@@ -2,6 +2,16 @@
 Changelog for package openrtm_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.3.1 (2015-12-16)
+------------------
+* deb release only targeting to indigo
+
+1.3.0 (2015-12-09)
+------------------
+* deb release only targeting to indigo
+* [openrtm_ros_bridge] Add gitignore to ignore auto-generated files
+* Contributors: Ryohei Ueda
+
 1.2.14 (2015-06-23)
 -------------------
 
