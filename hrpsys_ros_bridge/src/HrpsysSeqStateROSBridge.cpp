@@ -1145,13 +1145,10 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
     // orientation
     tf::Transform imu_transform = tf::Transform(q, tf::Vector3(0, 0, 0));
     tf::Quaternion root_relative_imu_orientation = (root_relative_gyrometer_transform * imu_transform).getRotation();
-    imu_rootlink.orientation.x = root_relative_imu_orientation.getX();
-    imu_rootlink.orientation.y = root_relative_imu_orientation.getY();
-    imu_rootlink.orientation.z = root_relative_imu_orientation.getZ();
-    imu_rootlink.orientation.w = root_relative_imu_orientation.getW();
+    tf::quaternionTFToMsg(root_relative_imu_orientation, imu_rootlink.orientation);
     tf::Matrix3x3 orientation_cov_matrix = tf::Matrix3x3(imu.orientation_covariance[0], imu.orientation_covariance[1], imu.orientation_covariance[2],
-                                                         imu.orientation_covariance[0], imu.orientation_covariance[1], imu.orientation_covariance[2],
-                                                         imu.orientation_covariance[0], imu.orientation_covariance[1], imu.orientation_covariance[2]);
+                                                         imu.orientation_covariance[3], imu.orientation_covariance[4], imu.orientation_covariance[5],
+                                                         imu.orientation_covariance[6], imu.orientation_covariance[7], imu.orientation_covariance[8]);
     tf::Matrix3x3 root_relative_orientation_cov_matrix = root_relative_gyrometer_transform.getBasis().transpose() * orientation_cov_matrix * root_relative_gyrometer_transform.getBasis();
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
@@ -1159,9 +1156,7 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
       }
     }
     tf::Vector3 root_relative_imu_angular_velocity = root_relative_gyrometer_transform.getBasis() * tf::Vector3(m_gyrometer[0].data.avx, m_gyrometer[0].data.avy, m_gyrometer[0].data.avz);
-    imu_rootlink.angular_velocity.x = root_relative_imu_angular_velocity[0];
-    imu_rootlink.angular_velocity.y = root_relative_imu_angular_velocity[1];
-    imu_rootlink.angular_velocity.z = root_relative_imu_angular_velocity[2];
+    tf::vector3TFToMsg(root_relative_imu_angular_velocity, imu_rootlink.angular_velocity);
     imu_rootlink.angular_velocity_covariance = imu.angular_velocity_covariance;
   }
   if (m_gsensor.size() > 0) {  // acceleration
@@ -1172,12 +1167,10 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
     tf::transformEigenToTF(acceleration_matrix, acceleration_transform);
     tf::Transform root_relative_acceleration_transform = base.inverse() * acceleration_transform; // base->odom->gyrometer
     tf::Vector3 root_relative_imu_acceleration = root_relative_acceleration_transform.getBasis() * tf::Vector3(m_gsensor[0].data.ax, m_gsensor[0].data.ay, m_gsensor[0].data.az);
-    imu_rootlink.linear_acceleration.x = root_relative_imu_acceleration[0];
-    imu_rootlink.linear_acceleration.y = root_relative_imu_acceleration[1];
-    imu_rootlink.linear_acceleration.z = root_relative_imu_acceleration[2];
+    tf::vector3TFToMsg(root_relative_imu_acceleration, imu_rootlink.linear_acceleration);
     imu_rootlink.linear_acceleration_covariance = imu.linear_acceleration_covariance;
   }
-  imu_rootlink_pub.publish(imu);
+  imu_rootlink_pub.publish(imu_rootlink);
 
   // Publish imu_floor frame in tf
   if (is_base_valid) {
