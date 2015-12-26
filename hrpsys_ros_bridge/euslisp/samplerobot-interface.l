@@ -7,21 +7,12 @@
 (defmethod samplerobot-interface
   (:init (&rest args)
     (send-super* :init :robot samplerobot-robot args)
+    (dolist (limb '(:rleg :lleg :torso)) (send self :def-limb-controller-method limb))
     (mapcar #'(lambda (ctype)
-                (send self :add-controller ctype))
-            (send self :default-controller-list))
+                (send self :add-controller ctype :create-actions t :joint-enable-check t))
+            (list :rhand-controller :lhand-controller :rarm-controller :larm-controller
+                  :torso-controller :rleg-controller :lleg-controller))
     )
-  (:default-controller-list ()
-   (list :larm-controller
-         :rarm-controller
-         :torso-controller
-         :lhand-controller
-         :rhand-controller
-         :fullbody-controller))
-  (:default-controller ()
-    (mapcar #'(lambda (ctype) (car (send self ctype))) (send self :default-controller-list)))
-  (:fullbody-controller ()
-   (send-message self robot-interface :default-controller))
   (:larm-controller ()
    (list
     (list
@@ -36,13 +27,6 @@
      (cons :controller-state  "/rarm_controller/state")
      (cons :action-type control_msgs::FollowJointTrajectoryAction)
      (cons :joint-names (list "RARM_SHOULDER_P" "RARM_SHOULDER_R" "RARM_SHOULDER_Y" "RARM_ELBOW" "RARM_WRIST_Y" "RARM_WRIST_P")))))
-  (:torso-controller ()
-   (list
-    (list
-     (cons :controller-action "/torso_controller/follow_joint_trajectory_action")
-     (cons :controller-state  "/torso_controller/state")
-     (cons :action-type control_msgs::FollowJointTrajectoryAction)
-     (cons :joint-names (list "WAIST_P" "WAIST_R" "CHEST")))))
   (:lhand-controller ()
    (list
     (list

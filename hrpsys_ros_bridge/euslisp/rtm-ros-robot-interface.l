@@ -295,6 +295,27 @@
              (digits-string (aref dt 2) 2)
              (digits-string (aref dt 1) 2)
              (digits-string (aref dt 0) 2))))
+  ;; Method for define limb controller method using defmethod
+  ;; If debugp t, we can see defmethod s-expressions.
+  (:def-limb-controller-method
+    (limb &key (debugp nil))
+    "Method to add limb controller action by default setting.
+     Currently, FollowJointTrajectoryAction is used."
+    (let ((sexp `(defmethod ,(send (class self):name)
+                   (,(read-from-string (format nil "~A-controller" limb))
+                    ()
+                    (list
+                     (list
+                      (cons :group-name ,(string-downcase limb))
+                      (cons :controller-action ,(format nil "~A_controller/follow_joint_trajectory_action" (string-downcase limb)))
+                      (cons :controller-state ,(format nil "~A_controller/state" (string-downcase limb)))
+                      (cons :action-type control_msgs::FollowJointTrajectoryAction)
+                      (cons :joint-names (list ,@(send-all (send robot limb :joint-list) :name))))
+                     )))))
+      (if debugp
+          (pprint (macroexpand sexp)))
+      (eval sexp)
+      ))
   )
 
 ;; define Euslisp setter and getter method
@@ -377,10 +398,19 @@
    (groupname)
    (send self :sequenceplayerservice_waitinterpolationofgroup :gname groupname))
   (:add-joint-group
-   (groupname jnames)
+   (groupname &optional (jnames
+                         (if (find-method self (read-from-string (format nil ":~A-controller" (string-downcase groupname))))
+                             (cdr (assoc :joint-names (car (send self (read-from-string (format nil ":~A-controller" (string-downcase groupname))))))))))
+   "Add joint group for SequencePlayer.
+    groupname is joint group name such as rarm or lleg.
+    jnames is list of joint name."
+   (unless jnames
+     (error ";; jnames argument is require in :add-joint-group~%"))
    (send self :sequenceplayerservice_addjointgroup :gname groupname :jnames jnames))
   (:remove-joint-group
    (groupname)
+   "Remove joint group for SequencePlayer.
+    groupname is joint group name such as rarm or lleg."
    (send self :sequenceplayerservice_removejointgroup :gname groupname))
   (:set-joint-angles-of-group
    (groupname av tm)
