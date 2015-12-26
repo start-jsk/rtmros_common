@@ -566,36 +566,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     
     updateOdometry(base, tm_on_execute);
   }  // end: m_baseTformIn
-
-  bool imu_updated = false;
-  // m_baseRpyIn
-  if (m_baseRpyIn.isNew()){
-    m_baseRpyIn.read();
-    imu_updated = true;
-  } // end: m_baseRpyIn
-
-  for (unsigned int i = 0; i < m_gyrometerIn.size(); i++) {
-    if (m_gyrometerIn[i]->isNew()) {
-
-      m_gyrometerIn[i]->read();
-      if (i == 0) {
-        imu_updated = true;
-      }
-    }
-  }
-
-  for (unsigned int i = 0; i < m_gsensorIn.size(); i++) {
-    if (m_gsensorIn[i]->isNew()) {
-      m_gsensorIn[i]->read();
-      if (i == 0) {
-        imu_updated = true;
-      }
-    }
-  }
-  
-  if (imu_updated){
-    updateImu(base, is_base_valid, tm_on_execute);
-  }
+ 
+  updateImu(base, is_base_valid, tm_on_execute);
 
   // publish forces sonsors
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
@@ -1083,6 +1055,23 @@ void HrpsysSeqStateROSBridge::odomInitTriggerCB(const std_msgs::Empty &trigger)
 
 void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp)
 {
+  if (m_baseRpyIn.isNew()){
+    m_baseRpyIn.read();
+  } 
+  if (m_baseRpyCurrentIn.isNew()) {
+    m_baseRpyCurrentIn.read();
+  } 
+  for (unsigned int i = 0; i < m_gyrometerIn.size(); i++) {
+    if (m_gyrometerIn[i]->isNew()) {
+      m_gyrometerIn[i]->read();
+    }
+  }
+  for (unsigned int i = 0; i < m_gsensorIn.size(); i++) {
+    if (m_gsensorIn[i]->isNew()) {
+      m_gsensorIn[i]->read();
+    }
+  }
+  
   sensor_msgs::Imu imu;
   if (m_gyrometerName.size() > 0) {
     imu.header.frame_id = m_gyrometerName[0];
@@ -1132,7 +1121,11 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
     tf::matrixTFToEigen(base.getBasis(), body->rootLink()->R);
     body->calcForwardKinematics();
   }
-  if (m_gyrometer.size() > 0) { // orientation and angular velocity (imu is assumed to be same coords as gyrometer)
+  // orientation
+  tf::Quaternion q_rootlink = tf::createQuaternionFromRPY(m_baseRpyCurrent.data.r, m_baseRpyCurrent.data.p, m_baseRpyCurrent.data.y);
+  tf::quaternionTFToMsg(q_rootlink, imu_rootlink.orientation);
+  imu_rootlink.orientation_covariance = imu.orientation_covariance;
+  if (m_gyrometer.size() > 0) { // angular velocity 
     // joint angles are assumed to be already updated
     // TODO: It is not good to assume hrp::Vector3 is typedef of Eigen::Vector3 and hrp::Matrix33 is typedef of Eigen::Matrix3d implicitly (cf. EigenTypes.h)
     // calculate current gyrometer coords
@@ -1142,19 +1135,6 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
     tf::Transform gyrometer_transform;
     tf::transformEigenToTF(gyrometer_matrix, gyrometer_transform);
     tf::Transform gyrometer_to_root_transform = gyrometer_transform.inverse() * base; // gyrometer->odom->base
-    // orientation
-    tf::Transform imu_transform = tf::Transform(q, tf::Vector3(0, 0, 0));
-    tf::Quaternion root_relative_imu_orientation = (gyrometer_to_root_transform * imu_transform).getRotation();
-    tf::quaternionTFToMsg(root_relative_imu_orientation, imu_rootlink.orientation);
-    tf::Matrix3x3 orientation_cov_matrix = tf::Matrix3x3(imu.orientation_covariance[0], imu.orientation_covariance[1], imu.orientation_covariance[2],
-                                                         imu.orientation_covariance[3], imu.orientation_covariance[4], imu.orientation_covariance[5],
-                                                         imu.orientation_covariance[6], imu.orientation_covariance[7], imu.orientation_covariance[8]);
-    tf::Matrix3x3 root_relative_orientation_cov_matrix = gyrometer_to_root_transform.getBasis().transpose() * orientation_cov_matrix * gyrometer_to_root_transform.getBasis();
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        imu_rootlink.orientation_covariance[3 * i + j] = orientation_cov_matrix[i][j];
-      }
-    }
     tf::Vector3 root_relative_imu_angular_velocity = gyrometer_to_root_transform.getBasis() * tf::Vector3(m_gyrometer[0].data.avx, m_gyrometer[0].data.avy, m_gyrometer[0].data.avz);
     tf::vector3TFToMsg(root_relative_imu_angular_velocity, imu_rootlink.angular_velocity);
     imu_rootlink.angular_velocity_covariance = imu.angular_velocity_covariance;

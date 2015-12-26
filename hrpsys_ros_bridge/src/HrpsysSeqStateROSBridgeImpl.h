@@ -125,7 +125,9 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
 
   // for imu topic
   TimedOrientation3D m_baseRpy;
+  TimedOrientation3D m_baseRpyCurrent;
   InPort<TimedOrientation3D> m_baseRpyIn;
+  InPort<TimedOrientation3D> m_baseRpyCurrentIn;
 
   TimedDoubleSeq m_rsvel;
   InPort<TimedDoubleSeq> m_rsvelIn;
