@@ -34,7 +34,7 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_mcangleIn("mcangle", m_mcangle),
     m_baseTformIn("baseTform", m_baseTform),
     m_baseRpyIn("baseRpy", m_baseRpy),
-    m_baseRpyCurrentIn("baseRpyCurrentIn", m_baseRpyCurrent),
+    m_baseRpyCurrentIn("baseRpyCurrent", m_baseRpyCurrent),
     m_rsvelIn("rsvel", m_rsvel),
     m_rstorqueIn("rstorque", m_rstorque),
     m_servoStateIn("servoState", m_servoState),
