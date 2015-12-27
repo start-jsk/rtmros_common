@@ -1276,7 +1276,7 @@
   (:set-st-param
    (&rest args
     &key st-algorithm
-         eefm-pos-damping-gain eefm-rot-damping-gain eefm-pos-time-const-support eefm-rot-time-const
+         eefm-pos-damping-gain eefm-rot-damping-gain eefm-pos-time-const-support eefm-rot-time-const eefm-swing-pos-spring-gain eefm-swing-rot-spring-gain
     &allow-other-keys)
    "Set Stabilizer parameters.
     To learn more about arguments, please see (pprint (find-method *ri* :raw-set-st-param))."
@@ -1309,6 +1309,14 @@
                  (let ((tmp (send prm :eefm_pos_time_const_support)))
                    (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-pos-time-const-support))
                    (list :eefm-pos-time-const-support tmp)))
+             (if (and (memq :eefm-swing-pos-spring-gain args) eefm-swing-pos-spring-gain)
+                 (let ((tmp (send prm :eefm_swing_pos_spring_gain)))
+                   (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-swing-pos-spring-gain))
+                   (list :eefm-swing-pos-spring-gain tmp)))
+             (if (and (memq :eefm-swing-rot-spring-gain args) eefm-swing-rot-spring-gain)
+                 (let ((tmp (send prm :eefm_swing_rot_spring_gain)))
+                   (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-swing-rot-spring-gain))
+                   (list :eefm-swing-rot-spring-gain tmp)))
              args))))
   (:set-st-param-for-non-feedback-LIP-mode
    ()
