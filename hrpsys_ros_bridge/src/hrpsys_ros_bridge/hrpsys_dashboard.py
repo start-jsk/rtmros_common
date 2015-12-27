@@ -60,6 +60,7 @@ class HrpsysLogMenu(MenuDashWidget):
     self.update_state(0)
     self.add_action('download rtm log', self.on_download)
     self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
+    self.setToolTip("Download rtm log")
   def on_download(self):
     try:
       hrpsys_save = rospy.ServiceProxy("/DataLoggerServiceROSBridge/save", OpenHRP_DataLoggerService_save )
@@ -137,6 +138,7 @@ class HrpsysPowerMenu(MenuDashWidget):
     self.add_action('Power On', self.on_power_on)
     self.add_action('Power Off', self.on_power_off)
     self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
+    self.setToolTip("Power On / Power Off")
   def on_power_on(self):
     try:
       power = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/power", OpenHRP_RobotHardwareService_power )
@@ -173,6 +175,15 @@ class HrpsysServoMenu(MenuDashWidget):
     self.add_action('Servo On', self.on_servo_on)
     self.add_action('Servo Off', self.on_servo_off)
     self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
+    self.setToolTip("Servo")
+  def update_state(self, mode, msg='Unknown'):
+      if mode == 1:
+          self.setToolTip("Servo : On")
+      elif mode == 2:
+          self.setToolTip("Servo : Off")
+      else:
+          self.setToolTip("Servo : " + msg)
+      super(HrpsysServoMenu, self).update_state(mode)
   def on_servo_on(self):
     try:
       if self.start_command:
@@ -188,6 +199,7 @@ class HrpsysServoMenu(MenuDashWidget):
         actual(OpenHRP_StateHolderService_goActualRequest())
         time.sleep(2)
         servo(OpenHRP_RobotHardwareService_servoRequest("all",0))
+        self.setToolTip("Servo : On")
     except Exception, e:
       mb = QMessageBox(QMessageBox.NoIcon, "Error",
                        "Failed to servo on: %s"%(e),
@@ -205,6 +217,7 @@ class HrpsysServoMenu(MenuDashWidget):
         servo(OpenHRP_RobotHardwareService_servoRequest("all", 1))
         time.sleep(1)
         power(OpenHRP_RobotHardwareService_powerRequest("all",1))
+        self.setToolTip("Servo : Off")
     except Exception, e:
       mb = QMessageBox(QMessageBox.NoIcon, "Error",
                        "Failed to servo off: %s"%(e),
@@ -402,8 +415,10 @@ class HrpsysDashboard(Dashboard):
         self._servo.update_state(1)
       elif servo_mode == 'Servo Off':
         self._servo.update_state(2)
+      else:
+        self._servo.update_state(0, servo_mode)
     else:
-      self._servo.update_state(0)
+      self._servo.update_state(0, "No Message Received")
 
     if self._power:
       if power_mode:
