@@ -70,6 +70,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   odom_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
   odom_init_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
   ground_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
+  imu_floor_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
   // is use_sim_time is set and no one publishes clock, publish clock time
   use_sim_time = ros::Time::isSimTime();
   clock_sub = nh.subscribe("/clock", 1, &HrpsysSeqStateROSBridge::clock_cb, this);
@@ -456,23 +457,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       joint_state.effort.resize(joint_state.name.size());
     }
     joint_state_pub.publish(joint_state);
-    // sensors publish
-    if (publish_sensor_transforms) {
-      boost::mutex::scoped_lock lock(sensor_transformation_mutex);
-      std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
-      while ( its != sensor_info.end() ) {
-        if (sensor_transformations.find((*its).first) == sensor_transformations.end()) {
-          br.sendTransform(tf::StampedTransform((*its).second.transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
-        }
-        else {
-          geometry_msgs::Transform transform = sensor_transformations[(*its).first];
-          tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
-                                     tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
-          br.sendTransform(tf::StampedTransform(tf_transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
-        }
-        ++its;
-      }
-    }
     m_mutex.unlock();
 
     if ( joint_trajectory_server.isActive() &&
@@ -583,8 +567,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
     
   }  // end: m_baseTformIn
- 
-  updateImu(base, is_base_valid, tm_on_execute);
+
+  { // imu block
+    boost::mutex::scoped_lock lock(imu_mutex);    
+    updateImu(base, is_base_valid, tm_on_execute);
+  }
 
   // publish forces sonsors
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
@@ -830,14 +817,28 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
 void HrpsysSeqStateROSBridge::periodicTimerCallback(const ros::TimerEvent& event)
 {
-  boost::mutex::scoped_lock lock(odom_mutex);
   ros::Time stamp;
   if ( use_hrpsys_time ) {
     stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
   } else {
     stamp = ros::Time::now();;
   }
-  publishOdometryTransforms(stamp);
+  
+  { // publish odom transforms
+    boost::mutex::scoped_lock lock(odom_mutex);
+    publishOdometryTransforms(stamp);
+  }
+  
+  { // publish imu transforms
+    boost::mutex::scoped_lock lock(imu_mutex);
+    publishImuTransform(stamp);
+  }
+
+  { // publish sensor transforms
+    boost::mutex::scoped_lock lock(sensor_transformation_mutex);
+    publishSensorTransform(stamp);
+  }
+  
 }
 
 void HrpsysSeqStateROSBridge::updateOdometry(const tf::Transform &base, const ros::Time &stamp)
@@ -1167,46 +1168,68 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
   }
   imu_rootlink_pub.publish(imu_rootlink);
 
-  // Publish imu_floor frame in tf
+  // Overwrite base pose by imu and pudate imu_floor frame in tf
   if (is_base_valid) {
-    bool found_imu_sensor_info = false;
+    base.setRotation(tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y));
+    imu_floor_transform = base.inverse();
+    imu_floor_transform.setOrigin(tf::Vector3(0, 0, 0));
+  }
+}
+
+void HrpsysSeqStateROSBridge::publishImuTransform(const ros::Time &stamp)
+{
+#if ROS_VERSION_MINIMUM(1,8,0)
+  tf::Matrix3x3 m;
+#else
+  btMatrix3x3 m; // for electric
+#endif
+  m = imu_floor_transform.getBasis();
+  bool not_nan = true;
+  for (int i = 0; i < 3; ++i) {
+    if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
+      not_nan = false;
+  }
+
+  bool found_imu_sensor_info = false;
+  std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
+  std::string imu_sensor_info_name;
+  while (its != sensor_info.end()) {
+    if ((*its).second.type_name == "RateGyro") {
+      imu_sensor_info_name = (*its).first;
+      found_imu_sensor_info = true;
+      break;
+    }
+    ++its;
+  }
+  
+  if (not_nan && found_imu_sensor_info) {
+    br.sendTransform(tf::StampedTransform(imu_floor_transform, stamp, imu_sensor_info_name, "imu_floor"));
+  } else {
+    ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
+                     << m_baseRpy.data.r << ","
+                     << m_baseRpy.data.p << ","
+                     << m_baseRpy.data.y << ")");
+  }
+}
+
+void HrpsysSeqStateROSBridge::publishSensorTransform(const ros::Time &stamp)
+{
+  // sensors publish
+  if (publish_sensor_transforms) {
     std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
-    std::string imu_sensor_info_name;
-    while (its != sensor_info.end()) {
-      if ((*its).second.type_name == "RateGyro") {
-        imu_sensor_info_name = (*its).first;
-        found_imu_sensor_info = true;
-        break;
+    while ( its != sensor_info.end() ) {
+      if (sensor_transformations.find((*its).first) == sensor_transformations.end()) {
+        br.sendTransform(tf::StampedTransform((*its).second.transform, stamp, std::string((*its).second.link_name), (*its).first));
+      }
+      else {
+        geometry_msgs::Transform transform = sensor_transformations[(*its).first];
+        tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
+                                   tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
+        br.sendTransform(tf::StampedTransform(tf_transform, stamp, std::string((*its).second.link_name), (*its).first));
       }
       ++its;
     }
-    ros::Time base_time = stamp;
-    //base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
-    base.setRotation(tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y));
-    tf::Transform inv = base.inverse();
-    inv.setOrigin(tf::Vector3(0, 0, 0));
-#if ROS_VERSION_MINIMUM(1,8,0)
-    tf::Matrix3x3 m;
-#else
-    btMatrix3x3 m; // for electric
-#endif
-    m = inv.getBasis();
-    bool not_nan = true;
-    for (int i = 0; i < 3; ++i) {
-      if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
-        not_nan = false;
-    }
-    if (not_nan) {
-      if (found_imu_sensor_info) {
-        br.sendTransform(tf::StampedTransform(inv, base_time, imu_sensor_info_name, "imu_floor"));
-      }
-    } else {
-      ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
-                       << m_baseRpy.data.r << ","
-                       << m_baseRpy.data.p << ","
-                       << m_baseRpy.data.y << ")");
-    }
-  }  
+  }
 }
 
 extern "C"

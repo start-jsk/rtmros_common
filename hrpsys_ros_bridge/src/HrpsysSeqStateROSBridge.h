@@ -75,9 +75,6 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   ros::Subscriber clock_sub;
 
-  std::map<std::string, geometry_msgs::Transform> sensor_transformations;
-  boost::mutex sensor_transformation_mutex;
-
   nav_msgs::Odometry prev_odom;
   bool prev_odom_acquired;
   hrp::Vector3 prev_rpy;
@@ -97,7 +94,6 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void odomInitTriggerCB(const std_msgs::Empty &trigger);
   bool isLeggedRobot();
   void updateGroundTransform();
-  void updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp);
   boost::mutex odom_mutex;
   tf::Transform odom_transform, odom_init_transform, ground_transform;
   bool update_odom_init_flag;
@@ -105,6 +101,18 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   bool prev_rfoot_contact_state;
   bool is_robot_on_ground;
   bool publish_odom_transform, publish_odom_init_transform, invert_odom_init_tf, check_robot_is_on_ground, publish_ground_transform;
+
+  // imu relatives
+  void updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp);
+  void publishImuTransform(const ros::Time &stamp);
+  boost::mutex imu_mutex;
+  tf::Transform imu_floor_transform; 
+
+  // sensor relatives
+  void publishSensorTransform(const ros::Time &stamp);
+  std::map<std::string, geometry_msgs::Transform> sensor_transformations;
+  boost::mutex sensor_transformation_mutex;
+  
 };
 
 
