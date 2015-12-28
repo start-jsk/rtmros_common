@@ -1710,7 +1710,7 @@
 ;; TorqueControllerService
 (def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_TorqueControllerService_TorqueControllerParam
   :set-torque-controller-param :get-torque-controller-param
-  :torquecontrollerservice_settorquecontorllerparam :torquecontrollerservice_gettorquecontorllerparam
+  :torquecontrollerservice_settorquecontrollerparam :torquecontrollerservice_gettorquecontrollerparam
   :optional-args (list :jname 'jname))
 (defmethod rtm-ros-robot-interface
   (:enable-torque-control ;; enable torque control in specified joint (only start torque control when tau exceeds tauMax)
