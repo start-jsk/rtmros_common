@@ -43,10 +43,13 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   // ros
   ros::NodeHandle pnh("~");
   pnh.param("publish_sensor_transforms", publish_sensor_transforms, true);
+  pnh.param("publish_odom_transform", publish_odom_transform, true);
   pnh.param("publish_odom_init_transform", publish_odom_init_transform, true);
   pnh.param("publish_ground_transform", publish_ground_transform, true);
   pnh.param("invert_odom_init_tf", invert_odom_init_tf, true);
   pnh.param("check_robot_is_on_ground", check_robot_is_on_ground, true);
+  pnh.param("tf_rate", tf_rate, 50.0);
+  periodic_update_timer = pnh.createTimer(ros::Duration(1.0 / tf_rate), boost::bind(&HrpsysSeqStateROSBridge::periodicTimerCallback, this, _1));
   
   joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
   joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
@@ -64,6 +67,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   imu_rootlink_pub = nh.advertise<sensor_msgs::Imu>("/imu_rootlink", 1);
   odom_init_pose_stamped_pub = nh.advertise<geometry_msgs::PoseStamped>("/odom_init_pose_stamped", 1, true);
   odom_init_transform_pub = nh.advertise<geometry_msgs::TransformStamped>("/odom_init_transform", 1, true);
+  odom_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
   odom_init_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
   ground_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
   // is use_sim_time is set and no one publishes clock, publish clock time
@@ -563,8 +567,21 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     hrp::Vector3 rpy = hrp::rpyFromRot(R);
     tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));
     base.setRotation(q);
+
+    ros::Time odom_stamp;
+    if ( use_hrpsys_time ) {
+      odom_stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
+    } else {
+      odom_stamp = tm_on_execute;
+    }
     
-    updateOdometry(base, tm_on_execute);
+    { // update odometry topics
+      boost::mutex::scoped_lock lock(odom_mutex);
+      updateOdometry(base, odom_stamp);
+      updateOdomInit(odom_stamp);
+      updateGroundTransform();
+    }
+    
   }  // end: m_baseTformIn
  
   updateImu(base, is_base_valid, tm_on_execute);
@@ -811,8 +828,20 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   return RTC::RTC_OK;
 }
 
-void HrpsysSeqStateROSBridge::updateOdometry(const tf::Transform &base, const ros::Time &stamp)
+void HrpsysSeqStateROSBridge::periodicTimerCallback(const ros::TimerEvent& event)
 {
+  boost::mutex::scoped_lock lock(odom_mutex);
+  ros::Time stamp;
+  if ( use_hrpsys_time ) {
+    stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
+  } else {
+    stamp = ros::Time::now();;
+  }
+  publishOdometryTransforms(stamp);
+}
+
+void HrpsysSeqStateROSBridge::updateOdometry(const tf::Transform &base, const ros::Time &stamp)
+{ 
   tf::Vector3 trans = base.getOrigin();
   tf::Quaternion q = base.getRotation();
   hrp::Matrix33 R;
@@ -821,12 +850,7 @@ void HrpsysSeqStateROSBridge::updateOdometry(const tf::Transform &base, const ro
   nav_msgs::Odometry odom;
   
   odom.header.frame_id = "odom";
-  if ( use_hrpsys_time ) {
-    odom.header.stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
-  } else {
-    odom.header.stamp = stamp;
-  }
-  // odom.child_frame_id = "/odom";
+  odom.header.stamp = stamp;
   odom.child_frame_id = rootlink_name;
   odom.pose.pose.position.x = trans[0];
   odom.pose.pose.position.y = trans[1];
@@ -909,17 +933,8 @@ void HrpsysSeqStateROSBridge::updateOdometry(const tf::Transform &base, const ro
       prev_rpy = rpy;
 
       // make transform from pose message in odom
-      tf::Transform odom_pose_transform(tf::Quaternion(odom.pose.pose.orientation.x, odom.pose.pose.orientation.y, odom.pose.pose.orientation.z, odom.pose.pose.orientation.w),
-                                        tf::Vector3(odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z));
-
-      // update odom_init
-      updateOdomInit(odom_pose_transform, odom.header.stamp);
-
-      // update ground
-      updateGroundTransform(odom_pose_transform);
-
-      // publish transformations
-      publishOdometryTransforms(odom_pose_transform, odom.header.stamp);
+      odom_transform = tf::Transform(tf::Quaternion(odom.pose.pose.orientation.x, odom.pose.pose.orientation.y, odom.pose.pose.orientation.z, odom.pose.pose.orientation.w),
+                                     tf::Vector3(odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z));
     }
   } else {
     // previous values are needed to calculate velocity
@@ -947,18 +962,17 @@ bool HrpsysSeqStateROSBridge::checkFootContactState(bool lfoot_contact_state, bo
   }
 }
 
-void HrpsysSeqStateROSBridge::updateOdomInit(const tf::Transform &odom_pose_transform, const ros::Time &stamp)
+void HrpsysSeqStateROSBridge::updateOdomInit(const ros::Time &stamp)
 {
-  boost::mutex::scoped_lock lock(odom_init_mutex);
   if (update_odom_init_flag) {
     // publish odom_init topics
     // whether invert_odom_init is true or not odom_init_pose_stamped and odom_init_transform is described in odom coordinates.
     geometry_msgs::TransformStamped ros_odom_init_coords;
     geometry_msgs::PoseStamped ros_odom_init_pose_stamped;
     // ignore z height and roll/pitch angle transform from odom assuming odom_init is on the flat ground
-    tf::Matrix3x3 odom_pose_matrix(odom_pose_transform.getRotation());
+    tf::Matrix3x3 odom_pose_matrix(odom_transform.getRotation());
     double odom_init_yaw = atan2(odom_pose_matrix[1][0], odom_pose_matrix[0][0]); // ref: pcl::getEulerAngles
-    odom_init_transform.setOrigin(tf::Vector3(odom_pose_transform.getOrigin()[0], odom_pose_transform.getOrigin()[1], 0.0));
+    odom_init_transform.setOrigin(tf::Vector3(odom_transform.getOrigin()[0], odom_transform.getOrigin()[1], 0.0));
     odom_init_transform.setRotation(tf::Quaternion(tf::Vector3(0, 0, 1), odom_init_yaw));
     // transform (not be affected by invert_odom_init_tf)
     ros_odom_init_coords.header.stamp = stamp;
@@ -982,15 +996,15 @@ bool HrpsysSeqStateROSBridge::isLeggedRobot()
   return (ee_info.find("rleg") != ee_info.end() && ee_info.find("lleg") != ee_info.end()); // TODO: do not hard-code leg link name
 }
 
-void HrpsysSeqStateROSBridge::updateGroundTransform(const tf::Transform &odom_pose_transform)
+void HrpsysSeqStateROSBridge::updateGroundTransform()
 {
   // TODO: It is not good to assume hrp::Vector3 is typedef of Eigen::Vector3 and hrp::Matrix33 is typedef of Eigen::Matrix3d implicitly (cf. EigenTypes.h)
   std::vector<tf::Transform> base_to_foot;
   std::vector<std::string> leg_names;
   if (isLeggedRobot()) {
     // joint angles are assumed to be already updated
-    tf::vectorTFToEigen(odom_pose_transform.getOrigin(), body->rootLink()->p);
-    tf::matrixTFToEigen(odom_pose_transform.getBasis(), body->rootLink()->R);
+    tf::vectorTFToEigen(odom_transform.getOrigin(), body->rootLink()->p);
+    tf::matrixTFToEigen(odom_transform.getBasis(), body->rootLink()->R);
     body->calcForwardKinematics();
     // TODO: do not hard-code leg link name
     leg_names.push_back("lleg"); 
@@ -1006,23 +1020,24 @@ void HrpsysSeqStateROSBridge::updateGroundTransform(const tf::Transform &odom_po
     tf::Vector3 midcoords_pos = base_to_foot[0].getOrigin().lerp(base_to_foot[1].getOrigin(), 0.5);
     tf::Quaternion midcoords_rot = base_to_foot[0].getRotation().slerp(base_to_foot[1].getRotation(), 0.5);
     tf::Transform odom_relative_ground_transform(midcoords_rot, midcoords_pos);
-    ground_transform = odom_pose_transform.inverse() * odom_relative_ground_transform;
+    ground_transform = odom_transform.inverse() * odom_relative_ground_transform;
   }
 }
 
-void HrpsysSeqStateROSBridge::publishOdometryTransforms(const tf::Transform &odom_pose_transform, const ros::Time &stamp)
-{  
+void HrpsysSeqStateROSBridge::publishOdometryTransforms(const ros::Time &stamp)
+{
   std::vector<geometry_msgs::TransformStamped> tf_transforms;
   geometry_msgs::TransformStamped ros_odom_to_body_coords, ros_odom_init_coords, ros_ground_coords;
   // odom
-  ros_odom_to_body_coords.header.stamp = stamp;
-  ros_odom_to_body_coords.header.frame_id = "/odom";
-  ros_odom_to_body_coords.child_frame_id = rootlink_name;
-  tf::transformTFToMsg(odom_pose_transform, ros_odom_to_body_coords.transform);
-  tf_transforms.push_back(ros_odom_to_body_coords);
+  if(publish_odom_transform) {
+    ros_odom_to_body_coords.header.stamp = stamp;
+    ros_odom_to_body_coords.header.frame_id = "/odom";
+    ros_odom_to_body_coords.child_frame_id = rootlink_name;
+    tf::transformTFToMsg(odom_transform, ros_odom_to_body_coords.transform);
+    tf_transforms.push_back(ros_odom_to_body_coords);
+  }
   // odom_init
   if (publish_odom_init_transform) {
-    boost::mutex::scoped_lock lock(odom_init_mutex);
     ros_odom_init_coords.header.stamp = stamp;
     if (invert_odom_init_tf) {
       ros_odom_init_coords.header.frame_id ="/odom_init";
@@ -1049,7 +1064,7 @@ void HrpsysSeqStateROSBridge::publishOdometryTransforms(const tf::Transform &odo
 
 void HrpsysSeqStateROSBridge::odomInitTriggerCB(const std_msgs::Empty &trigger)
 {
-  boost::mutex::scoped_lock lock(odom_init_mutex);
+  boost::mutex::scoped_lock lock(odom_mutex);
   update_odom_init_flag = true; // forcely update odom_init
 }
 

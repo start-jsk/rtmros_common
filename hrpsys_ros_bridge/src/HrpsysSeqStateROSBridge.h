@@ -83,24 +83,28 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   hrp::Vector3 prev_rpy;
   void clock_cb(const rosgraph_msgs::ClockPtr& str) {};
 
+  double tf_rate;
+  ros::Timer periodic_update_timer;
+  void periodicTimerCallback(const ros::TimerEvent& event);
+
   bool follow_action_initialized;
 
   // odometry relatives
   void updateOdometry(const tf::Transform &base, const ros::Time &stamp);
   bool checkFootContactState(bool lfoot_contact_state, bool rfoot_contact_state);
-  void updateOdomInit(const tf::Transform &odom_pose_transform, const ros::Time &stamp);
-  void publishOdometryTransforms(const tf::Transform &odom_pose_transform, const ros::Time &stamp);
+  void updateOdomInit(const ros::Time &stamp);
+  void publishOdometryTransforms(const ros::Time &stamp);
   void odomInitTriggerCB(const std_msgs::Empty &trigger);
   bool isLeggedRobot();
-  void updateGroundTransform(const tf::Transform &odom_pose_transform);
+  void updateGroundTransform();
   void updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp);
-  boost::mutex odom_init_mutex;
-  tf::Transform odom_init_transform, ground_transform;
+  boost::mutex odom_mutex;
+  tf::Transform odom_transform, odom_init_transform, ground_transform;
   bool update_odom_init_flag;
   bool prev_lfoot_contact_state;
   bool prev_rfoot_contact_state;
   bool is_robot_on_ground;
-  bool publish_odom_init_transform, invert_odom_init_tf, check_robot_is_on_ground, publish_ground_transform;
+  bool publish_odom_transform, publish_odom_init_transform, invert_odom_init_tf, check_robot_is_on_ground, publish_ground_transform;
 };
 
 
