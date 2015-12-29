@@ -678,10 +678,11 @@
                  (push (subseq vec (* i 3) (+ (* i 3) 3)) vret))
                (reverse vret))))
      (let ((ret (send self :impedancecontrollerservice_getObjectForcesMoments)))
-       (list (split-vector (send (send ret :o_forces) :data)) (split-vector (send (send ret :o_moments) :data)))
+       (list (split-vector (send (send ret :o_forces) :data))
+             (split-vector (send (send ret :o_moments) :data))
+             (send ret :o_3dofwrench))
        ))
    )
-  ;; !!Currently for resultant forces!!
   (:set-object-turnaround-ref-force
    (&key (limbs '(:rarm :larm))
          (axis (float-vector 0 0 -1))
@@ -735,6 +736,72 @@
      (if (eq detector-mode :mode_detected)
          (car fm-ret))
      ))
+  (:set-object-turnaround-ref-moment
+   (&key (limbs '(:rarm :larm))
+         (axis (float-vector 0 0 1))
+         (max-ref-moment 10)
+         (func)
+         (moment-center)
+         (max-time 4000.0)
+         (detect-time-offset 2000.0)
+         (set-ref-force-time 2000.0)
+         (set-ref-force-p t))
+   "Set object turnaround reference force.
+    axis is resultant force direction.
+    max-time is max time [msec].
+    detect-time-offset is additional checking time [msec]."
+   (format t ";; Start object turnaround detection~%")
+   (let ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+         (fs-list (funcall func max-ref-moment)))
+     (send self :set-object-turnaround-detector-param
+           :axis axis :moment-center (scale 1e-3 moment-center) :detector-total-wrench 1)
+     (send self :set-ref-forces
+           (mapcar #'(lambda (limb)
+                       (if (memq limb '(:rleg :lleg))
+                           (float-vector 0 0 0)
+                         (elt fs-list (position limb limbs))))
+                   all-limbs)
+           max-time)
+     (send self :start-object-turnaround-detection
+           :ref-diff-wrench max-ref-moment
+           :max-time (* 1e-3 (+ detect-time-offset max-time))
+           :limbs limbs)
+     (let ((detector-mode :mode_detector_idle) (fm-ret) (otd-ret-wrenches))
+       (do-until-key-with-check
+        (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
+        (setq detector-mode (send self :check-object-turnaround-detection))
+        (format t ";;   Detecting... (detector-mode = ~A, current force moment = ~A)~%" detector-mode (send self :get-otd-object-forces-moments))
+        (unix:usleep (* 1000 500)))
+       (if (eq detector-mode :mode_detected)
+           (progn
+             (Setq otd-ret-wrenches (send self :get-otd-object-forces-moments))
+             (setq fm-ret (caddr otd-ret-wrenches))
+             (format t ";; Detected (force moment = ~A ~A)~%" fm-ret (funcall func (v. axis fm-ret)))
+             (setq fm-ret (funcall func (v. axis fm-ret)))
+             (if set-ref-force-p
+                 (send self :set-ref-forces
+                       (mapcar #'(lambda (limb)
+                                   (if (memq limb '(:rleg :lleg))
+                                       (float-vector 0 0 0)
+                                     (elt fm-ret (position limb limbs))))
+                               all-limbs)
+                       set-ref-force-time)
+               (send self :set-ref-force
+                     (float-vector 0 0 0)
+                     set-ref-force-time
+                     (if (= (length limbs) 1) (car limbs) :arms))))
+         (progn
+           (format t ";; Not detected (~A)~%" detector-mode)
+           (send self :set-ref-force
+                 (float-vector 0 0 0)
+                 set-ref-force-time
+                 (if (= (length limbs) 1) (car limbs) :arms))
+           )
+         )
+       (send self :wait-interpolation-seq)
+       (if (eq detector-mode :mode_detected)
+           otd-ret-wrenches)
+       )))
   )
 
 ;; RemoveForceSensorLinkOffset
