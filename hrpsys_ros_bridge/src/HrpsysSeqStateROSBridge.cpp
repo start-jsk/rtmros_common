@@ -46,7 +46,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   pnh.param("publish_odom_transform", publish_odom_transform, true);
   pnh.param("publish_odom_init_transform", publish_odom_init_transform, true);
   pnh.param("publish_ground_transform", publish_ground_transform, true);
-  pnh.param("publish_body_on_odom_transform", publish_ground_transform, true);
+  pnh.param("publish_body_on_odom_transform", publish_body_on_odom_transform, true);
   pnh.param("invert_odom_init_tf", invert_odom_init_tf, true);
   pnh.param("check_robot_is_on_ground", check_robot_is_on_ground, true);
   pnh.param("tf_rate", tf_rate, 50.0);
