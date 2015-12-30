@@ -1039,8 +1039,8 @@ void HrpsysSeqStateROSBridge::updateBodyOnOdom()
                                                             0,
                                                             odom_height) * 
                                        Eigen::AngleAxisd(odom_roll, Eigen::Vector3d::UnitX()) *
-                                       Eigen::AngleAxisd(odom_pitch, Eigen::Vector3d::UnitY()));
-  tf::transformEigenToTF(body_on_odom_pose, body_on_odom_transform);
+                                       Eigen::AngleAxisd(odom_pitch, Eigen::Vector3d::UnitY())); // odom->body in z, roll, pitch
+  tf::transformEigenToTF(body_on_odom_pose.inverse(), body_on_odom_transform); // body_on_odom is assumed to be body->odom
 }
 
 void HrpsysSeqStateROSBridge::publishOdometryTransforms(const ros::Time &stamp)
