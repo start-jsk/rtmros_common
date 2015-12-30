@@ -178,8 +178,8 @@ if __name__ == '__main__':
 
     try:
         rospy.init_node('collision_state_diagnostics')
-        pub_diagnostics = rospy.Publisher('diagnostics', DiagnosticArray)
-        pub_collision = rospy.Publisher('collision_detector_marker_array', MarkerArray)
+        pub_diagnostics = rospy.Publisher('diagnostics', DiagnosticArray, queue_size=1)
+        pub_collision = rospy.Publisher('collision_detector_marker_array', MarkerArray, queue_size=1)
 
         r = rospy.Rate(50)
 
