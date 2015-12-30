@@ -16,6 +16,7 @@
 #include "ros/ros.h"
 #include "rosgraph_msgs/Clock.h"
 #include "std_msgs/Int32.h"
+#include "std_msgs/Empty.h"
 #include "sensor_msgs/JointState.h"
 #include "nav_msgs/Odometry.h"
 #include "geometry_msgs/WrenchStamped.h"
@@ -54,8 +55,9 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
                                hrpsys_ros_bridge::SetSensorTransformation::Response& res);
  private:
   ros::NodeHandle nh;
-  ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, ref_cp_pub, act_cp_pub, odom_pub, imu_pub, em_mode_pub, ref_contact_states_pub, act_contact_states_pub;
-  ros::Subscriber trajectory_command_sub;
+  ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, ref_cp_pub, act_cp_pub, odom_pub, imu_pub,
+    em_mode_pub, ref_contact_states_pub, act_contact_states_pub, odom_init_pose_stamped_pub, odom_init_transform_pub, imu_rootlink_pub;
+  ros::Subscriber trajectory_command_sub, odom_init_trigger_sub;
   std::vector<ros::Publisher> fsensor_pub, cop_pub;
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> joint_trajectory_server;
   actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> follow_joint_trajectory_server;
@@ -73,15 +75,44 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   ros::Subscriber clock_sub;
 
-  std::map<std::string, geometry_msgs::Transform> sensor_transformations;
-  boost::mutex sensor_transformation_mutex;
-
   nav_msgs::Odometry prev_odom;
   bool prev_odom_acquired;
   hrp::Vector3 prev_rpy;
   void clock_cb(const rosgraph_msgs::ClockPtr& str) {};
 
+  double tf_rate;
+  ros::Timer periodic_update_timer;
+  void periodicTimerCallback(const ros::TimerEvent& event);
+
   bool follow_action_initialized;
+
+  // odometry relatives
+  void updateOdometry(const tf::Transform &base, const ros::Time &stamp);
+  bool checkFootContactState(bool lfoot_contact_state, bool rfoot_contact_state);
+  void updateOdomInit(const ros::Time &stamp);
+  void publishOdometryTransforms(const ros::Time &stamp);
+  void odomInitTriggerCB(const std_msgs::Empty &trigger);
+  bool isLeggedRobot();
+  void updateGroundTransform();
+  boost::mutex odom_mutex;
+  tf::Transform odom_transform, odom_init_transform, ground_transform;
+  bool update_odom_init_flag;
+  bool prev_lfoot_contact_state;
+  bool prev_rfoot_contact_state;
+  bool is_robot_on_ground;
+  bool publish_odom_transform, publish_odom_init_transform, invert_odom_init_tf, check_robot_is_on_ground, publish_ground_transform;
+
+  // imu relatives
+  void updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp);
+  void publishImuTransform(const ros::Time &stamp);
+  boost::mutex imu_mutex;
+  tf::Transform imu_floor_transform; 
+
+  // sensor relatives
+  void publishSensorTransform(const ros::Time &stamp);
+  std::map<std::string, geometry_msgs::Transform> sensor_transformations;
+  boost::mutex sensor_transformation_mutex;
+  
 };
 
 
