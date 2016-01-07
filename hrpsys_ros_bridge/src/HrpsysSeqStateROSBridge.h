@@ -90,7 +90,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void updateOdometry(const tf::Transform &base, const ros::Time &stamp);
   bool checkFootContactState(bool lfoot_contact_state, bool rfoot_contact_state);
   void updateOdomInit(const ros::Time &stamp);
-  void publishOdometryTransforms(const ros::Time &stamp);
+  void pushOdometryTransforms(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms);
   void odomInitTriggerCB(const std_msgs::Empty &trigger);
   bool isLeggedRobot();
   void updateGroundTransform();
@@ -105,12 +105,12 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   // imu relatives
   void updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp);
-  void publishImuTransform(const ros::Time &stamp);
+  void pushImuTransform(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms);
   boost::mutex imu_mutex;
   tf::Transform imu_floor_transform; 
 
   // sensor relatives
-  void publishSensorTransform(const ros::Time &stamp);
+  void pushSensorTransform(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms);
   std::map<std::string, geometry_msgs::Transform> sensor_transformations;
   boost::mutex sensor_transformation_mutex;
   

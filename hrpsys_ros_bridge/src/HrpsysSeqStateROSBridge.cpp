@@ -821,6 +821,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 void HrpsysSeqStateROSBridge::periodicTimerCallback(const ros::TimerEvent& event)
 {
   ros::Time stamp;
+  std::vector<geometry_msgs::TransformStamped> tf_transforms;
   if ( use_hrpsys_time ) {
     stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
   } else {
@@ -829,19 +830,22 @@ void HrpsysSeqStateROSBridge::periodicTimerCallback(const ros::TimerEvent& event
   
   { // publish odom transforms
     boost::mutex::scoped_lock lock(odom_mutex);
-    publishOdometryTransforms(stamp);
+    pushOdometryTransforms(stamp, tf_transforms);
   }
   
   { // publish imu transforms
     boost::mutex::scoped_lock lock(imu_mutex);
-    publishImuTransform(stamp);
+    pushImuTransform(stamp, tf_transforms);
   }
 
   { // publish sensor transforms
     boost::mutex::scoped_lock lock(sensor_transformation_mutex);
-    publishSensorTransform(stamp);
+    pushSensorTransform(stamp, tf_transforms);
   }
-  
+
+  if (!tf_transforms.empty()) {
+    br.sendTransform(tf_transforms);
+  }
 }
 
 void HrpsysSeqStateROSBridge::updateOdometry(const tf::Transform &base, const ros::Time &stamp)
@@ -1043,9 +1047,8 @@ void HrpsysSeqStateROSBridge::updateBodyOnOdom()
   tf::transformEigenToTF(body_on_odom_pose.inverse(), body_on_odom_transform); // body_on_odom is assumed to be body->odom
 }
 
-void HrpsysSeqStateROSBridge::publishOdometryTransforms(const ros::Time &stamp)
+void HrpsysSeqStateROSBridge::pushOdometryTransforms(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms)
 {
-  std::vector<geometry_msgs::TransformStamped> tf_transforms;
   geometry_msgs::TransformStamped ros_odom_to_body_coords, ros_odom_init_coords, ros_ground_coords, ros_body_on_odom_coords;
   // odom
   if(publish_odom_transform) {
@@ -1085,8 +1088,6 @@ void HrpsysSeqStateROSBridge::publishOdometryTransforms(const ros::Time &stamp)
     tf::transformTFToMsg(body_on_odom_transform, ros_body_on_odom_coords.transform);
     tf_transforms.push_back(ros_body_on_odom_coords);
   }
-  
-  br.sendTransform(tf_transforms);
 }
 
 void HrpsysSeqStateROSBridge::odomInitTriggerCB(const std_msgs::Empty &trigger)
@@ -1202,7 +1203,7 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
   }
 }
 
-void HrpsysSeqStateROSBridge::publishImuTransform(const ros::Time &stamp)
+void HrpsysSeqStateROSBridge::pushImuTransform(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms)
 {
 #if ROS_VERSION_MINIMUM(1,8,0)
   tf::Matrix3x3 m;
@@ -1229,7 +1230,10 @@ void HrpsysSeqStateROSBridge::publishImuTransform(const ros::Time &stamp)
   }
   
   if (not_nan && found_imu_sensor_info) {
-    br.sendTransform(tf::StampedTransform(imu_floor_transform, stamp, imu_sensor_info_name, "imu_floor"));
+    tf::StampedTransform stamped_imu_floor_transform(imu_floor_transform, stamp, imu_sensor_info_name, "imu_floor");
+    geometry_msgs::TransformStamped ros_imu_floor_coords;
+    tf::transformStampedTFToMsg(stamped_imu_floor_transform, ros_imu_floor_coords);
+    tf_transforms.push_back(ros_imu_floor_coords);
   } else {
     ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
                      << m_baseRpy.data.r << ","
@@ -1238,21 +1242,25 @@ void HrpsysSeqStateROSBridge::publishImuTransform(const ros::Time &stamp)
   }
 }
 
-void HrpsysSeqStateROSBridge::publishSensorTransform(const ros::Time &stamp)
+void HrpsysSeqStateROSBridge::pushSensorTransform(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms)
 {
   // sensors publish
   if (publish_sensor_transforms) {
     std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
     while ( its != sensor_info.end() ) {
+      geometry_msgs::TransformStamped ros_sensor_coords;
+      tf::StampedTransform stamped_sensor_transform;
       if (sensor_transformations.find((*its).first) == sensor_transformations.end()) {
-        br.sendTransform(tf::StampedTransform((*its).second.transform, stamp, std::string((*its).second.link_name), (*its).first));
+        stamped_sensor_transform = tf::StampedTransform((*its).second.transform, stamp, std::string((*its).second.link_name), (*its).first);
       }
       else {
         geometry_msgs::Transform transform = sensor_transformations[(*its).first];
         tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
                                    tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
-        br.sendTransform(tf::StampedTransform(tf_transform, stamp, std::string((*its).second.link_name), (*its).first));
+        stamped_sensor_transform = tf::StampedTransform(tf_transform, stamp, std::string((*its).second.link_name), (*its).first);
       }
+      tf::transformStampedTFToMsg(stamped_sensor_transform, ros_sensor_coords);
+      tf_transforms.push_back(ros_sensor_coords);
       ++its;
     }
   }
