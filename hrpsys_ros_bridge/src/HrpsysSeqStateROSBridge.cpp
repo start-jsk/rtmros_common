@@ -592,7 +592,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         // calculate covariance
         // assume dx, dy >> dz, dgamma >> dalpha, dbeta and use 2d odometry update equation
         Eigen::VectorXd sigma(6);
-        sigma << 1.0, 1.0, 0.001, 0.001, 0.001, 0.1; // velocitis are assumed to have constant standard deviations and they are described in base_link local coordinates
+        sigma << 0.05, 0.05, 0.001, 0.001, 0.001, 0.1; // velocitis are assumed to have constant standard deviations and they are described in base_link local coordinates
         if (std::abs(local_velocity[0]) < 0.01) {
           sigma[0] = 0.001; // trust "stop" state in x
         }
