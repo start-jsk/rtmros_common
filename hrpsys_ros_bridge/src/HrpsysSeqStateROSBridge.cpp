@@ -39,7 +39,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   // ros
   ros::NodeHandle pnh("~");
   pnh.param("publish_sensor_transforms", publish_sensor_transforms, true);
-  
+  pnh.param("publish_imu_floor", publish_imu_floor, false);
   joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
   joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
   follow_joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal, this));
@@ -443,18 +443,23 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     if (publish_sensor_transforms) {
       boost::mutex::scoped_lock lock(sensor_transformation_mutex);
       std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
+      std::vector<geometry_msgs::TransformStamped> tf_transforms;
       while ( its != sensor_info.end() ) {
+        geometry_msgs::TransformStamped transform;
         if (sensor_transformations.find((*its).first) == sensor_transformations.end()) {
-          br.sendTransform(tf::StampedTransform((*its).second.transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
+          tf::transformTFToMsg(its->second.transform, transform.transform);
         }
         else {
-          geometry_msgs::Transform transform = sensor_transformations[(*its).first];
-          tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
-                                     tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
-          br.sendTransform(tf::StampedTransform(tf_transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
+          transform.transform = sensor_transformations[(*its).first];
         }
+        
+        transform.header.stamp = joint_state.header.stamp;
+        transform.header.frame_id = std::string((*its).second.link_name);
+        transform.child_frame_id = its->first;
+        tf_transforms.push_back(transform);
         ++its;
       }
+      br.sendTransform(tf_transforms);
     }
     m_mutex.unlock();
 
@@ -723,25 +728,27 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       btMatrix3x3 m; // for electric
 #endif
       m = inv.getBasis();
-      bool not_nan = true;
-      for (int i = 0; i < 3; ++i) {
-        if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
-          not_nan = false;
-      }
-      if (not_nan) {
-        std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
-        while ( its != sensor_info.end() ) {
-          if ( (*its).second.type_name == "RateGyro" ) {
-            br.sendTransform(tf::StampedTransform(inv, base_time, (*its).first, "imu_floor"));
-            break;
-          }
-          ++its;
+      if (publish_imu_floor) {
+        bool not_nan = true;
+        for (int i = 0; i < 3; ++i) {
+          if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
+            not_nan = false;
         }
-      } else {
-        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
-                         << m_baseRpy.data.r << ","
-                         << m_baseRpy.data.p << ","
-                         << m_baseRpy.data.y << ")");
+        if (not_nan) {
+          std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
+          while ( its != sensor_info.end() ) {
+            if ( (*its).second.type_name == "RateGyro" ) {
+              br.sendTransform(tf::StampedTransform(inv, base_time, (*its).first, "imu_floor"));
+              break;
+            }
+            ++its;
+          }
+        } else {
+          ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
+                           << m_baseRpy.data.r << ","
+                           << m_baseRpy.data.p << ","
+                           << m_baseRpy.data.y << ")");
+        }
       }
     }
   }
