@@ -45,6 +45,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   pnh.param("publish_sensor_transforms", publish_sensor_transforms, true);
   pnh.param("publish_odom_transform", publish_odom_transform, true);
   pnh.param("publish_odom_init_transform", publish_odom_init_transform, true);
+  pnh.param("publish_ground_transform", publish_ground_transform, true);
   pnh.param("invert_odom_init_tf", invert_odom_init_tf, true);
   pnh.param("check_robot_is_on_ground", check_robot_is_on_ground, true);
   pnh.param("tf_rate", tf_rate, 50.0);
@@ -67,6 +68,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   odom_init_transform_pub = nh.advertise<geometry_msgs::TransformStamped>("/odom_init_transform", 1, true);
   odom_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
   odom_init_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
+  ground_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
   imu_floor_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
   // is use_sim_time is set and no one publishes clock, publish clock time
   use_sim_time = ros::Time::isSimTime();
@@ -559,7 +561,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     { // update odometry topics
       boost::mutex::scoped_lock lock(odom_mutex);
       updateOdometry(base, odom_stamp);
-      updateOdomInit(odom_stamp);      
+      updateOdomInit(odom_stamp);
+      updateGroundTransform();
     }
 
   }  // end: m_baseTformIn
@@ -993,9 +996,42 @@ void HrpsysSeqStateROSBridge::updateOdomInit(const ros::Time &stamp)
   }
 }
 
+bool HrpsysSeqStateROSBridge::isLeggedRobot()
+{
+  return (ee_info.find("rleg") != ee_info.end() && ee_info.find("lleg") != ee_info.end()); // TODO: do not hard-code leg link name
+}
+
+void HrpsysSeqStateROSBridge::updateGroundTransform()
+{
+  // TODO: It is not good to assume hrp::Vector3 is typedef of Eigen::Vector3 and hrp::Matrix33 is typedef of Eigen::Matrix3d implicitly (cf. EigenTypes.h)
+  std::vector<tf::Transform> base_to_foot;
+  std::vector<std::string> leg_names;
+  if (isLeggedRobot()) {
+    // joint angles are assumed to be already updated
+    tf::vectorTFToEigen(odom_transform.getOrigin(), body->rootLink()->p);
+    tf::matrixTFToEigen(odom_transform.getBasis(), body->rootLink()->R);
+    body->calcForwardKinematics();
+    // TODO: do not hard-code leg link name
+    leg_names.push_back("lleg"); 
+    leg_names.push_back("rleg");
+    // calculate current foot coords
+    for (size_t i = 0; i < leg_names.size(); i++) {
+      hrp::Link* target_link = body->link(ee_info[leg_names[i]].target);
+      Eigen::Affine3d ee_target_matrix = (Eigen::Translation3d(target_link->p) * target_link->R); // target_link->p, target_link->R is odom relative
+      tf::Transform ee_target_transform;
+      tf::transformEigenToTF(ee_target_matrix, ee_target_transform);
+      base_to_foot.push_back(ee_target_transform * ee_info[leg_names[i]].transform);
+    }
+    tf::Vector3 midcoords_pos = base_to_foot[0].getOrigin().lerp(base_to_foot[1].getOrigin(), 0.5);
+    tf::Quaternion midcoords_rot = base_to_foot[0].getRotation().slerp(base_to_foot[1].getRotation(), 0.5);
+    tf::Transform odom_relative_ground_transform(midcoords_rot, midcoords_pos);
+    ground_transform = odom_transform.inverse() * odom_relative_ground_transform;
+  }
+}
+
 void HrpsysSeqStateROSBridge::pushOdometryTransforms(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms)
 {
-  geometry_msgs::TransformStamped ros_odom_to_body_coords, ros_odom_init_coords;
+  geometry_msgs::TransformStamped ros_odom_to_body_coords, ros_odom_init_coords, ros_ground_coords;
   // odom
   if(publish_odom_transform) {
     ros_odom_to_body_coords.header.stamp = stamp;
@@ -1017,6 +1053,14 @@ void HrpsysSeqStateROSBridge::pushOdometryTransforms(const ros::Time &stamp, std
       tf::transformTFToMsg(odom_init_transform, ros_odom_init_coords.transform);
     }
     tf_transforms.push_back(ros_odom_init_coords);
+  }
+  // ground
+  if (isLeggedRobot() && publish_ground_transform) {
+    ros_ground_coords.header.stamp = stamp;
+    ros_ground_coords.header.frame_id = rootlink_name;
+    ros_ground_coords.child_frame_id = "/ground";
+    tf::transformTFToMsg(ground_transform, ros_ground_coords.transform);
+    tf_transforms.push_back(ros_ground_coords);
   }
 }
 
