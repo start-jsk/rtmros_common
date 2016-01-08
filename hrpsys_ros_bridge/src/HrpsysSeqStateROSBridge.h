@@ -73,14 +73,15 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   ros::Subscriber clock_sub;
 
-  std::map<std::string, geometry_msgs::Transform> sensor_transformations;
-  boost::mutex sensor_transformation_mutex;
-
   nav_msgs::Odometry prev_odom;
   bool prev_odom_acquired;
   hrp::Vector3 prev_rpy;
   void clock_cb(const rosgraph_msgs::ClockPtr& str) {};
 
+  double tf_rate;
+  ros::Timer periodic_update_timer;
+  void periodicTimerCallback(const ros::TimerEvent& event);
+  
   bool follow_action_initialized;
 
   // odometry relatives
@@ -89,7 +90,14 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   // imu relatives
   void updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp);
-  tf::Transform imu_floor_transform; 
+  void pushImuTransform(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms);
+  boost::mutex imu_mutex;
+  tf::Transform imu_floor_transform;
+  
+  // sensor relatives
+  void pushSensorTransform(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms);
+  std::map<std::string, geometry_msgs::Transform> sensor_transformations;
+  boost::mutex sensor_transformation_mutex;
 
 };
 
