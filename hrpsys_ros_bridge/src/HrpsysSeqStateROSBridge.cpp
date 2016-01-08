@@ -8,6 +8,8 @@
 #include "rtm/idl/RTC.hh"
 #include "hrpsys_ros_bridge/idl/ExecutionProfileService.hh"
 #include "hrpsys_ros_bridge/idl/RobotHardwareService.hh"
+#include <eigen_conversions/eigen_msg.h>
+#include <tf_conversions/tf_eigen.h>
 #include <boost/format.hpp>
 
 // Module specification
@@ -39,6 +41,9 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   // ros
   ros::NodeHandle pnh("~");
   pnh.param("publish_sensor_transforms", publish_sensor_transforms, true);
+  pnh.param("publish_odom_transform", publish_odom_transform, true);
+  pnh.param("tf_rate", tf_rate, 50.0);
+  periodic_update_timer = pnh.createTimer(ros::Duration(1.0 / tf_rate), boost::bind(&HrpsysSeqStateROSBridge::periodicTimerCallback, this, _1));
   
   joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
   joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
@@ -52,7 +57,8 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
   odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
   imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1);
-
+  odom_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
+  imu_floor_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
   // is use_sim_time is set and no one publishes clock, publish clock time
   use_sim_time = ros::Time::isSimTime();
   clock_sub = nh.subscribe("/clock", 1, &HrpsysSeqStateROSBridge::clock_cb, this);
@@ -439,23 +445,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       joint_state.effort.resize(joint_state.name.size());
     }
     joint_state_pub.publish(joint_state);
-    // sensors publish
-    if (publish_sensor_transforms) {
-      boost::mutex::scoped_lock lock(sensor_transformation_mutex);
-      std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
-      while ( its != sensor_info.end() ) {
-        if (sensor_transformations.find((*its).first) == sensor_transformations.end()) {
-          br.sendTransform(tf::StampedTransform((*its).second.transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
-        }
-        else {
-          geometry_msgs::Transform transform = sensor_transformations[(*its).first];
-          tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
-                                     tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
-          br.sendTransform(tf::StampedTransform(tf_transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
-        }
-        ++its;
-      }
-    }
     m_mutex.unlock();
 
     if ( joint_trajectory_server.isActive() &&
@@ -540,210 +529,34 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   if ( m_baseTformIn.isNew () ) {
     m_baseTformIn.read();
     is_base_valid = true;
-    // tf::Transform base;
+    // calculate base transform
     double *a = m_baseTform.data.get_buffer();
-    base.setOrigin( tf::Vector3(a[0], a[1], a[2]) );
+    hrp::Vector3 base_origin = hrp::Vector3(a[0], a[1], a[2]);
+    base.setOrigin(tf::Vector3(base_origin[0], base_origin[1], base_origin[2]));
+    // calculate pose quaternion
     hrp::Matrix33 R;
     hrp::getMatrix33FromRowMajorArray(R, a, 3);
-    
     hrp::Vector3 rpy = hrp::rpyFromRot(R);
-    base.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)));
     tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));
-    nav_msgs::Odometry odom;
-    //odom.header.frame_id = rootlink_name;
-    odom.header.frame_id = "odom";
-    if ( use_hrpsys_time ) {
-      odom.header.stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
-    } else {
-      odom.header.stamp = tm_on_execute;
-    }
-    // odom.child_frame_id = "/odom";
-    odom.child_frame_id = rootlink_name;
-    odom.pose.pose.position.x = a[0];
-    odom.pose.pose.position.y = a[1];
-    odom.pose.pose.position.z = a[2];
-    odom.pose.pose.orientation.x = q.getX();
-    odom.pose.pose.orientation.y = q.getY();
-    odom.pose.pose.orientation.z = q.getZ();
-    odom.pose.pose.orientation.w = q.getW();
-    
-    if (prev_odom_acquired) {
-      // calc velocity
-      double dt = (odom.header.stamp - prev_odom.header.stamp).toSec();
-      if (dt > 0) {
-        hrp::Matrix33 prev_R = hrp::rotFromRpy(prev_rpy[0], prev_rpy[1], prev_rpy[2]);
-        // R = exp(omega_w*dt) * prev_R
-        // omega_w is described in global coordinates in relationships of twist transformation.
-        // omega in twist.angular is transformed into rootlink coords because twist should be described in child_frame_id.
-        hrp::Vector3 omega = R.transpose() * hrp::omegaFromRot(R * prev_R.transpose()) / dt;  // omegaFromRot returns matrix_log
-        odom.twist.twist.angular.x = omega[0];
-        odom.twist.twist.angular.y = omega[1];
-        odom.twist.twist.angular.z = omega[2];
-        // calculate velocity (not strict linear twist from odom)
-        hrp::Vector3 velocity, local_velocity;
-        velocity[0] = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
-        velocity[1] = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
-        velocity[2] = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;
-        local_velocity = R.transpose() * velocity; // global -> local
-        odom.twist.twist.linear.x = local_velocity[0];
-        odom.twist.twist.linear.y = local_velocity[1];
-        odom.twist.twist.linear.z = local_velocity[2];
-        
-        // calculate covariance
-        // assume dx, dy >> dz, dgamma >> dalpha, dbeta and use 2d odometry update equation
-        Eigen::VectorXd sigma(6);
-        sigma << 1.0, 1.0, 0.001, 0.001, 0.001, 0.1; // velocitis are assumed to have constant standard deviations and they are described in base_link local coordinates
-        if (std::abs(local_velocity[0]) < 0.01) {
-          sigma[0] = 0.001; // trust "stop" state in x
-        }
-        if (std::abs(local_velocity[1]) < 0.01) {
-          sigma[1] = 0.001; // trust "stop" state in y
-        }
-        if (std::abs(omega[2]) < 0.01) {
-          sigma[5] = 0.001; // trust "stop" state in theta
-        }
-        Eigen::Matrix<double,6,6> prev_pose_cov;
-        for(int i = 0; i < 6; i++) { // index in col
-          for (int j = 0; j < 6; j++) { // index in raw
-            prev_pose_cov(i, j) = prev_odom.pose.covariance[6 * i + j];
-          }
-        }
-        // each variance are assumed to be independent        
-        Eigen::VectorXd sigma2(6);
-        for (int i = 0; i < 6; i++) {
-          sigma2[i] = sigma[i] * sigma[i];
-        }
-        Eigen::Matrix<double,6,6> twist_transformation = Eigen::Matrix<double,6,6>::Zero(); // matrix [[R, 0], [0, R]] to convert twist from local to global
-        for (int i = 0; i < 3; i++) {
-          for (int j = 0; j < 3; j++) {
-            twist_transformation(i, j) = R(i, j);
-            twist_transformation(i + 3, j + 3) = R(i, j);
-          }
-        }
-        Eigen::Matrix<double,6,6> twist_cov = sigma2.asDiagonal(); // twist is described as base_link local coordinates
-        // update covariance according to the relationships from definition of variance: V(x) = E[(x-u) * (x-u)^T]
-        // jacovian is described in world coordinates: x(t+dt) = f(x(t), v(t)), x is in world coordinates
-        Eigen::Matrix<double,6,6> jacobi_velocity = Eigen::Matrix<double,6,6>::Identity() * dt;
-        Eigen::Matrix<double,6,6> pose_cov = prev_pose_cov + jacobi_velocity * (twist_transformation.transpose() * twist_cov * twist_transformation) * jacobi_velocity.transpose();
-        // insert covariance
-        for(int i = 0; i < 6; i++) { // index in col
-          for (int j = 0; j < 6; j++) { // index in raw
-            odom.pose.covariance[6 * i + j] = pose_cov(i, j);
-            odom.twist.covariance[6 * i + j] = twist_cov(i, j);
-          }
-        }
+    base.setRotation(q);
 
-        odom_pub.publish(odom);
-        prev_odom = odom;
-        prev_rpy = rpy;
-      }
+    ros::Time odom_stamp;
+    if ( use_hrpsys_time ) {
+      odom_stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
     } else {
-      prev_odom = odom;
-      prev_rpy = rpy;
-      prev_odom_acquired = true;
+      odom_stamp = tm_on_execute;
     }
+    
+    { // update odometry topics
+      boost::mutex::scoped_lock lock(odom_mutex);
+      updateOdometry(base, odom_stamp);
+    }
+
   }  // end: m_baseTformIn
 
-  bool updateImu = false;
-  // m_baseRpyIn
-  if (m_baseRpyIn.isNew()){
-    m_baseRpyIn.read();
-    updateImu = true;
-  } // end: m_baseRpyIn
-
-  for (unsigned int i = 0; i < m_gyrometerIn.size(); i++) {
-    if (m_gyrometerIn[i]->isNew()) {
-
-      m_gyrometerIn[i]->read();
-      if (i == 0) {
-        updateImu = true;
-      }
-    }
-  }
-
-  for (unsigned int i = 0; i < m_gsensorIn.size(); i++) {
-    if (m_gsensorIn[i]->isNew()) {
-      m_gsensorIn[i]->read();
-      if (i == 0) {
-        updateImu = true;
-      }
-    }
-  }
-  
-  if (updateImu){
-    sensor_msgs::Imu imu;
-    if (m_gyrometerName.size() > 0) {
-      imu.header.frame_id = m_gyrometerName[0];
-    }
-    else {
-      imu.header.frame_id = rootlink_name;
-    }
-    
-    if ( use_hrpsys_time ) {
-      imu.header.stamp = ros::Time(m_baseRpy.tm.sec, m_baseRpy.tm.nsec);
-    } else {
-      imu.header.stamp = tm_on_execute;
-    }
-    tf::Quaternion q = tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y);
-    imu.orientation.x = q.getX();
-    imu.orientation.y = q.getY();
-    imu.orientation.z = q.getZ();
-    imu.orientation.w = q.getW();
-    if (m_gyrometer.size() > 0) {
-      imu.angular_velocity.x = m_gyrometer[0].data.avx;
-      imu.angular_velocity.y = m_gyrometer[0].data.avy;
-      imu.angular_velocity.z = m_gyrometer[0].data.avz;
-    }
-    if (m_gsensor.size() > 0) {
-      imu.linear_acceleration.x = m_gsensor[0].data.ax;
-      imu.linear_acceleration.y = m_gsensor[0].data.ay;
-      imu.linear_acceleration.z = m_gsensor[0].data.az;
-    }
-    imu.orientation_covariance[0] = 2.89e-08;
-    imu.orientation_covariance[4] = 2.89e-08;
-    imu.orientation_covariance[8] = 2.89e-08;
-    imu.angular_velocity_covariance[0] = 0.000144;
-    imu.angular_velocity_covariance[4] = 0.000144;
-    imu.angular_velocity_covariance[8] = 0.000144;
-    imu.linear_acceleration_covariance[0] = 0.0096;
-    imu.linear_acceleration_covariance[4] = 0.0096;
-    imu.linear_acceleration_covariance[8] = 0.0096;
-    imu_pub.publish(imu);
-
-    // Publish imu_floor frame in tf
-    if (is_base_valid) {
-      ros::Time base_time = tm_on_execute;
-      //base_time = ros::Time(m_baseTform.tm.sec,m_baseTform.tm.nsec);
-      base.setRotation(tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y));
-      tf::Transform inv = base.inverse();
-      inv.setOrigin(tf::Vector3(0, 0, 0));
-#if ROS_VERSION_MINIMUM(1,8,0)
-      tf::Matrix3x3 m;
-#else
-      btMatrix3x3 m; // for electric
-#endif
-      m = inv.getBasis();
-      bool not_nan = true;
-      for (int i = 0; i < 3; ++i) {
-        if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
-          not_nan = false;
-      }
-      if (not_nan) {
-        std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
-        while ( its != sensor_info.end() ) {
-          if ( (*its).second.type_name == "RateGyro" ) {
-            br.sendTransform(tf::StampedTransform(inv, base_time, (*its).first, "imu_floor"));
-            break;
-          }
-          ++its;
-        }
-      } else {
-        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
-                         << m_baseRpy.data.r << ","
-                         << m_baseRpy.data.p << ","
-                         << m_baseRpy.data.y << ")");
-      }
-    }
+  { // imu block
+    boost::mutex::scoped_lock lock(imu_mutex);    
+    updateImu(base, is_base_valid, tm_on_execute);
   }
 
   // publish forces sonsors
@@ -977,6 +790,280 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   //
   return RTC::RTC_OK;
+}
+
+void HrpsysSeqStateROSBridge::periodicTimerCallback(const ros::TimerEvent& event)
+{
+  ros::Time stamp;
+  std::vector<geometry_msgs::TransformStamped> tf_transforms;
+  if ( use_hrpsys_time ) {
+    stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
+  } else {
+    stamp = ros::Time::now();;
+  }
+
+  { // publish odom transforms
+    boost::mutex::scoped_lock lock(odom_mutex);
+    pushOdometryTransforms(stamp, tf_transforms);
+  }  
+  
+  { // publish imu transforms
+    boost::mutex::scoped_lock lock(imu_mutex);
+    pushImuTransform(stamp, tf_transforms);
+  }
+
+  { // publish sensor transforms
+    boost::mutex::scoped_lock lock(sensor_transformation_mutex);
+    pushSensorTransform(stamp, tf_transforms);
+  }
+
+  if (!tf_transforms.empty()) {
+    br.sendTransform(tf_transforms);
+  }
+}
+
+void HrpsysSeqStateROSBridge::updateOdometry(const tf::Transform &base, const ros::Time &stamp)
+{ 
+  tf::Vector3 trans = base.getOrigin();
+  tf::Quaternion q = base.getRotation();
+  hrp::Matrix33 R;
+  tf::matrixTFToEigen(base.getBasis(), R); // TODO: It is not good to assume hrp::Matrix33 is typedef of Eigen::Matrix3d implicitly (cf. EigenTypes.h)
+  hrp::Vector3 rpy = hrp::rpyFromRot(R); 
+  nav_msgs::Odometry odom;
+  
+  odom.header.frame_id = "odom";
+  odom.header.stamp = stamp;
+  odom.child_frame_id = rootlink_name;
+  odom.pose.pose.position.x = trans[0];
+  odom.pose.pose.position.y = trans[1];
+  odom.pose.pose.position.z = trans[2];
+  odom.pose.pose.orientation.x = q.getX();
+  odom.pose.pose.orientation.y = q.getY();
+  odom.pose.pose.orientation.z = q.getZ();
+  odom.pose.pose.orientation.w = q.getW();
+    
+  if (prev_odom_acquired) {
+    // calc velocity
+    double dt = (odom.header.stamp - prev_odom.header.stamp).toSec();
+    if (dt > 0) {
+      hrp::Matrix33 prev_R = hrp::rotFromRpy(prev_rpy[0], prev_rpy[1], prev_rpy[2]);
+      // R = exp(omega_w*dt) * prev_R
+      // omega_w is described in global coordinates in relationships of twist transformation.
+      // omega in twist.angular is transformed into rootlink coords because twist should be described in child_frame_id.
+      hrp::Vector3 omega = R.transpose() * hrp::omegaFromRot(R * prev_R.transpose()) / dt;  // omegaFromRot returns matrix_log
+      odom.twist.twist.angular.x = omega[0];
+      odom.twist.twist.angular.y = omega[1];
+      odom.twist.twist.angular.z = omega[2];
+      // calculate velocity (not strict linear twist from odom)
+      hrp::Vector3 velocity, local_velocity;
+      velocity[0] = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
+      velocity[1] = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
+      velocity[2] = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;
+      local_velocity = R.transpose() * velocity; // global -> local
+      odom.twist.twist.linear.x = local_velocity[0];
+      odom.twist.twist.linear.y = local_velocity[1];
+      odom.twist.twist.linear.z = local_velocity[2];
+        
+      // calculate covariance
+      // assume dx, dy >> dz, dgamma >> dalpha, dbeta and use 2d odometry update equation
+      Eigen::VectorXd sigma(6);
+      sigma << 1.0, 1.0, 0.001, 0.001, 0.001, 0.1; // velocitis are assumed to have constant standard deviations and they are described in base_link local coordinates
+      if (std::abs(local_velocity[0]) < 0.01) {
+        sigma[0] = 0.001; // trust "stop" state in x
+      }
+      if (std::abs(local_velocity[1]) < 0.01) {
+        sigma[1] = 0.001; // trust "stop" state in y
+      }
+      if (std::abs(omega[2]) < 0.01) {
+        sigma[5] = 0.001; // trust "stop" state in theta
+      }
+      Eigen::Matrix<double,6,6> prev_pose_cov;
+      for(int i = 0; i < 6; i++) { // index in col
+        for (int j = 0; j < 6; j++) { // index in raw
+          prev_pose_cov(i, j) = prev_odom.pose.covariance[6 * i + j];
+        }
+      }
+      // each variance are assumed to be independent        
+      Eigen::VectorXd sigma2(6);
+      for (int i = 0; i < 6; i++) {
+        sigma2[i] = sigma[i] * sigma[i];
+      }
+      Eigen::Matrix<double,6,6> twist_transformation = Eigen::Matrix<double,6,6>::Zero(); // matrix [[R, 0], [0, R]] to convert twist from local to global
+      for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          twist_transformation(i, j) = R(i, j);
+          twist_transformation(i + 3, j + 3) = R(i, j);
+        }
+      }
+      Eigen::Matrix<double,6,6> twist_cov = sigma2.asDiagonal(); // twist is described as base_link local coordinates
+      // update covariance according to the relationships from definition of variance: V(x) = E[(x-u) * (x-u)^T]
+      // jacovian is described in world coordinates: x(t+dt) = f(x(t), v(t)), x is in world coordinates
+      Eigen::Matrix<double,6,6> jacobi_velocity = Eigen::Matrix<double,6,6>::Identity() * dt;
+      Eigen::Matrix<double,6,6> pose_cov = prev_pose_cov + jacobi_velocity * (twist_transformation.transpose() * twist_cov * twist_transformation) * jacobi_velocity.transpose();
+      // insert covariance
+      for(int i = 0; i < 6; i++) { // index in col
+        for (int j = 0; j < 6; j++) { // index in raw
+          odom.pose.covariance[6 * i + j] = pose_cov(i, j);
+          odom.twist.covariance[6 * i + j] = twist_cov(i, j);
+        }
+      }
+      // publish odometry
+      odom_pub.publish(odom);
+
+      // preserve old values
+      prev_odom = odom;
+      prev_rpy = rpy;
+
+      // make transform from pose message in odom
+      odom_transform = tf::Transform(tf::Quaternion(odom.pose.pose.orientation.x, odom.pose.pose.orientation.y, odom.pose.pose.orientation.z, odom.pose.pose.orientation.w),
+                                     tf::Vector3(odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z));
+    }
+  } else {
+    // previous values are needed to calculate velocity
+    prev_odom = odom;
+    prev_rpy = rpy;
+    prev_odom_acquired = true;
+  }
+}
+
+void HrpsysSeqStateROSBridge::pushOdometryTransforms(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms)
+{
+  geometry_msgs::TransformStamped ros_odom_to_body_coords;
+  // odom
+  if(publish_odom_transform) {
+    ros_odom_to_body_coords.header.stamp = stamp;
+    ros_odom_to_body_coords.header.frame_id = "/odom";
+    ros_odom_to_body_coords.child_frame_id = rootlink_name;
+    tf::transformTFToMsg(odom_transform, ros_odom_to_body_coords.transform);
+    tf_transforms.push_back(ros_odom_to_body_coords);
+  }
+}
+
+void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp)
+{
+  if (m_baseRpyIn.isNew()){
+    m_baseRpyIn.read();
+  } 
+  for (unsigned int i = 0; i < m_gyrometerIn.size(); i++) {
+    if (m_gyrometerIn[i]->isNew()) {
+      m_gyrometerIn[i]->read();
+    }
+  }
+  for (unsigned int i = 0; i < m_gsensorIn.size(); i++) {
+    if (m_gsensorIn[i]->isNew()) {
+      m_gsensorIn[i]->read();
+    }
+  }
+  
+  sensor_msgs::Imu imu;
+  if (m_gyrometerName.size() > 0) {
+    imu.header.frame_id = m_gyrometerName[0];
+  } else {
+    imu.header.frame_id = rootlink_name;
+  }
+    
+  if ( use_hrpsys_time ) {
+    imu.header.stamp = ros::Time(m_baseRpy.tm.sec, m_baseRpy.tm.nsec);
+  } else {
+    imu.header.stamp = stamp;
+  }
+
+  // original imu values
+  tf::Quaternion q = tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y);
+  imu.orientation.x = q.getX();
+  imu.orientation.y = q.getY();
+  imu.orientation.z = q.getZ();
+  imu.orientation.w = q.getW();
+  if (m_gyrometer.size() > 0) {
+    imu.angular_velocity.x = m_gyrometer[0].data.avx;
+    imu.angular_velocity.y = m_gyrometer[0].data.avy;
+    imu.angular_velocity.z = m_gyrometer[0].data.avz;
+  }
+  if (m_gsensor.size() > 0) {
+    imu.linear_acceleration.x = m_gsensor[0].data.ax;
+    imu.linear_acceleration.y = m_gsensor[0].data.ay;
+    imu.linear_acceleration.z = m_gsensor[0].data.az;
+  }
+  imu.orientation_covariance[0] = 2.89e-08;
+  imu.orientation_covariance[4] = 2.89e-08;
+  imu.orientation_covariance[8] = 2.89e-08;
+  imu.angular_velocity_covariance[0] = 0.000144;
+  imu.angular_velocity_covariance[4] = 0.000144;
+  imu.angular_velocity_covariance[8] = 0.000144;
+  imu.linear_acceleration_covariance[0] = 0.0096;
+  imu.linear_acceleration_covariance[4] = 0.0096;
+  imu.linear_acceleration_covariance[8] = 0.0096;
+  imu_pub.publish(imu);
+
+  // Overwrite base pose by imu and pudate imu_floor frame in tf
+  if (is_base_valid) {
+    base.setRotation(tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y));
+    imu_floor_transform = base.inverse();
+    imu_floor_transform.setOrigin(tf::Vector3(0, 0, 0));
+  }
+}
+
+void HrpsysSeqStateROSBridge::pushImuTransform(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms)
+{
+#if ROS_VERSION_MINIMUM(1,8,0)
+  tf::Matrix3x3 m;
+#else
+  btMatrix3x3 m; // for electric
+#endif
+  m = imu_floor_transform.getBasis();
+  bool not_nan = true;
+  for (int i = 0; i < 3; ++i) {
+    if (isnan(m[i].x()) || isnan(m[i].y()) || isnan(m[i].z()))
+      not_nan = false;
+  }
+
+  bool found_imu_sensor_info = false;
+  std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
+  std::string imu_sensor_info_name;
+  while (its != sensor_info.end()) {
+    if ((*its).second.type_name == "RateGyro") {
+      imu_sensor_info_name = (*its).first;
+      found_imu_sensor_info = true;
+      break;
+    }
+    ++its;
+  }
+  
+  if (not_nan && found_imu_sensor_info) {
+    tf::StampedTransform stamped_imu_floor_transform(imu_floor_transform, stamp, imu_sensor_info_name, "imu_floor");
+    geometry_msgs::TransformStamped ros_imu_floor_coords;
+    tf::transformStampedTFToMsg(stamped_imu_floor_transform, ros_imu_floor_coords);
+    tf_transforms.push_back(ros_imu_floor_coords);
+  } else {
+    ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
+                     << m_baseRpy.data.r << ","
+                     << m_baseRpy.data.p << ","
+                     << m_baseRpy.data.y << ")");
+  }
+}
+
+void HrpsysSeqStateROSBridge::pushSensorTransform(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms)
+{
+  // sensors publish
+  if (publish_sensor_transforms) {
+    std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
+    while ( its != sensor_info.end() ) {
+      geometry_msgs::TransformStamped ros_sensor_coords;
+      tf::StampedTransform stamped_sensor_transform;
+      if (sensor_transformations.find((*its).first) == sensor_transformations.end()) {
+        stamped_sensor_transform = tf::StampedTransform((*its).second.transform, stamp, std::string((*its).second.link_name), (*its).first);
+      }
+      else {
+        geometry_msgs::Transform transform = sensor_transformations[(*its).first];
+        tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
+                                   tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
+        stamped_sensor_transform = tf::StampedTransform(tf_transform, stamp, std::string((*its).second.link_name), (*its).first);
+      }
+      tf::transformStampedTFToMsg(stamped_sensor_transform, ros_sensor_coords);
+      tf_transforms.push_back(ros_sensor_coords);
+      ++its;
+    }
+  }
 }
 
 extern "C"
