@@ -41,6 +41,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   // ros
   ros::NodeHandle pnh("~");
   pnh.param("publish_sensor_transforms", publish_sensor_transforms, true);
+  pnh.param("publish_odom_transform", publish_odom_transform, true);
   pnh.param("tf_rate", tf_rate, 50.0);
   periodic_update_timer = pnh.createTimer(ros::Duration(1.0 / tf_rate), boost::bind(&HrpsysSeqStateROSBridge::periodicTimerCallback, this, _1));
   
@@ -546,7 +547,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       odom_stamp = tm_on_execute;
     }
     
-    updateOdometry(base, odom_stamp);    
+    { // update odometry topics
+      boost::mutex::scoped_lock lock(odom_mutex);
+      updateOdometry(base, odom_stamp);
+    }
 
   }  // end: m_baseTformIn
 
@@ -797,6 +801,11 @@ void HrpsysSeqStateROSBridge::periodicTimerCallback(const ros::TimerEvent& event
   } else {
     stamp = ros::Time::now();;
   }
+
+  { // publish odom transforms
+    boost::mutex::scoped_lock lock(odom_mutex);
+    pushOdometryTransforms(stamp, tf_transforms);
+  }  
   
   { // publish imu transforms
     boost::mutex::scoped_lock lock(imu_mutex);
@@ -914,6 +923,19 @@ void HrpsysSeqStateROSBridge::updateOdometry(const tf::Transform &base, const ro
     prev_odom = odom;
     prev_rpy = rpy;
     prev_odom_acquired = true;
+  }
+}
+
+void HrpsysSeqStateROSBridge::pushOdometryTransforms(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms)
+{
+  geometry_msgs::TransformStamped ros_odom_to_body_coords;
+  // odom
+  if(publish_odom_transform) {
+    ros_odom_to_body_coords.header.stamp = stamp;
+    ros_odom_to_body_coords.header.frame_id = "/odom";
+    ros_odom_to_body_coords.child_frame_id = rootlink_name;
+    tf::transformTFToMsg(odom_transform, ros_odom_to_body_coords.transform);
+    tf_transforms.push_back(ros_odom_to_body_coords);
   }
 }
 
