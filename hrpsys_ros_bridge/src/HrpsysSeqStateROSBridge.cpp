@@ -41,6 +41,8 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   // ros
   ros::NodeHandle pnh("~");
   pnh.param("publish_sensor_transforms", publish_sensor_transforms, true);
+  pnh.param("tf_rate", tf_rate, 50.0);
+  periodic_update_timer = pnh.createTimer(ros::Duration(1.0 / tf_rate), boost::bind(&HrpsysSeqStateROSBridge::periodicTimerCallback, this, _1));
   
   joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
   joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
@@ -442,23 +444,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       joint_state.effort.resize(joint_state.name.size());
     }
     joint_state_pub.publish(joint_state);
-    // sensors publish
-    if (publish_sensor_transforms) {
-      boost::mutex::scoped_lock lock(sensor_transformation_mutex);
-      std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
-      while ( its != sensor_info.end() ) {
-        if (sensor_transformations.find((*its).first) == sensor_transformations.end()) {
-          br.sendTransform(tf::StampedTransform((*its).second.transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
-        }
-        else {
-          geometry_msgs::Transform transform = sensor_transformations[(*its).first];
-          tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
-                                     tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
-          br.sendTransform(tf::StampedTransform(tf_transform, joint_state.header.stamp, std::string((*its).second.link_name), (*its).first));
-        }
-        ++its;
-      }
-    }
     m_mutex.unlock();
 
     if ( joint_trajectory_server.isActive() &&
@@ -565,7 +550,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   }  // end: m_baseTformIn
 
-  updateImu(base, is_base_valid, tm_on_execute);
+  { // imu block
+    boost::mutex::scoped_lock lock(imu_mutex);    
+    updateImu(base, is_base_valid, tm_on_execute);
+  }
 
   // publish forces sonsors
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
@@ -800,6 +788,31 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   return RTC::RTC_OK;
 }
 
+void HrpsysSeqStateROSBridge::periodicTimerCallback(const ros::TimerEvent& event)
+{
+  ros::Time stamp;
+  std::vector<geometry_msgs::TransformStamped> tf_transforms;
+  if ( use_hrpsys_time ) {
+    stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
+  } else {
+    stamp = ros::Time::now();;
+  }
+  
+  { // publish imu transforms
+    boost::mutex::scoped_lock lock(imu_mutex);
+    pushImuTransform(stamp, tf_transforms);
+  }
+
+  { // publish sensor transforms
+    boost::mutex::scoped_lock lock(sensor_transformation_mutex);
+    pushSensorTransform(stamp, tf_transforms);
+  }
+
+  if (!tf_transforms.empty()) {
+    br.sendTransform(tf_transforms);
+  }
+}
+
 void HrpsysSeqStateROSBridge::updateOdometry(const tf::Transform &base, const ros::Time &stamp)
 { 
   tf::Vector3 trans = base.getOrigin();
@@ -966,6 +979,10 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
     imu_floor_transform = base.inverse();
     imu_floor_transform.setOrigin(tf::Vector3(0, 0, 0));
   }
+}
+
+void HrpsysSeqStateROSBridge::pushImuTransform(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms)
+{
 #if ROS_VERSION_MINIMUM(1,8,0)
   tf::Matrix3x3 m;
 #else
@@ -992,12 +1009,38 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
   
   if (not_nan && found_imu_sensor_info) {
     tf::StampedTransform stamped_imu_floor_transform(imu_floor_transform, stamp, imu_sensor_info_name, "imu_floor");
-    br.sendTransform(stamped_imu_floor_transform);
+    geometry_msgs::TransformStamped ros_imu_floor_coords;
+    tf::transformStampedTFToMsg(stamped_imu_floor_transform, ros_imu_floor_coords);
+    tf_transforms.push_back(ros_imu_floor_coords);
   } else {
     ROS_ERROR_STREAM("[" << getInstanceName() << "] " << "nan value detected in imu_floor! (input: r,p,y="
                      << m_baseRpy.data.r << ","
                      << m_baseRpy.data.p << ","
                      << m_baseRpy.data.y << ")");
+  }
+}
+
+void HrpsysSeqStateROSBridge::pushSensorTransform(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms)
+{
+  // sensors publish
+  if (publish_sensor_transforms) {
+    std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
+    while ( its != sensor_info.end() ) {
+      geometry_msgs::TransformStamped ros_sensor_coords;
+      tf::StampedTransform stamped_sensor_transform;
+      if (sensor_transformations.find((*its).first) == sensor_transformations.end()) {
+        stamped_sensor_transform = tf::StampedTransform((*its).second.transform, stamp, std::string((*its).second.link_name), (*its).first);
+      }
+      else {
+        geometry_msgs::Transform transform = sensor_transformations[(*its).first];
+        tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
+                                   tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
+        stamped_sensor_transform = tf::StampedTransform(tf_transform, stamp, std::string((*its).second.link_name), (*its).first);
+      }
+      tf::transformStampedTFToMsg(stamped_sensor_transform, ros_sensor_coords);
+      tf_transforms.push_back(ros_sensor_coords);
+      ++its;
+    }
   }
 }
 
