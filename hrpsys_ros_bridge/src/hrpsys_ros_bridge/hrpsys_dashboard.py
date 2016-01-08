@@ -60,6 +60,7 @@ class HrpsysLogMenu(MenuDashWidget):
     self.update_state(0)
     self.add_action('download rtm log', self.on_download)
     self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
+    self.setToolTip("Download RTM log")
   def on_download(self):
     try:
       hrpsys_save = rospy.ServiceProxy("/DataLoggerServiceROSBridge/save", OpenHRP_DataLoggerService_save )
@@ -173,6 +174,7 @@ class HrpsysServoMenu(MenuDashWidget):
     self.add_action('Servo On', self.on_servo_on)
     self.add_action('Servo Off', self.on_servo_off)
     self.setFixedSize(self._icons[0].actualSize(QSize(50, 30)))
+    self.setToolTip("Servo on/off")
   def on_servo_on(self):
     try:
       if self.start_command:

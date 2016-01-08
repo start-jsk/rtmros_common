@@ -239,6 +239,24 @@ file(WRITE models/SampleRobot_controller_config.yaml
     controller_name: /lhand_controller
     joint_list:
       - LARM_WRIST_R
+  - group_name: rleg
+    controller_name: /rleg_controller
+    joint_list:
+      - RLEG_HIP_R
+      - RLEG_HIP_P
+      - RLEG_HIP_Y
+      - RLEG_KNEE
+      - RLEG_ANKLE_P
+      - RLEG_ANKLE_R
+  - group_name: lleg
+    controller_name: /lleg_controller
+    joint_list:
+      - LLEG_HIP_R
+      - LLEG_HIP_P
+      - LLEG_HIP_Y
+      - LLEG_KNEE
+      - LLEG_ANKLE_P
+      - LLEG_ANKLE_R
 ")
 
 add_rostest(test/test-samplerobot.test)
