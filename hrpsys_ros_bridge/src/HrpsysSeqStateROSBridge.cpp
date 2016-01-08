@@ -65,6 +65,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
   odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
   imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1);
+  imu_rootlink_pub = nh.advertise<sensor_msgs::Imu>("/imu_rootlink", 1);
   odom_init_pose_stamped_pub = nh.advertise<geometry_msgs::PoseStamped>("/odom_init_pose_stamped", 1, true);
   odom_init_transform_pub = nh.advertise<geometry_msgs::TransformStamped>("/odom_init_transform", 1, true);
   odom_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
@@ -1099,6 +1100,9 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
   if (m_baseRpyIn.isNew()){
     m_baseRpyIn.read();
   } 
+  if (m_baseRpyCurrentIn.isNew()) {
+    m_baseRpyCurrentIn.read();
+  } 
   for (unsigned int i = 0; i < m_gyrometerIn.size(); i++) {
     if (m_gyrometerIn[i]->isNew()) {
       m_gyrometerIn[i]->read();
@@ -1149,6 +1153,46 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
   imu.linear_acceleration_covariance[4] = 0.0096;
   imu.linear_acceleration_covariance[8] = 0.0096;
   imu_pub.publish(imu);
+
+  // transformed imu values
+  sensor_msgs::Imu imu_rootlink;
+  imu_rootlink.header.stamp = imu.header.stamp;
+  imu_rootlink.header.frame_id = rootlink_name;
+  if (is_base_valid) {
+    tf::vectorTFToEigen(base.getOrigin(), body->rootLink()->p);
+    tf::matrixTFToEigen(base.getBasis(), body->rootLink()->R);
+    body->calcForwardKinematics();
+  }
+  // orientation
+  tf::Quaternion q_rootlink = tf::createQuaternionFromRPY(m_baseRpyCurrent.data.r, m_baseRpyCurrent.data.p, m_baseRpyCurrent.data.y);
+  tf::quaternionTFToMsg(q_rootlink, imu_rootlink.orientation);
+  imu_rootlink.orientation_covariance = imu.orientation_covariance;
+  if (m_gyrometer.size() > 0) { // angular velocity 
+    // joint angles are assumed to be already updated
+    // TODO: It is not good to assume hrp::Vector3 is typedef of Eigen::Vector3 and hrp::Matrix33 is typedef of Eigen::Matrix3d implicitly (cf. EigenTypes.h)
+    // calculate current gyrometer coords
+    hrp::Sensor* gyrometer = body->sensor(hrp::Sensor::RATE_GYRO, 0);
+    Eigen::Affine3d gyrometer_parent_matrix = Eigen::Translation3d(gyrometer->link->p) * gyrometer->link->R; // odom->gyrometer_link
+    Eigen::Affine3d gyrometer_matrix = gyrometer_parent_matrix * (Eigen::Translation3d(gyrometer->localPos) * gyrometer->localR); // odom->gyrometer_link->gyrometer
+    tf::Transform gyrometer_transform;
+    tf::transformEigenToTF(gyrometer_matrix, gyrometer_transform);
+    tf::Transform gyrometer_to_root_transform = gyrometer_transform.inverse() * base; // gyrometer->odom->base
+    tf::Vector3 root_relative_imu_angular_velocity = gyrometer_to_root_transform.getBasis() * tf::Vector3(m_gyrometer[0].data.avx, m_gyrometer[0].data.avy, m_gyrometer[0].data.avz);
+    tf::vector3TFToMsg(root_relative_imu_angular_velocity, imu_rootlink.angular_velocity);
+    imu_rootlink.angular_velocity_covariance = imu.angular_velocity_covariance;
+  }
+  if (m_gsensor.size() > 0) {  // acceleration
+    hrp::Sensor* acceleration = body->sensor(hrp::Sensor::ACCELERATION, 0);
+    Eigen::Affine3d acceleration_parent_matrix = Eigen::Translation3d(acceleration->link->p) * acceleration->link->R; // odom->acceleration_link
+    Eigen::Affine3d acceleration_matrix = acceleration_parent_matrix * (Eigen::Translation3d(acceleration->localPos) * acceleration->localR); // odom->acceleration_link->acceleration
+    tf::Transform acceleration_transform;
+    tf::transformEigenToTF(acceleration_matrix, acceleration_transform);
+    tf::Transform acceleration_to_root_transform = acceleration_transform.inverse() * base; // acceleration->odom->base
+    tf::Vector3 root_relative_imu_acceleration = acceleration_to_root_transform.getBasis() * tf::Vector3(m_gsensor[0].data.ax, m_gsensor[0].data.ay, m_gsensor[0].data.az);
+    tf::vector3TFToMsg(root_relative_imu_acceleration, imu_rootlink.linear_acceleration);
+    imu_rootlink.linear_acceleration_covariance = imu.linear_acceleration_covariance;
+  }
+  imu_rootlink_pub.publish(imu_rootlink);
 
   // Overwrite base pose by imu and pudate imu_floor frame in tf
   if (is_base_valid) {

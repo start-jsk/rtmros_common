@@ -34,6 +34,7 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_mcangleIn("mcangle", m_mcangle),
     m_baseTformIn("baseTform", m_baseTform),
     m_baseRpyIn("baseRpy", m_baseRpy),
+    m_baseRpyCurrentIn("baseRpyCurrent", m_baseRpyCurrent),
     m_rsvelIn("rsvel", m_rsvel),
     m_rstorqueIn("rstorque", m_rstorque),
     m_servoStateIn("servoState", m_servoState),
@@ -66,6 +67,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("mcangle", m_mcangleIn);
   addInPort("baseTform", m_baseTformIn);
   addInPort("baseRpy", m_baseRpyIn);
+  addInPort("baseRpyCurrent", m_baseRpyCurrentIn);
   addInPort("rsvel", m_rsvelIn);
   addInPort("rstorque", m_rstorqueIn);
   addInPort("rszmp", m_rszmpIn);
@@ -274,11 +276,15 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     m_baseRpy.data.r = rpy[0];
     m_baseRpy.data.p = rpy[1];
     m_baseRpy.data.y = rpy[2];
+    m_baseRpyCurrent.data.r = rpy[0]; // same as baseRpy
+    m_baseRpyCurrent.data.p = rpy[1];
+    m_baseRpyCurrent.data.y = rpy[2]; 
   }
 
   // End effector setting from conf file
   // rleg,TARGET_LINK,BASE_LINK,x,y,z,rx,ry,rz,rth #<=pos + rot (axis+angle)
   coil::vstring end_effectors_str = coil::split(prop["end_effectors"], ",");
+  std::cerr << " end effector size : " << end_effectors_str.size() << std::endl;
   if (end_effectors_str.size() > 0) {
     size_t prop_num = 10;
     size_t num = end_effectors_str.size()/prop_num;

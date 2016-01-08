@@ -56,7 +56,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
  private:
   ros::NodeHandle nh;
   ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, ref_cp_pub, act_cp_pub, odom_pub, imu_pub,
-    em_mode_pub, ref_contact_states_pub, act_contact_states_pub, odom_init_pose_stamped_pub, odom_init_transform_pub;
+    em_mode_pub, ref_contact_states_pub, act_contact_states_pub, odom_init_pose_stamped_pub, odom_init_transform_pub, imu_rootlink_pub;
   ros::Subscriber trajectory_command_sub, odom_init_trigger_sub;
   std::vector<ros::Publisher> fsensor_pub, cop_pub;
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> joint_trajectory_server;
@@ -113,7 +113,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void pushSensorTransform(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms);
   std::map<std::string, geometry_msgs::Transform> sensor_transformations;
   boost::mutex sensor_transformation_mutex;
-
+  
 };
 
 
