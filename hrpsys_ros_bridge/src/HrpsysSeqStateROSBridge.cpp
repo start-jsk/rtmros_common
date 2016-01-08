@@ -46,6 +46,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   pnh.param("publish_odom_transform", publish_odom_transform, true);
   pnh.param("publish_odom_init_transform", publish_odom_init_transform, true);
   pnh.param("publish_ground_transform", publish_ground_transform, true);
+  pnh.param("publish_body_on_odom_transform", publish_body_on_odom_transform, true);
   pnh.param("invert_odom_init_tf", invert_odom_init_tf, true);
   pnh.param("check_robot_is_on_ground", check_robot_is_on_ground, true);
   pnh.param("tf_rate", tf_rate, 50.0);
@@ -70,6 +71,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   odom_init_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
   ground_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
   imu_floor_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
+  body_on_odom_transform = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0));
   // is use_sim_time is set and no one publishes clock, publish clock time
   use_sim_time = ros::Time::isSimTime();
   clock_sub = nh.subscribe("/clock", 1, &HrpsysSeqStateROSBridge::clock_cb, this);
@@ -563,6 +565,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       updateOdometry(base, odom_stamp);
       updateOdomInit(odom_stamp);
       updateGroundTransform();
+      updateBodyOnOdom();
     }
 
   }  // end: m_baseTformIn
@@ -1029,9 +1032,22 @@ void HrpsysSeqStateROSBridge::updateGroundTransform()
   }
 }
 
+void HrpsysSeqStateROSBridge::updateBodyOnOdom()
+{
+  double odom_height = odom_transform.getOrigin().getZ();
+  double odom_roll, odom_pitch, odom_yaw;
+  tf::Matrix3x3(odom_transform.getRotation()).getRPY(odom_roll, odom_pitch, odom_yaw);
+  Eigen::Affine3d body_on_odom_pose = (Eigen::Translation3d(0,
+                                                            0,
+                                                            odom_height) * 
+                                       Eigen::AngleAxisd(odom_roll, Eigen::Vector3d::UnitX()) *
+                                       Eigen::AngleAxisd(odom_pitch, Eigen::Vector3d::UnitY())); // odom->body in z, roll, pitch
+  tf::transformEigenToTF(body_on_odom_pose.inverse(), body_on_odom_transform); // body_on_odom is assumed to be body->odom
+}
+
 void HrpsysSeqStateROSBridge::pushOdometryTransforms(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms)
 {
-  geometry_msgs::TransformStamped ros_odom_to_body_coords, ros_odom_init_coords, ros_ground_coords;
+  geometry_msgs::TransformStamped ros_odom_to_body_coords, ros_odom_init_coords, ros_ground_coords, ros_body_on_odom_coords;
   // odom
   if(publish_odom_transform) {
     ros_odom_to_body_coords.header.stamp = stamp;
@@ -1061,6 +1077,14 @@ void HrpsysSeqStateROSBridge::pushOdometryTransforms(const ros::Time &stamp, std
     ros_ground_coords.child_frame_id = "/ground";
     tf::transformTFToMsg(ground_transform, ros_ground_coords.transform);
     tf_transforms.push_back(ros_ground_coords);
+  }
+  // body_on_odom
+  if (publish_body_on_odom_transform) {
+    ros_body_on_odom_coords.header.stamp = stamp;
+    ros_body_on_odom_coords.header.frame_id = rootlink_name;
+    ros_body_on_odom_coords.child_frame_id = "/body_on_odom";
+    tf::transformTFToMsg(body_on_odom_transform, ros_body_on_odom_coords.transform);
+    tf_transforms.push_back(ros_body_on_odom_coords);
   }
 }
 
