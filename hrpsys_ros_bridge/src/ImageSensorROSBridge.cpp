@@ -266,6 +266,9 @@ RTC::ReturnCode_t ImageSensorROSBridge::onExecute(RTC::UniqueId ec_id)
       for(int n = 0; n < m_timage.data.intrinsic.distortion_coefficient.length(); n++) {
         info->D[n] = m_timage.data.intrinsic.distortion_coefficient[n];
       }
+    } else {
+      ROS_WARN("intrinsic.distortion_coefficient.length() is 0, set dummy 0 array to D");
+      info->D.resize(5);
     }
     if (overwrite_K) {
       info->K = K;
