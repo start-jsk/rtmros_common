@@ -86,7 +86,7 @@ if __name__ == '__main__':
         rospy.init_node('operation_mode_diagnostics')
         sub = rospy.Subscriber('motor_states', MotorStates, states_cb)
         sub_emergency_mode = rospy.Subscriber('emergency_mode', Int32, emergency_mode_cb)
-        pub = rospy.Publisher('diagnostics', DiagnosticArray)
+        pub = rospy.Publisher('diagnostics', DiagnosticArray, queue_size=1)
         r = rospy.Rate(10)
         emergency_mode = None
         while not rospy.is_shutdown():
