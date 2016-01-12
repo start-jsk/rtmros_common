@@ -8,7 +8,6 @@
 #include "rtm/idl/RTC.hh"
 #include "hrpsys_ros_bridge/idl/ExecutionProfileService.hh"
 #include "hrpsys_ros_bridge/idl/RobotHardwareService.hh"
-#include <eigen_conversions/eigen_msg.h>
 #include <tf_conversions/tf_eigen.h>
 #include <boost/format.hpp>
 
@@ -530,8 +529,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     is_base_valid = true;
     // calculate base transform
     double *a = m_baseTform.data.get_buffer();
-    hrp::Vector3 base_origin = hrp::Vector3(a[0], a[1], a[2]);
-    base.setOrigin(tf::Vector3(base_origin[0], base_origin[1], base_origin[2]));
+    tf::Vector3 base_origin = tf::Vector3(a[0], a[1], a[2]);
+    base.setOrigin(base_origin);
     // calculate pose quaternion
     hrp::Matrix33 R;
     hrp::getMatrix33FromRowMajorArray(R, a, 3);
@@ -813,13 +812,15 @@ void HrpsysSeqStateROSBridge::periodicTimerCallback(const ros::TimerEvent& event
   }
 }
 
-void HrpsysSeqStateROSBridge::updateOdometry(const hrp::Vector3 &trans, const hrp::Matrix33 &R, const ros::Time &stamp)
+void HrpsysSeqStateROSBridge::updateOdometry(const tf::Vector3 &trans, const hrp::Matrix33 &R, const ros::Time &stamp)
 { 
   hrp::Vector3 rpy = hrp::rpyFromRot(R); 
   tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));  
-  nav_msgs::Odometry odom;
+
+  // make transform from pose message in odom
+  odom_transform = tf::Transform(q, trans);
   
-  //odom.header.frame_id = rootlink_name;
+  nav_msgs::Odometry odom;
   odom.header.frame_id = "odom";
   if ( use_hrpsys_time ) {
     odom.header.stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
@@ -827,13 +828,10 @@ void HrpsysSeqStateROSBridge::updateOdometry(const hrp::Vector3 &trans, const hr
     odom.header.stamp = stamp;
   }
   odom.child_frame_id = rootlink_name;
-  odom.pose.pose.position.x = trans[0];
+  odom.pose.pose.position.x = trans[0]; // Point is not Vector3
   odom.pose.pose.position.y = trans[1];
   odom.pose.pose.position.z = trans[2];
-  odom.pose.pose.orientation.x = q.getX();
-  odom.pose.pose.orientation.y = q.getY();
-  odom.pose.pose.orientation.z = q.getZ();
-  odom.pose.pose.orientation.w = q.getW();
+  tf::quaternionTFToMsg(q, odom.pose.pose.orientation);
     
   if (prev_odom_acquired) {
     // calc velocity
@@ -843,19 +841,17 @@ void HrpsysSeqStateROSBridge::updateOdometry(const hrp::Vector3 &trans, const hr
       // R = exp(omega_w*dt) * prev_R
       // omega_w is described in global coordinates in relationships of twist transformation.
       // omega in twist.angular is transformed into rootlink coords because twist should be described in child_frame_id.
-      hrp::Vector3 omega = R.transpose() * hrp::omegaFromRot(R * prev_R.transpose()) / dt;  // omegaFromRot returns matrix_log
-      odom.twist.twist.angular.x = omega[0];
-      odom.twist.twist.angular.y = omega[1];
-      odom.twist.twist.angular.z = omega[2];
+      tf::Vector3 omega;
+      tf::vectorEigenToTF(R.transpose() * hrp::omegaFromRot(R * prev_R.transpose()) / dt, omega); // omegaFromRot returns matrix_log
+      tf::vector3TFToMsg(omega, odom.twist.twist.angular);
       // calculate velocity (not strict linear twist from odom)
-      hrp::Vector3 velocity, local_velocity;
+      hrp::Vector3 velocity;
       velocity[0] = (odom.pose.pose.position.x - prev_odom.pose.pose.position.x) / dt;
       velocity[1] = (odom.pose.pose.position.y - prev_odom.pose.pose.position.y) / dt;
       velocity[2] = (odom.pose.pose.position.z - prev_odom.pose.pose.position.z) / dt;
-      local_velocity = R.transpose() * velocity; // global -> local
-      odom.twist.twist.linear.x = local_velocity[0];
-      odom.twist.twist.linear.y = local_velocity[1];
-      odom.twist.twist.linear.z = local_velocity[2];
+      tf::Vector3 local_velocity;
+      tf::vectorEigenToTF(R.transpose() * velocity, local_velocity); // global -> local
+      tf::vector3TFToMsg(local_velocity, odom.twist.twist.linear);
         
       // calculate covariance
       // assume dx, dy >> dz, dgamma >> dalpha, dbeta and use 2d odometry update equation
@@ -907,9 +903,6 @@ void HrpsysSeqStateROSBridge::updateOdometry(const hrp::Vector3 &trans, const hr
       prev_odom = odom;
       prev_rpy = rpy;
 
-      // make transform from pose message in odom
-      odom_transform = tf::Transform(tf::Quaternion(odom.pose.pose.orientation.x, odom.pose.pose.orientation.y, odom.pose.pose.orientation.z, odom.pose.pose.orientation.w),
-                                     tf::Vector3(odom.pose.pose.position.x, odom.pose.pose.position.y, odom.pose.pose.position.z));
     }
   } else {
     // previous values are needed to calculate velocity
@@ -950,10 +943,7 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
 
   // original imu values
   tf::Quaternion q = tf::createQuaternionFromRPY(m_baseRpy.data.r, m_baseRpy.data.p, m_baseRpy.data.y);
-  imu.orientation.x = q.getX();
-  imu.orientation.y = q.getY();
-  imu.orientation.z = q.getZ();
-  imu.orientation.w = q.getW();
+  tf::quaternionTFToMsg(q, imu.orientation);
   if (m_gyrometer.size() > 0) {
     imu.angular_velocity.x = m_gyrometer[0].data.avx;
     imu.angular_velocity.y = m_gyrometer[0].data.avy;
@@ -1034,9 +1024,9 @@ void HrpsysSeqStateROSBridge::pushSensorTransform(const ros::Time &stamp, std::v
         stamped_sensor_transform = tf::StampedTransform((*its).second.transform, stamp, std::string((*its).second.link_name), (*its).first);
       }
       else {
-        geometry_msgs::Transform transform = sensor_transformations[(*its).first];
-        tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
-                                   tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
+        geometry_msgs::Transform msg_transform = sensor_transformations[(*its).first];
+        tf::Transform tf_transform;
+        tf::transformMsgToTF(msg_transform, tf_transform);
         stamped_sensor_transform = tf::StampedTransform(tf_transform, stamp, std::string((*its).second.link_name), (*its).first);
       }
       tf::transformStampedTFToMsg(stamped_sensor_transform, ros_sensor_coords);
