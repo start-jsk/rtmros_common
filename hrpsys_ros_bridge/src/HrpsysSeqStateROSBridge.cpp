@@ -546,7 +546,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       odom_stamp = tm_on_execute;
     }
     
-    updateOdometry(base, odom_stamp);    
+    updateOdometry(base_origin, R, odom_stamp);
 
   }  // end: m_baseTformIn
 
@@ -813,17 +813,19 @@ void HrpsysSeqStateROSBridge::periodicTimerCallback(const ros::TimerEvent& event
   }
 }
 
-void HrpsysSeqStateROSBridge::updateOdometry(const tf::Transform &base, const ros::Time &stamp)
+void HrpsysSeqStateROSBridge::updateOdometry(const hrp::Vector3 &trans, const hrp::Matrix33 &R, const ros::Time &stamp)
 { 
-  tf::Vector3 trans = base.getOrigin();
-  tf::Quaternion q = base.getRotation();
-  hrp::Matrix33 R;
-  tf::matrixTFToEigen(base.getBasis(), R); // TODO: It is not good to assume hrp::Matrix33 is typedef of Eigen::Matrix3d implicitly (cf. EigenTypes.h)
   hrp::Vector3 rpy = hrp::rpyFromRot(R); 
+  tf::Quaternion q = tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2));  
   nav_msgs::Odometry odom;
   
+  //odom.header.frame_id = rootlink_name;
   odom.header.frame_id = "odom";
-  odom.header.stamp = stamp;
+  if ( use_hrpsys_time ) {
+    odom.header.stamp = ros::Time(m_baseTform.tm.sec, m_baseTform.tm.nsec);
+  } else {
+    odom.header.stamp = stamp;
+  }
   odom.child_frame_id = rootlink_name;
   odom.pose.pose.position.x = trans[0];
   odom.pose.pose.position.y = trans[1];

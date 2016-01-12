@@ -85,7 +85,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   bool follow_action_initialized;
 
   // odometry relatives
-  void updateOdometry(const tf::Transform &base, const ros::Time &stamp);
+  void updateOdometry(const hrp::Vector3 &trans, const hrp::Matrix33 &R, const ros::Time &stamp);
   tf::Transform odom_transform;
 
   // imu relatives
@@ -98,7 +98,6 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void pushSensorTransform(const ros::Time &stamp, std::vector<geometry_msgs::TransformStamped> &tf_transforms);
   std::map<std::string, geometry_msgs::Transform> sensor_transformations;
   boost::mutex sensor_transformation_mutex;
-
 };
 
 

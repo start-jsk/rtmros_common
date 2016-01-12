@@ -295,6 +295,27 @@
              (digits-string (aref dt 2) 2)
              (digits-string (aref dt 1) 2)
              (digits-string (aref dt 0) 2))))
+  ;; Method for define limb controller method using defmethod
+  ;; If debugp t, we can see defmethod s-expressions.
+  (:def-limb-controller-method
+    (limb &key (debugp nil))
+    "Method to add limb controller action by default setting.
+     Currently, FollowJointTrajectoryAction is used."
+    (let ((sexp `(defmethod ,(send (class self):name)
+                   (,(read-from-string (format nil "~A-controller" limb))
+                    ()
+                    (list
+                     (list
+                      (cons :group-name ,(string-downcase limb))
+                      (cons :controller-action ,(format nil "~A_controller/follow_joint_trajectory_action" (string-downcase limb)))
+                      (cons :controller-state ,(format nil "~A_controller/state" (string-downcase limb)))
+                      (cons :action-type control_msgs::FollowJointTrajectoryAction)
+                      (cons :joint-names (list ,@(send-all (send robot limb :joint-list) :name))))
+                     )))))
+      (if debugp
+          (pprint (macroexpand sexp)))
+      (eval sexp)
+      ))
   )
 
 ;; define Euslisp setter and getter method
@@ -377,10 +398,19 @@
    (groupname)
    (send self :sequenceplayerservice_waitinterpolationofgroup :gname groupname))
   (:add-joint-group
-   (groupname jnames)
+   (groupname &optional (jnames
+                         (if (find-method self (read-from-string (format nil ":~A-controller" (string-downcase groupname))))
+                             (cdr (assoc :joint-names (car (send self (read-from-string (format nil ":~A-controller" (string-downcase groupname))))))))))
+   "Add joint group for SequencePlayer.
+    groupname is joint group name such as rarm or lleg.
+    jnames is list of joint name."
+   (unless jnames
+     (error ";; jnames argument is require in :add-joint-group~%"))
    (send self :sequenceplayerservice_addjointgroup :gname groupname :jnames jnames))
   (:remove-joint-group
    (groupname)
+   "Remove joint group for SequencePlayer.
+    groupname is joint group name such as rarm or lleg."
    (send self :sequenceplayerservice_removejointgroup :gname groupname))
   (:set-joint-angles-of-group
    (groupname av tm)
@@ -648,10 +678,11 @@
                  (push (subseq vec (* i 3) (+ (* i 3) 3)) vret))
                (reverse vret))))
      (let ((ret (send self :impedancecontrollerservice_getObjectForcesMoments)))
-       (list (split-vector (send (send ret :o_forces) :data)) (split-vector (send (send ret :o_moments) :data)))
+       (list (split-vector (send (send ret :o_forces) :data))
+             (split-vector (send (send ret :o_moments) :data))
+             (send ret :o_3dofwrench))
        ))
    )
-  ;; !!Currently for resultant forces!!
   (:set-object-turnaround-ref-force
    (&key (limbs '(:rarm :larm))
          (axis (float-vector 0 0 -1))
@@ -705,6 +736,72 @@
      (if (eq detector-mode :mode_detected)
          (car fm-ret))
      ))
+  (:set-object-turnaround-ref-moment
+   (&key (limbs '(:rarm :larm))
+         (axis (float-vector 0 0 1))
+         (max-ref-moment 10)
+         (func)
+         (moment-center)
+         (max-time 4000.0)
+         (detect-time-offset 2000.0)
+         (set-ref-force-time 2000.0)
+         (set-ref-force-p t))
+   "Set object turnaround reference force.
+    axis is resultant force direction.
+    max-time is max time [msec].
+    detect-time-offset is additional checking time [msec]."
+   (format t ";; Start object turnaround detection~%")
+   (let ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+         (fs-list (funcall func max-ref-moment)))
+     (send self :set-object-turnaround-detector-param
+           :axis axis :moment-center (scale 1e-3 moment-center) :detector-total-wrench 1)
+     (send self :set-ref-forces
+           (mapcar #'(lambda (limb)
+                       (if (memq limb '(:rleg :lleg))
+                           (float-vector 0 0 0)
+                         (elt fs-list (position limb limbs))))
+                   all-limbs)
+           max-time)
+     (send self :start-object-turnaround-detection
+           :ref-diff-wrench max-ref-moment
+           :max-time (* 1e-3 (+ detect-time-offset max-time))
+           :limbs limbs)
+     (let ((detector-mode :mode_detector_idle) (fm-ret) (otd-ret-wrenches))
+       (do-until-key-with-check
+        (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
+        (setq detector-mode (send self :check-object-turnaround-detection))
+        (format t ";;   Detecting... (detector-mode = ~A, current force moment = ~A)~%" detector-mode (send self :get-otd-object-forces-moments))
+        (unix:usleep (* 1000 500)))
+       (if (eq detector-mode :mode_detected)
+           (progn
+             (Setq otd-ret-wrenches (send self :get-otd-object-forces-moments))
+             (setq fm-ret (caddr otd-ret-wrenches))
+             (format t ";; Detected (force moment = ~A ~A)~%" fm-ret (funcall func (v. axis fm-ret)))
+             (setq fm-ret (funcall func (v. axis fm-ret)))
+             (if set-ref-force-p
+                 (send self :set-ref-forces
+                       (mapcar #'(lambda (limb)
+                                   (if (memq limb '(:rleg :lleg))
+                                       (float-vector 0 0 0)
+                                     (elt fm-ret (position limb limbs))))
+                               all-limbs)
+                       set-ref-force-time)
+               (send self :set-ref-force
+                     (float-vector 0 0 0)
+                     set-ref-force-time
+                     (if (= (length limbs) 1) (car limbs) :arms))))
+         (progn
+           (format t ";; Not detected (~A)~%" detector-mode)
+           (send self :set-ref-force
+                 (float-vector 0 0 0)
+                 set-ref-force-time
+                 (if (= (length limbs) 1) (car limbs) :arms))
+           )
+         )
+       (send self :wait-interpolation-seq)
+       (if (eq detector-mode :mode_detected)
+           otd-ret-wrenches)
+       )))
   )
 
 ;; RemoveForceSensorLinkOffset
@@ -1178,6 +1275,21 @@
         (/ (* 1e-3 (elt (send tf :worldpos) 1)) default-step-time)
         (/ ang default-step-time)
         ))))
+  (:set-default-step-time-with-the-same-swing-time
+   (default-step-time)
+   "Set default step time with the same swing time."
+   (let* ((ggp (send self :get-gait-generator-param))
+          (prev-default-step-time (send ggp :default_step_time))
+          (prev-default-double-support-ratio (send ggp :default_double_support_ratio))
+          (swing-time (* (- 1.0 prev-default-double-support-ratio) prev-default-step-time))
+          (new-default-double-support-ratio (- 1.0 (/ swing-time default-step-time))))
+     (if (>= swing-time default-step-time)
+         (error ";; default step time(~A[s]) should be greater than swing time(~A[s])~%" default-step-time swing-time))
+     (send self :set-gait-generator-param
+           :default-step-time default-step-time
+           :default-double-support-ratio new-default-double-support-ratio)
+     )
+   )
   (:start-graspless-manip-mode
    (robot arm)
    "Start graspless manip mode while walking.
@@ -1231,7 +1343,7 @@
   (:set-st-param
    (&rest args
     &key st-algorithm
-         eefm-pos-damping-gain eefm-rot-damping-gain eefm-pos-time-const-support eefm-rot-time-const
+         eefm-pos-damping-gain eefm-rot-damping-gain eefm-pos-time-const-support eefm-rot-time-const eefm-swing-pos-spring-gain eefm-swing-rot-spring-gain
     &allow-other-keys)
    "Set Stabilizer parameters.
     To learn more about arguments, please see (pprint (find-method *ri* :raw-set-st-param))."
@@ -1264,6 +1376,14 @@
                  (let ((tmp (send prm :eefm_pos_time_const_support)))
                    (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-pos-time-const-support))
                    (list :eefm-pos-time-const-support tmp)))
+             (if (and (memq :eefm-swing-pos-spring-gain args) eefm-swing-pos-spring-gain)
+                 (let ((tmp (send prm :eefm_swing_pos_spring_gain)))
+                   (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-swing-pos-spring-gain))
+                   (list :eefm-swing-pos-spring-gain tmp)))
+             (if (and (memq :eefm-swing-rot-spring-gain args) eefm-swing-rot-spring-gain)
+                 (let ((tmp (send prm :eefm_swing_rot_spring_gain)))
+                   (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-swing-rot-spring-gain))
+                   (list :eefm-swing-rot-spring-gain tmp)))
              args))))
   (:set-st-param-for-non-feedback-LIP-mode
    ()
@@ -1425,10 +1545,10 @@
                       '(:rleg :lleg))))
    "Start default unstable RTCs controller mode.
     Currently Stabilzier, AutoBalancer, and ImpedanceController are started."
-   (send self :start-st)
+   (send self :start-auto-balancer :limbs abc-limbs)
    (dolist (limb ic-limbs)
      (send self :start-impedance-no-wait limb))
-   (send self :start-auto-balancer :limbs abc-limbs)
+   (send self :start-st)
    (dolist (limb ic-limbs)
      (send self :wait-impedance-controller-transition limb))
    )
