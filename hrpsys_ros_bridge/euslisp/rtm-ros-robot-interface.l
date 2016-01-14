@@ -949,8 +949,8 @@
    (let ((param (send self :raw-get-foot-step-param)))
      (append
       (mapcan #'(lambda (meth param-name) (list param-name (send self :abc-footstep->eus-footstep (send param meth))))
-              '(:rleg_coords :lleg_coords :support_leg_coords :swing_leg_coords :swing_leg_src_coords :swing_leg_dst_coords :dst_foot_midcoords)
-              '(:rleg-coords :lleg-coords :support-leg-coords :swing-leg-coords :swing-leg-src-coords :swing-leg-dst-coords :dst-foot-midcoords))
+              '(:support_leg_coords :swing_leg_coords :swing_leg_src_coords :swing_leg_dst_coords :dst_foot_midcoords)
+              '(:support-leg-coords :swing-leg-coords :swing-leg-src-coords :swing-leg-dst-coords :dst-foot-midcoords))
       (mapcan #'(lambda (meth param-name)
                   (list param-name (send self :get-idl-enum-values
                                          (send param meth)
@@ -963,7 +963,7 @@
    "Get AutoBalancer foot step param by given name.
     param-name is key word for parameters defined in IDL.
     param-name should be :rleg-coords :lleg-coords :support-leg-coords :swing-leg-coords :swing-leg-src-coords :swing-leg-dst-coords :dst-foot-midcoords :support-leg :support-leg-with-both."
-   (if (memq param-name '(:rleg-coords :lleg-coords :support-leg-coords :swing-leg-coords :swing-leg-src-coords :swing-leg-dst-coords :dst-foot-midcoords :support-leg :support-leg-with-both))
+   (if (memq param-name '(:support-leg-coords :swing-leg-coords :swing-leg-src-coords :swing-leg-dst-coords :dst-foot-midcoords :support-leg :support-leg-with-both))
        (cadr (memq param-name (send self :get-foot-step-params)))
      (error ";; no such abc footstep param ~A~%" param-name))
    )
