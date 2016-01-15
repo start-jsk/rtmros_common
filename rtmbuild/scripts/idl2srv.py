@@ -419,12 +419,21 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             code += '  %s operation_return;\n' % self.getCppTypeText(rtype, out=True, full=CPP_FULL)
             code += '    operation_return = m_service0->%s(%s);\n' % (op.identifier(), params)
             code += '    convert(%soperation_return, res.operation_return);\n' % ptr
-
+        connected_RTC_name = ifname[0:ifname.rindex("ServiceROSBridge")]
         code += '  } catch(CORBA::COMM_FAILURE& ex) {\n'
-        code += '      ROS_ERROR_STREAM("%s::%s : Caught system exception COMM_FAILURE -- unable to contact the object.");\n' % (ifname, op.identifier())
+        code += '      ROS_ERROR_STREAM("%s::%s : Caught system exception COMM_FAILURE -- unable to contact the object [minor code = " << ex.minor() << "]. One possibility is IDL version mismatch between %s and %s. So please check IDL versions are consistent. Another possibility is that Service-Port function, %s of %s, called but %s died becase of it. So please check %s is still alive.");\n' % (ifname, op.identifier(), ifname, connected_RTC_name, op.identifier(), connected_RTC_name, connected_RTC_name, connected_RTC_name)
         code += '      return false;\n'
-        code += '  } catch(CORBA::SystemException&) {\n'
-        code += '      ROS_ERROR_STREAM("%s::%s : Caught CORBA::SystemException.");\n' % (ifname, op.identifier())
+        code += '  } catch(CORBA::MARSHAL& ex) {\n'
+        code += '      ROS_ERROR_STREAM("%s::%s : Caught CORBA::SystemException::MARSHAL [minor code = " << ex.minor() << "]. One possibility is IDL version mismatch between %s and %s. So please check IDL versions are consistent.");\n' % (ifname, op.identifier(), ifname, connected_RTC_name)
+        code += '      return false;\n'
+        code += '  } catch(CORBA::BAD_PARAM& ex) {\n'
+        code += '      ROS_ERROR_STREAM("%s::%s : Caught CORBA::SystemException::BAD_PARAM [minor code = " << ex.minor() << "]. One possibility is that Service-Port function, %s of %s, called and some problem has occurred within it and %s keeps alive. So please check %s of %s is correctly finished.");\n' % (ifname, op.identifier(), op.identifier(), connected_RTC_name, connected_RTC_name, op.identifier(), connected_RTC_name)
+        code += '      return false;\n'
+        code += '  } catch(CORBA::OBJECT_NOT_EXIST& ex) {\n'
+        code += '      ROS_ERROR_STREAM("%s::%s : Caught CORBA::SystemException::OBJECT_NOT_EXIST [minor code = " << ex.minor() << "]. One possibility is that %s RTC is not found. So please check %s is still alive.");\n' % (ifname, op.identifier(), connected_RTC_name, connected_RTC_name)
+        code += '      return false;\n'
+        code += '  } catch(CORBA::SystemException& ex) {\n'
+        code += '      ROS_ERROR_STREAM("%s::%s : Caught CORBA::SystemException [minor code = " << ex.minor() << "].");\n' % (ifname, op.identifier())
         code += '      return false;\n'
         code += '  } catch(CORBA::Exception&) {\n'
         code += '      ROS_ERROR_STREAM("%s::%s : Caught CORBA::Exception.");\n' % (ifname, op.identifier())
