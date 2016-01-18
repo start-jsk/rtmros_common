@@ -9,7 +9,7 @@ try:
 except:
     import roslib; roslib.load_manifest(PKG)
 
-import argparse,unittest,rostest, time, sys, math, os
+import argparse,unittest,rostest, time, sys, math, os, rospkg
 from numpy import *
 
 import rospy,rospkg, tf
@@ -120,6 +120,17 @@ class TestSampleRobot(unittest.TestCase):
         rospy.logwarn("tf_echo /WAIST_LINK0 /LARM_LINK7 %r %r"%(trans2,rot2))
         rospy.logwarn("difference between two /LARM_LINK7 %r %r"%(array(trans1)-array(trans2),linalg.norm(array(trans1)-array(trans2))))
         self.assertNotAlmostEqual(linalg.norm(array(trans1)-array(trans2)), 0, delta=0.1)
+
+    def test_hcf_init(self):
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+"/src/hrpsys_ros_bridge")
+        import samplerobot_hrpsys_config
+        hcf = samplerobot_hrpsys_config.SampleRobotHrpsysConfigurator()
+        model_url = rospkg.RosPack().get_path("openhrp3") + "/share/OpenHRP-3.1/sample/model/sample1.wrl"
+        try:
+            hcf.init("SampleRobot(Robot)0", model_url)
+            assert(True)
+        except AttributeError:
+            assert(False)
 
 #unittest.main()
 if __name__ == '__main__':
