@@ -690,7 +690,9 @@
          (max-ref-force)
          (detect-time-offset 2000.0)
          (set-ref-force-time 2000.0)
-         (set-ref-force-p t))
+         (set-ref-force-p t)
+         (periodic-time 200) ;; [msec]
+         )
    "Set object turnaround reference force.
     axis is resultant force direction.
     max-time is max time [msec].
@@ -710,7 +712,7 @@
       (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
       (setq detector-mode (send self :check-object-turnaround-detection))
       (format t ";;   Detecting... (detector-mode = ~A, current force moment = ~A)~%" detector-mode (send self :get-otd-object-forces-moments))
-      (unix:usleep (* 1000 500)))
+      (unix:usleep (* 1000 periodic-time)))
      (if (eq detector-mode :mode_detected)
          (progn
            (setq fm-ret (send self :get-otd-object-forces-moments))
@@ -745,7 +747,9 @@
          (max-time 4000.0)
          (detect-time-offset 2000.0)
          (set-ref-force-time 2000.0)
-         (set-ref-force-p t))
+         (set-ref-force-p t)
+         (periodic-time 200) ;; [msec]
+         )
    "Set object turnaround reference force.
     axis is resultant force direction.
     max-time is max time [msec].
@@ -771,7 +775,7 @@
         (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
         (setq detector-mode (send self :check-object-turnaround-detection))
         (format t ";;   Detecting... (detector-mode = ~A, current force moment = ~A)~%" detector-mode (send self :get-otd-object-forces-moments))
-        (unix:usleep (* 1000 500)))
+        (unix:usleep (* 1000 periodic-time)))
        (if (eq detector-mode :mode_detected)
            (progn
              (Setq otd-ret-wrenches (send self :get-otd-object-forces-moments))
