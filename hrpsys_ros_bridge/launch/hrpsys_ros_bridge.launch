@@ -4,6 +4,11 @@
   <arg name="CONF_FILE" default="" />
   <arg name="BASE_LINK" default="BODY" />
   <arg name="SIMULATOR_NAME" default="RobotHardware0"/> <!-- please set $(arg ROBOT_NAME)(Robot) for simulation -->
+  <!-- if you want to connect rtc components other than Robothardware -->
+  <arg name="SIMULATOR_NAME_ANGLE"    default="$(arg SIMULATOR_NAME)" />
+  <arg name="SIMULATOR_NAME_VELOCITY" default="$(arg SIMULATOR_NAME)" />
+  <arg name="SIMULATOR_NAME_TORQUE"   default="$(arg SIMULATOR_NAME)" />
+
   <arg name="INSTALL_ROBOT_DESCRIPTION" default="true" />
   <arg name="DEBUG_HRPSYS" default="false" />
 
@@ -72,6 +77,9 @@
         args="$(arg MODEL_FILE) $(arg SIMULATOR_NAME) HrpsysSeqStateROSBridge0 $(arg nameserver) $(arg omniorb_args)" output="$(arg OUTPUT)"/>
   <!-- BEGIN:openrtm connection -->
   <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
+  <env name="SIMULATOR_NAME_ANGLE"    value="$(arg SIMULATOR_NAME_ANGLE)" />
+  <env name="SIMULATOR_NAME_VELOCITY" value="$(arg SIMULATOR_NAME_VELOCITY)" />
+  <env name="SIMULATOR_NAME_TORQUE"   value="$(arg SIMULATOR_NAME_TORQUE)" />
   <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm_tools" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch USE_COMMON=$(arg USE_COMMON) USE_WALKING=$(arg USE_WALKING) USE_COLLISIONCHECK=$(arg USE_COLLISIONCHECK) USE_IMPEDANCECONTROLLER=$(arg USE_IMPEDANCECONTROLLER) USE_SOFTERRORLIMIT=$(arg USE_SOFTERRORLIMIT) USE_IMAGESENSOR=$(arg USE_IMAGESENSOR) USE_ROBOTHARDWARE=$(arg USE_ROBOTHARDWARE) USE_GRASPCONTROLLER=$(arg USE_GRASPCONTROLLER) USE_SERVOCONTROLLER=$(arg USE_SERVOCONTROLLER) USE_TORQUECONTROLLER=$(arg USE_TORQUECONTROLLER) USE_TORQUEFILTER=$(arg USE_TORQUEFILTER) USE_EMERGENCYSTOPPER=$(arg USE_EMERGENCYSTOPPER) USE_VELOCITY_OUTPUT=$(arg USE_VELOCITY_OUTPUT)" output="$(arg OUTPUT)"/>
 
 
@@ -93,9 +101,9 @@
     <node pkg="hrpsys_ros_bridge" name="StateHolderServiceROSBridge" type="StateHolderServiceROSBridgeComp"
           output="screen" args ="$(arg openrtm_args)" />
 
-    <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="HrpsysSeqStateROSBridge0.rtc:rsangle" subscription_type="new"/>
-    <rtconnect from="$(arg SIMULATOR_NAME).rtc:dq" to="HrpsysSeqStateROSBridge0.rtc:rsvel" subscription_type="new" if="$(arg USE_VELOCITY_OUTPUT)" />
-    <rtconnect from="$(arg SIMULATOR_NAME).rtc:tau" to="HrpsysSeqStateROSBridge0.rtc:rstorque" subscription_type="new" unless="$(arg USE_TORQUEFILTER)"/>
+    <rtconnect from="$(arg SIMULATOR_NAME_ANGLE).rtc:q"     to="HrpsysSeqStateROSBridge0.rtc:rsangle" subscription_type="new"/>
+    <rtconnect from="$(arg SIMULATOR_NAME_VELOCITY).rtc:dq" to="HrpsysSeqStateROSBridge0.rtc:rsvel" subscription_type="new" if="$(arg USE_VELOCITY_OUTPUT)" />
+    <rtconnect from="$(arg SIMULATOR_NAME_TORQUE).rtc:tau"  to="HrpsysSeqStateROSBridge0.rtc:rstorque" subscription_type="new" unless="$(arg USE_TORQUEFILTER)"/>
     <rtconnect from="StateHolderServiceROSBridge.rtc:StateHolderService" to="sh.rtc:StateHolderService"  subscription_type="new"/>
     <rtconnect from="sh.rtc:baseTformOut" to="HrpsysSeqStateROSBridge0.rtc:baseTform" subscription_type="new" unless="$(arg USE_WALKING)"/>
     <rtconnect from="sh.rtc:qOut" to="HrpsysSeqStateROSBridge0.rtc:mcangle" subscription_type="new"/>
