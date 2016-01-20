@@ -1843,6 +1843,18 @@
                           (list :root-local-zmp root-local-zmp)))
                  (incf idx)
                  )))))
+      ;; optional data
+      (let ((oln) (optfile (concatenate string input-basename ".optionaldata")) (idx 0))
+        (if (probe-file optfile)
+            (with-open-file
+             (of optfile :direction :input)
+             (while (setq oln (read-line of nil))
+               (let* ((dd (subseq (data-str->data-list oln) 1)))
+                 (nconc (elt rs-list idx)
+                        (list :optional-data dd
+                              :contact-state (mapcar #'(lambda (x) (if (eps= x 1.0) :support :swing)) (concatenate cons (subseq dd 0 (/ (length dd) 2))))))
+                 (incf idx)
+                 )))))
       rs-list)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
