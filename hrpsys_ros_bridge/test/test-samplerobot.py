@@ -90,6 +90,27 @@ class TestSampleRobot(unittest.TestCase):
             self.assertAlmostEqual(t2-t1, 11, delta=2)
             #self.assertNotAlmostEqual(trans[1],0,2)
 
+    def test_go_pos(self):
+        # prepare
+        try: # go-pos requires hrpsys > 315.2.8
+            rospy.wait_for_service('/AutoBalancerServiceROSBridge/goPos', timeout = 10)
+        except ROSException:
+            return
+        go_pos = rospy.ServiceProxy('/AutoBalancerServiceROSBridge/goPos', OpenHRP_AutoBalancerService_goPos)
+        rospy.wait_for_service('/AutoBalancerServiceROSBridge/waitFootSteps')
+        wait_foot_steps = rospy.ServiceProxy('/AutoBalancerServiceROSBridge/waitFootSteps', OpenHRP_AutoBalancerService_waitFootSteps)
+        # Set joint angles just for initailize. To set joint angles from ROS, please use JointTrajectory and see test_joint_angles example
+        rospy.wait_for_service('/SequencePlayerServiceROSBridge/setJointAngles')
+        set_joint_angles = rospy.ServiceProxy('/SequencePlayerServiceROSBridge/setJointAngles', OpenHRP_SequencePlayerService_setJointAngles)
+        f=open(rospkg.RosPack().get_path('openhrp3')+'/share/OpenHRP-3.1/sample/controller/SampleController/etc/Sample.pos', 'r')
+        set_joint_angles(jvs=[float(x) for x in f.readline().split()[1:]], tm=1.0)
+        f.close()
+        # send go_pos 
+        ret1 = go_pos(x = 1.0, y = 0.0, th = 0.0)
+        ret2 = wait_foot_steps ()
+        # check result
+        self.assertTrue(ret1 and ret2, "walk")
+
     # send joint angles
     def test_joint_angles(self):
         larm = actionlib.SimpleActionClient("/larm_controller/joint_trajectory_action", JointTrajectoryAction)

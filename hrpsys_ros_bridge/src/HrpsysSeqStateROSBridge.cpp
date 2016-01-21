@@ -60,9 +60,10 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
     ros::WallDuration wtm(0, 500000000);
     wtm.sleep();
   }
+  ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] use_sim_time " << use_sim_time);
   if ( use_sim_time ) {
       int num = clock_sub.getNumPublishers();
-      ROS_DEBUG("[HrpsysSeqStateROSBridge] number of clock publisher : %d", num);
+      ROS_INFO("[HrpsysSeqStateROSBridge] number of clock publisher : %d", num);
       clock_pub = nh.advertise<rosgraph_msgs::Clock>("/clock", 5);
       ros::WallTime rnow = ros::WallTime::now();
       while (clock_sub.getNumPublishers() == num) {
@@ -72,7 +73,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
         ros::WallDuration wtm(0, 1000000);
         wtm.sleep();
       }
-      ROS_DEBUG("wating for num of clock publishers = %d", clock_sub.getNumPublishers());
+      ROS_INFO("wating for num of clock publishers = %d", clock_sub.getNumPublishers());
       if(clock_sub.getNumPublishers() == 1) { // if use sim_time and publisher==1, which means clock publisher is only this RosBridge
           ROS_WARN("[HrpsysSeqStateROSBridge] use_hrpsys_time");
           use_hrpsys_time = true;
