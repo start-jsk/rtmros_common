@@ -8,7 +8,7 @@
     <arg name="RUN_RVIZ" default="false" />
   </include>
 
-  <node name="hrpsys_seq_state_ros_bridge_tf_relay" pkg="hrpsys_ros_bridge" type="hrpsys_seq_state_ros_bridge_relay.py"/>
+  <node name="hrpsys_seq_state_ros_bridge_tf_relay" pkg="hrpsys_ros_bridge" type="hrpsys_seq_state_ros_bridge_tf_relay_for_test.py"/>
 
   <!-- check if joint_states is published -->       
   <param name="hztest_js/topic" value="/joint_states" />

@@ -1,4 +1,7 @@
 #! /usr/bin/env python
+
+# This script extracts tf from HrpsysSeqStateROSBridge to test tf rate of HrpsysSeqStateROSBridge in rostest.
+
 import rospy
 import tf
 from tf.msg import tfMessage
