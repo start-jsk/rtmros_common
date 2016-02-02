@@ -8,14 +8,24 @@
     <arg name="RUN_RVIZ" default="false" />
   </include>
 
-  <!-- check if tf is published -->       
-  <param name="hztest_tf/topic" value="/joint_states" />
-  <param name="hztest_tf/wait_time" value="100" />
-  <param name="hztest_tf/hz" value="500.0" />
-  <param name="hztest_tf/hzerror" value="200.0" />
+  <node name="hrpsys_seq_state_ros_bridge_tf_relay" pkg="hrpsys_ros_bridge" type="hrpsys_seq_state_ros_bridge_tf_relay_for_test.py"/>
+
+  <!-- check if joint_states is published -->       
+  <param name="hztest_js/topic" value="/joint_states" />
+  <param name="hztest_js/wait_time" value="100" />
+  <param name="hztest_js/hz" value="500.0" />
+  <param name="hztest_js/hzerror" value="200.0" />
+  <param name="hztest_js/test_duration" value="5.0" />
+  <test test-name="hztest_js" pkg="rostest" type="hztest" name="hztest_js" retry="4" />
+
+  <!-- check if tf is published -->
+  <param name="hztest_tf/topic" value="/hrpsys_ros_bridge/tf" />
+  <param name="hztest_tf/wait_time" value="10" />
+  <param name="hztest_tf/hz" value="50.0" />
+  <param name="hztest_tf/hzerror" value="20.0" />
   <param name="hztest_tf/test_duration" value="5.0" />
   <test test-name="hztest_tf" pkg="rostest" type="hztest" name="hztest_tf" retry="4" />
-
+  
   <test test-name="samplerobot" pkg="hrpsys_ros_bridge" type="test-samplerobot.py" retry="4" time-limit="300"/>
 
 </launch>
