@@ -89,6 +89,7 @@ def rtconnect(nameserver, tags, tree):
         dest_full_path = path.cmd_path_to_full_path(dest_path)
         if tag.attributes.get("subscription_type") != None:
             sub_type = tag.attributes.get("subscription_type").value
+            sub_type = replace_arg_tag_by_env(sub_type);
             if not sub_type in ['flush','new','periodic']:
                 print >>sys.stderr, sub_type+' is not a subscription type'
                 continue
@@ -109,12 +110,16 @@ def rtconnect(nameserver, tags, tree):
         try:
             sub_type = str(sub_type)
             props = {'dataport.subscription_type': sub_type}
+            if tag.attributes.get("push_policy") != None:
+                push_policy = replace_arg_tag_by_env(str(tag.attributes.get("push_policy").value));
+            else:
+                push_policy = 'all'
             if sub_type == 'new':
-                props['dataport.publisher.push_policy'] = 'all'
+                props['dataport.publisher.push_policy'] = push_policy
             elif sub_type == 'periodic':
-                props['dataport.publisher.push_policy'] = 'all'
+                props['dataport.publisher.push_policy'] = push_policy
                 if tag.attributes.get("push_rate") != None:
-                    props['dataport.push_rate'] = str(tag.attributes.get("push_rate").value)
+                    props['dataport.push_rate'] = replace_arg_tag_by_env(str(tag.attributes.get("push_rate").value))
                 else:
                     props['dataport.push_rate'] = str('50.0')
             options = optparse.Values({'verbose': False, 'id': '', 'name': None, 'properties': props})

@@ -15,28 +15,28 @@ import OpenHRP
 
 program_name = '[sensor_ros_bridge_connect.py] '
 
-def connecSensorRosBridgePort(url, rh, bridge, vs, rmfo, sh):
+def connecSensorRosBridgePort(url, rh, bridge, vs, rmfo, sh, subscription_type = "new", push_policy = 'all', push_rate = 50.0):
     for sen in hcf.getSensors(url):
         if sen.type in ['Acceleration', 'RateGyro', 'Force']:
             if rh.port(sen.name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
                 print program_name, "connect ", sen.name, rh.port(sen.name).get_port_profile().name, bridge.port(sen.name).get_port_profile().name
-                connectPorts(rh.port(sen.name), bridge.port(sen.name), "new")
+                connectPorts(rh.port(sen.name), bridge.port(sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy)
                 if sen.type == 'Force' and rmfo != None:
                     print program_name, "connect ", sen.name, rmfo.port("off_" + sen.name).get_port_profile().name, bridge.port("off_" + sen.name).get_port_profile().name
-                    connectPorts(rmfo.port("off_" + sen.name), bridge.port("off_" + sen.name), "new") # for abs forces
+                    connectPorts(rmfo.port("off_" + sen.name), bridge.port("off_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy) # for abs forces
                 if sen.type == 'Force' and sh.port(sen.name+"Out") and bridge.port("ref_" + sen.name):
                     print program_name, "connect ", sen.name, sh.port(sen.name+"Out").get_port_profile().name, bridge.port("ref_" + sen.name).get_port_profile().name
-                    connectPorts(sh.port(sen.name+"Out"), bridge.port("ref_" + sen.name), "new") # for reference forces
+                    connectPorts(sh.port(sen.name+"Out"), bridge.port("ref_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy) # for reference forces
         else:
             continue
     if vs != None:
         for vfp in filter(lambda x : str.find(x, 'v') >= 0 and str.find(x, 'sensor') >= 0, vs.ports.keys()):
             print program_name, "connect ", vfp, vs.port(vfp).get_port_profile().name, bridge.port(vfp).get_port_profile().name
-            connectPorts(vs.port(vfp), bridge.port(vfp), "new")
+            connectPorts(vs.port(vfp), bridge.port(vfp), subscription_type, rate=push_rate, pushpolicy=push_policy)
             print program_name, "connect ", vfp, sh.port(vfp+"Out").get_port_profile().name, bridge.port("ref_"+vfp).get_port_profile().name
-            connectPorts(sh.port(vfp+"Out"), bridge.port("ref_" + vfp), "new") # for reference forces
+            connectPorts(sh.port(vfp+"Out"), bridge.port("ref_" + vfp), subscription_type, rate=push_rate, pushpolicy=push_policy) # for reference forces
 
-def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name, managerhost):
+def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name, managerhost, subscription_type, push_policy, push_rate):
     hcf.waitForModelLoader()
     hcf.waitForRTCManagerAndRoboHardware(simulator_name, managerhost)
     bridge = rtm.findRTC(rosbridge_name)
@@ -51,13 +51,13 @@ def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name, managerho
         print program_name, " wait for 'sh' : ",sh
     vs=rtm.findRTC('vs')
     rmfo=rtm.findRTC('rmfo')
-    connecSensorRosBridgePort(url, hcf.rh, bridge, vs, rmfo, sh)
+    connecSensorRosBridgePort(url, hcf.rh, bridge, vs, rmfo, sh, subscription_type, push_policy, push_rate)
 
 if __name__ == '__main__':
     print program_name, "start"
     hcf=HrpsysConfigurator(program_name)
     if len(sys.argv) > 3 :
-        initSensorRosBridgeConnection(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+        initSensorRosBridgeConnection(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7])
     else :
         print program_name, " requires url, simulator_name, rosbridge_name"
 
