@@ -89,6 +89,7 @@ def rtconnect(nameserver, tags, tree):
         dest_full_path = path.cmd_path_to_full_path(dest_path)
         if tag.attributes.get("subscription_type") != None:
             sub_type = tag.attributes.get("subscription_type").value
+            sub_type = replace_arg_tag_by_env(sub_type);
             if not sub_type in ['flush','new','periodic']:
                 print >>sys.stderr, sub_type+' is not a subscription type'
                 continue
