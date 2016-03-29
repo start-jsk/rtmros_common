@@ -698,7 +698,7 @@
     max-time is max time [msec].
     detect-time-offset is additional checking time [msec]."
    (format t ";; Start object turnaround detection~%")
-   (send self :set-object-turnaround-detector-param :axis axis)
+   (send self :set-object-turnaround-detector-param :axis axis :detector-total-wrench 0)
    (send self :set-ref-force
          (scale (/ max-ref-force (length limbs)) axis)
          max-time
