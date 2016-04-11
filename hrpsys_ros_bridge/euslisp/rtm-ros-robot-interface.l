@@ -1582,6 +1582,24 @@
    )
 )
 
+;; ReferenceForceUpdater
+(def-set-get-param-method
+  'hrpsys_ros_bridge::Openhrp_ReferenceForceUpdaterService_ReferenceForceUpdaterParam
+  :set-reference-force-updater-param :get-reference-force-updater-param
+  :ReferenceForceUpdaterService_setReferenceForceUpdaterParam :ReferenceForceUpdaterService_getReferenceForceUpdaterParam)
+(defmethod rtm-ros-robot-interface
+  (:start-reference-force-updater
+   ()
+   "Start reference force updater."
+   (send self :referenceforceupdaterservice_startReferenceforceupdater)
+   )
+  (:stop-reference-force-updater
+   ()
+   "Stop reference force updater."
+   (send self :referenceforceupdaterservice_stopReferenceforceupdater)
+   )
+  )
+
 (defun print-end-effector-parameter-conf-from-robot
   (rb)
   "Print end effector setting for hrpsys conf file."
