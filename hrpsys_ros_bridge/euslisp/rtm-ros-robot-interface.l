@@ -12,6 +12,7 @@
 (defmethod rtm-ros-robot-interface
   (:init
    (&rest args)
+   ":init method. This method should be overriden in subclass."
    (prog1
        (send-super* :init args)
      (send self :define-all-ROSBridge-srv-methods)
@@ -272,12 +273,12 @@
          (error ";; no such interpolation-mode ~A in :set-interpolation-mode~%" interpolation-mode)))
      ))
   ;;
-  ;; Calculate zmp from state [mm]
-  ;; example ;; (progn (send *ri* :go-velocity 0 0 0) (objects (list (*ri* . robot))) (do-until-key (let ((zmp (send *ri* :calc-zmp-from-state))) (send *irtviewer* :draw-objects :flush nil) (send zmp :draw-on :flush t :size 300))))
   (:calc-zmp-from-state
    (&key (wrt :world))
-   ;; :wrt is :local => calc local zmp for (*ri* . robot)'s root-link coords
-   ;; :wrt is :world => calc world zmp for (*ri* . robot)
+   "Calculate zmp from state [mm].
+    For example ;; (progn (send *ri* :go-velocity 0 0 0) (objects (list (*ri* . robot))) (do-until-key (let ((zmp (send *ri* :calc-zmp-from-state))) (send *irtviewer* :draw-objects :flush nil) (send zmp :draw-on :flush t :size 300))))
+    :wrt is :local => calc local zmp for (*ri* . robot)'s root-link coords
+    :wrt is :world => calc world zmp for (*ri* . robot)"
    (send self :state)
    (send robot :calc-zmp-from-forces-moments
          (mapcar #'(lambda (x) (send self :force-vector x)) '(:rleg :lleg))
@@ -286,6 +287,8 @@
    )
   (:get-robot-date-string
    ()
+   "Get string including robot name and date.
+    For example, \"SampleRobot_20160412163151\"."
    (let* ((dt (unix:localtime)))
      (format nil "~A_~A~A~A~A~A~A"
              (send (send self :robot) :name)
@@ -295,12 +298,11 @@
              (digits-string (aref dt 2) 2)
              (digits-string (aref dt 1) 2)
              (digits-string (aref dt 0) 2))))
-  ;; Method for define limb controller method using defmethod
-  ;; If debugp t, we can see defmethod s-expressions.
   (:def-limb-controller-method
     (limb &key (debugp nil))
     "Method to add limb controller action by default setting.
-     Currently, FollowJointTrajectoryAction is used."
+     Currently, FollowJointTrajectoryAction is used.
+     This method calls defmethod. If :debugp t, we can see defmethod s-expressions."
     (let ((sexp `(defmethod ,(send (class self):name)
                    (,(read-from-string (format nil "~A-controller" limb))
                     ()
@@ -396,6 +398,8 @@
    )
   (:wait-interpolation-of-group
    (groupname)
+   "Wait interpolation of group.
+    !!This method is not recommended, please use :wait-interpolation method like (send *ri* :wait-interpolation :head-controller).!!"
    (send self :sequenceplayerservice_waitinterpolationofgroup :gname groupname))
   (:add-joint-group
    (groupname &optional (jnames
@@ -414,9 +418,19 @@
    (send self :sequenceplayerservice_removejointgroup :gname groupname))
   (:set-joint-angles-of-group
    (groupname av tm)
+   "Set joint angles of group.
+    !!This method is not recommended, please use :angle-vector method like (send *ri* :angle-vector (send *robot* :angle-vector) 2000 :head-controller).!!"
    (send self :sequenceplayerservice_setjointanglesofgroup :gname groupname :jvs av :tm tm))
-  (:load-pattern (basename &optional (tm 0.0)) (send self :sequenceplayerservice_loadpattern :basename basename :tm tm))
-  (:wait-interpolation-seq () (send self :sequenceplayerservice_waitinterpolation))
+  (:load-pattern
+   (basename &optional (tm 0.0))
+   "Load pattern files, such as xx.pos and xx.waist.
+    For pattern file definitions, please see loadPattern in SequencePlayer documentation in hrpsys-base API Doc."
+   (send self :sequenceplayerservice_loadpattern :basename basename :tm tm))
+  (:wait-interpolation-seq
+   ()
+   "Directly call SequencePlayer waitInterpolation.
+    This can be used for force/moment interpolation."
+   (send self :sequenceplayerservice_waitinterpolation))
   (:sync-controller
    (controller &optional (interpolation-time 1000) (blockp t))
    (let* ((controller-info (car (send self controller)))
@@ -500,16 +514,20 @@
 (defmethod rtm-ros-robot-interface
   (:set-tolerance
    (&key (tolerance 0.1) (link-pair-name "all"))
+   "Set tolerance [m] of collision detection with given link-pair-name (all by default)."
    (send self :collisiondetectorservice_settolerance
          :link_pair_name link-pair-name :tolerance tolerance))
   (:start-collision-detection
    ()
+   "Enable collision detection."
    (send self :collisiondetectorservice_enablecollisiondetection))
   (:stop-collision-detection
    ()
+   "Disable collision detection."
    (send self :collisiondetectorservice_disablecollisiondetection))
   (:get-collision-status
    ()
+   "Get collision status."
    (send (send self :collisiondetectorservice_getcollisionstatus) :cs)
    )
   )
@@ -539,14 +557,22 @@
 (defmethod rtm-ros-robot-interface
   (:set-servo-gain-percentage
    (name percentage)
+   "Set servo gain percentage [0-100] with given name."
    (send self :robothardwareservice_setservogainpercentage :name name :percentage percentage))
-  (:remove-force-sensor-offset () (send self :robothardwareservice_removeforcesensoroffset))
+  (:remove-force-sensor-offset
+   ()
+   "Remove force sensor offset.
+    This function takes 10[s]. Please keep the robot static and make sure that robot's sensors do not contact with any objects."
+   (send self :robothardwareservice_removeforcesensoroffset))
   (:set-servo-error-limit
     (name limit)
+    "Set RobotHardware servo error limit [rad] with given name."
     (send self :robothardwareservice_setservoerrorlimit :name name :limit limit)
     )
   (:calibrate-inertia-sensor
    ()
+   "Calibrate inetria sensor.
+    This function takes 10[s]. Please keep the robot static."
    (send self :robothardwareservice_calibrateInertiaSensor)
    )
   )
@@ -695,8 +721,11 @@
          )
    "Set object turnaround reference force.
     axis is resultant force direction.
-    max-time is max time [msec].
-    detect-time-offset is additional checking time [msec]."
+    max-time is max time [msec] and max-ref-force is max reference resultant force.
+    detect-time-offset is additional checking time [msec].
+    set-ref-force-time is time to set reference force [msec].
+    If set-ref-force-p is t, set estimated reference force. Otherwise, set reference force to zero.
+    periodic-time is loop wait time[msec]."
    (format t ";; Start object turnaround detection~%")
    (send self :set-object-turnaround-detector-param :axis axis :detector-total-wrench 0)
    (send self :set-ref-force
@@ -751,9 +780,14 @@
          (periodic-time 200) ;; [msec]
          )
    "Set object turnaround reference force.
-    axis is resultant force direction.
-    max-time is max time [msec].
-    detect-time-offset is additional checking time [msec]."
+    axis is axis which resultant moment is around.
+    max-time is max time [msec] and max-ref-moment is max reference resultant moment.
+    func is function to distribute estimated resultant moment to hands' forces/moments.
+    moment-center is moment center [mm].
+    detect-time-offset is additional checking time [msec].
+    set-ref-force-time is time to set reference force [msec].
+    If set-ref-force-p is t, set estimated reference force. Otherwise, set reference force to zero.
+    periodic-time is loop wait time[msec]."
    (format t ";; Start object turnaround detection~%")
    (let ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
          (fs-list (funcall func max-ref-moment)))
@@ -817,10 +851,12 @@
 (defmethod rtm-ros-robot-interface
   (:zero-set-forcemoment-offset-param
    (limb)
+   "Set RemoveForceSensorLinkOffset's params offset to zero."
    (send self :set-forcemoment-offset-param limb :force-offset #f(0 0 0) :moment-offset #f(0 0 0) :link-offset-centroid #f(0 0 0) :link-offset-mass 0)
    )
   (:set-forcemoment-offset-param
    (limb &rest args)
+   "Set RemoveForceSensorLinkOffset params for given limb."
    (send* self :force-sensor-method
          limb
          #'(lambda (name &rest _args)
@@ -829,6 +865,7 @@
          args))
   (:get-forcemoment-offset-param
    (limb)
+   "Get RemoveForceSensorLinkOffset params for given limb."
    (send self :force-sensor-method
          limb
          #'(lambda (name &rest _args)
@@ -836,6 +873,7 @@
          :get-forcemoment-offset-param))
   (:load-forcemoment-offset-param
    (fname &key (set-offset t))
+   "Load RemoveForceSensorLinkOffset params from fname (file path)."
    (mapcar #'(lambda (x)
                (send* self :set-forcemoment-offset-param (car x)
                       (if set-offset
@@ -936,12 +974,17 @@
     Otherwise, start auto balancer with legs ik by default."
    (send self :autobalancerservice_startAutoBalancer
          :limbs (mapcar #'(lambda (x) (format nil "~A" (string-downcase x))) limbs)))
-  (:stop-auto-balancer () (send self :autobalancerservice_stopAutoBalancer))
+  (:stop-auto-balancer
+   ()
+   "Stop auto balancer mode"
+   (send self :autobalancerservice_stopAutoBalancer))
   (:go-pos-no-wait
    (xx yy th)
+   "Call goPos without wait."
    (send self :autobalancerservice_goPos :x xx :y yy :th th))
   (:go-pos
    (xx yy th)
+   "Call goPos with wait."
    (send self :go-pos-no-wait xx yy th)
    (send self :wait-foot-steps))
   (:raw-get-foot-step-param
@@ -1051,6 +1094,7 @@
      ))
   (:set-foot-steps-with-base-height
    (fs av-list time-list)
+   "Set foot steps with sending angle-vector."
    (send self :set-foot-steps-no-wait fs)
    (send self :angle-vector-sequence av-list time-list)
    (send self :wait-interpolation)
@@ -1058,6 +1102,7 @@
    )
   (:set-foot-steps-with-param-and-base-height
    (fs-params av-list time-list)
+   "Set foot steps and params with sending angle-vector."
    (send self :set-foot-steps-with-param-no-wait fs-params)
    (send self :angle-vector-sequence av-list time-list)
    (send self :wait-interpolation)
@@ -1097,6 +1142,7 @@
      ))
   (:get-current-footstep-index
    ()
+   "Get current footstep index."
    (cadr (send self :get-remaining-foot-step-sequence-current-index)))
   (:get-remaining-foot-step-sequence
    ()
@@ -1122,6 +1168,7 @@
      ))
   (:go-velocity
    (vx vy vth)
+   "Call goVelocity."
    (send self :autobalancerservice_goVelocity :vx vx :vy vy :vth vth))
   (:go-stop
    ()
@@ -1156,6 +1203,7 @@
     &key default-orbit-type
          leg-default-translate-pos ;; [mm]
     &allow-other-keys)
+   "Set gait generator param."
    (send* self :raw-set-gait-generator-param
           (append
            (if (memq :default-orbit-type args)
@@ -1174,6 +1222,7 @@
            args)))
   (:print-gait-generator-orbit-type
    ()
+   "Print GaitGenerator orbit types."
    (let ((cs (constants "" "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE")))
      (mapcar #'(lambda (x) (format t ";; ~A => ~A~%" x (eval x))) cs)
      t))
@@ -1192,6 +1241,7 @@
   ;; :get-auto-balancer-param and :set-auto-balancer-param is not defined by def-set-get-param-method yet.
   (:get-auto-balancer-param
    ()
+   "Get AutoBalancer param."
    (send (send self :autobalancerservice_getautobalancerparam) :i_param))
   (:set-auto-balancer-param
    (&rest args
@@ -1201,6 +1251,7 @@
          graspless-manip-reference-trans-pos ;; [mm]
          graspless-manip-reference-trans-rot ;; rotation-matrix
     &allow-other-keys)
+   "Set AutoBalancer param"
    (send* self :raw-set-auto-balancer-param
           (append
            (if (and (memq :leg-names args) leg-names)
@@ -1243,6 +1294,7 @@
    )
   (:cmd-vel-mode
    ()
+   "Walk with subscribing /cmd_vel topic."
    (send self :start-cmd-vel-mode)
    (do-until-key
     (send self :go-velocity 0 0 0)
@@ -1267,7 +1319,8 @@
    )
   (:calc-dvel-with-velocity-center-offset
    (ang velocity-center-offset)
-   "ang : [deg], offset vector [mm]"
+   "Calculate velocity params for rotating with given velocity center offset.
+    Ang : [deg], offset vector [mm]"
    (let* ((default-step-time (send (send self :get-gait-generator-param) :default_step_time))
           (cen (make-cascoords :pos velocity-center-offset))
           (cc (make-cascoords)))
@@ -1315,6 +1368,7 @@
    (send self :set-auto-balancer-param :graspless-manip-mode nil))
   (:calc-hand-trans-coords-dual-arms
    (robot)
+   "Calculate foot->hand coords transformation for dual-arm graspless manipulation."
    (let* ((fc (send robot :foot-midcoords))
           (arm-pos (mapcar #'(lambda (x) (send fc :inverse-transform-vector (send robot x :end-coords :worldpos))) '(:larm :rarm)))
           (yy (apply #'v- arm-pos)))
@@ -1326,6 +1380,7 @@
                                                          (float-vector 0 0 1)))))))
   (:calc-hand-trans-coords-single-arm
    (robot arm)
+   "Calculate foot->hand coords transformation for single-arm graspless manipulation."
    (send (send robot :foot-midcoords) :transformation (send robot arm :end-coords)))
   )
 
@@ -1333,6 +1388,7 @@
 (defmethod rtm-ros-robot-interface
   (:set-soft-error-limit
     (name limit)
+    "Set SoftErrorLimiter servo error limit [rad] with given name."
     (send self :softerrorlimiterservice_setservoerrorlimit :name name :limit limit)
     )
   )
@@ -1492,15 +1548,19 @@
 (defmethod rtm-ros-robot-interface
   (:emergency-stop-motion
    ()
+   "Stop motion emergently in EmergencyStopper."
    (send self :emergencystopperservice_stopmotion))
   (:hard-emergency-stop-motion
    ()
+   "Stop motion emergently in hard EmergencyStopper."
    (send self :emergencystopperservice_stopmotion :rosbridge-name "/HardEmergencyStopperServiceROSBridge"))
   (:emergency-release-motion
    ()
+   "Release emergency motion stopping in EmergencyStopper."
    (send self :emergencystopperservice_releasemotion))
   (:hard-emergency-release-motion
    ()
+   "Release emergency motion stopping in hard EmergencyStopper."
    (send self :emergencystopperservice_releasemotion :rosbridge-name "/HardEmergencyStopperServiceROSBridge"))
   (:emergency-mode
    ()

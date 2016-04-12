@@ -3,6 +3,8 @@
   you can use ROSBridges. 
 
   Currently example codes are included in [start-jsk/rtmros_tutorials/hrpsys_ros_bridge_tutorials] (https://github.com/start-jsk/rtmros_tutorials/tree/master/hrpsys_ros_bridge_tutorials)
+
+  Euslisp interface documentation is [here] (http://euslisp-docs.readthedocs.org/en/latest/hrpsys_ros_bridge/rtm-ros-robot-interface)
   
 # Utilities
 ## datalogger-log-parser.l
