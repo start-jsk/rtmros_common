@@ -323,7 +323,7 @@
 ;; define Euslisp setter and getter method
 (defun def-set-get-param-method
   (param-class ;; parameter class
-   set-param-method-name get-param-method-name ;; Euslisp setter and getter method which user want to define
+   set-param-method-name get-param-method-name getarg-method-name ;; Euslisp setter and getter method which user want to define
    set-param-idl-name get-param-idl-name ;; raw setter and getter method converted from idl2srv files
    &key (optional-args) ;; arguments for raw setter and getter method
         (debug nil))
@@ -360,12 +360,22 @@
                                                         param-slots-list))
                                        )))
                  (send self ,set-param-idl-name :i_param param ,@optional-args)
-                 )))))
+                 ))))
+         (getarg-defmethod-macro
+          `(defmethod rtm-ros-robot-interface
+             (,getarg-method-name
+              ()
+              ,(format nil "Get arguments of ~A" set-param-method-name)
+              ,(append '(list) (mapcar #'(lambda (x) (read-from-string (format nil ":~A" (substitute (elt "-" 0) (elt "_" 0) x)))) param-slots-list)))))
+         )
     (when debug
       (pprint (macroexpand getter-defmethod-macro))
-      (pprint (macroexpand setter-defmethod-macro)))
+      (pprint (macroexpand setter-defmethod-macro))
+      (pprint (macroexpand getarg-defmethod-macro))
+      )
     (eval getter-defmethod-macro)
     (eval setter-defmethod-macro)
+    (eval getarg-defmethod-macro)
     t))
 
 ;; SequencePlayerService
@@ -578,7 +588,7 @@
   )
 
 (def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_ImpedanceControllerService_impedanceParam
-  :raw-set-impedance-controller-param :raw-get-impedance-controller-param
+  :raw-set-impedance-controller-param :raw-get-impedance-controller-param :get-impedance-controller-param-arguments
   :impedancecontrollerservice_setimpedancecontrollerparam :impedancecontrollerservice_getimpedancecontrollerparam
   :optional-args (list :name 'name))
 
@@ -633,7 +643,8 @@
   (:set-impedance-controller-param
    (limb &rest args)
    "Set impedance controller parameter like (send *ri* :set-impedance-controller-param :rarm :K-p 400).
-    limb should be limb symbol name such as :rarm, :larm, :rleg, :lleg, :arms, or :legs."
+    limb should be limb symbol name such as :rarm, :larm, :rleg, :lleg, :arms, or :legs.
+    For arguments, please see (send *ri* :get-impedance-controller-param-arguments)."
    (send* self :force-sensor-method
           limb
           #'(lambda (name &rest _args)
@@ -674,7 +685,7 @@
 
 ;; ImpedanceController's ObjectTurnaroundDetector
 (def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_ImpedanceControllerService_objectTurnaroundDetectorParam
-  :set-object-turnaround-detector-param :get-object-turnaround-detector-param
+  :set-object-turnaround-detector-param :get-object-turnaround-detector-param :get-object-turnaround-detector-param-arguments
   :impedancecontrollerservice_setObjectTurnaroundDetectorParam
   :impedancecontrollerservice_getObjectTurnaroundDetectorParam)
 (defmethod rtm-ros-robot-interface
@@ -844,7 +855,7 @@
 
 ;; RemoveForceSensorLinkOffset
 (def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_RemoveForceSensorLinkOffsetService_ForceMomentOffsetParam
-  :raw-set-forcemoment-offset-param :raw-get-forcemoment-offset-param
+  :raw-set-forcemoment-offset-param :raw-get-forcemoment-offset-param :get-forcemoment-offset-param-arguments
   :removeforcesensorlinkoffsetservice_setforcemomentoffsetparam :removeforcesensorlinkoffsetservice_getforcemomentoffsetparam
   :optional-args (list :name 'name))
 
@@ -856,7 +867,8 @@
    )
   (:set-forcemoment-offset-param
    (limb &rest args)
-   "Set RemoveForceSensorLinkOffset params for given limb."
+   "Set RemoveForceSensorLinkOffset params for given limb.
+    For arguments, please see (send *ri* :get-forcemoment-offset-param-arguments)."
    (send* self :force-sensor-method
          limb
          #'(lambda (name &rest _args)
@@ -957,11 +969,11 @@
 ;; AutoBalancerService
 (def-set-get-param-method
   'hrpsys_ros_bridge::Openhrp_AutoBalancerService_GaitGeneratorParam
-  :raw-set-gait-generator-param :get-gait-generator-param
+  :raw-set-gait-generator-param :get-gait-generator-param :get-gait-generator-param-arguments
   :autobalancerservice_setgaitgeneratorparam :autobalancerservice_getgaitgeneratorparam)
 (def-set-get-param-method
   'hrpsys_ros_bridge::Openhrp_AutoBalancerService_AutoBalancerParam
-  :raw-set-auto-balancer-param :get-auto-balancer-param
+  :raw-set-auto-balancer-param :get-auto-balancer-param :get-auto-balancer-param-arguments
   :autobalancerservice_setAutoBalancerparam :autobalancerservice_getAutoBalancerparam)
 
 (defmethod rtm-ros-robot-interface
@@ -1203,7 +1215,8 @@
     &key default-orbit-type
          leg-default-translate-pos ;; [mm]
     &allow-other-keys)
-   "Set gait generator param."
+   "Set gait generator param.
+    For arguments, please see (send *ri* :get-gait-generator-param-arguments)."
    (send* self :raw-set-gait-generator-param
           (append
            (if (memq :default-orbit-type args)
@@ -1251,7 +1264,8 @@
          graspless-manip-reference-trans-pos ;; [mm]
          graspless-manip-reference-trans-rot ;; rotation-matrix
     &allow-other-keys)
-   "Set AutoBalancer param"
+   "Set AutoBalancer param.
+    For arguments, please see (send *ri* :get-auto-balancer-param-arguments)."
    (send* self :raw-set-auto-balancer-param
           (append
            (if (and (memq :leg-names args) leg-names)
@@ -1396,7 +1410,7 @@
 ;; StabilizerService
 (def-set-get-param-method
   'hrpsys_ros_bridge::Openhrp_StabilizerService_stParam
-  :raw-set-st-param :get-st-param
+  :raw-set-st-param :get-st-param :get-st-param-arguments
   :stabilizerservice_setparameter :stabilizerservice_getparameter)
 
 (defmethod rtm-ros-robot-interface
@@ -1406,7 +1420,7 @@
          eefm-pos-damping-gain eefm-rot-damping-gain eefm-pos-time-const-support eefm-rot-time-const eefm-swing-pos-spring-gain eefm-swing-pos-time-const eefm-swing-rot-spring-gain eefm-swing-rot-time-const
     &allow-other-keys)
    "Set Stabilizer parameters.
-    To learn more about arguments, please see (pprint (find-method *ri* :raw-set-st-param))."
+    For arguments, please see (send *ri* :get-st-param-arguments)."
    (unless (send self :get :default-st-param)
      (send self :put :default-st-param (send self :get-st-param)))
    (let ((prm (send self :get-st-param)))
@@ -1527,7 +1541,7 @@
 ;; KalmanFilterService
 (def-set-get-param-method
   'hrpsys_ros_bridge::Openhrp_KalmanFilterService_KalmanFilterParam
-  :set-kalman-filter-param :get-kalman-filter-param
+  :set-kalman-filter-param :get-kalman-filter-param :get-kalman-filter-param-arguments
   :kalmanfilterservice_setkalmanfilterparam :kalmanfilterservice_getkalmanfilterparam)
 
 (defmethod rtm-ros-robot-interface
@@ -1542,7 +1556,7 @@
 ;; EmergencyStopperService
 (def-set-get-param-method
   'hrpsys_ros_bridge::Openhrp_EmergencyStopperService_EmergencyStopperParam
-  :set-emergency-stopper-param :get-emergency-stopper-param
+  :set-emergency-stopper-param :get-emergency-stopper-param :get-emergency-stopper-param-arguments
   :emergencystopperservice_setemergencystopperparam :emergencystopperservice_getemergencystopperparam)
 
 (defmethod rtm-ros-robot-interface
@@ -1645,7 +1659,7 @@
 ;; ReferenceForceUpdater
 (def-set-get-param-method
   'hrpsys_ros_bridge::Openhrp_ReferenceForceUpdaterService_ReferenceForceUpdaterParam
-  :set-reference-force-updater-param :get-reference-force-updater-param
+  :set-reference-force-updater-param :get-reference-force-updater-param :get-reference-force-updater-param-arguments
   :ReferenceForceUpdaterService_setReferenceForceUpdaterParam :ReferenceForceUpdaterService_getReferenceForceUpdaterParam)
 (defmethod rtm-ros-robot-interface
   (:start-reference-force-updater
