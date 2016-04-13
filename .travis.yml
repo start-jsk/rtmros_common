@@ -51,4 +51,4 @@ script:
   - ccache -s
 after_success:
   - TRAVIS_JOB_SUBNUMBER="${TRAVIS_JOB_NUMBER##*.}"
-  - if [ "$TRAVIS_JOB_SUBNUMBER" == 8 -a "$TRAVIS_BRANCH" == "master" -a "${TRAVIS_SECURE_ENV_VARS}" == "true" ]; then ${CI_SOURCE_PATH}/.travis/upload-docs.sh; fi
+  - if [ "$TRAVIS_JOB_SUBNUMBER" == 9 -a "$TRAVIS_BRANCH" == "master" -a "${TRAVIS_SECURE_ENV_VARS}" == "true" ]; then ${CI_SOURCE_PATH}/.travis/upload-docs.sh; fi
