@@ -104,7 +104,7 @@ fi
 if [ -e build ]; then find build -name LastTest.log -exec echo "==== {} ====" \; -exec cat {} \;  ; fi
 if [ -e ${HOME}/.ros/test_results ]; then find ${HOME}/.ros/test_results -type f -exec echo "=== {} ===" \; -exec cat {} \; ; fi
 if [ $EXIT_STATUS == 0 ] ; then
-    exit 0
+    return 0
 else
     exit 1
 fi
