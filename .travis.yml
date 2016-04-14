@@ -2,6 +2,8 @@
 #   Generic MoveIt Travis Continuous Integration Configuration File
 #   Works with all MoveIt! repositories/branches
 #   Author: Dave Coleman, Jonathan Bohren
+sudo: required
+dist: trusty
 language:
   - cpp
   - python
