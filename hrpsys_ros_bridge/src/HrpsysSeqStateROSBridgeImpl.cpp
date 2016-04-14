@@ -178,7 +178,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
           rpy = hrp::rpyFromRot(sensor->localR * m);
         }
       else
-        rpy = hrp::rpyFromRot(sensor->localR);
+      {
+        // localR is parent. https://github.com/start-jsk/rtmros_common/pull/925
+        rpy = hrp::rpyFromRot(sensor->link->Rs.inverse() * sensor->localR);
+      }
       si.transform.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
       OpenHRP::LinkInfoSequence_var links = bodyinfo->links();
       for ( int k = 0; k < links->length(); k++ ) {
