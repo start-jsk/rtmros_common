@@ -2,6 +2,12 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [feat] Enable to set push_policy and push_rate for DataPorts from hrpsys_ros_bridge.launch argument. Use all and 50.0 by default to keep backward compatibility.
+* [feat] Enable to set subscription_type for DataPorts from hrpsys_ros_bridge.launch argument. Use new by default to keep backward compatibility.
+* Contributors: Shunichi Nozawa
+
 1.3.1 (2015-12-16)
 ------------------
 * deb release only targeting to indigo

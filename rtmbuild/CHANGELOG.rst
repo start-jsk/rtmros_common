@@ -2,6 +2,11 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [feat][rtmbuild/scripts/idl2srv.py] Add more CORBA exception information. Add BAD_PARAM, MARSHAL, and OBJECT_NOT_EXIST checking. Add minor code printing and possible case assumption.
+* Contributors: Shunichi Nozawa
+
 1.3.1 (2015-12-16)
 ------------------
 * deb release only targeting to indigo
