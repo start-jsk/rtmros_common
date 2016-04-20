@@ -85,7 +85,7 @@ if __name__ == '__main__':
         rtc_init()
 
         rospy.init_node('hrpsys_profile_diagnostics')
-        pub = rospy.Publisher('diagnostics', DiagnosticArray)
+        pub = rospy.Publisher('diagnostics', DiagnosticArray, queue_size=1)
 
         r = rospy.Rate(1) # 10hz
 
