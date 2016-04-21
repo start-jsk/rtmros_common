@@ -327,69 +327,70 @@
    set-param-idl-name get-param-idl-name ;; raw setter and getter method converted from idl2srv files
    &key (optional-args) ;; arguments for raw setter and getter method
         (debug nil))
-  (let* ((param-slots-list ;; get slots list for param-class
-          (remove-if #'(lambda (x) (string= "plist" x))
-                     (mapcar #'(lambda (x) (string-left-trim "::_" (string-left-trim "ros" (format nil "~A" x))))
-                             (concatenate cons (send (eval param-class) :slots)))))
-         (param-name
-          ;; Extract param class, e.g., extract zz from hrpsys_ros_bridge::xx_yy_zz
-          (car (last (read-from-string (substitute (elt " " 0) (elt ":" 0) (substitute (elt " " 0) (elt "_" 0) (format nil "(~A)" param-class)))))))
-         (getter-defmethod-macro
-           `(defmethod rtm-ros-robot-interface
-              (,get-param-method-name
-               ;; Arguments
-               ,(if optional-args (list (cadr optional-args)) (list ))
-               ;; Documentation string
-               ,(unless (substringp "raw-" (string-downcase get-param-method-name))
-                  (format nil "Get ~A." param-name))
-               ;; Implementation
-               (send (send self ,get-param-idl-name ,@optional-args) :i_param))))
-         ;; generate defmethod like
-         ;;  (:set-xx-param (&rest args &key yy-zz)
-         ;;   (let ((current-param (send self :get-xx-param))
-         ;;         (param (instance ww :init (if (memq :yy-zz args) (cadr (memq :yy-zz args)) (send current-param :yy_zz))))
-         ;;      (send self :aaService_setParameter :i_param param)))
-         (setter-defmethod-macro
-           `(defmethod rtm-ros-robot-interface
-              (,set-param-method-name
-               ;; Arguments
-               ,(append (if optional-args (list (cadr optional-args))) (list '&rest 'args '&key) (mapcar #'(lambda (x) (read-from-string (substitute (elt "-" 0) (elt "_" 0) x))) param-slots-list)) ;; replace _ => - for Euslisp friendly argument
-               ;; Documentation string
-               ,(unless (substringp "raw-" (string-downcase set-param-method-name))
-                  (format nil "Set ~A. For arguments, please see (send *ri* ~A)." param-name getarg-method-name))
-               ;; Implementation
-               (let* ((current-param ,(append (list 'send 'self get-param-method-name) (if optional-args (list (cadr optional-args)))))
-                      (param (instance ,param-class
-                                       :init
-                                       ,@(apply #'append
-                                                (mapcar #'(lambda (x)
-                                                            (let* ((eus-sym (read-from-string (substitute (elt "-" 0) (elt "_" 0) x)))
-                                                                   (eus-keyword (read-from-string (format nil ":~A" eus-sym)))
-                                                                   (param-sym (read-from-string (format nil ":~A" x))))
-                                                              (list param-sym (list 'if
-                                                                                    (list 'memq eus-keyword 'args)
-                                                                                    (list 'cadr (list 'memq eus-keyword 'args))
-                                                                                    (list 'send 'current-param param-sym)))))
-                                                        param-slots-list))
-                                       )))
-                 (send self ,set-param-idl-name :i_param param ,@optional-args)
-                 ))))
-         (getarg-defmethod-macro
-          `(defmethod rtm-ros-robot-interface
-             (,getarg-method-name
-              ()
-              ,(format nil "Get arguments of ~A" set-param-method-name)
-              ,(append '(list) (mapcar #'(lambda (x) (read-from-string (format nil ":~A" (substitute (elt "-" 0) (elt "_" 0) x)))) param-slots-list)))))
-         )
-    (when debug
-      (pprint (macroexpand getter-defmethod-macro))
-      (pprint (macroexpand setter-defmethod-macro))
-      (pprint (macroexpand getarg-defmethod-macro))
-      )
-    (eval getter-defmethod-macro)
-    (eval setter-defmethod-macro)
-    (eval getarg-defmethod-macro)
-    t))
+  (when (boundp param-class)
+    (let* ((param-slots-list ;; get slots list for param-class
+            (remove-if #'(lambda (x) (string= "plist" x))
+                       (mapcar #'(lambda (x) (string-left-trim "::_" (string-left-trim "ros" (format nil "~A" x))))
+                               (concatenate cons (send (eval param-class) :slots)))))
+           (param-name
+            ;; Extract param class, e.g., extract zz from hrpsys_ros_bridge::xx_yy_zz
+            (car (last (read-from-string (substitute (elt " " 0) (elt ":" 0) (substitute (elt " " 0) (elt "_" 0) (format nil "(~A)" param-class)))))))
+           (getter-defmethod-macro
+            `(defmethod rtm-ros-robot-interface
+               (,get-param-method-name
+                ;; Arguments
+                ,(if optional-args (list (cadr optional-args)) (list ))
+                ;; Documentation string
+                ,(unless (substringp "raw-" (string-downcase get-param-method-name))
+                   (format nil "Get ~A." param-name))
+                ;; Implementation
+                (send (send self ,get-param-idl-name ,@optional-args) :i_param))))
+           ;; generate defmethod like
+           ;;  (:set-xx-param (&rest args &key yy-zz)
+           ;;   (let ((current-param (send self :get-xx-param))
+           ;;         (param (instance ww :init (if (memq :yy-zz args) (cadr (memq :yy-zz args)) (send current-param :yy_zz))))
+           ;;      (send self :aaService_setParameter :i_param param)))
+           (setter-defmethod-macro
+            `(defmethod rtm-ros-robot-interface
+               (,set-param-method-name
+                ;; Arguments
+                ,(append (if optional-args (list (cadr optional-args))) (list '&rest 'args '&key) (mapcar #'(lambda (x) (read-from-string (substitute (elt "-" 0) (elt "_" 0) x))) param-slots-list)) ;; replace _ => - for Euslisp friendly argument
+                ;; Documentation string
+                ,(unless (substringp "raw-" (string-downcase set-param-method-name))
+                   (format nil "Set ~A. For arguments, please see (send *ri* ~A)." param-name getarg-method-name))
+                ;; Implementation
+                (let* ((current-param ,(append (list 'send 'self get-param-method-name) (if optional-args (list (cadr optional-args)))))
+                       (param (instance ,param-class
+                                        :init
+                                        ,@(apply #'append
+                                                 (mapcar #'(lambda (x)
+                                                             (let* ((eus-sym (read-from-string (substitute (elt "-" 0) (elt "_" 0) x)))
+                                                                    (eus-keyword (read-from-string (format nil ":~A" eus-sym)))
+                                                                    (param-sym (read-from-string (format nil ":~A" x))))
+                                                               (list param-sym (list 'if
+                                                                                     (list 'memq eus-keyword 'args)
+                                                                                     (list 'cadr (list 'memq eus-keyword 'args))
+                                                                                     (list 'send 'current-param param-sym)))))
+                                                         param-slots-list))
+                                        )))
+                  (send self ,set-param-idl-name :i_param param ,@optional-args)
+                  ))))
+           (getarg-defmethod-macro
+            `(defmethod rtm-ros-robot-interface
+               (,getarg-method-name
+                ()
+                ,(format nil "Get arguments of ~A" set-param-method-name)
+                ,(append '(list) (mapcar #'(lambda (x) (read-from-string (format nil ":~A" (substitute (elt "-" 0) (elt "_" 0) x)))) param-slots-list)))))
+           )
+      (when debug
+        (pprint (macroexpand getter-defmethod-macro))
+        (pprint (macroexpand setter-defmethod-macro))
+        (pprint (macroexpand getarg-defmethod-macro))
+        )
+      (eval getter-defmethod-macro)
+      (eval setter-defmethod-macro)
+      (eval getarg-defmethod-macro)
+      t)))
 
 ;; SequencePlayerService
 (defmethod rtm-ros-robot-interface
