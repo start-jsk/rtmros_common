@@ -22,7 +22,12 @@ env:
     - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=source  NOT_TEST_INSTALL=true EXTRA_DEB="ros-hydro-roseus ros-hydro-euscollada ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" IS_EUSLISP_TRAVIS_TEST="true"
     - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=true    NOT_TEST_INSTALL=true INSTALL_SRC="http://github.com/start-jsk/rtmros_tutorials" TEST_PKGS="hrpsys_ros_bridge_tutorials" INSTALL_SRC_SECURE="git@github.com:start-jsk/rtmros_hrp2" TEST_PKGS_SECURE="jsk_hrp2_ros_bridge"
     - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=source  NOT_TEST_INSTALL=true
+    - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=true    EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
+    - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=false   EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
     - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true
+    - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=false   NOT_TEST_INSTALL=true
+    - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true    EXTRA_DEB="ros-indigo-hrpsys-ros-bridge ros-indigo-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
+    - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=false   EXTRA_DEB="ros-indigo-hrpsys-ros-bridge ros-indigo-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
     - USE_TRAVIS=true ROS_DISTRO=jade   USE_DEB=true
     - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=true
     - USE_TRAVIS=true TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=indigo EXTRA_DEB="ros-indigo-roslint"
