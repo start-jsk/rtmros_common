@@ -30,12 +30,12 @@ sudo apt-get install -qq -y python-catkin-pkg python-rosdep python-wstool ros-$R
 if [ "$EXTRA_DEB" ]; then sudo apt-get install -qq -y $EXTRA_DEB;  fi
 ###
 pkg=$TEST_PACKAGE
-sudo apt-get install -y ros-hydro-$pkg
+sudo apt-get install -y ros-$ROS_DISTRO-$pkg
 
-sudo apt-get install -y -qq ros-hydro-rqt-robot-dashboard
+sudo apt-get install -y -qq ros-$ROS_DISTRO-rqt-robot-dashboard
 
 #
-source /opt/ros/hydro/setup.bash
+source /opt/ros/$ROS_DISTRO/setup.bash
 
 # set hrpsys (hrpsys wrapper for ROS, just for compile and test)
 mkdir -p ~/catkin_ws/src
@@ -48,11 +48,11 @@ if [ "$TEST_TYPE" == "work_with_downstream" ]; then
             # check newer version of hrpsys works on current rtmros_common deb package
             # [rtmros_common:new] <-> [rtmros_<robot>:old]
             "
-    sudo dpkg -r --force-depends ros-hydro-hrpsys-ros-bridge
-    sudo dpkg -r --force-depends ros-hydro-hrpsys-tools
-    sudo dpkg -r --force-depends ros-hydro-rtmbuild
+    sudo dpkg -r --force-depends ros-$ROS_DISTRO-hrpsys-ros-bridge
+    sudo dpkg -r --force-depends ros-$ROS_DISTRO-hrpsys-tools
+    sudo dpkg -r --force-depends ros-$ROS_DISTRO-rtmbuild
     # https://github.com/start-jsk/rtmros_hironx/issues/287
-    sudo sed -i s@test_tf_and_controller@_test_tf_and_controller@ /opt/ros/hydro/share/hironx_ros_bridge/test/test_hironx_ros_bridge.py
+    sudo sed -i s@test_tf_and_controller@_test_tf_and_controller@ /opt/ros/$ROS_DISTRO/share/hironx_ros_bridge/test/test_hironx_ros_bridge.py
     catkin_make $ROS_PARALLEL_JOBS
     catkin_make install $ROS_PARALLEL_JOBS
 else
