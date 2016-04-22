@@ -3,6 +3,7 @@
   <arg name="COLLADA_FILE" />
   <arg name="CONF_FILE" default="" />
   <arg name="BASE_LINK" default="BODY" />
+  <arg name="HZ_WRENCHSTAMPED_TOPIC" default="10.0" />
   <arg name="SIMULATOR_NAME" default="RobotHardware0"/> <!-- please set $(arg ROBOT_NAME)(Robot) for simulation -->
   <!-- if you want to connect rtc components other than Robothardware -->
   <arg name="SIMULATOR_NAME_ANGLE"    default="$(arg SIMULATOR_NAME)" />
@@ -56,6 +57,7 @@
         output = "$(arg OUTPUT)">
     <param name="publish_sensor_transforms" value="$(arg PUBLISH_SENSOR_TF)" />
   </node>
+
   <node name = "HrpsysJointTrajectoryBridge"
         pkg  = "hrpsys_ros_bridge"
         type = "HrpsysJointTrajectoryBridge"
@@ -282,5 +284,7 @@
            if="$(arg USE_ROBOT_POSE_EKF)">
     <arg name="base_link" value="$(arg BASE_LINK)"/>
   </include>
+
+  <param name="hz_wrenchstamped" value="$(arg HZ_WRENCHSTAMPED_TOPIC)" />
 </launch>
 

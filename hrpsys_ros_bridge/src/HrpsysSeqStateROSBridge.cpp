@@ -129,12 +129,13 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
 
   ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @Initilize name : " << getInstanceName() << " done");
 
+  nh.param<double>("/hz_wrenchstamped", hz_wrenchstamped, 10.0))
   fsensor_pub.resize(m_rsforceIn.size()+m_mcforceIn.size());
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
-    fsensor_pub[i] = nh.advertise<geometry_msgs::WrenchStamped>(m_rsforceName[i], 10);
+    fsensor_pub[i] = nh.advertise<geometry_msgs::WrenchStamped>(m_rsforceName[i], hz_wrenchstamped);
   }
   for (unsigned int i=0; i<m_mcforceIn.size(); i++){
-    fsensor_pub[i+m_rsforceIn.size()] = nh.advertise<geometry_msgs::WrenchStamped>(m_mcforceName[i], 10);
+    fsensor_pub[i+m_rsforceIn.size()] = nh.advertise<geometry_msgs::WrenchStamped>(m_mcforceName[i], hz_wrenchstamped);
   }
   zmp_pub = nh.advertise<geometry_msgs::PointStamped>("/zmp", 10);
   ref_cp_pub = nh.advertise<geometry_msgs::PointStamped>("/ref_capture_point", 10);

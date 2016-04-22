@@ -64,6 +64,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   bool interpolationp, use_sim_time, use_hrpsys_time;
   bool publish_sensor_transforms;
   tf::TransformBroadcaster br;
+  double hz_wrenchstamped;
 
   coil::Mutex m_mutex;
   coil::TimeMeasure tm;
