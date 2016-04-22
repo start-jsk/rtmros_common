@@ -1,8 +1,5 @@
 #!/usr/bin/python
 
-import sys; sys.path.insert(0,"/usr/lib/python{0}.{1}/dist-packages".format(sys.version_info[0],sys.version_info[1])) ## ros-groovy-rqt-top install psutil under /opt/groovy/lib/python.. which is not working...
-
-
 import os,psutil,subprocess,socket,sys
 from omniORB import CORBA
 import CosNaming
