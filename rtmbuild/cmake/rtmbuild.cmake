@@ -157,6 +157,7 @@ macro(rtmbuild_genidl)
   endif()
 
   set(_output_idl_py_files "")
+  set(_output_idl_hh_files "")
   file(MAKE_DIRECTORY ${_output_cpp_dir}/idl)
   file(MAKE_DIRECTORY ${_output_lib_dir})
   link_directories(${_output_lib_dir})
@@ -212,12 +213,16 @@ macro(rtmbuild_genidl)
     endif()
     # python
     list(APPEND _output_idl_py_files ${_output_idl_py})
+    # cpp
+    list(APPEND _output_idl_hh_files ${_output_idl_hh})
     #
     list(APPEND _autogen ${_output_stub_lib} ${_output_skel_lib} ${_output_idl_py})
 
     # add custom target
     add_custom_target(RTMBUILD_${PROJECT_NAME}_${_idl_name}_genrpc DEPENDS ${_output_stub_lib} ${_output_skel_lib})
     add_dependencies(RTMBUILD_${PROJECT_NAME}_genrpc RTMBUILD_${PROJECT_NAME}_${_idl_name}_genrpc)
+    # genrpc may depends on any idl (generate all .hh filesbefore compiling rpc https://github.com/fkanehiro/hrpsys-base/pull/886)
+    add_dependencies(RTMBUILD_${PROJECT_NAME}_${_idl_name}_genrpc RTMBUILD_${PROJECT_NAME}_genhh)
 
   endforeach(_idl_file)
   # python
@@ -229,6 +234,9 @@ macro(rtmbuild_genidl)
     COMMENT "Generating python/idl from ${${PROJECT_NAME}_idl_files}"
     DEPENDS ${${PROJECT_NAME}_idl_files})
   add_dependencies(RTMBUILD_${PROJECT_NAME}_genrpc RTMBUILD_${PROJECT_NAME}_genpy)
+  # cpp (generate all .hh filesbefore compiling rpc https://github.com/fkanehiro/hrpsys-base/pull/886)
+  add_custom_target(RTMBUILD_${PROJECT_NAME}_genhh DEPENDS ${_output_idl_hh_files})
+  add_dependencies(RTMBUILD_${PROJECT_NAME}_genrpc RTMBUILD_${PROJECT_NAME}_genhh)
   ##
 
   if(_autogen)

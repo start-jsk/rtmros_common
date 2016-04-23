@@ -29,10 +29,13 @@ endif()
 # include rtmbuild
 #include(${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
 if(EXISTS ${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
+  message("Loading ${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake")
   include(${rtmbuild_SOURCE_DIR}/cmake/rtmbuild.cmake)
 elseif(EXISTS ${rtmbuild_SOURCE_PREFIX}/cmake/rtmbuild.cmake)
+  message("Loading ${rtmbuild_SOURCE_PREFIX}/cmake/rtmbuild.cmake")
   include(${rtmbuild_SOURCE_PREFIX}/cmake/rtmbuild.cmake)
 elseif(EXISTS ${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
+  message("Loading ${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake")
   include(${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
 else()
   get_cmake_property(_variableNames VARIABLES)
@@ -77,7 +80,7 @@ find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND AND "$ENV{CI}" STREQUAL "true" )
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif(CCACHE_FOUND)
+endif(CCACHE_FOUND AND "$ENV{CI}" STREQUAL "true" )
 
 # define add_message_files before rtmbuild_init
 add_message_files(FILES MotorStates.msg ContactState.msg ContactStateStamped.msg ContactStatesStamped.msg)
@@ -99,13 +102,6 @@ rtmbuild_genidl()
 
 # generate bridge
 rtmbuild_genbridge()
-
-##
-## [  9%] Generating /home/travis/ros/ws_rtmros_common/devel/lib/libStabilizerServiceStub.so, /home/travis/ros/ws_rtmros_common/devel/lib/libStabilizerServiceSkel.so
-## In file included from /home/travis/ros/ws_rtmros_common/devel/include/hrpsys_ros_bridge/idl/StabilizerServiceStub.h:30:0,
-##                  from /home/travis/ros/ws_rtmros_common/devel/include/hrpsys_ros_bridge/idl/StabilizerServiceStub.cpp:12:
-## /home/travis/ros/ws_rtmros_common/devel/include/hrpsys_ros_bridge/idl/StabilizerService.hh:23:34: fatal error: AutoBalancerService.hh: No such file or directory
-add_dependencies(RTMBUILD_hrpsys_ros_bridge_StabilizerService_genrpc RTMBUILD_hrpsys_ros_bridge_AutoBalancerService_genrpc)
 
 ##
 ## hrpsys ros bridge tools
