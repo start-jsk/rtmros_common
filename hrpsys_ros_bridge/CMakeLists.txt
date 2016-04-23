@@ -80,7 +80,7 @@ find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND AND "$ENV{CI}" STREQUAL "true" )
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif(CCACHE_FOUND)
+endif(CCACHE_FOUND AND "$ENV{CI}" STREQUAL "true" )
 
 # define add_message_files before rtmbuild_init
 add_message_files(FILES MotorStates.msg ContactState.msg ContactStateStamped.msg ContactStatesStamped.msg)
