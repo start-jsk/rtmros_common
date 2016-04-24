@@ -37,6 +37,6 @@
         retry="1" />
   <test test-name="test_samplerobot_5_auto_balancer" pkg="roseus" type="roseus"
         args="$(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-unittest.l $(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-auto-balancer.l"
-        time-limit="720"
+        time-limit="900"
         retry="1" />
 </launch>
