@@ -4,6 +4,8 @@
   <arg name="GUI" default="false" />
   <arg name="RUN_RVIZ" default="false" />
 
+  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2809" />
+
   <!-- setup xx_startup.launch and xx_ros_bridge.launch -->
   <include file="$(find hrpsys_ros_bridge)/launch/samplerobot.launch" >
     <arg name="NOSIM" default="$(arg NOSIM)" />
@@ -35,6 +37,6 @@
         retry="1" />
   <test test-name="test_samplerobot_5_auto_balancer" pkg="roseus" type="roseus"
         args="$(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-unittest.l $(find hrpsys_ros_bridge)/test/hrpsys-samples/samplerobot-auto-balancer.l"
-        time-limit="720"
+        time-limit="900"
         retry="1" />
 </launch>
