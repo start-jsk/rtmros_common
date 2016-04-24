@@ -4,6 +4,8 @@
   <arg name="GUI" default="false" />
   <arg name="RUN_RVIZ" default="false" />
 
+  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2809" />
+
   <!-- setup xx_startup.launch and xx_ros_bridge.launch -->
   <include file="$(find hrpsys_ros_bridge)/launch/samplerobot.launch" >
     <arg name="NOSIM" default="$(arg NOSIM)" />
