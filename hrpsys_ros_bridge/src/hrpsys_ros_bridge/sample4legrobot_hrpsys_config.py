@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 pkg = 'hrpsys'
-import imp
-imp.find_module(pkg)
 
 from hrpsys.hrpsys_config import *
 import OpenHRP
