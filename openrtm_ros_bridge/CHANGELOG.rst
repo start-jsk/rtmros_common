@@ -2,8 +2,8 @@
 Changelog for package openrtm_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.2 (2016-04-26)
+------------------
 
 * [refactor] remove old rosbuild files
 * [openrtm_ros_bridge] Fix genjava problem build_depend message_generation

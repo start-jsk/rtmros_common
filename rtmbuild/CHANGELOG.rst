@@ -2,8 +2,8 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.2 (2016-04-26)
+------------------
 
 * [refactor] delete depends from AutoBalancerService.hh to StabilizerService.hh (#939)
   * delete depends from AutoBalancerService.hh to StabilizerService.hh

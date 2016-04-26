@@ -2,8 +2,8 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.2 (2016-04-26)
+------------------
 
 * [refactor] remove old rosbuild files
 * [hrpsys_tools/launch/hrpsys.launch] add ReferenceForceUpdater

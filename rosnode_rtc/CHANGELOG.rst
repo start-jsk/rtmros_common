@@ -2,8 +2,8 @@
 Changelog for package rosnode_rtc
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.2 (2016-04-26)
+------------------
 
 * [refactor] remove old rosbuild files
 * Contributors: Kei Okada

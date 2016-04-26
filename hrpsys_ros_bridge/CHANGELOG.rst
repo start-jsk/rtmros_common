@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.2 (2016-04-26)
+------------------
 
 * [fix] getFootStepParam interface according to upstream change. Remove rleg_coords and lleg_coords.
 * [fix] HrpsysSeqStateROSBridgeImpl.cpp: sensor->localR is world coords

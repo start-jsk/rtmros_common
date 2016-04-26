@@ -2,8 +2,8 @@
 Changelog for package rtmros_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.2 (2016-04-26)
+------------------
 
 * [fix][openrtm_ros_bridge] Fix genjava problem build_depend message_generation
 * [fix][hrpsys_ros_bridge] HrpsysSeqStateROSBridgeImpl.cpp: sensor->localR is world coords

@@ -2,8 +2,8 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.2 (2016-04-26)
+------------------
 * [fix ] Revert "workaround for ros-groovy-rqt-top installs wrong(?) psutil" (#938)  This reverts commit 94975a81eadbf251a85b2fd3c77137b1f96f248b. This closes `#936 <https://github.com/start-jsk/rtmros_common/issues/936>`_
 * [refactor] add more mesage to prevent confusion
 * [refactor] remove old rosbuild files
