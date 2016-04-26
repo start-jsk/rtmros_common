@@ -32,6 +32,7 @@
   <build_depend>diagnostic_aggregator</build_depend>
   <build_depend>diagnostic_msgs</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>euscollada</build_depend>
   <build_depend>git</build_depend>
   <build_depend>hostname</build_depend>
   <build_depend version_gte="315.3.1">hrpsys</build_depend>
