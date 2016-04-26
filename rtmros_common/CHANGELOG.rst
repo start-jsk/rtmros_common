@@ -2,6 +2,30 @@
 Changelog for package rtmros_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [fix][openrtm_ros_bridge] Fix genjava problem build_depend message_generation
+* [fix] getFootStepParam interface according to upstream change. Remove rleg_coords and lleg_coords.
+* [feat] Add more CORBA exception information. Add BAD_PARAM, MARSHAL, and OBJECT_NOT_EXIST checking. Add minor code printing and possible case assumption.
+* [feat][openrtm_tools] Enable to set push_policy and push_rate for DataPorts from hrpsys_ros_bridge.launch argument. Use all and 50.0 by default to keep backward compatibility.
+* [feat][openrtm_tools] Enable to set subscription_type for DataPorts from hrpsys_ros_bridge.launch argument. Use new by default to keep backward compatibility.
+* [feat][hrpsys_tools] add ReferenceForceUpdater
+* [feat] enable virtual force in HrpsysSeqStateROSBridgeImpl
+* [feat] Enable to set subscription_type for DataPorts from hrpsys_ros_bridge.launch argument. Use new by default to keep backward compatibility.
+* [feat] Add loading of optionalData from seq pattern file.
+* [feat] add time constant prameter according to upstream idl update
+* [feat] Add HrpsysSeqStateROSBridge tf rate test
+* [feat] Add define controller `#887 <https://github.com/start-jsk/rtmros_common/issues/887>`_
+* [feat] Add leg limb controller setting.
+* [feat] Add method to define joint trajectory controller by default setting.
+* [feat] Add gopos overwrite and graspless manip mode to all demos
+* [feat] Add example for graspless manip mode and gopos overwrite.
+* [feat] Add euslisp interface for graspless manip mode.
+* [feat] add a set-default-step-time-with-the-same-swing-time method
+* [doc] default documentation string for def-set-get-param-method setter and getter.
+* [doc] In-code documentation improvement
+* Contributors: Eisoku Kuroiwa, Kei Okada, Kentaro Wada, Masaki Murooka, Shunichi Nozawa, KOYAMA Ryo, YoheiKakiuchi, YuOhara, eisoku9618, iori, Isaac I.Y. Saito
+
 1.3.1 (2015-12-16)
 ------------------
 * deb release only targeting to indigo

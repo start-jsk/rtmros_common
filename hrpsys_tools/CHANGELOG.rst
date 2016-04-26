@@ -2,6 +2,11 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [hrpsys_tools/launch/hrpsys.launch] add ReferenceForceUpdater
+* Contributors: KOYAMA Ryo
+
 1.3.1 (2015-12-16)
 ------------------
 * deb release only targeting to indigo
