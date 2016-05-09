@@ -141,4 +141,3 @@ install(PROGRAMS scripts/rtmlaunch scripts/rtmtest DESTINATION ${CATKIN_GLOBAL_B
 
 add_rostest(test/test-openrtm-tools.test)
 add_rostest(test/test-rtmlaunch.test)
-

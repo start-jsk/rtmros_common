@@ -287,4 +287,3 @@
 
   <rosparam param="robot/type" subst_value="True" if="$(arg USE_ROBOT_TYPE_SETTING)">$(arg ROBOT_TYPE)</rosparam>
 </launch>
-

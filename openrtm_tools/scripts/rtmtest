@@ -15,4 +15,3 @@ finally:
     if p :
         print "\033[34m[rtmtest] terminate", cosnames, "at port", port_number, "\033[0m"
         p.terminate()
-

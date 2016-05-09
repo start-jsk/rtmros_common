@@ -301,4 +301,3 @@ macro(rtmbuild_add_library lib)
   endif()
   target_link_libraries(${lib} ${openrtm_aist_LIBRARIES} ${openhrp3_LIBRARIES} ${${PROJECT_NAME}_IDLLIBRARY_DIRS})
 endmacro(rtmbuild_add_library)
-

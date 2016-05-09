@@ -47,4 +47,3 @@ else
     echo "compile-pkg $TARGET"
     compile-pkg $TARGET
 fi
-

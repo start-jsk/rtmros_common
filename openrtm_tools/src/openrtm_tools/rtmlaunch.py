@@ -259,7 +259,3 @@ def get_flag_from_argv(arg):
     for a in sys.argv:
         if arg in a: # If "USE_WALKING" is in argv
             return True if 'true' in a.split("=")[1] else False
-
-
-
-

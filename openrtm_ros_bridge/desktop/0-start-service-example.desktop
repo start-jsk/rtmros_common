@@ -7,4 +7,3 @@ Terminal=true
 Exec=bash -i -c "roslaunch openrtm_ros_bridge myservice_example.launch"
 Name=0 Start Service
 Icon=/usr/share/pixmaps/eclipse.png
-

@@ -15,4 +15,3 @@
   <include file="$(find roseus_tutorials)/launch/camshiftdemo.launch" />
 
 </launch>
-

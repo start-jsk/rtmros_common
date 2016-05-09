@@ -145,4 +145,3 @@ test_myservice_rosbridge.launch
 .. code-block:: bash
 
   roslaunch openrtm_ros_bridge test_myservice_rosbridge.launch
-

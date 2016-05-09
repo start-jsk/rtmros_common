@@ -12,16 +12,3 @@ catkin_make
 source ${CATKIN_DIR}/devel/setup.bash
 #yes | rosrun openrtm_aist rtm-naming
 #roslaunch hrpsys_ros_bridge_test samplerobot.launch corbaport:=2809 GUI:=false RUN_RVIZ:=false
-
-
-
-
-
-
-
-
-
-
-
-
-
