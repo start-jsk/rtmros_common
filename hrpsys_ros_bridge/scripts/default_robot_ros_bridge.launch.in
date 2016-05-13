@@ -6,12 +6,14 @@
             file="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@_controller_config.yaml" />
 
   <arg name="corbaport" default="15005" />
+  <arg name="nameserver" default="localhost" />
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
     <arg name="MODEL_FILE" value="@MODEL_FILE@" />
     <arg name="COLLADA_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.dae" />
     <arg name="CONF_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.conf" />
     <arg name="corbaport" default="$(arg corbaport)" />
+    <arg name="nameserver" default="$(arg nameserver)" />
     <arg name="USE_WALKING" default="true" if="$(arg USE_UNSTABLE_RTC)"/>
     <arg name="USE_IMPEDANCECONTROLLER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
     <arg name="USE_EMERGENCYSTOPPER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
