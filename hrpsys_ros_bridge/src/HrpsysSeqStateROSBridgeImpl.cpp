@@ -306,9 +306,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
         if ( sensor ) {
           // real force sensor
           sensor_link_name = sensor->link->name;
-        } else if (sensor_info.find(sensor_name) !=  sensor_info.end()) {
+        } else if (sensor_info.find(tmpname) !=  sensor_info.end()) {
           // virtual force sensor
-          sensor_link_name =  sensor_info[sensor_name].link_name;
+          sensor_link_name = sensor_info[tmpname].link_name;
+          sensor_link_name = sensor_link_name.substr(0, sensor_link_name.size()-5); // such that LLEG_JOINT0_LINK -> LLEG_JOINT0
         } else {
           std::cerr << "[" << m_profile.instance_name << "]   unknown force param" << std::endl;
           continue;
