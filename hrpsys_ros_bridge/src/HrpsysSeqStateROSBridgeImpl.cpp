@@ -45,6 +45,14 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_actContactStatesIn("actContactStates", m_actContactStates),
     m_controlSwingSupportTimeIn("controlSwingSupportTime", m_controlSwingSupportTime),
     m_mctorqueOut("mctorque", m_mctorque),
+    //for human tracker
+    m_htzmpOut("htzmp", m_htzmp),
+    m_htcomOut("htcom", m_htcom),
+    m_htrfOut("htrf", m_htrf),
+    m_htlfOut("htlf", m_htlf),
+    m_htrhOut("htrh", m_htrh),
+    m_htlhOut("htlh", m_htlh),
+
     m_SequencePlayerServicePort("SequencePlayerService")
 
     // </rtc-template>
@@ -79,6 +87,13 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
 
   // Set OutPort buffer
   addOutPort("mctorque", m_mctorqueOut);
+  //for human tracker
+  addOutPort("htzmp", m_htzmpOut);
+  addOutPort("htcom", m_htcomOut);
+  addOutPort("htrf", m_htrfOut);
+  addOutPort("htlf", m_htlfOut);
+  addOutPort("htrh", m_htrhOut);
+  addOutPort("htlh", m_htlhOut);
 
   // Set service provider to Ports
 
@@ -306,10 +321,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
         if ( sensor ) {
           // real force sensor
           sensor_link_name = sensor->link->name;
-        } else if (sensor_info.find(tmpname) !=  sensor_info.end()) {
+        } else if (sensor_info.find(sensor_name) !=  sensor_info.end()) {
           // virtual force sensor
-          sensor_link_name = sensor_info[tmpname].link_name;
-          sensor_link_name = sensor_link_name.substr(0, sensor_link_name.size()-5); // such that LLEG_JOINT0_LINK -> LLEG_JOINT0
+          sensor_link_name =  sensor_info[sensor_name].link_name;
         } else {
           std::cerr << "[" << m_profile.instance_name << "]   unknown force param" << std::endl;
           continue;

@@ -1,0 +1,32 @@
+<launch>
+  <arg name="RUN_RVIZ" default="true" />
+  <arg name="SIMULATOR_NAME" default="SampleSpecialJointRobot(Robot)0" />
+  <arg name="USE_UNSTABLE_RTC" default="false"/>
+  <rosparam command="load"
+            file="$(find hrpsys_ros_bridge)/models/SampleSpecialJointRobot_controller_config.yaml" />
+
+  <arg name="corbaport" default="15005" />
+  <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
+    <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
+    <arg name="MODEL_FILE" value="$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample_special_joint_robot.wrl" />
+    <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge)/models/SampleSpecialJointRobot.dae" />
+    <arg name="CONF_FILE" value="$(find hrpsys_ros_bridge)/models/SampleSpecialJointRobot.conf" />
+    <arg name="corbaport" default="$(arg corbaport)" />
+    <arg name="USE_WALKING" default="true" if="$(arg USE_UNSTABLE_RTC)"/>
+    <arg name="USE_IMPEDANCECONTROLLER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
+    <arg name="USE_EMERGENCYSTOPPER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
+    <arg name="USE_REFERENCEFORCEUPDATER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
+    <arg name="ROBOT_TYPE" default="samplespecialjointrobot" if="$(arg USE_UNSTABLE_RTC)" />
+    <arg name="USE_ROBOT_TYPE_SETTING" default="true" if="$(arg USE_UNSTABLE_RTC)" />
+    <arg name="BASE_LINK" default="WAIST_LINK0" />
+
+
+  </include>
+
+  <group if="$(arg RUN_RVIZ)" >
+    <node name="samplespecialjointrobot_rviz" pkg="rviz" type="rviz" respawn="true"
+          args="-sync -d $(find hrpsys_ros_bridge)/launch/samplespecialjointrobot.rviz" />
+  </group>
+</launch>
+
+

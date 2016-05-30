@@ -1,0 +1,26 @@
+<launch>
+  <arg name="KILL_SERVERS" default="false" />
+  <arg name="GUI" default="true" />
+  <arg name="NOSIM" default="false" />
+  <arg name="REALTIME" default="true" />
+  <arg name="SIMULATOR_NAME" default="SampleSpecialJointRobot(Robot)0" />
+  <arg name="PROJECT_FILE" default="$(find hrpsys_ros_bridge)/models/SampleSpecialJointRobot_nosim.xml" if="$(arg NOSIM)"/>
+  <arg name="PROJECT_FILE" default="$(find hrpsys_ros_bridge)/models/SampleSpecialJointRobot.xml" unless="$(arg NOSIM)"/>
+  <arg name="corbaport" default="15005" />
+  <arg name="hrpsys_precreate_rtc" default="HGcontroller"/>
+  <arg name="USE_UNSTABLE_RTC" default="false"/>
+  <param name="use_sim_time" value="true" />
+  <include file="$(find hrpsys_tools)/launch/hrpsys.launch">
+    <arg name="PROJECT_FILE" value="$(arg PROJECT_FILE)"/>
+    <arg name="MODEL_FILE" value="$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample_special_joint_robot.wrl" />
+    <arg name="CONF_FILE" value="$(find hrpsys_ros_bridge)/models/SampleSpecialJointRobot.conf" />
+    <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
+    <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
+    <arg name="REALTIME" default="$(arg REALTIME)" />
+    <arg name="corbaport" default="$(arg corbaport)" />
+    <arg name="GUI" default="$(arg GUI)" />
+    <arg name="hrpsys_precreate_rtc" default="$(arg hrpsys_precreate_rtc)" />
+    <arg name="HRPSYS_PY_PKG" default="hrpsys_ros_bridge" if="$(arg USE_UNSTABLE_RTC)"/>
+    <arg name="HRPSYS_PY_NAME" default="samplespecialjointrobot_hrpsys_config.py" if="$(arg USE_UNSTABLE_RTC)"/>
+  </include>
+</launch>

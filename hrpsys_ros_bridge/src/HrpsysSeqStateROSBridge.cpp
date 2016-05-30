@@ -57,6 +57,15 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
   odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
   imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1);
+  //ishiguro
+  ht_zmp_sub = nh.subscribe("/human_tracker_zmp_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerZMPCommandCB, this);
+  ht_com_sub = nh.subscribe("/human_tracker_com_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerCOMCommandCB, this);
+  ht_rf_sub = nh.subscribe("/human_tracker_rf_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRFCommandCB, this);
+  ht_lf_sub = nh.subscribe("/human_tracker_lf_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLFCommandCB, this);
+  ht_rh_sub = nh.subscribe("/human_tracker_rh_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRHCommandCB, this);
+  ht_lh_sub = nh.subscribe("/human_tracker_lh_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLHCommandCB, this);
+
+
 
   // is use_sim_time is set and no one publishes clock, publish clock time
   use_sim_time = ros::Time::isSimTime();
@@ -231,6 +240,31 @@ void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt() {
 void HrpsysSeqStateROSBridge::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg) {
   onJointTrajectory(*msg);
 }
+//for human tracker
+void HrpsysSeqStateROSBridge::onHumanTrackerZMPCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
+	m_htzmp.data.x = msg->point.x;	m_htzmp.data.y = msg->point.y;	m_htzmp.data.z = msg->point.z;
+	m_htzmpOut.write(m_htzmp);
+}
+void HrpsysSeqStateROSBridge::onHumanTrackerCOMCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
+	m_htcom.data.x = msg->point.x;	m_htcom.data.y = msg->point.y;	m_htcom.data.z = msg->point.z;
+	m_htcomOut.write(m_htcom);
+}
+void HrpsysSeqStateROSBridge::onHumanTrackerRFCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
+	m_htrf.data.x = msg->point.x;	m_htrf.data.y = msg->point.y;	m_htrf.data.z = msg->point.z;
+	m_htrfOut.write(m_htrf);
+}
+void HrpsysSeqStateROSBridge::onHumanTrackerLFCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
+	m_htlf.data.x = msg->point.x;	m_htlf.data.y = msg->point.y;	m_htlf.data.z = msg->point.z;
+	m_htlfOut.write(m_htlf);
+}
+void HrpsysSeqStateROSBridge::onHumanTrackerRHCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
+	m_htrh.data.x = msg->point.x;	m_htrh.data.y = msg->point.y;	m_htrh.data.z = msg->point.z;
+	m_htrhOut.write(m_htrh);
+}
+void HrpsysSeqStateROSBridge::onHumanTrackerLHCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
+	m_htlh.data.x = msg->point.x;	m_htlh.data.y = msg->point.y;	m_htlh.data.z = msg->point.z;
+	m_htlhOut.write(m_htlh);
+}
 
 bool HrpsysSeqStateROSBridge::setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
                                                       hrpsys_ros_bridge::SetSensorTransformation::Response& res)
@@ -289,6 +323,18 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   static int count_read = 0; // inc only when data is arrived
   static int count_drop = 0; // inc only when data is dropped
   count_all ++;
+
+  //ishiguro tf
+  tf::StampedTransform transform;
+  try{
+	  ht_tf_listener.lookupTransform("/torso_w","/camera_link",ros::Time(0), transform);
+	  ROS_INFO("[TF] %f, %f, %f\n",transform.getOrigin()[0],transform.getOrigin()[1],transform.getOrigin().z());
+  }
+  catch (tf::TransformException &ex) {
+    ROS_ERROR("%s",ex.what());
+    std::cout<<"[TF MISS]"<<std::endl;
+  }
+
 
   // servoStateIn
   if ( m_servoStateIn.isNew () ) {

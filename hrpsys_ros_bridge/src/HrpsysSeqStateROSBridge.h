@@ -29,6 +29,8 @@
 #include "diagnostic_msgs/DiagnosticArray.h"
 #include "sensor_msgs/Imu.h"
 #include "hrpsys_ros_bridge/SetSensorTransformation.h"
+//ishiguro
+#include <tf/transform_listener.h>
 
 extern const char* hrpsysseqstaterosbridgeimpl_spec[];
 
@@ -48,6 +50,13 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void onFollowJointTrajectoryActionGoal();
   void onFollowJointTrajectoryActionPreempt();
   void onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg);
+  //for human tracker
+  void onHumanTrackerZMPCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
+  void onHumanTrackerCOMCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
+  void onHumanTrackerRFCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
+  void onHumanTrackerLFCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
+  void onHumanTrackerRHCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
+  void onHumanTrackerLHCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
   bool sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
                 dynamic_reconfigure::Reconfigure::Response &res);
   bool setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
@@ -72,6 +81,9 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   std::string rootlink_name;
 
   ros::Subscriber clock_sub;
+  //ishiguro
+  ros::Subscriber ht_zmp_sub,ht_com_sub,ht_rf_sub,ht_lf_sub,ht_rh_sub,ht_lh_sub;
+  tf::TransformListener ht_tf_listener;
 
   nav_msgs::Odometry prev_odom;
   bool prev_odom_acquired;

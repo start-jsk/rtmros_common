@@ -1,0 +1,50 @@
+<launch>
+  <arg name="KILL_SERVERS" default="false" />
+  <arg name="NOSIM" default="false" />
+  <arg name="REALTIME" default="true" />
+  <arg name="RUN_RVIZ" default="true" />
+  <arg name="GUI" default="true" />
+  <arg name="PROJECT_FILE" default="$(find hrpsys_ros_bridge)/models/Sample4LegRobot_nosim.xml" if="$(arg NOSIM)"/>
+  <arg name="PROJECT_FILE" default="$(find hrpsys_ros_bridge)/models/Sample4LegRobot.xml" unless="$(arg NOSIM)"/>
+  <arg name="SIMULATOR_NAME" default="Sample4LegRobot(Robot)0" />
+  <arg name="corbaport" default="15005" />
+  <arg name="hrpsys_precreate_rtc" default="HGcontroller"/>
+  <arg name="USE_UNSTABLE_RTC" default="false"/>
+  <include file="$(find hrpsys_ros_bridge)/launch/sample4legrobot_startup.launch" >
+    <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
+    <arg name="NOSIM" value="$(arg NOSIM)" />
+    <arg name="PROJECT_FILE" value="$(arg PROJECT_FILE)" />
+    <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
+    <arg name="REALTIME" default="$(arg REALTIME)" />
+    <arg name="corbaport" default="$(arg corbaport)" />
+    <arg name="GUI" default="$(arg GUI)" />
+    <arg name="hrpsys_precreate_rtc" default="$(arg hrpsys_precreate_rtc)" />
+    <arg name="USE_UNSTABLE_RTC" default="$(arg USE_UNSTABLE_RTC)"/>
+  </include>
+  <include file="$(find hrpsys_ros_bridge)/launch/sample4legrobot_ros_bridge.launch" >
+    <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
+    <arg name="RUN_RVIZ" default="$(arg RUN_RVIZ)" />
+    <arg name="corbaport" default="$(arg corbaport)" />
+    <arg name="USE_UNSTABLE_RTC" default="$(arg USE_UNSTABLE_RTC)"/>
+  </include>
+
+  <sphinxdoc><![CDATA[
+
+.. code-block:: bash
+
+  rosrun roseus roseus `rospack find hrpsys_ros_bridge`/euslisp/sample4legrobot-interface.l
+
+This launch file shows an example of ros bridge for open sample4legrobot robot, `sample4legrobot.launch` file launches folloiwng two program
+
+1. `roslaunch hrpsys_ros_bridge sample4legrobot_startup.launch` : launch simulated robot environment, if you use real robot, you don't need this line
+
+2. `roslaunch hrpsys_ros_bridge sample4legrobot_ros_bridge.launch` : launch rtm ros bridge
+
+After that, we need to invoke the client program. Following program is the example of euslisp language
+
+3. `rosrun roseus roseus sample4legrobot-interface.l` : sample euslisp script to control the robot.
+
+  ]]></sphinxdoc>
+</launch>
+
+

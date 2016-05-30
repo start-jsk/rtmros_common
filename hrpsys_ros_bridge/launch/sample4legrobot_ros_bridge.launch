@@ -1,30 +1,31 @@
 <launch>
   <arg name="RUN_RVIZ" default="true" />
-  <arg name="SIMULATOR_NAME" default="@ROBOT@(Robot)0" />
-  <arg name="USE_UNSTABLE_RTC" default="@USE_UNSTABLE_RTC@"/>
+  <arg name="SIMULATOR_NAME" default="Sample4LegRobot(Robot)0" />
+  <arg name="USE_UNSTABLE_RTC" default="false"/>
   <rosparam command="load"
-            file="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@_controller_config.yaml" />
+            file="$(find hrpsys_ros_bridge)/models/Sample4LegRobot_controller_config.yaml" />
 
   <arg name="corbaport" default="15005" />
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
-    <arg name="MODEL_FILE" value="@MODEL_FILE@" />
-    <arg name="COLLADA_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.dae" />
-    <arg name="CONF_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.conf" />
+    <arg name="MODEL_FILE" value="$(find openhrp3)/share/OpenHRP-3.1/sample/model/sample_4leg_robot.wrl" />
+    <arg name="COLLADA_FILE" value="$(find hrpsys_ros_bridge)/models/Sample4LegRobot.dae" />
+    <arg name="CONF_FILE" value="$(find hrpsys_ros_bridge)/models/Sample4LegRobot.conf" />
     <arg name="corbaport" default="$(arg corbaport)" />
     <arg name="USE_WALKING" default="true" if="$(arg USE_UNSTABLE_RTC)"/>
     <arg name="USE_IMPEDANCECONTROLLER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
     <arg name="USE_EMERGENCYSTOPPER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
     <arg name="USE_REFERENCEFORCEUPDATER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
-    <arg name="ROBOT_TYPE" default="@robot@" if="$(arg USE_UNSTABLE_RTC)" />
+    <arg name="ROBOT_TYPE" default="sample4legrobot" if="$(arg USE_UNSTABLE_RTC)" />
     <arg name="USE_ROBOT_TYPE_SETTING" default="true" if="$(arg USE_UNSTABLE_RTC)" />
-@ROSBRIDGE_ARGS@
+    <arg name="BASE_LINK" default="WAIST_LINK0" />
+
 
   </include>
 
   <group if="$(arg RUN_RVIZ)" >
-    <node name="@robot@_rviz" pkg="rviz" type="rviz" respawn="true"
-          args="-sync -d $(find @PROJECT_PKG_NAME@)/launch/@robot@.rviz" />
+    <node name="sample4legrobot_rviz" pkg="rviz" type="rviz" respawn="true"
+          args="-sync -d $(find hrpsys_ros_bridge)/launch/sample4legrobot.rviz" />
   </group>
 </launch>
 
