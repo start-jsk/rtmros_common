@@ -1692,19 +1692,48 @@
 ;; ReferenceForceUpdater
 (def-set-get-param-method
   'hrpsys_ros_bridge::Openhrp_ReferenceForceUpdaterService_ReferenceForceUpdaterParam
-  :set-reference-force-updater-param :get-reference-force-updater-param :get-reference-force-updater-param-arguments
-  :ReferenceForceUpdaterService_setReferenceForceUpdaterParam :ReferenceForceUpdaterService_getReferenceForceUpdaterParam)
+  :raw-set-reference-force-updater-param :raw-get-reference-force-updater-param :get-reference-force-updater-param-arguments
+  :ReferenceForceUpdaterService_setReferenceForceUpdaterParam :ReferenceForceUpdaterService_getReferenceForceUpdaterParam
+  :optional-args (list :name 'name))
 (defmethod rtm-ros-robot-interface
   (:start-reference-force-updater
-   ()
-   "Start reference force updater."
-   (send self :referenceforceupdaterservice_startReferenceforceupdater)
-   )
+   (limb)
+   "Start reference force updater mode.
+    limb should be limb symbol name such as :rarm, :larm, or :arms."
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name)
+             (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase name)))
+         :start-reference-force-updater))
   (:stop-reference-force-updater
-   ()
-   "Stop reference force updater."
-   (send self :referenceforceupdaterservice_stopReferenceforceupdater)
-   )
+   (limb)
+   "Stop reference force updater mode.
+    limb should be limb symbol name such as :rarm, :larm, or :arms."
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name)
+             (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase name)))
+         :stop-reference-force-updater))
+  (:set-reference-force-updater-param
+   (limb &rest args)
+   "Set reference force updater parameter like (send *ri* :set-reference-force-updater-param :rarm :p-gain 0.02).
+    limb should be limb symbol name such as :rarm, :larm, :arms.
+    For arguments, please see (send *ri* :get-reference-force-updater-param-arguments)"
+   (send* self :force-sensor-method
+          limb
+          #'(lambda (name &rest _args)
+              (send* self :raw-set-reference-force-updater-param (string-downcase name) args))
+          :set-reference-force-updater-param
+          args))
+  (:get-reference-force-updater-param
+   (limb)
+   "Get reference force updater parameter.
+    limb should be limb symbol name such as :rarm, :larm, :arms."
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name)
+             (send self :raw-get-reference-force-updater-param (string-downcase name)))
+         :get-reference-force-updater-param))
   )
 
 (defun print-end-effector-parameter-conf-from-robot
