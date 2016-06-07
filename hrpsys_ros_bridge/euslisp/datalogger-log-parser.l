@@ -86,7 +86,10 @@
                                    :name (let ((nm (pathname-type x)))
                                            (read-from-string
                                             (if (and (substringp "(" nm) (substringp ")" nm))
-                                                (format nil "RobotHardware0_~A" (car (last (data-string-split nm "_"))))
+                                                (let* ((strlist (data-string-split nm "_")) ;; AA(Robot)0_BB_CC -> (list AA(Robot)0 BB CC)
+                                                       (suffix-str-list (subseq strlist (1+ (position-if #'(lambda (x) (and (substringp "(" x) (substringp ")" x))) strlist)))) ;; (list AA(Robot)0 BB CC) -> (list BB CC)
+                                                       (suffix-str (let ((str (car suffix-str-list))) (dolist (tstr (cdr suffix-str-list)) (setq str (format nil "~A_~A" str tstr))) str))) ;; (list BB CC) -> BB_CC
+                                                  (format nil "RobotHardware0_~A" suffix-str))
                                               nm)))))
                      (append (remove-if-not #'(lambda (x) (substringp "(" x)) fname-candidate-list)
                              fname-candidate-list-with-valid-line-without-rh)))
@@ -172,11 +175,12 @@
          :torque-vector
          (send (send self :parser-list "RobotHardware0_tau") :read-state))
    ;; (send robot :torque-vector (cdr (assoc :torque-vector robot-state)))
-   (send self :set-robot-state1
-         :servo-state
-         (map float-vector #'(lambda (intval)
-                               (let ((str (make-string 4))) (sys::poke intval str 0 :integer) (sys::peek str 0 :float)))
-              (mapcar #'ceiling (coerce (send (send self :parser-list "RobotHardware0_servoState") :read-state) cons))))
+   (if (send self :parser-list "RobotHardware0_servoState")
+       (send self :set-robot-state1
+             :servo-state
+             (map float-vector #'(lambda (intval)
+                                   (let ((str (make-string 4))) (sys::poke intval str 0 :integer) (sys::peek str 0 :float)))
+                  (mapcar #'ceiling (coerce (send (send self :parser-list "RobotHardware0_servoState") :read-state) cons)))))
    (send self :set-robot-state1
          :reference-torque-vector
          (send (send self :parser-list "sh_tqOut") :read-state))
@@ -233,6 +237,11 @@
      (send self :set-robot-state1
            :stabilizer-end-coords-list
            (mapcar #'(lambda (x) (send robot x :end-coords :copy-worldcoords)) limb-list)))
+   ;; Actual root coords from Simulation's actual WAIST pos and rot, which cannot be used for real robots.
+   (if (send self :parser-list "RobotHardware0_WAIST")
+       (send self :set-robot-state1
+             :actual-root-coords
+             (send self :hrpsys-tform->coords (send (send self :parser-list "RobotHardware0_WAIST") :read-state))))
    )
   (:hrpsys-tform->coords
    (tform-vector)
@@ -269,6 +278,7 @@
   (:stabilizer-debug-data () (cdr (assoc :stabilizer-debug-data robot-state)))
   (:stabilizer-end-coords-list () (cdr (assoc :stabilizer-end-coords-list robot-state)))
   (:servo-state () (cdr (assoc :servo-state robot-state)))
+  (:actual-root-coords () (cdr (assoc :actual-root-coords robot-state)))
   ;; overwrite
   (:reference-vector () (cdr (assoc :reference-vector robot-state)))
   (:actual-vector () (send self :potentio-vector))
