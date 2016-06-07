@@ -100,8 +100,8 @@
   (:eof-p () eof-p)
   (:fix-unitsystem-of-angle-vector
    (read-state &key (joint-list (send robot :joint-list)))
-   (let ((vec (instantiate float-vector (length read-state))))
-     (dotimes (i (length read-state))
+   (let ((vec (instantiate float-vector (length joint-list))))
+     (dotimes (i (length vec))
        (setf (elt vec i) (if (derivedp (elt joint-list i) rotational-joint)
                              (rad2deg (elt read-state i))
                            (* 1e3 (elt read-state i)))))
