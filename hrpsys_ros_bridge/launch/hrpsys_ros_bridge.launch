@@ -164,6 +164,8 @@
 <!--    for human tracker-->
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htzmp" to="abc.rtc:htzmpIn" subscription_type="new"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htcom" to="abc.rtc:htcomIn" subscription_type="new"/>
+    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htrfw" to="abc.rtc:htrfwIn" subscription_type="new"/>
+    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htlfw" to="abc.rtc:htlfwIn" subscription_type="new"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htrf" to="abc.rtc:htrfIn" subscription_type="new"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htlf" to="abc.rtc:htlfIn" subscription_type="new"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htrh" to="abc.rtc:htrhIn" subscription_type="new"/>

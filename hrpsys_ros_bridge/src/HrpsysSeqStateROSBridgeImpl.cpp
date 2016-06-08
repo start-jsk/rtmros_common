@@ -48,6 +48,8 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     //for human tracker
     m_htzmpOut("htzmp", m_htzmp),
     m_htcomOut("htcom", m_htcom),
+    m_htrfwOut("htrfw", m_htrfw),
+    m_htlfwOut("htlfw", m_htlfw),
     m_htrfOut("htrf", m_htrf),
     m_htlfOut("htlf", m_htlf),
     m_htrhOut("htrh", m_htrh),
@@ -90,10 +92,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   //for human tracker
   addOutPort("htzmp", m_htzmpOut);
   addOutPort("htcom", m_htcomOut);
+  addOutPort("htrfw", m_htrfwOut);
+  addOutPort("htlfw", m_htlfwOut);
   addOutPort("htrf", m_htrfOut);
   addOutPort("htlf", m_htlfOut);
   addOutPort("htrh", m_htrhOut);
   addOutPort("htlh", m_htlhOut);
+  m_htrfw.data.length(6);
+  m_htlfw.data.length(6);
 
   // Set service provider to Ports
 

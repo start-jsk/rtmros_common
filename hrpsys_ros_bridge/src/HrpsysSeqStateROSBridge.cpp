@@ -58,12 +58,14 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
   imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1);
   //ishiguro
-  ht_zmp_sub = nh.subscribe("/human_tracker_zmp_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerZMPCommandCB, this);
-  ht_com_sub = nh.subscribe("/human_tracker_com_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerCOMCommandCB, this);
-  ht_rf_sub = nh.subscribe("/human_tracker_rf_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRFCommandCB, this);
-  ht_lf_sub = nh.subscribe("/human_tracker_lf_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLFCommandCB, this);
-  ht_rh_sub = nh.subscribe("/human_tracker_rh_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRHCommandCB, this);
-  ht_lh_sub = nh.subscribe("/human_tracker_lh_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLHCommandCB, this);
+  ht_zmp_sub = nh.subscribe("human_tracker_zmp_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerZMPCommandCB, this);
+  ht_com_sub = nh.subscribe("human_tracker_com_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerCOMCommandCB, this);
+  ht_rfw_sub = nh.subscribe("human_tracker_rfw_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRFWCommandCB, this);
+  ht_lfw_sub = nh.subscribe("human_tracker_lfw_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLFWCommandCB, this);
+  ht_rf_sub = nh.subscribe("human_tracker_rf_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRFCommandCB, this);
+  ht_lf_sub = nh.subscribe("human_tracker_lf_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLFCommandCB, this);
+  ht_rh_sub = nh.subscribe("human_tracker_rh_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRHCommandCB, this);
+  ht_lh_sub = nh.subscribe("human_tracker_lh_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLHCommandCB, this);
 
 
 
@@ -249,6 +251,16 @@ void HrpsysSeqStateROSBridge::onHumanTrackerCOMCommandCB(const geometry_msgs::Po
 	m_htcom.data.x = msg->point.x;	m_htcom.data.y = msg->point.y;	m_htcom.data.z = msg->point.z;
 	m_htcomOut.write(m_htcom);
 }
+void HrpsysSeqStateROSBridge::onHumanTrackerRFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg) {
+	m_htrfw.data[0] = msg->wrench.force.x;	m_htrfw.data[1] = msg->wrench.force.y;	m_htrfw.data[2] = msg->wrench.force.z;
+	m_htrfw.data[3] = msg->wrench.torque.x;	m_htrfw.data[4] = msg->wrench.torque.y;	m_htrfw.data[5] = msg->wrench.torque.z;
+	m_htrfwOut.write(m_htrfw);
+}
+void HrpsysSeqStateROSBridge::onHumanTrackerLFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg) {
+	m_htlfw.data[0] = msg->wrench.force.x;	m_htlfw.data[1] = msg->wrench.force.y;	m_htlfw.data[2] = msg->wrench.force.z;
+	m_htlfw.data[3] = msg->wrench.torque.x;	m_htlfw.data[4] = msg->wrench.torque.y;	m_htlfw.data[5] = msg->wrench.torque.z;
+	m_htlfwOut.write(m_htlfw);
+}
 void HrpsysSeqStateROSBridge::onHumanTrackerRFCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
 	m_htrf.data.x = msg->point.x;	m_htrf.data.y = msg->point.y;	m_htrf.data.z = msg->point.z;
 	m_htrfOut.write(m_htrf);
@@ -325,15 +337,29 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   count_all ++;
 
   //ishiguro tf
-  tf::StampedTransform transform;
-  try{
-	  ht_tf_listener.lookupTransform("/torso_w","/camera_link",ros::Time(0), transform);
-	  ROS_INFO("[TF] %f, %f, %f\n",transform.getOrigin()[0],transform.getOrigin()[1],transform.getOrigin().z());
-  }
-  catch (tf::TransformException &ex) {
-    ROS_ERROR("%s",ex.what());
-    std::cout<<"[TF MISS]"<<std::endl;
-  }
+//	tf::StampedTransform transform;
+//	try{
+//		ht_tf_listener.lookupTransform("/torso_1","/world",ros::Time(0), transform);
+//		ROS_INFO("[TF] %f, %f, %f\n",transform.getOrigin()[0],transform.getOrigin()[1],transform.getOrigin().z());
+//		m_htcom.data.x = transform.getOrigin()[0];	m_htcom.data.y = transform.getOrigin()[1];	m_htcom.data.z = transform.getOrigin()[2];
+//		m_htcomOut.write(m_htcom);
+//		ht_tf_listener.lookupTransform("/right_foot_1","/world",ros::Time(0), transform);
+//		m_htrf.data.x = transform.getOrigin()[0];	m_htrf.data.y = transform.getOrigin()[1];	m_htrf.data.z = transform.getOrigin()[2];
+//		m_htrfOut.write(m_htrf);
+//		ht_tf_listener.lookupTransform("/left_foot_1","/world",ros::Time(0), transform);
+//		m_htlf.data.x = transform.getOrigin()[0];	m_htlf.data.y = transform.getOrigin()[1];	m_htlf.data.z = transform.getOrigin()[2];
+//		m_htlfOut.write(m_htlf);
+//		ht_tf_listener.lookupTransform("/right_hand_1","/world",ros::Time(0), transform);
+//		m_htrh.data.x = transform.getOrigin()[0];	m_htrh.data.y = transform.getOrigin()[1];	m_htrh.data.z = transform.getOrigin()[2];
+//		m_htrhOut.write(m_htrh);
+//		ht_tf_listener.lookupTransform("/left_hand_1","/world",ros::Time(0), transform);
+//		m_htlh.data.x = transform.getOrigin()[0];	m_htlh.data.y = transform.getOrigin()[1];	m_htlh.data.z = transform.getOrigin()[2];
+//		m_htlhOut.write(m_htlh);
+//	}
+//	catch (tf::TransformException &ex) {
+//	ROS_ERROR("%s",ex.what());
+//	std::cout<<"[TF MISS]"<<std::endl;
+//	}
 
 
   // servoStateIn

@@ -53,6 +53,8 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   //for human tracker
   void onHumanTrackerZMPCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
   void onHumanTrackerCOMCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
+  void onHumanTrackerRFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg);
+  void onHumanTrackerLFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg);
   void onHumanTrackerRFCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
   void onHumanTrackerLFCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
   void onHumanTrackerRHCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
@@ -82,7 +84,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   ros::Subscriber clock_sub;
   //ishiguro
-  ros::Subscriber ht_zmp_sub,ht_com_sub,ht_rf_sub,ht_lf_sub,ht_rh_sub,ht_lh_sub;
+  ros::Subscriber ht_zmp_sub,ht_com_sub,ht_rfw_sub,ht_lfw_sub,ht_rf_sub,ht_lf_sub,ht_rh_sub,ht_lh_sub;
   tf::TransformListener ht_tf_listener;
 
   nav_msgs::Odometry prev_odom;
