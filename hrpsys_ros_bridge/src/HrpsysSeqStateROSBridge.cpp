@@ -469,6 +469,29 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       interpolationp = false;
     }
 
+    ros::Time tm_on_execute = ros::Time::now();
+
+    if ( joint_trajectory_server.isActive() ) {
+      pr2_controllers_msgs::JointTrajectoryFeedback joint_trajectory_feedback;
+      joint_trajectory_server.publishFeedback(joint_trajectory_feedback);
+    }
+    if ( follow_joint_trajectory_server.isActive() ) {
+      control_msgs::FollowJointTrajectoryFeedback follow_joint_trajectory_feedback;
+      follow_joint_trajectory_feedback.header.stamp = tm_on_execute;
+      int joint_size = body->joints().size();
+      follow_joint_trajectory_feedback.joint_names.resize(joint_size);
+      follow_joint_trajectory_feedback.actual.positions.resize(joint_size);
+      for (unsigned int j = 0; j < joint_size; j++)
+      {
+        follow_joint_trajectory_feedback.joint_names[j] = body->joint(j)->name;
+        follow_joint_trajectory_feedback.actual.positions[j] = body->joint(j)->q;
+      }
+      if (!follow_joint_trajectory_feedback.joint_names.empty() &&
+          !follow_joint_trajectory_feedback.actual.positions.empty())
+      {
+        follow_joint_trajectory_server.publishFeedback(follow_joint_trajectory_feedback);
+      }
+    }
     ros::spinOnce();
 
     // diagnostics
