@@ -532,6 +532,102 @@
                    (send robot :force-sensors) (send self :reference-moment-vector))
            tm)
      ))
+  (:angle-vector-sequence-full
+   (jpos tm
+         &key
+         (jvs (apply #'matrix jpos))
+         (sequence-length (nth 0 (array-dimensions jvs)))
+         (joint-length (nth 1 (array-dimensions jvs)))
+         (vel (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
+         (torque (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
+         (pos (make-list sequence-length :initial-element (instantiate float-vector 3)))
+         (rpy (make-list sequence-length :initial-element (instantiate float-vector 3)))
+         (acc (make-list sequence-length :initial-element (instantiate float-vector 3)))
+         (zmp (make-list sequence-length :initial-element (instantiate float-vector 3)))
+         (wrench (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
+         (optional (make-list sequence-length :initial-element (instantiate float-vector 8)))
+         )
+   "Call service for setJointAnglesSequenceFull. Definition of each sequence is similar to sequence file of loadPattern.
+    Arguments type:
+     Required
+      jpos: sequence of joint angles(float-vector) [rad],  (list av0 av1 ... avn)
+      tm: sequence of duration(float) [s],  (list tm0 tm1 ... tmn) or #f(tm0 tm1 ... tmn)
+     Key
+      vel: sequence of joint angular velocities(float-vector) [rad/s],  (list vel0 vel1 ... veln)
+      torque: sequence of torques(float-vector) [Nm],  (list torque0 torque1 ... torquen)
+      pos: sequence of waist pos(float-vector) [m],  (list pos0 pos1 ... posn)
+      rpy: sequence of waist rpy(float-vector) [rad],  (list rpy0 rpy1 ... rpyn)
+      acc: sequence of waist acc(float-vector) [m/s^2],  (list acc0 acc1 ... accn)
+      zmp: sequence of zmp(float-vector) [m],  (list zmp0 zmp1 ... zmpn)
+      wrench: sequence of wrench(float-vector) [N, Nm],  (list wrench0 wrench1 ... wrenchn)
+      optional: sequence of optional(float-vector) [],  (list optional0 optional1 ... optionaln)"
+   (let* ((jvss (instance std_msgs::float64multiarray :init))
+          (vels (instance std_msgs::float64multiarray :init))
+          (torques (instance std_msgs::float64multiarray :init))
+          (poss (instance std_msgs::float64multiarray :init))
+          (rpys (instance std_msgs::float64multiarray :init))
+          (accs (instance std_msgs::float64multiarray :init))
+          (zmps (instance std_msgs::float64multiarray :init))
+          (wrenchs (instance std_msgs::float64multiarray :init))
+          (optionals (instance std_msgs::float64multiarray :init))
+          (tms (coerce tm float-vector)))
+     ;; jvss
+     (send jvss :layout :dim (list
+                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions jvs)) :stride (* (nth 0 (array-dimensions jvs)) (nth 1 (array-dimensions jvs))))
+                              (instance std_msgs::multiArraydimension :init :label "jvs length" :size (nth 1 (array-dimensions jvs)) :stride (nth 1 (array-dimensions jvs)))))
+     (send jvss :data (array-entity jvs))
+     ;; vels
+     (setq vel (apply #'matrix vel))
+     (send vels :layout :dim (list
+                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions vel)) :stride (* (nth 0 (array-dimensions vel)) (nth 1 (array-dimensions vel))))
+                              (instance std_msgs::multiArraydimension :init :label "vel length" :size (nth 1 (array-dimensions vel)) :stride (nth 1 (array-dimensions vel)))))
+     (send vels :data (array-entity vel))
+     ;; torques
+     (setq torque (apply #'matrix torque))
+     (send torques :layout :dim (list
+                                 (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions torque)) :stride (* (nth 0 (array-dimensions torque)) (nth 1 (array-dimensions torque))))
+                                 (instance std_msgs::multiArraydimension :init :label "torque length" :size (nth 1 (array-dimensions torque)) :stride (nth 1 (array-dimensions torque)))))
+     (send torques :data (array-entity torque))
+     ;; poss
+     (setq pos (apply #'matrix pos))
+     (send poss :layout :dim (list
+                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions pos)) :stride (* (nth 0 (array-dimensions pos)) (nth 1 (array-dimensions pos))))
+                              (instance std_msgs::multiArraydimension :init :label "pos length" :size (nth 1 (array-dimensions pos)) :stride (nth 1 (array-dimensions pos)))))
+     (send poss :data (array-entity pos))
+     ;; rpys
+     (setq rpy (apply #'matrix rpy))
+     (send rpys :layout :dim (list
+                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions rpy)) :stride (* (nth 0 (array-dimensions rpy)) (nth 1 (array-dimensions rpy))))
+                              (instance std_msgs::multiArraydimension :init :label "rpy length" :size (nth 1 (array-dimensions rpy)) :stride (nth 1 (array-dimensions rpy)))))
+     (send rpys :data (array-entity rpy))
+     ;; accs
+     (setq acc (apply #'matrix acc))
+     (send accs :layout :dim (list
+                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions acc)) :stride (* (nth 0 (array-dimensions acc)) (nth 1 (array-dimensions acc))))
+                              (instance std_msgs::multiArraydimension :init :label "acc length" :size (nth 1 (array-dimensions acc)) :stride (nth 1 (array-dimensions acc)))))
+     (send accs :data (array-entity acc))
+     ;; zmps
+     (setq zmp (apply #'matrix zmp))
+     (send zmps :layout :dim (list
+                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions zmp)) :stride (* (nth 0 (array-dimensions zmp)) (nth 1 (array-dimensions zmp))))
+                              (instance std_msgs::multiArraydimension :init :label "zmp length" :size (nth 1 (array-dimensions zmp)) :stride (nth 1 (array-dimensions zmp)))))
+     (send zmps :data (array-entity zmp))
+     ;; wrenchs
+     (setq wrench (apply #'matrix wrench))
+     (send wrenchs :layout :dim (list
+                                 (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions wrench)) :stride (* (nth 0 (array-dimensions wrench)) (nth 1 (array-dimensions wrench))))
+                                 (instance std_msgs::multiArraydimension :init :label "wrench length" :size (nth 1 (array-dimensions wrench)) :stride (nth 1 (array-dimensions wrench)))))
+     (send wrenchs :data (array-entity wrench))
+     ;; optionals
+     (setq optional (apply #'matrix optional))
+     (send optionals :layout :dim (list
+                                   (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions optional)) :stride (* (nth 0 (array-dimensions optional)) (nth 1 (array-dimensions optional))))
+                                   (instance std_msgs::multiArraydimension :init :label "optional length" :size (nth 1 (array-dimensions optional)) :stride (nth 1 (array-dimensions optional)))))
+     (send optionals :data (array-entity optional))
+
+     (send self :sequenceplayerservice_setjointanglessequencefull :jvss jvss :vels vels :torques torques :poss poss :rpys rpys :accs accs :zmps zmps :wrenchs wrenchs :optionals optionals :tms tms)
+     )
+   )
   )
 
 ;; CollisionDetectorService
