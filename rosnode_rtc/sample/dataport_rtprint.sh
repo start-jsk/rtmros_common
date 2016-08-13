@@ -8,4 +8,4 @@ do
     sleep 1
 done
 echo "start listening ${port}"
-rosrun rtshell rtprint -p /tmp -m RTMROSDataBridge ${port}
+rtprint -p /tmp -m RTMROSDataBridge ${port}

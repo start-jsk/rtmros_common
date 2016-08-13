@@ -11,7 +11,7 @@ do
 done
 echo "start injecting ${count} times to ${port}"
 
-rosrun rtshell rtinject -p /tmp -m RTMROSDataBridge -n ${count} -c "${data}" ${port}
+rtinject -p /tmp -m RTMROSDataBridge -n ${count} -c "${data}" ${port}
 
 # this script may not work in OpenRTM-Python-1.1.0
 # ModuleMgr.find_class in rtshell does not parse dataport.data_type

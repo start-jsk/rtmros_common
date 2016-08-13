@@ -50,7 +50,8 @@ catkin_python_setup()
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 
-unset(openrtm_aist_LIBRARIES CACHE) # remove not to add openrtm_aist_LIBRARIES to openrtm_toolsConfig.cmake
+find_package(PkgConfig)
+pkg_check_modules(openrtm_aist REQUIRED openrtm-aist)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES openrtm_tools
