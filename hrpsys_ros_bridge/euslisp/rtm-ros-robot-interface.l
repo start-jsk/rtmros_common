@@ -1917,22 +1917,13 @@
          (format zf "~%")
          ))) ;; with-open-file for .zmp file
     )
-  (when (or (cadr (memq :ee-local-wrench-list (car rs-list)))
-            (and (cadr (memq :end-coords-list (car rs-list))) (cadr (memq :wrench-list (car rs-list)))))
+  (when (cadr (memq :wrench-list (car rs-list)))
     (with-open-file
      (wrf (format nil "~A.wrenches" output-basename) :direction :output) ;; wrench file -> force and moment ;; 6 x force-sensor-num
      (dolist (l rs-list)
        ;; write wrenches file
        (format wrf "~A " (+ initial-sync-time (cadr (memq :time l))))
-       (let ((wrl
-              (or (cadr (memq :ee-local-wrench-list l))
-                  (list
-                   (mapcar #'(lambda (ee ff)
-                               (send ee :inverse-rotate-vector ff))
-                           (cadr (memq :end-coords-list l)) (car (cadr (memq :wrench-list l))))
-                   (mapcar #'(lambda (ee mm)
-                               (send ee :inverse-rotate-vector mm))
-                           (cadr (memq :end-coords-list l)) (cadr (cadr (memq :wrench-list l))))))))
+       (let ((wrl (cadr (memq :wrench-list l))))
          (dotimes (j (length (car wrl))) ;; j is limb index
            (let ((f (elt (car wrl) j)) (m (elt (cadr wrl) j)))
              (dotimes (i 3) (format wrf "~A " (elt f i))) ;; force
