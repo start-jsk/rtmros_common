@@ -129,12 +129,15 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
 
   ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @Initilize name : " << getInstanceName() << " done");
 
-  fsensor_pub.resize(m_rsforceIn.size()+m_mcforceIn.size());
+  fsensor_pub.resize(m_rsforceIn.size()+m_offforceIn.size()+m_mcforceIn.size());
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
     fsensor_pub[i] = nh.advertise<geometry_msgs::WrenchStamped>(m_rsforceName[i], 10);
   }
+  for (unsigned int i=0; i<m_offforceIn.size(); i++){
+    fsensor_pub[i+m_rsforceIn.size()] = nh.advertise<geometry_msgs::WrenchStamped>(m_offforceName[i], 10);
+  }
   for (unsigned int i=0; i<m_mcforceIn.size(); i++){
-    fsensor_pub[i+m_rsforceIn.size()] = nh.advertise<geometry_msgs::WrenchStamped>(m_mcforceName[i], 10);
+    fsensor_pub[i+m_rsforceIn.size()+m_offforceIn.size()] = nh.advertise<geometry_msgs::WrenchStamped>(m_mcforceName[i], 10);
   }
   zmp_pub = nh.advertise<geometry_msgs::PointStamped>("/zmp", 10);
   ref_cp_pub = nh.advertise<geometry_msgs::PointStamped>("/ref_capture_point", 10);
@@ -572,7 +575,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	  }else{
 	    fsensor.header.stamp = tm_on_execute;
 	  }
-	  fsensor.header.frame_id = m_rsforceName[i].find("off_") != std::string::npos ? m_rsforceName[i].substr(std::string("off_").size()) : m_rsforceName[i];
+	  fsensor.header.frame_id = m_rsforceName[i];
 	  fsensor.wrench.force.x = m_rsforce[i].data[0];
 	  fsensor.wrench.force.y = m_rsforce[i].data[1];
 	  fsensor.wrench.force.z = m_rsforce[i].data[2];
@@ -580,6 +583,34 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	  fsensor.wrench.torque.y = m_rsforce[i].data[4];
 	  fsensor.wrench.torque.z = m_rsforce[i].data[5];
 	  fsensor_pub[i].publish(fsensor);
+	}
+      }
+      catch(const std::runtime_error &e)
+	{
+	  ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+	}
+    }
+  } // end: publish forces sonsors
+  for (unsigned int i=0; i<m_offforceIn.size(); i++){
+    if ( m_offforceIn[i]->isNew() ) {
+      try {
+	m_offforceIn[i]->read();
+	ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute " << m_offforceName[i] << " size = " << m_offforce[i].data.length() );
+	if ( m_offforce[i].data.length() >= 6 ) {
+	  geometry_msgs::WrenchStamped fsensor;
+	  if ( use_hrpsys_time ) {
+	    fsensor.header.stamp = ros::Time(m_offforce[i].tm.sec, m_offforce[i].tm.nsec);
+	  }else{
+	    fsensor.header.stamp = tm_on_execute;
+	  }
+	  fsensor.header.frame_id = m_offforceName[i].substr(std::string("off_").size());
+	  fsensor.wrench.force.x = m_offforce[i].data[0];
+	  fsensor.wrench.force.y = m_offforce[i].data[1];
+	  fsensor.wrench.force.z = m_offforce[i].data[2];
+	  fsensor.wrench.torque.x = m_offforce[i].data[3];
+	  fsensor.wrench.torque.y = m_offforce[i].data[4];
+	  fsensor.wrench.torque.z = m_offforce[i].data[5];
+	  fsensor_pub[i+m_rsforceIn.size()].publish(fsensor);
 	}
       }
       catch(const std::runtime_error &e)
@@ -609,7 +640,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	  fsensor.wrench.torque.x = m_mcforce[i].data[3];
 	  fsensor.wrench.torque.y = m_mcforce[i].data[4];
 	  fsensor.wrench.torque.z = m_mcforce[i].data[5];
-	  fsensor_pub[i+m_rsforceIn.size()].publish(fsensor);
+	  fsensor_pub[i+m_rsforceIn.size()+m_offforceIn.size()].publish(fsensor);
 	}
       }
       catch(const std::runtime_error &e)
@@ -704,7 +735,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         }
         s.remaining_time = m_controlSwingSupportTime.data[i];
         refCSs.states[i].header.stamp = refCSs.header.stamp;
-        refCSs.states[i].header.frame_id = m_rsforceName[i*2];
+        refCSs.states[i].header.frame_id = m_rsforceName[i];
         refCSs.states[i].state = s;
       }
       ref_contact_states_pub.publish(refCSs);
@@ -734,7 +765,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
           s.state = s.OFF;
         }
         actCSs.states[i].header.stamp = actCSs.header.stamp;
-        actCSs.states[i].header.frame_id = m_rsforceName[i*2];
+        actCSs.states[i].header.frame_id = m_rsforceName[i];
         actCSs.states[i].state = s;
       }
       act_contact_states_pub.publish(actCSs);
