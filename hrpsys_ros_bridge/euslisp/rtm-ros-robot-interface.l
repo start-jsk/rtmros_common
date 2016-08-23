@@ -1290,6 +1290,17 @@
    "Get remaining foot steps from GaitGenerator.
    Return is (list current-support-foot-coords remaining-swing-dst-coords-0 ... )."
    (car (send self :get-remaining-foot-step-sequence-current-index)))
+  (:get-go-pos-footsteps-sequence
+   (xx yy th)
+   "Get foot steps of go-pos without executing them.
+   Return is list of list of footstep."
+   (let ((ret (send self :autobalancerservice_getGoPosFootstepsSequence :x xx :y yy :th th)))
+     (mapcar #'(lambda (fsl)
+                 (mapcar #'(lambda (fs)
+                             (send self :abc-footstep->eus-footstep fs))
+                         (send fsl :fs)))
+             (send ret :o_footstep))
+     ))
   (:draw-remaining-foot-step-sequence
    (vwer
     &key (flush) (rleg-color #f(1 0 0)) (lleg-color #f(0 1 0))
