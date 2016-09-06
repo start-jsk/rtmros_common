@@ -309,18 +309,52 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::proc()
     interpolationp = false;
     ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @proc follow_joint_trajectory_server->setSucceeded()");
   }
-#if 0
+
   ros::Time tm_on_execute = ros::Time::now();
 
-  control_msgs::FollowJointTrajectoryFeedback follow_joint_trajectory_feedback;
-  follow_joint_trajectory_feedback.header.stamp = tm_on_execute;
+  // FIXME: need to set actual informatoin, currently we set dummy information
+  trajectory_msgs::JointTrajectoryPoint commanded_joint_trajectory_point, error_joint_trajectory_point;
+  commanded_joint_trajectory_point.positions.resize(joint_list.size());
+  commanded_joint_trajectory_point.velocities.resize(joint_list.size());
+  commanded_joint_trajectory_point.accelerations.resize(joint_list.size());
+  commanded_joint_trajectory_point.effort.resize(joint_list.size());
+  for (unsigned int j = 0; j < joint_list.size(); j++)
+    {
+      commanded_joint_trajectory_point.positions[j]     = parent->body->link(joint_list[j])->q;
+      commanded_joint_trajectory_point.velocities[j]    = parent->body->link(joint_list[j])->dq;
+      commanded_joint_trajectory_point.accelerations[j] = parent->body->link(joint_list[j])->ddq;
+      commanded_joint_trajectory_point.effort[j]        = parent->body->link(joint_list[j])->u;
+    }
+  error_joint_trajectory_point.positions.resize(joint_list.size());
+  error_joint_trajectory_point.velocities.resize(joint_list.size());
+  error_joint_trajectory_point.accelerations.resize(joint_list.size());
+  error_joint_trajectory_point.effort.resize(joint_list.size());
 
-  if (!follow_joint_trajectory_feedback->joint_names.empty() &&
-      !follow_joint_trajectory_feedback->actual.positions.empty())
-  {
+  if ( joint_trajectory_server->isActive() ) {
+    pr2_controllers_msgs::JointTrajectoryFeedback joint_trajectory_feedback;
+    joint_trajectory_server->publishFeedback(joint_trajectory_feedback);
+  }
+
+  if ( follow_joint_trajectory_server->isActive() ) {
+    control_msgs::FollowJointTrajectoryFeedback follow_joint_trajectory_feedback;
+    follow_joint_trajectory_feedback.header.stamp = tm_on_execute;
+    follow_joint_trajectory_feedback.joint_names = joint_list;
+
+    follow_joint_trajectory_feedback.desired = commanded_joint_trajectory_point;
+    follow_joint_trajectory_feedback.actual  = commanded_joint_trajectory_point;
+    follow_joint_trajectory_feedback.error   = error_joint_trajectory_point;
+
     follow_joint_trajectory_server->publishFeedback(follow_joint_trajectory_feedback);
   }
-#endif
+
+  pr2_controllers_msgs::JointTrajectoryControllerState joint_controller_state;
+  joint_controller_state.joint_names = joint_list;
+
+  joint_controller_state.desired = commanded_joint_trajectory_point;
+  joint_controller_state.actual = commanded_joint_trajectory_point;
+  joint_controller_state.error = error_joint_trajectory_point;
+
+  joint_controller_state_pub.publish(joint_controller_state);
 }
 
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::restart()
