@@ -2,6 +2,58 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.3.2 (2016-04-26)
+------------------
+
+* [fix] getFootStepParam interface according to upstream change. Remove rleg_coords and lleg_coords.
+* [fix] HrpsysSeqStateROSBridgeImpl.cpp: sensor->localR is world coords
+* [fix] Modified HrpsysSeqStateROSBridgeImpl to enable virtual force
+* [fix] [rtm-ros-robot-interface.l] add time constant prameter according to upstream idl update
+* [fix] [hrpsys_ros_bridge] Fix genjava problem by adding message_generation as build_depend
+* [fix] getFootStepParam interface according to upstream change. Remove rleg_coords and lleg_coords.
+* [fix] [hrpsys_ros_bridge]change D if D from hrpsys is empty
+* [feat] [hrpsys_ros_bridge/test/test-samplerobot.py] add test programs to check frame_id of off_xxsensor and ref_xxsensor (#940)
+* [feat] Set /robot/type param according to lower-case robot name such as samplerobot.
+* [feat] [hrpsys_ros_bridge/test/test-samplerobot.*] add a test program for init of hcf
+* [feat] fix collision visualization, color of sphere will be purple if collision occur
+* [feat] .travis.yml : add test when old hrpsys-ros-bridge exists (#929)
+* [feat] [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add check for param existence for def-set-get-param-method to neglect idl mismatch error. Fix indent. (#933)
+* [feat] [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add reference force updater euslisp methods.
+* [feat] [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add object turnaround detector moment version interface.l
+* [feat] Add define controller `#887 <https://github.com/start-jsk/rtmros_common/issues/887>`_
+* [feat] Add leg limb controller setting.
+* [feat] Add method to define joint trajectory controller by default setting.
+* [feat] Add gopos overwrite and graspless manip mode to all demos
+* [feat] Add example for graspless manip mode and gopos overwrite.
+* [feat] Add euslisp interface for graspless manip mode.
+* [feat] add a set-default-step-time-with-the-same-swing-time method
+* [feat] add time constant prameter according to upstream idl update
+* [feat] Add HrpsysSeqStateROSBridge tf rate test
+* [feat] enable virtual force in HrpsysSeqStateROSBridgeImpl
+* [feat] Enable to set subscription_type for DataPorts from hrpsys_ros_bridge.launch argument. Use new by default to keep backward compatibility.
+* [feat] Add loading of optionalData from seq pattern file.
+* [improve] add more mesage to prevent confusion
+* [improve] Add setting for ReferenceForceUpdater
+* [improve] Reset object turnaround detector's detector total wrench mode as TOTAL_FORCE in force estimation.
+* [improve] Enable to set push_policy and push_rate for DataPorts from hrpsys_ros_bridge.launch argument. Use all and 50.0 by default to keep backward compatibility.
+* [improve] Rename tf extract script for test and add comments for that
+* [improve] add arguments(SIMULATOR_NAME\_[ANGLE,VELOCITY,TORQUE]) to hrpsys_ros_bridge.launch, for connecting rtc components other than RobotHardware
+* [improve] add time constant prameter according to u… `#910 <https://github.com/start-jsk/rtmros_common/issues/910>`_
+* [improve] add argument to set periodic time for object turning detection.
+* [improve] define method to set/get emergency-stopper-paramMerge pull request `#865 <https://github.com/start-jsk/rtmros_common/issues/865>`_
+* [improve] Suppress /tf publishing rate by tf_rate using Timer callback in ros.
+* [improve] Separate updating odometry and imu into functions
+* [improve] Update st param `#894 <https://github.com/start-jsk/rtmros_common/issues/894>`_
+* [improve] add eefm_swing_rot_spring_gain / eefm_swing_pos_spring_gain as st param
+* [improve] Update joint group and add test for limb controller
+* [doc] [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] In-code documentation improvement
+* [doc] [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Set default documentation string for def-set-get-param-method setter and getter.
+* [doc] [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add argument documentation for :set-xxx methods.
+* [doc] [hrpsys_ros_bridge/euslisp/README.md,hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Update readme and euslisp documentation strings
+* [doc] default documentation string for def-set-get-param-method setter and getter.
+* [doc] In-code documentation improvement
+* Contributors: Eisoku Kuroiwa, Kei Okada, Kentaro Wada, Masaki Murooka, Shunichi Nozawa, Yohei Kakiuchi, Yu Ohara, Iori Yanokura
+
 1.3.1 (2015-12-16)
 ------------------
 * deb release only targeting to indigo

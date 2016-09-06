@@ -2,6 +2,15 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.3.2 (2016-04-26)
+------------------
+* [fix ] Revert "workaround for ros-groovy-rqt-top installs wrong(?) psutil" (#938)  This reverts commit 94975a81eadbf251a85b2fd3c77137b1f96f248b. This closes `#936 <https://github.com/start-jsk/rtmros_common/issues/936>`_
+* [refactor] add more mesage to prevent confusion
+* [refactor] remove old rosbuild files
+* [feat] Enable to set push_policy and push_rate for DataPorts from hrpsys_ros_bridge.launch argument. Use all and 50.0 by default to keep backward compatibility.
+* [feat] Enable to set subscription_type for DataPorts from hrpsys_ros_bridge.launch argument. Use new by default to keep backward compatibility.
+* Contributors: Shunichi Nozawa, Kei Okada, Iori Yanokura
+
 1.3.1 (2015-12-16)
 ------------------
 * deb release only targeting to indigo

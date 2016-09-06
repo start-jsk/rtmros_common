@@ -6,7 +6,6 @@ find_package(catkin REQUIRED COMPONENTS openrtm_tools)
 
 catkin_package()
 
-install(DIRECTORY scripts/
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-        USE_SOURCE_PERMISSIONS
-        PATTERN ".svn" EXCLUDE)
+install(DIRECTORY scripts sample desktop
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        USE_SOURCE_PERMISSIONS)

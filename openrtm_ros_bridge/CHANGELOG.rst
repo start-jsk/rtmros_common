@@ -2,6 +2,13 @@
 Changelog for package openrtm_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.3.2 (2016-04-26)
+------------------
+
+* [refactor] remove old rosbuild files
+* [openrtm_ros_bridge] Fix genjava problem build_depend message_generation
+* Contributors: Kentaro Wada, Kei Okada
+
 1.3.1 (2015-12-16)
 ------------------
 * deb release only targeting to indigo

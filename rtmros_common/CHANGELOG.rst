@@ -2,6 +2,43 @@
 Changelog for package rtmros_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.3.2 (2016-04-26)
+------------------
+
+* [fix][openrtm_ros_bridge] Fix genjava problem build_depend message_generation
+* [fix][hrpsys_ros_bridge] HrpsysSeqStateROSBridgeImpl.cpp: sensor->localR is world coords
+* [fix][rtm-ros-robot-interface.l] add time constant prameter according to upstream idl update
+* [fix] getFootStepParam interface according to upstream change. Remove rleg_coords and lleg_coords.
+* [feat] [hrpsys_ros_bridge/test/test-samplerobot.py] add test programs to check frame_id of off_xxsensor and ref_xxsensor (#940)
+* [feat] Set /robot/type param according to lower-case robot name such as samplerobot.
+* [feat] [hrpsys_ros_bridge/test/test-samplerobot.*] add a test program for init of hcf
+* [feat] fix collision visualization, color of sphere will be purple if collision occur
+* [feat] .travis.yml : add test when old hrpsys-ros-bridge exists (#929)
+* [feat] [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add check for param existence for def-set-get-param-method to neglect idl mismatch error. Fix indent. (#933)
+* [feat] [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add reference force updater euslisp methods.
+* [feat] [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add object turnaround detector moment version interface.l
+* [feat] Add more CORBA exception information. Add BAD_PARAM, MARSHAL, and OBJECT_NOT_EXIST checking. Add minor code printing and possible case assumption.
+* [feat][openrtm_tools] Enable to set push_policy and push_rate for DataPorts from hrpsys_ros_bridge.launch argument. Use all and 50.0 by default to keep backward compatibility.
+* [feat][openrtm_tools] Enable to set subscription_type for DataPorts from hrpsys_ros_bridge.launch argument. Use new by default to keep backward compatibility.
+* [feat][hrpsys_tools] add ReferenceForceUpdater
+* [feat] enable virtual force in HrpsysSeqStateROSBridgeImpl
+* [feat] Enable to set subscription_type for DataPorts from hrpsys_ros_bridge.launch argument. Use new by default to keep backward compatibility.
+* [feat] Add loading of optionalData from seq pattern file.
+* [feat] add time constant prameter according to upstream idl update
+* [feat] Add HrpsysSeqStateROSBridge tf rate test
+* [feat] Add define controller `#887 <https://github.com/start-jsk/rtmros_common/issues/887>`_
+* [feat] Add leg limb controller setting.
+* [feat] Add method to define joint trajectory controller by default setting.
+* [feat] Add gopos overwrite and graspless manip mode to all demos
+* [feat] Add example for graspless manip mode and gopos overwrite.
+* [feat] Add euslisp interface for graspless manip mode.
+* [feat] add a set-default-step-time-with-the-same-swing-time method
+* [doc] default documentation string for def-set-get-param-method setter and getter.
+* [doc] In-code documentation improvement
+
+* Contributors: Eisoku Kuroiwa, Kei Okada, Kentaro Wada, Masaki Murooka, Shunichi Nozawa, Koyama Ryo, Yohei Kakiuchi, Yu Ohara, Iori Kuroiwa, Isaac I.Y. Saito
+
+
 1.3.1 (2015-12-16)
 ------------------
 * deb release only targeting to indigo

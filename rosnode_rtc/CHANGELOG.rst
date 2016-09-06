@@ -2,6 +2,12 @@
 Changelog for package rosnode_rtc
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.3.2 (2016-04-26)
+------------------
+
+* [refactor] remove old rosbuild files
+* Contributors: Kei Okada
+
 1.3.1 (2015-12-16)
 ------------------
 * deb release only targeting to indigo

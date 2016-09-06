@@ -25,8 +25,8 @@ import genpy
 
 # rtm modules
 import time
-import RTC
 import OpenRTM_aist
+import RTC
 
 module_spec = ["implementation_id", "<implementation_id>",
                "type_name",         "<type_name>",

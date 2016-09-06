@@ -2,6 +2,18 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.3.2 (2016-04-26)
+------------------
+
+* [refactor] delete depends from AutoBalancerService.hh to StabilizerService.hh (#939)
+  * delete depends from AutoBalancerService.hh to StabilizerService.hh
+  * CMakeLists.txt: add Loing ... rtmbuild.cmake message
+  * CMakeLists.txt: fix syntax warning
+  * cmake/rtmbuild.cmake: genrcp may depends on any idl (.hh) file
+* [refactor] remove old rosbuild files
+* [feat][rtmbuild/scripts/idl2srv.py] Add more CORBA exception information. Add BAD_PARAM, MARSHAL, and OBJECT_NOT_EXIST checking. Add minor code printing and possible case assumption.
+* Contributors: Shunichi Nozawa, Kei Okada
+
 1.3.1 (2015-12-16)
 ------------------
 * deb release only targeting to indigo

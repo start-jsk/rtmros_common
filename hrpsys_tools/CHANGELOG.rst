@@ -2,6 +2,13 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.3.2 (2016-04-26)
+------------------
+
+* [refactor] remove old rosbuild files
+* [hrpsys_tools/launch/hrpsys.launch] add ReferenceForceUpdater
+* Contributors: Koyama Ryo, Kei Okada
+
 1.3.1 (2015-12-16)
 ------------------
 * deb release only targeting to indigo

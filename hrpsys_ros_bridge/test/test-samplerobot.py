@@ -3,12 +3,6 @@
 PKG = 'hrpsys_ros_bridge'
 NAME = 'test_samplerobot'
 
-import imp  ## for rosbuild
-try:
-    imp.find_module(PKG)
-except:
-    import roslib; roslib.load_manifest(PKG)
-
 import argparse,unittest,rostest, time, sys, math, os
 from numpy import *
 

@@ -86,7 +86,10 @@
                                    :name (let ((nm (pathname-type x)))
                                            (read-from-string
                                             (if (and (substringp "(" nm) (substringp ")" nm))
-                                                (format nil "RobotHardware0_~A" (car (last (data-string-split nm "_"))))
+                                                (let* ((strlist (data-string-split nm "_")) ;; AA(Robot)0_BB_CC -> (list AA(Robot)0 BB CC)
+                                                       (suffix-str-list (subseq strlist (1+ (position-if #'(lambda (x) (and (substringp "(" x) (substringp ")" x))) strlist)))) ;; (list AA(Robot)0 BB CC) -> (list BB CC)
+                                                       (suffix-str (let ((str (car suffix-str-list))) (dolist (tstr (cdr suffix-str-list)) (setq str (format nil "~A_~A" str tstr))) str))) ;; (list BB CC) -> BB_CC
+                                                  (format nil "RobotHardware0_~A" suffix-str))
                                               nm)))))
                      (append (remove-if-not #'(lambda (x) (substringp "(" x)) fname-candidate-list)
                              fname-candidate-list-with-valid-line-without-rh)))
@@ -100,8 +103,8 @@
   (:eof-p () eof-p)
   (:fix-unitsystem-of-angle-vector
    (read-state &key (joint-list (send robot :joint-list)))
-   (let ((vec (instantiate float-vector (length read-state))))
-     (dotimes (i (length read-state))
+   (let ((vec (instantiate float-vector (length joint-list))))
+     (dotimes (i (length vec))
        (setf (elt vec i) (if (derivedp (elt joint-list i) rotational-joint)
                              (rad2deg (elt read-state i))
                            (* 1e3 (elt read-state i)))))
@@ -141,9 +144,9 @@
            (mapcar #'(lambda (x) (send robot x :end-coords :copy-worldcoords)) limb-list)))
    ;; Stabilizer parameter
    (let ((rsd (send self :parser-list "st_originRefCogVel")))
-     (if rsd (send self :set-robot-state1 :stabilizer-reference-cogvel (send rsd :read-state))))
+     (if rsd (send self :set-robot-state1 :stabilizer-reference-cogvel (scale 1e3 (send rsd :read-state)))))
    (let ((rsd (send self :parser-list "st_originActCogVel")))
-     (if rsd (send self :set-robot-state1 :stabilizer-cogvel (send rsd :read-state))))
+     (if rsd (send self :set-robot-state1 :stabilizer-cogvel (scale 1e3 (send rsd :read-state)))))
    (let ((rsd (send self :parser-list "st_originRefZmp")))
      (if rsd (send self :set-robot-state1 :stabilizer-reference-zmp (scale 1e3 (send rsd :read-state)))))
    (let ((rsd (send self :parser-list "st_originActZmp")))
@@ -172,11 +175,12 @@
          :torque-vector
          (send (send self :parser-list "RobotHardware0_tau") :read-state))
    ;; (send robot :torque-vector (cdr (assoc :torque-vector robot-state)))
-   (send self :set-robot-state1
-         :servo-state
-         (map float-vector #'(lambda (intval)
-                               (let ((str (make-string 4))) (sys::poke intval str 0 :integer) (sys::peek str 0 :float)))
-              (mapcar #'ceiling (coerce (send (send self :parser-list "RobotHardware0_servoState") :read-state) cons))))
+   (if (send self :parser-list "RobotHardware0_servoState")
+       (send self :set-robot-state1
+             :servo-state
+             (map float-vector #'(lambda (intval)
+                                   (let ((str (make-string 4))) (sys::poke intval str 0 :integer) (sys::peek str 0 :float)))
+                  (mapcar #'ceiling (coerce (send (send self :parser-list "RobotHardware0_servoState") :read-state) cons)))))
    (send self :set-robot-state1
          :reference-torque-vector
          (send (send self :parser-list "sh_tqOut") :read-state))
@@ -200,7 +204,11 @@
            (send (send self :parser-list (format nil "RobotHardware0_~A" (send f :name))) :read-state))
      (send self :set-robot-state1
            (read-from-string (format nil ":off-~A" (string-downcase (send f :name))))
-           (send (send self :parser-list (format nil "rmfo_off_~A" (send f :name))) :read-state)))
+           (send (send self :parser-list (format nil "rmfo_off_~A" (send f :name))) :read-state))
+     (send self :set-robot-state1
+           (read-from-string (format nil ":reference-~A" (string-downcase (send f :name))))
+           (send (send self :parser-list (format nil "sh_~AOut" (send f :name))) :read-state))
+     )
    ;; (dolist (i (send robot :imu-sensors))
    ;;   (send self :set-robot-state1
    ;;         (send i :name)
@@ -233,6 +241,14 @@
      (send self :set-robot-state1
            :stabilizer-end-coords-list
            (mapcar #'(lambda (x) (send robot x :end-coords :copy-worldcoords)) limb-list)))
+   ;; Actual root coords from Simulation's actual WAIST pos and rot, which cannot be used for real robots.
+   (if (send self :parser-list "RobotHardware0_WAIST")
+       (send self :set-robot-state1
+             :actual-root-coords
+             (let ((wpr (send (send self :parser-list "RobotHardware0_WAIST") :read-state)))
+               (if (= (length wpr) 6) ;; If length = 6, rotation is rpy. Otherwise, 3x3 matrix.
+                   (make-coords :pos (scale 1e3 (subseq wpr 0 3)) :rpy (list (elt wpr 5) (elt wpr 4) (elt wpr 3)))
+                 (send self :hrpsys-tform->coords wpr)))))
    )
   (:hrpsys-tform->coords
    (tform-vector)
@@ -269,6 +285,7 @@
   (:stabilizer-debug-data () (cdr (assoc :stabilizer-debug-data robot-state)))
   (:stabilizer-end-coords-list () (cdr (assoc :stabilizer-end-coords-list robot-state)))
   (:servo-state () (cdr (assoc :servo-state robot-state)))
+  (:actual-root-coords () (cdr (assoc :actual-root-coords robot-state)))
   ;; overwrite
   (:reference-vector () (cdr (assoc :reference-vector robot-state)))
   (:actual-vector () (send self :potentio-vector))

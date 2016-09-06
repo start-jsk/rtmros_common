@@ -1,6 +1,6 @@
 <package>
   <name>hrpsys_ros_bridge</name>
-  <version>1.3.1</version>
+  <version>1.3.2</version>
   <description>hrpsys_ros_bridge package provides basic functionalities to bind
   	<a href = "http://wiki.ros.org/hrpsys">hrpsys</a>, a 
   	<a href = "http://openrtm.org/">OpenRTM</a>-based controller, and ROS.<br /> 
@@ -32,6 +32,7 @@
   <build_depend>diagnostic_aggregator</build_depend>
   <build_depend>diagnostic_msgs</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>euscollada</build_depend>
   <build_depend>git</build_depend>
   <build_depend>hostname</build_depend>
   <build_depend version_gte="315.3.1">hrpsys</build_depend>

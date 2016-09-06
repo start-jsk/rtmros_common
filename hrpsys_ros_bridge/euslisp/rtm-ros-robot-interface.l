@@ -532,6 +532,102 @@
                    (send robot :force-sensors) (send self :reference-moment-vector))
            tm)
      ))
+  (:angle-vector-sequence-full
+   (jpos tm
+         &key
+         (jvs (apply #'matrix jpos))
+         (sequence-length (nth 0 (array-dimensions jvs)))
+         (joint-length (nth 1 (array-dimensions jvs)))
+         (vel (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
+         (torque (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
+         (pos (make-list sequence-length :initial-element (instantiate float-vector 3)))
+         (rpy (make-list sequence-length :initial-element (instantiate float-vector 3)))
+         (acc (make-list sequence-length :initial-element (instantiate float-vector 3)))
+         (zmp (make-list sequence-length :initial-element (instantiate float-vector 3)))
+         (wrench (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
+         (optional (make-list sequence-length :initial-element (instantiate float-vector 8)))
+         )
+   "Call service for setJointAnglesSequenceFull. Definition of each sequence is similar to sequence file of loadPattern.
+    Arguments type:
+     Required
+      jpos: sequence of joint angles(float-vector) [rad],  (list av0 av1 ... avn)
+      tm: sequence of duration(float) [s],  (list tm0 tm1 ... tmn) or #f(tm0 tm1 ... tmn)
+     Key
+      vel: sequence of joint angular velocities(float-vector) [rad/s],  (list vel0 vel1 ... veln)
+      torque: sequence of torques(float-vector) [Nm],  (list torque0 torque1 ... torquen)
+      pos: sequence of waist pos(float-vector) [m],  (list pos0 pos1 ... posn)
+      rpy: sequence of waist rpy(float-vector) [rad],  (list rpy0 rpy1 ... rpyn)
+      acc: sequence of waist acc(float-vector) [m/s^2],  (list acc0 acc1 ... accn)
+      zmp: sequence of zmp(float-vector) [m],  (list zmp0 zmp1 ... zmpn)
+      wrench: sequence of wrench(float-vector) [N, Nm],  (list wrench0 wrench1 ... wrenchn)
+      optional: sequence of optional(float-vector) [],  (list optional0 optional1 ... optionaln)"
+   (let* ((jvss (instance std_msgs::float64multiarray :init))
+          (vels (instance std_msgs::float64multiarray :init))
+          (torques (instance std_msgs::float64multiarray :init))
+          (poss (instance std_msgs::float64multiarray :init))
+          (rpys (instance std_msgs::float64multiarray :init))
+          (accs (instance std_msgs::float64multiarray :init))
+          (zmps (instance std_msgs::float64multiarray :init))
+          (wrenchs (instance std_msgs::float64multiarray :init))
+          (optionals (instance std_msgs::float64multiarray :init))
+          (tms (coerce tm float-vector)))
+     ;; jvss
+     (send jvss :layout :dim (list
+                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions jvs)) :stride (* (nth 0 (array-dimensions jvs)) (nth 1 (array-dimensions jvs))))
+                              (instance std_msgs::multiArraydimension :init :label "jvs length" :size (nth 1 (array-dimensions jvs)) :stride (nth 1 (array-dimensions jvs)))))
+     (send jvss :data (array-entity jvs))
+     ;; vels
+     (setq vel (apply #'matrix vel))
+     (send vels :layout :dim (list
+                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions vel)) :stride (* (nth 0 (array-dimensions vel)) (nth 1 (array-dimensions vel))))
+                              (instance std_msgs::multiArraydimension :init :label "vel length" :size (nth 1 (array-dimensions vel)) :stride (nth 1 (array-dimensions vel)))))
+     (send vels :data (array-entity vel))
+     ;; torques
+     (setq torque (apply #'matrix torque))
+     (send torques :layout :dim (list
+                                 (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions torque)) :stride (* (nth 0 (array-dimensions torque)) (nth 1 (array-dimensions torque))))
+                                 (instance std_msgs::multiArraydimension :init :label "torque length" :size (nth 1 (array-dimensions torque)) :stride (nth 1 (array-dimensions torque)))))
+     (send torques :data (array-entity torque))
+     ;; poss
+     (setq pos (apply #'matrix pos))
+     (send poss :layout :dim (list
+                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions pos)) :stride (* (nth 0 (array-dimensions pos)) (nth 1 (array-dimensions pos))))
+                              (instance std_msgs::multiArraydimension :init :label "pos length" :size (nth 1 (array-dimensions pos)) :stride (nth 1 (array-dimensions pos)))))
+     (send poss :data (array-entity pos))
+     ;; rpys
+     (setq rpy (apply #'matrix rpy))
+     (send rpys :layout :dim (list
+                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions rpy)) :stride (* (nth 0 (array-dimensions rpy)) (nth 1 (array-dimensions rpy))))
+                              (instance std_msgs::multiArraydimension :init :label "rpy length" :size (nth 1 (array-dimensions rpy)) :stride (nth 1 (array-dimensions rpy)))))
+     (send rpys :data (array-entity rpy))
+     ;; accs
+     (setq acc (apply #'matrix acc))
+     (send accs :layout :dim (list
+                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions acc)) :stride (* (nth 0 (array-dimensions acc)) (nth 1 (array-dimensions acc))))
+                              (instance std_msgs::multiArraydimension :init :label "acc length" :size (nth 1 (array-dimensions acc)) :stride (nth 1 (array-dimensions acc)))))
+     (send accs :data (array-entity acc))
+     ;; zmps
+     (setq zmp (apply #'matrix zmp))
+     (send zmps :layout :dim (list
+                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions zmp)) :stride (* (nth 0 (array-dimensions zmp)) (nth 1 (array-dimensions zmp))))
+                              (instance std_msgs::multiArraydimension :init :label "zmp length" :size (nth 1 (array-dimensions zmp)) :stride (nth 1 (array-dimensions zmp)))))
+     (send zmps :data (array-entity zmp))
+     ;; wrenchs
+     (setq wrench (apply #'matrix wrench))
+     (send wrenchs :layout :dim (list
+                                 (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions wrench)) :stride (* (nth 0 (array-dimensions wrench)) (nth 1 (array-dimensions wrench))))
+                                 (instance std_msgs::multiArraydimension :init :label "wrench length" :size (nth 1 (array-dimensions wrench)) :stride (nth 1 (array-dimensions wrench)))))
+     (send wrenchs :data (array-entity wrench))
+     ;; optionals
+     (setq optional (apply #'matrix optional))
+     (send optionals :layout :dim (list
+                                   (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions optional)) :stride (* (nth 0 (array-dimensions optional)) (nth 1 (array-dimensions optional))))
+                                   (instance std_msgs::multiArraydimension :init :label "optional length" :size (nth 1 (array-dimensions optional)) :stride (nth 1 (array-dimensions optional)))))
+     (send optionals :data (array-entity optional))
+
+     (send self :sequenceplayerservice_setjointanglessequencefull :jvss jvss :vels vels :torques torques :poss poss :rpys rpys :accs accs :zmps zmps :wrenchs wrenchs :optionals optionals :tms tms)
+     )
+   )
   )
 
 ;; CollisionDetectorService
@@ -559,11 +655,30 @@
 ;; DataLoggerService
 (defmethod rtm-ros-robot-interface
   (:save-log
-   (fname &key (set-robot-date-string t))
+   (fname &key (set-robot-date-string t) (make-directory nil))
    "Save log files as [fname].[component_name]_[dataport_name].
     This method corresponds to DataLogger save().
-    If set-robot-date-string is t, filename includes date string and robot name. By default, set-robot-date-string is t."
-   (send self :dataloggerservice_save :basename (format nil "~A~A" fname (if set-robot-date-string (format nil "_~A" (send self :get-robot-date-string)) ""))))
+    If set-robot-date-string is t, filename includes date string and robot name. By default, set-robot-date-string is t.
+    If make-directory is t and fname is /foo/bar/basename, make directory of /foo/bar/basename and log files will be saved with /foo/bar/basename/basename"
+   (let ((basename
+          (format nil "~A~A" fname (if set-robot-date-string (format nil "_~A" (send self :get-robot-date-string)) ""))))
+     (when make-directory
+       (let* ((pname (pathname basename))
+              dirname
+              (fname
+               (if (send pname :type)
+                   (concatenate string (send pname :name) "." (send pname :type))
+                   (send pname :name))))
+         (send pname :add-directory (list fname))
+         (setq dirname (send pname :directory-string))
+         (when (and dirname
+                    (not (lisp::probe-file dirname)))
+           (unix::mkdir dirname))
+         (setq basename (send pname :namestring))
+         ))
+     (warn ";; save log to ~A~%" basename)
+     (send self :dataloggerservice_save :basename basename)
+     ))
   ;; start log by clearing log
   (:start-log
    ()
@@ -1175,6 +1290,17 @@
    "Get remaining foot steps from GaitGenerator.
    Return is (list current-support-foot-coords remaining-swing-dst-coords-0 ... )."
    (car (send self :get-remaining-foot-step-sequence-current-index)))
+  (:get-go-pos-footsteps-sequence
+   (xx yy th)
+   "Get foot steps of go-pos without executing them.
+   Return is list of list of footstep."
+   (let ((ret (send self :autobalancerservice_getGoPosFootstepsSequence :x xx :y yy :th th)))
+     (mapcar #'(lambda (fsl)
+                 (mapcar #'(lambda (fs)
+                             (send self :abc-footstep->eus-footstep fs))
+                         (send fsl :fs)))
+             (send ret :o_footstep))
+     ))
   (:draw-remaining-foot-step-sequence
    (vwer
     &key (flush) (rleg-color #f(1 0 0)) (lleg-color #f(0 1 0))
@@ -1431,7 +1557,7 @@
   (:set-st-param
    (&rest args
     &key st-algorithm
-         eefm-pos-damping-gain eefm-rot-damping-gain eefm-pos-time-const-support eefm-rot-time-const eefm-swing-pos-spring-gain eefm-swing-pos-time-const eefm-swing-rot-spring-gain eefm-swing-rot-time-const
+         eefm-pos-damping-gain eefm-rot-damping-gain eefm-pos-time-const-support eefm-rot-time-const eefm-swing-pos-spring-gain eefm-swing-pos-time-const eefm-swing-rot-spring-gain eefm-swing-rot-time-const eefm-ee-forcemoment-distribution-weight
     &allow-other-keys)
    "Set Stabilizer parameters.
     For arguments, please see (send *ri* :get-st-param-arguments)."
@@ -1480,6 +1606,10 @@
                  (let ((tmp (send prm :eefm_swing_rot_time_const)))
                    (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-swing-rot-time-const))
                    (list :eefm-swing-rot-time-const tmp)))
+             (if (and (memq :eefm-ee-forcemoment-distribution-weight args) eefm-ee-forcemoment-distribution-weight)
+                 (let ((tmp (send prm :eefm_ee_forcemoment_distribution_weight)))
+                   (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-ee-forcemoment-distribution-weight))
+                   (list :eefm-ee-forcemoment-distribution-weight tmp)))
              args))))
   (:set-st-param-for-non-feedback-LIP-mode
    ()
@@ -1673,19 +1803,48 @@
 ;; ReferenceForceUpdater
 (def-set-get-param-method
   'hrpsys_ros_bridge::Openhrp_ReferenceForceUpdaterService_ReferenceForceUpdaterParam
-  :set-reference-force-updater-param :get-reference-force-updater-param :get-reference-force-updater-param-arguments
-  :ReferenceForceUpdaterService_setReferenceForceUpdaterParam :ReferenceForceUpdaterService_getReferenceForceUpdaterParam)
+  :raw-set-reference-force-updater-param :raw-get-reference-force-updater-param :get-reference-force-updater-param-arguments
+  :ReferenceForceUpdaterService_setReferenceForceUpdaterParam :ReferenceForceUpdaterService_getReferenceForceUpdaterParam
+  :optional-args (list :name 'name))
 (defmethod rtm-ros-robot-interface
   (:start-reference-force-updater
-   ()
-   "Start reference force updater."
-   (send self :referenceforceupdaterservice_startReferenceforceupdater)
-   )
+   (limb)
+   "Start reference force updater mode.
+    limb should be limb symbol name such as :rarm, :larm, or :arms."
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name)
+             (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase name)))
+         :start-reference-force-updater))
   (:stop-reference-force-updater
-   ()
-   "Stop reference force updater."
-   (send self :referenceforceupdaterservice_stopReferenceforceupdater)
-   )
+   (limb)
+   "Stop reference force updater mode.
+    limb should be limb symbol name such as :rarm, :larm, or :arms."
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name)
+             (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase name)))
+         :stop-reference-force-updater))
+  (:set-reference-force-updater-param
+   (limb &rest args)
+   "Set reference force updater parameter like (send *ri* :set-reference-force-updater-param :rarm :p-gain 0.02).
+    limb should be limb symbol name such as :rarm, :larm, :arms.
+    For arguments, please see (send *ri* :get-reference-force-updater-param-arguments)"
+   (send* self :force-sensor-method
+          limb
+          #'(lambda (name &rest _args)
+              (send* self :raw-set-reference-force-updater-param (string-downcase name) args))
+          :set-reference-force-updater-param
+          args))
+  (:get-reference-force-updater-param
+   (limb)
+   "Get reference force updater parameter.
+    limb should be limb symbol name such as :rarm, :larm, :arms."
+   (send self :force-sensor-method
+         limb
+         #'(lambda (name)
+             (send self :raw-get-reference-force-updater-param (string-downcase name)))
+         :get-reference-force-updater-param))
   )
 
 (defun print-end-effector-parameter-conf-from-robot
@@ -1769,22 +1928,13 @@
          (format zf "~%")
          ))) ;; with-open-file for .zmp file
     )
-  (when (or (cadr (memq :ee-local-wrench-list (car rs-list)))
-            (and (cadr (memq :end-coords-list (car rs-list))) (cadr (memq :wrench-list (car rs-list)))))
+  (when (cadr (memq :wrench-list (car rs-list)))
     (with-open-file
      (wrf (format nil "~A.wrenches" output-basename) :direction :output) ;; wrench file -> force and moment ;; 6 x force-sensor-num
      (dolist (l rs-list)
        ;; write wrenches file
        (format wrf "~A " (+ initial-sync-time (cadr (memq :time l))))
-       (let ((wrl
-              (or (cadr (memq :ee-local-wrench-list l))
-                  (list
-                   (mapcar #'(lambda (ee ff)
-                               (send ee :inverse-rotate-vector ff))
-                           (cadr (memq :end-coords-list l)) (car (cadr (memq :wrench-list l))))
-                   (mapcar #'(lambda (ee mm)
-                               (send ee :inverse-rotate-vector mm))
-                           (cadr (memq :end-coords-list l)) (cadr (cadr (memq :wrench-list l))))))))
+       (let ((wrl (cadr (memq :wrench-list l))))
          (dotimes (j (length (car wrl))) ;; j is limb index
            (let ((f (elt (car wrl) j)) (m (elt (cadr wrl) j)))
              (dotimes (i 3) (format wrf "~A " (elt f i))) ;; force

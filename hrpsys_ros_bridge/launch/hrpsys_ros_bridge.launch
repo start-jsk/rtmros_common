@@ -46,6 +46,8 @@
   <arg name="push_rate" default="50.0" />
   <!-- END:openrtm setting -->
   <arg name="OUTPUT" default="screen"/>
+  <arg name="ROBOT_TYPE" default=""/>
+  <arg name="USE_ROBOT_TYPE_SETTING" default="false"/>
   <env name="LANG" value="C" />
   <env name="ORBgiopMaxMsgSize" value="2147483648" />
 
@@ -282,5 +284,7 @@
            if="$(arg USE_ROBOT_POSE_EKF)">
     <arg name="base_link" value="$(arg BASE_LINK)"/>
   </include>
+
+  <rosparam param="robot/type" subst_value="True" if="$(arg USE_ROBOT_TYPE_SETTING)">$(arg ROBOT_TYPE)</rosparam>
 </launch>
 

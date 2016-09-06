@@ -10,7 +10,7 @@ if (!OMNIORB_FOUND)
 endif()
 
 catkin_package(
-  DEPENDS omniorb
+  DEPENDS OMNIORB
   CATKIN_DEPENDS message_generation std_msgs
   CFG_EXTRAS servicebridge.cmake rtmbuild.cmake
   )
