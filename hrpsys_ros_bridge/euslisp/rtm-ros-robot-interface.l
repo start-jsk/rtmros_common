@@ -1868,7 +1868,7 @@
 
 ;; TorqueControllerService
 (def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_TorqueControllerService_TorqueControllerParam
-  :set-torque-controller-param :get-torque-controller-param
+  :set-torque-controller-param :get-torque-controller-param :get-torque-controller-param-arguments
   :torquecontrollerservice_settorquecontrollerparam :torquecontrollerservice_gettorquecontrollerparam
   :optional-args (list :jname 'jname))
 (defmethod rtm-ros-robot-interface
