@@ -21,9 +21,6 @@ def connecSensorRosBridgePort(url, rh, bridge, vs, rmfo, sh, subscription_type =
             if rh.port(sen.name) != None: # check existence of sensor ;; currently original HRP4C.xml has different naming rule of gsensor and gyrometer
                 print program_name, "connect ", sen.name, rh.port(sen.name).get_port_profile().name, bridge.port(sen.name).get_port_profile().name
                 connectPorts(rh.port(sen.name), bridge.port(sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy)
-                if sen.type == 'Force' and rmfo != None:
-                    print program_name, "connect ", sen.name, rmfo.port("off_" + sen.name).get_port_profile().name, bridge.port("off_" + sen.name).get_port_profile().name
-                    connectPorts(rmfo.port("off_" + sen.name), bridge.port("off_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy) # for abs forces
                 if sen.type == 'Force' and sh.port(sen.name+"Out") and bridge.port("ref_" + sen.name):
                     print program_name, "connect ", sen.name, sh.port(sen.name+"Out").get_port_profile().name, bridge.port("ref_" + sen.name).get_port_profile().name
                     connectPorts(sh.port(sen.name+"Out"), bridge.port("ref_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy) # for reference forces

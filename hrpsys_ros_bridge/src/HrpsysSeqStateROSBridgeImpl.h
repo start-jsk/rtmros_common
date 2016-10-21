@@ -16,6 +16,14 @@
 #include <rtm/DataInPort.h>
 #include <rtm/DataOutPort.h>
 #include "hrpsys_ros_bridge/idl/HRPDataTypes.hh"
+#ifdef USE_SERIALIZEDSTATEDATA
+#include "hrpsys_ros_bridge/idl/RemoveForceSensorLinkOffsetService.hh"
+#include "hrpsys_ros_bridge/idl/AutoBalancerService.hh"
+#include "hrpsys_ros_bridge/idl/StabilizerService.hh"
+#warning "Use Serialized State Data"
+#else
+#warning "NOT Use Serialized State Data"
+#endif
 
 // hrp
 #include <hrpCorba/ModelLoader.hh>
@@ -155,6 +163,16 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   TimedDoubleSeq m_controlSwingSupportTime;
   InPort<TimedDoubleSeq> m_controlSwingSupportTimeIn;
 
+#ifdef USE_SERIALIZEDSTATEDATA
+  // Serialized State Data
+  OpenHRP::RemoveForceSensorLinkOffsetService::TimedSerializedStateData m_serializedStateDataRMFO;
+  InPort<OpenHRP::RemoveForceSensorLinkOffsetService::TimedSerializedStateData> m_serializedStateDataRMFOIn;
+  OpenHRP::AutoBalancerService::TimedSerializedStateData m_serializedStateDataABC;
+  InPort<OpenHRP::AutoBalancerService::TimedSerializedStateData> m_serializedStateDataABCIn;
+  OpenHRP::StabilizerService::TimedSerializedStateData m_serializedStateDataST;
+  InPort<OpenHRP::StabilizerService::TimedSerializedStateData> m_serializedStateDataSTIn;
+#endif
+
   // </rtc-template>
 
   // DataOutPort declaration
@@ -196,6 +214,7 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
     std::string link_name;
   } COPLinkInfo;
   std::map<std::string, COPLinkInfo> cop_link_info;
+  size_t fsensor_num, gsensor_num, gyrometer_num;
 
   double dt;
 
