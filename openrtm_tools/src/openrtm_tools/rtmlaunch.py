@@ -123,6 +123,8 @@ def rtconnect(nameserver, tags, tree):
                     props['dataport.push_rate'] = replace_arg_tag_by_env(str(tag.attributes.get("push_rate").value))
                 else:
                     props['dataport.push_rate'] = str('50.0')
+            if tag.attributes.get("buffer_length") != None:
+                props['dataport.buffer.length'] = replace_arg_tag_by_env(str(tag.attributes.get("buffer_length").value))
             options = optparse.Values({'verbose': False, 'id': '', 'name': None, 'properties': props})
             print >>sys.stderr, "[rtmlaunch] Connected from",source_path
             print >>sys.stderr, "[rtmlaunch]             to",dest_path
