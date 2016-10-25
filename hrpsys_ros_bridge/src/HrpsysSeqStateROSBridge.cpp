@@ -293,6 +293,25 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   static int count_drop = 0; // inc only when data is dropped
   count_all ++;
 
+  // Reading of serialized state data
+  bool is_serializedStateDataRMFO_new = false;
+  bool is_serializedStateDataST_new = false;
+  bool is_serializedStateDataABC_new = false;
+#ifdef USE_SERIALIZEDSTATEDATA
+  if (m_serializedStateDataRMFOIn.isNew()) {
+    m_serializedStateDataRMFOIn.read();
+    is_serializedStateDataRMFO_new = true;
+  }
+  if (m_serializedStateDataSTIn.isNew()) {
+    m_serializedStateDataSTIn.read();
+    is_serializedStateDataST_new = true;
+  }
+  if (m_serializedStateDataABCIn.isNew()) {
+    m_serializedStateDataABCIn.read();
+    is_serializedStateDataABC_new = true;
+  }
+#endif
+
   // servoStateIn
   if ( m_servoStateIn.isNew () ) {
     try {
@@ -614,34 +633,35 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	}
     }
   } // end: publish forces sonsors
-  for (unsigned int i=0; i<m_offforceIn.size(); i++){
-    if ( m_offforceIn[i]->isNew() ) {
+
+  // RMFO
+#ifdef USE_SERIALIZEDSTATEDATA
+  if (is_serializedStateDataRMFO_new) {
+    for (unsigned int i=0; i<fsensor_num; i++){
       try {
-	m_offforceIn[i]->read();
-	ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute " << m_offforceName[i] << " size = " << m_offforce[i].data.length() );
-	if ( m_offforce[i].data.length() >= 6 ) {
+        ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute " << m_offforceName[i] );
 	  geometry_msgs::WrenchStamped fsensor;
 	  if ( use_hrpsys_time ) {
-	    fsensor.header.stamp = ros::Time(m_offforce[i].tm.sec, m_offforce[i].tm.nsec);
+           fsensor.header.stamp = ros::Time(m_serializedStateDataRMFO.tm.sec, m_serializedStateDataRMFO.tm.nsec);
 	  }else{
 	    fsensor.header.stamp = tm_on_execute;
 	  }
 	  fsensor.header.frame_id = m_offforceName[i].substr(std::string("off_").size());
-	  fsensor.wrench.force.x = m_offforce[i].data[0];
-	  fsensor.wrench.force.y = m_offforce[i].data[1];
-	  fsensor.wrench.force.z = m_offforce[i].data[2];
-	  fsensor.wrench.torque.x = m_offforce[i].data[3];
-	  fsensor.wrench.torque.y = m_offforce[i].data[4];
-	  fsensor.wrench.torque.z = m_offforce[i].data[5];
-	  fsensor_pub[i+m_rsforceIn.size()].publish(fsensor);
+        fsensor.wrench.force.x = m_serializedStateDataRMFO.data.wrenches[i*6];
+        fsensor.wrench.force.y = m_serializedStateDataRMFO.data.wrenches[i*6+1];
+        fsensor.wrench.force.z = m_serializedStateDataRMFO.data.wrenches[i*6+2];
+        fsensor.wrench.torque.x = m_serializedStateDataRMFO.data.wrenches[i*6+3];
+        fsensor.wrench.torque.y = m_serializedStateDataRMFO.data.wrenches[i*6+4];
+        fsensor.wrench.torque.z = m_serializedStateDataRMFO.data.wrenches[i*6+5];
+        fsensor_pub[i+fsensor_num].publish(fsensor);
 	}
-      }
       catch(const std::runtime_error &e)
 	{
 	  ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
 	}
     }
-  } // end: publish forces sonsors
+  }
+#endif
 
   // publish reference forces sonsors
   for (unsigned int i=0; i<m_mcforceIn.size(); i++){
@@ -673,62 +693,58 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
   } // end: publish reference forces sonsors
 
-  if ( m_rszmpIn.isNew() ) {
+#ifdef USE_SERIALIZEDSTATEDATA
+  if (is_serializedStateDataST_new) {
+    // Act ZMP
     try {
-      m_rszmpIn.read();
-      //ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute " << m_rsforceName[i] << " size = " << m_rsforce[i].data.length() );
       geometry_msgs::PointStamped zmpv;
       if ( use_hrpsys_time ) {
-        zmpv.header.stamp = ros::Time(m_rszmp.tm.sec, m_rszmp.tm.nsec);
+        zmpv.header.stamp = ros::Time(m_serializedStateDataST.tm.sec, m_serializedStateDataST.tm.nsec);
       }else{
         zmpv.header.stamp = tm_on_execute;
       }
       zmpv.header.frame_id = rootlink_name;
-      zmpv.point.x = m_rszmp.data.x;
-      zmpv.point.y = m_rszmp.data.y;
-      zmpv.point.z = m_rszmp.data.z;
+      zmpv.point.x = m_serializedStateDataST.data.zmp.x;
+      zmpv.point.y = m_serializedStateDataST.data.zmp.y;
+      zmpv.point.z = m_serializedStateDataST.data.zmp.z;
       zmp_pub.publish(zmpv);
     }
     catch(const std::runtime_error &e)
       {
         ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
-  }
 
-  if ( m_rsrefCPIn.isNew() ) {
+    // RefCP
     try {
-      m_rsrefCPIn.read();
       geometry_msgs::PointStamped refCPv;
       if ( use_hrpsys_time ) {
-        refCPv.header.stamp = ros::Time(m_rsrefCP.tm.sec, m_rsrefCP.tm.nsec);
+        refCPv.header.stamp = ros::Time(m_serializedStateDataST.tm.sec, m_serializedStateDataST.tm.nsec);
       }else{
         refCPv.header.stamp = tm_on_execute;
       }
       refCPv.header.frame_id = rootlink_name;
-      refCPv.point.x = m_rsrefCP.data.x;
-      refCPv.point.y = m_rsrefCP.data.y;
-      refCPv.point.z = m_rsrefCP.data.z;
+      refCPv.point.x = m_serializedStateDataST.data.refCapturePoint.x;
+      refCPv.point.y = m_serializedStateDataST.data.refCapturePoint.y;
+      refCPv.point.z = m_serializedStateDataST.data.refCapturePoint.z;
       ref_cp_pub.publish(refCPv);
     }
     catch(const std::runtime_error &e)
       {
         ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
-  }
 
-  if ( m_rsactCPIn.isNew() ) {
+    // ActCP
     try {
-      m_rsactCPIn.read();
       geometry_msgs::PointStamped actCPv;
       if ( use_hrpsys_time ) {
-        actCPv.header.stamp = ros::Time(m_rsactCP.tm.sec, m_rsactCP.tm.nsec);
+        actCPv.header.stamp = ros::Time(m_serializedStateDataST.tm.sec, m_serializedStateDataST.tm.nsec);
       }else{
         actCPv.header.stamp = tm_on_execute;
       }
       actCPv.header.frame_id = rootlink_name;
-      actCPv.point.x = m_rsactCP.data.x;
-      actCPv.point.y = m_rsactCP.data.y;
-      actCPv.point.z = m_rsactCP.data.z;
+      actCPv.point.x = m_serializedStateDataST.data.actCapturePoint.x;
+      actCPv.point.y = m_serializedStateDataST.data.actCapturePoint.y;
+      actCPv.point.z = m_serializedStateDataST.data.actCapturePoint.z;
       act_cp_pub.publish(actCPv);
     }
     catch(const std::runtime_error &e)
@@ -737,26 +753,23 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
   }
 
-  if ( m_refContactStatesIn.isNew() && m_controlSwingSupportTimeIn.isNew() ) {
+  if (is_serializedStateDataABC_new) {
     try {
-      m_refContactStatesIn.read();
-      m_controlSwingSupportTimeIn.read();
       hrpsys_ros_bridge::ContactStatesStamped refCSs;
       if ( use_hrpsys_time ) {
-        refCSs.header.stamp = ros::Time(m_refContactStates.tm.sec, m_refContactStates.tm.nsec);
+        refCSs.header.stamp = ros::Time(m_serializedStateDataABC.tm.sec, m_serializedStateDataABC.tm.nsec);
       }else{
         refCSs.header.stamp = tm_on_execute;
       }
-      int limb_size = m_refContactStates.data.length();
-      refCSs.states.resize(limb_size);
-      for ( unsigned int i = 0; i < limb_size ; i++ ){
+      refCSs.states.resize(fsensor_num);
+      for ( unsigned int i = 0; i < fsensor_num ; i++ ){
         hrpsys_ros_bridge::ContactState s;
-        if (m_refContactStates.data[i]) {
+        if (m_serializedStateDataABC.data.contactStates[i]) {
           s.state = s.ON;
         } else {
           s.state = s.OFF;
         }
-        s.remaining_time = m_controlSwingSupportTime.data[i];
+        s.remaining_time = m_serializedStateDataABC.data.controlSwingSupportTime[i];
         refCSs.states[i].header.stamp = refCSs.header.stamp;
         refCSs.states[i].header.frame_id = m_rsforceName[i];
         refCSs.states[i].state = s;
@@ -769,20 +782,19 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
   }
 
-  if ( m_actContactStatesIn.isNew() ) {
+  if (is_serializedStateDataST_new) {
+    // Act Contact State
     try {
-      m_actContactStatesIn.read();
       hrpsys_ros_bridge::ContactStatesStamped actCSs;
       if ( use_hrpsys_time ) {
-        actCSs.header.stamp = ros::Time(m_actContactStates.tm.sec, m_actContactStates.tm.nsec);
+        actCSs.header.stamp = ros::Time(m_serializedStateDataST.tm.sec, m_serializedStateDataST.tm.nsec);
       }else{
         actCSs.header.stamp = tm_on_execute;
       }
-      int limb_size = m_actContactStates.data.length();
-      actCSs.states.resize(limb_size);
-      for ( unsigned int i = 0; i < limb_size ; i++ ){
+      actCSs.states.resize(fsensor_num);
+      for ( unsigned int i = 0; i < fsensor_num ; i++ ){
         hrpsys_ros_bridge::ContactState s;
-        if (m_actContactStates.data[i]) {
+        if (m_serializedStateDataST.data.contactStates[i]) {
           s.state = s.ON;
         } else {
           s.state = s.OFF;
@@ -797,27 +809,24 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       {
         ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
-  }
 
-  if ( m_rsCOPInfoIn.isNew() ) {
+    // Act COP Info
     try {
-      m_rsCOPInfoIn.read();
-      //ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute " << m_rsforceName[i] << " size = " << m_rsforce[i].data.length() );
-      for (size_t i = 0; i < m_mcforceIn.size(); i++) {
+      for (size_t i = 0; i < fsensor_num; i++) {
         std::string tmpname = m_mcforceName[i]; // "ref_xx"
         tmpname.erase(0,4); // Remove "ref_"
         if (cop_link_info.find(tmpname) == cop_link_info.end()) continue;
-        double fz = m_rsCOPInfo.data[i*3+2];
+        double fz = m_serializedStateDataST.data.COPInfo[i*3+2];
         if (fz < 1e-3) continue; // If fz is small, do not publish COP.
         geometry_msgs::PointStamped copv;
         if ( use_hrpsys_time ) {
-          copv.header.stamp = ros::Time(m_rsCOPInfo.tm.sec, m_rsCOPInfo.tm.nsec);
+          copv.header.stamp = ros::Time(m_serializedStateDataST.tm.sec, m_serializedStateDataST.tm.nsec);
         }else{
           copv.header.stamp = tm_on_execute;
         }
         copv.header.frame_id = cop_link_info[tmpname].link_name;
-        copv.point.x = m_rsCOPInfo.data[i*3+1]/fz; // copx = my / fz
-        copv.point.y = m_rsCOPInfo.data[i*3]/fz; // copy = mx / fz
+        copv.point.x = m_serializedStateDataST.data.COPInfo[i*3+1]/fz; // copx = my / fz
+        copv.point.y = m_serializedStateDataST.data.COPInfo[i*3]/fz; // copy = mx / fz
         copv.point.z = cop_link_info[tmpname].cop_offset_z; // cop z position is static.
         cop_pub[i].publish(copv);
       }
@@ -827,7 +836,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
   }
-
+#endif
   if ( m_emergencyModeIn.isNew() ) {
     try {
       m_emergencyModeIn.read();
