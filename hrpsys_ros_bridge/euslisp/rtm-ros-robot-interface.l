@@ -104,15 +104,19 @@
    (send self :tmp-force-moment-vector :moment limb))
   (:off-force-vector
    (&optional (limb))
-   "Returns offset-removed :force-vector [N] list for all limbs obtained by :state.
+   "!! This method is deprecated, use :force-vector !!
+    Returns offset-removed :force-vector [N] list for all limbs obtained by :state.
     This value corresponds to RemoveForceSensorLinkOffset RTC.
     If a limb argument is specified, returns a vector for the limb."
+   (warning-message 1 ";; !!~%;; !! :off-force-vector is deprecated, use :force-vector !!~%;; !!~%")
    (send self :tmp-force-moment-vector :force limb "off"))
   (:off-moment-vector
    (&optional (limb))
-   "Returns offset-removed :moment-vector [Nm] list for all limbs obtained by :state.
+   "!! This method is deprecated, use :moment-vector !!
+    Returns offset-removed :moment-vector [Nm] list for all limbs obtained by :state.
     This value corresponds to RemoveForceSensorLinkOffset RTC.
     If a limb argument is specified, returns a vector for the limb."
+   (warning-message 1 ";; !!~%;; !! :off-moment-vector is deprecated, use :moment-vector !!~%;; !!~%")
    (send self :tmp-force-moment-vector :moment limb "off"))
   (:reference-force-vector
    (&optional (limb))
@@ -132,20 +136,20 @@
     This value corresponds to RemoveForceSensorLinkOffset RTC.
     If a limb argument is specified, returns a vector for the limb."
    (if limb
-       (send (car (send robot limb :force-sensors)) :rotate-vector (send self :off-force-vector limb))
+       (send (car (send robot limb :force-sensors)) :rotate-vector (send self :force-vector limb))
      (mapcar #'(lambda (fs force)
                  (send fs :rotate-vector force))
-             (send robot :force-sensors) (send self :off-force-vector))))
+             (send robot :force-sensors) (send self :force-vector))))
   (:absolute-moment-vector
    (&optional (limb))
    "Returns offset-removed :moment-vector [Nm] list for all limbs in world frame obtained by :state.
     This value corresponds to RemoveForceSensorLinkOffset RTC.
     If a limb argument is specified, returns a vector for the limb."
    (if limb
-       (send (car (send robot limb :force-sensors)) :rotate-vector (send self :off-moment-vector limb))
+       (send (car (send robot limb :force-sensors)) :rotate-vector (send self :moment-vector limb))
      (mapcar #'(lambda (fs moment)
                  (send fs :rotate-vector moment))
-             (send robot :force-sensors) (send self :off-moment-vector))))
+             (send robot :force-sensors) (send self :moment-vector))))
   (:zmp-vector
    (&optional (wrt :local))
    "Returns zmp vector [mm].
@@ -1053,12 +1057,12 @@
    (let* ((params (mapcar #'(lambda (alimb) (send self :get-forcemoment-offset-param alimb)) limbs)))
      (labels ((calc-off
                (alimb)
-               (send self (if (eq f/m :force) :off-force-vector :off-moment-vector) alimb))
+               (send self (if (eq f/m :force) :force-vector :moment-vector) alimb))
               (get-avg-fm
                ()
                (let ((fm (mapcar #'(lambda (i)
                                      (send self :state)
-                                     (mapcar #'(lambda (alimb) (send self (if (eq f/m :force) :off-force-vector :off-moment-vector) alimb)) limbs))
+                                     (mapcar #'(lambda (alimb) (send self (if (eq f/m :force) :force-vector :moment-vector) alimb)) limbs))
                                  (make-list itr))))
                  (mapcar #'(lambda (alimb)
                              (let ((idx (position alimb limbs)))
