@@ -1050,14 +1050,10 @@
    )
   (:_reset-force-moment-offset
    (limbs f/m &key (itr 10))
-   (let* ((params (mapcar #'(lambda (alimb) (send self :get-forcemoment-offset-param alimb)) limbs))
-          (nominal-mgs (mapcar #'(lambda (param) (scale (* 1e-3 (send param :link_offset_mass)) *g-vec*)) params)))
+   (let* ((params (mapcar #'(lambda (alimb) (send self :get-forcemoment-offset-param alimb)) limbs)))
      (labels ((calc-off
-               (alimb param nominal-mg)
-               (v+ (send self (if (eq f/m :force) :force-vector :moment-vector) alimb)
-                   (if (eq f/m :force)
-                       (send (car (send robot alimb :force-sensors)) :inverse-rotate-vector nominal-mg)
-                     (v* (send param :link_offset_centroid) (send (car (send robot alimb :force-sensors)) :inverse-rotate-vector nominal-mg)))))
+               (alimb)
+               (send self (if (eq f/m :force) :off-force-vector :off-moment-vector) alimb))
               (get-avg-fm
                ()
                (let ((fm (mapcar #'(lambda (i)
@@ -1071,7 +1067,7 @@
        ;; estimate offsets
        (let* ((tmp-fm-offsets (mapcar #'(lambda (i)
                                           (send self :state)
-                                          (mapcar #'calc-off limbs params nominal-mgs))
+                                          (mapcar #'calc-off limbs))
                                       (make-list itr)))
               (new-fm-offsets (mapcar #'(lambda (alimb)
                                           (let ((idx (position alimb limbs)))
@@ -1079,11 +1075,14 @@
                                       limbs))
               (org-fm-list (get-avg-fm)))
          ;; set offsets
-         (mapcar #'(lambda (alimb new-fm-offset)
+         (mapcar #'(lambda (alimb new-fm-offset param)
                      (send self :set-forcemoment-offset-param alimb
                            (if (eq f/m :force) :force-offset :moment-offset)
-                           new-fm-offset))
-                 limbs new-fm-offsets)
+                           (v+ (if (eq f/m :force)
+                                   (send param :force_offset)
+                                 (send param :moment_offset))
+                               new-fm-offset)))
+                 limbs new-fm-offsets params)
          (unix:usleep 10000)
          ;; check ;; compare sensor value before & after resetting
          (mapcar #'(lambda (alimb org-fm new-fm)
