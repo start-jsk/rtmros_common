@@ -34,7 +34,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   use_sim_time(false), use_hrpsys_time(false),
   joint_trajectory_server(nh, "fullbody_controller/joint_trajectory_action", false),
   follow_joint_trajectory_server(nh, "fullbody_controller/follow_joint_trajectory_action", false),
-  HrpsysSeqStateROSBridgeImpl(manager), follow_action_initialized(false), prev_odom_acquired(false)
+  HrpsysSeqStateROSBridgeImpl(manager), follow_action_initialized(false), prev_odom_acquired(false), is_rsforce_connected(false)
 {
   // ros
   ros::NodeHandle pnh("~");
@@ -606,6 +606,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	  fsensor.wrench.torque.y = m_rsforce[i].data[4];
 	  fsensor.wrench.torque.z = m_rsforce[i].data[5];
 	  fsensor_pub[i].publish(fsensor);
+          is_rsforce_connected = true;
 	}
       }
       catch(const std::runtime_error &e)
@@ -634,6 +635,12 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 	  fsensor.wrench.torque.y = m_offforce[i].data[4];
 	  fsensor.wrench.torque.z = m_offforce[i].data[5];
 	  fsensor_pub[i+m_rsforceIn.size()].publish(fsensor);
+          // Publish same force as rsforce for backward compatibility.
+          //   For example, if off_rfsensor is available, publish off_rfsensor and rfsensor.
+          if (!is_rsforce_connected) {
+            fsensor.header.frame_id = m_rsforceName[i];
+            fsensor_pub[i].publish(fsensor);
+          }
 	}
       }
       catch(const std::runtime_error &e)
