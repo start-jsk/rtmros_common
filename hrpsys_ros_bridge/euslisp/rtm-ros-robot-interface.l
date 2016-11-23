@@ -540,12 +540,14 @@
          (fsensor-length (length (send robot :force-sensors))) ;; "fsensor length = ee length" is assumed
          (vel (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
          (torque (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
-         (pos (make-list sequence-length :initial-element (instantiate float-vector 3)))
-         (rpy (make-list sequence-length :initial-element (instantiate float-vector 3)))
+         (root-coords (make-list sequence-length :initial-element (make-coords)))
          (acc (make-list sequence-length :initial-element (instantiate float-vector 3)))
          (zmp (make-list sequence-length :initial-element (instantiate float-vector 3)))
          (wrench (make-list sequence-length :initial-element (instantiate float-vector (* 6 fsensor-length)))) ;; wrench = 6dim
          (optional (make-list sequence-length :initial-element (instantiate float-vector (* 2 fsensor-length)))) ;; 2 is for contactState and controlSwingSupportTime
+         (pos (send-all root-coords :worldpos))
+         (rpy (mapcar #'(lambda (x) (reverse (car (rpy-angle (send x :worldrot))))) root-coords))
+         (root-local-zmp (mapcar #'(lambda (zz cc) (send cc :inverse-transform-vector zz)) zmp root-coords))
          )
    "Call service for setJointAnglesSequenceFull. Definition of each sequence is similar to sequence file of loadPattern.
     Arguments type:
@@ -555,12 +557,15 @@
      Key
       vel: sequence of joint angular velocities(float-vector) [deg/s],  (list vel0 vel1 ... veln)
       torque: sequence of torques(float-vector) [Nm],  (list torque0 torque1 ... torquen)
-      pos: sequence of waist pos(float-vector) [mm],  (list pos0 pos1 ... posn)
-      rpy: sequence of waist rpy(float-vector) [rad],  (list rpy0 rpy1 ... rpyn)
+      root-coords: sequence of waist(root-link) coords in the world frame. (list rc0 rc1 ... rcn). Origin coords by default.
       acc: sequence of waist acc(float-vector) [m/s^2],  (list acc0 acc1 ... accn)
-      zmp: sequence of zmp(float-vector) [mm],  (list zmp0 zmp1 ... zmpn)
+      zmp: sequence of zmp in the world frame (float-vector) [mm],  (list zmp0 zmp1 ... zmpn). Zero by default.
       wrench: sequence of wrench(float-vector) [N, Nm] for all fsensors,  (list wrench0 wrench1 ... wrenchn)
-      optional: sequence of optional(float-vector) [],  (list optional0 optional1 ... optionaln)"
+      optional: sequence of optional(float-vector) [],  (list optional0 optional1 ... optionaln)
+     Not required (calculated from other arguments by default), therefore users need not to use these arguments.
+      pos: sequence of waist pos(float-vector) [mm] in the world frame,  (list pos0 pos1 ... posn). If root-coords is specified, calculated from root-coords and do not set pos.
+      rpy: sequence of waist rpy(float-vector) [rad] in the world frame,  (list rpy0 rpy1 ... rpyn). If root-coords is specified, calculated from root-coords and do not set rpy.
+      root-local-zmp: sequence of zmp in the waist(root-link) frame (float-vector) [mm],  (list zmp0 zmp1 ... zmpn). If root-coords and zmp are specified, calculated from root-coords and zmp and do not set root-local-zmp."
    (let* ((jvss (instance std_msgs::float64multiarray :init))
           (vels (instance std_msgs::float64multiarray :init))
           (torques (instance std_msgs::float64multiarray :init))
@@ -608,7 +613,7 @@
                               (instance std_msgs::multiArraydimension :init :label "acc length" :size (nth 1 (array-dimensions acc)) :stride (nth 1 (array-dimensions acc)))))
      (send accs :data (array-entity acc))
      ;; zmps
-     (setq zmp (apply #'matrix (mapcar #'(lambda (x) (scale 1e-3 x)) zmp))) ;; [mm] -> [m]
+     (setq zmp (apply #'matrix (mapcar #'(lambda (x) (scale 1e-3 x)) root-local-zmp))) ;; [mm] -> [m]
      (send zmps :layout :dim (list
                               (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions zmp)) :stride (* (nth 0 (array-dimensions zmp)) (nth 1 (array-dimensions zmp))))
                               (instance std_msgs::multiArraydimension :init :label "zmp length" :size (nth 1 (array-dimensions zmp)) :stride (nth 1 (array-dimensions zmp)))))
