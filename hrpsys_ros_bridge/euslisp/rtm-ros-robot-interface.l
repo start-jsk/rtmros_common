@@ -552,12 +552,12 @@
       jpos: sequence of joint angles(float-vector) [deg],  (list av0 av1 ... avn)
       tm: sequence of duration(float) [ms],  (list tm0 tm1 ... tmn)
      Key
-      vel: sequence of joint angular velocities(float-vector) [rad/s],  (list vel0 vel1 ... veln)
+      vel: sequence of joint angular velocities(float-vector) [deg/s],  (list vel0 vel1 ... veln)
       torque: sequence of torques(float-vector) [Nm],  (list torque0 torque1 ... torquen)
-      pos: sequence of waist pos(float-vector) [m],  (list pos0 pos1 ... posn)
+      pos: sequence of waist pos(float-vector) [mm],  (list pos0 pos1 ... posn)
       rpy: sequence of waist rpy(float-vector) [rad],  (list rpy0 rpy1 ... rpyn)
       acc: sequence of waist acc(float-vector) [m/s^2],  (list acc0 acc1 ... accn)
-      zmp: sequence of zmp(float-vector) [m],  (list zmp0 zmp1 ... zmpn)
+      zmp: sequence of zmp(float-vector) [mm],  (list zmp0 zmp1 ... zmpn)
       wrench: sequence of wrench(float-vector) [N, Nm],  (list wrench0 wrench1 ... wrenchn)
       optional: sequence of optional(float-vector) [],  (list optional0 optional1 ... optionaln)"
    (let* ((jvss (instance std_msgs::float64multiarray :init))
@@ -577,7 +577,7 @@
                                 (instance std_msgs::multiArraydimension :init :label "jvs length" :size (nth 1 (array-dimensions jvs)) :stride (nth 1 (array-dimensions jvs)))))
        (send jvss :data (array-entity jvs)))
      ;; vels
-     (setq vel (apply #'matrix vel))
+     (setq vel (apply #'matrix (mapcar #'(lambda (x) (map float-vector #'deg2rad x)) vel))) ;; [deg/s] -> [rad/s]
      (send vels :layout :dim (list
                               (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions vel)) :stride (* (nth 0 (array-dimensions vel)) (nth 1 (array-dimensions vel))))
                               (instance std_msgs::multiArraydimension :init :label "vel length" :size (nth 1 (array-dimensions vel)) :stride (nth 1 (array-dimensions vel)))))
@@ -589,7 +589,7 @@
                                  (instance std_msgs::multiArraydimension :init :label "torque length" :size (nth 1 (array-dimensions torque)) :stride (nth 1 (array-dimensions torque)))))
      (send torques :data (array-entity torque))
      ;; poss
-     (setq pos (apply #'matrix pos))
+     (setq pos (apply #'matrix (mapcar #'(lambda (x) (scale 1e-3 x)) pos))) ;; [mm] -> [m]
      (send poss :layout :dim (list
                               (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions pos)) :stride (* (nth 0 (array-dimensions pos)) (nth 1 (array-dimensions pos))))
                               (instance std_msgs::multiArraydimension :init :label "pos length" :size (nth 1 (array-dimensions pos)) :stride (nth 1 (array-dimensions pos)))))
@@ -607,7 +607,7 @@
                               (instance std_msgs::multiArraydimension :init :label "acc length" :size (nth 1 (array-dimensions acc)) :stride (nth 1 (array-dimensions acc)))))
      (send accs :data (array-entity acc))
      ;; zmps
-     (setq zmp (apply #'matrix zmp))
+     (setq zmp (apply #'matrix (mapcar #'(lambda (x) (scale 1e-3 x)) zmp))) ;; [mm] -> [m]
      (send zmps :layout :dim (list
                               (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions zmp)) :stride (* (nth 0 (array-dimensions zmp)) (nth 1 (array-dimensions zmp))))
                               (instance std_msgs::multiArraydimension :init :label "zmp length" :size (nth 1 (array-dimensions zmp)) :stride (nth 1 (array-dimensions zmp)))))
