@@ -537,14 +537,15 @@
          &key
          (sequence-length (length jpos))
          (joint-length (length (car jpos)))
+         (fsensor-length (length (send robot :force-sensors))) ;; "fsensor length = ee length" is assumed
          (vel (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
          (torque (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
          (pos (make-list sequence-length :initial-element (instantiate float-vector 3)))
          (rpy (make-list sequence-length :initial-element (instantiate float-vector 3)))
          (acc (make-list sequence-length :initial-element (instantiate float-vector 3)))
          (zmp (make-list sequence-length :initial-element (instantiate float-vector 3)))
-         (wrench (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
-         (optional (make-list sequence-length :initial-element (instantiate float-vector 8)))
+         (wrench (make-list sequence-length :initial-element (instantiate float-vector (* 6 fsensor-length)))) ;; wrench = 6dim
+         (optional (make-list sequence-length :initial-element (instantiate float-vector (* 2 fsensor-length)))) ;; 2 is for contactState and controlSwingSupportTime
          )
    "Call service for setJointAnglesSequenceFull. Definition of each sequence is similar to sequence file of loadPattern.
     Arguments type:
@@ -558,7 +559,7 @@
       rpy: sequence of waist rpy(float-vector) [rad],  (list rpy0 rpy1 ... rpyn)
       acc: sequence of waist acc(float-vector) [m/s^2],  (list acc0 acc1 ... accn)
       zmp: sequence of zmp(float-vector) [mm],  (list zmp0 zmp1 ... zmpn)
-      wrench: sequence of wrench(float-vector) [N, Nm],  (list wrench0 wrench1 ... wrenchn)
+      wrench: sequence of wrench(float-vector) [N, Nm] for all fsensors,  (list wrench0 wrench1 ... wrenchn)
       optional: sequence of optional(float-vector) [],  (list optional0 optional1 ... optionaln)"
    (let* ((jvss (instance std_msgs::float64multiarray :init))
           (vels (instance std_msgs::float64multiarray :init))
