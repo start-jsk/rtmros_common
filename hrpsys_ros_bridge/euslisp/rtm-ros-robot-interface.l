@@ -551,7 +551,7 @@
     Arguments type:
      Required
       jpos: sequence of joint angles(float-vector) [rad],  (list av0 av1 ... avn)
-      tm: sequence of duration(float) [s],  (list tm0 tm1 ... tmn) or #f(tm0 tm1 ... tmn)
+      tm: sequence of duration(float) [ms],  (list tm0 tm1 ... tmn)
      Key
       vel: sequence of joint angular velocities(float-vector) [rad/s],  (list vel0 vel1 ... veln)
       torque: sequence of torques(float-vector) [Nm],  (list torque0 torque1 ... torquen)
@@ -570,7 +570,7 @@
           (zmps (instance std_msgs::float64multiarray :init))
           (wrenchs (instance std_msgs::float64multiarray :init))
           (optionals (instance std_msgs::float64multiarray :init))
-          (tms (coerce tm float-vector)))
+          (tms (coerce (mapcar #'(lambda (ttm) (* 1e-3 ttm)) tm) float-vector))) ;; [ms]->[s], list -> float-vector
      ;; jvss
      (send jvss :layout :dim (list
                               (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions jvs)) :stride (* (nth 0 (array-dimensions jvs)) (nth 1 (array-dimensions jvs))))
