@@ -535,9 +535,8 @@
   (:angle-vector-sequence-full
    (jpos tm
          &key
-         (jvs (apply #'matrix jpos))
-         (sequence-length (nth 0 (array-dimensions jvs)))
-         (joint-length (nth 1 (array-dimensions jvs)))
+         (sequence-length (length jpos))
+         (joint-length (length (car jpos)))
          (vel (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
          (torque (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
          (pos (make-list sequence-length :initial-element (instantiate float-vector 3)))
@@ -550,7 +549,7 @@
    "Call service for setJointAnglesSequenceFull. Definition of each sequence is similar to sequence file of loadPattern.
     Arguments type:
      Required
-      jpos: sequence of joint angles(float-vector) [rad],  (list av0 av1 ... avn)
+      jpos: sequence of joint angles(float-vector) [deg],  (list av0 av1 ... avn)
       tm: sequence of duration(float) [ms],  (list tm0 tm1 ... tmn)
      Key
       vel: sequence of joint angular velocities(float-vector) [rad/s],  (list vel0 vel1 ... veln)
@@ -572,10 +571,11 @@
           (optionals (instance std_msgs::float64multiarray :init))
           (tms (coerce (mapcar #'(lambda (ttm) (* 1e-3 ttm)) tm) float-vector))) ;; [ms]->[s], list -> float-vector
      ;; jvss
-     (send jvss :layout :dim (list
-                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions jvs)) :stride (* (nth 0 (array-dimensions jvs)) (nth 1 (array-dimensions jvs))))
-                              (instance std_msgs::multiArraydimension :init :label "jvs length" :size (nth 1 (array-dimensions jvs)) :stride (nth 1 (array-dimensions jvs)))))
-     (send jvss :data (array-entity jvs))
+     (let ((jvs (apply #'matrix (mapcar #'(lambda (x) (map float-vector #'deg2rad x)) jpos)))) ;; [deg] -> [rad]
+       (send jvss :layout :dim (list
+                                (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions jvs)) :stride (* (nth 0 (array-dimensions jvs)) (nth 1 (array-dimensions jvs))))
+                                (instance std_msgs::multiArraydimension :init :label "jvs length" :size (nth 1 (array-dimensions jvs)) :stride (nth 1 (array-dimensions jvs)))))
+       (send jvss :data (array-entity jvs)))
      ;; vels
      (setq vel (apply #'matrix vel))
      (send vels :layout :dim (list
