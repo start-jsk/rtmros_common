@@ -2,6 +2,14 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [capability] [hrpsys_ros_bridge] Add euslisp interface for torque controller
+* [improve][hrpsys_ros_bridge/euslisp] Many API improvements
+* [improve] [hrpsys_ros_bridge/launch/hrpsys_ros_bridge.launch, openrtm_tools/src/openrtm_tools/rtmlaunch.py] Add argument to change buffer length of rtmlaunch connection. Set 8 by default (default setting in openrtm) `#980 <https://github.com/start-jsk/rtmros_common/issues/980>`_
+* [improve] Add nameserver argument for ros_bridge.launch (`#950 <https://github.com/start-jsk/rtmros_common/issues/950>`_)
+* Contributors: KOYAMA Ryo, Kei Okada, Noriaki Takasugi, Ryo Terasawa, Shunichi Nozawa, YoheiKakiuchi, Yoshimaru Tanaka, Iori Kumagai, Iori Yanokura, mttamtam
+
 1.3.2 (2016-04-26)
 ------------------
 
