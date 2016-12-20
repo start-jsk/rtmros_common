@@ -510,6 +510,15 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         follow_joint_trajectory_feedback.desired.positions.push_back(j->q);
         follow_joint_trajectory_feedback.actual.positions.push_back(j->q);
         follow_joint_trajectory_feedback.error.positions.push_back(0);
+        follow_joint_trajectory_feedback.desired.velocities.push_back(j->dq);
+        follow_joint_trajectory_feedback.actual.velocities.push_back(j->dq);
+        follow_joint_trajectory_feedback.error.velocities.push_back(0);
+        follow_joint_trajectory_feedback.desired.accelerations.push_back(j->ddq);
+        follow_joint_trajectory_feedback.actual.accelerations.push_back(j->ddq);
+        follow_joint_trajectory_feedback.error.accelerations.push_back(0);
+        follow_joint_trajectory_feedback.desired.effort.push_back(j->u);
+        follow_joint_trajectory_feedback.actual.effort.push_back(j->u);
+        follow_joint_trajectory_feedback.error.effort.push_back(0);
       }
       ++it;
     }
@@ -555,6 +564,20 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       interpolationp = false;
     }
 
+    ros::Time tm_on_execute = ros::Time::now();
+
+    if ( joint_trajectory_server.isActive() ) {
+      pr2_controllers_msgs::JointTrajectoryFeedback joint_trajectory_feedback;
+      joint_trajectory_server.publishFeedback(joint_trajectory_feedback);
+    }
+    if ( follow_joint_trajectory_server.isActive() ) {
+      follow_joint_trajectory_feedback.header.stamp = tm_on_execute;
+      if (!follow_joint_trajectory_feedback.joint_names.empty() &&
+          !follow_joint_trajectory_feedback.actual.positions.empty())
+      {
+        follow_joint_trajectory_server.publishFeedback(follow_joint_trajectory_feedback);
+      }
+    }
     ros::spinOnce();
 
     // diagnostics
@@ -809,7 +832,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
       int limb_size = m_refContactStates.data.length();
       refCSs.states.resize(limb_size);
-      for ( unsigned int i = 0; i < limb_size ; i++ ){
+      for ( unsigned int i = 0; i < limb_size && i < m_rsforceName.size(); i++ ){
         hrpsys_ros_bridge::ContactState s;
         if (m_refContactStates.data[i]) {
           s.state = s.ON;
@@ -840,7 +863,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
       int limb_size = m_actContactStates.data.length();
       actCSs.states.resize(limb_size);
-      for ( unsigned int i = 0; i < limb_size ; i++ ){
+      for ( unsigned int i = 0; i < limb_size && i < m_rsforceName.size(); i++ ){
         hrpsys_ros_bridge::ContactState s;
         if (m_actContactStates.data[i]) {
           s.state = s.ON;

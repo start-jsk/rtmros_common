@@ -144,9 +144,9 @@
            (mapcar #'(lambda (x) (send robot x :end-coords :copy-worldcoords)) limb-list)))
    ;; Stabilizer parameter
    (let ((rsd (send self :parser-list "st_originRefCogVel")))
-     (if rsd (send self :set-robot-state1 :stabilizer-reference-cogvel (send rsd :read-state))))
+     (if rsd (send self :set-robot-state1 :stabilizer-reference-cogvel (scale 1e3 (send rsd :read-state)))))
    (let ((rsd (send self :parser-list "st_originActCogVel")))
-     (if rsd (send self :set-robot-state1 :stabilizer-cogvel (send rsd :read-state))))
+     (if rsd (send self :set-robot-state1 :stabilizer-cogvel (scale 1e3 (send rsd :read-state)))))
    (let ((rsd (send self :parser-list "st_originRefZmp")))
      (if rsd (send self :set-robot-state1 :stabilizer-reference-zmp (scale 1e3 (send rsd :read-state)))))
    (let ((rsd (send self :parser-list "st_originActZmp")))
