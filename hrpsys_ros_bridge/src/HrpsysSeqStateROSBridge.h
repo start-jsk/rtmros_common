@@ -59,6 +59,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void onHumanTrackerLFCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
   void onHumanTrackerRHCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
   void onHumanTrackerLHCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
+  void onHumanTrackerCAMCommandCB(const geometry_msgs::PoseStampedConstPtr& msg);
   bool sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
                 dynamic_reconfigure::Reconfigure::Response &res);
   bool setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
@@ -84,7 +85,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   ros::Subscriber clock_sub;
   //ishiguro
-  ros::Subscriber ht_zmp_sub,ht_com_sub,ht_rfw_sub,ht_lfw_sub,ht_rf_sub,ht_lf_sub,ht_rh_sub,ht_lh_sub;
+  ros::Subscriber ht_zmp_sub,ht_com_sub,ht_rfw_sub,ht_lfw_sub,ht_rf_sub,ht_lf_sub,ht_rh_sub,ht_lh_sub,ht_cam_sub;
   tf::TransformListener ht_tf_listener;
 
   nav_msgs::Odometry prev_odom;

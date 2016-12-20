@@ -54,6 +54,7 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_htlfOut("htlf", m_htlf),
     m_htrhOut("htrh", m_htrh),
     m_htlhOut("htlh", m_htlh),
+    m_htcamOut("htcam", m_htcam),
 
     m_SequencePlayerServicePort("SequencePlayerService")
 
@@ -98,6 +99,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addOutPort("htlf", m_htlfOut);
   addOutPort("htrh", m_htrhOut);
   addOutPort("htlh", m_htlhOut);
+  addOutPort("htcam", m_htcamOut);
   m_htrfw.data.length(6);
   m_htlfw.data.length(6);
 

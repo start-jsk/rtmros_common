@@ -138,7 +138,7 @@
     <rtactivate component="RobotHardwareServiceROSBridge.rtc" />
   </group>
 
-  <!-- USE_WALING
+  <!-- USE_WALKING
       AutoBalancer
       Stabilizer
   -->
@@ -170,6 +170,7 @@
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htlf" to="abc.rtc:htlfIn" subscription_type="new"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htrh" to="abc.rtc:htrhIn" subscription_type="new"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htlh" to="abc.rtc:htlhIn" subscription_type="new"/>
+    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htcam" to="abc.rtc:htcamIn" subscription_type="new"/>
 
     <rtactivate component="AutoBalancerServiceROSBridge.rtc" />
     <rtactivate component="StabilizerServiceROSBridge.rtc" />

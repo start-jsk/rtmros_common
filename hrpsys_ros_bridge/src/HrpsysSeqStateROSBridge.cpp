@@ -65,7 +65,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   ht_rf_sub = nh.subscribe("human_tracker_rf_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRFCommandCB, this);
   ht_lf_sub = nh.subscribe("human_tracker_lf_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLFCommandCB, this);
   ht_rh_sub = nh.subscribe("human_tracker_rh_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRHCommandCB, this);
-  ht_lh_sub = nh.subscribe("human_tracker_lh_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLHCommandCB, this);
+  ht_cam_sub = nh.subscribe("human_tracker_cam_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerCAMCommandCB, this);
 
 
 
@@ -280,6 +280,17 @@ void HrpsysSeqStateROSBridge::onHumanTrackerLHCommandCB(const geometry_msgs::Poi
 	m_htlh.data.x = msg->point.x;	m_htlh.data.y = msg->point.y;	m_htlh.data.z = msg->point.z;
 	m_htlhOut.write(m_htlh);
 }
+void HrpsysSeqStateROSBridge::onHumanTrackerCAMCommandCB(const geometry_msgs::PoseStampedConstPtr& msg) {
+  m_htcam.data.position.x = msg->pose.position.x;
+  m_htcam.data.position.y = msg->pose.position.y;
+  m_htcam.data.position.z = msg->pose.position.z;
+  tf::Quaternion quat(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w);
+  if(quat.length() != 0.0){
+    tf::Matrix3x3(quat.normalized()).getRPY(m_htcam.data.orientation.r, m_htcam.data.orientation.p, m_htcam.data.orientation.y);
+    m_htcamOut.write(m_htcam);
+  }
+}
+
 
 bool HrpsysSeqStateROSBridge::setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
                                                       hrpsys_ros_bridge::SetSensorTransformation::Response& res)
