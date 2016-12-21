@@ -749,7 +749,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
       int limb_size = m_refContactStates.data.length();
       refCSs.states.resize(limb_size);
-      for ( unsigned int i = 0; i < limb_size && i < m_rsforceName.size(); i++ ){
+      for ( unsigned int i = 0; i < limb_size ; i++ ){
         hrpsys_ros_bridge::ContactState s;
         if (m_refContactStates.data[i]) {
           s.state = s.ON;
@@ -780,7 +780,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
       int limb_size = m_actContactStates.data.length();
       actCSs.states.resize(limb_size);
-      for ( unsigned int i = 0; i < limb_size && i < m_rsforceName.size(); i++ ){
+      for ( unsigned int i = 0; i < limb_size ; i++ ){
         hrpsys_ros_bridge::ContactState s;
         if (m_actContactStates.data[i]) {
           s.state = s.ON;
