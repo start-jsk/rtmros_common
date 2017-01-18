@@ -163,24 +163,24 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   OutPort<TimedDoubleSeq> m_mctorqueOut;
 
   //for human tracker
+  TimedPose3D m_htcom;
+  OutPort<TimedPose3D> m_htcomOut;
+  TimedPose3D m_htrf;
+  OutPort<TimedPose3D> m_htrfOut;
+  TimedPose3D m_htlf;
+  OutPort<TimedPose3D> m_htlfOut;
+  TimedPose3D m_htrh;
+  OutPort<TimedPose3D> m_htrhOut;
+  TimedPose3D m_htlh;
+  OutPort<TimedPose3D> m_htlhOut;
+  TimedPose3D m_htcam;
+  OutPort<TimedPose3D> m_htcamOut;
   TimedPoint3D m_htzmp;
   OutPort<TimedPoint3D> m_htzmpOut;
-  TimedPoint3D m_htcom;
-  OutPort<TimedPoint3D> m_htcomOut;
   TimedDoubleSeq m_htrfw;
   OutPort<TimedDoubleSeq> m_htrfwOut;
   TimedDoubleSeq m_htlfw;
   OutPort<TimedDoubleSeq> m_htlfwOut;
-  TimedPoint3D m_htrf;
-  OutPort<TimedPoint3D> m_htrfOut;
-  TimedPoint3D m_htlf;
-  OutPort<TimedPoint3D> m_htlfOut;
-  TimedPoint3D m_htrh;
-  OutPort<TimedPoint3D> m_htrhOut;
-  TimedPoint3D m_htlh;
-  OutPort<TimedPoint3D> m_htlhOut;
-  TimedPose3D m_htcam;
-  OutPort<TimedPose3D> m_htcamOut;
 
   // </rtc-template>
 

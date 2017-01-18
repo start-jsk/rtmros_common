@@ -246,49 +246,55 @@ void HrpsysSeqStateROSBridge::onTrajectoryCommandCB(const trajectory_msgs::Joint
   onJointTrajectory(*msg);
 }
 //for human tracker
-void HrpsysSeqStateROSBridge::onHumanTrackerZMPCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
-	m_htzmp.data.x = msg->point.x;	m_htzmp.data.y = msg->point.y;	m_htzmp.data.z = msg->point.z;
-	m_htzmpOut.write(m_htzmp);
-}
-void HrpsysSeqStateROSBridge::onHumanTrackerCOMCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
-	m_htcom.data.x = msg->point.x;	m_htcom.data.y = msg->point.y;	m_htcom.data.z = msg->point.z;
+void HrpsysSeqStateROSBridge::onHumanTrackerCOMCommandCB(const geometry_msgs::PoseStampedConstPtr& msg) {
+	m_htcom.data.position.x = msg->pose.position.x;	m_htcom.data.position.y = msg->pose.position.y;	m_htcom.data.position.z = msg->pose.position.z;
+  tf::Quaternion quat(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w);
+  if(quat.length() != 0.0){ tf::Matrix3x3(quat.normalized()).getRPY(m_htcom.data.orientation.r, m_htcom.data.orientation.p, m_htcom.data.orientation.y); }
 	m_htcomOut.write(m_htcom);
 }
-void HrpsysSeqStateROSBridge::onHumanTrackerRFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg) {
-	m_htrfw.data[0] = msg->wrench.force.x;	m_htrfw.data[1] = msg->wrench.force.y;	m_htrfw.data[2] = msg->wrench.force.z;
-	m_htrfw.data[3] = msg->wrench.torque.x;	m_htrfw.data[4] = msg->wrench.torque.y;	m_htrfw.data[5] = msg->wrench.torque.z;
-	m_htrfwOut.write(m_htrfw);
-}
-void HrpsysSeqStateROSBridge::onHumanTrackerLFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg) {
-	m_htlfw.data[0] = msg->wrench.force.x;	m_htlfw.data[1] = msg->wrench.force.y;	m_htlfw.data[2] = msg->wrench.force.z;
-	m_htlfw.data[3] = msg->wrench.torque.x;	m_htlfw.data[4] = msg->wrench.torque.y;	m_htlfw.data[5] = msg->wrench.torque.z;
-	m_htlfwOut.write(m_htlfw);
-}
-void HrpsysSeqStateROSBridge::onHumanTrackerRFCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
-	m_htrf.data.x = msg->point.x;	m_htrf.data.y = msg->point.y;	m_htrf.data.z = msg->point.z;
+void HrpsysSeqStateROSBridge::onHumanTrackerRFCommandCB(const geometry_msgs::PoseStampedConstPtr& msg) {
+  m_htrf.data.position.x = msg->pose.position.x;  m_htrf.data.position.y = msg->pose.position.y;  m_htrf.data.position.z = msg->pose.position.z;
+  tf::Quaternion quat(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w);
+  if(quat.length() != 0.0){ tf::Matrix3x3(quat.normalized()).getRPY(m_htrf.data.orientation.r, m_htrf.data.orientation.p, m_htrf.data.orientation.y); }
 	m_htrfOut.write(m_htrf);
 }
-void HrpsysSeqStateROSBridge::onHumanTrackerLFCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
-	m_htlf.data.x = msg->point.x;	m_htlf.data.y = msg->point.y;	m_htlf.data.z = msg->point.z;
+void HrpsysSeqStateROSBridge::onHumanTrackerLFCommandCB(const geometry_msgs::PoseStampedConstPtr& msg) {
+  m_htlf.data.position.x = msg->pose.position.x;  m_htlf.data.position.y = msg->pose.position.y;  m_htlf.data.position.z = msg->pose.position.z;
+  tf::Quaternion quat(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w);
+  if(quat.length() != 0.0){ tf::Matrix3x3(quat.normalized()).getRPY(m_htlf.data.orientation.r, m_htlf.data.orientation.p, m_htlf.data.orientation.y); }
 	m_htlfOut.write(m_htlf);
 }
-void HrpsysSeqStateROSBridge::onHumanTrackerRHCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
-	m_htrh.data.x = msg->point.x;	m_htrh.data.y = msg->point.y;	m_htrh.data.z = msg->point.z;
+void HrpsysSeqStateROSBridge::onHumanTrackerRHCommandCB(const geometry_msgs::PoseStampedConstPtr& msg) {
+  m_htrh.data.position.x = msg->pose.position.x;  m_htrh.data.position.y = msg->pose.position.y;  m_htrh.data.position.z = msg->pose.position.z;
+  tf::Quaternion quat(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w);
+  if(quat.length() != 0.0){ tf::Matrix3x3(quat.normalized()).getRPY(m_htrh.data.orientation.r, m_htrh.data.orientation.p, m_htrh.data.orientation.y); }
 	m_htrhOut.write(m_htrh);
 }
-void HrpsysSeqStateROSBridge::onHumanTrackerLHCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
-	m_htlh.data.x = msg->point.x;	m_htlh.data.y = msg->point.y;	m_htlh.data.z = msg->point.z;
+void HrpsysSeqStateROSBridge::onHumanTrackerLHCommandCB(const geometry_msgs::PoseStampedConstPtr& msg) {
+  m_htlh.data.position.x = msg->pose.position.x;  m_htlh.data.position.y = msg->pose.position.y;  m_htlh.data.position.z = msg->pose.position.z;
+  tf::Quaternion quat(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w);
+  if(quat.length() != 0.0){ tf::Matrix3x3(quat.normalized()).getRPY(m_htlh.data.orientation.r, m_htlh.data.orientation.p, m_htlh.data.orientation.y); }
 	m_htlhOut.write(m_htlh);
 }
 void HrpsysSeqStateROSBridge::onHumanTrackerCAMCommandCB(const geometry_msgs::PoseStampedConstPtr& msg) {
-  m_htcam.data.position.x = msg->pose.position.x;
-  m_htcam.data.position.y = msg->pose.position.y;
-  m_htcam.data.position.z = msg->pose.position.z;
+  m_htcam.data.position.x = msg->pose.position.x;  m_htcam.data.position.y = msg->pose.position.y;  m_htcam.data.position.z = msg->pose.position.z;
   tf::Quaternion quat(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w);
-  if(quat.length() != 0.0){
-    tf::Matrix3x3(quat.normalized()).getRPY(m_htcam.data.orientation.r, m_htcam.data.orientation.p, m_htcam.data.orientation.y);
-    m_htcamOut.write(m_htcam);
-  }
+  if(quat.length() != 0.0){ tf::Matrix3x3(quat.normalized()).getRPY(m_htcam.data.orientation.r, m_htcam.data.orientation.p, m_htcam.data.orientation.y); }
+  m_htcamOut.write(m_htcam);
+}
+void HrpsysSeqStateROSBridge::onHumanTrackerZMPCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
+  m_htzmp.data.x = msg->point.x;  m_htzmp.data.y = msg->point.y;  m_htzmp.data.z = msg->point.z;
+  m_htzmpOut.write(m_htzmp);
+}
+void HrpsysSeqStateROSBridge::onHumanTrackerRFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg) {
+  m_htrfw.data[0] = msg->wrench.force.x;  m_htrfw.data[1] = msg->wrench.force.y;  m_htrfw.data[2] = msg->wrench.force.z;
+  m_htrfw.data[3] = msg->wrench.torque.x; m_htrfw.data[4] = msg->wrench.torque.y; m_htrfw.data[5] = msg->wrench.torque.z;
+  m_htrfwOut.write(m_htrfw);
+}
+void HrpsysSeqStateROSBridge::onHumanTrackerLFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg) {
+  m_htlfw.data[0] = msg->wrench.force.x;  m_htlfw.data[1] = msg->wrench.force.y;  m_htlfw.data[2] = msg->wrench.force.z;
+  m_htlfw.data[3] = msg->wrench.torque.x; m_htlfw.data[4] = msg->wrench.torque.y; m_htlfw.data[5] = msg->wrench.torque.z;
+  m_htlfwOut.write(m_htlfw);
 }
 
 
