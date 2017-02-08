@@ -173,8 +173,8 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   OutPort<TimedPose3D> m_htrhOut;
   TimedPose3D m_htlh;
   OutPort<TimedPose3D> m_htlhOut;
-  TimedPose3D m_htcam;
-  OutPort<TimedPose3D> m_htcamOut;
+  TimedPose3D m_hthead;
+  OutPort<TimedPose3D> m_htheadOut;
   TimedPoint3D m_htzmp;
   OutPort<TimedPoint3D> m_htzmpOut;
   TimedDoubleSeq m_htrfw;

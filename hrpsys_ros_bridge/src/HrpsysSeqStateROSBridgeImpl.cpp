@@ -54,7 +54,7 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_htlfOut("htlf", m_htlf),
     m_htrhOut("htrh", m_htrh),
     m_htlhOut("htlh", m_htlh),
-    m_htcamOut("htcam", m_htcam),
+    m_htheadOut("hthead", m_hthead),
 
     m_SequencePlayerServicePort("SequencePlayerService")
 
@@ -99,7 +99,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addOutPort("htlf", m_htlfOut);
   addOutPort("htrh", m_htrhOut);
   addOutPort("htlh", m_htlhOut);
-  addOutPort("htcam", m_htcamOut);
+  addOutPort("hthead", m_htheadOut);
   m_htrfw.data.length(6);
   m_htlfw.data.length(6);
 
@@ -190,7 +190,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
       si.transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
       hrp::Vector3 rpy;
       if ( hrp::Sensor::VISION == sensor->type )
-        // Rotate sensor->localR 180[deg] because OpenHRP3 camera -Z axis equals to ROS camera Z axis
+        // Rotate sensor->localR 180[deg] because OpenHRP3 cheadra -Z axis equals to ROS camera Z axis
         // http://www.openrtp.jp/openhrp3/jp/create_model.html
         rpy = hrp::rpyFromRot(sensor->localR * hrp::rodrigues(hrp::Vector3(1,0,0), M_PI));
       else if ( hrp::Sensor::RANGE == sensor->type )
