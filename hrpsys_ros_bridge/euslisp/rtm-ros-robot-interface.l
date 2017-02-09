@@ -1879,46 +1879,60 @@
 (defmethod rtm-ros-robot-interface
   (:enable-torque-control ;; enable torque control in specified joint (only start torque control when tau exceeds tauMax)
    (jname)
-   (send self :torquecontrollerservice_enabletorquecontrol :jname jname))
-  (:enable-multiple-torque-controls ;; enable torque control in specified joints (only start torque control when tau exceeds tauMax)
-   (jname-list)
-   (send self :torquecontrollerservice_enablemultipletorquecontrols :jnames jname-list))   
+   (cond
+    ((listp jname)
+     (send self :torquecontrollerservice_enablemultipletorquecontrollers :jnames jname))
+    (t
+     (send self :torquecontrollerservice_enabletorquecontroller :jname jname))
+    ))
   (:disable-torque-control ;; disable torque control in specified joint (torque controller do nothing and pass qRefIn when disabeld)
    (jname)
-   (send self :torquecontrollerservice_disabletorquecontrol :jname jname))
-  (:disable-multiple-torque-controls ;; enable torque control in specified joints (torque controller do nothing and pass qRefIn when disabeld)
-   (jname-list)
-   (send self :torquecontrollerservice_disablemultipletorquecontrols :jnames jname-list))   
-  
+   (cond
+    ((listp jname)
+     (send self :torquecontrollerservice_disablemultipletorquecontrollers :jnames jname)
+     )
+    (t
+     (send self :torquecontrollerservice_disabletorquecontroller :jname jname))
+    ))
   (:start-torque-control ;; start torque control in specified joint
    (jname &optional (tauref nil))
    ;; set reference torque before start torque control
-   (when tauref
-     (send self :set-reference-torque jname tauref)
+   (cond
+    ((listp jname)
+     (when tauref
+       (send self :set-multiple-reference-torques jname tauref))
+     (send self :torquecontrollerservice_startmultipletorquecontrols :jnames jname)
      )
-   (send self :torquecontrollerservice_starttorquecontrol :jname jname))
-  (:start-multiple-torque-controls ;; start torque control in specified joints
-   (jname-list &optional (tauref-list nil))
-      ;; set reference torque before start torque control
-   (when tauref-list
-     (send self :set-multiple-reference-torques jname-list tauref-list)
-     )
-   (send self :torquecontrollerservice_startmultipletorquecontrols :jnames jname-list))
+    (t
+     (when tauref
+       (send self :set-reference-torque jname tauref))
+     (send self :torquecontrollerservice_starttorquecontrol :jname jname))
+    ))
   (:stop-torque-control ;; stop torque control in specified joint (this method does not disable torque control) 
    (jname)
-   (send self :torquecontrollerservice_stoptorquecontrol :jname jname))
-  (:stop-multiple-torque-controls ;; stop torque control in specified joints (this method does not disable torque control)
-   (jname-list)
-   (send self :torquecontrollerservice_stopmultipletorquecontrols :jnames jname-list))
-
+   (cond
+    ((listp jname)
+     (send self :torquecontrollerservice_stopmultipletorquecontrols :jnames jname)
+     )
+    (t
+     (send self :torquecontrollerservice_stoptorquecontrol :jname jname))
+    ))
   (:set-reference-torque ;; set reference torque in specified joint
    (jname tauref)
-   (send self :torquecontrollerservice_setreferencetorque
-         :jname jname :tauRef tauref))
-  (:set-multiple-reference-torques ;; set reference torque in specified joint
-   (jname-list tauref-list)
-   (send self :torquecontrollerservice_setmultiplereferencetorques
-         :jnames jname-list :tauRefs tauref-list))
+   (cond
+    ((listp jname)
+     (unless (listp tauref)
+       (warn ";; tauref ~A should be a list~%")
+       (return-from :set-reference-torque))
+     (send self :torquecontrollerservice_setmultiplereferencetorques :jnames jname :tauRefs tauref)
+     )
+    (t
+     (when (listp tauref)
+       (warn ";; tauref ~A should be a number~%")
+       (return-from :set-reference-torque))
+     (send self :torquecontrollerservice_setreferencetorque
+           :jname jname :tauRef tauref))
+    ))
   )
 
 
