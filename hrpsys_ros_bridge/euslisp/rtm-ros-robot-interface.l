@@ -1877,16 +1877,20 @@
   :torquecontrollerservice_settorquecontrollerparam :torquecontrollerservice_gettorquecontrollerparam
   :optional-args (list :jname 'jname))
 (defmethod rtm-ros-robot-interface
-  (:enable-torque-control ;; enable torque control in specified joint (only start torque control when tau exceeds tauMax)
+  (:enable-torque-control
    (jname)
+   "enable torque controller for specified joint (only start torque control when tau exceeds tauMax)
+    jname should be string of jointname (for one joint) or list of jointname (for multiple joints)"
    (cond
     ((listp jname)
      (send self :torquecontrollerservice_enablemultipletorquecontrollers :jnames jname))
     (t
      (send self :torquecontrollerservice_enabletorquecontroller :jname jname))
     ))
-  (:disable-torque-control ;; disable torque control in specified joint (torque controller do nothing and pass qRefIn when disabeld)
+  (:disable-torque-control
    (jname)
+   "disable torque control in specified joint (torque controller do nothing and pass qRefIn when disabeld)
+    jname should be string of jointname (for one joint) or list of jointname (for multiple joints)"
    (cond
     ((listp jname)
      (send self :torquecontrollerservice_disablemultipletorquecontrollers :jnames jname)
@@ -1894,9 +1898,11 @@
     (t
      (send self :torquecontrollerservice_disabletorquecontroller :jname jname))
     ))
-  (:start-torque-control ;; start torque control in specified joint
+  (:start-torque-control
    (jname &optional (tauref nil))
-   ;; set reference torque before start torque control
+   "start torque control in specified joint. set reference torque before start if tauref is given.
+    jname should be string of jointname (for one joint) or list of jointname (for multiple joints)
+    tauref is reference torque [N/m], should be a number (for one joint) or list of numbers (for multiple joints)"
    (cond
     ((listp jname)
      (when tauref
@@ -1908,8 +1914,10 @@
        (send self :set-reference-torque jname tauref))
      (send self :torquecontrollerservice_starttorquecontrol :jname jname))
     ))
-  (:stop-torque-control ;; stop torque control in specified joint (this method does not disable torque control) 
+  (:stop-torque-control
    (jname)
+   "stop torque controller for specified joint (this method does not disable torque control)
+    jname should be string of jointname (for one joint) or list of jointname (for multiple joints)"
    (cond
     ((listp jname)
      (send self :torquecontrollerservice_stopmultipletorquecontrols :jnames jname)
@@ -1917,8 +1925,11 @@
     (t
      (send self :torquecontrollerservice_stoptorquecontrol :jname jname))
     ))
-  (:set-reference-torque ;; set reference torque in specified joint
+  (:set-reference-torque
    (jname tauref)
+   "set reference torque in specified joint
+    jname should be string of jointname (for one joint) or list of jointname (for multiple joints)
+    tauref (reference torque [N/m]) should be a number (for one joint) or list of numbers (for multiple joints)"
    (cond
     ((listp jname)
      (unless (listp tauref)
