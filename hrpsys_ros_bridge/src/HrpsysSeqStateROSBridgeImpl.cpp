@@ -375,12 +375,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onShutdown(RTC::UniqueId ec_id)
   return RTC::RTC_OK;
 }
 */
-/*
+
 RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onActivated(RTC::UniqueId ec_id)
 {
+  hrpsys_version = GetHrpsysVersion(m_SequencePlayerServicePort);
+
   return RTC::RTC_OK;
 }
-*/
+
 /*
 RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onDeactivated(RTC::UniqueId ec_id)
 {
