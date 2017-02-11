@@ -57,7 +57,7 @@ static const char* hrpsysjointtrajectorybridge_spec[] = {"implementation_id", "H
 HrpsysJointTrajectoryBridge::HrpsysJointTrajectoryBridge(RTC::Manager* manager)
 // <rtc-template block="initializer">
 :
-    RTC::DataFlowComponentBase(manager), m_SequencePlayerServicePort("SequencePlayerService")
+    RTC::DataFlowComponentBase(manager), m_rsangleIn("rsangle", m_rsangle), m_SequencePlayerServicePort("SequencePlayerService")
 // </rtc-template>
 {
 }
@@ -68,6 +68,8 @@ HrpsysJointTrajectoryBridge::~HrpsysJointTrajectoryBridge()
 
 RTC::ReturnCode_t HrpsysJointTrajectoryBridge::onInitialize()
 {
+  addInPort("rsangle", m_rsangleIn);
+
   m_SequencePlayerServicePort.registerConsumer("service0", "SequencePlayerService", m_service0);
 
   addPort(m_SequencePlayerServicePort);
@@ -202,6 +204,35 @@ RTC::ReturnCode_t HrpsysJointTrajectoryBridge::onFinalize()
 
 RTC::ReturnCode_t HrpsysJointTrajectoryBridge::onExecute(RTC::UniqueId ec_id)
 {
+  // m_in_rsangleIn
+  if ( m_rsangleIn.isNew () ) {
+    ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", rs:" << m_rsangleIn.isNew());
+    try {
+      m_rsangleIn.read();
+      //for ( unsigned int i = 0; i < m_rsangle.data.length() ; i++ ) std::cerr << m_rsangle.data[i] << " "; std::cerr << std::endl;
+    }
+    catch(const std::runtime_error &e)
+      {
+	ROS_ERROR_STREAM("[" << getInstanceName() << "] m_rsangleIn failed with " << e.what());
+      }
+    m_mutex.lock();
+    body->calcForwardKinematics();
+    if ( m_rsangle.data.length() < body->joints().size() ) {
+      ROS_ERROR_STREAM("rsangle.data.length(" << m_rsangle.data.length() << ") is not equal to body->joints().size(" << body->joints().size() << ")");
+      m_mutex.unlock();
+      return RTC::RTC_OK;
+    } else if ( m_rsangle.data.length() != body->joints().size() ) {
+      ROS_INFO_STREAM("rsangle.data.length(" << m_rsangle.data.length() << ") is not equal to body->joints().size(" << body->joints().size() << ")");
+    }
+    for ( unsigned int i = 0; i < body->joints().size() ; i++ ){
+      body->joint(i)->q = m_rsangle.data[i];
+      ROS_DEBUG_STREAM(m_rsangle.data[i] << " ");
+    }
+    ROS_DEBUG_STREAM(std::endl);
+    body->calcForwardKinematics();
+    m_mutex.unlock();
+  }
+  // ros stuff
   ros::spinOnce();
   for (size_t i = 0; i < trajectory_actions.size(); i++)
   {

@@ -113,6 +113,7 @@
           output="screen" args ="$(arg openrtm_args)" />
 
     <rtconnect from="$(arg SIMULATOR_NAME_ANGLE).rtc:q"     to="HrpsysSeqStateROSBridge0.rtc:rsangle" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
+    <rtconnect from="$(arg SIMULATOR_NAME_ANGLE).rtc:q"     to="HrpsysJointTrajectoryBridge0.rtc:rsangle" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
     <rtconnect from="$(arg SIMULATOR_NAME_VELOCITY).rtc:dq" to="HrpsysSeqStateROSBridge0.rtc:rsvel" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)" if="$(arg USE_VELOCITY_OUTPUT)" />
     <rtconnect from="$(arg SIMULATOR_NAME_TORQUE).rtc:tau"  to="HrpsysSeqStateROSBridge0.rtc:rstorque" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)" unless="$(arg USE_TORQUEFILTER)"/>
     <rtconnect from="StateHolderServiceROSBridge.rtc:StateHolderService" to="sh.rtc:StateHolderService"  subscription_type="new"/>
