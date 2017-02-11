@@ -2,6 +2,12 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [capability] re-enable rosnode_rtc (`#961 <https://github.com/start-jsk/rtmros_common/issues/961>`_)
+* [improve] [hrpsys_ros_bridge/launch/hrpsys_ros_bridge.launch, openrtm_tools/src/openrtm_tools/rtmlaunch.py] Add argument to change buffer length of rtmlaunch connection. Set 8 by default (default setting in openrtm).
+* Contributors: Kei Okada, Shunichi Nozawa
+
 1.3.2 (2016-04-26)
 ------------------
 * [fix ] Revert "workaround for ros-groovy-rqt-top installs wrong(?) psutil" (#938)  This reverts commit 94975a81eadbf251a85b2fd3c77137b1f96f248b. This closes `#936 <https://github.com/start-jsk/rtmros_common/issues/936>`_

@@ -2,6 +2,9 @@
 Changelog for package openrtm_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.3.2 (2016-04-26)
 ------------------
 
