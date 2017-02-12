@@ -98,6 +98,8 @@ HrpsysSeqStateROSBridge::~HrpsysSeqStateROSBridge() {
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onFinalize() {
   ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @onFinalize : " << getInstanceName());
+
+  //
   if ( joint_trajectory_server.isActive() ) {
       joint_trajectory_server.setPreempted();
   }
@@ -155,6 +157,80 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   return RTC::RTC_OK;
 }
 
+RTC::ReturnCode_t HrpsysSeqStateROSBridge::onActivated(RTC::UniqueId ec_id)
+{
+  // joint trajectory action for limbs
+  std::string config_name;
+  config_name = nh.resolveName("controller_configuration");
+  if (nh.hasParam(config_name))
+  {
+    XmlRpc::XmlRpcValue param_val;
+    nh.getParam(config_name, param_val);
+    if (param_val.getType() == XmlRpc::XmlRpcValue::TypeArray)
+    {
+      for (int i = 0; i < param_val.size(); i++)
+      {
+        if (param_val[i].getType() == XmlRpc::XmlRpcValue::TypeStruct)
+        {
+          XmlRpc::XmlRpcValue gval = param_val[i]["group_name"];
+          XmlRpc::XmlRpcValue cval = param_val[i]["controller_name"];
+          XmlRpc::XmlRpcValue lval = param_val[i]["joint_list"];
+
+          std::string gname = gval;
+          std::string cname = cval;
+          std::vector<std::string> jlst;
+          if (lval.getType() == XmlRpc::XmlRpcValue::TypeArray)
+          {
+            for (int s = 0; s < lval.size(); s++)
+            {
+              jlst.push_back(lval[s]);
+            }
+          }
+          if (gname.length() == 0 && cname.length() > 0)
+          {
+            gname = cname;
+          }
+          if (gname.length() > 0 && cname.length() == 0)
+          {
+            cname = gname;
+          }
+          if (gname.length() > 0 && cname.length() > 0 && jlst.size() > 0)
+          {
+            std::stringstream ss;
+            for (size_t s = 0; s < jlst.size(); s++)
+            {
+              ss << " " << jlst[s];
+            }
+            ROS_INFO_STREAM("ADD_GROUP: " << gname << " (" << cname << ")");
+            ROS_INFO_STREAM("    JOINT:" << ss.str());
+            boost::shared_ptr<HrpsysJointTrajectoryAction> tmp(new HrpsysJointTrajectoryAction(this, cval, gval, jlst));
+            trajectory_actions.push_back(tmp);
+          }
+        }
+      }
+    }
+    else
+    {
+      ROS_WARN_STREAM("param: " << config_name << ", configuration is not an array.");
+    }
+  }
+  else
+  {
+    ROS_WARN_STREAM("param: " << config_name << ", param does not exist.");
+  }
+
+  return RTC::RTC_OK;
+}
+
+RTC::ReturnCode_t HrpsysSeqStateROSBridge::onDeactivated(RTC::UniqueId ec_id) {
+  // delete trajectorya actions
+  for (size_t i = 0; i < trajectory_actions.size(); i++)
+  {
+    trajectory_actions[i].reset();
+  }
+
+  return RTC::RTC_OK;
+}
 
 void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
   m_mutex.lock();
@@ -495,7 +571,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         follow_joint_trajectory_server.publishFeedback(follow_joint_trajectory_feedback);
       }
     }
+
+    // ros stuff
     ros::spinOnce();
+
+    for (size_t i = 0; i < trajectory_actions.size(); i++)
+    {
+      trajectory_actions[i]->proc();
+    }
 
     // diagnostics
     tm.tack();

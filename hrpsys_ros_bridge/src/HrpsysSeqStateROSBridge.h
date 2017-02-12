@@ -8,6 +8,7 @@
 #define HRPSYSSEQSTATEROSBRIDGE_H
 
 #include "HrpsysSeqStateROSBridgeImpl.h"
+#include "HrpsysJointTrajectoryBridge.h"
 
 // rtm
 #include <rtm/CorbaNaming.h>
@@ -32,6 +33,7 @@
 
 extern const char* hrpsysseqstaterosbridgeimpl_spec[];
 
+class HrpsysJointTrajectoryAction;
 class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 {
  public:
@@ -40,6 +42,8 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   RTC::ReturnCode_t onInitialize();
   RTC::ReturnCode_t onFinalize();
+  RTC::ReturnCode_t onActivated(RTC::UniqueId ec_id);
+  RTC::ReturnCode_t onDeactivated(RTC::UniqueId ec_id);
   RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
 
   void onJointTrajectory(trajectory_msgs::JointTrajectory trajectory);
@@ -64,6 +68,9 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   bool interpolationp, use_sim_time, use_hrpsys_time;
   bool publish_sensor_transforms;
   tf::TransformBroadcaster br;
+
+  // joint trajectry actions for limb
+  std::vector<boost::shared_ptr<HrpsysJointTrajectoryAction> > trajectory_actions;
 
   coil::Mutex m_mutex;
   coil::TimeMeasure tm;
@@ -96,6 +103,8 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void updateSensorTransform(const ros::Time &stamp);
   std::map<std::string, geometry_msgs::Transform> sensor_transformations;
   boost::mutex sensor_transformation_mutex;
+
+  friend class HrpsysJointTrajectoryAction;
 };
 
 

@@ -37,214 +37,29 @@
  */
 #include "HrpsysJointTrajectoryBridge.h"
 
+// rtm
 #include "rtm/idl/RTC.hh"
+#include <rtm/idl/BasicDataTypeSkel.h>
+#include <rtm/idl/ExtendedDataTypesSkel.h>
+#include <rtm/Manager.h>
+#include <rtm/CorbaNaming.h>
+#include <rtm/DataFlowComponentBase.h>
+#include <rtm/CorbaPort.h>
+#include <rtm/DataInPort.h>
+#include <rtm/DataOutPort.h>
+
+// hrp
+#include "hrpsys_ros_bridge/idl/HRPDataTypes.hh"
 #include "hrpsys_ros_bridge/idl/ExecutionProfileService.hh"
 #include "hrpsys_ros_bridge/idl/RobotHardwareService.hh"
+#include <hrpCorba/ModelLoader.hh>
+#include <hrpModel/Body.h>
+#include <hrpModel/Sensor.h>
+#include <hrpModel/Link.h>
 
-// Module specification
-// <rtc-template block="module_spec">
-static const char* hrpsysjointtrajectorybridge_spec[] = {"implementation_id", "HrpsysJointTrajectoryBridge",
-                                                         "type_name", "HrpsysJointTrajectoryBridge", "description",
-                                                         "hrpsys setJointAngle - ros joint trajectory bridge",
-                                                         "version", "1.0", "vendor", "Yohei Kakiuchi", "category",
-                                                         "example", "activity_type", "SPORADIC", "kind",
-                                                         "DataFlowComponent", "max_instance", "10", "language", "C++",
-                                                         "lang_type", "compile",
-                                                         // Configuration variables
-                                                         ""};
-// </rtc-template>
-
-HrpsysJointTrajectoryBridge::HrpsysJointTrajectoryBridge(RTC::Manager* manager)
-// <rtc-template block="initializer">
-:
-    RTC::DataFlowComponentBase(manager), m_rsangleIn("rsangle", m_rsangle), m_SequencePlayerServicePort("SequencePlayerService")
-// </rtc-template>
-{
-}
-
-HrpsysJointTrajectoryBridge::~HrpsysJointTrajectoryBridge()
-{
-}
-
-RTC::ReturnCode_t HrpsysJointTrajectoryBridge::onInitialize()
-{
-  addInPort("rsangle", m_rsangleIn);
-
-  m_SequencePlayerServicePort.registerConsumer("service0", "SequencePlayerService", m_service0);
-
-  addPort(m_SequencePlayerServicePort);
-
-  RTC::Properties& prop = getProperties();
-
-  body = hrp::BodyPtr(new hrp::Body());
-
-  RTC::Manager& rtcManager = RTC::Manager::instance();
-  std::string nameServer = rtcManager.getConfig()["corba.nameservers"];
-  int comPos = nameServer.find(",");
-  if (comPos < 0)
-  {
-    comPos = nameServer.length();
-  }
-  nameServer = nameServer.substr(0, comPos);
-  RTC::CorbaNaming naming(rtcManager.getORB(), nameServer.c_str());
-  std::string modelfile = m_pManager->getConfig()["model"];
-
-  if (!loadBodyFromModelLoader(body, modelfile.c_str(), CosNaming::NamingContext::_duplicate(naming.getRootContext())))
-  {
-    std::cerr << "[HrpsysJointTrajectoryBridge] failed to load model[" << prop["model"] << "]" << std::endl;
-  }
-  bool ret = false;
-  while (!ret)
-  {
-    try
-    {
-      bodyinfo = hrp::loadBodyInfo(modelfile.c_str(), CosNaming::NamingContext::_duplicate(naming.getRootContext()));
-      ret = loadBodyFromBodyInfo(body, bodyinfo);
-    }
-    catch (CORBA::SystemException& ex)
-    {
-      std::cerr << "[HrpsysJointTrajectoryBridge] loadBodyInfo(): CORBA::SystemException " << ex._name() << std::endl;
-      sleep(1);
-    }
-    catch (...)
-    {
-      std::cerr << "[HrpsysJointTrajectoryBridge] loadBodyInfo(): failed to load model[" << modelfile << "]"
-          << std::endl;
-      ;
-      sleep(1);
-    }
-  }
-
-  if (body == NULL)
-  {
-    return RTC::RTC_ERROR;
-  }
-  body->calcForwardKinematics();
-
-  ROS_INFO_STREAM("[HrpsysJointTrajectoryBridge] @Initilize name : " << getInstanceName() << " done");
-
-  return RTC::RTC_OK;
-}
-
-RTC::ReturnCode_t HrpsysJointTrajectoryBridge::onActivated(RTC::UniqueId ec_id)
-{
-  // ROS_INFO("ON_ACTIVATED");
-  std::string config_name;
-  config_name = nh.resolveName("controller_configuration");
-  if (nh.hasParam(config_name))
-  {
-    XmlRpc::XmlRpcValue param_val;
-    nh.getParam(config_name, param_val);
-    if (param_val.getType() == XmlRpc::XmlRpcValue::TypeArray)
-    {
-      for (int i = 0; i < param_val.size(); i++)
-      {
-        if (param_val[i].getType() == XmlRpc::XmlRpcValue::TypeStruct)
-        {
-          XmlRpc::XmlRpcValue gval = param_val[i]["group_name"];
-          XmlRpc::XmlRpcValue cval = param_val[i]["controller_name"];
-          XmlRpc::XmlRpcValue lval = param_val[i]["joint_list"];
-
-          std::string gname = gval;
-          std::string cname = cval;
-          std::vector<std::string> jlst;
-          if (lval.getType() == XmlRpc::XmlRpcValue::TypeArray)
-          {
-            for (int s = 0; s < lval.size(); s++)
-            {
-              jlst.push_back(lval[s]);
-            }
-          }
-          if (gname.length() == 0 && cname.length() > 0)
-          {
-            gname = cname;
-          }
-          if (gname.length() > 0 && cname.length() == 0)
-          {
-            cname = gname;
-          }
-          if (gname.length() > 0 && cname.length() > 0 && jlst.size() > 0)
-          {
-            std::stringstream ss;
-            for (size_t s = 0; s < jlst.size(); s++)
-            {
-              ss << " " << jlst[s];
-            }
-            ROS_INFO_STREAM("ADD_GROUP: " << gname << " (" << cname << ")");
-            ROS_INFO_STREAM("    JOINT:" << ss.str());
-            jointTrajectoryActionObj::Ptr tmp(new jointTrajectoryActionObj(this, cval, gval, jlst));
-            trajectory_actions.push_back(tmp);
-          }
-        }
-      }
-    }
-    else
-    {
-      ROS_WARN_STREAM("param: " << config_name << ", configuration is not an array.");
-    }
-  }
-  else
-  {
-    ROS_WARN_STREAM("param: " << config_name << ", param does not exist.");
-  }
-
-  return RTC::RTC_OK;
-}
-
-RTC::ReturnCode_t HrpsysJointTrajectoryBridge::onFinalize()
-{
-  // delete objs
-  for (size_t i = 0; i < trajectory_actions.size(); i++)
-  {
-    trajectory_actions[i].reset();
-  }
-
-  return RTC::RTC_OK;
-}
-
-RTC::ReturnCode_t HrpsysJointTrajectoryBridge::onExecute(RTC::UniqueId ec_id)
-{
-  // m_in_rsangleIn
-  if ( m_rsangleIn.isNew () ) {
-    ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", rs:" << m_rsangleIn.isNew());
-    try {
-      m_rsangleIn.read();
-      //for ( unsigned int i = 0; i < m_rsangle.data.length() ; i++ ) std::cerr << m_rsangle.data[i] << " "; std::cerr << std::endl;
-    }
-    catch(const std::runtime_error &e)
-      {
-	ROS_ERROR_STREAM("[" << getInstanceName() << "] m_rsangleIn failed with " << e.what());
-      }
-    m_mutex.lock();
-    body->calcForwardKinematics();
-    if ( m_rsangle.data.length() < body->joints().size() ) {
-      ROS_ERROR_STREAM("rsangle.data.length(" << m_rsangle.data.length() << ") is not equal to body->joints().size(" << body->joints().size() << ")");
-      m_mutex.unlock();
-      return RTC::RTC_OK;
-    } else if ( m_rsangle.data.length() != body->joints().size() ) {
-      ROS_INFO_STREAM("rsangle.data.length(" << m_rsangle.data.length() << ") is not equal to body->joints().size(" << body->joints().size() << ")");
-    }
-    for ( unsigned int i = 0; i < body->joints().size() ; i++ ){
-      body->joint(i)->q = m_rsangle.data[i];
-      ROS_DEBUG_STREAM(m_rsangle.data[i] << " ");
-    }
-    ROS_DEBUG_STREAM(std::endl);
-    body->calcForwardKinematics();
-    m_mutex.unlock();
-  }
-  // ros stuff
-  ros::spinOnce();
-  for (size_t i = 0; i < trajectory_actions.size(); i++)
-  {
-    trajectory_actions[i]->proc();
-  }
-
-  return RTC::RTC_OK;
-}
-
-HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::jointTrajectoryActionObj(HrpsysJointTrajectoryBridge *ptr,
-                                                                                std::string &cname, std::string &gname,
-                                                                                std::vector<std::string> &jlist)
+HrpsysJointTrajectoryAction::HrpsysJointTrajectoryAction(HrpsysSeqStateROSBridge *ptr,
+                                                         std::string &cname, std::string &gname,
+                                                         std::vector<std::string> &jlist)
 {
   parent = ptr;
   controller_name = cname;
@@ -257,17 +72,17 @@ HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::jointTrajectoryActionObj(
   follow_joint_trajectory_server.reset(
       new actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>(
           parent->nh, controller_name + "/follow_joint_trajectory_action", false));
-  trajectory_command_sub = parent->nh.subscribe(controller_name + "/command", 1, &HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onTrajectoryCommandCB, this);
+  trajectory_command_sub = parent->nh.subscribe(controller_name + "/command", 1, &HrpsysJointTrajectoryAction::onTrajectoryCommandCB, this);
 
 
   joint_trajectory_server->registerGoalCallback(
-      boost::bind(&HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryActionGoal, this));
+      boost::bind(&HrpsysJointTrajectoryAction::onJointTrajectoryActionGoal, this));
   joint_trajectory_server->registerPreemptCallback(
-      boost::bind(&HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryActionPreempt, this));
+      boost::bind(&HrpsysJointTrajectoryAction::onJointTrajectoryActionPreempt, this));
   follow_joint_trajectory_server->registerGoalCallback(
-      boost::bind(&HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTrajectoryActionGoal, this));
+      boost::bind(&HrpsysJointTrajectoryAction::onFollowJointTrajectoryActionGoal, this));
   follow_joint_trajectory_server->registerPreemptCallback(
-      boost::bind(&HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTrajectoryActionPreempt, this));
+      boost::bind(&HrpsysJointTrajectoryAction::onFollowJointTrajectoryActionPreempt, this));
 
   joint_controller_state_pub = parent->nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>(
       controller_name + "/state", 1);
@@ -305,9 +120,9 @@ HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::jointTrajectoryActionObj(
   follow_joint_trajectory_server->start();
 }
 
-HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::~jointTrajectoryActionObj()
+HrpsysJointTrajectoryAction::~HrpsysJointTrajectoryAction()
 {
-  ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @~jointTrajectoryActionObj (" << this->groupname);
+  ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @~HrpsysJointTrajectoryAction (" << this->groupname);
   if (joint_trajectory_server->isActive())
   {
     joint_trajectory_server->setPreempted();
@@ -322,7 +137,7 @@ HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::~jointTrajectoryActionObj
   follow_joint_trajectory_server->shutdown();
 }
 
-void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::proc()
+void HrpsysJointTrajectoryAction::proc()
 {
   // finish interpolation
   if (joint_trajectory_server->isActive() && interpolationp == true && parent->m_service0->isEmpty() == true)
@@ -388,7 +203,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::proc()
   joint_controller_state_pub.publish(joint_controller_state);
 }
 
-void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::restart()
+void HrpsysJointTrajectoryAction::restart()
 {
   parent->m_service0->removeJointGroup(groupname.c_str());
   sleep(0.1);
@@ -419,7 +234,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::restart()
   }
 }
 
-void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
+void HrpsysJointTrajectoryAction::onJointTrajectory(
     trajectory_msgs::JointTrajectory trajectory)
 {
   parent->m_mutex.lock();
@@ -521,46 +336,35 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
   interpolationp = true;
 }
 
-void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryActionGoal()
+void HrpsysJointTrajectoryAction::onJointTrajectoryActionGoal()
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryActionGoal");
   pr2_controllers_msgs::JointTrajectoryGoalConstPtr goal = joint_trajectory_server->acceptNewGoal();
   onJointTrajectory(goal->trajectory);
 }
 
-void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTrajectoryActionGoal()
+void HrpsysJointTrajectoryAction::onFollowJointTrajectoryActionGoal()
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onFollowJointTrajectoryActionGoal()");
   control_msgs::FollowJointTrajectoryGoalConstPtr goal = follow_joint_trajectory_server->acceptNewGoal();
   onJointTrajectory(goal->trajectory);
 }
 
-void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryActionPreempt()
+void HrpsysJointTrajectoryAction::onJointTrajectoryActionPreempt()
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryActionPreempt()");
   joint_trajectory_server->setPreempted();
 }
 
-void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTrajectoryActionPreempt()
+void HrpsysJointTrajectoryAction::onFollowJointTrajectoryActionPreempt()
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onFollowJointTrajectoryActionPreempt()");
   follow_joint_trajectory_server->setPreempted();
 }
 
-void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg)
+void HrpsysJointTrajectoryAction::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg)
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onTrajectoryCommandCB()");
   onJointTrajectory(*msg);
 }
 
-extern "C"
-{
-
-void HrpsysJointTrajectoryBridgeInit(RTC::Manager* manager)
-{
-  coil::Properties profile(hrpsysjointtrajectorybridge_spec);
-  manager->registerFactory(profile, RTC::Create<HrpsysJointTrajectoryBridge>, RTC::Delete<HrpsysJointTrajectoryBridge>);
-}
-
-}
-;
