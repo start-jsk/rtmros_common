@@ -142,6 +142,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onActivated(RTC::UniqueId ec_id)
 {
+  // impl
+  HrpsysSeqStateROSBridgeImpl::onActivated(ec_id);
+
   // joint trajectory action for fullbody
   std::string gname = "fullbody";
   std::string cname = "fullbody_controller";
