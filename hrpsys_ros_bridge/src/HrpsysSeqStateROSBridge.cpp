@@ -32,9 +32,7 @@ static const char* hrpsysseqstaterosbridge_spec[] =
 
 HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   use_sim_time(false), use_hrpsys_time(false),
-  joint_trajectory_server(nh, "fullbody_controller/joint_trajectory_action", false),
-  follow_joint_trajectory_server(nh, "fullbody_controller/follow_joint_trajectory_action", false),
-  HrpsysSeqStateROSBridgeImpl(manager), follow_action_initialized(false), prev_odom_acquired(false)
+  HrpsysSeqStateROSBridgeImpl(manager), prev_odom_acquired(false)
 {
   // ros
   ros::NodeHandle pnh("~");
@@ -45,15 +43,9 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   tf_transforms.clear();
   periodic_update_timer = pnh.createTimer(ros::Duration(1.0 / tf_rate), boost::bind(&HrpsysSeqStateROSBridge::periodicTimerCallback, this, _1));
   
-  joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
-  joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
-  follow_joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal, this));
-  follow_joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt, this));
   sendmsg_srv = nh.advertiseService(std::string("sendmsg"), &HrpsysSeqStateROSBridge::sendMsg, this);
   set_sensor_transformation_srv = nh.advertiseService("set_sensor_transformation", &HrpsysSeqStateROSBridge::setSensorTransformation, this);
   joint_state_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
-  joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
-  trajectory_command_sub = nh.subscribe("/fullbody_controller/command", 1, &HrpsysSeqStateROSBridge::onTrajectoryCommandCB, this);
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
   odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
   imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1);
@@ -87,26 +79,13 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
         ROS_WARN("[HrpsysSeqStateROSBridge] use_sim_time");
       }
   }
-  joint_trajectory_server.start();
-  follow_joint_trajectory_server.start();
 }
 
 HrpsysSeqStateROSBridge::~HrpsysSeqStateROSBridge() {
-  joint_trajectory_server.shutdown();
-  follow_joint_trajectory_server.shutdown();
 };
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onFinalize() {
   ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @onFinalize : " << getInstanceName());
-
-  //
-  if ( joint_trajectory_server.isActive() ) {
-      joint_trajectory_server.setPreempted();
-  }
-
-  if (   follow_joint_trajectory_server.isActive() ) {
-      follow_joint_trajectory_server.setPreempted();
-  }
 
   return RTC_OK;
 }
@@ -127,7 +106,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   tm.tick();
 
   rootlink_name = std::string((*(bodyinfo->links()))[0].segments[0].name);
-  interpolationp = false;
 
   ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @Initilize name : " << getInstanceName() << " done");
 
@@ -159,6 +137,16 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onActivated(RTC::UniqueId ec_id)
 {
+  // joint trajectory action for fullbody
+  std::string gname = "fullbody";
+  std::string cname = "fullbody_controller";
+  std::vector<std::string> jlst;
+  for ( unsigned int i = 0; i < body->joints().size() ; i++ ) {
+    jlst.push_back(body->joint(i)->name);
+  }
+  boost::shared_ptr<HrpsysJointTrajectoryAction> tmp(new HrpsysJointTrajectoryAction(this, cname, gname, jlst));
+  trajectory_actions.push_back(tmp);
+
   // joint trajectory action for limbs
   std::string config_name;
   config_name = nh.resolveName("controller_configuration");
@@ -232,85 +220,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onDeactivated(RTC::UniqueId ec_id) {
   return RTC::RTC_OK;
 }
 
-void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory trajectory) {
-  m_mutex.lock();
-
-  ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction ");
-  //std::cerr << goal->trajectory.joint_names.size() << std::endl;
-
-  OpenHRP::dSequenceSequence angles;
-  OpenHRP::dSequence duration;
-
-  angles.length(trajectory.points.size()) ;
-  duration.length(trajectory.points.size()) ;
-
-  std::vector<std::string> joint_names = trajectory.joint_names;
-
-  for (unsigned int i=0; i < trajectory.points.size(); i++) {
-    angles[i].length(body->joints().size());
-
-    trajectory_msgs::JointTrajectoryPoint point = trajectory.points[i];
-    for (unsigned int j=0; j < trajectory.joint_names.size(); j++ ) {
-      body->link(joint_names[j])->q = point.positions[j];
-    }
-
-    body->calcForwardKinematics();
-
-    int j = 0;
-    std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
-    while ( it != body->joints().end() ) {
-      hrp::Link* l = ((hrp::Link*)*it);
-      angles[i][j] = l->q;
-      ++it;++j;
-    }
-
-    ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction : time_from_start " << trajectory.points[i].time_from_start.toSec());
-    if ( i > 0 ) {
-      duration[i] =  trajectory.points[i].time_from_start.toSec() - trajectory.points[i-1].time_from_start.toSec();
-    } else { // if i == 0
-      if ( trajectory.points.size()== 1 ) {
-	duration[i] = trajectory.points[i].time_from_start.toSec();
-      } else { // 0.2 is magic number writtein in roseus/euslisp/robot-interface.l
-	duration[i] = trajectory.points[i].time_from_start.toSec() - 0.2;
-      }
-    }
-  }
-
-  m_mutex.unlock();
-
-  if ( duration.length() == 1 ) {
-    m_service0->setJointAngles(angles[0], duration[0]);
-  } else {
-    OpenHRP::dSequenceSequence rpy, zmp;
-    m_service0->playPattern(angles, rpy, zmp, duration);
-  }
-
-  interpolationp = true;
-}
-
-void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
-  pr2_controllers_msgs::JointTrajectoryGoalConstPtr goal = joint_trajectory_server.acceptNewGoal();
-  onJointTrajectory(goal->trajectory);
-}
-
-void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal() {
-  control_msgs::FollowJointTrajectoryGoalConstPtr goal = follow_joint_trajectory_server.acceptNewGoal();
-  follow_action_initialized = true;
-  onJointTrajectory(goal->trajectory);
-}
-
-void HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt() {
-  joint_trajectory_server.setPreempted();
-}
-
-void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt() {
-  follow_joint_trajectory_server.setPreempted();
-}
-
-void HrpsysSeqStateROSBridge::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg) {
-  onJointTrajectory(*msg);
-}
-
 bool HrpsysSeqStateROSBridge::setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
                                                       hrpsys_ros_bridge::SetSensorTransformation::Response& res)
 {
@@ -355,11 +264,6 @@ bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 {
   ros::Time tm_on_execute = ros::Time::now();
-  pr2_controllers_msgs::JointTrajectoryControllerState joint_controller_state;
-  joint_controller_state.header.stamp = tm_on_execute;
-
-  control_msgs::FollowJointTrajectoryFeedback follow_joint_trajectory_feedback;
-  follow_joint_trajectory_feedback.header.stamp = tm_on_execute;
 
   hrpsys_ros_bridge::MotorStates mot_states;
   mot_states.header.stamp = tm_on_execute;
@@ -445,6 +349,24 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
   }  // end: rsvelIn
 
+  // m_mcangleIn
+  if ( m_mcangleIn.isNew () ) {
+    //ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", mc:" << m_mcangleIn.isNew () << ", baseTform:" << m_baseTformIn.isNew() << ", lfsensor:" << m_mclfsensorIn.isNew() << ", rfsensor:" << m_mcrfsensorIn.isNew());
+    try {
+      m_mcangleIn.read();
+      //
+      // mcangle is desired(commanded) joint value, where as rsangle is current joint value
+      //
+      // ROS_DEBUG_STREAM(body->joint(i)->name << " - " << m_mcangle.data[i]);
+      // joint_controller_state.desired.positions.push_back(m_mcangle.data[i]);
+      // joint_controller_state.error.positions.push_back(joint_controller_state.actual.positions[i]-joint_controller_state.desired.positions[i]);
+    }
+    catch(const std::runtime_error &e)
+      {
+	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  } // end: m_mcangleIn
+
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
     sensor_msgs::JointState joint_state;
@@ -495,23 +417,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         ROS_DEBUG_STREAM(j->name << " - " << j->q);
         joint_state.name.push_back(j->name);
         joint_state.position.push_back(j->q);
-        joint_controller_state.joint_names.push_back(j->name);
-        joint_controller_state.actual.positions.push_back(j->q);
-        //joint_state.velocity
-        //joint_state.effort
-        follow_joint_trajectory_feedback.joint_names.push_back(j->name);
-        follow_joint_trajectory_feedback.desired.positions.push_back(j->q);
-        follow_joint_trajectory_feedback.actual.positions.push_back(j->q);
-        follow_joint_trajectory_feedback.error.positions.push_back(0);
-        follow_joint_trajectory_feedback.desired.velocities.push_back(j->dq);
-        follow_joint_trajectory_feedback.actual.velocities.push_back(j->dq);
-        follow_joint_trajectory_feedback.error.velocities.push_back(0);
-        follow_joint_trajectory_feedback.desired.accelerations.push_back(j->ddq);
-        follow_joint_trajectory_feedback.actual.accelerations.push_back(j->ddq);
-        follow_joint_trajectory_feedback.error.accelerations.push_back(0);
-        follow_joint_trajectory_feedback.desired.effort.push_back(j->u);
-        follow_joint_trajectory_feedback.actual.effort.push_back(j->u);
-        follow_joint_trajectory_feedback.error.effort.push_back(0);
       }
       ++it;
     }
@@ -543,34 +448,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
     updateSensorTransform(sensor_tf_stamp); // transform depends on joint angles, not sensor values
 
-    if ( joint_trajectory_server.isActive() &&
-	 interpolationp == true &&  m_service0->isEmpty() == true ) {
-      pr2_controllers_msgs::JointTrajectoryResult result;
-      joint_trajectory_server.setSucceeded(result);
-      interpolationp = false;
-    }
-    if ( follow_joint_trajectory_server.isActive() &&
-	 interpolationp == true &&  m_service0->isEmpty() == true ) {
-      control_msgs::FollowJointTrajectoryResult result;
-      result.error_code = control_msgs::FollowJointTrajectoryResult::SUCCESSFUL;
-      follow_joint_trajectory_server.setSucceeded(result);
-      interpolationp = false;
-    }
-
     ros::Time tm_on_execute = ros::Time::now();
-
-    if ( joint_trajectory_server.isActive() ) {
-      pr2_controllers_msgs::JointTrajectoryFeedback joint_trajectory_feedback;
-      joint_trajectory_server.publishFeedback(joint_trajectory_feedback);
-    }
-    if ( follow_joint_trajectory_server.isActive() ) {
-      follow_joint_trajectory_feedback.header.stamp = tm_on_execute;
-      if (!follow_joint_trajectory_feedback.joint_names.empty() &&
-          !follow_joint_trajectory_feedback.actual.positions.empty())
-      {
-        follow_joint_trajectory_server.publishFeedback(follow_joint_trajectory_feedback);
-      }
-    }
 
     // ros stuff
     ros::spinOnce();
@@ -605,40 +483,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       tm.tick();
     }
   } // end: m_in_rsangleIn
-
-  // m_mcangleIn
-  if ( m_mcangleIn.isNew () ) {
-    //ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", mc:" << m_mcangleIn.isNew () << ", baseTform:" << m_baseTformIn.isNew() << ", lfsensor:" << m_mclfsensorIn.isNew() << ", rfsensor:" << m_mcrfsensorIn.isNew());
-    try {
-      m_mcangleIn.read();
-    }
-    catch(const std::runtime_error &e)
-      {
-	ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
-      }
-    // joint controller state publish <- only if both rsangle and mcangle are prepared.
-    if ( !joint_controller_state.joint_names.empty() && !joint_controller_state.actual.positions.empty() ) {
-      for ( unsigned int i = 0; i < body->joints().size() ; i++ ){
-        ROS_DEBUG_STREAM(body->joint(i)->name << " - " << m_mcangle.data[i]);
-        joint_controller_state.desired.positions.push_back(m_mcangle.data[i]);
-        joint_controller_state.error.positions.push_back(joint_controller_state.actual.positions[i]-joint_controller_state.desired.positions[i]);
-      }
-      /* set zero for all velocities and accelerations */
-      joint_controller_state.desired.velocities.resize(joint_controller_state.joint_names.size());
-      joint_controller_state.desired.accelerations.resize(joint_controller_state.joint_names.size());
-      joint_controller_state.actual.velocities.resize(joint_controller_state.joint_names.size());
-      joint_controller_state.actual.accelerations.resize(joint_controller_state.joint_names.size());
-      joint_controller_state.error.velocities.resize(joint_controller_state.joint_names.size());
-      joint_controller_state.error.accelerations.resize(joint_controller_state.joint_names.size());
-
-      joint_controller_state_pub.publish(joint_controller_state);
-    }
-    if ( !follow_joint_trajectory_feedback.joint_names.empty() &&
-         !follow_joint_trajectory_feedback.actual.positions.empty() &&
-         follow_action_initialized ) {
-      follow_joint_trajectory_server.publishFeedback(follow_joint_trajectory_feedback);
-    }
-  } // end: m_mcangleIn
 
   // m_baseTformIn
   bool is_base_valid = false;

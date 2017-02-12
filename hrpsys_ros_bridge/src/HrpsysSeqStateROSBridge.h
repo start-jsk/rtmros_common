@@ -46,26 +46,18 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   RTC::ReturnCode_t onDeactivated(RTC::UniqueId ec_id);
   RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
 
-  void onJointTrajectory(trajectory_msgs::JointTrajectory trajectory);
-  void onJointTrajectoryActionGoal();
-  void onJointTrajectoryActionPreempt();
-  void onFollowJointTrajectoryActionGoal();
-  void onFollowJointTrajectoryActionPreempt();
-  void onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg);
   bool sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
                 dynamic_reconfigure::Reconfigure::Response &res);
   bool setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
                                hrpsys_ros_bridge::SetSensorTransformation::Response& res);
  private:
   ros::NodeHandle nh;
-  ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, ref_cp_pub, act_cp_pub, odom_pub, imu_pub, em_mode_pub, ref_contact_states_pub, act_contact_states_pub;
+  ros::Publisher joint_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, ref_cp_pub, act_cp_pub, odom_pub, imu_pub, em_mode_pub, ref_contact_states_pub, act_contact_states_pub;
   ros::Subscriber trajectory_command_sub;
   std::vector<ros::Publisher> fsensor_pub, cop_pub;
-  actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> joint_trajectory_server;
-  actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> follow_joint_trajectory_server;
   ros::ServiceServer sendmsg_srv;
   ros::ServiceServer set_sensor_transformation_srv;
-  bool interpolationp, use_sim_time, use_hrpsys_time;
+  bool use_sim_time, use_hrpsys_time;
   bool publish_sensor_transforms;
   tf::TransformBroadcaster br;
 
@@ -84,8 +76,6 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   bool prev_odom_acquired;
   hrp::Vector3 prev_rpy;
   void clock_cb(const rosgraph_msgs::ClockPtr& str) {};
-
-  bool follow_action_initialized;
 
   boost::mutex tf_mutex;
   double tf_rate;
