@@ -77,6 +77,8 @@ class HrpsysJointTrajectoryAction
     void onFollowJointTrajectoryActionPreempt();
     void onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg);
 
+    void onJointTrajectoryCancel();
+
     void proc();
     void restart();
 };

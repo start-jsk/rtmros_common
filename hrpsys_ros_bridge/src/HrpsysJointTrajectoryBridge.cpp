@@ -57,6 +57,32 @@
 #include <hrpModel/Sensor.h>
 #include <hrpModel/Link.h>
 
+// http://stackoverflow.com/questions/2941491/compare-versions-as-strings
+void Parse(int result[3], const std::string& input)
+{
+  std::istringstream parser(input);
+  parser >> result[0];
+  for(int idx = 1; idx < 3; idx++)
+  {
+    parser.get(); //Skip period
+    parser >> result[idx];
+  }
+}
+
+bool LessThanVersion(const std::string& a,const std::string& b)
+{
+  int parsedA[3], parsedB[3];
+  try {
+    Parse(parsedA, a);
+    Parse(parsedB, b);
+    return std::lexicographical_compare(parsedA, parsedA + 4, parsedB, parsedB + 4);
+  } catch (...) {
+    ROS_ERROR_STREAM("LessThanVersion failed " << a << " < " << b <<", force return false");
+    return false;
+  }
+}
+
+//
 HrpsysJointTrajectoryAction::HrpsysJointTrajectoryAction(HrpsysSeqStateROSBridge *ptr,
                                                          std::string &cname, std::string &gname,
                                                          std::vector<std::string> &jlist)
@@ -123,6 +149,10 @@ HrpsysJointTrajectoryAction::HrpsysJointTrajectoryAction(HrpsysSeqStateROSBridge
 HrpsysJointTrajectoryAction::~HrpsysJointTrajectoryAction()
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @~HrpsysJointTrajectoryAction (" << this->groupname);
+  if (joint_trajectory_server->isActive() || follow_joint_trajectory_server->isActive()) {
+    onJointTrajectoryCancel();
+  }
+
   if (joint_trajectory_server->isActive())
   {
     joint_trajectory_server->setPreempted();
@@ -132,6 +162,7 @@ HrpsysJointTrajectoryAction::~HrpsysJointTrajectoryAction()
   {
     follow_joint_trajectory_server->setPreempted();
   }
+
 
   joint_trajectory_server->shutdown();
   follow_joint_trajectory_server->shutdown();
@@ -332,13 +363,24 @@ void HrpsysJointTrajectoryAction::onJointTrajectory(
   {
     if (groupname.length() > 0)
     { // group
-      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] playPatternGroup: " << groupname);
-      parent->m_service0->playPatternOfGroup(groupname.c_str(), angles, duration);
+      // hrpsys < 315.5.0 does not have setJointAnglesSequenceOfGroup,  so need to use old API
+      if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+        ROS_INFO_STREAM("[" << parent->getInstanceName() << "] playPatternGroup: " << groupname);
+        parent->m_service0->playPatternOfGroup(groupname.c_str(), angles, duration);
+      }else{
+        ROS_INFO_STREAM("[" << parent->getInstanceName() << "] setJointAnglesSequenceOfGroup: " << groupname);
+        parent->m_service0->setJointAnglesSequenceOfGroup(groupname.c_str(), angles, duration);
+      }
     }
     else
-    {
-      OpenHRP::dSequenceSequence rpy, zmp;
-      parent->m_service0->playPattern(angles, rpy, zmp, duration);
+    { // fullbody
+      // hrpsys < 315.5.0 does not have setJointAnglesSequence,  so need to use old API
+      if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+        OpenHRP::dSequenceSequence rpy, zmp;
+        parent->m_service0->playPattern(angles, rpy, zmp, duration);
+      }else{
+        parent->m_service0->setJointAnglesSequence(angles, duration);
+      }
     }
   }
 
@@ -359,16 +401,59 @@ void HrpsysJointTrajectoryAction::onFollowJointTrajectoryActionGoal()
   onJointTrajectory(goal->trajectory);
 }
 
+
+void HrpsysJointTrajectoryAction::onJointTrajectoryCancel()
+{
+  if (groupname.length() > 0)
+  { // group
+      // hrpsys < 315.5.0 does not have clearJointAnglesOfGroup,  so need to use old API
+    if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearOfGroup: " << groupname);
+      parent->m_service0->clearOfGroup(groupname.c_str(), 0.05);
+      OpenHRP::dSequence angles;
+      angles.length(joint_list.size());
+      for (unsigned int i = 0; i < joint_list.size(); i++)
+      {
+        angles[i] = parent->body->link(joint_list[i])->q;
+      }
+      parent->m_service0->setJointAnglesOfGroup(groupname.c_str(), angles, 0.05);
+    } else {
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAnglesOfGroup: " << groupname);
+      parent->m_service0->clearJointAnglesOfGroup(groupname.c_str());
+    }
+  }
+  else
+  { // fullbody
+      // hrpsys < 315.5.0 does not have clearJointAngles,  so need to use old API
+    if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clear ");
+      parent->m_service0->clear();
+      OpenHRP::dSequence angles;
+      angles.length(joint_list.size());
+      for (unsigned int i = 0; i < joint_list.size(); i++)
+      {
+        angles[i] = parent->body->link(joint_list[i])->q;
+      }
+      parent->m_service0->setJointAngles(angles, 0.05);
+    } else {
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAngles ");
+      parent->m_service0->clearJointAngles();
+    }
+  }
+}
+
 void HrpsysJointTrajectoryAction::onJointTrajectoryActionPreempt()
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryActionPreempt()");
   joint_trajectory_server->setPreempted();
+  onJointTrajectoryCancel();
 }
 
 void HrpsysJointTrajectoryAction::onFollowJointTrajectoryActionPreempt()
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onFollowJointTrajectoryActionPreempt()");
   follow_joint_trajectory_server->setPreempted();
+  onJointTrajectoryCancel();
 }
 
 void HrpsysJointTrajectoryAction::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg)
