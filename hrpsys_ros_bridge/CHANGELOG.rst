@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.3 (2017-02-12)
+------------------
 
 * HrpsysSeqStateROSBridge.cpp
   * HrpsysSeqStateROSBridge occurs error if number of force sensor is different with size of contact states. fix number of force sensor (`#982 <https://github.com/start-jsk/rtmros_common/issues/982>`_)
