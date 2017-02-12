@@ -2,6 +2,12 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* re-enable rosnode_rtc (`#961 <https://github.com/start-jsk/rtmros_common/issues/961>`_)
+  * rtmbuild: fix type in DEPENDS section of catkin_package
+* Contributors: Kei Okada
+
 1.3.2 (2016-04-26)
 ------------------
 
