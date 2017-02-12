@@ -63,6 +63,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   // joint trajectry actions for limb
   std::vector<boost::shared_ptr<HrpsysJointTrajectoryAction> > trajectory_actions;
+  std::map<std::string, double> desired_joint_values;
 
   coil::Mutex m_mutex;
   coil::TimeMeasure tm;

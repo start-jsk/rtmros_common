@@ -132,6 +132,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   }
   em_mode_pub = nh.advertise<std_msgs::Int32>("emergency_mode", 10);
 
+  // used to send mcangle to HrpsysJointTrajectoryAction
+  for ( unsigned int i = 0; i < body->joints().size() ; i++ ){
+    desired_joint_values[body->joint(i)->name] = 0;
+  }
+
   return RTC::RTC_OK;
 }
 
@@ -360,6 +365,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       // ROS_DEBUG_STREAM(body->joint(i)->name << " - " << m_mcangle.data[i]);
       // joint_controller_state.desired.positions.push_back(m_mcangle.data[i]);
       // joint_controller_state.error.positions.push_back(joint_controller_state.actual.positions[i]-joint_controller_state.desired.positions[i]);
+      for ( unsigned int i = 0; i < body->joints().size() ; i++ ){
+        //std::cerr << body->joint(i)->name << " : " << body->link(i)->name << " : " << body->link(i)->index << " : " << body->link(i)->jointId << std::endl;
+        desired_joint_values[body->joint(i)->name] = m_mcangle.data[i];
+      }
     }
     catch(const std::runtime_error &e)
       {
