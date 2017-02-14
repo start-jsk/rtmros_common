@@ -289,7 +289,8 @@ void HrpsysJointTrajectoryAction::onJointTrajectory(
   duration.length(trajectory.points.size());
 
   std::vector<std::string> joint_names = trajectory.joint_names;
-  if (joint_names.size() < joint_list.size())
+  // if number of joint_names (within trajectory command) is larger than number of joint_list (set from configuration or body mdoel), something wrong
+  if (joint_names.size() > joint_list.size())
   {
     ROS_ERROR_STREAM(
         "[" << parent->getInstanceName() << "] @onJointTrajectoryAction / Error : " << "required joint_names.size() = " << joint_names.size() << " < joint_list.size() = " << joint_list.size());
@@ -299,8 +300,16 @@ void HrpsysJointTrajectoryAction::onJointTrajectory(
   {
     if (count(joint_names.begin(), joint_names.end(), joint_list[i]) != 1)
     {
-      ROS_ERROR_STREAM(
+      ROS_WARN_STREAM(
           "[" << parent->getInstanceName() << "] @onJointTrajectoryAction / Error : " << "joint : " << joint_list[i] << " did not exist in the required trajectory.");
+    }
+  }
+  for (unsigned int i = 0; i < joint_names.size(); i++)
+  {
+    if (count(joint_list.begin(), joint_list.end(), joint_names[i]) != 1)
+    {
+      ROS_ERROR_STREAM(
+          "[" << parent->getInstanceName() << "] @onJointTrajectoryAction / Error : " << "joint : " << joint_list[i] << " did not exist in the robot model (or limbs).");
       return;
     }
   }
@@ -309,7 +318,7 @@ void HrpsysJointTrajectoryAction::onJointTrajectory(
       "[" << parent->getInstanceName() << "] @onJointTrajectoryAction (" << this->groupname << ") : trajectory.points.size() " << trajectory.points.size());
   for (unsigned int i = 0; i < trajectory.points.size(); i++)
   {
-    angles[i].length(joint_names.size());
+    angles[i].length(joint_list.size());
 
     trajectory_msgs::JointTrajectoryPoint point = trajectory.points[i];
     for (unsigned int j = 0; j < joint_names.size(); j++)
