@@ -150,7 +150,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onActivated(RTC::UniqueId ec_id)
   std::string cname = "fullbody_controller";
   std::vector<std::string> jlst;
   for ( unsigned int i = 0; i < body->joints().size() ; i++ ) {
-    jlst.push_back(body->joint(i)->name);
+    if ( body->joint(i)->index >= 0 ) { // index == -1 is non-actuated joint
+      jlst.push_back(body->joint(i)->name);
+    }
   }
   boost::shared_ptr<HrpsysJointTrajectoryAction> tmp(new HrpsysJointTrajectoryAction(this, cname, gname, jlst));
   trajectory_actions.push_back(tmp);
