@@ -56,6 +56,22 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_htlhOut("htlh", m_htlh),
     m_htheadOut("hthead", m_hthead),
 
+    m_htcom_dbgIn("htcom_dbgIn", m_htcom_dbg),
+    m_htrf_dbgIn("htrf_dbgIn", m_htrf_dbg),
+    m_htlf_dbgIn("htlf_dbgIn", m_htlf_dbg),
+    m_htrh_dbgIn("htrh_dbgIn", m_htrh_dbg),
+    m_htlh_dbgIn("htlh_dbgIn", m_htlh_dbg),
+    m_hthead_dbgIn("hthead_dbgIn", m_hthead_dbg),
+    m_rpcom_dbgIn("rpcom_dbgIn", m_rpcom_dbg),
+    m_rprf_dbgIn("rprf_dbgIn", m_rprf_dbg),
+    m_rplf_dbgIn("rplf_dbgIn", m_rplf_dbg),
+    m_rprh_dbgIn("rprh_dbgIn", m_rprh_dbg),
+    m_rplh_dbgIn("rplh_dbgIn", m_rplh_dbg),
+    m_rphead_dbgIn("rphead_dbgIn", m_rphead_dbg),
+    m_rpzmp_dbgIn("rpzmp_dbgIn", m_rpzmp_dbg),
+    m_rpdcp_dbgIn("rpdcp_dbgIn", m_rpdcp_dbg),
+    m_rpacp_dbgIn("rpacp_dbgIn", m_rpacp_dbg),
+
     m_SequencePlayerServicePort("SequencePlayerService")
 
     // </rtc-template>
@@ -102,6 +118,22 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addOutPort("hthead", m_htheadOut);
   m_htrfw.data.length(6);
   m_htlfw.data.length(6);
+
+  addInPort("htcom_dbgIn", m_htcom_dbgIn);
+  addInPort("htrf_dbgIn", m_htrf_dbgIn);
+  addInPort("htlf_dbgIn", m_htlf_dbgIn);
+  addInPort("htrh_dbgIn", m_htrh_dbgIn);
+  addInPort("htlh_dbgIn", m_htlh_dbgIn);
+  addInPort("hthead_dbgIn", m_hthead_dbgIn);
+  addInPort("rpcom_dbgIn", m_rpcom_dbgIn);
+  addInPort("rprf_dbgIn", m_rprf_dbgIn);
+  addInPort("rplf_dbgIn", m_rplf_dbgIn);
+  addInPort("rprh_dbgIn", m_rprh_dbgIn);
+  addInPort("rplh_dbgIn", m_rplh_dbgIn);
+  addInPort("rphead_dbgIn", m_rphead_dbgIn);
+  addInPort("rpzmp_dbgIn", m_rpzmp_dbgIn);
+  addInPort("rpdcp_dbgIn", m_rpdcp_dbgIn);
+  addInPort("rpacp_dbgIn", m_rpacp_dbgIn);
 
   // Set service provider to Ports
 

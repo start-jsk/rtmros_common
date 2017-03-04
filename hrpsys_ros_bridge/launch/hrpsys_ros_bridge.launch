@@ -172,6 +172,23 @@
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htrh" to="abc.rtc:htrhIn" subscription_type="new"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htlh" to="abc.rtc:htlhIn" subscription_type="new"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:hthead" to="abc.rtc:htheadIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:htcom_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:htcom_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:htrf_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:htrf_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:htlf_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:htlf_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:htrh_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:htrh_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:htlh_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:htlh_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:hthead_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:hthead_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:rpcom_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rpcom_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:rprf_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rprf_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:rplf_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rplf_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:rprh_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rprh_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:rplh_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rplh_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:rphead_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rphead_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:rpdcp_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rpdcp_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:rpacp_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rpacp_dbgIn" subscription_type="new"/>
+    <rtconnect from="abc.rtc:rpzmp_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rpzmp_dbgIn" subscription_type="new"/>
+    
+    
     <rtconnect from="st.rtc:COPInfo" to="HrpsysSeqStateROSBridge0.rtc:rsCOPInfo" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
 
     <rtactivate component="AutoBalancerServiceROSBridge.rtc" />

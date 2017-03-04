@@ -85,7 +85,9 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   ros::Subscriber clock_sub;
   //ishiguro
-  ros::Subscriber ht_zmp_sub,ht_com_sub,ht_rfw_sub,ht_lfw_sub,ht_rf_sub,ht_lf_sub,ht_rh_sub,ht_lh_sub,ht_head_sub;
+  ros::Subscriber htzmp_sub,htcom_sub,htrfw_sub,htlfw_sub,htrf_sub,htlf_sub,htrh_sub,htlh_sub,hthead_sub;
+  ros::Publisher htcom_dbg_pub,htrf_dbg_pub,htlf_dbg_pub,htrh_dbg_pub,htlh_dbg_pub,hthead_dbg_pub;
+  ros::Publisher rpcom_dbg_pub,rprf_dbg_pub,rplf_dbg_pub,rprh_dbg_pub,rplh_dbg_pub,rphead_dbg_pub,rpzmp_dbg_pub,rpdcp_dbg_pub,rpacp_dbg_pub;
   tf::TransformListener ht_tf_listener;
 
   nav_msgs::Odometry prev_odom;
@@ -111,6 +113,9 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void updateSensorTransform(const ros::Time &stamp);
   std::map<std::string, geometry_msgs::Transform> sensor_transformations;
   boost::mutex sensor_transformation_mutex;
+
+  // whole body master slave relatives
+  void updateWBMS(const ros::Time &stamp);
 };
 
 

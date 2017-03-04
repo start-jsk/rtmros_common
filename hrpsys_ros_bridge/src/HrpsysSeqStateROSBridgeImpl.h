@@ -182,6 +182,37 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   TimedDoubleSeq m_htlfw;
   OutPort<TimedDoubleSeq> m_htlfwOut;
 
+  TimedPose3D m_htcom_dbg;
+  InPort<TimedPose3D> m_htcom_dbgIn;
+  TimedPose3D m_htrf_dbg;
+  InPort<TimedPose3D> m_htrf_dbgIn;
+  TimedPose3D m_htlf_dbg;
+  InPort<TimedPose3D> m_htlf_dbgIn;
+  TimedPose3D m_htrh_dbg;
+  InPort<TimedPose3D> m_htrh_dbgIn;
+  TimedPose3D m_htlh_dbg;
+  InPort<TimedPose3D> m_htlh_dbgIn;
+  TimedPose3D m_hthead_dbg;
+  InPort<TimedPose3D> m_hthead_dbgIn;
+  TimedPose3D m_rpcom_dbg;
+  InPort<TimedPose3D> m_rpcom_dbgIn;
+  TimedPose3D m_rprf_dbg;
+  InPort<TimedPose3D> m_rprf_dbgIn;
+  TimedPose3D m_rplf_dbg;
+  InPort<TimedPose3D> m_rplf_dbgIn;
+  TimedPose3D m_rprh_dbg;
+  InPort<TimedPose3D> m_rprh_dbgIn;
+  TimedPose3D m_rplh_dbg;
+  InPort<TimedPose3D> m_rplh_dbgIn;
+  TimedPose3D m_rphead_dbg;
+  InPort<TimedPose3D> m_rphead_dbgIn;
+  TimedPoint3D m_rpzmp_dbg;
+  InPort<TimedPoint3D> m_rpzmp_dbgIn;
+  TimedPoint3D m_rpdcp_dbg;
+  InPort<TimedPoint3D> m_rpdcp_dbgIn;
+  TimedPoint3D m_rpacp_dbg;
+  InPort<TimedPoint3D> m_rpacp_dbgIn;
+
   // </rtc-template>
 
   // CORBA Port declaration
