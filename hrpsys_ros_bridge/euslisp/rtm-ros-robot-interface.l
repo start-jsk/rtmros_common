@@ -818,30 +818,30 @@
     ))
   )
 
-;; ImpedanceController's ObjectTurnaroundDetector
-(def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_ImpedanceControllerService_objectTurnaroundDetectorParam
+;; ObjectContactTurnaroundDetector
+(def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_ObjectContactTurnaroundDetectorService_objectContactTurnaroundDetectorParam
   :set-object-turnaround-detector-param :get-object-turnaround-detector-param :get-object-turnaround-detector-param-arguments
-  :impedancecontrollerservice_setObjectTurnaroundDetectorParam
-  :impedancecontrollerservice_getObjectTurnaroundDetectorParam)
+  :ObjectContactTurnaroundDetectorService_setObjectContactTurnaroundDetectorParam
+  :ObjectContactTurnaroundDetectorService_getObjectContactTurnaroundDetectorParam)
 (defmethod rtm-ros-robot-interface
   (:start-object-turnaround-detection
    (&key (ref-diff-wrench) (max-time) (limbs))
-   "Start ObjectTurnaroundDetection mode.
+   "Start ObjectContactTurnaroundDetection mode.
     ref-diff-wrench is final reference wrench (scalar).
     max-time is max time [msec].
     limbs is limb list to be used."
-   (send self :impedancecontrollerservice_startObjectTurnaroundDetection
+   (send self :ObjectContactTurnaroundDetectorService_startObjectContactTurnaroundDetection
          :i_ref_diff_wrench ref-diff-wrench :i_max_time max-time :i_ee_names (mapcar #'string-downcase limbs)))
   (:check-object-turnaround-detection
    ()
-   "Check object turnaround detection.
+   "Check object contact turnaround detection.
    If t, detected. Otherwise, not detected."
    (send self :get-idl-enum-values
-         (send (send self :impedancecontrollerservice_checkObjectTurnaroundDetection) :operation_return)
-         "HRPSYS_ROS_BRIDGE::OPENHRP_IMPEDANCECONTROLLERSERVICE_DETECTORMODE"))
+         (send (send self :ObjectContactTurnaroundDetectorService_checkObjectContactTurnaroundDetection) :operation_return)
+         "HRPSYS_ROS_BRIDGE::OPENHRP_OBJECTCONTACTTURNAROUNDDETECTORSERVICE_DETECTORMODE"))
   (:get-otd-object-forces-moments
    ()
-   "Get ObjectTurnaroundDetector's curernt forces and moments for used limbs.
+   "Get ObjectContactTurnaroundDetector's curernt forces and moments for used limbs.
     Return value is (list force-list moment-list)."
    (labels ((split-vector
              (vec &optional (dim 3))
@@ -849,7 +849,7 @@
                (dotimes (i (/ (length vec) dim))
                  (push (subseq vec (* i 3) (+ (* i 3) 3)) vret))
                (reverse vret))))
-     (let ((ret (send self :impedancecontrollerservice_getObjectForcesMoments)))
+     (let ((ret (send self :ObjectContactTurnaroundDetectorService_getObjectForcesMoments)))
        (list (split-vector (send (send ret :o_forces) :data))
              (split-vector (send (send ret :o_moments) :data))
              (send ret :o_3dofwrench))
