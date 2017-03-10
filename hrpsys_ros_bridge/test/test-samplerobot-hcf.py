@@ -29,10 +29,13 @@ class TestSampleRobotHcf(unittest.TestCase):
         pass
 
     def test_off_force_sensor(self):
-        while self.off_lfsensor == None:
-            time.sleep(1)
-            rospy.logwarn("wait for off_lfsensor...")
-        self.assertEqual(self.off_lfsensor.header.frame_id, "lfsensor")
+        if rospy.has_param("use_unstable_rtc") and rospy.getparam("use_unstable_rtc"):
+            while self.off_lfsensor == None:
+                time.sleep(1)
+                rospy.logwarn("wait for off_lfsensor...")
+            self.assertEqual(self.off_lfsensor.header.frame_id, "lfsensor")
+        else:
+            assert(True)
 
     def test_ref_force_sensor(self):
         while self.ref_lfsensor == None:
@@ -41,15 +44,18 @@ class TestSampleRobotHcf(unittest.TestCase):
         self.assertEqual(self.ref_lfsensor.header.frame_id, "lfsensor")
 
     def test_hcf_init(self):
-        hcf = samplerobot_hrpsys_config.SampleRobotHrpsysConfigurator()
-        model_url = rospkg.RosPack().get_path("openhrp3") + "/share/OpenHRP-3.1/sample/model/sample1.wrl"
-        if os.path.exists(model_url):
-            try:
-                hcf.init("SampleRobot(Robot)0", model_url)
-                assert(True)
-            except AttributeError as e:
-                print >> sys.stderr, "[test-samplerobot-hcf.py] catch exception", e
-                assert(False)
+        if rospy.has_param("use_unstable_rtc") and rospy.getparam("use_unstable_rtc"):
+            hcf = samplerobot_hrpsys_config.SampleRobotHrpsysConfigurator()
+            model_url = rospkg.RosPack().get_path("openhrp3") + "/share/OpenHRP-3.1/sample/model/sample1.wrl"
+            if os.path.exists(model_url):
+                try:
+                    hcf.init("SampleRobot(Robot)0", model_ur)
+                    assert(True)
+                except AttributeError as e:
+                    print >> sys.stderr, "[test-samplerobot-hcf.py] catch exception", e
+                    assert(False)
+        else:
+            assert(True)
 
 #unittest.main()
 if __name__ == '__main__':

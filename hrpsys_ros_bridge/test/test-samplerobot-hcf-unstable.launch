@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find hrpsys_ros_bridge)/test/test-samplerobot-hcf.launch" >
+    <arg name="USE_UNSTABLE_RTC" default="true" />
+  </include>
+</launch>
