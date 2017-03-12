@@ -17,7 +17,9 @@
     <arg name="USE_WALKING" default="true" if="$(arg USE_UNSTABLE_RTC)"/>
     <arg name="USE_IMPEDANCECONTROLLER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
     <arg name="USE_EMERGENCYSTOPPER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
-    <arg name="USE_MANIPULATION" default="true" if="$(arg USE_UNSTABLE_RTC)" />
+    <arg name="USE_REFERENCEFORCEUPDATER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
+    <!-- OBJECTCONTACTTURNAROUNDDETECTOR is not included in unstable, still under development -->
+    <!-- <arg name="USE_OBJECTCONTACTTURNAROUNDDETECTOR" default="true" if="$(arg USE_UNSTABLE_RTC)" /> -->
     <arg name="ROBOT_TYPE" default="@robot@" if="$(arg USE_UNSTABLE_RTC)" />
     <arg name="USE_ROBOT_TYPE_SETTING" default="true" if="$(arg USE_UNSTABLE_RTC)" />
 @ROSBRIDGE_ARGS@
