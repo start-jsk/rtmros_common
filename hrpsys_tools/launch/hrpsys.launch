@@ -71,6 +71,7 @@
 -o "example.PDcontroller.config_file:$(arg CONF_FILE)"
 -o "example.EmergencyStopper.config_file:$(arg CONF_FILE)"
 -o "example.ReferenceForceUpdater.config_file:$(arg CONF_FILE)"
+-o "example.ObjectContactTurnaroundDetector.config_file:$(arg CONF_FILE)"
 -o "example.RobotHardware.config_file:$(arg RobotHardware_conf)"
     '/>
   <arg name="hrpsys_opt_rtc_config_args" default=''/>
