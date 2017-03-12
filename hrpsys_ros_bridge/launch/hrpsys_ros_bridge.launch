@@ -28,6 +28,7 @@
   <arg name="USE_IMAGESENSOR" default="false" />
   <arg name="USE_EMERGENCYSTOPPER" default="false" />
   <arg name="USE_REFERENCEFORCEUPDATER" default="false" />
+  <arg name="USE_OBJECTCONTACTTURNAROUNDDETECTOR" default="false" />
   <arg name="USE_HRPSYS_PROFILE" default="true" />
   <arg name="USE_VELOCITY_OUTPUT" default="false" />
   <arg name="PUBLISH_SENSOR_TF" default="true" />
@@ -91,7 +92,7 @@
   <env name="push_policy" value="$(arg push_policy)" />
   <env name="push_rate" value="$(arg push_rate)" />
   <env name="buffer_length" value="$(arg buffer_length)" />
-  <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm_tools" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch USE_COMMON=$(arg USE_COMMON) USE_WALKING=$(arg USE_WALKING) USE_COLLISIONCHECK=$(arg USE_COLLISIONCHECK) USE_IMPEDANCECONTROLLER=$(arg USE_IMPEDANCECONTROLLER) USE_SOFTERRORLIMIT=$(arg USE_SOFTERRORLIMIT) USE_IMAGESENSOR=$(arg USE_IMAGESENSOR) USE_ROBOTHARDWARE=$(arg USE_ROBOTHARDWARE) USE_GRASPCONTROLLER=$(arg USE_GRASPCONTROLLER) USE_SERVOCONTROLLER=$(arg USE_SERVOCONTROLLER) USE_TORQUECONTROLLER=$(arg USE_TORQUECONTROLLER) USE_TORQUEFILTER=$(arg USE_TORQUEFILTER) USE_EMERGENCYSTOPPER=$(arg USE_EMERGENCYSTOPPER) USE_REFERENCEFORCEUPDATER=$(arg USE_REFERENCEFORCEUPDATER) USE_VELOCITY_OUTPUT=$(arg USE_VELOCITY_OUTPUT)" output="$(arg OUTPUT)"/>
+  <node name="rtmlaunch_hrpsys_ros_bridge" pkg="openrtm_tools" type="rtmlaunch.py" args="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch USE_COMMON=$(arg USE_COMMON) USE_WALKING=$(arg USE_WALKING) USE_COLLISIONCHECK=$(arg USE_COLLISIONCHECK) USE_IMPEDANCECONTROLLER=$(arg USE_IMPEDANCECONTROLLER) USE_SOFTERRORLIMIT=$(arg USE_SOFTERRORLIMIT) USE_IMAGESENSOR=$(arg USE_IMAGESENSOR) USE_ROBOTHARDWARE=$(arg USE_ROBOTHARDWARE) USE_GRASPCONTROLLER=$(arg USE_GRASPCONTROLLER) USE_SERVOCONTROLLER=$(arg USE_SERVOCONTROLLER) USE_TORQUECONTROLLER=$(arg USE_TORQUECONTROLLER) USE_TORQUEFILTER=$(arg USE_TORQUEFILTER) USE_EMERGENCYSTOPPER=$(arg USE_EMERGENCYSTOPPER) USE_REFERENCEFORCEUPDATER=$(arg USE_REFERENCEFORCEUPDATER) USE_OBJECTCONTACTTURNAROUNDDETECTOR=$(arg USE_OBJECTCONTACTTURNAROUNDDETECTOR) USE_VELOCITY_OUTPUT=$(arg USE_VELOCITY_OUTPUT)" output="$(arg OUTPUT)"/>
 
 
   <!-- All Robots -->
@@ -265,6 +266,12 @@
           output="screen" args ="$(arg openrtm_args)" />
     <rtconnect from="ReferenceForceUpdaterServiceROSBridge.rtc:ReferenceForceUpdaterService" to="rfu.rtc:ReferenceForceUpdaterService"  subscription_type="new"/>
     <rtactivate component="ReferenceForceUpdaterServiceROSBridge.rtc" />
+  </group>
+  <group if="$(arg USE_OBJECTCONTACTTURNAROUNDDETECTOR)" >
+    <node pkg="hrpsys_ros_bridge" name="ObjectContactTurnaroundDetectorServiceROSBridge" type="ObjectContactTurnaroundDetectorServiceROSBridgeComp"
+          output="screen" args ="$(arg openrtm_args)" />
+    <rtconnect from="ObjectContactTurnaroundDetectorServiceROSBridge.rtc:ObjectContactTurnaroundDetectorService" to="octd.rtc:ObjectContactTurnaroundDetectorService"  subscription_type="new"/>
+    <rtactivate component="ObjectContactTurnaroundDetectorServiceROSBridge.rtc" />
   </group>
 
   <!-- USER_IMAGESENSOR
