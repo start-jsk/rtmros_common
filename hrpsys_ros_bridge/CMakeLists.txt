@@ -256,8 +256,8 @@ file(WRITE models/SampleRobot_controller_config.yaml
 ")
 
 add_rostest(test/test-samplerobot.test)
-if (NOT $ENV{ROS_DISTRO} STREQUAL "hydro")
-  add_rostest(test/test-samplerobot-hcf.launch) # hydro-deb does not work with --unstable-rtc
+if (${hrpsys_VERSION} VERSION_GREATER "315.11.0") # --unstable-rtc only ork with >= 315.12.0
+  add_rostest(test/test-samplerobot-hcf.launch)
 endif()
 add_rostest(test/test-pa10.test)
 add_rostest(test/test-import-python.test)
