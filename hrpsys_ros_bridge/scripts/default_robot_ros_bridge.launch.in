@@ -2,6 +2,8 @@
   <arg name="RUN_RVIZ" default="true" />
   <arg name="SIMULATOR_NAME" default="@ROBOT@(Robot)0" />
   <arg name="USE_UNSTABLE_RTC" default="@USE_UNSTABLE_RTC@"/>
+  <arg     if="@HRPSYS_315_12_0@" name="USE_UNSTABLE_RTC_315_12_0" value="$(arg USE_UNSTABLE_RTC)"/>
+  <arg unless="@HRPSYS_315_12_0@" name="USE_UNSTABLE_RTC_315_12_0" value="false"/>
   <rosparam command="load"
             file="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@_controller_config.yaml" />
 
@@ -18,8 +20,8 @@
     <arg name="USE_IMPEDANCECONTROLLER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
     <arg name="USE_EMERGENCYSTOPPER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
     <arg name="USE_REFERENCEFORCEUPDATER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
-    <!-- OBJECTCONTACTTURNAROUNDDETECTOR is not included in unstable, still under development -->
-    <!-- <arg name="USE_OBJECTCONTACTTURNAROUNDDETECTOR" default="true" if="$(arg USE_UNSTABLE_RTC)" /> -->
+    <!-- ObjectContactTurnAroundDetector requires hrpsys 315.12.0 -->
+    <arg name="USE_OBJECTCONTACTTURNAROUNDDETECTOR" default="true" if="$(arg USE_UNSTABLE_RTC_315_12_0)" />
     <arg name="ROBOT_TYPE" default="@robot@" if="$(arg USE_UNSTABLE_RTC)" />
     <arg name="USE_ROBOT_TYPE_SETTING" default="true" if="$(arg USE_UNSTABLE_RTC)" />
 @ROSBRIDGE_ARGS@

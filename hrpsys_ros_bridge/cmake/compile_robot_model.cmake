@@ -209,6 +209,12 @@ macro (generate_default_launch_eusinterface_files wrlfile project_pkg_name)
   #  generate startup.launch
   configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot_startup.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}_startup.launch)
   #  generate ros_bridge.launch
+  message("hrpsys_VERSION : ${hrpsys_VERSION}")
+  if("${hrpsys_VERSION}" VERSION_LESS "315.12.0")
+    set(HRPSYS_315_12_0 false)
+  else()
+    set(HRPSYS_315_12_0 true)
+  endif()
   configure_file(${hrpsys_ros_bridge_PACKAGE_PATH}/scripts/default_robot_ros_bridge.launch.in ${PROJECT_SOURCE_DIR}/launch/${_sname}_ros_bridge.launch)
   add_custom_target(${_sname}_${PROJECT_NAME}_compile_launch DEPENDS ${PROJECT_SOURCE_DIR}/launch/${_sname}_startup.launch ${PROJECT_SOURCE_DIR}/launch/${_sname}_ros_bridge.launch)
   #  generate toplevel launch which includes ros_bridge.launch and startup.launch
