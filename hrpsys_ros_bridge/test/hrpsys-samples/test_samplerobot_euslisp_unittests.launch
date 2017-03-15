@@ -13,6 +13,9 @@
     <arg name="RUN_RVIZ" default="$(arg RUN_RVIZ)" />
     <arg name="corbaport" default="2809" />
     <arg name="USE_UNSTABLE_RTC" default="true"/>
+    <arg name="USE_EMERGENCYSTOPPER" default="true" />
+    <arg name="USE_REFERENCEFORCEUPDATER" default="true" />
+    <arg name="USE_OBJECTCONTACTTURNAROUNDDETECTOR" default="true" />
   </include>
 
   <test test-name="test_samplerobot_0_data_logger" pkg="roseus" type="roseus"
