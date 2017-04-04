@@ -10,6 +10,10 @@
   <arg name="corbaport" default="15005" />
   <arg name="hrpsys_precreate_rtc" default="HGcontroller"/>
   <arg name="USE_UNSTABLE_RTC" default="@USE_UNSTABLE_RTC@"/>
+  <!-- following rtc is used for test/hrpsys-samples, mainly full euslisp test -->
+  <arg name="USE_EMERGENCYSTOPPER" default="false" />
+  <arg name="USE_REFERENCEFORCEUPDATER" default="false" />
+  <arg name="USE_OBJECTCONTACTTURNAROUNDDETECTOR" default="false" />
   <include file="$(find @PROJECT_PKG_NAME@)/launch/@robot@_startup.launch" >
     <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
     <arg name="NOSIM" value="$(arg NOSIM)" />
@@ -26,6 +30,11 @@
     <arg name="RUN_RVIZ" default="$(arg RUN_RVIZ)" />
     <arg name="corbaport" default="$(arg corbaport)" />
     <arg name="USE_UNSTABLE_RTC" default="$(arg USE_UNSTABLE_RTC)"/>
+    <!-- BEGIN: development -->
+    <arg name="USE_EMERGENCYSTOPPER" default="$(arg USE_EMERGENCYSTOPPER)" />
+    <arg name="USE_REFERENCEFORCEUPDATER" default="$(arg USE_REFERENCEFORCEUPDATER)" />
+    <arg name="USE_OBJECTCONTACTTURNAROUNDDETECTOR" default="$(arg USE_OBJECTCONTACTTURNAROUNDDETECTOR)" />
+    <!-- END: development -->
   </include>
 
   <sphinxdoc><![CDATA[
