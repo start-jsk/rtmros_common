@@ -2406,7 +2406,7 @@
          ;; Rot
          (dr (matrix-log (send (car (send obj :links)) :worldrot)))
          (ndr (if (< (norm dr) epsilon) (float-vector 1 0 0) (normalize-vector dr)))
-         (ang (if (< (norm dr) epsilon) 0 (/ (elt dr 1) (elt ndr 1))))
+         (ang (if (< (norm dr) epsilon) 0 (norm dr)))
          ;; Removing offset
          ;;   Initial rootLink pos offset should be removed https://github.com/fkanehiro/openhrp3/blob/master/server/ModelLoader/projectGenerator.cpp#L501-L503 (rootLink->p addition)
          (off-root-pos (send obj :inverse-transform-vector (send (car (send obj :links)) :worldpos)))
