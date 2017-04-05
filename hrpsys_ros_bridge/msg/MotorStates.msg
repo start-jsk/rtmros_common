@@ -39,4 +39,3 @@ int32[] servo_alarm
 int16[] driver_temp
 float64[] temperature
 std_msgs/Float64MultiArray extra_data
-

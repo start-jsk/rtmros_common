@@ -328,4 +328,3 @@ macro(get_collada_to_urdf _collada_to_urdf_exe)
     message(FATAL_ERROR "could not find ${${_collada_to_urdf_exe}}")
   endif()
 endmacro(get_collada_to_urdf _collada_to_urdf_exe)
-

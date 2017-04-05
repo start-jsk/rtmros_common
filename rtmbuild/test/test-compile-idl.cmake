@@ -18,4 +18,3 @@ rtmbuild_genidl()
 
 # generate bridge
 rtmbuild_genbridge()
-

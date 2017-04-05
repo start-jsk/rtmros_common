@@ -51,4 +51,3 @@ if __name__ == '__main__':
         hcf.init(sys.argv[1])
     else :
         hcf.init()
-

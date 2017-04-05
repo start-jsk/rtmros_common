@@ -71,4 +71,3 @@ install(DIRECTORY test samples DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION} U
 ## tests
 ##
 add_rostest(test/test_myservice_rosbridge.test)
-

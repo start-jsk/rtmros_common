@@ -41,5 +41,3 @@
           args="-sync -d $(find @PROJECT_PKG_NAME@)/launch/@robot@.rviz" />
   </group>
 </launch>
-
-

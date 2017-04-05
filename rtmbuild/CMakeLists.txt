@@ -21,4 +21,3 @@ install(DIRECTORY cmake scripts test
   )
 
 add_rostest(test/test-compile-idl.test)
-

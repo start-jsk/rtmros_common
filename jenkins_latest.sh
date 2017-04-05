@@ -101,5 +101,3 @@ rtmros_common_merge
 rtmros_common_commit
 rosinstall_merge
 rosinstall_commit
-
-

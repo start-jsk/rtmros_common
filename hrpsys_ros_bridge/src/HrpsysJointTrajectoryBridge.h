@@ -139,4 +139,3 @@ DLL_EXPORT void HrpsysJointTrajectoryBridgeInit(RTC::Manager* manager);
 ;
 
 #endif // HRPSYSJOINTTRAJECTORYBRIDGE_H
-

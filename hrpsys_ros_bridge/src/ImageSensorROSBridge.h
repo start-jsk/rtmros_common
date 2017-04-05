@@ -154,4 +154,3 @@ extern "C"
 };
 
 #endif // IMAGESENSORROSBRIDGE_H
-

@@ -479,4 +479,3 @@ smartpal5_startup.launch
 .. code-block:: bash
 
   roslaunch hrpsys_ros_bridge smartpal5_startup.launch
-

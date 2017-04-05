@@ -209,4 +209,3 @@ extern "C"
 };
 
 #endif // HRPSYSSEQSTATEROSBRIDGEIMPL_H
-

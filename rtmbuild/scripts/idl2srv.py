@@ -706,4 +706,3 @@ if __name__ == '__main__':
     else:
         tree.accept(ServiceVisitor())
         tree.accept(InterfaceNameVisitor())
-

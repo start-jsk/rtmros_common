@@ -24,4 +24,3 @@ test-pkg $PKGS
 
 #
 (which rosrun && rosrun rosunit clean_junit_xml.py; echo "done")     # check error
-

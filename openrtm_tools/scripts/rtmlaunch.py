@@ -11,7 +11,3 @@ def signal_handler(signum, frame):
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     rtmlaunch.main()
-
-
-
-

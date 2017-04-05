@@ -34,4 +34,3 @@ rosrun rtmbuild_test MyServiceROSBridgeComp -o "corba.nameservers:localhost:9999
 PID=$!
 rosrun rtmbuild test-compile-idl.py $@
 kill -HUP $PID
-

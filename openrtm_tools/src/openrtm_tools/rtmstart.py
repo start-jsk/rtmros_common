@@ -53,7 +53,3 @@ def start_cosname(cosnames, port_number):
         p = subprocess.Popen([cosnames,"-start", str(port_number), "-always", "-logdir", logdir])
 
         return p
-
-
-
-
