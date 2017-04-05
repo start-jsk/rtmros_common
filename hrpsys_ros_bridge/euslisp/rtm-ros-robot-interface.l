@@ -2314,22 +2314,37 @@
 ;; utility functions for project generator generation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; clone euslisp robot and objects to OpenHRP3 project file
-;;   add euslisp model + locate euslisp model in OpenHRP3 world
 (defun dump-project-file-by-cloning-euslisp-models
-  (robot robot-file-path ;; robot euslisp model, robot VRML(or Collada) file path
-   &key (object-models) (object-models-file-path) ;; list of object euslisp model, list of object VRML(or Collada) file path
-        (nosim) (timestep 0.005) (dt 0.005) ;; [s]
-        (output-fname (format nil "/tmp/~A" (send robot :name)))) ;; output file name "output-fname.xml"
+  (robot robot-file-path
+   &key (object-models) (object-models-file-path)
+        (timestep 0.005) (dt 0.005)
+        (use-highgain-mode t) (integrate t) (method :euler)
+        (output-fname (format nil "/tmp/~A" (send robot :name)))
+        (debug)
+        )
+  "Clone euslisp robot and objects to OpenHRP3 project file.
+   Add euslisp model + locate euslisp model in OpenHRP3 world.
+   Arguments (required)
+      robot  : Robot model
+      robot-file-path : Path to the robot euslisp model, robot VRML(or Collada) file path.
+   Arguments (key word)
+      object-models : list of object euslisp model
+      object-models-file-path) ;; list of object VRML(or Collada) file path
+      debug : print openhrp3
+   Arguments (key word + openhrp-project-generator's argument)
+      Please see https://github.com/fkanehiro/openhrp3/blob/master/server/ModelLoader/README.md
+      timestep, dt : [s]
+      output-fname : output file name '[output-fname].xml'. By default, '[robot'sname].xml'
+      integrate, use-highgain-mode, method : See above README
+  "
   ;; TODO : Is longfloor.wrl necessary??
   (let ((str
-         (format nil "rosrun hrpsys_ros_bridge rtmtest -t hrpsys_tools _gen_project.launch \\\
-               INPUT:=~A,~A \\\
-               OBJECT_MODELS:='`rospack find openhrp3`/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,1,0,0,0 ~A' \\\
-               OUTPUT:=~A.xml \\\
-               INTEGRATE:=~A CORBA_PORT:=15005 CONF_DT_OPTION:='--dt ~A' \\\
-               SIMULATION_TIMESTEP_OPTION:='--timeStep ~A' \\\
-               SIMULATION_JOINT_PROPERTIES_OPTION:='--joint-properties ~A'"
+         (format nil "openhrp-project-generator \\\
+               ~A,~A \\\
+               `rospack find openhrp3`/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,1,0,0,0 ~A \\\
+               --output ~A.xml \\\
+               --integrate ~A --dt ~A --timeStep ~A --use-highgain-mode ~A --method ~A\\\
+               --joint-properties ~A"
                  robot-file-path
                  (gen-ProjectGenerator-model-root-coords-string robot)
                  (let ((obj-path-list
@@ -2338,17 +2353,25 @@
                    (if obj-path-list
                        (reduce #'(lambda (x y) (format nil "~A ~A" x y)) obj-path-list)
                      ""))
-                 (format nil "~A~A" output-fname (if nosim "_nosim" ""))
-                 (if nosim "false" "true")
+                 output-fname
+                 (if integrate "true" "false")
                  dt
                  timestep
+                 (if use-highgain-mode "true" "false")
+                 (case method
+                       (:runge-kutta "RUNGE_KUTTA")
+                       (:euler "EULER")
+                       (t "EULER"))
                  (gen-ProjectGenerator-joint-properties-string robot)
                  )))
+    (if debug (warn ";; execute : ~A~%" str))
     (unix:system (format nil "bash -c -i \"~A;exit 0\";exit 0" str))
     ))
 
 (defun gen-ProjectGenerator-joint-properties-string
   (robot)
+  "Generate joint properties setting for openhrp-project-generator.
+   Object (cascaded-link) is required as an argument."
   (let ((str))
     (dolist (j (send robot :joint-list))
       (if str
@@ -2359,11 +2382,21 @@
 
 (defun gen-ProjectGenerator-model-root-coords-string
   (obj)
-  (let* ((dr (matrix-log (send (car (send obj :links)) :worldrot)))
-         (ndr (normalize-vector dr))
-         (rpos (scale 1e-3 (send (car (send obj :links)) :worldpos))))
+  "Generate root-coords offset setting for openhrp-project-generator.
+   Object (cascaded-link) is required as an argument."
+  (let* ((epsilon 1.0e-20) ;; same as normalize-vector threshold
+         ;; Rot
+         (dr (matrix-log (send (car (send obj :links)) :worldrot)))
+         (ndr (if (< (norm dr) epsilon) (float-vector 1 0 0) (normalize-vector dr)))
+         (ang (if (< (norm dr) epsilon) 0 (/ (elt dr 1) (elt ndr 1))))
+         ;; Removing offset
+         ;;   Initial rootLink pos offset should be removed https://github.com/fkanehiro/openhrp3/blob/master/server/ModelLoader/projectGenerator.cpp#L501-L503 (rootLink->p addition)
+         (off-root-pos (send obj :inverse-transform-vector (send (car (send obj :links)) :worldpos)))
+         ;; Pos
+         (rpos (scale 1e-3 (v- (send (car (send obj :links)) :worldpos) off-root-pos))))
       (format nil "~A,~A,~A,~A,~A,~A,~A"
               (elt rpos 0) (elt rpos 1) (elt rpos 2)
-              (elt ndr 0) (elt ndr 1) (elt ndr 2) (/ (elt dr 1) (elt ndr 1)) ;; openhrp3 axis angle orientation representation
+              (elt ndr 0) (elt ndr 1) (elt ndr 2) ang ;; openhrp3 axis angle orientation representation
               )))
+
 
