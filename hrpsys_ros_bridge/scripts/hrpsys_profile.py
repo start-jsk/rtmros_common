@@ -30,16 +30,19 @@ def rtc_init () :
         ms = rtm.findRTCmanager(rtm.nshost)
         print "[hrpsys_profile.py] wait for RTCmanager : ",ms
 
+component_names = dict()
 def hrpsys_profile() :
-    global ms, rh, eps
+    global ms, rh, eps, component_names
 
     diagnostic = DiagnosticArray()
     diagnostic.header.stamp = rospy.Time.now()
 
     components = ms.get_components()
     eps_of_rh = narrow(findRTC(components[0].name()).owned_ecs[0], "ExecutionProfileService")
-    for component in components :
-        component_name = component.name()
+    for component in components:
+        if not component_names.has_key(component):
+            component_names[component] = component.name()
+        component_name = component_names[component]
         component_rtc = findRTC(component_name)
         eps = narrow(component_rtc.owned_ecs[0], "ExecutionProfileService")
 
@@ -63,8 +66,8 @@ def hrpsys_profile() :
             diagnostic.status.append(status)
 
         try:
-            prof = eps_of_rh.getComponentProfile(component.ref)
-            status = DiagnosticStatus(name =  'hrpEC Profile (RTC: ' + component.name() + ')', level = DiagnosticStatus.OK)
+            prof = eps_of_rh.getComponentProfile(component_rtc.ref)
+            status = DiagnosticStatus(name =  'hrpEC Profile (RTC: ' + component_name + ')', level = DiagnosticStatus.OK)
             status.message = "Running : Average Process : %7.5f, Max Process : %7.5f" % (prof.avg_process*1000, prof.max_process*1000);
             status.values.append(KeyValue(key = "Max Process", value = str(prof.max_process*1000)))
             status.values.append(KeyValue(key = "Average Process", value = str(prof.avg_process*1000)))
