@@ -15,6 +15,9 @@
   <env name="COLLISIONDETECTOR_INSTANCE_NAME" value="$(arg COLLISIONDETECTOR_INSTANCE_NAME)" />
   <arg name="RUN_COLLISION_STATE" default="true" />
 
+  <!-- ros bridge setting -->
+  <arg name="USE_COLLISIONDETECTOR_ROS_BRIDGE" default="false"/>
+
   <!-- launch collision detector -->
   <node pkg="hrpsys" name="CollisionDetectorComp"
         type="CollisionDetectorComp"
@@ -23,7 +26,7 @@
   <rtconnect from="$(arg SIMULATOR_NAME).rtc:q" to="$(arg COLLISIONDETECTOR_INSTANCE_NAME).rtc:qRef" subscription_type="new"/>
   <rtactivate component="$(arg COLLISIONDETECTOR_INSTANCE_NAME).rtc" />
   <node name="rtmlaunch_collision_detector" pkg="openrtm_tools" type="rtmlaunch.py"
-        args="$(find hrpsys_ros_bridge)/launch/collision_detector.launch" />
+        args="$(find hrpsys_ros_bridge)/launch/collision_detector.launch USE_COLLISIONDETECTOR_ROS_BRIDGE=$(arg USE_COLLISIONDETECTOR_ROS_BRIDGE)" />
 
   <!-- launch collision result publisher -->
   <node pkg="hrpsys_ros_bridge" name="collision_state" type="collision_state.py"
@@ -31,4 +34,13 @@
         args="$(arg MODEL_FILE) $(arg omniorb_args)" >
     <param name="comp_name" type="string" value="$(arg COLLISIONDETECTOR_INSTANCE_NAME)" />
   </node>
+
+  <!-- launch collision detector ros bridge -->
+  <group if="$(arg USE_COLLISIONDETECTOR_ROS_BRIDGE)" >
+    <node pkg="hrpsys_ros_bridge" name="CollisionDetectorServiceROSBridge" type="CollisionDetectorServiceROSBridgeComp"
+          args="$(arg openrtm_args)" />
+
+    <rtconnect from="CollisionDetectorServiceROSBridge.rtc:CollisionDetectorService" to="CollisionDetector0.rtc:CollisionDetectorService" subscription_type="new"/>
+    <rtactivate component="CollisionDetectorServiceROSBridge.rtc" />
+  </group>
 </launch>
