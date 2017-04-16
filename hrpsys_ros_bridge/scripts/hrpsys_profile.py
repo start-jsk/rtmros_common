@@ -30,18 +30,25 @@ def rtc_init () :
         ms = rtm.findRTCmanager(rtm.nshost)
         print "[hrpsys_profile.py] wait for RTCmanager : ",ms
 
+components_rtc = dict()
 def hrpsys_profile() :
-    global ms, rh, eps
+    global ms, rh, eps, components_rtc
 
     diagnostic = DiagnosticArray()
     diagnostic.header.stamp = rospy.Time.now()
 
     components = ms.get_components()
     eps_of_rh = narrow(findRTC(components[0].name()).owned_ecs[0], "ExecutionProfileService")
-    for component in components :
+    for component in list(set(components)) :
         component_name = component.name()
-        component_rtc = findRTC(component_name)
-        eps = narrow(component_rtc.owned_ecs[0], "ExecutionProfileService")
+        if not components_rtc.has_key(component_name) :
+            components_rtc[component_name] = findRTC(component_name)
+        component_rtc = components_rtc[component_name]
+        try:
+            eps = narrow(component_rtc.owned_ecs[0], "ExecutionProfileService")
+        except Exception, e:
+            del components_rtc[component_name]
+            raise Exception(e)
 
         if not eps :
             continue
