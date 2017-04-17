@@ -1,4 +1,6 @@
 ================================================================================================================================================================
+
+[![Join the chat at https://gitter.im/start-jsk/rtmros_common](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/start-jsk/rtmros_common?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 rtmros_common  [![Build Status](https://travis-ci.org/start-jsk/rtmros_common.png)](https://travis-ci.org/start-jsk/rtmros_common)
 ================================================================================================================================================================
 
