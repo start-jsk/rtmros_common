@@ -868,51 +868,69 @@
    "Set object turnaround reference force.
     axis is resultant force direction.
     max-time is max time [msec] and max-ref-force is max reference resultant force.
+    max-ref-force is max resultant reference force [N]. max-ref-force is added to original ref forces.
     detect-time-offset is additional checking time [msec].
     set-ref-force-time is time to set reference force [msec].
     If set-ref-force-p is t, set estimated reference force. Otherwise, set reference force to zero.
     periodic-time is loop wait time[msec]."
+   ;; Step.0 Initialize
    (format t ";; Start object turnaround detection~%")
    (send self :set-object-turnaround-detector-param :axis axis :detector-total-wrench 0)
-   (send self :set-ref-force
-         (scale (/ max-ref-force (length limbs)) axis)
-         max-time
-         (if (= (length limbs) 1) (car limbs) :arms))
-   (send self :start-object-turnaround-detection
-         :ref-diff-wrench max-ref-force
-         :max-time (* 1e-3 (+ detect-time-offset max-time))
-         :limbs limbs)
-   (let ((detector-mode :mode_detector_idle) (fm-ret))
-     (do-until-key-with-check
-      (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
-      (setq detector-mode (send self :check-object-turnaround-detection))
-      (format t ";;   Detecting... (detector-mode = ~A, current force moment = ~A)~%" detector-mode (send self :get-otd-object-forces-moments))
-      (unix:usleep (* 1000 periodic-time)))
-     (if (eq detector-mode :mode_detected)
+   (send self :state)
+   (let* ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+          (org-ref-forces (mapcar #'(lambda (limb) (send self :reference-force-vector limb)) all-limbs))
+          (diff-force (scale (/ max-ref-force (length limbs)) axis)))
+     ;; Step.1 Set ref force and start detection
+     (send self :set-ref-forces
+           (mapcar #'(lambda (org-f limb)
+                       (if (memq limb limbs)
+                           (v+ org-f diff-force)
+                         org-f))
+                   org-ref-forces all-limbs)
+           max-time
+           :update-robot-state nil)
+     (send self :start-object-turnaround-detection
+           :ref-diff-wrench max-ref-force
+           :max-time (* 1e-3 (+ detect-time-offset max-time))
+           :limbs limbs)
+     (let ((detector-mode :mode_detector_idle) (fm-ret))
+       ;; Step.2 Detection loop
+       (do-until-key-with-check
+        (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
+        (setq detector-mode (send self :check-object-turnaround-detection))
+        (setq fm-ret (send self :get-otd-object-forces-moments))
+        (format t ";;   Detecting... (detector-mode = ~A, limbs = ~A, current forces = ~A[N], current moments = ~A[Nm], current res force = ~A[N])~%"
+                detector-mode limbs
+                (car fm-ret) (cadr fm-ret) (caddr fm-ret))
+        (unix:usleep (* 1000 periodic-time)))
+       ;; Step.3 If detected, update ref force
+       (if (eq detector-mode :mode_detected)
+           (progn
+             (setq fm-ret (send self :get-otd-object-forces-moments))
+             (format t ";; Detected (limbs = ~A, forces = ~A[N], moments = ~A[Nm], res-force = ~A[N])~%"
+                     limbs (car fm-ret) (cadr fm-ret) (caddr fm-ret))
+             (if set-ref-force-p
+                 (send self :set-ref-forces
+                       (mapcar #'(lambda (org-f limb)
+                                   ;; Revert org force orthogonal to axis direction
+                                   (let ((org-f2 (v- org-f (scale (v. axis org-f) axis))))
+                                     (if (memq limb limbs)
+                                         (v+ org-f2 (elt (car fm-ret) (position limb limbs)))
+                                       org-f)))
+                               org-ref-forces all-limbs)
+                       set-ref-force-time)
+               (send self :set-ref-forces
+                     org-ref-forces set-ref-force-time)))
          (progn
-           (setq fm-ret (send self :get-otd-object-forces-moments))
-           (format t ";; Detected (force moment = ~A)~%" fm-ret)
-           (if set-ref-force-p
-               (send self :set-ref-force
-                     (car (car fm-ret))
-                     set-ref-force-time
-                     (if (= (length limbs) 1) (car limbs) :arms))
-             (send self :set-ref-force
-                   (float-vector 0 0 0)
-                   set-ref-force-time
-                   (if (= (length limbs) 1) (car limbs) :arms))))
-       (progn
-         (format t ";; Not detected (~A)~%" detector-mode)
-         (send self :set-ref-force
-               (float-vector 0 0 0)
-               set-ref-force-time
-               (if (= (length limbs) 1) (car limbs) :arms))
+           (format t ";; Not detected (~A)~%" detector-mode)
+           (send self :set-ref-forces
+                 org-ref-forces set-ref-force-time)
+           )
          )
-       )
-     (send self :wait-interpolation-seq)
-     (if (eq detector-mode :mode_detected)
-         (car fm-ret))
-     ))
+       (send self :wait-interpolation-seq)
+       (if (eq detector-mode :mode_detected)
+           (car fm-ret))
+       )))
   (:set-object-turnaround-ref-moment
    (&key (limbs '(:rarm :larm))
          (axis (float-vector 0 0 1))
@@ -2314,22 +2332,37 @@
 ;; utility functions for project generator generation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; clone euslisp robot and objects to OpenHRP3 project file
-;;   add euslisp model + locate euslisp model in OpenHRP3 world
 (defun dump-project-file-by-cloning-euslisp-models
-  (robot robot-file-path ;; robot euslisp model, robot VRML(or Collada) file path
-   &key (object-models) (object-models-file-path) ;; list of object euslisp model, list of object VRML(or Collada) file path
-        (nosim) (timestep 0.005) (dt 0.005) ;; [s]
-        (output-fname (format nil "/tmp/~A" (send robot :name)))) ;; output file name "output-fname.xml"
+  (robot robot-file-path
+   &key (object-models) (object-models-file-path)
+        (timestep 0.005) (dt 0.005)
+        (use-highgain-mode t) (integrate t) (method :euler)
+        (output-fname (format nil "/tmp/~A" (send robot :name)))
+        (debug)
+        )
+  "Clone euslisp robot and objects to OpenHRP3 project file.
+   Add euslisp model + locate euslisp model in OpenHRP3 world.
+   Arguments (required)
+      robot  : Robot model
+      robot-file-path : Path to the robot euslisp model, robot VRML(or Collada) file path.
+   Arguments (key word)
+      object-models : list of object euslisp model
+      object-models-file-path) ;; list of object VRML(or Collada) file path
+      debug : print openhrp3
+   Arguments (key word + openhrp-project-generator's argument)
+      Please see https://github.com/fkanehiro/openhrp3/blob/master/server/ModelLoader/README.md
+      timestep, dt : [s]
+      output-fname : output file name '[output-fname].xml'. By default, '[robot'sname].xml'
+      integrate, use-highgain-mode, method : See above README
+  "
   ;; TODO : Is longfloor.wrl necessary??
   (let ((str
-         (format nil "rosrun hrpsys_ros_bridge rtmtest -t hrpsys_tools _gen_project.launch \\\
-               INPUT:=~A,~A \\\
-               OBJECT_MODELS:='`rospack find openhrp3`/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,1,0,0,0 ~A' \\\
-               OUTPUT:=~A.xml \\\
-               INTEGRATE:=~A CORBA_PORT:=15005 CONF_DT_OPTION:='--dt ~A' \\\
-               SIMULATION_TIMESTEP_OPTION:='--timeStep ~A' \\\
-               SIMULATION_JOINT_PROPERTIES_OPTION:='--joint-properties ~A'"
+         (format nil "openhrp-project-generator \\\
+               ~A,~A \\\
+               `rospack find openhrp3`/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,1,0,0,0 ~A \\\
+               --output ~A.xml \\\
+               --integrate ~A --dt ~A --timeStep ~A --use-highgain-mode ~A --method ~A\\\
+               --joint-properties ~A"
                  robot-file-path
                  (gen-ProjectGenerator-model-root-coords-string robot)
                  (let ((obj-path-list
@@ -2338,17 +2371,25 @@
                    (if obj-path-list
                        (reduce #'(lambda (x y) (format nil "~A ~A" x y)) obj-path-list)
                      ""))
-                 (format nil "~A~A" output-fname (if nosim "_nosim" ""))
-                 (if nosim "false" "true")
+                 output-fname
+                 (if integrate "true" "false")
                  dt
                  timestep
+                 (if use-highgain-mode "true" "false")
+                 (case method
+                       (:runge-kutta "RUNGE_KUTTA")
+                       (:euler "EULER")
+                       (t "EULER"))
                  (gen-ProjectGenerator-joint-properties-string robot)
                  )))
+    (if debug (warn ";; execute : ~A~%" str))
     (unix:system (format nil "bash -c -i \"~A;exit 0\";exit 0" str))
     ))
 
 (defun gen-ProjectGenerator-joint-properties-string
   (robot)
+  "Generate joint properties setting for openhrp-project-generator.
+   Object (cascaded-link) is required as an argument."
   (let ((str))
     (dolist (j (send robot :joint-list))
       (if str
@@ -2359,11 +2400,21 @@
 
 (defun gen-ProjectGenerator-model-root-coords-string
   (obj)
-  (let* ((dr (matrix-log (send (car (send obj :links)) :worldrot)))
-         (ndr (normalize-vector dr))
-         (rpos (scale 1e-3 (send (car (send obj :links)) :worldpos))))
+  "Generate root-coords offset setting for openhrp-project-generator.
+   Object (cascaded-link) is required as an argument."
+  (let* ((epsilon 1.0e-20) ;; same as normalize-vector threshold
+         ;; Rot
+         (dr (matrix-log (send (car (send obj :links)) :worldrot)))
+         (ndr (if (< (norm dr) epsilon) (float-vector 1 0 0) (normalize-vector dr)))
+         (ang (if (< (norm dr) epsilon) 0 (norm dr)))
+         ;; Removing offset
+         ;;   Initial rootLink pos offset should be removed https://github.com/fkanehiro/openhrp3/blob/master/server/ModelLoader/projectGenerator.cpp#L501-L503 (rootLink->p addition)
+         (off-root-pos (send obj :inverse-transform-vector (send (car (send obj :links)) :worldpos)))
+         ;; Pos
+         (rpos (scale 1e-3 (v- (send (car (send obj :links)) :worldpos) off-root-pos))))
       (format nil "~A,~A,~A,~A,~A,~A,~A"
               (elt rpos 0) (elt rpos 1) (elt rpos 2)
-              (elt ndr 0) (elt ndr 1) (elt ndr 2) (/ (elt dr 1) (elt ndr 1)) ;; openhrp3 axis angle orientation representation
+              (elt ndr 0) (elt ndr 1) (elt ndr 2) ang ;; openhrp3 axis angle orientation representation
               )))
+
 
