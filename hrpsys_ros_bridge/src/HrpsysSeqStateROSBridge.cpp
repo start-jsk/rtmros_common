@@ -97,7 +97,7 @@ HrpsysSeqStateROSBridge::~HrpsysSeqStateROSBridge() {
 };
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onFinalize() {
-  ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @onFinalize : " << getInstanceName());
+  ROS_ERROR_STREAM("[HrpsysSeqStateROSBridge] @onFinalize : " << getInstanceName());
   if ( joint_trajectory_server.isActive() ) {
       joint_trajectory_server.setPreempted();
   }
