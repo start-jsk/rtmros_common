@@ -11,6 +11,7 @@ import socket
 
 from xml.dom.minidom import parse
 
+from rtctree.rtmidl import OpenRTM__POA
 import rtctree
 from rtshell import rtcon
 from rtshell import path
