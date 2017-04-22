@@ -83,6 +83,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   rpzmp_dbg_pub = nh.advertise<geometry_msgs::PointStamped>("/wbms/feedback/r_zmp", 1);
   rpdcp_dbg_pub = nh.advertise<geometry_msgs::PointStamped>("/wbms/feedback/r_dcp", 1);
   rpacp_dbg_pub = nh.advertise<geometry_msgs::PointStamped>("/wbms/feedback/r_acp", 1);
+  invdyn_dbg_pub = nh.advertise<geometry_msgs::WrenchStamped>("/wbms/feedback/invdyn", 1);
 
   // is use_sim_time is set and no one publishes clock, publish clock time
   use_sim_time = ros::Time::isSimTime();
@@ -1264,6 +1265,18 @@ void HrpsysSeqStateROSBridge::updateWBMS(const ros::Time &stamp){
     m_rpzmp_dbgIn.read();
     tmp_func::TimedPoint3DToPointStamped(m_rpzmp_dbg,stamp,tmp_point);
     rpzmp_dbg_pub.publish(tmp_point);
+  }
+  if ( m_invdyn_dbgIn.isNew() ) {
+    m_invdyn_dbgIn.read();
+    geometry_msgs::WrenchStamped tmp_w;
+    tmp_w.header.stamp = stamp;
+    tmp_w.wrench.force.x = m_invdyn_dbg.data[0];
+    tmp_w.wrench.force.y = m_invdyn_dbg.data[1];
+    tmp_w.wrench.force.z = m_invdyn_dbg.data[2];
+    tmp_w.wrench.torque.x = m_invdyn_dbg.data[3];
+    tmp_w.wrench.torque.y = m_invdyn_dbg.data[4];
+    tmp_w.wrench.torque.z = m_invdyn_dbg.data[5];
+    invdyn_dbg_pub.publish(tmp_w);
   }
 }
 

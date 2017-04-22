@@ -72,6 +72,8 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_rpdcp_dbgIn("rpdcp_dbgIn", m_rpdcp_dbg),
     m_rpacp_dbgIn("rpacp_dbgIn", m_rpacp_dbg),
 
+    m_invdyn_dbgIn("invdyn_dbgIn", m_invdyn_dbg),
+
     m_SequencePlayerServicePort("SequencePlayerService")
 
     // </rtc-template>
@@ -134,6 +136,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("rpzmp_dbgIn", m_rpzmp_dbgIn);
   addInPort("rpdcp_dbgIn", m_rpdcp_dbgIn);
   addInPort("rpacp_dbgIn", m_rpacp_dbgIn);
+  addInPort("invdyn_dbgIn", m_invdyn_dbgIn);
 
   // Set service provider to Ports
 

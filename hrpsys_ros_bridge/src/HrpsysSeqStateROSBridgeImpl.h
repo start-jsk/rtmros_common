@@ -213,6 +213,9 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   TimedPoint3D m_rpacp_dbg;
   InPort<TimedPoint3D> m_rpacp_dbgIn;
 
+  TimedDoubleSeq m_invdyn_dbg;
+  InPort<TimedDoubleSeq> m_invdyn_dbgIn;
+
   // </rtc-template>
 
   // CORBA Port declaration

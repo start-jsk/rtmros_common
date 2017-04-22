@@ -88,6 +88,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   ros::Subscriber htzmp_sub,htcom_sub,htrfw_sub,htlfw_sub,htrf_sub,htlf_sub,htrh_sub,htlh_sub,hthead_sub;
   ros::Publisher htcom_dbg_pub,htrf_dbg_pub,htlf_dbg_pub,htrh_dbg_pub,htlh_dbg_pub,hthead_dbg_pub;
   ros::Publisher rpcom_dbg_pub,rprf_dbg_pub,rplf_dbg_pub,rprh_dbg_pub,rplh_dbg_pub,rphead_dbg_pub,rpzmp_dbg_pub,rpdcp_dbg_pub,rpacp_dbg_pub;
+  ros::Publisher invdyn_dbg_pub;
   tf::TransformListener ht_tf_listener;
 
   nav_msgs::Odometry prev_odom;
