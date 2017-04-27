@@ -45,3 +45,6 @@ This package contains ROSBridge to `hrpsys`, cmake_libraries, launch files, Eusl
 
 ### Examples
    ``hrpsys_ros_bridge/test/test-samplerobot.test``
+
+### Euslisp Examples
+[Euslisp example](https://github.com/start-jsk/rtmros_common/blob/master/hrpsys_ros_bridge/test/hrpsys-samples/README.md)
