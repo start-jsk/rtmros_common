@@ -65,7 +65,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   htrf_sub = nh.subscribe("human_tracker_rf_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRFCommandCB, this);
   htlf_sub = nh.subscribe("human_tracker_lf_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLFCommandCB, this);
   htrh_sub = nh.subscribe("human_tracker_rh_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRHCommandCB, this);
-  htrh_sub = nh.subscribe("human_tracker_lh_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLHCommandCB, this);
+  htlh_sub = nh.subscribe("human_tracker_lh_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLHCommandCB, this);
   hthead_sub = nh.subscribe("human_tracker_head_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerHEADCommandCB, this);
 
   htcom_dbg_pub = nh.advertise<geometry_msgs::PoseStamped>("/wbms/feedback/h_com", 1);
