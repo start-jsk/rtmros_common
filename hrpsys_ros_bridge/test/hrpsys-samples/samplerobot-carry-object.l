@@ -69,8 +69,8 @@
           (send *ri* :wait-interpolation-seq)))
       ;; Lift up
       (send *robot* :fullbody-inverse-kinematics
-            (list (send (send r-handle-coords :copy-worldcoords) :translate (float-vector 0 0 50) :world)
-                  (send (send l-handle-coords :copy-worldcoords) :translate (float-vector 0 0 50) :world)
+            (list (send (send (send r-handle-coords :copy-worldcoords) :translate (float-vector 0 0 50) :world) :rotate (deg2rad 5) :z)
+                  (send (send (send l-handle-coords :copy-worldcoords) :translate (float-vector 0 0 50) :world) :rotate (deg2rad -5) :z)
                   (send *robot* :rleg :end-coords :copy-worldcoords)
                   (send *robot* :lleg :end-coords :copy-worldcoords))
             :move-target (mapcar #'(lambda (x) (send *robot* x :end-coords)) '(:rarm :larm :rleg :lleg))
@@ -130,15 +130,16 @@
           (send *ri* :wait-interpolation-seq)
           ))
       (send *robot* :fullbody-inverse-kinematics
-            (list (send (send r-handle-coords :copy-worldcoords) :translate (float-vector 0 0 50) :world)
+            (list (send (send (send r-handle-coords :copy-worldcoords) :translate (float-vector 0 0 50) :world) :rotate (deg2rad 5) :z)
                   (send *robot* :rleg :end-coords :copy-worldcoords)
                   (send *robot* :lleg :end-coords :copy-worldcoords))
             :move-target (mapcar #'(lambda (x) (send *robot* x :end-coords)) '(:rarm :rleg :lleg))
             :link-list (mapcar #'(lambda (x) (send *robot* :link-list (send *robot* x :end-coords :parent))) '(:rarm :rleg :lleg))
             :cog-null-space nil
             :use-6dof-joint-leg-gain nil)
-      (send *robot* :rarm :wrist-r :joint-angle 10)
-      (send *Ri* :angle-vector (Send *robot* :angle-vector) 2000)
+      ;; (send *robot* :rarm :wrist-r :joint-angle 10)
+      (send *robot* :rarm :wrist-r :joint-angle 5)
+      (send *Ri* :angle-vector (Send *robot* :angle-vector) 300)
       (send *ri* :wait-interpolation)
       (if walk-p (object-hold-walk))
       (send *robot* :angle-vector reaching-pose)
@@ -245,6 +246,7 @@
   (samplerobot-carry-object-init)
   (samplerobot-carry-object-demo0)
   (samplerobot-carry-object-demo1)
+  (samplerobot-carry-object-demo2)
   )
 
 (warn ";; (samplerobot-carry-object-demo)~%")

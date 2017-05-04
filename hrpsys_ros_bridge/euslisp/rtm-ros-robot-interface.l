@@ -535,32 +535,37 @@
   (:angle-vector-sequence-full
    (jpos tm
          &key
-         (jvs (apply #'matrix jpos))
-         (sequence-length (nth 0 (array-dimensions jvs)))
-         (joint-length (nth 1 (array-dimensions jvs)))
+         (sequence-length (length jpos))
+         (joint-length (length (car jpos)))
+         (fsensor-length (length (send robot :force-sensors))) ;; "fsensor length = ee length" is assumed
          (vel (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
          (torque (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
-         (pos (make-list sequence-length :initial-element (instantiate float-vector 3)))
-         (rpy (make-list sequence-length :initial-element (instantiate float-vector 3)))
+         (root-coords (make-list sequence-length :initial-element (make-coords)))
          (acc (make-list sequence-length :initial-element (instantiate float-vector 3)))
          (zmp (make-list sequence-length :initial-element (instantiate float-vector 3)))
-         (wrench (make-list sequence-length :initial-element (instantiate float-vector joint-length)))
-         (optional (make-list sequence-length :initial-element (instantiate float-vector 8)))
+         (wrench (make-list sequence-length :initial-element (instantiate float-vector (* 6 fsensor-length)))) ;; wrench = 6dim
+         (optional (make-list sequence-length :initial-element (instantiate float-vector (* 2 fsensor-length)))) ;; 2 is for contactState and controlSwingSupportTime
+         (pos (send-all root-coords :worldpos))
+         (rpy (mapcar #'(lambda (x) (reverse (car (rpy-angle (send x :worldrot))))) root-coords))
+         (root-local-zmp (mapcar #'(lambda (zz cc) (send cc :inverse-transform-vector zz)) zmp root-coords))
          )
    "Call service for setJointAnglesSequenceFull. Definition of each sequence is similar to sequence file of loadPattern.
     Arguments type:
      Required
-      jpos: sequence of joint angles(float-vector) [rad],  (list av0 av1 ... avn)
-      tm: sequence of duration(float) [s],  (list tm0 tm1 ... tmn) or #f(tm0 tm1 ... tmn)
+      jpos: sequence of joint angles(float-vector) [deg],  (list av0 av1 ... avn)
+      tm: sequence of duration(float) [ms],  (list tm0 tm1 ... tmn)
      Key
-      vel: sequence of joint angular velocities(float-vector) [rad/s],  (list vel0 vel1 ... veln)
+      vel: sequence of joint angular velocities(float-vector) [deg/s],  (list vel0 vel1 ... veln)
       torque: sequence of torques(float-vector) [Nm],  (list torque0 torque1 ... torquen)
-      pos: sequence of waist pos(float-vector) [m],  (list pos0 pos1 ... posn)
-      rpy: sequence of waist rpy(float-vector) [rad],  (list rpy0 rpy1 ... rpyn)
+      root-coords: sequence of waist(root-link) coords in the world frame. (list rc0 rc1 ... rcn). Origin coords by default.
       acc: sequence of waist acc(float-vector) [m/s^2],  (list acc0 acc1 ... accn)
-      zmp: sequence of zmp(float-vector) [m],  (list zmp0 zmp1 ... zmpn)
-      wrench: sequence of wrench(float-vector) [N, Nm],  (list wrench0 wrench1 ... wrenchn)
-      optional: sequence of optional(float-vector) [],  (list optional0 optional1 ... optionaln)"
+      zmp: sequence of zmp in the world frame (float-vector) [mm],  (list zmp0 zmp1 ... zmpn). Zero by default.
+      wrench: sequence of wrench(float-vector) [N, Nm] for all fsensors,  (list wrench0 wrench1 ... wrenchn)
+      optional: sequence of optional(float-vector) [],  (list optional0 optional1 ... optionaln)
+     Not required (calculated from other arguments by default), therefore users need not to use these arguments.
+      pos: sequence of waist pos(float-vector) [mm] in the world frame,  (list pos0 pos1 ... posn). If root-coords is specified, calculated from root-coords and do not set pos.
+      rpy: sequence of waist rpy(float-vector) [rad] in the world frame,  (list rpy0 rpy1 ... rpyn). If root-coords is specified, calculated from root-coords and do not set rpy.
+      root-local-zmp: sequence of zmp in the waist(root-link) frame (float-vector) [mm],  (list zmp0 zmp1 ... zmpn). If root-coords and zmp are specified, calculated from root-coords and zmp and do not set root-local-zmp."
    (let* ((jvss (instance std_msgs::float64multiarray :init))
           (vels (instance std_msgs::float64multiarray :init))
           (torques (instance std_msgs::float64multiarray :init))
@@ -570,14 +575,15 @@
           (zmps (instance std_msgs::float64multiarray :init))
           (wrenchs (instance std_msgs::float64multiarray :init))
           (optionals (instance std_msgs::float64multiarray :init))
-          (tms (coerce tm float-vector)))
+          (tms (coerce (mapcar #'(lambda (ttm) (* 1e-3 ttm)) tm) float-vector))) ;; [ms]->[s], list -> float-vector
      ;; jvss
-     (send jvss :layout :dim (list
-                              (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions jvs)) :stride (* (nth 0 (array-dimensions jvs)) (nth 1 (array-dimensions jvs))))
-                              (instance std_msgs::multiArraydimension :init :label "jvs length" :size (nth 1 (array-dimensions jvs)) :stride (nth 1 (array-dimensions jvs)))))
-     (send jvss :data (array-entity jvs))
+     (let ((jvs (apply #'matrix (mapcar #'(lambda (x) (map float-vector #'deg2rad x)) jpos)))) ;; [deg] -> [rad]
+       (send jvss :layout :dim (list
+                                (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions jvs)) :stride (* (nth 0 (array-dimensions jvs)) (nth 1 (array-dimensions jvs))))
+                                (instance std_msgs::multiArraydimension :init :label "jvs length" :size (nth 1 (array-dimensions jvs)) :stride (nth 1 (array-dimensions jvs)))))
+       (send jvss :data (array-entity jvs)))
      ;; vels
-     (setq vel (apply #'matrix vel))
+     (setq vel (apply #'matrix (mapcar #'(lambda (x) (map float-vector #'deg2rad x)) vel))) ;; [deg/s] -> [rad/s]
      (send vels :layout :dim (list
                               (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions vel)) :stride (* (nth 0 (array-dimensions vel)) (nth 1 (array-dimensions vel))))
                               (instance std_msgs::multiArraydimension :init :label "vel length" :size (nth 1 (array-dimensions vel)) :stride (nth 1 (array-dimensions vel)))))
@@ -589,7 +595,7 @@
                                  (instance std_msgs::multiArraydimension :init :label "torque length" :size (nth 1 (array-dimensions torque)) :stride (nth 1 (array-dimensions torque)))))
      (send torques :data (array-entity torque))
      ;; poss
-     (setq pos (apply #'matrix pos))
+     (setq pos (apply #'matrix (mapcar #'(lambda (x) (scale 1e-3 x)) pos))) ;; [mm] -> [m]
      (send poss :layout :dim (list
                               (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions pos)) :stride (* (nth 0 (array-dimensions pos)) (nth 1 (array-dimensions pos))))
                               (instance std_msgs::multiArraydimension :init :label "pos length" :size (nth 1 (array-dimensions pos)) :stride (nth 1 (array-dimensions pos)))))
@@ -607,7 +613,7 @@
                               (instance std_msgs::multiArraydimension :init :label "acc length" :size (nth 1 (array-dimensions acc)) :stride (nth 1 (array-dimensions acc)))))
      (send accs :data (array-entity acc))
      ;; zmps
-     (setq zmp (apply #'matrix zmp))
+     (setq zmp (apply #'matrix (mapcar #'(lambda (x) (scale 1e-3 x)) root-local-zmp))) ;; [mm] -> [m]
      (send zmps :layout :dim (list
                               (instance std_msgs::multiArraydimension :init :label "sequence length" :size (nth 0 (array-dimensions zmp)) :stride (* (nth 0 (array-dimensions zmp)) (nth 1 (array-dimensions zmp))))
                               (instance std_msgs::multiArraydimension :init :label "zmp length" :size (nth 1 (array-dimensions zmp)) :stride (nth 1 (array-dimensions zmp)))))
@@ -812,30 +818,30 @@
     ))
   )
 
-;; ImpedanceController's ObjectTurnaroundDetector
-(def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_ImpedanceControllerService_objectTurnaroundDetectorParam
+;; ObjectContactTurnaroundDetector
+(def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_ObjectContactTurnaroundDetectorService_objectContactTurnaroundDetectorParam
   :set-object-turnaround-detector-param :get-object-turnaround-detector-param :get-object-turnaround-detector-param-arguments
-  :impedancecontrollerservice_setObjectTurnaroundDetectorParam
-  :impedancecontrollerservice_getObjectTurnaroundDetectorParam)
+  :ObjectContactTurnaroundDetectorService_setObjectContactTurnaroundDetectorParam
+  :ObjectContactTurnaroundDetectorService_getObjectContactTurnaroundDetectorParam)
 (defmethod rtm-ros-robot-interface
   (:start-object-turnaround-detection
    (&key (ref-diff-wrench) (max-time) (limbs))
-   "Start ObjectTurnaroundDetection mode.
+   "Start ObjectContactTurnaroundDetection mode.
     ref-diff-wrench is final reference wrench (scalar).
     max-time is max time [msec].
     limbs is limb list to be used."
-   (send self :impedancecontrollerservice_startObjectTurnaroundDetection
+   (send self :ObjectContactTurnaroundDetectorService_startObjectContactTurnaroundDetection
          :i_ref_diff_wrench ref-diff-wrench :i_max_time max-time :i_ee_names (mapcar #'string-downcase limbs)))
   (:check-object-turnaround-detection
    ()
-   "Check object turnaround detection.
+   "Check object contact turnaround detection.
    If t, detected. Otherwise, not detected."
    (send self :get-idl-enum-values
-         (send (send self :impedancecontrollerservice_checkObjectTurnaroundDetection) :operation_return)
-         "HRPSYS_ROS_BRIDGE::OPENHRP_IMPEDANCECONTROLLERSERVICE_DETECTORMODE"))
+         (send (send self :ObjectContactTurnaroundDetectorService_checkObjectContactTurnaroundDetection) :operation_return)
+         "HRPSYS_ROS_BRIDGE::OPENHRP_OBJECTCONTACTTURNAROUNDDETECTORSERVICE_DETECTORMODE"))
   (:get-otd-object-forces-moments
    ()
-   "Get ObjectTurnaroundDetector's curernt forces and moments for used limbs.
+   "Get ObjectContactTurnaroundDetector's curernt forces and moments for used limbs.
     Return value is (list force-list moment-list)."
    (labels ((split-vector
              (vec &optional (dim 3))
@@ -843,7 +849,7 @@
                (dotimes (i (/ (length vec) dim))
                  (push (subseq vec (* i 3) (+ (* i 3) 3)) vret))
                (reverse vret))))
-     (let ((ret (send self :impedancecontrollerservice_getObjectForcesMoments)))
+     (let ((ret (send self :ObjectContactTurnaroundDetectorService_getObjectForcesMoments)))
        (list (split-vector (send (send ret :o_forces) :data))
              (split-vector (send (send ret :o_moments) :data))
              (send ret :o_3dofwrench))
@@ -862,51 +868,69 @@
    "Set object turnaround reference force.
     axis is resultant force direction.
     max-time is max time [msec] and max-ref-force is max reference resultant force.
+    max-ref-force is max resultant reference force [N]. max-ref-force is added to original ref forces.
     detect-time-offset is additional checking time [msec].
     set-ref-force-time is time to set reference force [msec].
     If set-ref-force-p is t, set estimated reference force. Otherwise, set reference force to zero.
     periodic-time is loop wait time[msec]."
+   ;; Step.0 Initialize
    (format t ";; Start object turnaround detection~%")
    (send self :set-object-turnaround-detector-param :axis axis :detector-total-wrench 0)
-   (send self :set-ref-force
-         (scale (/ max-ref-force (length limbs)) axis)
-         max-time
-         (if (= (length limbs) 1) (car limbs) :arms))
-   (send self :start-object-turnaround-detection
-         :ref-diff-wrench max-ref-force
-         :max-time (* 1e-3 (+ detect-time-offset max-time))
-         :limbs limbs)
-   (let ((detector-mode :mode_detector_idle) (fm-ret))
-     (do-until-key-with-check
-      (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
-      (setq detector-mode (send self :check-object-turnaround-detection))
-      (format t ";;   Detecting... (detector-mode = ~A, current force moment = ~A)~%" detector-mode (send self :get-otd-object-forces-moments))
-      (unix:usleep (* 1000 periodic-time)))
-     (if (eq detector-mode :mode_detected)
+   (send self :state)
+   (let* ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+          (org-ref-forces (mapcar #'(lambda (limb) (send self :reference-force-vector limb)) all-limbs))
+          (diff-force (scale (/ max-ref-force (length limbs)) axis)))
+     ;; Step.1 Set ref force and start detection
+     (send self :set-ref-forces
+           (mapcar #'(lambda (org-f limb)
+                       (if (memq limb limbs)
+                           (v+ org-f diff-force)
+                         org-f))
+                   org-ref-forces all-limbs)
+           max-time
+           :update-robot-state nil)
+     (send self :start-object-turnaround-detection
+           :ref-diff-wrench max-ref-force
+           :max-time (* 1e-3 (+ detect-time-offset max-time))
+           :limbs limbs)
+     (let ((detector-mode :mode_detector_idle) (fm-ret))
+       ;; Step.2 Detection loop
+       (do-until-key-with-check
+        (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
+        (setq detector-mode (send self :check-object-turnaround-detection))
+        (setq fm-ret (send self :get-otd-object-forces-moments))
+        (format t ";;   Detecting... (detector-mode = ~A, limbs = ~A, current forces = ~A[N], current moments = ~A[Nm], current res force = ~A[N])~%"
+                detector-mode limbs
+                (car fm-ret) (cadr fm-ret) (caddr fm-ret))
+        (unix:usleep (* 1000 periodic-time)))
+       ;; Step.3 If detected, update ref force
+       (if (eq detector-mode :mode_detected)
+           (progn
+             (setq fm-ret (send self :get-otd-object-forces-moments))
+             (format t ";; Detected (limbs = ~A, forces = ~A[N], moments = ~A[Nm], res-force = ~A[N])~%"
+                     limbs (car fm-ret) (cadr fm-ret) (caddr fm-ret))
+             (if set-ref-force-p
+                 (send self :set-ref-forces
+                       (mapcar #'(lambda (org-f limb)
+                                   ;; Revert org force orthogonal to axis direction
+                                   (let ((org-f2 (v- org-f (scale (v. axis org-f) axis))))
+                                     (if (memq limb limbs)
+                                         (v+ org-f2 (elt (car fm-ret) (position limb limbs)))
+                                       org-f)))
+                               org-ref-forces all-limbs)
+                       set-ref-force-time)
+               (send self :set-ref-forces
+                     org-ref-forces set-ref-force-time)))
          (progn
-           (setq fm-ret (send self :get-otd-object-forces-moments))
-           (format t ";; Detected (force moment = ~A)~%" fm-ret)
-           (if set-ref-force-p
-               (send self :set-ref-force
-                     (car (car fm-ret))
-                     set-ref-force-time
-                     (if (= (length limbs) 1) (car limbs) :arms))
-             (send self :set-ref-force
-                   (float-vector 0 0 0)
-                   set-ref-force-time
-                   (if (= (length limbs) 1) (car limbs) :arms))))
-       (progn
-         (format t ";; Not detected (~A)~%" detector-mode)
-         (send self :set-ref-force
-               (float-vector 0 0 0)
-               set-ref-force-time
-               (if (= (length limbs) 1) (car limbs) :arms))
+           (format t ";; Not detected (~A)~%" detector-mode)
+           (send self :set-ref-forces
+                 org-ref-forces set-ref-force-time)
+           )
          )
-       )
-     (send self :wait-interpolation-seq)
-     (if (eq detector-mode :mode_detected)
-         (car fm-ret))
-     ))
+       (send self :wait-interpolation-seq)
+       (if (eq detector-mode :mode_detected)
+           (car fm-ret))
+       )))
   (:set-object-turnaround-ref-moment
    (&key (limbs '(:rarm :larm))
          (axis (float-vector 0 0 1))
@@ -1050,14 +1074,10 @@
    )
   (:_reset-force-moment-offset
    (limbs f/m &key (itr 10))
-   (let* ((params (mapcar #'(lambda (alimb) (send self :get-forcemoment-offset-param alimb)) limbs))
-          (nominal-mgs (mapcar #'(lambda (param) (scale (* 1e-3 (send param :link_offset_mass)) *g-vec*)) params)))
+   (let* ((params (mapcar #'(lambda (alimb) (send self :get-forcemoment-offset-param alimb)) limbs)))
      (labels ((calc-off
-               (alimb param nominal-mg)
-               (v+ (send self (if (eq f/m :force) :force-vector :moment-vector) alimb)
-                   (if (eq f/m :force)
-                       (send (car (send robot alimb :force-sensors)) :inverse-rotate-vector nominal-mg)
-                     (v* (send param :link_offset_centroid) (send (car (send robot alimb :force-sensors)) :inverse-rotate-vector nominal-mg)))))
+               (alimb)
+               (send self (if (eq f/m :force) :off-force-vector :off-moment-vector) alimb))
               (get-avg-fm
                ()
                (let ((fm (mapcar #'(lambda (i)
@@ -1071,7 +1091,7 @@
        ;; estimate offsets
        (let* ((tmp-fm-offsets (mapcar #'(lambda (i)
                                           (send self :state)
-                                          (mapcar #'calc-off limbs params nominal-mgs))
+                                          (mapcar #'calc-off limbs))
                                       (make-list itr)))
               (new-fm-offsets (mapcar #'(lambda (alimb)
                                           (let ((idx (position alimb limbs)))
@@ -1079,11 +1099,14 @@
                                       limbs))
               (org-fm-list (get-avg-fm)))
          ;; set offsets
-         (mapcar #'(lambda (alimb new-fm-offset)
+         (mapcar #'(lambda (alimb new-fm-offset param)
                      (send self :set-forcemoment-offset-param alimb
                            (if (eq f/m :force) :force-offset :moment-offset)
-                           new-fm-offset))
-                 limbs new-fm-offsets)
+                           (v+ (if (eq f/m :force)
+                                   (send param :force_offset)
+                                 (send param :moment_offset))
+                               new-fm-offset)))
+                 limbs new-fm-offsets params)
          (unix:usleep 10000)
          ;; check ;; compare sensor value before & after resetting
          (mapcar #'(lambda (alimb org-fm new-fm)
@@ -1866,6 +1889,83 @@
     (format t "~%")
     ))
 
+;; TorqueControllerService
+(def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_TorqueControllerService_TorqueControllerParam
+  :set-torque-controller-param :get-torque-controller-param :get-torque-controller-param-arguments
+  :torquecontrollerservice_settorquecontrollerparam :torquecontrollerservice_gettorquecontrollerparam
+  :optional-args (list :jname 'jname))
+(defmethod rtm-ros-robot-interface
+  (:enable-torque-control
+   (jname)
+   "enable torque controller for specified joint (only start torque control when tau exceeds tauMax)
+    jname should be string of jointname (for one joint) or list of jointname (for multiple joints)"
+   (cond
+    ((listp jname)
+     (send self :torquecontrollerservice_enablemultipletorquecontrollers :jnames jname))
+    (t
+     (send self :torquecontrollerservice_enabletorquecontroller :jname jname))
+    ))
+  (:disable-torque-control
+   (jname)
+   "disable torque control in specified joint (torque controller do nothing and pass qRefIn when disabeld)
+    jname should be string of jointname (for one joint) or list of jointname (for multiple joints)"
+   (cond
+    ((listp jname)
+     (send self :torquecontrollerservice_disablemultipletorquecontrollers :jnames jname)
+     )
+    (t
+     (send self :torquecontrollerservice_disabletorquecontroller :jname jname))
+    ))
+  (:start-torque-control
+   (jname &optional (tauref nil))
+   "start torque control in specified joint. set reference torque before start if tauref is given.
+    jname should be string of jointname (for one joint) or list of jointname (for multiple joints)
+    tauref is reference torque [N/m], should be a number (for one joint) or list of numbers (for multiple joints)"
+   (cond
+    ((listp jname)
+     (when tauref
+       (send self :set-multiple-reference-torques jname tauref))
+     (send self :torquecontrollerservice_startmultipletorquecontrols :jnames jname)
+     )
+    (t
+     (when tauref
+       (send self :set-reference-torque jname tauref))
+     (send self :torquecontrollerservice_starttorquecontrol :jname jname))
+    ))
+  (:stop-torque-control
+   (jname)
+   "stop torque controller for specified joint (this method does not disable torque control)
+    jname should be string of jointname (for one joint) or list of jointname (for multiple joints)"
+   (cond
+    ((listp jname)
+     (send self :torquecontrollerservice_stopmultipletorquecontrols :jnames jname)
+     )
+    (t
+     (send self :torquecontrollerservice_stoptorquecontrol :jname jname))
+    ))
+  (:set-reference-torque
+   (jname tauref)
+   "set reference torque in specified joint
+    jname should be string of jointname (for one joint) or list of jointname (for multiple joints)
+    tauref (reference torque [N/m]) should be a number (for one joint) or list of numbers (for multiple joints)"
+   (cond
+    ((listp jname)
+     (unless (listp tauref)
+       (warn ";; tauref ~A should be a list~%")
+       (return-from :set-reference-torque))
+     (send self :torquecontrollerservice_setmultiplereferencetorques :jnames jname :tauRefs tauref)
+     )
+    (t
+     (when (listp tauref)
+       (warn ";; tauref ~A should be a number~%")
+       (return-from :set-reference-torque))
+     (send self :torquecontrollerservice_setreferencetorque
+           :jname jname :tauRef tauref))
+    ))
+  )
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; utility functions for seq
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2232,22 +2332,37 @@
 ;; utility functions for project generator generation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; clone euslisp robot and objects to OpenHRP3 project file
-;;   add euslisp model + locate euslisp model in OpenHRP3 world
 (defun dump-project-file-by-cloning-euslisp-models
-  (robot robot-file-path ;; robot euslisp model, robot VRML(or Collada) file path
-   &key (object-models) (object-models-file-path) ;; list of object euslisp model, list of object VRML(or Collada) file path
-        (nosim) (timestep 0.005) (dt 0.005) ;; [s]
-        (output-fname (format nil "/tmp/~A" (send robot :name)))) ;; output file name "output-fname.xml"
+  (robot robot-file-path
+   &key (object-models) (object-models-file-path)
+        (timestep 0.005) (dt 0.005)
+        (use-highgain-mode t) (integrate t) (method :euler)
+        (output-fname (format nil "/tmp/~A" (send robot :name)))
+        (debug)
+        )
+  "Clone euslisp robot and objects to OpenHRP3 project file.
+   Add euslisp model + locate euslisp model in OpenHRP3 world.
+   Arguments (required)
+      robot  : Robot model
+      robot-file-path : Path to the robot euslisp model, robot VRML(or Collada) file path.
+   Arguments (key word)
+      object-models : list of object euslisp model
+      object-models-file-path) ;; list of object VRML(or Collada) file path
+      debug : print openhrp3
+   Arguments (key word + openhrp-project-generator's argument)
+      Please see https://github.com/fkanehiro/openhrp3/blob/master/server/ModelLoader/README.md
+      timestep, dt : [s]
+      output-fname : output file name '[output-fname].xml'. By default, '[robot'sname].xml'
+      integrate, use-highgain-mode, method : See above README
+  "
   ;; TODO : Is longfloor.wrl necessary??
   (let ((str
-         (format nil "rosrun hrpsys_ros_bridge rtmtest -t hrpsys_tools _gen_project.launch \\\
-               INPUT:=~A,~A \\\
-               OBJECT_MODELS:='`rospack find openhrp3`/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,1,0,0,0 ~A' \\\
-               OUTPUT:=~A.xml \\\
-               INTEGRATE:=~A CORBA_PORT:=15005 CONF_DT_OPTION:='--dt ~A' \\\
-               SIMULATION_TIMESTEP_OPTION:='--timeStep ~A' \\\
-               SIMULATION_JOINT_PROPERTIES_OPTION:='--joint-properties ~A'"
+         (format nil "openhrp-project-generator \\\
+               ~A,~A \\\
+               `rospack find openhrp3`/share/OpenHRP-3.1/sample/model/longfloor.wrl,0,0,0,1,0,0,0 ~A \\\
+               --output ~A.xml \\\
+               --integrate ~A --dt ~A --timeStep ~A --use-highgain-mode ~A --method ~A\\\
+               --joint-properties ~A"
                  robot-file-path
                  (gen-ProjectGenerator-model-root-coords-string robot)
                  (let ((obj-path-list
@@ -2256,17 +2371,25 @@
                    (if obj-path-list
                        (reduce #'(lambda (x y) (format nil "~A ~A" x y)) obj-path-list)
                      ""))
-                 (format nil "~A~A" output-fname (if nosim "_nosim" ""))
-                 (if nosim "false" "true")
+                 output-fname
+                 (if integrate "true" "false")
                  dt
                  timestep
+                 (if use-highgain-mode "true" "false")
+                 (case method
+                       (:runge-kutta "RUNGE_KUTTA")
+                       (:euler "EULER")
+                       (t "EULER"))
                  (gen-ProjectGenerator-joint-properties-string robot)
                  )))
+    (if debug (warn ";; execute : ~A~%" str))
     (unix:system (format nil "bash -c -i \"~A;exit 0\";exit 0" str))
     ))
 
 (defun gen-ProjectGenerator-joint-properties-string
   (robot)
+  "Generate joint properties setting for openhrp-project-generator.
+   Object (cascaded-link) is required as an argument."
   (let ((str))
     (dolist (j (send robot :joint-list))
       (if str
@@ -2277,11 +2400,21 @@
 
 (defun gen-ProjectGenerator-model-root-coords-string
   (obj)
-  (let* ((dr (matrix-log (send (car (send obj :links)) :worldrot)))
-         (ndr (normalize-vector dr))
-         (rpos (scale 1e-3 (send (car (send obj :links)) :worldpos))))
+  "Generate root-coords offset setting for openhrp-project-generator.
+   Object (cascaded-link) is required as an argument."
+  (let* ((epsilon 1.0e-20) ;; same as normalize-vector threshold
+         ;; Rot
+         (dr (matrix-log (send (car (send obj :links)) :worldrot)))
+         (ndr (if (< (norm dr) epsilon) (float-vector 1 0 0) (normalize-vector dr)))
+         (ang (if (< (norm dr) epsilon) 0 (norm dr)))
+         ;; Removing offset
+         ;;   Initial rootLink pos offset should be removed https://github.com/fkanehiro/openhrp3/blob/master/server/ModelLoader/projectGenerator.cpp#L501-L503 (rootLink->p addition)
+         (off-root-pos (send obj :inverse-transform-vector (send (car (send obj :links)) :worldpos)))
+         ;; Pos
+         (rpos (scale 1e-3 (v- (send (car (send obj :links)) :worldpos) off-root-pos))))
       (format nil "~A,~A,~A,~A,~A,~A,~A"
               (elt rpos 0) (elt rpos 1) (elt rpos 2)
-              (elt ndr 0) (elt ndr 1) (elt ndr 2) (/ (elt dr 1) (elt ndr 1)) ;; openhrp3 axis angle orientation representation
+              (elt ndr 0) (elt ndr 1) (elt ndr 2) ang ;; openhrp3 axis angle orientation representation
               )))
+
 

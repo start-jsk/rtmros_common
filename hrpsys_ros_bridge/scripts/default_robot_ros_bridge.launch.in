@@ -1,7 +1,13 @@
 <launch>
   <arg name="RUN_RVIZ" default="true" />
   <arg name="SIMULATOR_NAME" default="@ROBOT@(Robot)0" />
+  <!-- unstable means minimum rtc set for walking demo -->
   <arg name="USE_UNSTABLE_RTC" default="@USE_UNSTABLE_RTC@"/>
+  <!-- following rtc is used for test/hrpsys-samples, mainly full euslisp test -->
+  <arg name="USE_EMERGENCYSTOPPER" default="false" />
+  <arg name="USE_REFERENCEFORCEUPDATER" default="false" />
+  <arg name="USE_OBJECTCONTACTTURNAROUNDDETECTOR" default="false" />
+
   <rosparam command="load"
             file="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@_controller_config.yaml" />
 
@@ -14,10 +20,16 @@
     <arg name="CONF_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.conf" />
     <arg name="corbaport" default="$(arg corbaport)" />
     <arg name="nameserver" default="$(arg nameserver)" />
+    <!-- BEGIN: unstable : maintained-->
     <arg name="USE_WALKING" default="true" if="$(arg USE_UNSTABLE_RTC)"/>
     <arg name="USE_IMPEDANCECONTROLLER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
-    <arg name="USE_EMERGENCYSTOPPER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
-    <arg name="USE_REFERENCEFORCEUPDATER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
+
+    <!-- END: unstable : maintained -->
+    <!-- BEGIN: development -->
+    <arg name="USE_EMERGENCYSTOPPER" default="$(arg USE_EMERGENCYSTOPPER)" />
+    <arg name="USE_REFERENCEFORCEUPDATER" default="$(arg USE_REFERENCEFORCEUPDATER)" />
+    <arg name="USE_OBJECTCONTACTTURNAROUNDDETECTOR" default="$(arg USE_OBJECTCONTACTTURNAROUNDDETECTOR)" />
+    <!-- END: development -->
     <arg name="ROBOT_TYPE" default="@robot@" if="$(arg USE_UNSTABLE_RTC)" />
     <arg name="USE_ROBOT_TYPE_SETTING" default="true" if="$(arg USE_UNSTABLE_RTC)" />
 @ROSBRIDGE_ARGS@

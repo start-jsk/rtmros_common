@@ -60,3 +60,59 @@ $ (send *log* :force-vector)
   you can calibrate legs force sensors.
   
   This file can be read from loadForceMomentSensorOffset function, i.e., ``(send *ri* :load-forcemoment-offset-params "xxx")``.
+
+## Dump openhrp project file based on Euslisp world(rtm-ros-robot-interface.l)
+
+1. Initialize euslisp models
+    ```
+    (load "package://hrpsys_ros_bridge/euslisp/samplerobot-interface.l")
+    (setq *robot* (samplerobot))
+    (setq *box* (let ((obj (instance cascaded-link :init)) (lk (instance bodyset-link :init (make-cascoords) :bodies (list (make-cube 200 800 200)))))
+                  (send obj :assoc lk)
+                  (setq (obj . links) (list lk))
+                  (send obj :init-ending)
+                  obj))
+    (send *robot* :fix-leg-to-coords (make-coords :pos #f(200 300 0) :rpy (list (deg2rad 45) 0 0)))
+    (send *box* :newcoords (make-coords :pos #f(450 550 0) :rpy (list (deg2rad 45) 0 0)))
+    (objects (list *robot* *box*))
+    ```
+
+2. Generate openhrp3 project file
+    ```
+    ;; For Torque Mode
+    (dump-project-file-by-cloning-euslisp-models
+     *robot*
+     (ros::resolve-ros-path (format nil "package://openhrp3/share/OpenHRP-3.1/sample/model/sample1_bush.wrl"))
+     :object-models nil
+     :object-models-file-path nil
+     :timestep 0.001 :dt 0.002 :use-highgain-mode nil :method :runge-kutta
+     :output-fname (format nil "/tmp/~A_ResetPose_TorqueMode" (send *robot* :name)) :debug t)
+    ;; For Torque Mode + Object
+    (dump-project-file-by-cloning-euslisp-models
+     *robot*
+     (ros::resolve-ros-path (format nil "package://openhrp3/share/OpenHRP-3.1/sample/model/sample1_bush.wrl"))
+     :object-models (list *box*)
+     :object-models-file-path (list (ros::resolve-ros-path (format nil "package://openhrp3/share/OpenHRP-3.1/sample/model/box.wrl")))
+     :timestep 0.001 :dt 0.002 :use-highgain-mode nil :method :runge-kutta
+     :output-fname (format nil "/tmp/~A_ResetPose_TorqueMode_Box" (send *robot* :name)) :debug t)
+    ;; For HighGain Mode
+    (dump-project-file-by-cloning-euslisp-models
+     *robot*
+     (ros::resolve-ros-path (format nil "package://openhrp3/share/OpenHRP-3.1/sample/model/sample1.wrl"))
+     :object-models nil
+     :object-models-file-path nil
+     :timestep 0.001 :dt 0.002 :use-highgain-mode t :method :runge-kutta
+     :output-fname (format nil "/tmp/~A_ResetPose_HighGainMode" (send *robot* :name)) :debug t)
+    ```
+
+3. Launch hrpsys-simulator
+    ```
+    # For Torque Mode
+    export BUSH_CUSTOMIZER_CONFIG_PATH=`rospack find openhrp3`/share/OpenHRP-3.1/customizer/sample1_bush_customizer_param.conf
+    rtmlaunch hrpsys_ros_bridge samplerobot.launch PROJECT_FILE:=/tmp/SampleRobot_ResetPose_TorqueMode.xml RUN_RVIZ:=false
+    # For Torque Mode + Object
+    export BUSH_CUSTOMIZER_CONFIG_PATH=`rospack find openhrp3`/share/OpenHRP-3.1/customizer/sample1_bush_customizer_param.conf
+    rtmlaunch hrpsys_ros_bridge samplerobot.launch PROJECT_FILE:=/tmp/SampleRobot_ResetPose_TorqueMode_Box.xml RUN_RVIZ:=false
+    # For HighGain Mode
+    rtmlaunch hrpsys_ros_bridge samplerobot.launch PROJECT_FILE:=/tmp/SampleRobot_ResetPose_HighGainMode.xml RUN_RVIZ:=false
+    ```
