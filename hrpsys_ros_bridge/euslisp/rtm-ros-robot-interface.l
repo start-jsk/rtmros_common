@@ -708,6 +708,9 @@
    ()
    "Remove force sensor offset.
     This function takes 10[s]. Please keep the robot static and make sure that robot's sensors do not contact with any objects."
+   (warning-message 1 ";; !!!!!!!!~%")
+   (warning-message 1 ";; !! Warning, :remove-force-sensor-offset by RobotHardware is deprecated. Please use :remove-force-sensor-offset-rmfo~%")
+   (warning-message 1 ";; !!!!!!!!~%")
    (send self :robothardwareservice_removeforcesensoroffset))
   (:set-servo-error-limit
     (name limit)
@@ -1062,10 +1065,41 @@
     If set-robot-date-string is t, filename includes date string and robot name. By default, set-robot-date-string is t."
    (send self :removeforcesensorlinkoffsetservice_dumpforcemomentoffsetparams :filename (format nil "~A~A" filename (if set-robot-date-string (format nil "_~A" (send self :get-robot-date-string)) "")))
    )
-  (:reset-force-moment-offset-arms
+  (:remove-force-sensor-offset-rmfo
+   (&optional (limbs))
+   "remove offsets on sensor outputs form force/torque sensors.
+    Sensor offsets (force_offset and moment_offset in ForceMomentOffsetParam) are calibrated.
+    This function takes 8.0[s].
+    Please keep the robot static and make sure that robot's sensors do not contact with any objects.
+    Argument:
+      limbs is list of sensor names to be calibrated.
+      If not specified, all sensors are calibrated by default.
+    Return:
+      t if set successfully, nil otherwise"
+   (send self :removeforcesensorlinkoffsetservice_removeforcesensoroffset
+         :names
+         (mapcar #'(lambda (limb) (send (car (send robot limb :force-sensors)) :name)) limbs)))
+  (:remove-force-sensor-offset-rmfo-arms
    ()
    "Remove force and moment offset for :rarm and :larm"
-   (send self :reset-force-moment-offset '(:rarm :larm)))
+   (send self :remove-force-sensor-offset-rmfo '(:rarm :larm)))
+  (:remove-force-sensor-offset-rmfo-legs
+   ()
+   "Remove force and moment offset for :rleg and :lleg"
+   (send self :remove-force-sensor-offset-rmfo '(:rleg :lleg)))
+  ;; Deprecated
+  (:reset-force-moment-offset-arms
+   ()
+   (warning-message 1 ";; !!!!!!!!~%")
+   (warning-message 1 ";; !! Warning, :reset-force-moment-offset-arms is deprecated. Please use :remove-force-sensor-offset-rmfo-arms~%")
+   (warning-message 1 ";; !!!!!!!!~%")
+   (send self :remove-force-sensor-offset-rmfo-arms))
+  (:reset-force-moment-offset-legs
+   ()
+   (warning-message 1 ";; !!!!!!!!~%")
+   (warning-message 1 ";; !! Warning, :reset-force-moment-offset-legs is deprecated. Please use :remove-force-sensor-offset-rmfo-legs~%")
+   (warning-message 1 ";; !!!!!!!!~%")
+   (send self :remove-force-sensor-offset-rmfo-legs))
   (:reset-force-moment-offset
    (limbs)
    "Remove force and moment offsets. limbs should be list of limb symbol name."
