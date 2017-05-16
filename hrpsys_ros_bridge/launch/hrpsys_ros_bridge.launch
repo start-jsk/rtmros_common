@@ -60,11 +60,6 @@
         output = "$(arg OUTPUT)">
     <param name="publish_sensor_transforms" value="$(arg PUBLISH_SENSOR_TF)" />
   </node>
-  <node name = "HrpsysJointTrajectoryBridge"
-        pkg  = "hrpsys_ros_bridge"
-        type = "HrpsysJointTrajectoryBridge"
-        args = "$(arg openrtm_args) -o model:'file://$(arg MODEL_FILE)'"
-        output = "$(arg OUTPUT)" />
 
   <group if="$(arg INSTALL_ROBOT_DESCRIPTION)" >
     <param name="robot_description" textfile="$(arg COLLADA_FILE)" />
@@ -120,13 +115,11 @@
     <rtconnect from="sh.rtc:baseTformOut" to="HrpsysSeqStateROSBridge0.rtc:baseTform" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)" unless="$(arg USE_WALKING)"/>
     <rtconnect from="sh.rtc:qOut" to="HrpsysSeqStateROSBridge0.rtc:mcangle" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
-    <rtconnect from="HrpsysJointTrajectoryBridge0.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
     <rtconnect from="DataLoggerServiceROSBridge.rtc:DataLoggerService" to="log.rtc:DataLoggerService" subscription_type="new"/>
     <rtconnect from="SequencePlayerServiceROSBridge.rtc:SequencePlayerService" to="seq.rtc:SequencePlayerService" subscription_type="new"/>
     <rtconnect from="ForwardKinematicsServiceROSBridge.rtc:ForwardKinematicsService" to="fk.rtc:ForwardKinematicsService" subscription_type="new"/>
 
     <rtactivate component="HrpsysSeqStateROSBridge0.rtc" />
-    <rtactivate component="HrpsysJointTrajectoryBridge0.rtc" />
     <rtactivate component="DataLoggerServiceROSBridge.rtc" />
     <rtactivate component="SequencePlayerServiceROSBridge.rtc" />
     <rtactivate component="ForwardKinematicsServiceROSBridge.rtc" />

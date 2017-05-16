@@ -362,12 +362,39 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onShutdown(RTC::UniqueId ec_id)
   return RTC::RTC_OK;
 }
 */
-/*
+
 RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onActivated(RTC::UniqueId ec_id)
 {
+  // get hrpsys version from Sequence Player
+  try {
+    RTC::ConnectorProfileList* connector_profile_list = m_SequencePlayerServicePort.get_connector_profiles();
+    for (int i = 0; i < connector_profile_list->length(); i++ ) {
+      RTC::ConnectorProfile& connector_profile = (*connector_profile_list)[i];
+      RTC::PortServiceList ports_list = connector_profile.ports;
+      for (int j = 0; j < ports_list.length(); j++ ) {
+        RTC::PortService_var port = ports_list[j];
+        RTC::PortProfile* profile = port->get_port_profile();
+        if ( profile ) {
+          RTC::RTObject_var owner = profile->owner;
+          if ( owner ) {
+            RTC::ComponentProfile* component_profile = owner->get_component_profile();
+            if ( component_profile && std::string(component_profile->type_name) == std::string("SequencePlayer") ) {
+              ROS_WARN_STREAM(getInstanceName() << " Connected to " << component_profile->type_name  << " (" << component_profile->instance_name << ") version " << component_profile->version);
+              hrpsys_version = std::string(component_profile->version);
+            }
+          }
+        }
+      }
+    }
+    if ( hrpsys_version == "" ) {
+      ROS_ERROR_STREAM( __PRETTY_FUNCTION__ << " Could not get valid hrpsys_version");
+    }
+  } catch (...) {
+    ROS_ERROR_STREAM( __PRETTY_FUNCTION__ << " Could not get hrpsys_version");
+  }
   return RTC::RTC_OK;
 }
-*/
+
 /*
 RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onDeactivated(RTC::UniqueId ec_id)
 {
