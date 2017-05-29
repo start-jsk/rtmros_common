@@ -41,6 +41,13 @@
                                  #'send self :rtmros-contact-states-callback (read-from-string (format nil ":~A-contact-states" x)) :groupname groupname))
              '(ref act))
      ))
+  (:default-controller ()
+   (list
+    (list
+     (cons :controller-action "fullbody_controller/follow_joint_trajectory_action")
+     (cons :controller-state "fullbody_controller/state")
+     (cons :action-type control_msgs::FollowJointTrajectoryAction)
+     (cons :joint-names (mapcar #'(lambda (n) (if (symbolp n) (symbol-name n) n)) (send-all (send robot :joint-list) :name))))))
   (:rtmros-motor-states-callback
    (msg)
    (send self :set-robot-state1 :motor-extra-data (send msg :extra_data))
