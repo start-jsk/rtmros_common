@@ -449,14 +449,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
     }
     else
     { // if i == 0
-      if (trajectory.points.size() == 1)
-      {
-        duration[i] = trajectory.points[i].time_from_start.toSec();
-      }
-      else
-      { // 0.2 is magic number writtein in roseus/euslisp/robot-interface.l
-        duration[i] = trajectory.points[i].time_from_start.toSec() - 0.2;
-      }
+      duration[i] = trajectory.points[i].time_from_start.toSec();
     }
   }
 
