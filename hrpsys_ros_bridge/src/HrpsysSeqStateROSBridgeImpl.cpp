@@ -163,6 +163,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   for (int j = 0 ; j < body->numSensorTypes(); j++) {
     for (int i = 0 ; i < body->numSensors(j); i++) {
       hrp::Sensor* sensor = body->sensor(j, i);
+      if (sensor == NULL) {
+        continue; // invalid sensor id
+      }
       SensorInfo si;
       si.transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
       hrp::Vector3 rpy;
