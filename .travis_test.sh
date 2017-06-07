@@ -52,7 +52,7 @@ if [ "$TEST_TYPE" == "work_with_downstream" ]; then
     sudo dpkg -r --force-depends ros-$ROS_DISTRO-hrpsys-tools
     sudo dpkg -r --force-depends ros-$ROS_DISTRO-rtmbuild
     # https://github.com/start-jsk/rtmros_hironx/issues/287
-    sudo sed -i s@test_tf_and_controller@_test_tf_and_controller@ /opt/ros/$ROS_DISTRO/share/hironx_ros_bridge/test/test_hironx_ros_bridge.py
+    sudo sed -i s@test_tf_and_controller@_test_tf_and_controller@ /opt/ros/$ROS_DISTRO/lib/python2.7/dist-packages/hironx_ros_bridge/testutil/test_hironx_ros_bridge.py
     catkin_make $ROS_PARALLEL_JOBS
     catkin_make install $ROS_PARALLEL_JOBS
 else
