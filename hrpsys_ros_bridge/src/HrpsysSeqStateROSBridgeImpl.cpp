@@ -163,6 +163,12 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   for (int j = 0 ; j < body->numSensorTypes(); j++) {
     for (int i = 0 ; i < body->numSensors(j); i++) {
       hrp::Sensor* sensor = body->sensor(j, i);
+      if (! sensor ) {
+        std::cerr << "ERROR : Unknown sensor (type : " << j << ", id : " << i << ")" << std::endl;
+        std::cerr << "ERROR : Please make sure that each sensor type start from 0 sensorId" << std::endl;
+        std::cerr << "ERROR : THIS WILL CAUSE SEVERE PROBLEM, PLEASE FIX YOUR MODEL FILE " << std::endl;
+        continue;
+      }
       SensorInfo si;
       si.transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
       hrp::Vector3 rpy;
