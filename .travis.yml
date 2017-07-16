@@ -4,7 +4,7 @@
 #   Author: Dave Coleman, Jonathan Bohren
 sudo: required
 dist: trusty
-language: generic
+language: c++
 cache:
   - ccache
   - apt
