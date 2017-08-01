@@ -446,14 +446,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   // m_in_rsangleIn
   if ( m_rsangleIn.isNew () ) {
-    sensor_msgs::JointState joint_state;
-    // convert openrtm time to ros time
-    if ( use_hrpsys_time ) {
-        joint_state.header.stamp = ros::Time(m_rsangle.tm.sec, m_rsangle.tm.nsec);
-    }else{
-        joint_state.header.stamp = tm_on_execute;
-    }
-
     ROS_DEBUG_STREAM("[" << getInstanceName() << "] @onExecute ec_id : " << ec_id << ", rs:" << m_rsangleIn.isNew () << ", baseTform:" << m_baseTformIn.isNew());
     try {
       m_rsangleIn.read();
@@ -463,6 +455,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       {
 	ROS_ERROR_STREAM("[" << getInstanceName() << "] m_rsangleIn failed with " << e.what());
       }
+    //
+    sensor_msgs::JointState joint_state;
+    if ( use_hrpsys_time ) {
+       // convert openrtm time to ros time
+        joint_state.header.stamp = ros::Time(m_rsangle.tm.sec, m_rsangle.tm.nsec);
+    }else{
+        joint_state.header.stamp = tm_on_execute;
+    }
     //
     if ( use_hrpsys_time ) {
         rosgraph_msgs::Clock clock_msg;
