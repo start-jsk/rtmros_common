@@ -60,8 +60,12 @@
 #include "sensor_msgs/JointState.h"
 #include "control_msgs/FollowJointTrajectoryAction.h"
 #include "actionlib/server/simple_action_server.h"
+#ifdef USE_PR2_CONTROLLERS_MSGS
 #include "pr2_controllers_msgs/JointTrajectoryAction.h"
 #include "pr2_controllers_msgs/JointTrajectoryControllerState.h"
+#else
+#include "control_msgs/JointTrajectoryControllerState.h"
+#endif
 #include "trajectory_msgs/JointTrajectory.h"
 
 #include "hrpsys_ros_bridge/idl/SequencePlayerServiceStub.h"
@@ -88,7 +92,9 @@ public:
 
     ros::Publisher joint_controller_state_pub;
 
+#ifdef USE_PR2_CONTROLLERS_MSGS
     boost::shared_ptr<actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> > joint_trajectory_server;
+#endif
     boost::shared_ptr<actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> > follow_joint_trajectory_server;
     ros::Subscriber trajectory_command_sub;
 
@@ -104,8 +110,10 @@ public:
     ~jointTrajectoryActionObj();
 
     void onJointTrajectory(trajectory_msgs::JointTrajectory trajectory);
+#ifdef USE_PR2_CONTROLLERS_MSGS
     void onJointTrajectoryActionGoal();
     void onJointTrajectoryActionPreempt();
+#endif
     void onFollowJointTrajectoryActionGoal();
     void onFollowJointTrajectoryActionPreempt();
     void onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg);
