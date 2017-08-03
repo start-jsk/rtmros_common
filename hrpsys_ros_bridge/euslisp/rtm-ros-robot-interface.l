@@ -1416,25 +1416,37 @@
    (&rest args
     &key default-orbit-type
          leg-default-translate-pos ;; [mm]
+         stride-parameter
     &allow-other-keys)
    "Set gait generator param.
     For arguments, please see (send *ri* :get-gait-generator-param-arguments)."
-   (send* self :raw-set-gait-generator-param
-          (append
-           (if (memq :default-orbit-type args)
-               (list :default-orbit-type
-                     (if (or (null default-orbit-type) (integerp default-orbit-type))
-                         default-orbit-type
-                       (let ((ot (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE::*~A*" (string-downcase default-orbit-type)))))
-                         (if (boundp ot)
-                             (eval ot)
-                           (error ";; no such :default-orbit-type ~A in :set-gait-generator-param~%" default-orbit-type))
-                         ))))
-           (if (memq :leg-default-translate-pos args)
-               (let ((lo (copy-object (send (send self :get-gait-generator-param) :leg_default_translate_pos))))
-                 (setq (lo . ros::_data) (scale 1e-3 (apply #'concatenate float-vector leg-default-translate-pos)))
-                 (list :leg-default-translate-pos lo)))
-           args)))
+   (let ((gg-prm (if (or (memq :leg-default-translate-pos args) (memq :stride-parameter args)) (send self :get-gait-generator-param))))
+     (send* self :raw-set-gait-generator-param
+            (append
+             (if (memq :default-orbit-type args)
+                 (list :default-orbit-type
+                       (if (or (null default-orbit-type) (integerp default-orbit-type))
+                           default-orbit-type
+                         (let ((ot (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE::*~A*" (string-downcase default-orbit-type)))))
+                           (if (boundp ot)
+                               (eval ot)
+                             (error ";; no such :default-orbit-type ~A in :set-gait-generator-param~%" default-orbit-type))
+                           ))))
+             (if (memq :leg-default-translate-pos args)
+                 (let ((lo (copy-object (send gg-prm :leg_default_translate_pos))))
+                   (setq (lo . ros::_data) (scale 1e-3 (apply #'concatenate float-vector leg-default-translate-pos)))
+                   (list :leg-default-translate-pos lo)))
+             (if (memq :stride-parameter args)
+                 (let ((sprm (send gg-prm :stride_parameter)))
+                   (cond
+                    ((= (length sprm) (length stride-parameter)) ;; If same length
+                     (list :stride-parameter stride-parameter))
+                    ((< (length sprm) (length stride-parameter)) ;; If rtcd's length is shorter than argument's length
+                     (list :stride-parameter (subseq stride-parameter 0 (length sprm))))
+                    (t ;; If rtcd's length is longer than argument's length
+                     (list :stride-parameter (concatenate float-vector stride-parameter (subseq sprm (length stride-parameter))))))
+                   ))
+             args))))
   (:print-gait-generator-orbit-type
    ()
    "Print GaitGenerator orbit types."
