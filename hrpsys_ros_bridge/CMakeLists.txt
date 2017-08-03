@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(hrpsys_ros_bridge)
 
 # call catkin depends
-find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp rostest sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager hrpsys_tools image_transport dynamic_reconfigure nav_msgs geometry_msgs pr2_controllers_msgs pr2_msgs) # robot_monitor
+find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp rostest sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager hrpsys_tools image_transport dynamic_reconfigure nav_msgs geometry_msgs pr2_controllers_msgs) # robot_monitor
 find_package(hrpsys QUIET) # on indigo, hrpsys is not ros package
 if(NOT ${hrpsys_FOUND})
   find_package(PkgConfig)
