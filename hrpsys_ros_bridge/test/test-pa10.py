@@ -9,7 +9,7 @@ try:
 except:
     import roslib; roslib.load_manifest(PKG)
 
-import argparse,unittest,rostest, time, sys, math
+import argparse,unittest,rostest, time, sys, math, os
 from numpy import *
 
 import rospy,rospkg, tf
@@ -18,7 +18,6 @@ from hrpsys_ros_bridge.srv import OpenHRP_SequencePlayerService_loadPattern, Ope
 
 import actionlib
 
-from pr2_controllers_msgs.msg import JointTrajectoryAction, JointTrajectoryGoal
 from trajectory_msgs.msg import JointTrajectoryPoint, JointTrajectory
 
 class TestPA10Robot(unittest.TestCase):
@@ -54,7 +53,23 @@ class TestPA10Robot(unittest.TestCase):
 
     # send joint angles
     def test_joint_trajectory_action(self):
+        # for <= indigo
+        if os.environ['ROS_DISTRO'] >= 'kinetic' :
+            return True
+        from pr2_controllers_msgs.msg import JointTrajectoryAction, JointTrajectoryGoal
         larm = actionlib.SimpleActionClient("/fullbody_controller/joint_trajectory_action", JointTrajectoryAction)
+        self.impl_test_joint_trajectory_action(larm)
+
+    def test_follow_joint_trajectory_action(self):
+        # for >= indigo
+        if os.environ['ROS_DISTRO'] < 'indigo' :
+            return True
+        from control_msgs.msg import FollowJointTrajectoryAction as JointTrajectoryAction
+        from control_msgs.msg import FollowJointTrajectoryGoal as JointTrajectoryGoal
+        larm = actionlib.SimpleActionClient("/fullbody_controller/follow_joint_trajectory_action", JointTrajectoryAction)
+        self.impl_test_joint_trajectory_action(larm)
+
+    def impl_test_joint_trajectory_action(self, larm):
         larm.wait_for_server()
 
         try:
