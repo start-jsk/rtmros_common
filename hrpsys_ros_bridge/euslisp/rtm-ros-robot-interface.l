@@ -1477,6 +1477,7 @@
          graspless-manip-arm
          graspless-manip-reference-trans-pos ;; [mm]
          graspless-manip-reference-trans-rot ;; rotation-matrix
+         use-force-mode
     &allow-other-keys)
    "Set AutoBalancer param.
     For arguments, please see (send *ri* :get-auto-balancer-param-arguments)."
@@ -1499,7 +1500,28 @@
                (list :graspless-manip-reference-trans-pos (scale 1e-3 graspless-manip-reference-trans-pos)))
            (if (and (memq :graspless-manip-reference-trans-rot args) graspless-manip-reference-trans-rot)
                (list :graspless-manip-reference-trans-rot (matrix2quaternion graspless-manip-reference-trans-rot)))
+           (if (memq :use-force-mode args)
+               (list :use-force-mode
+                     (if (or (null use-force-mode) (integerp use-force-mode))
+                         use-force-mode
+                       (let ((ot (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_USEFORCEMODE::*~A*" (substitute (elt "_" 0) (elt "-" 0) (string-downcase use-force-mode))))))
+                         (if (boundp ot)
+                             (eval ot)
+                           (error ";; no such :use-force-mode ~A in :set-auto-balancer-param~%" use-force-mode))
+                         ))))
            args)))
+  (:print-auto-balancer-use-force-mode
+   ()
+   "Print AutoBalancer UseForceMode."
+   (let ((cs (constants "" "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_USEFORCEMODE")))
+     (mapcar #'(lambda (x) (format t ";; ~A => ~A~%" x (eval x))) cs)
+     t))
+  (:get-auto-balancer-use-force-mode
+   ()
+   "Get AutoBalancer UseForceMode as Euslisp symbol."
+   (send self :get-idl-enum-values
+         (send (send self :get-auto-balancer-param) :use_force_mode)
+         "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_USEFORCEMODE"))
   (:abc-footstep->eus-footstep
    (f)
    (make-coords :pos (scale 1e3 (send f :pos))
