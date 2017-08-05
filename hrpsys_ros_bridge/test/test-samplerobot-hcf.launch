@@ -11,6 +11,6 @@
 
   <node name="hrpsys_seq_state_ros_bridge_tf_relay" pkg="hrpsys_ros_bridge" type="hrpsys_seq_state_ros_bridge_tf_relay_for_test.py"/>
 
-  <test test-name="samplerobot_hcf" pkg="hrpsys_ros_bridge" type="test-samplerobot-hcf.py" retry="4" time-limit="300" args="-ORBInitRef NameService=corbaloc:iiop:localhost:2809/NameService"/>
+  <test test-name="samplerobot_hcf" pkg="hrpsys_ros_bridge" type="test-samplerobot-hcf.py" retry="4" time-limit="600" args="-ORBInitRef NameService=corbaloc:iiop:localhost:2809/NameService"/>
 
 </launch>
