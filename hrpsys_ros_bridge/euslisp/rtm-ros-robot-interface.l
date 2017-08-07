@@ -1477,6 +1477,7 @@
          graspless-manip-arm
          graspless-manip-reference-trans-pos ;; [mm]
          graspless-manip-reference-trans-rot ;; rotation-matrix
+         use-force-mode
     &allow-other-keys)
    "Set AutoBalancer param.
     For arguments, please see (send *ri* :get-auto-balancer-param-arguments)."
@@ -1499,7 +1500,28 @@
                (list :graspless-manip-reference-trans-pos (scale 1e-3 graspless-manip-reference-trans-pos)))
            (if (and (memq :graspless-manip-reference-trans-rot args) graspless-manip-reference-trans-rot)
                (list :graspless-manip-reference-trans-rot (matrix2quaternion graspless-manip-reference-trans-rot)))
+           (if (memq :use-force-mode args)
+               (list :use-force-mode
+                     (if (or (null use-force-mode) (integerp use-force-mode))
+                         use-force-mode
+                       (let ((ot (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_USEFORCEMODE::*~A*" (substitute (elt "_" 0) (elt "-" 0) (string-downcase use-force-mode))))))
+                         (if (boundp ot)
+                             (eval ot)
+                           (error ";; no such :use-force-mode ~A in :set-auto-balancer-param~%" use-force-mode))
+                         ))))
            args)))
+  (:print-auto-balancer-use-force-mode
+   ()
+   "Print AutoBalancer UseForceMode."
+   (let ((cs (constants "" "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_USEFORCEMODE")))
+     (mapcar #'(lambda (x) (format t ";; ~A => ~A~%" x (eval x))) cs)
+     t))
+  (:get-auto-balancer-use-force-mode
+   ()
+   "Get AutoBalancer UseForceMode as Euslisp symbol."
+   (send self :get-idl-enum-values
+         (send (send self :get-auto-balancer-param) :use_force_mode)
+         "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_USEFORCEMODE"))
   (:abc-footstep->eus-footstep
    (f)
    (make-coords :pos (scale 1e3 (send f :pos))
@@ -1884,41 +1906,49 @@
   (:start-reference-force-updater
    (limb)
    "Start reference force updater mode.
-    limb should be limb symbol name such as :rarm, :larm, or :arms."
-   (send self :force-sensor-method
-         limb
-         #'(lambda (name)
-             (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase name)))
-         :start-reference-force-updater))
+    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment."
+   (if (eq limb :FootOriginExtMoment)
+       (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase limb))
+     (send self :force-sensor-method
+           limb
+           #'(lambda (name)
+               (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase name)))
+           :start-reference-force-updater)))
   (:stop-reference-force-updater
    (limb)
    "Stop reference force updater mode.
-    limb should be limb symbol name such as :rarm, :larm, or :arms."
-   (send self :force-sensor-method
-         limb
-         #'(lambda (name)
-             (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase name)))
-         :stop-reference-force-updater))
+    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment."
+   (if (eq limb :FootOriginExtMoment)
+       (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase limb))
+     (send self :force-sensor-method
+           limb
+           #'(lambda (name)
+               (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase name)))
+           :stop-reference-force-updater)))
   (:set-reference-force-updater-param
    (limb &rest args)
    "Set reference force updater parameter like (send *ri* :set-reference-force-updater-param :rarm :p-gain 0.02).
-    limb should be limb symbol name such as :rarm, :larm, :arms.
+    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment.
     For arguments, please see (send *ri* :get-reference-force-updater-param-arguments)"
-   (send* self :force-sensor-method
-          limb
-          #'(lambda (name &rest _args)
-              (send* self :raw-set-reference-force-updater-param (string-downcase name) args))
-          :set-reference-force-updater-param
-          args))
+   (if (eq limb :FootOriginExtMoment)
+       (send* self :raw-set-reference-force-updater-param (string-downcase limb) args)
+     (send* self :force-sensor-method
+            limb
+            #'(lambda (name &rest _args)
+                (send* self :raw-set-reference-force-updater-param (string-downcase name) args))
+            :set-reference-force-updater-param
+            args)))
   (:get-reference-force-updater-param
    (limb)
    "Get reference force updater parameter.
-    limb should be limb symbol name such as :rarm, :larm, :arms."
-   (send self :force-sensor-method
-         limb
-         #'(lambda (name)
-             (send self :raw-get-reference-force-updater-param (string-downcase name)))
-         :get-reference-force-updater-param))
+    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment."
+   (if (eq limb :FootOriginExtMoment)
+       (send self :raw-get-reference-force-updater-param (string-downcase limb))
+     (send self :force-sensor-method
+           limb
+           #'(lambda (name)
+               (send self :raw-get-reference-force-updater-param (string-downcase name)))
+           :get-reference-force-updater-param)))
   )
 
 (defun print-end-effector-parameter-conf-from-robot
