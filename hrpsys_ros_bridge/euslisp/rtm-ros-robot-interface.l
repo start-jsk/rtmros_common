@@ -1416,25 +1416,37 @@
    (&rest args
     &key default-orbit-type
          leg-default-translate-pos ;; [mm]
+         stride-parameter
     &allow-other-keys)
    "Set gait generator param.
     For arguments, please see (send *ri* :get-gait-generator-param-arguments)."
-   (send* self :raw-set-gait-generator-param
-          (append
-           (if (memq :default-orbit-type args)
-               (list :default-orbit-type
-                     (if (or (null default-orbit-type) (integerp default-orbit-type))
-                         default-orbit-type
-                       (let ((ot (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE::*~A*" (string-downcase default-orbit-type)))))
-                         (if (boundp ot)
-                             (eval ot)
-                           (error ";; no such :default-orbit-type ~A in :set-gait-generator-param~%" default-orbit-type))
-                         ))))
-           (if (memq :leg-default-translate-pos args)
-               (let ((lo (copy-object (send (send self :get-gait-generator-param) :leg_default_translate_pos))))
-                 (setq (lo . ros::_data) (scale 1e-3 (apply #'concatenate float-vector leg-default-translate-pos)))
-                 (list :leg-default-translate-pos lo)))
-           args)))
+   (let ((gg-prm (if (or (memq :leg-default-translate-pos args) (memq :stride-parameter args)) (send self :get-gait-generator-param))))
+     (send* self :raw-set-gait-generator-param
+            (append
+             (if (memq :default-orbit-type args)
+                 (list :default-orbit-type
+                       (if (or (null default-orbit-type) (integerp default-orbit-type))
+                           default-orbit-type
+                         (let ((ot (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE::*~A*" (string-downcase default-orbit-type)))))
+                           (if (boundp ot)
+                               (eval ot)
+                             (error ";; no such :default-orbit-type ~A in :set-gait-generator-param~%" default-orbit-type))
+                           ))))
+             (if (memq :leg-default-translate-pos args)
+                 (let ((lo (copy-object (send gg-prm :leg_default_translate_pos))))
+                   (setq (lo . ros::_data) (scale 1e-3 (apply #'concatenate float-vector leg-default-translate-pos)))
+                   (list :leg-default-translate-pos lo)))
+             (if (memq :stride-parameter args)
+                 (let ((sprm (send gg-prm :stride_parameter)))
+                   (cond
+                    ((= (length sprm) (length stride-parameter)) ;; If same length
+                     (list :stride-parameter stride-parameter))
+                    ((< (length sprm) (length stride-parameter)) ;; If rtcd's length is shorter than argument's length
+                     (list :stride-parameter (subseq stride-parameter 0 (length sprm))))
+                    (t ;; If rtcd's length is longer than argument's length
+                     (list :stride-parameter (concatenate float-vector stride-parameter (subseq sprm (length stride-parameter))))))
+                   ))
+             args))))
   (:print-gait-generator-orbit-type
    ()
    "Print GaitGenerator orbit types."
@@ -1465,6 +1477,7 @@
          graspless-manip-arm
          graspless-manip-reference-trans-pos ;; [mm]
          graspless-manip-reference-trans-rot ;; rotation-matrix
+         use-force-mode
     &allow-other-keys)
    "Set AutoBalancer param.
     For arguments, please see (send *ri* :get-auto-balancer-param-arguments)."
@@ -1487,7 +1500,28 @@
                (list :graspless-manip-reference-trans-pos (scale 1e-3 graspless-manip-reference-trans-pos)))
            (if (and (memq :graspless-manip-reference-trans-rot args) graspless-manip-reference-trans-rot)
                (list :graspless-manip-reference-trans-rot (matrix2quaternion graspless-manip-reference-trans-rot)))
+           (if (memq :use-force-mode args)
+               (list :use-force-mode
+                     (if (or (null use-force-mode) (integerp use-force-mode))
+                         use-force-mode
+                       (let ((ot (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_USEFORCEMODE::*~A*" (substitute (elt "_" 0) (elt "-" 0) (string-downcase use-force-mode))))))
+                         (if (boundp ot)
+                             (eval ot)
+                           (error ";; no such :use-force-mode ~A in :set-auto-balancer-param~%" use-force-mode))
+                         ))))
            args)))
+  (:print-auto-balancer-use-force-mode
+   ()
+   "Print AutoBalancer UseForceMode."
+   (let ((cs (constants "" "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_USEFORCEMODE")))
+     (mapcar #'(lambda (x) (format t ";; ~A => ~A~%" x (eval x))) cs)
+     t))
+  (:get-auto-balancer-use-force-mode
+   ()
+   "Get AutoBalancer UseForceMode as Euslisp symbol."
+   (send self :get-idl-enum-values
+         (send (send self :get-auto-balancer-param) :use_force_mode)
+         "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_USEFORCEMODE"))
   (:abc-footstep->eus-footstep
    (f)
    (make-coords :pos (scale 1e3 (send f :pos))
@@ -1872,41 +1906,49 @@
   (:start-reference-force-updater
    (limb)
    "Start reference force updater mode.
-    limb should be limb symbol name such as :rarm, :larm, or :arms."
-   (send self :force-sensor-method
-         limb
-         #'(lambda (name)
-             (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase name)))
-         :start-reference-force-updater))
+    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment."
+   (if (eq limb :FootOriginExtMoment)
+       (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase limb))
+     (send self :force-sensor-method
+           limb
+           #'(lambda (name)
+               (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase name)))
+           :start-reference-force-updater)))
   (:stop-reference-force-updater
    (limb)
    "Stop reference force updater mode.
-    limb should be limb symbol name such as :rarm, :larm, or :arms."
-   (send self :force-sensor-method
-         limb
-         #'(lambda (name)
-             (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase name)))
-         :stop-reference-force-updater))
+    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment."
+   (if (eq limb :FootOriginExtMoment)
+       (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase limb))
+     (send self :force-sensor-method
+           limb
+           #'(lambda (name)
+               (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase name)))
+           :stop-reference-force-updater)))
   (:set-reference-force-updater-param
    (limb &rest args)
    "Set reference force updater parameter like (send *ri* :set-reference-force-updater-param :rarm :p-gain 0.02).
-    limb should be limb symbol name such as :rarm, :larm, :arms.
+    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment.
     For arguments, please see (send *ri* :get-reference-force-updater-param-arguments)"
-   (send* self :force-sensor-method
-          limb
-          #'(lambda (name &rest _args)
-              (send* self :raw-set-reference-force-updater-param (string-downcase name) args))
-          :set-reference-force-updater-param
-          args))
+   (if (eq limb :FootOriginExtMoment)
+       (send* self :raw-set-reference-force-updater-param (string-downcase limb) args)
+     (send* self :force-sensor-method
+            limb
+            #'(lambda (name &rest _args)
+                (send* self :raw-set-reference-force-updater-param (string-downcase name) args))
+            :set-reference-force-updater-param
+            args)))
   (:get-reference-force-updater-param
    (limb)
    "Get reference force updater parameter.
-    limb should be limb symbol name such as :rarm, :larm, :arms."
-   (send self :force-sensor-method
-         limb
-         #'(lambda (name)
-             (send self :raw-get-reference-force-updater-param (string-downcase name)))
-         :get-reference-force-updater-param))
+    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment."
+   (if (eq limb :FootOriginExtMoment)
+       (send self :raw-get-reference-force-updater-param (string-downcase limb))
+     (send self :force-sensor-method
+           limb
+           #'(lambda (name)
+               (send self :raw-get-reference-force-updater-param (string-downcase name)))
+           :get-reference-force-updater-param)))
   )
 
 (defun print-end-effector-parameter-conf-from-robot

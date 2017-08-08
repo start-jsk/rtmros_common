@@ -7,6 +7,6 @@
   <node name="provider" pkg="openrtm_aist" type="MyServiceProviderComp" args='$(arg openrtm_args)' />
   <node name="consumer" pkg="openrtm_aist" type="MyServiceConsumerComp"	args='$(arg openrtm_args)' />
 
-  <test test-name="test_compile_idl_sh" pkg="rtmbuild" type="test-compile-idl.sh" />
+  <test test-name="test_compile_idl_sh" pkg="rtmbuild" type="test-compile-idl.sh" retry="4" time-limit="120" />
 
 </launch>

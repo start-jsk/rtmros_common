@@ -21,8 +21,12 @@
 #include "geometry_msgs/WrenchStamped.h"
 #include "actionlib/server/simple_action_server.h"
 #include "control_msgs/FollowJointTrajectoryAction.h"
+#ifdef USE_PR2_CONTROLLERS_MSGS
 #include "pr2_controllers_msgs/JointTrajectoryAction.h"
 #include "pr2_controllers_msgs/JointTrajectoryControllerState.h"
+#else
+#include "control_msgs/JointTrajectoryControllerState.h"
+#endif
 #include "dynamic_reconfigure/Reconfigure.h"
 #include "hrpsys_ros_bridge/MotorStates.h"
 #include "hrpsys_ros_bridge/ContactStatesStamped.h"
@@ -43,8 +47,10 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
 
   void onJointTrajectory(trajectory_msgs::JointTrajectory trajectory);
+#ifdef USE_PR2_CONTROLLERS_MSGS
   void onJointTrajectoryActionGoal();
   void onJointTrajectoryActionPreempt();
+#endif
   void onFollowJointTrajectoryActionGoal();
   void onFollowJointTrajectoryActionPreempt();
   void onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg);
@@ -57,7 +63,9 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, ref_cp_pub, act_cp_pub, odom_pub, imu_pub, em_mode_pub, ref_contact_states_pub, act_contact_states_pub;
   ros::Subscriber trajectory_command_sub;
   std::vector<ros::Publisher> fsensor_pub, cop_pub;
+#ifdef USE_PR2_CONTROLLERS_MSGS
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> joint_trajectory_server;
+#endif
   actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> follow_joint_trajectory_server;
   ros::ServiceServer sendmsg_srv;
   ros::ServiceServer set_sensor_transformation_srv;
