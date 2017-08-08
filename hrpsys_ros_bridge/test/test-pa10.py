@@ -9,7 +9,7 @@ try:
 except:
     import roslib; roslib.load_manifest(PKG)
 
-import argparse,unittest,rostest, time, sys, math
+import argparse,unittest,rostest, time, sys, math, os
 from numpy import *
 
 import rospy,rospkg, tf
@@ -18,7 +18,6 @@ from hrpsys_ros_bridge.srv import OpenHRP_SequencePlayerService_loadPattern, Ope
 
 import actionlib
 
-from pr2_controllers_msgs.msg import JointTrajectoryAction, JointTrajectoryGoal
 from trajectory_msgs.msg import JointTrajectoryPoint, JointTrajectory
 
 class TestPA10Robot(unittest.TestCase):
@@ -54,7 +53,22 @@ class TestPA10Robot(unittest.TestCase):
 
     # send joint angles
     def test_joint_trajectory_action(self):
+        # for < kinetic
+        if os.environ['ROS_DISTRO'] >= 'kinetic' :
+            return True
+        from pr2_controllers_msgs.msg import JointTrajectoryAction, JointTrajectoryGoal
         larm = actionlib.SimpleActionClient("/fullbody_controller/joint_trajectory_action", JointTrajectoryAction)
+        self.impl_test_joint_trajectory_action(larm, JointTrajectoryGoal())
+
+    def test_follow_joint_trajectory_action(self):
+        # for >= kinetic
+        if os.environ['ROS_DISTRO'] < 'kinetic' :
+            return True
+        from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
+        larm = actionlib.SimpleActionClient("/fullbody_controller/follow_joint_trajectory_action", FollowJointTrajectoryAction)
+        self.impl_test_joint_trajectory_action(larm, FollowJointTrajectoryGoal())
+
+    def impl_test_joint_trajectory_action(self, larm, goal):
         larm.wait_for_server()
 
         try:
@@ -63,7 +77,6 @@ class TestPA10Robot(unittest.TestCase):
             self.assertTrue(None, "could not found tf from /BASE_LINK to /J7_LINK")
         (trans1,rot1) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
         rospy.logwarn("tf_echo /BASE_LINK /J7_LINK %r %r"%(trans1,rot1))
-        goal = JointTrajectoryGoal()
         goal.trajectory.header.stamp = rospy.get_rostime()
         goal.trajectory.joint_names.append("J1")
         goal.trajectory.joint_names.append("J2")
