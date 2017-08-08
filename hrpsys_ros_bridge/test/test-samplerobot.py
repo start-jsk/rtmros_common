@@ -13,7 +13,6 @@ from hrpsys_ros_bridge.srv import *
 
 import actionlib
 
-from pr2_controllers_msgs.msg import JointTrajectoryAction, JointTrajectoryGoal
 from trajectory_msgs.msg import JointTrajectoryPoint
 
 class TestSampleRobot(unittest.TestCase):
@@ -84,9 +83,7 @@ class TestSampleRobot(unittest.TestCase):
             self.assertAlmostEqual(t2-t1, 11, delta=2)
             #self.assertNotAlmostEqual(trans[1],0,2)
 
-    # send joint angles
-    def test_joint_angles(self):
-        larm = actionlib.SimpleActionClient("/larm_controller/joint_trajectory_action", JointTrajectoryAction)
+    def impl_test_joint_angles(self, larm, goal):
         larm.wait_for_server()
 
         try:
@@ -95,7 +92,6 @@ class TestSampleRobot(unittest.TestCase):
             self.assertTrue(None, "could not found tf from /WAIST_LINK0 to /LARM_LINK7")
         (trans1,rot1) = self.listener.lookupTransform('/WAIST_LINK0', '/LARM_LINK7', rospy.Time(0))
         rospy.logwarn("tf_echo /WAIST_LINK0 /LARM_LINK7 %r %r"%(trans1,rot1))
-        goal = JointTrajectoryGoal()
         goal.trajectory.header.stamp = rospy.get_rostime()
         goal.trajectory.joint_names.append("LARM_SHOULDER_P")
         goal.trajectory.joint_names.append("LARM_SHOULDER_R")
@@ -114,6 +110,23 @@ class TestSampleRobot(unittest.TestCase):
         rospy.logwarn("tf_echo /WAIST_LINK0 /LARM_LINK7 %r %r"%(trans2,rot2))
         rospy.logwarn("difference between two /LARM_LINK7 %r %r"%(array(trans1)-array(trans2),linalg.norm(array(trans1)-array(trans2))))
         self.assertNotAlmostEqual(linalg.norm(array(trans1)-array(trans2)), 0, delta=0.1)
+
+    # send joint angles
+    def test_joint_angles(self):
+        # for < kinetic
+        if os.environ['ROS_DISTRO'] >= 'kinetic' :
+            return True
+        from pr2_controllers_msgs.msg import JointTrajectoryAction, JointTrajectoryGoal
+        larm = actionlib.SimpleActionClient("/larm_controller/joint_trajectory_action", JointTrajectoryAction)
+        self.impl_test_joint_angles(larm, JointTrajectoryGoal())
+
+    def test_follow_joint_angles(self):
+        # for >= kinetic
+        if os.environ['ROS_DISTRO'] < 'kinetic' :
+            return True
+        from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
+        larm = actionlib.SimpleActionClient("/larm_controller/follow_joint_trajectory_action", FollowJointTrajectoryAction)
+        self.impl_test_joint_angles(larm, FollowJointTrajectoryGoal())
 
 #unittest.main()
 if __name__ == '__main__':
