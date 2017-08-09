@@ -2,8 +2,8 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.0 (2017-08-09)
+------------------
 * fix code to run both Indido and Kinetic (`#1025 <https://github.com/start-jsk/rtmros_common/issues/1025>`_)
   * rtmbuild/test/test-compile-idl.test: add retry=4 and time-limit=120
 

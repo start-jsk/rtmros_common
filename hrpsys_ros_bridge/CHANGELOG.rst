@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.0 (2017-08-09)
+------------------
 * display error message when body->sensor(j, i) is null (`#1014 <https://github.com/start-jsk/rtmros_common/issues/1014>`_)
 * sensor_ros_bridge_connect.py : add more debug message (`#1015 <https://github.com/start-jsk/rtmros_common/issues/1015>`_)
 * Update AutoBalancer and ReferenceForceUpdater euslisp method symbols (`#1026 <https://github.com/start-jsk/rtmros_common/issues/1026>`_)

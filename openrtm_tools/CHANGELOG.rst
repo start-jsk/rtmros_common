@@ -2,8 +2,8 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.0 (2017-08-09)
+------------------
 * fix code to run both Indido and Kinetic (`#1025 <https://github.com/start-jsk/rtmros_common/issues/1025>`_)
   * add retry=3 to openrtm_tools/test/test-rtmlaunch.test
 
