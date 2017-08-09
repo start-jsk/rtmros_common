@@ -2,6 +2,13 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix code to run both Indido and Kinetic (`#1025 <https://github.com/start-jsk/rtmros_common/issues/1025>`_)
+  * add retry=3 to openrtm_tools/test/test-rtmlaunch.test
+
+* Contributors: Kei Okada
+
 1.3.3 (2017-02-12)
 ------------------
 * [hrpsys_ros_bridge/launch/hrpsys_ros_bridge.launch, openrtm_tools/src/openrtm_tools/rtmlaunch.py] Add argument to change buffer length of rtmlaunch connection. Set 8 by default (default setting in openrtm). (`#980 <https://github.com/start-jsk/rtmros_common/issues/980>`_)

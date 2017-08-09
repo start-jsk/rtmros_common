@@ -2,6 +2,13 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix code to run both Indido and Kinetic (`#1025 <https://github.com/start-jsk/rtmros_common/issues/1025>`_)
+  * rtmbuild/test/test-compile-idl.test: add retry=4 and time-limit=120
+
+* Contributors: Kei Okada
+
 1.3.3 (2017-02-12)
 ------------------
 * re-enable rosnode_rtc (`#961 <https://github.com/start-jsk/rtmros_common/issues/961>`_)
