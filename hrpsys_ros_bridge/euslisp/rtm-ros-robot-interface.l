@@ -973,24 +973,24 @@
            :ref-diff-wrench max-ref-moment
            :max-time (* 1e-3 (+ detect-time-offset max-time))
            :limbs limbs)
-     (let ((detector-mode :mode_detector_idle) (fm-ret) (otd-ret-wrenches))
+     (let ((detector-mode :mode_detector_idle) (fm-ret))
        (do-until-key-with-check
         (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
+        (unix:usleep (* 1000 periodic-time))
         (setq detector-mode (send self :check-object-turnaround-detection))
-        (format t ";;   Detecting... (detector-mode = ~A, current force moment = ~A)~%" detector-mode (send self :get-otd-object-forces-moments))
-        (unix:usleep (* 1000 periodic-time)))
+        (Setq fm-ret (send self :get-otd-object-forces-moments))
+        (format t ";;   Detecting... (detector-mode = ~A, current force moment = ~A)~%" detector-mode fm-ret)
+        )
        (if (eq detector-mode :mode_detected)
-           (progn
-             (Setq otd-ret-wrenches (send self :get-otd-object-forces-moments))
-             (setq fm-ret (caddr otd-ret-wrenches))
-             (format t ";; Detected (force moment = ~A ~A)~%" fm-ret (funcall func (v. axis fm-ret)))
-             (setq fm-ret (funcall func (v. axis fm-ret)))
+           (let* ((total-moment (caddr fm-ret))
+                  (forces-from-total-moment (funcall func (v. axis total-moment))))
+             (format t ";; Detected (force moment = ~A ~A)~%" fm-ret forces-from-total-moment)
              (if set-ref-force-p
                  (send self :set-ref-forces
                        (mapcar #'(lambda (limb)
                                    (if (memq limb '(:rleg :lleg))
                                        (float-vector 0 0 0)
-                                     (elt fm-ret (position limb limbs))))
+                                     (elt forces-from-total-moment (position limb limbs))))
                                all-limbs)
                        set-ref-force-time)
                (send self :set-ref-force
@@ -1007,7 +1007,7 @@
          )
        (send self :wait-interpolation-seq)
        (if (eq detector-mode :mode_detected)
-           otd-ret-wrenches)
+           fm-ret)
        )))
   (:set-object-turnaround-detector-param
    (&rest args
