@@ -879,7 +879,10 @@
     detect-time-offset is additional checking time [msec].
     set-ref-force-time is time to set reference force [msec].
     If set-ref-force-p is t, set estimated reference force. Otherwise, set reference force to zero.
-    periodic-time is loop wait time[msec]."
+    periodic-time is loop wait time[msec].
+    return-value-mode is used to select return value type.
+    If :all, returns the results of :get-otd-object-forces-moments itself. If :forces, returns forces results.
+    If set-ref-force-linear-p t, set linear interpolation first and set hoffarbib interpolation in return."
    ;; Step.0 Initialize
    (format t ";; Start object turnaround detection~%")
    (send self :set-object-turnaround-detector-param :axis axis :detector-total-wrench detector-total-wrench)
@@ -967,7 +970,10 @@
     detect-time-offset is additional checking time [msec].
     set-ref-force-time is time to set reference force [msec].
     If set-ref-force-p is t, set estimated reference force. Otherwise, set reference force to zero.
-    periodic-time is loop wait time[msec]."
+    periodic-time is loop wait time[msec].
+    return-value-mode is used to select return value type.
+    If :all, returns the results of :get-otd-object-forces-moments itself. If :forces, returns forces results.
+    If set-ref-force-linear-p t, set linear interpolation first and set hoffarbib interpolation in return."
    (format t ";; Start object turnaround detection~%")
    (let ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
          (fs-list (funcall func max-ref-moment)))
