@@ -867,6 +867,7 @@
          (set-ref-force-time 2000.0)
          (set-ref-force-p t)
          (periodic-time 200) ;; [msec]
+         (detector-total-wrench :total-force)
          )
    "Set object turnaround reference force.
     axis is resultant force direction.
@@ -878,7 +879,7 @@
     periodic-time is loop wait time[msec]."
    ;; Step.0 Initialize
    (format t ";; Start object turnaround detection~%")
-   (send self :set-object-turnaround-detector-param :axis axis :detector-total-wrench 0)
+   (send self :set-object-turnaround-detector-param :axis axis :detector-total-wrench detector-total-wrench)
    (send self :state)
    (let* ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
           (org-ref-forces (mapcar #'(lambda (limb) (send self :reference-force-vector limb)) all-limbs))
@@ -945,6 +946,7 @@
          (set-ref-force-time 2000.0)
          (set-ref-force-p t)
          (periodic-time 200) ;; [msec]
+         (detector-total-wrench :total-moment)
          )
    "Set object turnaround reference force.
     axis is axis which resultant moment is around.
@@ -959,7 +961,7 @@
    (let ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
          (fs-list (funcall func max-ref-moment)))
      (send self :set-object-turnaround-detector-param
-           :axis axis :moment-center (scale 1e-3 moment-center) :detector-total-wrench 1)
+           :axis axis :moment-center (scale 1e-3 moment-center) :detector-total-wrench detector-total-wrench)
      (send self :set-ref-forces
            (mapcar #'(lambda (limb)
                        (if (memq limb '(:rleg :lleg))
