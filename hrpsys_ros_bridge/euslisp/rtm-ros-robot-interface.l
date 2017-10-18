@@ -823,7 +823,7 @@
 
 ;; ObjectContactTurnaroundDetector
 (def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_ObjectContactTurnaroundDetectorService_objectContactTurnaroundDetectorParam
-  :set-object-turnaround-detector-param :get-object-turnaround-detector-param :get-object-turnaround-detector-param-arguments
+  :raw-set-object-turnaround-detector-param :get-object-turnaround-detector-param :get-object-turnaround-detector-param-arguments
   :ObjectContactTurnaroundDetectorService_setObjectContactTurnaroundDetectorParam
   :ObjectContactTurnaroundDetectorService_getObjectContactTurnaroundDetectorParam)
 (defmethod rtm-ros-robot-interface
@@ -1007,6 +1007,30 @@
        (if (eq detector-mode :mode_detected)
            otd-ret-wrenches)
        )))
+  (:set-object-turnaround-detector-param
+   (&rest args
+    &key detector-total-wrench
+    &allow-other-keys)
+   "Set Object Turnaround Detector.
+    For arguments, please see (send *ri* :get-object-turnaround-detector-param-arguments)."
+   (let ((prm (send self :get-object-turnaround-detector-param)))
+     (send* self :raw-set-object-turnaround-detector-param
+            (append
+             (if (memq :detector-total-wrench args)
+                 (list :detector-total-wrench
+                       (if (or (null detector-total-wrench) (integerp detector-total-wrench))
+                           detector-total-wrench
+                         (let ((dtw (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_OBJECTCONTACTTURNAROUNDDETECTORSERVICE_DETECTORTOTALWRENCH::*~A*" (substitute (elt "_" 0) (elt "-" 0) (string-downcase detector-total-wrench))))))
+                           (if (boundp dtw)
+                               (eval dtw)
+                             (error ";; no such :detector-total-wrench ~A in :set-object-turnaround-detector-param~%" detector-total-wrench))))))
+             args))))
+  (:get-object-turnaround-detector-detector-total-wrench
+   ()
+   "Get Object Turnadound Detector as Euslisp symbol."
+   (send self :get-idl-enum-values
+         (send (send self :get-object-turnaround-detector-param) :detector_total_wrench)
+         "HRPSYS_ROS_BRIDGE::OPENHRP_OBJECTCONTACTTURNAROUNDDETECTORSERVICE_DETECTORTOTALWRENCH"))
   )
 
 ;; RemoveForceSensorLinkOffset
