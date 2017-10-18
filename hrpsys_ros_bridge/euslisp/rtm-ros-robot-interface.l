@@ -900,16 +900,16 @@
        ;; Step.2 Detection loop
        (do-until-key-with-check
         (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
+        (unix:usleep (* 1000 periodic-time))
         (setq detector-mode (send self :check-object-turnaround-detection))
         (setq fm-ret (send self :get-otd-object-forces-moments))
         (format t ";;   Detecting... (detector-mode = ~A, limbs = ~A, current forces = ~A[N], current moments = ~A[Nm], current res force = ~A[N])~%"
                 detector-mode limbs
                 (car fm-ret) (cadr fm-ret) (caddr fm-ret))
-        (unix:usleep (* 1000 periodic-time)))
+        )
        ;; Step.3 If detected, update ref force
        (if (eq detector-mode :mode_detected)
            (progn
-             (setq fm-ret (send self :get-otd-object-forces-moments))
              (format t ";; Detected (limbs = ~A, forces = ~A[N], moments = ~A[Nm], res-force = ~A[N])~%"
                      limbs (car fm-ret) (cadr fm-ret) (caddr fm-ret))
              (if set-ref-force-p
