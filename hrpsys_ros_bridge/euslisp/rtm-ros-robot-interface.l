@@ -869,6 +869,7 @@
          (set-ref-force-p t)
          (periodic-time 200) ;; [msec]
          (detector-total-wrench :total-force)
+         (return-value-mode :forces)
          )
    "Set object turnaround reference force.
     axis is resultant force direction.
@@ -935,7 +936,10 @@
          )
        (send self :wait-interpolation-seq)
        (if (eq detector-mode :mode_detected)
-           (car fm-ret))
+           (case return-value-mode
+                 (:all fm-ret)
+                 (:forces (car fm-ret))
+                 (t nil)))
        )))
   (:set-object-turnaround-ref-moment
    (&key (limbs '(:rarm :larm))
@@ -949,6 +953,7 @@
          (set-ref-force-p t)
          (periodic-time 200) ;; [msec]
          (detector-total-wrench :total-moment)
+         (return-value-mode :all)
          )
    "Set object turnaround reference force.
     axis is axis which resultant moment is around.
@@ -975,7 +980,7 @@
            :ref-diff-wrench max-ref-moment
            :max-time (* 1e-3 (+ detect-time-offset max-time))
            :limbs limbs)
-     (let ((detector-mode :mode_detector_idle) (fm-ret))
+     (let ((detector-mode :mode_detector_idle) (fm-ret) (forces-from-total-moment))
        (do-until-key-with-check
         (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
         (unix:usleep (* 1000 periodic-time))
@@ -986,8 +991,8 @@
                 (car fm-ret) (cadr fm-ret) (caddr fm-ret) (cadddr fm-ret))
         )
        (if (eq detector-mode :mode_detected)
-           (let* ((total-moment (caddr fm-ret))
-                  (forces-from-total-moment (funcall func (v. axis total-moment))))
+           (let ((total-moment (caddr fm-ret)))
+             (setq forces-from-total-moment (funcall func (v. axis total-moment)))
              (format t ";; Detected (limbs = ~A, forces from total moment = ~A[N], forces = ~A[N], moments = ~A[Nm], res moment = ~A[Nm], fric force = ~A[N])~%"
                      limbs forces-from-total-moment
                      (car fm-ret) (cadr fm-ret) (caddr fm-ret) (cadddr fm-ret))
@@ -1013,7 +1018,11 @@
          )
        (send self :wait-interpolation-seq)
        (if (eq detector-mode :mode_detected)
-           fm-ret)
+           (case return-value-mode
+                 (:all fm-ret)
+                 (:forces (car fm-ret))
+                 (:forces-from-total-moment forces-from-total-moment)
+                 (t nil)))
        )))
   (:set-object-turnaround-detector-param
    (&rest args
