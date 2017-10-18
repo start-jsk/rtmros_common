@@ -855,7 +855,8 @@
      (let ((ret (send self :ObjectContactTurnaroundDetectorService_getObjectForcesMoments)))
        (list (split-vector (send (send ret :o_forces) :data))
              (split-vector (send (send ret :o_moments) :data))
-             (send ret :o_3dofwrench))
+             (send ret :o_3dofwrench)
+             (send ret :o_fric_coeff_wrench))
        ))
    )
   (:set-object-turnaround-ref-force
@@ -904,15 +905,16 @@
         (unix:usleep (* 1000 periodic-time))
         (setq detector-mode (send self :check-object-turnaround-detection))
         (setq fm-ret (send self :get-otd-object-forces-moments))
-        (format t ";;   Detecting... (detector-mode = ~A, limbs = ~A, current forces = ~A[N], current moments = ~A[Nm], current res force = ~A[N])~%"
+        (format t ";;   Detecting... (detector-mode = ~A, limbs = ~A, forces = ~A[N], moments = ~A[Nm], res force = ~A[N], fric force = ~A[N])~%"
                 detector-mode limbs
-                (car fm-ret) (cadr fm-ret) (caddr fm-ret))
+                (car fm-ret) (cadr fm-ret) (caddr fm-ret) (cadddr fm-ret))
         )
        ;; Step.3 If detected, update ref force
        (if (eq detector-mode :mode_detected)
            (progn
-             (format t ";; Detected (limbs = ~A, forces = ~A[N], moments = ~A[Nm], res-force = ~A[N])~%"
-                     limbs (car fm-ret) (cadr fm-ret) (caddr fm-ret))
+             (format t ";; Detected (limbs = ~A, forces = ~A[N], moments = ~A[Nm], res force = ~A[N], fric force = ~A[N])~%"
+                     limbs
+                     (car fm-ret) (cadr fm-ret) (caddr fm-ret) (cadddr fm-ret))
              (if set-ref-force-p
                  (send self :set-ref-forces
                        (mapcar #'(lambda (org-f limb)
@@ -979,12 +981,16 @@
         (unix:usleep (* 1000 periodic-time))
         (setq detector-mode (send self :check-object-turnaround-detection))
         (Setq fm-ret (send self :get-otd-object-forces-moments))
-        (format t ";;   Detecting... (detector-mode = ~A, current force moment = ~A)~%" detector-mode fm-ret)
+        (format t ";;   Detecting... (detector-mode = ~A, limbs = ~A, forces = ~A[N], moments = ~A[Nm], res moment = ~A[Nm], fric force = ~A[N])~%"
+                detector-mode limbs
+                (car fm-ret) (cadr fm-ret) (caddr fm-ret) (cadddr fm-ret))
         )
        (if (eq detector-mode :mode_detected)
            (let* ((total-moment (caddr fm-ret))
                   (forces-from-total-moment (funcall func (v. axis total-moment))))
-             (format t ";; Detected (force moment = ~A ~A)~%" fm-ret forces-from-total-moment)
+             (format t ";; Detected (limbs = ~A, forces from total moment = ~A[N], forces = ~A[N], moments = ~A[Nm], res moment = ~A[Nm], fric force = ~A[N])~%"
+                     limbs forces-from-total-moment
+                     (car fm-ret) (cadr fm-ret) (caddr fm-ret) (cadddr fm-ret))
              (if set-ref-force-p
                  (send self :set-ref-forces
                        (mapcar #'(lambda (limb)
