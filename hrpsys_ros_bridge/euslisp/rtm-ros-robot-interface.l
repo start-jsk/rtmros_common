@@ -870,6 +870,7 @@
          (periodic-time 200) ;; [msec]
          (detector-total-wrench :total-force)
          (return-value-mode :forces)
+         (set-ref-force-linear-p)
          )
    "Set object turnaround reference force.
     axis is resultant force direction.
@@ -887,6 +888,7 @@
           (org-ref-forces (mapcar #'(lambda (limb) (send self :reference-force-vector limb)) all-limbs))
           (diff-force (scale (/ max-ref-force (length limbs)) axis)))
      ;; Step.1 Set ref force and start detection
+     (if set-ref-force-linear-p (send self :set-interpolation-mode :linear))
      (send self :set-ref-forces
            (mapcar #'(lambda (org-f limb)
                        (if (memq limb limbs)
@@ -935,6 +937,7 @@
            )
          )
        (send self :wait-interpolation-seq)
+       (if set-ref-force-linear-p (send self :set-interpolation-mode :hoffarbib))
        (if (eq detector-mode :mode_detected)
            (case return-value-mode
                  (:all fm-ret)
@@ -954,6 +957,7 @@
          (periodic-time 200) ;; [msec]
          (detector-total-wrench :total-moment)
          (return-value-mode :all)
+         (set-ref-force-linear-p)
          )
    "Set object turnaround reference force.
     axis is axis which resultant moment is around.
@@ -969,6 +973,7 @@
          (fs-list (funcall func max-ref-moment)))
      (send self :set-object-turnaround-detector-param
            :axis axis :moment-center (scale 1e-3 moment-center) :detector-total-wrench detector-total-wrench)
+     (if set-ref-force-linear-p (send self :set-interpolation-mode :linear))
      (send self :set-ref-forces
            (mapcar #'(lambda (limb)
                        (if (memq limb '(:rleg :lleg))
@@ -1017,6 +1022,7 @@
            )
          )
        (send self :wait-interpolation-seq)
+       (if set-ref-force-linear-p (send self :set-interpolation-mode :hoffarbib))
        (if (eq detector-mode :mode_detected)
            (case return-value-mode
                  (:all fm-ret)
