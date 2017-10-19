@@ -823,7 +823,7 @@
 
 ;; ObjectContactTurnaroundDetector
 (def-set-get-param-method 'hrpsys_ros_bridge::OpenHRP_ObjectContactTurnaroundDetectorService_objectContactTurnaroundDetectorParam
-  :set-object-turnaround-detector-param :get-object-turnaround-detector-param :get-object-turnaround-detector-param-arguments
+  :raw-set-object-turnaround-detector-param :get-object-turnaround-detector-param :get-object-turnaround-detector-param-arguments
   :ObjectContactTurnaroundDetectorService_setObjectContactTurnaroundDetectorParam
   :ObjectContactTurnaroundDetectorService_getObjectContactTurnaroundDetectorParam)
 (defmethod rtm-ros-robot-interface
@@ -855,7 +855,8 @@
      (let ((ret (send self :ObjectContactTurnaroundDetectorService_getObjectForcesMoments)))
        (list (split-vector (send (send ret :o_forces) :data))
              (split-vector (send (send ret :o_moments) :data))
-             (send ret :o_3dofwrench))
+             (send ret :o_3dofwrench)
+             (send ret :o_fric_coeff_wrench))
        ))
    )
   (:set-object-turnaround-ref-force
@@ -867,6 +868,9 @@
          (set-ref-force-time 2000.0)
          (set-ref-force-p t)
          (periodic-time 200) ;; [msec]
+         (detector-total-wrench :total-force)
+         (return-value-mode :forces)
+         (set-ref-force-linear-p)
          )
    "Set object turnaround reference force.
     axis is resultant force direction.
@@ -875,15 +879,19 @@
     detect-time-offset is additional checking time [msec].
     set-ref-force-time is time to set reference force [msec].
     If set-ref-force-p is t, set estimated reference force. Otherwise, set reference force to zero.
-    periodic-time is loop wait time[msec]."
+    periodic-time is loop wait time[msec].
+    return-value-mode is used to select return value type.
+    If :all, returns the results of :get-otd-object-forces-moments itself. If :forces, returns forces results.
+    If set-ref-force-linear-p t, set linear interpolation first and set hoffarbib interpolation in return."
    ;; Step.0 Initialize
    (format t ";; Start object turnaround detection~%")
-   (send self :set-object-turnaround-detector-param :axis axis :detector-total-wrench 0)
+   (send self :set-object-turnaround-detector-param :axis axis :detector-total-wrench detector-total-wrench)
    (send self :state)
    (let* ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
           (org-ref-forces (mapcar #'(lambda (limb) (send self :reference-force-vector limb)) all-limbs))
           (diff-force (scale (/ max-ref-force (length limbs)) axis)))
      ;; Step.1 Set ref force and start detection
+     (if set-ref-force-linear-p (send self :set-interpolation-mode :linear))
      (send self :set-ref-forces
            (mapcar #'(lambda (org-f limb)
                        (if (memq limb limbs)
@@ -900,18 +908,19 @@
        ;; Step.2 Detection loop
        (do-until-key-with-check
         (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
+        (unix:usleep (* 1000 periodic-time))
         (setq detector-mode (send self :check-object-turnaround-detection))
         (setq fm-ret (send self :get-otd-object-forces-moments))
-        (format t ";;   Detecting... (detector-mode = ~A, limbs = ~A, current forces = ~A[N], current moments = ~A[Nm], current res force = ~A[N])~%"
+        (format t ";;   Detecting... (detector-mode = ~A, limbs = ~A, forces = ~A[N], moments = ~A[Nm], res force = ~A[N], fric force = ~A[N])~%"
                 detector-mode limbs
-                (car fm-ret) (cadr fm-ret) (caddr fm-ret))
-        (unix:usleep (* 1000 periodic-time)))
+                (car fm-ret) (cadr fm-ret) (caddr fm-ret) (cadddr fm-ret))
+        )
        ;; Step.3 If detected, update ref force
        (if (eq detector-mode :mode_detected)
            (progn
-             (setq fm-ret (send self :get-otd-object-forces-moments))
-             (format t ";; Detected (limbs = ~A, forces = ~A[N], moments = ~A[Nm], res-force = ~A[N])~%"
-                     limbs (car fm-ret) (cadr fm-ret) (caddr fm-ret))
+             (format t ";; Detected (limbs = ~A, forces = ~A[N], moments = ~A[Nm], res force = ~A[N], fric force = ~A[N])~%"
+                     limbs
+                     (car fm-ret) (cadr fm-ret) (caddr fm-ret) (cadddr fm-ret))
              (if set-ref-force-p
                  (send self :set-ref-forces
                        (mapcar #'(lambda (org-f limb)
@@ -931,8 +940,12 @@
            )
          )
        (send self :wait-interpolation-seq)
+       (if set-ref-force-linear-p (send self :set-interpolation-mode :hoffarbib))
        (if (eq detector-mode :mode_detected)
-           (car fm-ret))
+           (case return-value-mode
+                 (:all fm-ret)
+                 (:forces (car fm-ret))
+                 (t nil)))
        )))
   (:set-object-turnaround-ref-moment
    (&key (limbs '(:rarm :larm))
@@ -945,6 +958,9 @@
          (set-ref-force-time 2000.0)
          (set-ref-force-p t)
          (periodic-time 200) ;; [msec]
+         (detector-total-wrench :total-moment)
+         (return-value-mode :all)
+         (set-ref-force-linear-p)
          )
    "Set object turnaround reference force.
     axis is axis which resultant moment is around.
@@ -954,12 +970,16 @@
     detect-time-offset is additional checking time [msec].
     set-ref-force-time is time to set reference force [msec].
     If set-ref-force-p is t, set estimated reference force. Otherwise, set reference force to zero.
-    periodic-time is loop wait time[msec]."
+    periodic-time is loop wait time[msec].
+    return-value-mode is used to select return value type.
+    If :all, returns the results of :get-otd-object-forces-moments itself. If :forces, returns forces results.
+    If set-ref-force-linear-p t, set linear interpolation first and set hoffarbib interpolation in return."
    (format t ";; Start object turnaround detection~%")
    (let ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
          (fs-list (funcall func max-ref-moment)))
      (send self :set-object-turnaround-detector-param
-           :axis axis :moment-center (scale 1e-3 moment-center) :detector-total-wrench 1)
+           :axis axis :moment-center (scale 1e-3 moment-center) :detector-total-wrench detector-total-wrench)
+     (if set-ref-force-linear-p (send self :set-interpolation-mode :linear))
      (send self :set-ref-forces
            (mapcar #'(lambda (limb)
                        (if (memq limb '(:rleg :lleg))
@@ -971,24 +991,28 @@
            :ref-diff-wrench max-ref-moment
            :max-time (* 1e-3 (+ detect-time-offset max-time))
            :limbs limbs)
-     (let ((detector-mode :mode_detector_idle) (fm-ret) (otd-ret-wrenches))
+     (let ((detector-mode :mode_detector_idle) (fm-ret) (forces-from-total-moment))
        (do-until-key-with-check
         (not (not (memq detector-mode '(:mode_started :mode_detector_idle))))
+        (unix:usleep (* 1000 periodic-time))
         (setq detector-mode (send self :check-object-turnaround-detection))
-        (format t ";;   Detecting... (detector-mode = ~A, current force moment = ~A)~%" detector-mode (send self :get-otd-object-forces-moments))
-        (unix:usleep (* 1000 periodic-time)))
+        (Setq fm-ret (send self :get-otd-object-forces-moments))
+        (format t ";;   Detecting... (detector-mode = ~A, limbs = ~A, forces = ~A[N], moments = ~A[Nm], res moment = ~A[Nm], fric force = ~A[N])~%"
+                detector-mode limbs
+                (car fm-ret) (cadr fm-ret) (caddr fm-ret) (cadddr fm-ret))
+        )
        (if (eq detector-mode :mode_detected)
-           (progn
-             (Setq otd-ret-wrenches (send self :get-otd-object-forces-moments))
-             (setq fm-ret (caddr otd-ret-wrenches))
-             (format t ";; Detected (force moment = ~A ~A)~%" fm-ret (funcall func (v. axis fm-ret)))
-             (setq fm-ret (funcall func (v. axis fm-ret)))
+           (let ((total-moment (caddr fm-ret)))
+             (setq forces-from-total-moment (funcall func (v. axis total-moment)))
+             (format t ";; Detected (limbs = ~A, forces from total moment = ~A[N], forces = ~A[N], moments = ~A[Nm], res moment = ~A[Nm], fric force = ~A[N])~%"
+                     limbs forces-from-total-moment
+                     (car fm-ret) (cadr fm-ret) (caddr fm-ret) (cadddr fm-ret))
              (if set-ref-force-p
                  (send self :set-ref-forces
                        (mapcar #'(lambda (limb)
                                    (if (memq limb '(:rleg :lleg))
                                        (float-vector 0 0 0)
-                                     (elt fm-ret (position limb limbs))))
+                                     (elt forces-from-total-moment (position limb limbs))))
                                all-limbs)
                        set-ref-force-time)
                (send self :set-ref-force
@@ -1004,9 +1028,38 @@
            )
          )
        (send self :wait-interpolation-seq)
+       (if set-ref-force-linear-p (send self :set-interpolation-mode :hoffarbib))
        (if (eq detector-mode :mode_detected)
-           otd-ret-wrenches)
+           (case return-value-mode
+                 (:all fm-ret)
+                 (:forces (car fm-ret))
+                 (:forces-from-total-moment forces-from-total-moment)
+                 (t nil)))
        )))
+  (:set-object-turnaround-detector-param
+   (&rest args
+    &key detector-total-wrench
+    &allow-other-keys)
+   "Set Object Turnaround Detector.
+    For arguments, please see (send *ri* :get-object-turnaround-detector-param-arguments)."
+   (let ((prm (send self :get-object-turnaround-detector-param)))
+     (send* self :raw-set-object-turnaround-detector-param
+            (append
+             (if (memq :detector-total-wrench args)
+                 (list :detector-total-wrench
+                       (if (or (null detector-total-wrench) (integerp detector-total-wrench))
+                           detector-total-wrench
+                         (let ((dtw (read-from-string (format nil "HRPSYS_ROS_BRIDGE::OPENHRP_OBJECTCONTACTTURNAROUNDDETECTORSERVICE_DETECTORTOTALWRENCH::*~A*" (substitute (elt "_" 0) (elt "-" 0) (string-downcase detector-total-wrench))))))
+                           (if (boundp dtw)
+                               (eval dtw)
+                             (error ";; no such :detector-total-wrench ~A in :set-object-turnaround-detector-param~%" detector-total-wrench))))))
+             args))))
+  (:get-object-turnaround-detector-detector-total-wrench
+   ()
+   "Get Object Turnadound Detector as Euslisp symbol."
+   (send self :get-idl-enum-values
+         (send (send self :get-object-turnaround-detector-param) :detector_total_wrench)
+         "HRPSYS_ROS_BRIDGE::OPENHRP_OBJECTCONTACTTURNAROUNDDETECTORSERVICE_DETECTORTOTALWRENCH"))
   )
 
 ;; RemoveForceSensorLinkOffset
