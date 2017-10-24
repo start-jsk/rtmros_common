@@ -91,8 +91,9 @@ macro(_rtmbuild_genbridge_init)
       list(APPEND ${PROJECT_NAME}_autogen_interfaces ${${PROJECT_NAME}_${_idl_name}_autogen_interfaces})
 
       # add custom command for nexttime you invoke make
+      separate_arguments(tmp_idl_dirs UNIX_COMMAND "${idl_dirs}") # We need to use separate_arguments fot add_custom_target's arguments
       add_custom_command(OUTPUT ${${PROJECT_NAME}_${_idl_name}_autogen_cpp_files}
-        COMMAND ${idl2srv_EXECUTABLE} -i ${_idl_file} --include-dirs="${idl_dirs}" --package-name=${PROJECT_NAME} --tmpdir=/tmp/idl2srv_${PROJECT_NAME}_${_idl_name}_${_rand_str}
+        COMMAND ${idl2srv_EXECUTABLE} -i ${_idl_file} --include-dirs="${tmp_idl_dirs}" --package-name=${PROJECT_NAME} --tmpdir=/tmp/idl2srv_${PROJECT_NAME}_${_idl_name}_${_rand_str}
         DEPENDS ${_idl_file})
       list(APPEND _autogen /tmp/idl2srv_${PROJECT_NAME}_${_idl_name}_${_rand_str})
 
