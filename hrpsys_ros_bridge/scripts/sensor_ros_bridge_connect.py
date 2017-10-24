@@ -15,7 +15,7 @@ import OpenHRP
 
 program_name = '[sensor_ros_bridge_connect.py] '
 
-def connecSensorRosBridgePort(url, rh, bridge, vs, rmfo, sh, subscription_type = "new", push_policy = 'all', push_rate = 50.0):
+def connecSensorRosBridgePort(url, rh, bridge, vs, rmfo, sh, es, rfu, subscription_type = "new", push_policy = 'all', push_rate = 50.0):
     print program_name, "connecSensorRosBridgePort(", url, ",", rh.name(), ")"
     for sen in hcf.getSensors(url):
         print program_name, "sensor(name: ", sen.name, ", type:", sen.type, ")"
@@ -27,9 +27,16 @@ def connecSensorRosBridgePort(url, rh, bridge, vs, rmfo, sh, subscription_type =
                 if sen.type == 'Force' and rmfo != None:
                     print program_name, "connect ", sen.name, rmfo.port("off_" + sen.name).get_port_profile().name, bridge.port("off_" + sen.name).get_port_profile().name
                     connectPorts(rmfo.port("off_" + sen.name), bridge.port("off_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy) # for abs forces
-                if sen.type == 'Force' and sh.port(sen.name+"Out") and bridge.port("ref_" + sen.name):
-                    print program_name, "connect ", sen.name, sh.port(sen.name+"Out").get_port_profile().name, bridge.port("ref_" + sen.name).get_port_profile().name
-                    connectPorts(sh.port(sen.name+"Out"), bridge.port("ref_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy) # for reference forces
+                if sen.type == 'Force' and bridge.port("ref_" + sen.name): # for reference forces
+                    if rfu != None and rfu.port("ref_"+sen.name+"Out"):
+                        print program_name, "connect ", sen.name, rfu.port("ref_"+sen.name+"Out").get_port_profile().name, bridge.port("ref_" + sen.name).get_port_profile().name
+                        connectPorts(rfu.port("ref_"+sen.name+"Out"), bridge.port("ref_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy)
+                    elif es != None and es.port(sen.name+"Out"):
+                        print program_name, "connect ", sen.name, es.port(sen.name+"Out").get_port_profile().name, bridge.port("ref_" + sen.name).get_port_profile().name
+                        connectPorts(es.port(sen.name+"Out"), bridge.port("ref_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy)
+                    elif sh.port(sen.name+"Out"):
+                        print program_name, "connect ", sen.name, sh.port(sen.name+"Out").get_port_profile().name, bridge.port("ref_" + sen.name).get_port_profile().name
+                        connectPorts(sh.port(sen.name+"Out"), bridge.port("ref_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy)
         else:
             continue
     if vs != None:
@@ -60,7 +67,9 @@ def initSensorRosBridgeConnection(url, simulator_name, rosbridge_name, managerho
 
     vs=rtm.findRTC('vs')
     rmfo=rtm.findRTC('rmfo')
-    connecSensorRosBridgePort(url, hcf.rh, bridge, vs, rmfo, sh, subscription_type, push_policy, push_rate)
+    es=rtm.findRTC('es')
+    rfu=rtm.findRTC('rfu')
+    connecSensorRosBridgePort(url, hcf.rh, bridge, vs, rmfo, sh, es, rfu, subscription_type, push_policy, push_rate)
 
 if __name__ == '__main__':
     print program_name, "start"
