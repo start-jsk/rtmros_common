@@ -2,8 +2,8 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.1 (2017-10-25)
+------------------
 * Fix bug of servicebridge.cmake (`#1031 <https://github.com/start-jsk/rtmros_common/pull/1031>`_)
   * [rtmbuild/cmake/servicebridge.cmake] Fix bug of argument passing to avoid unnecessary addition of '\' : https://github.com/start-jsk/rtmros_common/pull/1031#issuecomment-338370927
   * [rtmbuild/cmake/servicebridge.cmake] Fix typo. rand_str -> _rand_str

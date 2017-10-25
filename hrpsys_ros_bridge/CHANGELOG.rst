@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.1 (2017-10-25)
+------------------
 * Update of sensor_ros_bridge_connect.py
   * Connect ReferenceForceUpdater's ref_force (`#1033 <https://github.com/start-jsk/rtmros_common/pull/1033>`_)
     * [hrpsys_ros_bridge/scripts/sensor_ros_bridge_connect.py] connect reference force port to ReferenceForceUpdater or EmergencyStopper if exists.
