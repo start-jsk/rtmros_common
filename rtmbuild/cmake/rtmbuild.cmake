@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 
-#set(DEBUG_RTMBUILD_CMAKE TRUE)
+set(DEBUG_RTMBUILD_CMAKE TRUE)
 
 set(use_catkin TRUE)
 
