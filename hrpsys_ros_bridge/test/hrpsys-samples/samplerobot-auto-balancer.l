@@ -183,6 +183,9 @@
     (send *ri* :go-velocity 0.1 0 0)
     (unix:sleep 1)
     (send *ri* :go-stop)
+    ;; stride-parameter
+    (send *ri* :set-gait-generator-param :stride-parameter #f(0.15 0.05 10 0.05))
+    (send *ri* :set-gait-generator-param :stride-parameter #f(0.15 0.05 10 0.05 0.025 5))
     (send *ri* :set-gait-generator-param
           :default-step-time (send org-gp :default_step_time)
           :default-step-height (send org-gp :default_step_height)

@@ -13,9 +13,9 @@
      -->
   </include>
 
-  <!-- need time.sleep(1): need code that waht for all component in serialization is actually activated.... -->
+  <!-- need time.sleep(1): need this code for waiting for all component in serialization is actually activated.... -->
   <test test-name="hrpsys_tool_config_interactive" pkg="hrpsys_tools"
-        type="hrpsys_tools_config.py" args='--host 127.0.0.1 --port 2809 -i PA10Controller\(Robot\)0 -c "import rostest, unittest" "import time" "time.sleep(5)" "hcf.setJointAngles([10,10,10,10,10,10,10,10,10], 1)" "print hcf.getJointAngles()" "rostest.rosrun(\"hrpsys_tools\", \"test_interactive\", unittest.TestCase)" "quit()"'
+        type="hrpsys_tools_config.py" args='--host 127.0.0.1 --port 2809 -i PA10Controller\(Robot\)0 -c "import rostest, unittest" "import time" "time.sleep(10)" "hcf.setJointAngles([10,10,10,10,10,10,10,10,10], 1)" "print hcf.getJointAngles()" "rostest.rosrun(\"hrpsys_tools\", \"test_interactive\", unittest.TestCase)" "quit()"'
         retry="4" />
 
 </launch>

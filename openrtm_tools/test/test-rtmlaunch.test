@@ -28,5 +28,5 @@
   <rtconnect from="SequenceInComponent0.rtc:FloatSeq"  to="SequenceOutComponent0.rtc:FloatSeq" subscription_type="flush"/>
   <!-- END:openrtm connection -->
 
-  <test test-name="rtmlaunch" pkg="openrtm_tools" type="test-rtmlaunch.py" />
+  <test test-name="rtmlaunch" pkg="openrtm_tools" type="test-rtmlaunch.py" retry="4" />
 </launch>

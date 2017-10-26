@@ -30,8 +30,13 @@ from rqt_robot_dashboard.widgets import MenuDashWidget
 
 from python_qt_binding.QtCore import QSize
 from python_qt_binding.QtCore import Qt
-from python_qt_binding.QtGui import (QMessageBox, QSplashScreen,
-                                     QPixmap, QApplication)
+try: # 14.04
+    from python_qt_binding.QtGui import (QMessageBox, QSplashScreen,
+                                         QPixmap, QApplication)
+except: # 16.04
+    from python_qt_binding.QtWidgets import (QMessageBox, QSplashScreen,
+                                             QApplication)
+    from python_qt_binding.QtGui import QPixmap
 
 from subprocess import check_call, Popen
 

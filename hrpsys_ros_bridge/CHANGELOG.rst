@@ -2,6 +2,108 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.0 (2017-08-09)
+------------------
+* display error message when body->sensor(j, i) is null (`#1014 <https://github.com/start-jsk/rtmros_common/issues/1014>`_)
+* sensor_ros_bridge_connect.py : add more debug message (`#1015 <https://github.com/start-jsk/rtmros_common/issues/1015>`_)
+* Update AutoBalancer and ReferenceForceUpdater euslisp method symbols (`#1026 <https://github.com/start-jsk/rtmros_common/issues/1026>`_)
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Supprot :FootOriginExtMoment for RFU methods.
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Support UseForceMode setting as euslisp symbol in :set-auto-balancer-param.
+
+* fix code to run both Indido and Kinetic (`#1025 <https://github.com/start-jsk/rtmros_common/issues/1025>`_)
+  * /test/test-samplerobot-hcf.launch: increase time-limit to 600
+  * test/{test-samplerobot.py,test-pa10.py} support both pr2_controllers_msgs and controllr_msgs
+  * src/hrpsys_ros_bridge/hrpsys_dashboard.py: fix for qt5
+  * add USE_PR2_CONTROLLERS_MSGS definition
+  * CMakeLists.txt : we do not use pr2_msgs on build time
+  * CMakeLists.txt : remove code to download wet pr2_controllers_msgs for groovy
+
+* Support stride parameter with different length (`#1022 <https://github.com/start-jsk/rtmros_common/issues/1022>`_)
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Support stride_parameter of different length
+  * [hrpsys_ros_bridge/test/hrpsys-samples/samplerobot-auto-balancer.l] Add test to check stride parameter 4 and 6
+
+* [HrpsysSeqStateROSBridge] fix stamp of joint_state. add stamp after reading m_rsangle (`#1019 <https://github.com/start-jsk/rtmros_common/issues/1019>`_)
+  * [HrpsysSeqStateROSBridge] fix stamp of joint_state. add stamp after reading m_rsangle
+
+* [HrpsysSeqStateROSBridge] remove subtraction magic number (`#1013 <https://github.com/start-jsk/rtmros_common/issues/1013>`_)
+  * [HrpsysSeqStateROSBridge] remove subtraction magic number
+
+* Support argumen t for setting duration of calibration. For :remove-xx methods, 8.0 by default[s]. For :reset-xx methods, 0.1[s] by default for compatibility (`#1011 <https://github.com/start-jsk/rtmros_common/issues/1011>`_)
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Support argument for setting duration of calibration. For :remove-xx methods, 8.0 by default[s]. For :reset-xx methods, 0.1[s] by default for compatibility
+
+* Add new methods for :remove-force-sensor-offset using RMFO (`#1010 <https://github.com/start-jsk/rtmros_common/issues/1010>`_)
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add new methods for :remove-force-sensor-offset using RMFO. Add warning message for deprecated remove-force methods.
+
+* Update euslisp hrpsysbase samples (`#1009 <https://github.com/start-jsk/rtmros_common/issues/1009>`_)
+  * [hrpsys_ros_bridge/test/hrpsys-samples] Add README for Euslisp hrpsys example basically copied from ros wiki (http://wiki.ros.org/rtmros_common/Tutorials/WorkingWithEusLisp)
+  * [hrpsys_ros_bridge/test/hrpsys-samples/samplerobot-carry-object.l] Update carry demo euslisp sample.
+  * [hrpsys_ros_bridge/test/hrpsys-samples/samplerobot-stabilizer.l] Update stabilizer euslisp sample according to hrpsys-base stabilizer sample update.
+
+* Fix bug of sample4leg robot end-coords setting for arms. (`#1008 <https://github.com/start-jsk/rtmros_common/issues/1008>`_)
+  * [hrpsys_ros_bridge/models/sample4legrobot.yaml] Fix bug of sample4legrobot end-coords setting for arms.
+
+* Update project generator and refforce (`#1007 <https://github.com/start-jsk/rtmros_common/issues/1007>`_)
+  * [hrpsys_ros_bridge/euslisp] Update README for openhrp-project-generator
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Fix orientation for openhrp-project-generator
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Update for object turnaround detection to use initial ref forces
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Update dump function for openhrp project generator. Use openhrp-project-generator in openhrp3 package instead of _gen_project.launch
+
+* Add forgotten update for robot.launch (https://github.com/start-jsk/rtmros_common/pull/1004) (`#1005 <https://github.com/start-jsk/rtmros_common/issues/1005>`_)
+  * [hrpsys_ros_bridge/scripts/default_robot.launch.in] Add forgotten update in https://github.com/start-jsk/rtmros_common/pull/1004. Add USE_XXX of under-development RTCs for robot.launch such as samplerobot.launch to pass arguments to robot_ros_bridge.launch
+
+* set USE_UNSTABLE_RTC as not all unstable rtc defiend in hrpsys_config.py, just for basic walking test, other latest development rtc is passed by arg (`#1004 <https://github.com/start-jsk/rtmros_common/issues/1004>`_)
+  * set USE_UNSTABLE_RTC as not getUnstableRTC defined in hrpsys_config.py, it is for a basic walking test, other latest development rtc is passed by arg from test_samplerobot_euslisp_unittests.launch
+  * [hrpsys_ros_bridge/launch/hrpsys_ros_bridge.launch,hrpsys_ros_bridge/scripts/default_robot_ros_bridge.launch.in,hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l,hrpsys_tools/launch/hrpsys.launch] Update for ObjectTurnaroundDetector RTC. add USE_REFERENCEFORCEUDPATER and USE_OBJECTCONTACTTURNAROUNDDETECTOR.
+
+* Contributors: Kei Okada, Shunichi Nozawa, Yohei Kakiuchi
+
+1.3.3 (2017-02-12)
+------------------
+
+* HrpsysSeqStateROSBridge.cpp
+  * HrpsysSeqStateROSBridge occurs error if number of force sensor is different with size of contact states. fix number of force sensor (`#982 <https://github.com/start-jsk/rtmros_common/issues/982>`_)
+  * Revert "[HrpsysSeqStateROSBridge] fix number of force sensor" `#984 <https://github.com/start-jsk/rtmros_common/issues/984>`_
+  * Separate offset-removed force sensor data ports from rsforce, which is actual and non-offset-removed data port. Currently rsforce ports -> rsforce ports + offforce ports. (`#964 <https://github.com/start-jsk/rtmros_common/issues/964>`_)
+  * Fixed mistake of sensor_link_name, when robot has only virturl force sonsors (`#945 <https://github.com/start-jsk/rtmros_common/issues/945>`_)
+
+* HrpsysJointTrajectoryBridge.cpp
+  * publish feedback for joint_trajectory_actions (`#966 <https://github.com/start-jsk/rtmros_common/issues/966>`_)
+
+* hrpsys_ros_bridge/launch/hrpsys_ros_bridge.launch
+  * Add argument to change buffer length of rtmlaunch connection. Set 8 by default (default setting in openrtm). (`#980 <https://github.com/start-jsk/rtmros_common/issues/980>`_)
+  * fix model filename. Enable cache in ModelLoader, filename should be same as in .conf file. (`#978 <https://github.com/start-jsk/rtmros_common/issues/978>`_)
+
+* euslisp
+  * [rtm-ros-robot-interface.l] refactor torque-controller interface (`#994 <https://github.com/start-jsk/rtmros_common/issues/994>`_)
+  * Update sequencefull unit system and arguments (`#988 <https://github.com/start-jsk/rtmros_common/issues/988>`_)
+    * changed arguments of angle-vector-sequence-full see `#985 <https://github.com/start-jsk/rtmros_common/issues/985>`_
+    * [hrpsys-samples/samplerobot-sequence-player.l] Add test for angle-vector-sequence-full (check validity)
+    * [rtm-ros-robot-interface.l] Use root-coords and zmp in the abs frame and convert them inside the :angle-vector-sequence-full
+    * [rtm-ros-robot-interface.l] Introduce fsensor length for wrench and optionals
+    * [rtm-ros-robot-interface.l] Use [mm] and [deg/s] instead of [m] and [rad/s] for vel, pos, and zmp.
+    * [rtm-ros-robot-interface.l] Use [deg] instead of [rad] for jpos argument and remove jvs arg.
+    * [rtm-ros-robot-interface.l] Use tm as [ms], previously [s].
+
+  * [tm-ros-robot-interface.l] Update :reset-force-moment-offset to use :off force/moment vector (`#983 <https://github.com/start-jsk/rtmros_common/issues/983>`_)
+  * [tm-ros-robot-interface.l] Added a missing keyword in def-set-get-method for TorqueControllerService. (`#972 <https://github.com/start-jsk/rtmros_common/issues/972>`_)
+  * [tm-ros-robot-interface.l] Add euslisp interface for torque controller (`#965 <https://github.com/start-jsk/rtmros_common/issues/965>`_)
+  * [datalogger-log-parser.l] Modify unit of cogvel [m] -> [mm] for euslisp (`#960 <https://github.com/start-jsk/rtmros_common/issues/960>`_)
+  * [rtm-ros-robot-interface.l] Add get-go-pos-footsteps-sequence in rtm-ros-robot-interface.l and add test (`#965 <https://github.com/start-jsk/rtmros_common/issues/965>`_)
+  * [rtm-ros-robot-interface.l] Update frame of wrench. Previously, wrench frame is mismatch with documentation string. Previous : local -> new : world. (`#963 <https://github.com/start-jsk/rtmros_common/issues/963>`_)
+  * [rtm-ros-robot-interface.l] Add eefm force moment distribution weight parameter. (`#958 <https://github.com/start-jsk/rtmros_common/issues/958>`_)
+  * [rtm-ros-robot-interface.l] add Eus interface of SequencePlayserService_setJointAnglesSequenceFull and add test in test/hrpsys-samples/samplerobot-sequence-player.l (`#954 <https://github.com/start-jsk/rtmros_common/issues/954>`_)
+  * [datalogger-log-parser.l] Add sh reference force and support both rpy and 3x3 matrix for WAIST log(`#956 <https://github.com/start-jsk/rtmros_common/issues/956>`_)
+  * [rtm-ros-robot-interface.l] update rfu interface for idl changed in https://github.com/fkanehiro/hrpsys-base/pull/1005 (`#952 <https://github.com/start-jsk/rtmros_common/issues/952>`_)
+  * [datalogger-log-parser.l] Use joint-list length for datalogger joint angle conversion. (`#953 <https://github.com/start-jsk/rtmros_common/issues/953>`_)
+    * Add simulation actual root coords reading and check for existance of RobotHardware0_servoState in datalogger. Fix setting of simulators' data parser names.
+    *  Use joint-list length for datalogger joint angle conversion.
+  * [rtm-ros-robot-interface.l] make directory for log files (`#951 <https://github.com/start-jsk/rtmros_common/issues/951>`_)
+
+* [scripts/default_robot_ros_bridge.launch.in] Add nameserver argument for ros_bridge.launch (`#950 <https://github.com/start-jsk/rtmros_common/issues/950>`_)
+* [test/hrpsys-samples/samplerobot-stabilizer.l] Update loadPattern sample because add-optional-data-from-rs-list is included in dump-seq-pattern-file (`#959 <https://github.com/start-jsk/rtmros_common/issues/959>`_)
+
+* Contributors: Ryo Koyama, Kei Okada, Noriaki Takasugi, Ryo Terasawa, Shunichi Nozawa, Yohei Kakiuchi, Yoshimaru Tanaka, Iori Kumagai, Iori Yanokura, Juntaro Tamura
+
 1.3.2 (2016-04-26)
 ------------------
 

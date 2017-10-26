@@ -2,6 +2,17 @@
 Changelog for package rosnode_rtc
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.0 (2017-08-09)
+------------------
+
+1.3.3 (2017-02-12)
+------------------
+* re-enable rosnode_rtc (`#961 <https://github.com/start-jsk/rtmros_common/issues/961>`_)
+  * rosnode_rtc/scripts/rtmros-data-bridge.py: import RTC after OpenRTM_aist
+  * rosnode_rtc/sample : now rtshell is installed in global bin
+  * CMakeLists.txt : install scripts/ sample/ desktop/ to CATKIN_PACKAGE_SHARE_DESTINATION
+* Contributors: Kei Okada
+
 1.3.2 (2016-04-26)
 ------------------
 
