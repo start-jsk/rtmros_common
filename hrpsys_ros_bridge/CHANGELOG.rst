@@ -2,6 +2,29 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.1 (2017-10-25)
+------------------
+* Update of sensor_ros_bridge_connect.py
+  * Connect ReferenceForceUpdater's ref_force (`#1033 <https://github.com/start-jsk/rtmros_common/pull/1033>`_)
+    * [hrpsys_ros_bridge/scripts/sensor_ros_bridge_connect.py] connect reference force port to ReferenceForceUpdater or EmergencyStopper if exists.
+  * Add wait for rmfo and vs (`#1029 <https://github.com/start-jsk/rtmros_common/pull/1029>`_)
+    * [hrpsys_ros_bridge, sensor_ros_bridge_connect.py] add wait for initalizinig all components
+
+* HrpsysSeqStateROSBridge (`#1027 <https://github.com/start-jsk/rtmros_common/pull/1027>`_)
+  * [HrpsysSeqStateROSBridge] fix for using virtual force sensor
+
+* Update rtm-ros-robot-interface.l (`#1030 <https://github.com/start-jsk/rtmros_common/pull/1030>`_)
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add documentation string for new arguments (set-ref-force-linear-p, return-value-mode)
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add argument to set linear interpolation during increasing force
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Enable to set return value mode
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Enable to get fric coefficient wrench add update print messages
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Update otd checking loop for moment. Exit from do-until-key loop immediately when otd detection. Fix valiables for set ref force
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Use euslisp symbol as detector total wrench parameter
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Enable to access detector total wrench as euslisp symbol.
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Update otd checking loop. Exit from do-until-key loop immediately when otd detection.
+
+* Contributors: MasakiMurooka, Shunichi Nozawa, YoheiKakiuchi
+
 1.4.0 (2017-08-09)
 ------------------
 * display error message when body->sensor(j, i) is null (`#1014 <https://github.com/start-jsk/rtmros_common/issues/1014>`_)
