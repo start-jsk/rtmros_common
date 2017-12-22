@@ -2,6 +2,9 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.4.1 (2017-10-25)
 ------------------
 * Fix bug of servicebridge.cmake (`#1031 <https://github.com/start-jsk/rtmros_common/pull/1031>`_)
