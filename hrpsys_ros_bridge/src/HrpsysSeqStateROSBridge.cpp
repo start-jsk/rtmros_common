@@ -206,6 +206,7 @@ void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory
       duration[i] =  trajectory.points[i].time_from_start.toSec() - trajectory.points[i-1].time_from_start.toSec();
     } else { // if i == 0
       duration[i] = trajectory.points[i].time_from_start.toSec();
+      if ( abs(duration[i]) < 0.001 ) duration[i] = 0.001; // set delta ... https://github.com/start-jsk/rtmros_common/issues/1036
     }
   }
 
