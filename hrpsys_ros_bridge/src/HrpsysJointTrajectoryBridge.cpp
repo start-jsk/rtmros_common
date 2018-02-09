@@ -467,8 +467,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
       ss << " " << point.positions[j];
     }
     ROS_INFO_STREAM(
-        "[" << parent->getInstanceName() << "] @onJointTrajectoryAction (" << this->groupname << ") : time_from_start " << trajectory.points[i].time_from_start.toSec());
-    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] " << ss.str());
+        "[" << parent->getInstanceName() << "] i:" << i << " : time_from_start " << trajectory.points[i].time_from_start.toSec());
 
     if (i > 0)
     {
@@ -479,6 +478,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
       duration[i] = trajectory.points[i].time_from_start.toSec();
       if ( std::abs(duration[i]) < 0.001 ) duration[i] = 0.001; // set magic delta ... https://github.com/start-jsk/rtmros_common/issues/1036
     }
+    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] [" << ss.str() << "] " << duration[i]);
   }
 
   parent->m_mutex.unlock();
@@ -491,6 +491,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
     }
     else
     { // fullbody
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] setJointAngles");
       parent->m_service0->setJointAngles(angles[0], duration[0]);
     }
   }
@@ -498,11 +499,12 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
   {
     if (groupname.length() > 0)
     { // group
-      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] setJointAnglesOfGroup: " << groupname);
       // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
       if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+        ROS_INFO_STREAM("[" << parent->getInstanceName() << "] playPatternOfGroup: " << groupname);
         parent->m_service0->playPatternOfGroup(groupname.c_str(), angles, duration);
       } else {
+        ROS_INFO_STREAM("[" << parent->getInstanceName() << "] setJointAnglesSequenceOfGroup: " << groupname);
         parent->m_service0->setJointAnglesSequenceOfGroup(groupname.c_str(), angles, duration);
       }
     }
@@ -510,9 +512,11 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
     { // fullbody
       // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
       if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+        ROS_INFO_STREAM("[" << parent->getInstanceName() << "] playPattern");
         OpenHRP::dSequenceSequence rpy, zmp;
         parent->m_service0->playPattern(angles, rpy, zmp, duration);
       } else {
+        ROS_INFO_STREAM("[" << parent->getInstanceName() << "] setJointAnglesSequence");
         parent->m_service0->setJointAnglesSequence(angles, duration);
       }
     }
@@ -544,11 +548,12 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryAct
   joint_trajectory_server->setPreempted();
   if (groupname.length() > 0)
   { // group
-    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAnglesOfGroup: " << groupname);
     // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
     if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearOfGroup: " << groupname);
       parent->m_service0->clearOfGroup(groupname.c_str(), 0.05);
     } else {
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAnglesOfGroup: " << groupname);
       parent->m_service0->clearJointAnglesOfGroup(groupname.c_str());
     }
   }
@@ -557,8 +562,10 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryAct
     ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAngles ");
     // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
     if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clear");
       parent->m_service0->clear();
     } else {
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAngles");
       parent->m_service0->clearJointAngles();
     }
   }
@@ -572,19 +579,21 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTraject
 
   if (groupname.length() > 0)
   { // group
-    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAnglesOfGroup: " << groupname);
     if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearOfGroup: " << groupname);
       parent->m_service0->clearOfGroup(groupname.c_str(), 0.05);
     } else {
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAnglesOfGroup: " << groupname);
       parent->m_service0->clearJointAnglesOfGroup(groupname.c_str());
     }
   }
   else
   { // fullbody
-    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAngles ");
     if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAngles");
       parent->m_service0->clearJointAngles();
     } else {
+      ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clear");
       parent->m_service0->clear();
     }
   }
