@@ -3,7 +3,14 @@ cmake_minimum_required(VERSION 2.8.3)
 project(hrpsys_ros_bridge)
 
 # call catkin depends
-find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp rostest sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager hrpsys_tools image_transport dynamic_reconfigure nav_msgs geometry_msgs pr2_controllers_msgs pr2_msgs) # robot_monitor
+find_package(catkin QUIET COMPONENTS pr2_controllers_msgs)
+if(pr2_controllers_msgs_FOUND)
+  set(PR2_CONTROLLERS_MSGS_PACKAGE pr2_controllers_msgs)
+  add_definitions("-DUSE_PR2_CONTROLLERS_MSGS")
+endif()
+message(STATUS "check for pr2 messages, will compile with ${PR2_CONTROLLERS_MSGS_PACKAGE}.")
+
+find_package(catkin REQUIRED COMPONENTS rtmbuild roscpp rostest sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager hrpsys_tools image_transport dynamic_reconfigure nav_msgs geometry_msgs ${PR2_CONTROLLERS_MSGS_PACKAGE}) # robot_monitor
 find_package(hrpsys QUIET) # on indigo, hrpsys is not ros package
 if(NOT ${hrpsys_FOUND})
   find_package(PkgConfig)
@@ -11,20 +18,6 @@ if(NOT ${hrpsys_FOUND})
 endif()
 
 catkin_python_setup()
-
-# download pr2_controllers_msgs for git
-find_package(pr2_controllers_msgs QUIET)
-if(NOT pr2_controllers_msgs_FOUND)
-  download_pr2_controllers_msgs(hydro-devel) # even for Groovy, download hydro-devel that's wet.
-  # catkin_make
-  # rosmake pr2_controllers_msgs
-  execute_process(COMMAND cmake -E chdir ${CMAKE_SOURCE_DIR}/../ catkin_make -C ${CMAKE_SOURCE_DIR}/../ --build /tmp/pr2_controllers --source ${PROJECT_SOURCE_DIR}/../pr2_controllers_msgs --pkg pr2_controllers_msgs OUTPUT_VARIABLE _compile_output RESULT_VARIABLE _compile_failed)
-  message("compile pr2_controllers_msgs ${_compile_output}")
-  if (_compile_failed)
-    message(FATAL_ERROR "compile pr2_controllers_msgs failed : ${_compile_failed}")
-  endif(_compile_failed)
- include_directories(${CMAKE_SOURCE_DIR}/../devel/include)
-endif()
 
 # include rtmbuild
 #include(${rtmbuild_PREFIX}/share/rtmbuild/cmake/rtmbuild.cmake)
@@ -91,7 +84,7 @@ rtmbuild_init(geometry_msgs)
 # call catkin_package, after rtmbuild_init, before rtmbuild_gen*
 catkin_package(
     DEPENDS hrpsys # TODO
-    CATKIN_DEPENDS rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure nav_msgs pr2_controllers_msgs #robot_monitor
+    CATKIN_DEPENDS rtmbuild roscpp sensor_msgs robot_state_publisher actionlib control_msgs tf camera_info_manager image_transport dynamic_reconfigure nav_msgs ${PR2_CONTROLLERS_MSGS_PACKAGE} #robot_monitor
     INCLUDE_DIRS # TODO include
     LIBRARIES # TODO
     CFG_EXTRAS compile_robot_model.cmake

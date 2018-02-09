@@ -37,10 +37,8 @@ larm:
 ##
 larm-end-coords:
   translate : [0, 0, -0.07]
-  parent    : LARM_LINK5
 rarm-end-coords:
   translate : [0, 0, -0.07]
-  parent    : RARM_LINK5
 lleg-end-coords:
   translate : [0, 0, -0.07]
 rleg-end-coords:
