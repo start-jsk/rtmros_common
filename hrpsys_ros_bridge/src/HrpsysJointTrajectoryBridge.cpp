@@ -500,7 +500,8 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
     if (groupname.length() > 0)
     { // group
       // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
-      if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+      // hrpsys < 315.16.0 have bugs in setJointAnglesSequenceOfGroup https://github.com/fkanehiro/hrpsys-base/pull/1237
+      if (LessThanVersion(parent->hrpsys_version, std::string("315.16.0"))) {
         ROS_INFO_STREAM("[" << parent->getInstanceName() << "] playPatternOfGroup: " << groupname);
         parent->m_service0->playPatternOfGroup(groupname.c_str(), angles, duration);
       } else {
@@ -549,7 +550,8 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryAct
   if (groupname.length() > 0)
   { // group
     // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
-    if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+    // hrpsys < 315.16.0 have bugs in setJointAnglesSequenceOfGroup https://github.com/fkanehiro/hrpsys-base/pull/1237
+    if (LessThanVersion(parent->hrpsys_version, std::string("315.16.0"))) {
       ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearOfGroup: " << groupname);
       parent->m_service0->clearOfGroup(groupname.c_str(), 0.05);
     } else {
@@ -579,7 +581,8 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTraject
 
   if (groupname.length() > 0)
   { // group
-    if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
+    // hrpsys < 315.16.0 have bugs in setJointAnglesSequenceOfGroup https://github.com/fkanehiro/hrpsys-base/pull/1237
+    if (LessThanVersion(parent->hrpsys_version, std::string("315.16.0"))) {
       ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearOfGroup: " << groupname);
       parent->m_service0->clearOfGroup(groupname.c_str(), 0.05);
     } else {
