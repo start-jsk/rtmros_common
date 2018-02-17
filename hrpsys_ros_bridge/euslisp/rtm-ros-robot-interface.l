@@ -1956,52 +1956,93 @@
   :ReferenceForceUpdaterService_setReferenceForceUpdaterParam :ReferenceForceUpdaterService_getReferenceForceUpdaterParam
   :optional-args (list :name 'name))
 (defmethod rtm-ros-robot-interface
+  (:get-supported-reference-force-updater-name-list
+   ()
+   "Get supported reference force updater names (:rarm, :larm, ...)"
+   (unless (send self :get :supported-reference-force-updater-name-list)
+     (send self :put :supported-reference-force-updater-name-list
+           (mapcar #'(lambda (x) (read-from-string (format nil ":~A" x))) (send (send self :referenceforceupdaterservice_getSupportedReferenceForceUpdaterNameSequence) :o_names))))
+   (send self :get :supported-reference-force-updater-name-list))
   (:start-reference-force-updater
    (limb)
    "Start reference force updater mode.
-    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment."
-   (if (eq limb :FootOriginExtMoment)
-       (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase limb))
+    limb should be limb symbol name such as :rarm, :larm, :arms, or supported names (see :get-supported-reference-force-updater-name-list)."
+   (cond
+    ((memq limb (send self :get-supported-reference-force-updater-name-list))
+     (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase limb)))
+    (t
      (send self :force-sensor-method
            limb
            #'(lambda (name)
                (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase name)))
-           :start-reference-force-updater)))
+           :start-reference-force-updater))))
   (:stop-reference-force-updater
    (limb)
    "Stop reference force updater mode.
-    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment."
-   (if (eq limb :FootOriginExtMoment)
-       (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase limb))
+    limb should be limb symbol name such as :rarm, :larm, :arms, or supported names (see :get-supported-reference-force-updater-name-list)."
+   (cond
+    ((memq limb (send self :get-supported-reference-force-updater-name-list))
+     (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase limb)))
+    (t
      (send self :force-sensor-method
            limb
            #'(lambda (name)
                (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase name)))
-           :stop-reference-force-updater)))
+           :stop-reference-force-updater))))
+  (:start-reference-force-updater-no-wait
+   (limb)
+   "Start reference force updater mode without wait.
+    limb should be limb symbol name such as :rarm, :larm, :arms, or supported names (see :get-supported-reference-force-updater-name-list)."
+   (cond
+    ((memq limb (send self :get-supported-reference-force-updater-name-list))
+     (send self :referenceforceupdaterservice_startReferenceforceupdaterNoWait :name (string-downcase limb)))
+    (t
+     (send self :force-sensor-method
+           limb
+           #'(lambda (name)
+               (send self :referenceforceupdaterservice_startReferenceforceupdaterNoWait :name (string-downcase name)))
+           :start-reference-force-updater))))
+  (:stop-reference-force-updater-no-wait
+   (limb)
+   "Start reference force updater mode without wait.
+    limb should be limb symbol name such as :rarm, :larm, :arms, or supported names (see :get-supported-reference-force-updater-name-list)."
+   (cond
+    ((memq limb (send self :get-supported-reference-force-updater-name-list))
+     (send self :referenceforceupdaterservice_stopReferenceforceupdaterNoWait :name (string-downcase limb)))
+    (t
+     (send self :force-sensor-method
+           limb
+           #'(lambda (name)
+               (send self :referenceforceupdaterservice_stopReferenceforceupdaterNoWait :name (string-downcase name)))
+           :start-reference-force-updater))))
   (:set-reference-force-updater-param
    (limb &rest args)
    "Set reference force updater parameter like (send *ri* :set-reference-force-updater-param :rarm :p-gain 0.02).
-    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment.
+    limb should be limb symbol name such as :rarm, :larm, :arms, or supported names (see :get-supported-reference-force-updater-name-list).
     For arguments, please see (send *ri* :get-reference-force-updater-param-arguments)"
-   (if (eq limb :FootOriginExtMoment)
-       (send* self :raw-set-reference-force-updater-param (string-downcase limb) args)
+   (cond
+    ((memq limb (send self :get-supported-reference-force-updater-name-list))
+     (send* self :raw-set-reference-force-updater-param (string-downcase limb) args))
+    (t
      (send* self :force-sensor-method
             limb
             #'(lambda (name &rest _args)
                 (send* self :raw-set-reference-force-updater-param (string-downcase name) args))
             :set-reference-force-updater-param
-            args)))
+            args))))
   (:get-reference-force-updater-param
    (limb)
    "Get reference force updater parameter.
-    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment."
-   (if (eq limb :FootOriginExtMoment)
-       (send self :raw-get-reference-force-updater-param (string-downcase limb))
+    limb should be limb symbol name such as :rarm, :larm, :arms, or supported names (see :get-supported-reference-force-updater-name-list)."
+   (cond
+    ((memq limb (send self :get-supported-reference-force-updater-name-list))
+     (send self :raw-get-reference-force-updater-param (string-downcase limb)))
+    (t
      (send self :force-sensor-method
            limb
            #'(lambda (name)
                (send self :raw-get-reference-force-updater-param (string-downcase name)))
-           :get-reference-force-updater-param)))
+           :get-reference-force-updater-param))))
   )
 
 (defun print-end-effector-parameter-conf-from-robot
