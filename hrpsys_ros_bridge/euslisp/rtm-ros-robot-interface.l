@@ -1512,6 +1512,34 @@
    (send self :get-idl-enum-values
          (send (send self :get-gait-generator-param) :default_orbit_type)
          "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE"))
+  (:calc-toe-heel-phase-ratio
+   (toe-angle heel-angle double-support-ratio-half)
+   "Calculate vector for toe heel phase ratio.
+    Arguments:
+      toe-angle, heel-angle : max toe/heel angle [deg].
+      double-support-ratio-half : half of double support ratio in terms of toe heel phase ratio."
+   (let* ((remain-ratio (- 1 (* 2 double-support-ratio-half)))
+          (total-angle-diff (+ (* toe-angle 2.0) (* heel-angle 2.0)))
+          (ret
+           (list double-support-ratio-half
+                 (* remain-ratio (/ toe-angle total-angle-diff))
+                 (* remain-ratio (/ toe-angle total-angle-diff))
+                 0
+                 (* remain-ratio (/ heel-angle total-angle-diff))
+                 (* remain-ratio (/ heel-angle total-angle-diff))
+                 double-support-ratio-half)))
+     (concatenate float-vector ret)
+     ))
+  (:set-gait-generator-toe-heel-angles
+   (toe-angle heel-angle double-support-ratio-half)
+   "Set toe-angle, heel-angle, and toe-heel-phase-ratio.
+    toe-heel-phase-ratio is automatically calculated.
+    Arguments:
+      toe-angle, heel-angle : max toe/heel angle [deg].
+      double-support-ratio-half : half of double support ratio in terms of toe heel phase ratio."
+   (send self :set-gait-generator-param
+         :toe-angle toe-angle :heel-angle heel-angle
+         :toe-heel-phase-ratio (send self :calc-toe-heel-phase-ratio toe-angle heel-angle double-support-ratio-half)))
   (:get-auto-balancer-controller-mode
    ()
    "Get AutoBalancer ControllerMode as Euslisp symbol."
