@@ -2167,6 +2167,44 @@
     ))
   )
 
+(defmethod rtm-ros-robot-interface
+  (:print-rtc-param-all
+   ()
+   "Print RTC parameter struct probided by :get-xx method in more readable style for all recommended RTCs.
+    Check all possible RTCs by checking existence of ROSBridge nodes."
+   (let ((rosbridge-nodes (ros::get-nodes)))
+     (when (find "/AutoBalancerServiceROSBridge" rosbridge-nodes :test #'string=)
+       (format t ";; :get-gait-generator-param~%")
+       (print-ros-msg (send self :get-gait-generator-param))
+       (format t ";; :get-auto-balancer-param~%")
+       (print-ros-msg (send self :get-auto-balancer-param)))
+     (when (find "/StabilizerServiceROSBridge" rosbridge-nodes :test #'string=)
+       (format t ";; :get-st-param~%")
+       (print-ros-msg (send self :get-st-param)))
+     (when (find "/ObjectContactTurnaroundDetectorServiceROSBridge" rosbridge-nodes :test #'string=)
+       (format t ";; :get-object-turnaround-detector-param~%")
+       (print-ros-msg (send self :get-object-turnaround-detector-param)))
+     (when (find "/KalmanFilterServiceROSBridge" rosbridge-nodes :test #'string=)
+       (format t ";; :get-kalman-filter-param~%")
+       (print-ros-msg (send self :get-kalman-filter-param)))
+     (when (find "/ReferenceForceUpdaterServiceROSBridge" rosbridge-nodes :test #'string=)
+       (dolist (limb (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+         (format t ";; :get-reference-force-updater-param ~A~%" limb)
+         (print-ros-msg (send self :get-reference-force-updater-param limb))))
+     (when (find "/ImpedanceControllerServiceROSBridge" rosbridge-nodes :test #'string=)
+       (dolist (limb (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+         (format t ";; :get-impedance-controller-param ~A~%" limb)
+         (print-ros-msg (send self :get-impedance-controller-param limb))))
+     (when (find "/RemoveForceSensorLinkOffsetServiceROSBridge" rosbridge-nodes :test #'string=)
+       (dolist (limb (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+         (format t ";; :get-forcemoment-offset-param ~A~%" limb)
+         (print-ros-msg (send self :get-forcemoment-offset-param limb))))
+     (when (find "/TorqueControllerServiceROSBridge" rosbridge-nodes :test #'string=)
+       (dolist (j (send robot :joint-list))
+         (format t ";; :get-torque-controller-param ~A~%" (read-from-string (format nil ":~A" (send j :name))))
+         (print-ros-msg (send self :get-torque-controller-param (read-from-string (format nil ":~A" (send j :name)))))))
+     t))
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
