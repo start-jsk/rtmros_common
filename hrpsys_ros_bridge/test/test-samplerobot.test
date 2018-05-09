@@ -1,9 +1,9 @@
 <launch>
 
-  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2809" />
+  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2898" />
 
   <include file="$(find hrpsys_ros_bridge)/launch/samplerobot.launch" >
-    <arg name="corbaport" default="2809" />
+    <arg name="corbaport" default="2898" />
     <arg name="GUI" default="false" />
     <arg name="RUN_RVIZ" default="false" />
   </include>
