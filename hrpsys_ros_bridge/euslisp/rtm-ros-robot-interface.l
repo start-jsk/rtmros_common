@@ -2042,7 +2042,7 @@
            limb
            #'(lambda (name)
                (send self :referenceforceupdaterservice_stopReferenceforceupdaterNoWait :name (string-downcase name)))
-           :start-reference-force-updater))))
+           :stop-reference-force-updater))))
   (:set-reference-force-updater-param
    (limb &rest args)
    "Set reference force updater parameter like (send *ri* :set-reference-force-updater-param :rarm :p-gain 0.02).
