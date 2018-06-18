@@ -243,22 +243,26 @@ void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal() {
 #ifdef USE_PR2_CONTROLLERS_MSGS
 void HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt() {
   joint_trajectory_server.setPreempted();
-  // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
-  if (LessThanVersion(hrpsys_version, std::string("315.5.0"))) {
-    m_service0->clear();
-  } else {
-    m_service0->clearJointAngles();
+  if (!joint_trajectory_server.isNewGoalAvailable()) {
+    // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
+    if (LessThanVersion(hrpsys_version, std::string("315.5.0"))) {
+      m_service0->clear();
+    } else {
+      m_service0->clearJointAngles();
+    }
   }
 }
 #endif
 
 void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt() {
   follow_joint_trajectory_server.setPreempted();
-  // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
-  if (LessThanVersion(hrpsys_version, std::string("315.5.0"))) {
-    m_service0->clear();
-  } else {
-    m_service0->clearJointAngles();
+  if (!follow_joint_trajectory_server.isNewGoalAvailable()) {
+    // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
+    if (LessThanVersion(hrpsys_version, std::string("315.5.0"))) {
+      m_service0->clear();
+    } else {
+      m_service0->clearJointAngles();
+    }
   }
 }
 
