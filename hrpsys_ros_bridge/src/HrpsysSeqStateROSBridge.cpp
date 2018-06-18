@@ -244,6 +244,8 @@ void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal() {
 void HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt() {
   joint_trajectory_server.setPreempted();
   if (!joint_trajectory_server.isNewGoalAvailable()) {
+    // Cancel request comes from client, so motion should be stopped immediately,
+    // while motion should be changed smoothly when new goal comes.
     // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
     if (LessThanVersion(hrpsys_version, std::string("315.5.0"))) {
       m_service0->clear();
@@ -257,6 +259,8 @@ void HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt() {
 void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt() {
   follow_joint_trajectory_server.setPreempted();
   if (!follow_joint_trajectory_server.isNewGoalAvailable()) {
+    // Cancel request comes from client, so motion should be stopped immediately,
+    // while motion should be changed smoothly when new goal comes.
     // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
     if (LessThanVersion(hrpsys_version, std::string("315.5.0"))) {
       m_service0->clear();

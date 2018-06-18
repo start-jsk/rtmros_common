@@ -548,7 +548,8 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryAct
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryActionPreempt()");
   joint_trajectory_server->setPreempted();
   if (!joint_trajectory_server->isNewGoalAvailable())
-  {
+  { // Cancel request comes from client, so motion should be stopped immediately,
+    // while motion should be changed smoothly when new goal comes
     if (groupname.length() > 0)
     { // group
       // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
@@ -583,7 +584,8 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTraject
   follow_joint_trajectory_server->setPreempted();
 
   if (!follow_joint_trajectory_server->isNewGoalAvailable())
-  {
+  { // Cancel request comes from client, so motion should be stopped immediately,
+    // while motion should be changed smoothly when new goal comes
     if (groupname.length() > 0)
     { // group
       // hrpsys < 315.16.0 have bugs in setJointAnglesSequenceOfGroup https://github.com/fkanehiro/hrpsys-base/pull/1237
