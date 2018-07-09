@@ -102,6 +102,7 @@ public:
     std::string groupname;
     std::vector<std::string> joint_list;
     bool interpolationp;
+    ros::Time prev_traj_tm;
 
   public:
     typedef boost::shared_ptr<jointTrajectoryActionObj> Ptr;
