@@ -578,7 +578,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
     if ( !follow_joint_trajectory_feedback.joint_names.empty() &&
          !follow_joint_trajectory_feedback.actual.positions.empty() &&
-         follow_action_initialized ) {
+         follow_action_initialized &&
+         follow_joint_trajectory_server.isActive() ) {
       follow_joint_trajectory_server.publishFeedback(follow_joint_trajectory_feedback);
     }
   } // end: m_mcangleIn
