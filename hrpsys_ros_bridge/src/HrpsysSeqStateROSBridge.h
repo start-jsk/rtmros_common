@@ -87,7 +87,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void clock_cb(const rosgraph_msgs::ClockPtr& str) {};
 
   bool follow_action_initialized;
-  ros::Time prev_traj_tm;
+  ros::Time traj_start_tm;
 
   boost::mutex tf_mutex;
   double tf_rate;
