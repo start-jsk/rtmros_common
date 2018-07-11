@@ -218,7 +218,7 @@ void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory
     OpenHRP::dSequenceSequence rpy, zmp;
     m_service0->playPattern(angles, rpy, zmp, duration);
   }
-  prev_traj_tm = ros::Time::now();
+  traj_start_tm = ros::Time::now();
 
   interpolationp = true;
 }
@@ -443,9 +443,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         //joint_state.velocity
         //joint_state.effort
         follow_joint_trajectory_feedback.joint_names.push_back(j->name);
-        follow_joint_trajectory_feedback.desired.time_from_start = tm_on_execute - prev_traj_tm;
-        follow_joint_trajectory_feedback.actual.time_from_start = tm_on_execute - prev_traj_tm;
-        follow_joint_trajectory_feedback.error.time_from_start = tm_on_execute - prev_traj_tm;
+        follow_joint_trajectory_feedback.desired.time_from_start = tm_on_execute - traj_start_tm;
+        follow_joint_trajectory_feedback.actual.time_from_start = tm_on_execute - traj_start_tm;
+        follow_joint_trajectory_feedback.error.time_from_start = tm_on_execute - traj_start_tm;
         follow_joint_trajectory_feedback.desired.positions.push_back(j->q);
         follow_joint_trajectory_feedback.actual.positions.push_back(j->q);
         follow_joint_trajectory_feedback.error.positions.push_back(0);
