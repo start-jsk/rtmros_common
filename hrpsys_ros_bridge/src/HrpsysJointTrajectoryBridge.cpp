@@ -307,8 +307,15 @@ HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::~jointTrajectoryActionObj
 
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::proc()
 {
-  // finish interpolation
+  ros::Time tm_on_execute = ros::Time::now();
+
 #ifdef USE_PR2_CONTROLLERS_MSGS
+  // start postponed joint trajectory
+  if (joint_trajectory_server->isActive() && interpolationp == false && pr2_traj_start_tm <= tm_on_execute)
+  {
+    onJointTrajectory(postponed_pr2_traj);
+  }
+  // finish interpolation
   if (joint_trajectory_server->isActive() && interpolationp == true && parent->m_service0->isEmpty() == true)
   {
     pr2_controllers_msgs::JointTrajectoryResult result;
@@ -317,6 +324,12 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::proc()
     ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @proc joint_trajectory_server->setSucceeded()");
   }
 #endif
+  // start postponed joint trajectory
+  if (follow_joint_trajectory_server->isActive() && interpolationp == false && traj_start_tm <= tm_on_execute)
+  {
+    onJointTrajectory(postponed_traj);
+  }
+  // finish interpolation
   if (follow_joint_trajectory_server->isActive() && interpolationp == true && parent->m_service0->isEmpty() == true)
   {
     control_msgs::FollowJointTrajectoryResult result;
@@ -325,8 +338,6 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::proc()
     interpolationp = false;
     ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @proc follow_joint_trajectory_server->setSucceeded()");
   }
-
-  ros::Time tm_on_execute = ros::Time::now();
 
   // FIXME: need to set actual informatoin, currently we set dummy information
   trajectory_msgs::JointTrajectoryPoint commanded_joint_trajectory_point, error_joint_trajectory_point;
@@ -504,7 +515,6 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
       parent->m_service0->playPattern(angles, rpy, zmp, duration);
     }
   }
-  traj_start_tm = ros::Time::now();
 
   interpolationp = true;
 }
@@ -514,7 +524,16 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryAct
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryActionGoal");
   pr2_controllers_msgs::JointTrajectoryGoalConstPtr goal = joint_trajectory_server->acceptNewGoal();
-  onJointTrajectory(goal->trajectory);
+  pr2_traj_start_tm = goal->trajectory.header.stamp;
+  if (pr2_traj_start_tm <= ros::Time::now())
+  {
+    onJointTrajectory(goal->trajectory);
+  }
+  else
+  {
+    // trajectory is postponed as it is in future
+    postponed_pr2_traj = goal->trajectory;
+  }
 }
 #endif
 
@@ -522,7 +541,16 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTraject
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onFollowJointTrajectoryActionGoal()");
   control_msgs::FollowJointTrajectoryGoalConstPtr goal = follow_joint_trajectory_server->acceptNewGoal();
-  onJointTrajectory(goal->trajectory);
+  traj_start_tm = goal->trajectory.header.stamp;
+  if (traj_start_tm <= ros::Time::now())
+  {
+    onJointTrajectory(goal->trajectory);
+  }
+  else
+  {
+    // trajectory is postponed as it is in future
+    postponed_traj = goal->trajectory;
+  }
 }
 
 #ifdef USE_PR2_CONTROLLERS_MSGS

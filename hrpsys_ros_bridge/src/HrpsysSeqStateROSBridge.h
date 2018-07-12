@@ -87,6 +87,11 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void clock_cb(const rosgraph_msgs::ClockPtr& str) {};
 
   bool follow_action_initialized;
+#ifdef USE_PR2_CONTROLLERS_MSGS
+  trajectory_msgs::JointTrajectory postponed_pr2_traj;
+  ros::Time pr2_traj_start_tm;
+#endif
+  trajectory_msgs::JointTrajectory postponed_traj;
   ros::Time traj_start_tm;
 
   boost::mutex tf_mutex;
