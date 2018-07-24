@@ -118,6 +118,19 @@ class TestSampleRobot(unittest.TestCase):
         rospy.logwarn("difference between two /LARM_LINK7 %r %r"%(array(trans1)-array(trans2),linalg.norm(array(trans1)-array(trans2))))
         self.assertNotAlmostEqual(linalg.norm(array(trans1)-array(trans2)), 0, delta=0.1)
 
+        ## move less than 1.0 sec
+        goal.trajectory.header.stamp = rospy.get_rostime()
+        point = JointTrajectoryPoint()
+        point.positions = [ x * math.pi / 180.0 for x in [30,30,30, 0,-40,-30] ]
+        point.time_from_start = rospy.Duration(0.9)
+        goal.trajectory.points = [point]
+        larm.send_goal(goal)
+        start_time = rospy.get_rostime()
+        larm.wait_for_result()
+        stop_time  = rospy.get_rostime()
+        rospy.logwarn("working time: %f"%(stop_time - start_time).to_sec())
+        self.assertNotAlmostEqual((stop_time - start_time).to_sec(), 0, delta=0.1)
+
     # send joint angles
     def test_joint_angles(self):
         # for < kinetic

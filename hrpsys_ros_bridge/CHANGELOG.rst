@@ -2,6 +2,12 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.2 (2017-12-22)
+------------------
+* add test to check `#1036 <https://github.com/start-jsk/rtmros_common/issues/1036>`_ situation (`#1038 <https://github.com/start-jsk/rtmros_common/issues/1038>`_)
+* duration == 0.0 results unexpected behavior, so force set 0.001 when duration == 0 s set (`#1037 <https://github.com/start-jsk/rtmros_common/issues/1037>`_ )
+* Contributors: Kei Okada
+
 1.4.1 (2017-10-25)
 ------------------
 * Update of sensor_ros_bridge_connect.py

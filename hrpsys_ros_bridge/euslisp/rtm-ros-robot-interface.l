@@ -1512,6 +1512,34 @@
    (send self :get-idl-enum-values
          (send (send self :get-gait-generator-param) :default_orbit_type)
          "HRPSYS_ROS_BRIDGE::OPENHRP_AUTOBALANCERSERVICE_ORBITTYPE"))
+  (:calc-toe-heel-phase-ratio
+   (toe-angle heel-angle double-support-ratio-half)
+   "Calculate vector for toe heel phase ratio.
+    Arguments:
+      toe-angle, heel-angle : max toe/heel angle [deg].
+      double-support-ratio-half : half of double support ratio in terms of toe heel phase ratio."
+   (let* ((remain-ratio (- 1 (* 2 double-support-ratio-half)))
+          (total-angle-diff (+ (* toe-angle 2.0) (* heel-angle 2.0)))
+          (ret
+           (list double-support-ratio-half
+                 (* remain-ratio (/ toe-angle total-angle-diff))
+                 (* remain-ratio (/ toe-angle total-angle-diff))
+                 0
+                 (* remain-ratio (/ heel-angle total-angle-diff))
+                 (* remain-ratio (/ heel-angle total-angle-diff))
+                 double-support-ratio-half)))
+     (concatenate float-vector ret)
+     ))
+  (:set-gait-generator-toe-heel-angles
+   (toe-angle heel-angle double-support-ratio-half)
+   "Set toe-angle, heel-angle, and toe-heel-phase-ratio.
+    toe-heel-phase-ratio is automatically calculated.
+    Arguments:
+      toe-angle, heel-angle : max toe/heel angle [deg].
+      double-support-ratio-half : half of double support ratio in terms of toe heel phase ratio."
+   (send self :set-gait-generator-param
+         :toe-angle toe-angle :heel-angle heel-angle
+         :toe-heel-phase-ratio (send self :calc-toe-heel-phase-ratio toe-angle heel-angle double-support-ratio-half)))
   (:get-auto-balancer-controller-mode
    ()
    "Get AutoBalancer ControllerMode as Euslisp symbol."
@@ -1956,52 +1984,93 @@
   :ReferenceForceUpdaterService_setReferenceForceUpdaterParam :ReferenceForceUpdaterService_getReferenceForceUpdaterParam
   :optional-args (list :name 'name))
 (defmethod rtm-ros-robot-interface
+  (:get-supported-reference-force-updater-name-list
+   ()
+   "Get supported reference force updater names (:rarm, :larm, ...)"
+   (unless (send self :get :supported-reference-force-updater-name-list)
+     (send self :put :supported-reference-force-updater-name-list
+           (mapcar #'(lambda (x) (read-from-string (format nil ":~A" x))) (send (send self :referenceforceupdaterservice_getSupportedReferenceForceUpdaterNameSequence) :o_names))))
+   (send self :get :supported-reference-force-updater-name-list))
   (:start-reference-force-updater
    (limb)
    "Start reference force updater mode.
-    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment."
-   (if (eq limb :FootOriginExtMoment)
-       (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase limb))
+    limb should be limb symbol name such as :rarm, :larm, :arms, or supported names (see :get-supported-reference-force-updater-name-list)."
+   (cond
+    ((memq limb (send self :get-supported-reference-force-updater-name-list))
+     (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase limb)))
+    (t
      (send self :force-sensor-method
            limb
            #'(lambda (name)
                (send self :referenceforceupdaterservice_startReferenceforceupdater :name (string-downcase name)))
-           :start-reference-force-updater)))
+           :start-reference-force-updater))))
   (:stop-reference-force-updater
    (limb)
    "Stop reference force updater mode.
-    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment."
-   (if (eq limb :FootOriginExtMoment)
-       (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase limb))
+    limb should be limb symbol name such as :rarm, :larm, :arms, or supported names (see :get-supported-reference-force-updater-name-list)."
+   (cond
+    ((memq limb (send self :get-supported-reference-force-updater-name-list))
+     (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase limb)))
+    (t
      (send self :force-sensor-method
            limb
            #'(lambda (name)
                (send self :referenceforceupdaterservice_stopReferenceforceupdater :name (string-downcase name)))
-           :stop-reference-force-updater)))
+           :stop-reference-force-updater))))
+  (:start-reference-force-updater-no-wait
+   (limb)
+   "Start reference force updater mode without wait.
+    limb should be limb symbol name such as :rarm, :larm, :arms, or supported names (see :get-supported-reference-force-updater-name-list)."
+   (cond
+    ((memq limb (send self :get-supported-reference-force-updater-name-list))
+     (send self :referenceforceupdaterservice_startReferenceforceupdaterNoWait :name (string-downcase limb)))
+    (t
+     (send self :force-sensor-method
+           limb
+           #'(lambda (name)
+               (send self :referenceforceupdaterservice_startReferenceforceupdaterNoWait :name (string-downcase name)))
+           :start-reference-force-updater))))
+  (:stop-reference-force-updater-no-wait
+   (limb)
+   "Start reference force updater mode without wait.
+    limb should be limb symbol name such as :rarm, :larm, :arms, or supported names (see :get-supported-reference-force-updater-name-list)."
+   (cond
+    ((memq limb (send self :get-supported-reference-force-updater-name-list))
+     (send self :referenceforceupdaterservice_stopReferenceforceupdaterNoWait :name (string-downcase limb)))
+    (t
+     (send self :force-sensor-method
+           limb
+           #'(lambda (name)
+               (send self :referenceforceupdaterservice_stopReferenceforceupdaterNoWait :name (string-downcase name)))
+           :stop-reference-force-updater))))
   (:set-reference-force-updater-param
    (limb &rest args)
    "Set reference force updater parameter like (send *ri* :set-reference-force-updater-param :rarm :p-gain 0.02).
-    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment.
+    limb should be limb symbol name such as :rarm, :larm, :arms, or supported names (see :get-supported-reference-force-updater-name-list).
     For arguments, please see (send *ri* :get-reference-force-updater-param-arguments)"
-   (if (eq limb :FootOriginExtMoment)
-       (send* self :raw-set-reference-force-updater-param (string-downcase limb) args)
+   (cond
+    ((memq limb (send self :get-supported-reference-force-updater-name-list))
+     (send* self :raw-set-reference-force-updater-param (string-downcase limb) args))
+    (t
      (send* self :force-sensor-method
             limb
             #'(lambda (name &rest _args)
                 (send* self :raw-set-reference-force-updater-param (string-downcase name) args))
             :set-reference-force-updater-param
-            args)))
+            args))))
   (:get-reference-force-updater-param
    (limb)
    "Get reference force updater parameter.
-    limb should be limb symbol name such as :rarm, :larm, :arms, or :FootOriginExtMoment."
-   (if (eq limb :FootOriginExtMoment)
-       (send self :raw-get-reference-force-updater-param (string-downcase limb))
+    limb should be limb symbol name such as :rarm, :larm, :arms, or supported names (see :get-supported-reference-force-updater-name-list)."
+   (cond
+    ((memq limb (send self :get-supported-reference-force-updater-name-list))
+     (send self :raw-get-reference-force-updater-param (string-downcase limb)))
+    (t
      (send self :force-sensor-method
            limb
            #'(lambda (name)
                (send self :raw-get-reference-force-updater-param (string-downcase name)))
-           :get-reference-force-updater-param)))
+           :get-reference-force-updater-param))))
   )
 
 (defun print-end-effector-parameter-conf-from-robot
@@ -2098,6 +2167,44 @@
     ))
   )
 
+(defmethod rtm-ros-robot-interface
+  (:print-rtc-param-all
+   ()
+   "Print RTC parameter struct probided by :get-xx method in more readable style for all recommended RTCs.
+    Check all possible RTCs by checking existence of ROSBridge nodes."
+   (let ((rosbridge-nodes (ros::get-nodes)))
+     (when (find "/AutoBalancerServiceROSBridge" rosbridge-nodes :test #'string=)
+       (format t ";; :get-gait-generator-param~%")
+       (print-ros-msg (send self :get-gait-generator-param))
+       (format t ";; :get-auto-balancer-param~%")
+       (print-ros-msg (send self :get-auto-balancer-param)))
+     (when (find "/StabilizerServiceROSBridge" rosbridge-nodes :test #'string=)
+       (format t ";; :get-st-param~%")
+       (print-ros-msg (send self :get-st-param)))
+     (when (find "/ObjectContactTurnaroundDetectorServiceROSBridge" rosbridge-nodes :test #'string=)
+       (format t ";; :get-object-turnaround-detector-param~%")
+       (print-ros-msg (send self :get-object-turnaround-detector-param)))
+     (when (find "/KalmanFilterServiceROSBridge" rosbridge-nodes :test #'string=)
+       (format t ";; :get-kalman-filter-param~%")
+       (print-ros-msg (send self :get-kalman-filter-param)))
+     (when (find "/ReferenceForceUpdaterServiceROSBridge" rosbridge-nodes :test #'string=)
+       (dolist (limb (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+         (format t ";; :get-reference-force-updater-param ~A~%" limb)
+         (print-ros-msg (send self :get-reference-force-updater-param limb))))
+     (when (find "/ImpedanceControllerServiceROSBridge" rosbridge-nodes :test #'string=)
+       (dolist (limb (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+         (format t ";; :get-impedance-controller-param ~A~%" limb)
+         (print-ros-msg (send self :get-impedance-controller-param limb))))
+     (when (find "/RemoveForceSensorLinkOffsetServiceROSBridge" rosbridge-nodes :test #'string=)
+       (dolist (limb (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+         (format t ";; :get-forcemoment-offset-param ~A~%" limb)
+         (print-ros-msg (send self :get-forcemoment-offset-param limb))))
+     (when (find "/TorqueControllerServiceROSBridge" rosbridge-nodes :test #'string=)
+       (dolist (j (send robot :joint-list))
+         (format t ";; :get-torque-controller-param ~A~%" (read-from-string (format nil ":~A" (send j :name))))
+         (print-ros-msg (send self :get-torque-controller-param (read-from-string (format nil ":~A" (send j :name)))))))
+     t))
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
