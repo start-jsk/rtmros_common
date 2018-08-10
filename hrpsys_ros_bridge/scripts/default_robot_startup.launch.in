@@ -7,6 +7,7 @@
   <arg name="PROJECT_FILE" default="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@_nosim.xml" if="$(arg NOSIM)"/>
   <arg name="PROJECT_FILE" default="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.xml" unless="$(arg NOSIM)"/>
   <arg name="corbaport" default="15005" />
+  <arg name="managerport" default="15006" />
   <arg name="hrpsys_precreate_rtc" default="HGcontroller"/>
   <arg name="USE_UNSTABLE_RTC" default="@USE_UNSTABLE_RTC@"/>
   <param name="use_sim_time" value="true" />
@@ -18,6 +19,7 @@
     <arg name="KILL_SERVERS" default="$(arg KILL_SERVERS)" />
     <arg name="REALTIME" default="$(arg REALTIME)" />
     <arg name="corbaport" default="$(arg corbaport)" />
+    <arg name="managerport" default="$(arg managerport)" />
     <arg name="GUI" default="$(arg GUI)" />
     <arg name="hrpsys_precreate_rtc" default="$(arg hrpsys_precreate_rtc)" />
 @STARTUP_ARGS@
