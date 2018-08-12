@@ -32,8 +32,6 @@ port_number = 15005 # default
 
 arg_remap = names.load_mappings(sys.argv)
 
-print arg_remap
-
 if 'corbaport' in arg_remap:
     port_number = int(arg_remap['corbaport'])
     print "\033[34m[rtmlaunch] user defined corbaport:=", port_number, "will be used\033[0m"
