@@ -12,6 +12,10 @@
             file="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@_controller_config.yaml" />
 
   <arg name="corbaport" default="15005" />
+  <arg name="managerport" default="2810" />
+  <!-- <arg name="managerport" default="15006" /> -->
+  <!-- available in Kinetic -->
+  <!-- <arg name="managerport" default="$(eval arg('corbaport') + 1)"/> -->
   <arg name="nameserver" default="localhost" />
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
@@ -19,6 +23,7 @@
     <arg name="COLLADA_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.dae" />
     <arg name="CONF_FILE" value="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.conf" />
     <arg name="corbaport" default="$(arg corbaport)" />
+    <arg name="managerport" default="$(arg managerport)" />
     <arg name="nameserver" default="$(arg nameserver)" />
     <!-- BEGIN: unstable : maintained-->
     <arg name="USE_WALKING" default="true" if="$(arg USE_UNSTABLE_RTC)"/>
