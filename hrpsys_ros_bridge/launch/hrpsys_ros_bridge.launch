@@ -44,7 +44,7 @@
   <!-- <arg name="managerport" default="$(eval arg('corbaport') + 1)"/> -->
   <arg name="periodic_rate" default="2000" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver):$(arg corbaport)" />
-  <arg name="omniorb_args" default="-ORBInitRef NameService=corbaloc:iiop:$(arg nameserver):$(arg corbaport)/NameService" />
+  <arg name="omniorb_args" default="-ORBInitRef NameService=corbaloc:iiop:$(arg nameserver):$(arg corbaport)/NameService -RTCManagerPort $(arg managerport)" />
   <arg name="openrtm_args" default='-o "corba.master_manager:$(arg nameserver):$(arg managerport)" -o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type:PeriodicExecutionContext" -o "exec_cxt.periodic.rate:$(arg periodic_rate)" -o "logger.file_name:/tmp/rtc%p.log"' />
   <arg name="subscription_type" default="new" />
   <arg name="push_policy" default="all" />
