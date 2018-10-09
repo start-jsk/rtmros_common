@@ -344,7 +344,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
       }
       // Set cop_link_info
       COPLinkInfo ci;
-      ci.link_name = sensor_info[sensor_name].link_name; // Link name for tf frame
+      ci.link_name = ee_name + "_end_coords"; // Link name for tf frame
       ci.cop_offset_z = eep(2);
       cop_link_info.insert(std::pair<std::string, COPLinkInfo>(sensor_name, ci));
       std::cerr << "[" << m_profile.instance_name << "]   target = " << ci.link_name << ", sensor_name = " << sensor_name << std::endl;
