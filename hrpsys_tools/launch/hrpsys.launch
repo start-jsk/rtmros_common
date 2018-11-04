@@ -139,8 +139,8 @@
 
   <group if="$(arg LAUNCH_HRPSYSPY)">
     <node name="hrpsys_py" pkg="$(arg HRPSYS_PY_PKG)" type="$(arg HRPSYS_PY_NAME)" output="screen"
-          args='$(arg HRPSYS_PY_ARGS) $(arg SIMULATOR_NAME) $(arg MODEL_FILE) $(arg openrtm_args)'
-          launch-prefix="$(arg PY_LAUNCH_PREFIX)" />
+          args='$(arg HRPSYS_PY_ARGS) $(arg SIMULATOR_NAME) $(arg MODEL_FILE) $(arg openrtm_args) $(arg omniorb_args)'
+          launch-prefix="$(arg PY_LAUNCH_PREFIX)" /> <!-- omniorb_args is still used for backward compatibility -->
   </group>
 
   <!-- <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="$(arg OUTPUT)" -->
