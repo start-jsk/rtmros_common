@@ -38,10 +38,15 @@
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
   <arg name="corbaport" default="15005" />
+  <arg name="managerport" default="2810" />
+  <!-- <arg name="managerport" default="15006" /> -->
+  <!-- available in Kinetic -->
+  <!-- <arg name="managerport" default="$(eval arg('corbaport') + 1)"/> -->
   <arg name="periodic_rate" default="2000" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver):$(arg corbaport)" />
+  <!-- omniorb_args will be obsolete -->
   <arg name="omniorb_args" default="-ORBInitRef NameService=corbaloc:iiop:$(arg nameserver):$(arg corbaport)/NameService" />
-  <arg name="openrtm_args" default='-o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type:PeriodicExecutionContext" -o "exec_cxt.periodic.rate:$(arg periodic_rate)" -o "logger.file_name:/tmp/rtc%p.log"' />
+  <arg name="openrtm_args" default='-o "corba.master_manager:$(arg nameserver):$(arg managerport)" -o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type:PeriodicExecutionContext" -o "exec_cxt.periodic.rate:$(arg periodic_rate)" -o "logger.file_name:/tmp/rtc%p.log"' />
   <arg name="subscription_type" default="new" />
   <arg name="push_policy" default="all" />
   <arg name="push_rate" default="50.0" />
@@ -82,7 +87,7 @@
         if="$(arg USE_HRPSYS_PROFILE)"/>
 
   <node pkg="hrpsys_ros_bridge" name="sensor_ros_bridge_connect" type="sensor_ros_bridge_connect.py"
-        args="$(arg MODEL_FILE) $(arg SIMULATOR_NAME) HrpsysSeqStateROSBridge0 $(arg nameserver) $(arg subscription_type) $(arg push_policy) $(arg push_rate) $(arg omniorb_args)" output="$(arg OUTPUT)"/>
+        args="$(arg MODEL_FILE) $(arg SIMULATOR_NAME) HrpsysSeqStateROSBridge0 $(arg nameserver) $(arg subscription_type) $(arg push_policy) $(arg push_rate) $(arg openrtm_args) $(arg omniorb_args)" output="$(arg OUTPUT)"/> <!-- omniorb_args is still used for backward compatibility -->
   <!-- BEGIN:openrtm connection -->
   <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
   <env name="SIMULATOR_NAME_ANGLE"    value="$(arg SIMULATOR_NAME_ANGLE)" />
@@ -179,7 +184,7 @@
     <rtconnect from="CollisionDetectorServiceROSBridge.rtc:CollisionDetectorService" to="co.rtc:CollisionDetectorService" subscription_type="new"/>
     <rtactivate component="CollisionDetectorServiceROSBridge.rtc" />
     <node pkg="hrpsys_ros_bridge" name="collision_state" type="collision_state.py"
-          args="$(arg MODEL_FILE) $(arg omniorb_args)" output="$(arg OUTPUT)"/>
+          args="$(arg MODEL_FILE) $(arg openrtm_args) $(arg omniorb_args)" output="$(arg OUTPUT)"/> <!-- omniorb_args is still used for backward compatibility -->
   </group>
 
   <!-- USE_IMPEDANCECONTROLLER

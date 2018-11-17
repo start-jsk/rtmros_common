@@ -16,10 +16,14 @@
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
   <arg name="corbaport" default="15005" />
+  <arg name="managerport" default="2810" />
+  <!-- <arg name="managerport" default="15006" /> -->
+  <!-- available in Kinetic -->
+  <!-- <arg name="managerport" default="$(eval arg('corbaport') + 1)"/> -->
   <arg name="KILL_SERVERS" default="false" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver):$(arg corbaport)" />
   <arg name="omniorb_args" default="-ORBInitRef NameService=corbaloc:iiop:$(arg nameserver):$(arg corbaport)/NameService" />
-  <arg name="openrtm_args" default='-o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+  <arg name="openrtm_args" default='-o "corba.master_manager:$(arg nameserver):$(arg managerport)" -o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
   <!-- END:openrtm setting -->
 
   <!-- BEGIN:setting for hrpsys-simulator or rtcd -->
@@ -135,8 +139,8 @@
 
   <group if="$(arg LAUNCH_HRPSYSPY)">
     <node name="hrpsys_py" pkg="$(arg HRPSYS_PY_PKG)" type="$(arg HRPSYS_PY_NAME)" output="screen"
-          args='$(arg HRPSYS_PY_ARGS) $(arg SIMULATOR_NAME) $(arg MODEL_FILE) $(arg omniorb_args)'
-          launch-prefix="$(arg PY_LAUNCH_PREFIX)" />
+          args='$(arg HRPSYS_PY_ARGS) $(arg SIMULATOR_NAME) $(arg MODEL_FILE) $(arg openrtm_args) $(arg omniorb_args)'
+          launch-prefix="$(arg PY_LAUNCH_PREFIX)" /> <!-- omniorb_args is still used for backward compatibility -->
   </group>
 
   <!-- <node name="abstransform2posrpy" pkg="hrpsys" type="AbsTransformToPosRpy" output="$(arg OUTPUT)" -->

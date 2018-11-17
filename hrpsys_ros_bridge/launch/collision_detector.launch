@@ -2,12 +2,16 @@
 <launch>
   <arg name="nameserver" default="localhost" />
   <arg name="corbaport" default="15005" />
+  <arg name="managerport" default="2810" />
+  <!-- <arg name="managerport" default="15006" /> -->
+  <!-- available in Kinetic -->
+  <!-- <arg name="managerport" default="$(eval arg('corbaport') + 1)"/> -->
   <arg name="SIMULATOR_NAME" default="RobotHardware0"/> <!-- please set $(arg ROBOT_NAME)(Robot) for simulation -->
   <env name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
   <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver):$(arg corbaport)" />
-  
+  <!-- omniorb_args will be obsolete -->
   <arg name="omniorb_args" default="-ORBInitRef NameService=corbaloc:iiop:$(arg nameserver):$(arg corbaport)/NameService" />
-  <arg name="openrtm_args" default='-o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type:PeriodicExecutionContext" -o "exec_cxt.periodic.rate:2000" -o "logger.file_name:/tmp/collision_detector%p.log"' />
+  <arg name="openrtm_args" default='-o "corba.master_manager:$(arg nameserver):$(arg managerport)" -o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type:PeriodicExecutionContext" -o "exec_cxt.periodic.rate:2000" -o "logger.file_name:/tmp/collision_detector%p.log"' />
   <arg name="MODEL_FILE" default="/opt/jsk/etc/HIRONX/model/main.wrl" />
   <arg name="CONF_FILE" />
   <!-- <arg name="COLLISIONDETECTOR_INSTANCE_NAME" default="CollisionDetector0" /> -->
@@ -28,7 +32,7 @@
   <!-- launch collision result publisher -->
   <node pkg="hrpsys_ros_bridge" name="collision_state" type="collision_state.py"
         output="screen" if="$(arg RUN_COLLISION_STATE)"
-        args="$(arg MODEL_FILE) $(arg omniorb_args)" >
+        args="$(arg MODEL_FILE) $(arg openrtm_args) $(arg omniorb_args)" > <!-- omniorb_args is still used for backward compatibility -->
     <param name="comp_name" type="string" value="$(arg COLLISIONDETECTOR_INSTANCE_NAME)" />
   </node>
 </launch>
