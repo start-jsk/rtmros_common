@@ -548,7 +548,7 @@ RTC::ReturnCode_t %s::onExecute(RTC::UniqueId ec_id) {
         #.h
         #  add ros headers, service server functions, uncomment onExecute
         compsrc = open(tmpdir + '/' + module_name + '.h').read()
-        compsrc = re.sub(basedir+"/idl/(.+).h", pkgname+r'/idl/\1.h', compsrc)
+        compsrc = re.sub(basedir+"/idl(.*)/(.+).h", pkgname+r'/idl\1/\2.h', compsrc)
 
         compsrc = compsrc.replace('<%s>'%service_name, '<%s>'%idlutil.ccolonName(interface.scopedName()))
 
