@@ -459,7 +459,8 @@ class ServiceVisitor (idlvisitor.AstVisitor):
     # generate cpp source to bridge RTM/ROS
     def genBridgeComponent(self, interface):
         idlfile = interface.file()
-        module_name = '%sROSBridge' % interface.identifier()
+        #module_name = '%sROSBridge' % interface.identifier()
+        module_name = '%sROSBridge' % '_'.join(interface.scopedName())
         #service_name = idlutil.ccolonName(interface.scopedName())
         service_name = interface.identifier()
         idl_name = os.path.split(idlfile)[1]
@@ -645,7 +646,8 @@ class InterfaceNameVisitor (idlvisitor.AstVisitor):
             n.accept(self)
     def visitInterface(self, node):
         if node.mainFile():
-            print node.identifier()
+            #print node.identifier()
+            print '_'.join(node.scopedName())
             if options.interfaces:
                 pass
 
