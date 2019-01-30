@@ -17,8 +17,7 @@ void MyModuleInit(RTC::Manager* manager)
   RTC::RtcBase* comp;
 
   // Create a component
-  comp = manager->createComponent("PointCloudROSBridge");
-
+  comp = manager->createComponent(std::string("PointCloudROSBridge?instance_name="+ros::this_node::getName().substr(ros::this_node::getNamespace().length())).c_str());
 
   // Example
   // The following procedure is examples how handle RT-Components.
