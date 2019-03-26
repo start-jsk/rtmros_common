@@ -1,6 +1,6 @@
 <package>
   <name>rosnode_rtc</name>
-  <version>1.3.3</version>
+  <version>1.4.2</version>
   <description>
      This package gives transparency between RTM and ROS.
 
@@ -8,7 +8,6 @@
      This automatically convert ROS/topic into RTM/dataport.
   </description>
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
-  <maintainer email="iisaito@kinugarage.com">Isaac Isao Saito</maintainer>
   <author email="saito@jsk.t.u-tokyo.ac.jp">Manabu Saito</author>
 
   <license>BSD</license>

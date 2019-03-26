@@ -2,6 +2,23 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.2 (2017-12-22)
+------------------
+
+1.4.1 (2017-10-25)
+------------------
+* Fix bug of servicebridge.cmake (`#1031 <https://github.com/start-jsk/rtmros_common/pull/1031>`_)
+  * [rtmbuild/cmake/servicebridge.cmake] Fix bug of argument passing to avoid unnecessary addition of '\' : https://github.com/start-jsk/rtmros_common/pull/1031#issuecomment-338370927
+  * [rtmbuild/cmake/servicebridge.cmake] Fix typo. rand_str -> _rand_str
+* Contributors: Shunichi Nozawa
+
+1.4.0 (2017-08-09)
+------------------
+* fix code to run both Indido and Kinetic (`#1025 <https://github.com/start-jsk/rtmros_common/issues/1025>`_)
+  * rtmbuild/test/test-compile-idl.test: add retry=4 and time-limit=120
+
+* Contributors: Kei Okada
+
 1.3.3 (2017-02-12)
 ------------------
 * re-enable rosnode_rtc (`#961 <https://github.com/start-jsk/rtmros_common/issues/961>`_)

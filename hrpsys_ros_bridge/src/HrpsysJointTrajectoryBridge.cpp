@@ -220,26 +220,35 @@ HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::jointTrajectoryActionObj(
   groupname = gname;
   joint_list = jlist;
 
+#ifdef USE_PR2_CONTROLLERS_MSGS
   joint_trajectory_server.reset(
       new actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction>(
           parent->nh, controller_name + "/joint_trajectory_action", false));
+#endif
   follow_joint_trajectory_server.reset(
       new actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>(
           parent->nh, controller_name + "/follow_joint_trajectory_action", false));
   trajectory_command_sub = parent->nh.subscribe(controller_name + "/command", 1, &HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onTrajectoryCommandCB, this);
 
 
+#ifdef USE_PR2_CONTROLLERS_MSGS
   joint_trajectory_server->registerGoalCallback(
       boost::bind(&HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryActionGoal, this));
   joint_trajectory_server->registerPreemptCallback(
       boost::bind(&HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryActionPreempt, this));
+#endif
   follow_joint_trajectory_server->registerGoalCallback(
       boost::bind(&HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTrajectoryActionGoal, this));
   follow_joint_trajectory_server->registerPreemptCallback(
       boost::bind(&HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTrajectoryActionPreempt, this));
 
+#ifdef USE_PR2_CONTROLLERS_MSGS
   joint_controller_state_pub = parent->nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>(
       controller_name + "/state", 1);
+#else
+  joint_controller_state_pub = parent->nh.advertise<control_msgs::JointTrajectoryControllerState>(
+      controller_name + "/state", 1);
+#endif
 
   if (groupname.length() > 0)
   {
@@ -269,31 +278,37 @@ HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::jointTrajectoryActionObj(
   }
 
   interpolationp = false;
-
+#ifdef USE_PR2_CONTROLLERS_MSGS
   joint_trajectory_server->start();
+#endif
   follow_joint_trajectory_server->start();
 }
 
 HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::~jointTrajectoryActionObj()
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @~jointTrajectoryActionObj (" << this->groupname);
+#ifdef USE_PR2_CONTROLLERS_MSGS
   if (joint_trajectory_server->isActive())
   {
     joint_trajectory_server->setPreempted();
   }
+#endif
 
   if (follow_joint_trajectory_server->isActive())
   {
     follow_joint_trajectory_server->setPreempted();
   }
 
+#ifdef USE_PR2_CONTROLLERS_MSGS
   joint_trajectory_server->shutdown();
+#endif
   follow_joint_trajectory_server->shutdown();
 }
 
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::proc()
 {
   // finish interpolation
+#ifdef USE_PR2_CONTROLLERS_MSGS
   if (joint_trajectory_server->isActive() && interpolationp == true && parent->m_service0->isEmpty() == true)
   {
     pr2_controllers_msgs::JointTrajectoryResult result;
@@ -301,6 +316,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::proc()
     interpolationp = false;
     ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @proc joint_trajectory_server->setSucceeded()");
   }
+#endif
   if (follow_joint_trajectory_server->isActive() && interpolationp == true && parent->m_service0->isEmpty() == true)
   {
     control_msgs::FollowJointTrajectoryResult result;
@@ -330,10 +346,12 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::proc()
   error_joint_trajectory_point.accelerations.resize(joint_list.size());
   error_joint_trajectory_point.effort.resize(joint_list.size());
 
+#ifdef USE_PR2_CONTROLLERS_MSGS
   if ( joint_trajectory_server->isActive() ) {
     pr2_controllers_msgs::JointTrajectoryFeedback joint_trajectory_feedback;
     joint_trajectory_server->publishFeedback(joint_trajectory_feedback);
   }
+#endif
 
   if ( follow_joint_trajectory_server->isActive() ) {
     control_msgs::FollowJointTrajectoryFeedback follow_joint_trajectory_feedback;
@@ -347,7 +365,11 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::proc()
     follow_joint_trajectory_server->publishFeedback(follow_joint_trajectory_feedback);
   }
 
+#ifdef USE_PR2_CONTROLLERS_MSGS
   pr2_controllers_msgs::JointTrajectoryControllerState joint_controller_state;
+#else
+  control_msgs::JointTrajectoryControllerState joint_controller_state;
+#endif
   joint_controller_state.joint_names = joint_list;
 
   joint_controller_state.desired = commanded_joint_trajectory_point;
@@ -450,6 +472,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
     else
     { // if i == 0
       duration[i] = trajectory.points[i].time_from_start.toSec();
+      if ( std::abs(duration[i]) < 0.001 ) duration[i] = 0.001; // set magic delta ... https://github.com/start-jsk/rtmros_common/issues/1036
     }
   }
 
@@ -483,12 +506,14 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
   interpolationp = true;
 }
 
+#ifdef USE_PR2_CONTROLLERS_MSGS
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryActionGoal()
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryActionGoal");
   pr2_controllers_msgs::JointTrajectoryGoalConstPtr goal = joint_trajectory_server->acceptNewGoal();
   onJointTrajectory(goal->trajectory);
 }
+#endif
 
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTrajectoryActionGoal()
 {
@@ -497,11 +522,13 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTraject
   onJointTrajectory(goal->trajectory);
 }
 
+#ifdef USE_PR2_CONTROLLERS_MSGS
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectoryActionPreempt()
 {
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryActionPreempt()");
   joint_trajectory_server->setPreempted();
 }
+#endif
 
 void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTrajectoryActionPreempt()
 {

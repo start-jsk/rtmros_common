@@ -32,7 +32,9 @@ static const char* hrpsysseqstaterosbridge_spec[] =
 
 HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   use_sim_time(false), use_hrpsys_time(false),
+#ifdef USE_PR2_CONTROLLERS_MSGS
   joint_trajectory_server(nh, "fullbody_controller/joint_trajectory_action", false),
+#endif
   follow_joint_trajectory_server(nh, "fullbody_controller/follow_joint_trajectory_action", false),
   HrpsysSeqStateROSBridgeImpl(manager), follow_action_initialized(false), prev_odom_acquired(false)
 {
@@ -45,14 +47,20 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   tf_transforms.clear();
   periodic_update_timer = pnh.createTimer(ros::Duration(1.0 / tf_rate), boost::bind(&HrpsysSeqStateROSBridge::periodicTimerCallback, this, _1));
   
+#ifdef USE_PR2_CONTROLLERS_MSGS
   joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal, this));
   joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt, this));
+#endif
   follow_joint_trajectory_server.registerGoalCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal, this));
   follow_joint_trajectory_server.registerPreemptCallback(boost::bind(&HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt, this));
   sendmsg_srv = nh.advertiseService(std::string("sendmsg"), &HrpsysSeqStateROSBridge::sendMsg, this);
   set_sensor_transformation_srv = nh.advertiseService("set_sensor_transformation", &HrpsysSeqStateROSBridge::setSensorTransformation, this);
   joint_state_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
+#ifdef USE_PR2_CONTROLLERS_MSGS
   joint_controller_state_pub = nh.advertise<pr2_controllers_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
+#else
+  joint_controller_state_pub = nh.advertise<control_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
+#endif
   trajectory_command_sub = nh.subscribe("/fullbody_controller/command", 1, &HrpsysSeqStateROSBridge::onTrajectoryCommandCB, this);
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
   odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
@@ -114,21 +122,26 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
         ROS_WARN("[HrpsysSeqStateROSBridge] use_sim_time");
       }
   }
+#ifdef USE_PR2_CONTROLLERS_MSGS
   joint_trajectory_server.start();
+#endif
   follow_joint_trajectory_server.start();
 }
 
 HrpsysSeqStateROSBridge::~HrpsysSeqStateROSBridge() {
+#ifdef USE_PR2_CONTROLLERS_MSGS
   joint_trajectory_server.shutdown();
+#endif
   follow_joint_trajectory_server.shutdown();
 };
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onFinalize() {
   ROS_INFO_STREAM("[HrpsysSeqStateROSBridge] @onFinalize : " << getInstanceName());
+#ifdef USE_PR2_CONTROLLERS_MSGS
   if ( joint_trajectory_server.isActive() ) {
       joint_trajectory_server.setPreempted();
   }
-
+#endif
   if (   follow_joint_trajectory_server.isActive() ) {
       follow_joint_trajectory_server.setPreempted();
   }
@@ -220,6 +233,7 @@ void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory
       duration[i] =  trajectory.points[i].time_from_start.toSec() - trajectory.points[i-1].time_from_start.toSec();
     } else { // if i == 0
       duration[i] = trajectory.points[i].time_from_start.toSec();
+      if ( std::abs(duration[i]) < 0.001 ) duration[i] = 0.001; // set delta ... https://github.com/start-jsk/rtmros_common/issues/1036
     }
   }
 
@@ -235,10 +249,12 @@ void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory
   interpolationp = true;
 }
 
+#ifdef USE_PR2_CONTROLLERS_MSGS
 void HrpsysSeqStateROSBridge::onJointTrajectoryActionGoal() {
   pr2_controllers_msgs::JointTrajectoryGoalConstPtr goal = joint_trajectory_server.acceptNewGoal();
   onJointTrajectory(goal->trajectory);
 }
+#endif
 
 void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal() {
   control_msgs::FollowJointTrajectoryGoalConstPtr goal = follow_joint_trajectory_server.acceptNewGoal();
@@ -246,9 +262,11 @@ void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionGoal() {
   onJointTrajectory(goal->trajectory);
 }
 
+#ifdef USE_PR2_CONTROLLERS_MSGS
 void HrpsysSeqStateROSBridge::onJointTrajectoryActionPreempt() {
   joint_trajectory_server.setPreempted();
 }
+#endif
 
 void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt() {
   follow_joint_trajectory_server.setPreempted();
@@ -354,7 +372,11 @@ bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 {
   ros::Time tm_on_execute = ros::Time::now();
+#ifdef USE_PR2_CONTROLLERS_MSGS
   pr2_controllers_msgs::JointTrajectoryControllerState joint_controller_state;
+#else
+  control_msgs::JointTrajectoryControllerState joint_controller_state;
+#endif
   joint_controller_state.header.stamp = tm_on_execute;
 
   control_msgs::FollowJointTrajectoryFeedback follow_joint_trajectory_feedback;
@@ -542,12 +564,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
     }
     updateSensorTransform(sensor_tf_stamp); // transform depends on joint angles, not sensor values
 
+#ifdef USE_PR2_CONTROLLERS_MSGS
     if ( joint_trajectory_server.isActive() &&
 	 interpolationp == true &&  m_service0->isEmpty() == true ) {
       pr2_controllers_msgs::JointTrajectoryResult result;
       joint_trajectory_server.setSucceeded(result);
       interpolationp = false;
     }
+#endif
     if ( follow_joint_trajectory_server.isActive() &&
 	 interpolationp == true &&  m_service0->isEmpty() == true ) {
       control_msgs::FollowJointTrajectoryResult result;
@@ -558,10 +582,12 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
     ros::Time tm_on_execute = ros::Time::now();
 
+#ifdef USE_PR2_CONTROLLERS_MSGS
     if ( joint_trajectory_server.isActive() ) {
       pr2_controllers_msgs::JointTrajectoryFeedback joint_trajectory_feedback;
       joint_trajectory_server.publishFeedback(joint_trajectory_feedback);
     }
+#endif
     if ( follow_joint_trajectory_server.isActive() ) {
       follow_joint_trajectory_feedback.header.stamp = tm_on_execute;
       if (!follow_joint_trajectory_feedback.joint_names.empty() &&

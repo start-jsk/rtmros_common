@@ -2,6 +2,90 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.2 (2017-12-22)
+------------------
+* add test to check `#1036 <https://github.com/start-jsk/rtmros_common/issues/1036>`_ situation (`#1038 <https://github.com/start-jsk/rtmros_common/issues/1038>`_)
+* duration == 0.0 results unexpected behavior, so force set 0.001 when duration == 0 s set (`#1037 <https://github.com/start-jsk/rtmros_common/issues/1037>`_ )
+* Contributors: Kei Okada
+
+1.4.1 (2017-10-25)
+------------------
+* Update of sensor_ros_bridge_connect.py
+  * Connect ReferenceForceUpdater's ref_force (`#1033 <https://github.com/start-jsk/rtmros_common/pull/1033>`_)
+    * [hrpsys_ros_bridge/scripts/sensor_ros_bridge_connect.py] connect reference force port to ReferenceForceUpdater or EmergencyStopper if exists.
+  * Add wait for rmfo and vs (`#1029 <https://github.com/start-jsk/rtmros_common/pull/1029>`_)
+    * [hrpsys_ros_bridge, sensor_ros_bridge_connect.py] add wait for initalizinig all components
+
+* HrpsysSeqStateROSBridge (`#1027 <https://github.com/start-jsk/rtmros_common/pull/1027>`_)
+  * [HrpsysSeqStateROSBridge] fix for using virtual force sensor
+
+* Update rtm-ros-robot-interface.l (`#1030 <https://github.com/start-jsk/rtmros_common/pull/1030>`_)
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add documentation string for new arguments (set-ref-force-linear-p, return-value-mode)
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add argument to set linear interpolation during increasing force
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Enable to set return value mode
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Enable to get fric coefficient wrench add update print messages
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Update otd checking loop for moment. Exit from do-until-key loop immediately when otd detection. Fix valiables for set ref force
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Use euslisp symbol as detector total wrench parameter
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Enable to access detector total wrench as euslisp symbol.
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Update otd checking loop. Exit from do-until-key loop immediately when otd detection.
+
+* Contributors: MasakiMurooka, Shunichi Nozawa, YoheiKakiuchi
+
+1.4.0 (2017-08-09)
+------------------
+* display error message when body->sensor(j, i) is null (`#1014 <https://github.com/start-jsk/rtmros_common/issues/1014>`_)
+* sensor_ros_bridge_connect.py : add more debug message (`#1015 <https://github.com/start-jsk/rtmros_common/issues/1015>`_)
+* Update AutoBalancer and ReferenceForceUpdater euslisp method symbols (`#1026 <https://github.com/start-jsk/rtmros_common/issues/1026>`_)
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Supprot :FootOriginExtMoment for RFU methods.
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Support UseForceMode setting as euslisp symbol in :set-auto-balancer-param.
+
+* fix code to run both Indido and Kinetic (`#1025 <https://github.com/start-jsk/rtmros_common/issues/1025>`_)
+  * /test/test-samplerobot-hcf.launch: increase time-limit to 600
+  * test/{test-samplerobot.py,test-pa10.py} support both pr2_controllers_msgs and controllr_msgs
+  * src/hrpsys_ros_bridge/hrpsys_dashboard.py: fix for qt5
+  * add USE_PR2_CONTROLLERS_MSGS definition
+  * CMakeLists.txt : we do not use pr2_msgs on build time
+  * CMakeLists.txt : remove code to download wet pr2_controllers_msgs for groovy
+
+* Support stride parameter with different length (`#1022 <https://github.com/start-jsk/rtmros_common/issues/1022>`_)
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Support stride_parameter of different length
+  * [hrpsys_ros_bridge/test/hrpsys-samples/samplerobot-auto-balancer.l] Add test to check stride parameter 4 and 6
+
+* [HrpsysSeqStateROSBridge] fix stamp of joint_state. add stamp after reading m_rsangle (`#1019 <https://github.com/start-jsk/rtmros_common/issues/1019>`_)
+  * [HrpsysSeqStateROSBridge] fix stamp of joint_state. add stamp after reading m_rsangle
+
+* [HrpsysSeqStateROSBridge] remove subtraction magic number (`#1013 <https://github.com/start-jsk/rtmros_common/issues/1013>`_)
+  * [HrpsysSeqStateROSBridge] remove subtraction magic number
+
+* Support argumen t for setting duration of calibration. For :remove-xx methods, 8.0 by default[s]. For :reset-xx methods, 0.1[s] by default for compatibility (`#1011 <https://github.com/start-jsk/rtmros_common/issues/1011>`_)
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Support argument for setting duration of calibration. For :remove-xx methods, 8.0 by default[s]. For :reset-xx methods, 0.1[s] by default for compatibility
+
+* Add new methods for :remove-force-sensor-offset using RMFO (`#1010 <https://github.com/start-jsk/rtmros_common/issues/1010>`_)
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add new methods for :remove-force-sensor-offset using RMFO. Add warning message for deprecated remove-force methods.
+
+* Update euslisp hrpsysbase samples (`#1009 <https://github.com/start-jsk/rtmros_common/issues/1009>`_)
+  * [hrpsys_ros_bridge/test/hrpsys-samples] Add README for Euslisp hrpsys example basically copied from ros wiki (http://wiki.ros.org/rtmros_common/Tutorials/WorkingWithEusLisp)
+  * [hrpsys_ros_bridge/test/hrpsys-samples/samplerobot-carry-object.l] Update carry demo euslisp sample.
+  * [hrpsys_ros_bridge/test/hrpsys-samples/samplerobot-stabilizer.l] Update stabilizer euslisp sample according to hrpsys-base stabilizer sample update.
+
+* Fix bug of sample4leg robot end-coords setting for arms. (`#1008 <https://github.com/start-jsk/rtmros_common/issues/1008>`_)
+  * [hrpsys_ros_bridge/models/sample4legrobot.yaml] Fix bug of sample4legrobot end-coords setting for arms.
+
+* Update project generator and refforce (`#1007 <https://github.com/start-jsk/rtmros_common/issues/1007>`_)
+  * [hrpsys_ros_bridge/euslisp] Update README for openhrp-project-generator
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Fix orientation for openhrp-project-generator
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Update for object turnaround detection to use initial ref forces
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Update dump function for openhrp project generator. Use openhrp-project-generator in openhrp3 package instead of _gen_project.launch
+
+* Add forgotten update for robot.launch (https://github.com/start-jsk/rtmros_common/pull/1004) (`#1005 <https://github.com/start-jsk/rtmros_common/issues/1005>`_)
+  * [hrpsys_ros_bridge/scripts/default_robot.launch.in] Add forgotten update in https://github.com/start-jsk/rtmros_common/pull/1004. Add USE_XXX of under-development RTCs for robot.launch such as samplerobot.launch to pass arguments to robot_ros_bridge.launch
+
+* set USE_UNSTABLE_RTC as not all unstable rtc defiend in hrpsys_config.py, just for basic walking test, other latest development rtc is passed by arg (`#1004 <https://github.com/start-jsk/rtmros_common/issues/1004>`_)
+  * set USE_UNSTABLE_RTC as not getUnstableRTC defined in hrpsys_config.py, it is for a basic walking test, other latest development rtc is passed by arg from test_samplerobot_euslisp_unittests.launch
+  * [hrpsys_ros_bridge/launch/hrpsys_ros_bridge.launch,hrpsys_ros_bridge/scripts/default_robot_ros_bridge.launch.in,hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l,hrpsys_tools/launch/hrpsys.launch] Update for ObjectTurnaroundDetector RTC. add USE_REFERENCEFORCEUDPATER and USE_OBJECTCONTACTTURNAROUNDDETECTOR.
+
+* Contributors: Kei Okada, Shunichi Nozawa, Yohei Kakiuchi
+
 1.3.3 (2017-02-12)
 ------------------
 

@@ -2,6 +2,22 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.2 (2017-12-22)
+------------------
+
+1.4.1 (2017-10-25)
+------------------
+
+1.4.0 (2017-08-09)
+------------------
+* fix code to run both Indido and Kinetic (`#1025 <https://github.com/start-jsk/rtmros_common/issues/1025>`_)
+  * hrpsys_tools/test/test-pa10.test: increase sleep time to 10
+
+* set USE_UNSTABLE_RTC as not all unstable rtc defiend in hrpsys_config.py, just for basic walking test, other latest development rtc is passed by arg (`#1004 <https://github.com/start-jsk/rtmros_common/issues/1004>`_)
+  * [hrpsys_ros_bridge/launch/hrpsys_ros_bridge.launch,hrpsys_ros_bridge/scripts/default_robot_ros_bridge.launch.in,hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l,hrpsys_tools/launch/hrpsys.launch] Update for ObjectTurnaroundDetector RTC. add USE_REFERENCEFORCEUDPATER and USE_OBJECTCONTACTTURNAROUNDDETECTOR.
+
+* Contributors: Kei Okada, Shunichi Nozawa
+
 1.3.3 (2017-02-12)
 ------------------
 

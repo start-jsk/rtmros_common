@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>rtmros_common</name>
-  <version>1.3.3</version>
+  <version>1.4.2</version>
   <description>A package suite that provides all the capabilities for
     the ROS users to connect to the robots that run on
     <a href = "http://www.openrtm.org/openrtm/en/content/what-rt-middleware-0">RT Middleware</a>
@@ -9,7 +9,6 @@
   </description>
 
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
-  <maintainer email="iisaito@kinugarage.com">Isaac Isao Saito</maintainer>
   <author email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</author>
   <author>Rosen Diankov</author>
 

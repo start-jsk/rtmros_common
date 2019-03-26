@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
 <package>
   <name>hrpsys_tools</name>
-  <version>1.3.3</version>
+  <version>1.4.2</version>
   <description>The hrpsys_tools package</description>
 
   <maintainer email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</maintainer>
-  <maintainer email="iisaito@kinugarage.com">Isaac Isao Saito</maintainer>
   <author email="k-okada@jsk.t.u-tokyo.ac.jp">Kei Okada</author>
 
   <license>BSD</license>

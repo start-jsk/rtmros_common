@@ -188,6 +188,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     }
   }
 
+  // Force Sensor Settings
   coil::vstring virtual_force_sensor = coil::split(prop["virtual_force_sensor"], ",");
   int npforce = body->numSensors(hrp::Sensor::FORCE);
   int nvforce = virtual_force_sensor.size()/10;
@@ -218,9 +219,16 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     std::cerr << i << " physical force sensor : " << s->name << std::endl;
   }
 
+  // Sensor Settings
   for (int j = 0 ; j < body->numSensorTypes(); j++) {
     for (int i = 0 ; i < body->numSensors(j); i++) {
       hrp::Sensor* sensor = body->sensor(j, i);
+      if (! sensor ) {
+        std::cerr << "ERROR : Unknown sensor (type : " << j << ", id : " << i << ")" << std::endl;
+        std::cerr << "ERROR : Please make sure that each sensor type start from 0 sensorId" << std::endl;
+        std::cerr << "ERROR : THIS WILL CAUSE SEVERE PROBLEM, PLEASE FIX YOUR MODEL FILE " << std::endl;
+        continue;
+      }
       SensorInfo si;
       si.transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
       hrp::Vector3 rpy;
@@ -257,6 +265,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     }
   }
 
+  // Virtual Force Sensor Settings
   for(unsigned int j = 0, i = npforce; j < nvforce; j++, i++ ){
     std::string name = virtual_force_sensor[j*10+0];
     std::string base = virtual_force_sensor[j*10+1];

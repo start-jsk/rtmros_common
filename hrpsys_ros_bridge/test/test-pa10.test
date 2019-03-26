@@ -1,10 +1,10 @@
 <launch>
 
   <arg name="GUI" default="false" />
-  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2809" />
+  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2899" />
 
   <include file="$(find hrpsys_ros_bridge)/launch/pa10.launch" >
-    <arg name="corbaport" default="2809" />
+    <arg name="corbaport" default="2899" />
     <arg name="GUI" default="$(arg GUI)" />
     <arg name="RUN_RVIZ" default="false" />
     <arg name="SIMULATOR_NAME" default="HRP1(Robot)0" />
@@ -18,6 +18,6 @@
   <param name="hztest_tf/test_duration" value="5.0" />
   <test test-name="hztest_tf" pkg="rostest" type="hztest" name="hztest_tf" retry="4" />
 
-  <test test-name="pa10" pkg="hrpsys_ros_bridge" type="test-pa10.py" retry="4" />
+  <test test-name="pa10" pkg="hrpsys_ros_bridge" type="test-pa10.py" retry="4" time-limit="400" />
 
 </launch>

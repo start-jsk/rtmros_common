@@ -8,6 +8,10 @@
   <arg name="PROJECT_FILE" default="$(find @PROJECT_PKG_NAME@)/models/@ROBOT@.xml" unless="$(arg NOSIM)"/>
   <arg name="SIMULATOR_NAME" default="@ROBOT@(Robot)0" />
   <arg name="corbaport" default="15005" />
+  <arg name="managerport" default="2810" />
+  <!-- <arg name="managerport" default="15006" /> -->
+  <!-- available in Kinetic -->
+  <!-- <arg name="managerport" default="$(eval arg('corbaport') + 1)"/> -->
   <arg name="hrpsys_precreate_rtc" default="HGcontroller"/>
   <arg name="USE_UNSTABLE_RTC" default="@USE_UNSTABLE_RTC@"/>
   <!-- following rtc is used for test/hrpsys-samples, mainly full euslisp test -->
@@ -21,6 +25,7 @@
     <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
     <arg name="REALTIME" default="$(arg REALTIME)" />
     <arg name="corbaport" default="$(arg corbaport)" />
+    <arg name="managerport" default="$(arg managerport)" />
     <arg name="GUI" default="$(arg GUI)" />
     <arg name="hrpsys_precreate_rtc" default="$(arg hrpsys_precreate_rtc)" />
     <arg name="USE_UNSTABLE_RTC" default="$(arg USE_UNSTABLE_RTC)"/>
@@ -29,6 +34,7 @@
     <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
     <arg name="RUN_RVIZ" default="$(arg RUN_RVIZ)" />
     <arg name="corbaport" default="$(arg corbaport)" />
+    <arg name="managerport" default="$(arg managerport)" />
     <arg name="USE_UNSTABLE_RTC" default="$(arg USE_UNSTABLE_RTC)"/>
     <!-- BEGIN: development -->
     <arg name="USE_EMERGENCYSTOPPER" default="$(arg USE_EMERGENCYSTOPPER)" />
