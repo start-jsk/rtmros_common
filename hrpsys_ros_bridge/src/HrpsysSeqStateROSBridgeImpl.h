@@ -177,10 +177,10 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   OutPort<TimedPose3D> m_htheadOut;
   TimedPoint3D m_htzmp;
   OutPort<TimedPoint3D> m_htzmpOut;
-  TimedDoubleSeq m_htrfw;
-  OutPort<TimedDoubleSeq> m_htrfwOut;
-  TimedDoubleSeq m_htlfw;
-  OutPort<TimedDoubleSeq> m_htlfwOut;
+  OpenHRP::TimedWrench m_htrfw;
+  OutPort<OpenHRP::TimedWrench> m_htrfwOut;
+  OpenHRP::TimedWrench m_htlfw;
+  OutPort<OpenHRP::TimedWrench> m_htlfwOut;
 
   TimedPose3D m_htcom_dbg;
   InPort<TimedPose3D> m_htcom_dbgIn;

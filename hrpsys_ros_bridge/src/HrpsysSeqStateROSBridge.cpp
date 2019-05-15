@@ -317,13 +317,13 @@ void HrpsysSeqStateROSBridge::onHumanTrackerZMPCommandCB(const geometry_msgs::Po
   m_htzmpOut.write(m_htzmp);
 }
 void HrpsysSeqStateROSBridge::onHumanTrackerRFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg) {
-  m_htrfw.data[0] = msg->wrench.force.x;  m_htrfw.data[1] = msg->wrench.force.y;  m_htrfw.data[2] = msg->wrench.force.z;
-  m_htrfw.data[3] = msg->wrench.torque.x; m_htrfw.data[4] = msg->wrench.torque.y; m_htrfw.data[5] = msg->wrench.torque.z;
+  m_htrfw.data.force.x  = msg->wrench.force.x;  m_htrfw.data.force.y    = msg->wrench.force.y;  m_htrfw.data.force.z    = msg->wrench.force.z;
+  m_htrfw.data.torque.x = msg->wrench.torque.x; m_htrfw.data.torque.y   = msg->wrench.torque.y; m_htrfw.data.torque.z   = msg->wrench.torque.z;
   m_htrfwOut.write(m_htrfw);
 }
 void HrpsysSeqStateROSBridge::onHumanTrackerLFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg) {
-  m_htlfw.data[0] = msg->wrench.force.x;  m_htlfw.data[1] = msg->wrench.force.y;  m_htlfw.data[2] = msg->wrench.force.z;
-  m_htlfw.data[3] = msg->wrench.torque.x; m_htlfw.data[4] = msg->wrench.torque.y; m_htlfw.data[5] = msg->wrench.torque.z;
+  m_htlfw.data.force.x  = msg->wrench.force.x;  m_htlfw.data.force.y    = msg->wrench.force.y;  m_htlfw.data.force.z    = msg->wrench.force.z;
+  m_htlfw.data.torque.x = msg->wrench.torque.x; m_htlfw.data.torque.y   = msg->wrench.torque.y; m_htlfw.data.torque.z   = msg->wrench.torque.z;
   m_htlfwOut.write(m_htlfw);
 }
 

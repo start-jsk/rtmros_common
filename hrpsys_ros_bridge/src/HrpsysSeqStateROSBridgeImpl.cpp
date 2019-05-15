@@ -118,8 +118,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addOutPort("htrh", m_htrhOut);
   addOutPort("htlh", m_htlhOut);
   addOutPort("hthead", m_htheadOut);
-  m_htrfw.data.length(6);
-  m_htlfw.data.length(6);
 
   addInPort("htcom_dbgIn", m_htcom_dbgIn);
   addInPort("htrf_dbgIn", m_htrf_dbgIn);
