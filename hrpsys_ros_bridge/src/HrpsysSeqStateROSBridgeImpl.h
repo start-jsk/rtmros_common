@@ -157,6 +157,8 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   InPort<TimedBooleanSeq> m_refContactStatesIn, m_actContactStatesIn;
   TimedDoubleSeq m_controlSwingSupportTime;
   InPort<TimedDoubleSeq> m_controlSwingSupportTimeIn;
+  OpenHRP::TimedLandingPosition m_rslandingTarget;
+  InPort<OpenHRP::TimedLandingPosition> m_rslandingTargetIn;
 
   // </rtc-template>
 
@@ -164,6 +166,8 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   // <rtc-template block="outport_declare">
   TimedDoubleSeq m_mctorque;
   OutPort<TimedDoubleSeq> m_mctorqueOut;
+  OpenHRP::TimedLandingPosition m_rslandingHeight;
+  OutPort<OpenHRP::TimedLandingPosition> m_rslandingHeightOut;
 
   // </rtc-template>
 

@@ -62,6 +62,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   joint_controller_state_pub = nh.advertise<control_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
 #endif
   trajectory_command_sub = nh.subscribe("/fullbody_controller/command", 1, &HrpsysSeqStateROSBridge::onTrajectoryCommandCB, this);
+  landing_height_sub = nh.subscribe("/landing_height", 1, &HrpsysSeqStateROSBridge::onLandingHeightCB, this);
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
   odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
   imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1);
@@ -158,6 +159,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   ref_contact_states_pub = nh.advertise<hrpsys_ros_bridge::ContactStatesStamped>("/ref_contact_states", 10);
   act_contact_states_pub = nh.advertise<hrpsys_ros_bridge::ContactStatesStamped>("/act_contact_states", 10);
   cop_pub.resize(m_mcforceName.size());
+  landing_target_pub = nh.advertise<hrpsys_ros_bridge::LandingPosition>("/landing_target", 10);
   for (unsigned int i=0; i<m_mcforceName.size(); i++){
     std::string tmpname(m_mcforceName[i]); // "ref_xx"
     tmpname.erase(0,4); // Remove "ref_"
@@ -273,6 +275,14 @@ void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt() {
 
 void HrpsysSeqStateROSBridge::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg) {
   onJointTrajectory(*msg);
+}
+
+void HrpsysSeqStateROSBridge::onLandingHeightCB(const hrpsys_ros_bridge::LandingPosition::ConstPtr& msg) {
+  m_rslandingHeight.data.x = msg->x;
+  m_rslandingHeight.data.y = msg->y;
+  m_rslandingHeight.data.z = msg->z;
+  m_rslandingHeight.data.l_r = msg->l_r;
+  m_rslandingHeightOut.write();
 }
 
 bool HrpsysSeqStateROSBridge::setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
@@ -790,6 +800,28 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       actCPv.point.y = m_rsactCP.data.y;
       actCPv.point.z = m_rsactCP.data.z;
       act_cp_pub.publish(actCPv);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+  if ( m_rslandingTargetIn.isNew() ) {
+    try {
+      m_rslandingTargetIn.read();
+      hrpsys_ros_bridge::LandingPosition landingTargetv;
+      if ( use_hrpsys_time ) {
+        landingTargetv.header.stamp = ros::Time(m_rslandingTarget.tm.sec, m_rslandingTarget.tm.nsec);
+      }else{
+        landingTargetv.header.stamp = tm_on_execute;
+      }
+      landingTargetv.header.frame_id = rootlink_name;
+      landingTargetv.x = m_rslandingTarget.data.x;
+      landingTargetv.y = m_rslandingTarget.data.y;
+      landingTargetv.z = m_rslandingTarget.data.z;
+      landingTargetv.l_r = m_rslandingTarget.data.l_r;
+      landing_target_pub.publish(landingTargetv);
     }
     catch(const std::runtime_error &e)
       {
