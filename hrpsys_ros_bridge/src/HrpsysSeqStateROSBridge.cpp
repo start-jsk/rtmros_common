@@ -281,6 +281,9 @@ void HrpsysSeqStateROSBridge::onLandingHeightCB(const hrpsys_ros_bridge::Landing
   m_rslandingHeight.data.x = msg->x;
   m_rslandingHeight.data.y = msg->y;
   m_rslandingHeight.data.z = msg->z;
+  m_rslandingHeight.data.nx = msg->nx;
+  m_rslandingHeight.data.ny = msg->ny;
+  m_rslandingHeight.data.nz = msg->nz;
   m_rslandingHeight.data.l_r = msg->l_r;
   m_rslandingHeightOut.write();
 }
