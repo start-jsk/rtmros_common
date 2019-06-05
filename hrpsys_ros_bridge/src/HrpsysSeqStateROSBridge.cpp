@@ -63,6 +63,7 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
 #endif
   trajectory_command_sub = nh.subscribe("/fullbody_controller/command", 1, &HrpsysSeqStateROSBridge::onTrajectoryCommandCB, this);
   landing_height_sub = nh.subscribe("/landing_height", 1, &HrpsysSeqStateROSBridge::onLandingHeightCB, this);
+  steppable_region_sub = nh.subscribe("/steppable_region", 1, &HrpsysSeqStateROSBridge::onSteppableRegionCB, this);
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
   odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
   imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1);
@@ -286,6 +287,21 @@ void HrpsysSeqStateROSBridge::onLandingHeightCB(const hrpsys_ros_bridge::Landing
   m_rslandingHeight.data.nz = msg->nz;
   m_rslandingHeight.data.l_r = msg->l_r;
   m_rslandingHeightOut.write();
+}
+
+void HrpsysSeqStateROSBridge::onSteppableRegionCB(const hrpsys_ros_bridge::SteppableRegion::ConstPtr& msg) {
+  size_t convex_num(msg->polygons.size());
+  m_rssteppableRegion.data.region.length(convex_num);
+  for (size_t i = 0; i < convex_num; i++) {
+    size_t vs_num(msg->polygons[i].polygon.points.size());
+    m_rssteppableRegion.data.region[i].length(2 * vs_num); // x,y components
+    for (size_t j = 0; j < vs_num; j++) {
+      m_rssteppableRegion.data.region[i][2*j] = msg->polygons[i].polygon.points[j].x;
+      m_rssteppableRegion.data.region[i][2*j+1] = msg->polygons[i].polygon.points[j].y;
+    }
+  }
+  m_rssteppableRegion.data.l_r = msg->l_r;
+  m_rssteppableRegionOut.write();
 }
 
 bool HrpsysSeqStateROSBridge::setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
