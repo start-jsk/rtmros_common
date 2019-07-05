@@ -45,6 +45,7 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_actContactStatesIn("actContactStates", m_actContactStates),
     m_controlSwingSupportTimeIn("controlSwingSupportTime", m_controlSwingSupportTime),
     m_mctorqueOut("mctorque", m_mctorque),
+    m_SegwaySensorsOut("SegwaySensors", m_SegwaySensors),
     m_SequencePlayerServicePort("SequencePlayerService")
 
     // </rtc-template>
@@ -79,6 +80,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
 
   // Set OutPort buffer
   addOutPort("mctorque", m_mctorqueOut);
+  addOutPort("SegwaySensors", m_SegwaySensorsOut);
 
   // Set service provider to Ports
 
