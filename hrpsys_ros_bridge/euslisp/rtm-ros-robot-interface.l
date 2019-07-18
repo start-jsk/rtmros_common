@@ -185,12 +185,14 @@
   (:motor-extra-data
    ()
    "Returns motor extra data. Please see iob definition for each system."
-   (let* ((d (cdr (assoc :motor-extra-data robot-state)))
-          (dims (mapcar #'(lambda (x) (send x :size)) (send (send d :layout) :dim)))
-          (ret))
-     (dotimes (j (car dims))
-       (push (subseq (send d :data) (* j (cadr dims)) (* (1+ j) (cadr dims))) ret))
-     (reverse ret)))
+   (if (cdr (assoc :motor-extra-data robot-state))
+       (let* ((d (cdr (assoc :motor-extra-data robot-state)))
+              (dims (mapcar #'(lambda (x) (send x :size)) (send (send d :layout) :dim)))
+              (ret))
+         (dotimes (j (car dims))
+           (push (subseq (send d :data) (* j (cadr dims)) (* (1+ j) (cadr dims))) ret))
+         (reverse ret))
+     nil))
   (:imucoords
    ()
    "Returns robot's coords based on imu measurement."
