@@ -164,6 +164,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
     cop_pub[i] = nh.advertise<geometry_msgs::PointStamped>(tmpname+"_cop", 10);
   }
   em_mode_pub = nh.advertise<std_msgs::Int32>("emergency_mode", 10);
+  fbwrench_subs.resize(m_fbwrenchName.size());
+  for(int i=0;i<fbwrench_subs.size();i++){
+      fbwrench_subs[i] = nh.subscribe(m_fbwrenchName[i], 1, &HrpsysSeqStateROSBridge::onFeedbackWrench, this);
+  }
 
   return RTC::RTC_OK;
 }
@@ -288,6 +292,21 @@ bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request
     return false;
   }
   return true;
+}
+
+void HrpsysSeqStateROSBridge::onFeedbackWrench(const ros::MessageEvent<geometry_msgs::WrenchStamped const>& event){
+    const ros::M_string& header = event.getConnectionHeader();
+    std::string topic = header.at("topic");
+    const geometry_msgs::WrenchStampedConstPtr msg = event.getMessage();
+    for(int i=0; i<m_fbwrenchName.size();i++){
+        if(topic.find(m_fbwrenchName[i]) != std::string::npos){
+            RTC::TimedDoubleSeq d;
+            d.data.length(6);
+            d.data[0] = msg->wrench.force.x;     d.data[1] = msg->wrench.force.y;     d.data[2] = msg->wrench.force.z;
+            d.data[3] = msg->wrench.torque.x;    d.data[4] = msg->wrench.torque.y;    d.data[5] = msg->wrench.torque.z;
+            m_fbwrenchOut[i]->write(d);
+        }
+    }
 }
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)

@@ -161,6 +161,11 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   // <rtc-template block="outport_declare">
   TimedDoubleSeq m_mctorque;
   OutPort<TimedDoubleSeq> m_mctorqueOut;
+  // feedback force/moment ports
+  typedef boost::shared_ptr<RTC::OutPort<RTC::TimedDoubleSeq> > OTDS_Ptr;
+  std::vector<TimedDoubleSeq> m_fbwrench;
+  std::vector<OTDS_Ptr> m_fbwrenchOut;
+  std::vector<std::string> m_fbwrenchName;
 
   // </rtc-template>
 
