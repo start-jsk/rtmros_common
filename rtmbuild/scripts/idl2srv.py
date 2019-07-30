@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 from optparse import OptionParser
 import os, os.path, sys, string, re
+
+if sys.version_info[0] >= 3:
+    from functools import reduce # python3
 
 # resolve library path, copied from omniidl (ubuntu 11.10)
 # Try a path based on the installation prefix, customised for Debian
@@ -283,7 +288,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         msgfile = basedir + "/msg/" + self.getCppTypeText(typ,full=ROS_FULL) + ".msg"
         if not os.path.exists(basedir):
             return
-        print msgfile
+        print(msgfile)
         if options.filenames:
             return
 
@@ -291,7 +296,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
             return # do not overwrite
 
         os.system('mkdir -p %s/msg' % basedir)
-        print >>sys.stderr,"[idl2srv] writing "+msgfile+"...."
+        print("[idl2srv] writing "+msgfile+"....", file=sys.stderr)
         fd = open(msgfile, 'w')
         if isinstance(typ, idlast.Enum):
             for val in typ.enumerators():
@@ -311,7 +316,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         srvfile = basedir + "/srv/" + self.getCppTypeText(op,full=ROS_FULL) + ".srv"
         if not os.path.exists(basedir):
             return
-        print srvfile
+        print(srvfile)
         if options.filenames:
             return
 
@@ -320,7 +325,7 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         os.system('mkdir -p %s/srv' % basedir)
         args = op.parameters()
 
-        print >>sys.stderr, "[idl2srv] writing "+srvfile+"...."
+        print("[idl2srv] writing "+srvfile+"....", file=sys.stderr)
         fd = open(srvfile, 'w')
         for arg in [arg for arg in args if arg.is_in()]:
             fd.write("%s %s\n" % (self.getROSTypeText(arg.paramType()), arg.identifier()))
@@ -468,9 +473,9 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         Comp_cpp = wd + '/' + module_name + 'Comp.cpp'
         mod_cpp = wd + '/' + module_name + '.cpp'
         mod_h = wd + '/' + module_name + '.h'
-        print Comp_cpp
-        print mod_cpp
-        print mod_h
+        print(Comp_cpp)
+        print(mod_cpp)
+        print(mod_h)
         if options.filenames:
             return
 
@@ -480,8 +485,13 @@ class ServiceVisitor (idlvisitor.AstVisitor):
         # check if rtc-template exists under `rospack find openrtm_aist`/bin, otherwise use openrtm_aist_PREFIX/lib/openrtm_aist/bin
         from subprocess import check_output, Popen, PIPE
         openrtm_path = Popen(['rospack','find','openrtm_aist'], stdout=PIPE).communicate()[0].rstrip() # use Popen, not check_output, since catkin_make can not found rospack find
+        if not isinstance(openrtm_path, str):
+            openrtm_path = openrtm_path.decode('ascii')
         if not os.path.exists(os.path.join(openrtm_path, "bin")) :
-            openrtm_path = os.path.join(check_output(['pkg-config','openrtm-aist','--variable=prefix']).rstrip(),"lib/openrtm_aist")
+            openrtm_prefix = check_output(['pkg-config','openrtm-aist','--variable=prefix']).rstrip()
+            if not isinstance(openrtm_prefix, str):
+                openrtm_prefix = openrtm_prefix.decode('ascii')
+            openrtm_path = os.path.join(openrtm_prefix,"lib/openrtm_aist")
         command = "PATH=%s/bin:$PATH rtc-template -bcxx --module-name=%s --consumer=%s:service0:'%s' --consumer-idl=%s --idl-include=%s" % (openrtm_path, module_name, service_name, service_name, idlfile, idldir)
         #command = "rosrun openrtm_aist rtc-template -bcxx --module-name=%s --consumer=%s:service0:'%s' --consumer-idl=%s --idl-include=%s" % (module_name, service_name, service_name, idlfile, idldir)
         os.system("mkdir -p %s" % tmpdir)
@@ -645,7 +655,7 @@ class InterfaceNameVisitor (idlvisitor.AstVisitor):
             n.accept(self)
     def visitInterface(self, node):
         if node.mainFile():
-            print node.identifier()
+            print(node.identifier())
             if options.interfaces:
                 pass
 

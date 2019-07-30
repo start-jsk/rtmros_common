@@ -67,6 +67,10 @@ macro(rtmbuild_init)
     pkg_check_modules(rtmbuild rtmbuild REQUIRED)
     set(idl2srv_EXECUTABLE ${rtmbuild_PREFIX}/share/rtmbuild/scripts/idl2srv.py)
   endif()
+  # on melodic (18.04) omnniorb requries python3
+  if($ENV{ROS_DISTRO} STRGREATER "lunar")
+    set(idl2srv_EXECUTABLE "python3;${idl2srv_EXECUTABLE}")
+  endif()
   message("[rtmbuild_init] - idl2srv_EXECUTABLE     -> ${idl2srv_EXECUTABLE}")
 
   execute_process(COMMAND pkg-config openrtm-aist --variable=prefix      OUTPUT_VARIABLE rtm_prefix    OUTPUT_STRIP_TRAILING_WHITESPACE)
