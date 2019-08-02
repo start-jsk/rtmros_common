@@ -3,6 +3,6 @@
     version: release/kinetic/openhrp3
     local-name: openhrp3
 - git:
-    uri: https://github.com/tork-a/hrpsys-release
-    version: release/kinetic/hrpsys
+    uri: https://github.com/fkanehiro/hrpsys-base
+    version: master
     local-name: hrpsys
