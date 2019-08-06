@@ -299,6 +299,14 @@ macro(rtmbuild_add_executable exe)
   else()
     rosbuild_add_executable(${ARGV})
   endif()
+  ## disable -Wdeprecated to shorten the log data
+  ## ^~~~~
+  ## /opt/ros/melodic/include/openrtm-1.1/rtm/PeriodicExecutionContext.h:633:7: warning: dynamic exception specifications are deprecated in C++11 [-Wdeprecated]
+  ## throw (CORBA::SystemException);
+  ## ^~~~~
+  ## The job exceeded the maximum log length, and has been terminated.
+  set_target_properties(${exe} PROPERTIES COMPILE_FLAGS "-Wno-deprecated")
+  ##
   add_dependencies(${exe} RTMBUILD_${PROJECT_NAME}_genbridge ${${_package}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
   target_link_libraries(${exe} ${catkin_LIBRARIES} ${openrtm_aist_LIBRARIES} ${openhrp3_LIBRARIES} ${${PROJECT_NAME}_IDLLIBRARY_DIRS} )
 endmacro(rtmbuild_add_executable)
