@@ -67,6 +67,10 @@ macro(rtmbuild_init)
     pkg_check_modules(rtmbuild rtmbuild REQUIRED)
     set(idl2srv_EXECUTABLE ${rtmbuild_PREFIX}/share/rtmbuild/scripts/idl2srv.py)
   endif()
+  # on melodic (18.04) omnniorb requries python3
+  if($ENV{ROS_DISTRO} STRGREATER "lunar")
+    set(idl2srv_EXECUTABLE "python3;${idl2srv_EXECUTABLE}")
+  endif()
   message("[rtmbuild_init] - idl2srv_EXECUTABLE     -> ${idl2srv_EXECUTABLE}")
 
   execute_process(COMMAND pkg-config openrtm-aist --variable=prefix      OUTPUT_VARIABLE rtm_prefix    OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -134,6 +138,13 @@ macro(rtmbuild_init)
   endif()
 
   include_directories(${catkin_INCLUDE_DIRS} ${openrtm_aist_INCLUDE_DIRS} ${openhrp3_INCLUDE_DIRS})
+  # since catkin > 0.7.0, the CPATH is no longer being set by catkin, so rtmbuild manually add them
+  set(_cmake_prefix_path_tmp $ENV{CMAKE_PREFIX_PATH})
+  string(REPLACE ":" ";" _cmake_prefix_path_tmp ${_cmake_prefix_path_tmp})
+  foreach(_cmake_prefix_path ${_cmake_prefix_path_tmp})
+    include_directories(${_cmake_prefix_path}/include)
+  endforeach()
+
   link_directories(${catkin_LIBRARY_DIRS} ${openrtm_aist_LIBRARY_DIRS} ${openhrp3_LIBRARY_DIRS})
 
 endmacro(rtmbuild_init)
@@ -288,6 +299,14 @@ macro(rtmbuild_add_executable exe)
   else()
     rosbuild_add_executable(${ARGV})
   endif()
+  ## disable -Wdeprecated to shorten the log data
+  ## ^~~~~
+  ## /opt/ros/melodic/include/openrtm-1.1/rtm/PeriodicExecutionContext.h:633:7: warning: dynamic exception specifications are deprecated in C++11 [-Wdeprecated]
+  ## throw (CORBA::SystemException);
+  ## ^~~~~
+  ## The job exceeded the maximum log length, and has been terminated.
+  set_target_properties(${exe} PROPERTIES COMPILE_FLAGS "-Wno-deprecated")
+  ##
   add_dependencies(${exe} RTMBUILD_${PROJECT_NAME}_genbridge ${${_package}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
   target_link_libraries(${exe} ${catkin_LIBRARIES} ${openrtm_aist_LIBRARIES} ${openhrp3_LIBRARIES} ${${PROJECT_NAME}_IDLLIBRARY_DIRS} )
 endmacro(rtmbuild_add_executable)
