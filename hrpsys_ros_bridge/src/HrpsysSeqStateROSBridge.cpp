@@ -463,8 +463,16 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         joint_state.velocity.push_back(m_rsvel.data[i]);
       }
     } else {
-      joint_state.velocity.resize(joint_state.name.size());
+      double time_from_prev = (joint_state.header.stamp - prev_joint_state.header.stamp).toSec();
+      if(time_from_prev > 0 && prev_joint_state.position.size() == joint_state.position.size()) {
+        for (unsigned int i = 0; i < joint_state.position.size(); i++) {
+          joint_state.velocity.push_back((joint_state.position[i] - prev_joint_state.position[i]) / time_from_prev);
+        }
+      } else {
+        joint_state.velocity.resize(joint_state.name.size());
+      }
     }
+    prev_joint_state = joint_state;
     // set effort if m_rstorque is available
     if (m_rstorque.data.length() == body->joints().size()) {
       for ( unsigned int i = 0; i < body->joints().size() ; i++ ){
