@@ -30,7 +30,7 @@
   <arg name="USE_REFERENCEFORCEUPDATER" default="false" />
   <arg name="USE_OBJECTCONTACTTURNAROUNDDETECTOR" default="false" />
   <arg name="USE_HRPSYS_PROFILE" default="true" />
-  <arg name="USE_VELOCITY_OUTPUT" default="false" />
+  <arg name="USE_VELOCITY_OUTPUT" default="false" doc="true: output actual velocity / false: output differential value of actual postition as /joint_states/velocity"/>
   <arg name="PUBLISH_SENSOR_TF" default="true" />
   <!--
       roslaunch hrpsys_ros_bridge sample.launch nameserver:=192.168.1.1
