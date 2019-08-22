@@ -626,6 +626,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   updateImu(base, is_base_valid, tm_on_execute);
 
+  updateOdometryTF(tm_on_execute);
+
   // publish forces sonsors
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
     if ( m_rsforceIn[i]->isNew() ) {
@@ -995,6 +997,33 @@ void HrpsysSeqStateROSBridge::updateOdometry(const hrp::Vector3 &trans, const hr
     prev_rpy = rpy;
     prev_odom_acquired = true;
   }
+}
+
+
+void HrpsysSeqStateROSBridge::updateOdometryTF(const ros::Time &stamp)
+{
+
+
+    if (m_teleopOdomIn.isNew()) {
+        m_teleopOdomIn.read();
+        geometry_msgs::TransformStamped tf_tmp;
+        tf_tmp.header.stamp = stamp;
+        tf_tmp.header.frame_id = "teleop_world";
+        tf_tmp.child_frame_id = rootlink_name;
+        Eigen::Quaternion<double> quat(hrp::rotFromRpy(m_teleopOdom.data.orientation.r, m_teleopOdom.data.orientation.p, m_teleopOdom.data.orientation.y));
+        tf_tmp.transform.translation.x = m_teleopOdom.data.position.x;
+        tf_tmp.transform.translation.y = m_teleopOdom.data.position.y;
+        tf_tmp.transform.translation.z = m_teleopOdom.data.position.z;
+        tf_tmp.transform.rotation.x = quat.x();
+        tf_tmp.transform.rotation.y = quat.y();
+        tf_tmp.transform.rotation.z = quat.z();
+        tf_tmp.transform.rotation.w = quat.w();
+        tf_transforms.push_back(tf_tmp);
+
+//        tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
+//                                   tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
+
+    }
 }
 
 void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp)

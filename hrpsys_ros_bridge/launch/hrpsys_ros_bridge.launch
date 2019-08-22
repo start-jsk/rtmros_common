@@ -173,6 +173,7 @@
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:feedback_rfsensor" to="st.rtc:feedback_rfsensor" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:feedback_lhsensor" to="st.rtc:feedback_lhsensor" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:feedback_rhsensor" to="st.rtc:feedback_rhsensor" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
+    <rtconnect from="st.rtc:teleopOdom" to="HrpsysSeqStateROSBridge0.rtc:teleopOdom" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
 
     <rtactivate component="AutoBalancerServiceROSBridge.rtc" />
     <rtactivate component="StabilizerServiceROSBridge.rtc" />

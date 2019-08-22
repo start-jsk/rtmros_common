@@ -96,9 +96,12 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   ros::Timer periodic_update_timer;
   std::vector<geometry_msgs::TransformStamped> tf_transforms;
   void periodicTimerCallback(const ros::TimerEvent& event);
-  
+
   // odometry relatives
   void updateOdometry(const hrp::Vector3 &trans, const hrp::Matrix33 &R, const ros::Time &stamp);
+
+  // teleop relatives
+  void updateOdometryTF(const ros::Time &stamp);
 
   // imu relatives
   void updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp);
