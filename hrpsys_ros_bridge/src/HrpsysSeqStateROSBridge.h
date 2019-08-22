@@ -70,10 +70,13 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
                 dynamic_reconfigure::Reconfigure::Response &res);
   bool setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
                                hrpsys_ros_bridge::SetSensorTransformation::Response& res);
- private:
+  void onFeedbackWrench(const ros::MessageEvent<geometry_msgs::WrenchStamped const>& event);
+
+      private:
   ros::NodeHandle nh;
   ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, ref_cp_pub, act_cp_pub, odom_pub, imu_pub, em_mode_pub, ref_contact_states_pub, act_contact_states_pub;
   ros::Subscriber trajectory_command_sub;
+  std::vector<ros::Subscriber> fbwrench_subs;
   std::vector<ros::Publisher> fsensor_pub, cop_pub;
 #ifdef USE_PR2_CONTROLLERS_MSGS
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> joint_trajectory_server;
@@ -111,9 +114,12 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   ros::Timer periodic_update_timer;
   std::vector<geometry_msgs::TransformStamped> tf_transforms;
   void periodicTimerCallback(const ros::TimerEvent& event);
-  
+
   // odometry relatives
   void updateOdometry(const hrp::Vector3 &trans, const hrp::Matrix33 &R, const ros::Time &stamp);
+
+  // teleop relatives
+  void updateOdometryTF(const ros::Time &stamp);
 
   // imu relatives
   void updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp);

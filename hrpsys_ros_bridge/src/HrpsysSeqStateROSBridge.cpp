@@ -191,6 +191,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
     cop_pub[i] = nh.advertise<geometry_msgs::PointStamped>(tmpname+"_cop", 10);
   }
   em_mode_pub = nh.advertise<std_msgs::Int32>("emergency_mode", 10);
+  fbwrench_subs.resize(m_fbwrenchName.size());
+  for(int i=0;i<fbwrench_subs.size();i++){
+      fbwrench_subs[i] = nh.subscribe(m_fbwrenchName[i], 1, &HrpsysSeqStateROSBridge::onFeedbackWrench, this);
+  }
 
   return RTC::RTC_OK;
 }
@@ -367,6 +371,21 @@ bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request
     return false;
   }
   return true;
+}
+
+void HrpsysSeqStateROSBridge::onFeedbackWrench(const ros::MessageEvent<geometry_msgs::WrenchStamped const>& event){
+    const ros::M_string& header = event.getConnectionHeader();
+    std::string topic = header.at("topic");
+    const geometry_msgs::WrenchStampedConstPtr msg = event.getMessage();
+    for(int i=0; i<m_fbwrenchName.size();i++){
+        if(topic.find(m_fbwrenchName[i]) != std::string::npos){
+            RTC::TimedDoubleSeq d;
+            d.data.length(6);
+            d.data[0] = msg->wrench.force.x;     d.data[1] = msg->wrench.force.y;     d.data[2] = msg->wrench.force.z;
+            d.data[3] = msg->wrench.torque.x;    d.data[4] = msg->wrench.torque.y;    d.data[5] = msg->wrench.torque.z;
+            m_fbwrenchOut[i]->write(d);
+        }
+    }
 }
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
@@ -685,6 +704,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
   }  // end: m_baseTformIn
 
   updateImu(base, is_base_valid, tm_on_execute);
+
+  updateOdometryTF(tm_on_execute);
 
   // publish forces sonsors
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
@@ -1059,6 +1080,33 @@ void HrpsysSeqStateROSBridge::updateOdometry(const hrp::Vector3 &trans, const hr
     prev_rpy = rpy;
     prev_odom_acquired = true;
   }
+}
+
+
+void HrpsysSeqStateROSBridge::updateOdometryTF(const ros::Time &stamp)
+{
+
+
+    if (m_teleopOdomIn.isNew()) {
+        m_teleopOdomIn.read();
+        geometry_msgs::TransformStamped tf_tmp;
+        tf_tmp.header.stamp = stamp;
+        tf_tmp.header.frame_id = "teleop_world";
+        tf_tmp.child_frame_id = rootlink_name;
+        Eigen::Quaternion<double> quat(hrp::rotFromRpy(m_teleopOdom.data.orientation.r, m_teleopOdom.data.orientation.p, m_teleopOdom.data.orientation.y));
+        tf_tmp.transform.translation.x = m_teleopOdom.data.position.x;
+        tf_tmp.transform.translation.y = m_teleopOdom.data.position.y;
+        tf_tmp.transform.translation.z = m_teleopOdom.data.position.z;
+        tf_tmp.transform.rotation.x = quat.x();
+        tf_tmp.transform.rotation.y = quat.y();
+        tf_tmp.transform.rotation.z = quat.z();
+        tf_tmp.transform.rotation.w = quat.w();
+        tf_transforms.push_back(tf_tmp);
+
+//        tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
+//                                   tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
+
+    }
 }
 
 void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp)

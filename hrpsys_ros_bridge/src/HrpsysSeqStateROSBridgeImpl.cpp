@@ -74,6 +74,7 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
 
     m_invdyn_dbgIn("invdyn_dbgIn", m_invdyn_dbg),
 
+    m_teleopOdomIn("teleopOdom", m_teleopOdom),
     m_SequencePlayerServicePort("SequencePlayerService")
 
     // </rtc-template>
@@ -105,6 +106,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("refContactStates", m_refContactStatesIn);
   addInPort("actContactStates", m_actContactStatesIn);
   addInPort("controlSwingSupportTime", m_controlSwingSupportTimeIn);
+  addInPort("teleopOdom", m_teleopOdomIn);
 
   // Set OutPort buffer
   addOutPort("mctorque", m_mctorqueOut);
@@ -197,6 +199,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   m_offforceIn.resize(nforce);
   m_mcforce.resize(nforce);
   m_mcforceIn.resize(nforce);
+  m_fbwrench.resize(npforce);
+  m_fbwrenchOut.resize(npforce);
   for (unsigned int i=0; i<npforce; i++){
     hrp::Sensor *s = body->sensor(hrp::Sensor::FORCE, i);
     // force and moment
@@ -214,6 +218,11 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     m_mcforce[i].data.length(6);
     registerInPort(std::string("ref_" + s->name).c_str(), *m_mcforceIn[i]);
     m_mcforceName.push_back(std::string("ref_" + s->name));
+    // feedback force and moment
+    m_fbwrenchOut[i] = OTDS_Ptr(new OutPort<TimedDoubleSeq>(std::string("feedback_" + s->name).c_str(), m_fbwrench[i]));
+    m_fbwrench[i].data.length(6);
+    registerOutPort(std::string("feedback_" + s->name).c_str(), *m_fbwrenchOut[i]);
+    m_fbwrenchName.push_back(std::string("feedback_" + s->name));
     std::cerr << i << " physical force sensor : " << s->name << std::endl;
   }
 

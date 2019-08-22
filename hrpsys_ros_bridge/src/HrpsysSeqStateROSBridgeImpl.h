@@ -215,6 +215,13 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
 
   TimedDoubleSeq m_invdyn_dbg;
   InPort<TimedDoubleSeq> m_invdyn_dbgIn;
+  //teleop
+  RTC::TimedPose3D m_teleopOdom;
+  RTC::InPort<RTC::TimedPose3D> m_teleopOdomIn;
+  typedef boost::shared_ptr<RTC::OutPort<RTC::TimedDoubleSeq> > OTDS_Ptr;
+  std::vector<TimedDoubleSeq> m_fbwrench;
+  std::vector<OTDS_Ptr> m_fbwrenchOut;
+  std::vector<std::string> m_fbwrenchName;
 
   // </rtc-template>
 
