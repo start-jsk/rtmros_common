@@ -161,6 +161,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   act_contact_states_pub = nh.advertise<hrpsys_ros_bridge::ContactStatesStamped>("/act_contact_states", 10);
   cop_pub.resize(m_mcforceName.size());
   landing_target_pub = nh.advertise<hrpsys_ros_bridge::LandingPosition>("/landing_target", 10);
+  end_cog_state_pub = nh.advertise<hrpsys_ros_bridge::CogState>("/end_cog_state", 10);
   for (unsigned int i=0; i<m_mcforceName.size(); i++){
     std::string tmpname(m_mcforceName[i]); // "ref_xx"
     tmpname.erase(0,4); // Remove "ref_"
@@ -841,6 +842,31 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       landingTargetv.z = m_rslandingTarget.data.z;
       landingTargetv.l_r = m_rslandingTarget.data.l_r;
       landing_target_pub.publish(landingTargetv);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+  if ( m_rsendCogStateIn.isNew() ) {
+    try {
+      m_rsendCogStateIn.read();
+      hrpsys_ros_bridge::CogState endCogStatev;
+      if ( use_hrpsys_time ) {
+        endCogStatev.header.stamp = ros::Time(m_rsendCogState.tm.sec, m_rsendCogState.tm.nsec);
+      }else{
+        endCogStatev.header.stamp = tm_on_execute;
+      }
+      endCogStatev.header.frame_id = rootlink_name;
+      endCogStatev.x = m_rsendCogState.data.x;
+      endCogStatev.y = m_rsendCogState.data.y;
+      endCogStatev.z = m_rsendCogState.data.z;
+      endCogStatev.vx = m_rsendCogState.data.vx;
+      endCogStatev.vy = m_rsendCogState.data.vy;
+      endCogStatev.vz = m_rsendCogState.data.vz;
+      endCogStatev.l_r = m_rsendCogState.data.l_r;
+      end_cog_state_pub.publish(endCogStatev);
     }
     catch(const std::runtime_error &e)
       {

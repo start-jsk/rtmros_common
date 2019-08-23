@@ -170,6 +170,7 @@
     <rtconnect from="KalmanFilterServiceROSBridge.rtc:KalmanFilterService" to="kf.rtc:KalmanFilterService"  subscription_type="new"/>
     <rtconnect from="st.rtc:COPInfo" to="HrpsysSeqStateROSBridge0.rtc:rsCOPInfo" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
     <rtconnect from="abc.rtc:landingTarget" to="HrpsysSeqStateROSBridge0.rtc:rslandingTarget" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
+    <rtconnect from="abc.rtc:endCogState" to="HrpsysSeqStateROSBridge0.rtc:rsendCogState" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:rslandingHeight" to="abc.rtc:landingHeight"  subscription_type="new"/>
     <rtconnect from="HrpsysSeqStateROSBridge0.rtc:rssteppableRegion" to="abc.rtc:steppableRegion"  subscription_type="new"/>
     <rtactivate component="AutoBalancerServiceROSBridge.rtc" />
