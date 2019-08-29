@@ -169,46 +169,41 @@
     <rtconnect from="StabilizerServiceROSBridge.rtc:StabilizerService" to="st.rtc:StabilizerService"  subscription_type="new"/>
     <rtconnect from="KalmanFilterServiceROSBridge.rtc:KalmanFilterService" to="kf.rtc:KalmanFilterService"  subscription_type="new"/>
     <rtconnect from="st.rtc:COPInfo" to="HrpsysSeqStateROSBridge0.rtc:rsCOPInfo" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:feedback_lfsensor" to="st.rtc:feedback_lfsensor" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:feedback_rfsensor" to="st.rtc:feedback_rfsensor" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:feedback_lhsensor" to="st.rtc:feedback_lhsensor" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:feedback_rhsensor" to="st.rtc:feedback_rhsensor" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
-    <rtconnect from="st.rtc:teleopOdom" to="HrpsysSeqStateROSBridge0.rtc:teleopOdom" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
-
     <rtactivate component="AutoBalancerServiceROSBridge.rtc" />
     <rtactivate component="StabilizerServiceROSBridge.rtc" />
     <rtactivate component="KalmanFilterServiceROSBridge.rtc" />
   </group>
   
+
   <!-- USE_WBMS -->
-<!--  <arg name="USE_WBMS" default="true" />-->
-<!--  <group if="$(arg USE_WBMS)" >-->
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htzmp" to="wbms.rtc:htzmpIn" subscription_type="new"/>
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htcom" to="wbms.rtc:htcomIn" subscription_type="new"/>
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htrfw" to="wbms.rtc:htrfwIn" subscription_type="new"/>
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htlfw" to="wbms.rtc:htlfwIn" subscription_type="new"/>
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htrf" to="wbms.rtc:htrfIn" subscription_type="new"/>
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htlf" to="wbms.rtc:htlfIn" subscription_type="new"/>
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htrh" to="wbms.rtc:htrhIn" subscription_type="new"/>
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:htlh" to="wbms.rtc:htlhIn" subscription_type="new"/>
-    <rtconnect from="HrpsysSeqStateROSBridge0.rtc:hthead" to="wbms.rtc:htheadIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:htcom_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:htcom_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:htrf_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:htrf_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:htlf_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:htlf_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:htrh_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:htrh_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:htlh_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:htlh_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:hthead_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:hthead_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:rpcom_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rpcom_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:rprf_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rprf_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:rplf_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rplf_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:rprh_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rprh_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:rplh_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rplh_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:rphead_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rphead_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:rpdcp_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rpdcp_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:rpacp_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rpacp_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:rpzmp_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:rpzmp_dbgIn" subscription_type="new"/>
-    <rtconnect from="wbms.rtc:invdyn_dbgOut" to="HrpsysSeqStateROSBridge0.rtc:invdyn_dbgIn" subscription_type="new"/>
-<!--  </group>-->
+  <arg name="openrtm_args_high" default='-o "corba.master_manager:$(arg nameserver):$(arg managerport)" -o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type:PeriodicExecutionContext" -o "exec_cxt.periodic.rate:500" -o "logger.file_name:/tmp/rtc%p.log"' />
+  <node pkg  = "hrpsys_ros_bridge" name = "MasterSlaveROSBridge" type = "MasterSlaveROSBridge"
+        args = "$(arg openrtm_args_high) -o model:'file://$(arg MODEL_FILE)' -o example.MasterSlaveROSBridge.config_file:$(arg CONF_FILE)" output = "$(arg OUTPUT)" />
+  <!--master side-->
+  <!-- <rtconnect from="hc.rtc:master_lleg_pose_out" to="MasterSlaveROSBridge0.rtc:master_lleg_pose_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/> -->
+  <!-- <rtconnect from="hc.rtc:master_rleg_pose_out" to="MasterSlaveROSBridge0.rtc:master_rleg_pose_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/> -->
+  <!-- <rtconnect from="hc.rtc:master_larm_pose_out" to="MasterSlaveROSBridge0.rtc:master_larm_pose_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/> -->
+  <!-- <rtconnect from="hc.rtc:master_rarm_pose_out" to="MasterSlaveROSBridge0.rtc:master_rarm_pose_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/> -->
+  <!-- <rtconnect from="hc.rtc:master_com_pose_out"  to="MasterSlaveROSBridge0.rtc:master_com_pose_in"  subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/> -->
+  <!-- <rtconnect from="hc.rtc:master_head_pose_out" to="MasterSlaveROSBridge0.rtc:master_head_pose_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/> -->
+  <!-- <rtconnect from="MasterSlaveROSBridge0.rtc:slave_lleg_wrench_out" to="hc.rtc:slave_lleg_wrench_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/> -->
+  <!-- <rtconnect from="MasterSlaveROSBridge0.rtc:slave_rleg_wrench_out" to="hc.rtc:slave_rleg_wrench_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/> -->
+  <!-- <rtconnect from="MasterSlaveROSBridge0.rtc:slave_larm_wrench_out" to="hc.rtc:slave_larm_wrench_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/> -->
+  <!-- <rtconnect from="MasterSlaveROSBridge0.rtc:slave_rarm_wrench_out" to="hc.rtc:slave_rarm_wrench_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/> -->
+  <!--slave side-->
+  <rtconnect from="MasterSlaveROSBridge0.rtc:master_lleg_pose_out" to="wbms.rtc:master_lleg_pose_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/>
+  <rtconnect from="MasterSlaveROSBridge0.rtc:master_rleg_pose_out" to="wbms.rtc:master_rleg_pose_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/>
+  <rtconnect from="MasterSlaveROSBridge0.rtc:master_larm_pose_out" to="wbms.rtc:master_larm_pose_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/>
+  <rtconnect from="MasterSlaveROSBridge0.rtc:master_rarm_pose_out" to="wbms.rtc:master_rarm_pose_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/>
+  <rtconnect from="MasterSlaveROSBridge0.rtc:master_com_pose_out"  to="wbms.rtc:master_com_pose_in"  subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/>
+  <rtconnect from="MasterSlaveROSBridge0.rtc:master_head_pose_out" to="wbms.rtc:master_head_pose_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/>
+  <rtconnect from="wbms.rtc:slave_lleg_wrench_out" to="MasterSlaveROSBridge0.rtc:slave_lleg_wrench_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/>
+  <rtconnect from="wbms.rtc:slave_rleg_wrench_out" to="MasterSlaveROSBridge0.rtc:slave_rleg_wrench_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/>
+  <rtconnect from="wbms.rtc:slave_larm_wrench_out" to="MasterSlaveROSBridge0.rtc:slave_larm_wrench_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/>
+  <rtconnect from="wbms.rtc:slave_rarm_wrench_out" to="MasterSlaveROSBridge0.rtc:slave_rarm_wrench_in" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)"/>
+
+  <rtactivate component="MasterSlaveROSBridge0.rtc" />
+
 
   <!-- USE_COLLISIONCHECK
        CollisionDetector
