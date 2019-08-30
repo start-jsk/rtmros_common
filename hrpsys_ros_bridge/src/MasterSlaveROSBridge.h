@@ -24,8 +24,8 @@ class MasterSlaveROSBridge  : public RTC::DataFlowComponentBase
         virtual RTC::ReturnCode_t onInitialize();
         virtual RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
 
-        void onMasterTgtPoseCB(const ros::MessageEvent<geometry_msgs::PoseStamped const>& e);
-        void onSlaveEEWrenchCB(const ros::MessageEvent<geometry_msgs::WrenchStamped const>& e);
+        void onMasterTgtPoseCB(const geometry_msgs::PoseStamped::ConstPtr& msg, std::string& key);
+        void onSlaveEEWrenchCB(const geometry_msgs::WrenchStamped::ConstPtr& msg, std::string& key);
 
     protected:
         typedef boost::shared_ptr<RTC::InPort   <RTC::TimedPose3D>      > ITP3_Ptr;
@@ -53,12 +53,9 @@ class MasterSlaveROSBridge  : public RTC::DataFlowComponentBase
         std::map<std::string, ros::Publisher> slaveEEWrenches_pub;
         std::map<std::string, ros::Subscriber> slaveEEWrenches_sub;
 
-        std::map<std::string, std::string> masterTgtPoses_topic2key;
-        std::map<std::string, std::string> slaveEEWrenches_topic2key;
-
         std::vector<std::string> ee_names, tgt_names;
 
-        std::string mode;
+        bool is_master_side;
 
 
     private:
