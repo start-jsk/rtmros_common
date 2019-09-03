@@ -177,7 +177,7 @@
   
 
   <!-- Haptic Coltroller HC - Master Slave WBMS -->
-  <arg name="openrtm_args_high" default='-o "corba.master_manager:$(arg nameserver):$(arg managerport)" -o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type:PeriodicExecutionContext" -o "exec_cxt.periodic.rate:500" -o "logger.file_name:/tmp/rtc%p.log"' />
+  <arg name="openrtm_args_high" default='-o "corba.master_manager:$(arg nameserver):$(arg managerport)" -o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "exec_cxt.periodic.type:PeriodicExecutionContext" -o "exec_cxt.periodic.rate:1000" -o "logger.file_name:/tmp/rtc%p.log"' />
   <node pkg="hrpsys_ros_bridge" name="MasterSlaveROSBridge" type="MasterSlaveROSBridge" args="$(arg openrtm_args_high) -o model:'file://$(arg MODEL_FILE)' -o example.MasterSlaveROSBridge.config_file:$(arg CONF_FILE)" output="$(arg OUTPUT)">
     <param name="is_master_side" type="bool" value="$(arg IS_MASTER_SIDE_OF_MASTERSLAVE)" />
   </node>

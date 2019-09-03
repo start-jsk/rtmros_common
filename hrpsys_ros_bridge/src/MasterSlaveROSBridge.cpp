@@ -38,17 +38,14 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onInitialize(){
 
     ros::param::param<bool>("~is_master_side", is_master_side);
     ros::param::get("~is_master_side", is_master_side);
-//    if(!nh.hasParam("~is_master_side")){
-//        RTCOUT("is_master_side param not set !!!! use = "<< is_master_side);
-//    }
-//    nh.getParam("~is_master_side",is_master_side);
 
     if(is_master_side){
         RTCOUT("Set up ports for MASTER side connection (is_master_side = "<<is_master_side<<")");
         for ( int i=0; i<ee_names.size(); i++) { // to read ROS data from Network
             std::string n = "slave_"+ee_names[i]+"_wrench_in";
-            //slaveEEWrenches_sub[ee_names[i]] = nh.subscribe<geometry_msgs::WrenchStamped>(n, 1, boost::bind(&testCallbackG, _1, ee_names[i]));//global func ver
-            slaveEEWrenches_sub[ee_names[i]] = nh.subscribe<geometry_msgs::WrenchStamped>(n, 1, boost::bind(&MasterSlaveROSBridge::onSlaveEEWrenchCB, this, _1, ee_names[i]));
+            slaveEEWrenches_sub[ee_names[i]] = nh.subscribe<geometry_msgs::WrenchStamped>(n, 1,
+                boost::bind(&MasterSlaveROSBridge::onSlaveEEWrenchCB, this, _1, ee_names[i]), ros::VoidConstPtr(),
+                ros::TransportHints().unreliable().reliable().tcpNoDelay());
             RTCOUT("register ROS Subscriber " << n );
         }
         for ( int i=0; i<ee_names.size(); i++) { // to write RTM data to HC
@@ -72,7 +69,9 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onInitialize(){
         RTCOUT("Set up ports for SLAVE side connection (is_master_side = "<<is_master_side<<")");
         for ( int i=0; i<tgt_names.size(); i++) { // to read ROS data from Network
             std::string n = "master_"+tgt_names[i]+"_pose_in";
-            masterTgtPoses_sub[tgt_names[i]] = nh.subscribe<geometry_msgs::PoseStamped>(n, 1, boost::bind(&MasterSlaveROSBridge::onMasterTgtPoseCB, this, _1, tgt_names[i]));
+            masterTgtPoses_sub[tgt_names[i]] = nh.subscribe<geometry_msgs::PoseStamped>(n, 1,
+                boost::bind(&MasterSlaveROSBridge::onMasterTgtPoseCB, this, _1, tgt_names[i]), ros::VoidConstPtr(),
+                ros::TransportHints().unreliable().reliable().tcpNoDelay());
             RTCOUT("register ROS Subscriber " << n );
         }
         for ( int i=0; i<tgt_names.size(); i++) { // to write RTM data to WBMS
