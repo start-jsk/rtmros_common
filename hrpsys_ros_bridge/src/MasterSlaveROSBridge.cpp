@@ -144,6 +144,8 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onExecute(RTC::UniqueId ec_id){
                 tmp.pose.orientation.z = quat.getZ();
                 tmp.pose.orientation.w = quat.getW();
                 tmp.header.stamp = tm_on_execute;
+//                tmp.header.frame_id = "BASE_LINK";
+                tmp.header.frame_id = "teleop_odom";
                 masterTgtPoses_pub[tgt_names[i]].publish(tmp);
             }
         }
@@ -159,6 +161,7 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onExecute(RTC::UniqueId ec_id){
                 tmp.wrench.torque.y = m_slaveEEWrenches[ee_names[i]].data[4];
                 tmp.wrench.torque.z = m_slaveEEWrenches[ee_names[i]].data[5];
                 tmp.header.stamp = tm_on_execute;
+                tmp.header.frame_id = "slave_"+ee_names[i]+"_aligned_to_world";
                 slaveEEWrenches_pub[ee_names[i]].publish(tmp);
             }
         }

@@ -1085,13 +1085,11 @@ void HrpsysSeqStateROSBridge::updateOdometry(const hrp::Vector3 &trans, const hr
 
 void HrpsysSeqStateROSBridge::updateOdometryTF(const ros::Time &stamp)
 {
-
-
     if (m_teleopOdomIn.isNew()) {
         m_teleopOdomIn.read();
         geometry_msgs::TransformStamped tf_tmp;
         tf_tmp.header.stamp = stamp;
-        tf_tmp.header.frame_id = "teleop_world";
+        tf_tmp.header.frame_id = "teleop_odom";
         tf_tmp.child_frame_id = rootlink_name;
         Eigen::Quaternion<double> quat(hrp::rotFromRpy(m_teleopOdom.data.orientation.r, m_teleopOdom.data.orientation.p, m_teleopOdom.data.orientation.y));
         tf_tmp.transform.translation.x = m_teleopOdom.data.position.x;
@@ -1102,10 +1100,6 @@ void HrpsysSeqStateROSBridge::updateOdometryTF(const ros::Time &stamp)
         tf_tmp.transform.rotation.z = quat.z();
         tf_tmp.transform.rotation.w = quat.w();
         tf_transforms.push_back(tf_tmp);
-
-//        tf::Transform tf_transform(tf::Quaternion(transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w),
-//                                   tf::Vector3(transform.translation.x, transform.translation.y, transform.translation.z));
-
     }
 }
 
