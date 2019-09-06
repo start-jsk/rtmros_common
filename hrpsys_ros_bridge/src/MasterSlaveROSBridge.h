@@ -12,7 +12,8 @@
 #include "ros/ros.h"
 #include "geometry_msgs/PoseStamped.h"
 #include "geometry_msgs/WrenchStamped.h"
-#include <tf/transform_listener.h>
+//#include <tf/transform_listener.h>
+#include <tf/transform_broadcaster.h>
 
 using namespace RTC;
 
@@ -23,44 +24,53 @@ class MasterSlaveROSBridge  : public RTC::DataFlowComponentBase
         ~MasterSlaveROSBridge();
         virtual RTC::ReturnCode_t onInitialize();
         virtual RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
-
+        void updateOdometryTF(const ros::Time &stamp);
         void onMasterTgtPoseCB(const geometry_msgs::PoseStamped::ConstPtr& msg, std::string& key);
         void onSlaveEEWrenchCB(const geometry_msgs::WrenchStamped::ConstPtr& msg, std::string& key);
 
     protected:
+        // used in both case
+        bool is_master_side;
+        ros::NodeHandle nh;
+        coil::TimeMeasure tm;
+        unsigned long loop;
+        std::vector<std::string> ee_names, tgt_names;
+        std::map<std::string, RTC::TimedPose3D> m_masterTgtPoses;
+        std::map<std::string, RTC::TimedDoubleSeq> m_slaveEEWrenches;
+
+        // master side
         typedef boost::shared_ptr<RTC::InPort   <RTC::TimedPose3D>      > ITP3_Ptr;
+        typedef boost::shared_ptr<RTC::OutPort  <RTC::TimedDoubleSeq>   > OTDS_Ptr;
+        std::map<std::string, ITP3_Ptr> m_masterTgtPosesIn;
+        std::map<std::string, OTDS_Ptr> m_slaveEEWrenchesOut;
+        std::map<std::string, ros::Subscriber> slaveEEWrenches_sub;
+        std::map<std::string, ros::Publisher> masterTgtPoses_pub;
+        RTC::TimedPose3D m_teleopOdom;
+        ITP3_Ptr m_teleopOdomIn;
+        tf::TransformBroadcaster br;
+
+        // slave side
         typedef boost::shared_ptr<RTC::OutPort  <RTC::TimedPose3D>      > OTP3_Ptr;
         typedef boost::shared_ptr<RTC::InPort   <RTC::TimedDoubleSeq>   > ITDS_Ptr;
-        typedef boost::shared_ptr<RTC::OutPort  <RTC::TimedDoubleSeq>   > OTDS_Ptr;
-
-        std::map<std::string, RTC::TimedPose3D> m_masterTgtPoses;//used both on master mode / slave mode
-        RTC::TimedPose3D test;//used both on master mode / slave mode
-        std::map<std::string, ITP3_Ptr> m_masterTgtPosesIn;
-        std::map<std::string, OTP3_Ptr> m_masterTgtPosesOut;
-
-        std::map<std::string, RTC::TimedDoubleSeq> m_slaveEEWrenches;//used both on master mode / slave mode
         std::map<std::string, ITDS_Ptr> m_slaveEEWrenchesIn;
-        std::map<std::string, OTDS_Ptr> m_slaveEEWrenchesOut;
+        std::map<std::string, OTP3_Ptr> m_masterTgtPosesOut;
+        std::map<std::string, ros::Subscriber> masterTgtPoses_sub;
+        std::map<std::string, ros::Publisher> slaveEEWrenches_pub;
+
+
+
+
+
 
         RTC::TimedDoubleSeq m_exData;
         RTC::TimedStringSeq m_exDataIndex;
         RTC::OutPort<RTC::TimedDoubleSeq> m_exDataOut;
         RTC::OutPort<RTC::TimedStringSeq> m_exDataIndexOut;
 
-        std::map<std::string, ros::Publisher> masterTgtPoses_pub;
-        std::map<std::string, ros::Subscriber> masterTgtPoses_sub;
-
-        std::map<std::string, ros::Publisher> slaveEEWrenches_pub;
-        std::map<std::string, ros::Subscriber> slaveEEWrenches_sub;
-
-        std::vector<std::string> ee_names, tgt_names;
-
-        bool is_master_side;
 
 
-    private:
-        ros::NodeHandle nh;
-        coil::TimeMeasure tm;
+
+
 };
 
 

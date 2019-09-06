@@ -65,6 +65,13 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onInitialize(){
             masterTgtPoses_pub[tgt_names[i]] = nh.advertise<geometry_msgs::PoseStamped>(n, 1);
             RTCOUT("register ROS Publisher " << n );
         }
+        {// teleop Odom TF
+            std::string n = "teleopOdom";
+            m_teleopOdomIn = ITP3_Ptr(new RTC::InPort<RTC::TimedPose3D>(n.c_str(), m_teleopOdom));
+            registerInPort(n.c_str(), *m_teleopOdomIn);
+            RTCOUT("register RTC InPort  " << n );
+        }
+
     }else{
         RTCOUT("Set up ports for SLAVE side connection (is_master_side = "<<is_master_side<<")");
         for ( int i=0; i<tgt_names.size(); i++) { // to read ROS data from Network
@@ -96,6 +103,7 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onInitialize(){
 
     ROS_INFO_STREAM("[MasterSlaveROSBridge] @Initilize name : " << getInstanceName());
 
+    loop = 0;
     tm.tick();
     return RTC::RTC_OK;
 }
@@ -132,6 +140,8 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onExecute(RTC::UniqueId ec_id){
             if(m_masterTgtPosesIn[tgt_names[i]]->isNew()){
                 m_masterTgtPosesIn[tgt_names[i]]->read();
                 geometry_msgs::PoseStamped tmp;
+                tmp.header.stamp = tm_on_execute;
+                tmp.header.frame_id = "teleop_odom";
                 tmp.pose.position.x = m_masterTgtPoses[tgt_names[i]].data.position.x;
                 tmp.pose.position.y = m_masterTgtPoses[tgt_names[i]].data.position.y;
                 tmp.pose.position.z = m_masterTgtPoses[tgt_names[i]].data.position.z;
@@ -143,25 +153,47 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onExecute(RTC::UniqueId ec_id){
                 tmp.pose.orientation.y = quat.getY();
                 tmp.pose.orientation.z = quat.getZ();
                 tmp.pose.orientation.w = quat.getW();
-                tmp.header.stamp = tm_on_execute;
-//                tmp.header.frame_id = "BASE_LINK";
-                tmp.header.frame_id = "teleop_odom";
                 masterTgtPoses_pub[tgt_names[i]].publish(tmp);
             }
         }
+
+        if (m_teleopOdomIn->isNew()) {
+            m_teleopOdomIn->read();
+            geometry_msgs::TransformStamped tf_tmp;
+            tf_tmp.header.stamp = tm_on_execute;
+            tf_tmp.header.frame_id = "teleop_odom";
+            tf_tmp.child_frame_id = "BASE_LINK";
+            tf::Quaternion quat = tf::createQuaternionFromRPY(m_teleopOdom.data.orientation.r, m_teleopOdom.data.orientation.p, m_teleopOdom.data.orientation.y);
+            tf_tmp.transform.translation.x = m_teleopOdom.data.position.x;
+            tf_tmp.transform.translation.y = m_teleopOdom.data.position.y;
+            tf_tmp.transform.translation.z = m_teleopOdom.data.position.z;
+            tf_tmp.transform.rotation.x = quat.getX();
+            tf_tmp.transform.rotation.y = quat.getY();
+            tf_tmp.transform.rotation.z = quat.getZ();
+            tf_tmp.transform.rotation.w = quat.getW();
+            if(loop%10==0){ // will be 100Hz of 1000Hz
+                std::vector<geometry_msgs::TransformStamped> tf_transforms;
+                tf_transforms.push_back(tf_tmp);
+                br.sendTransform(tf_transforms);
+            }
+        }
+
+
+
+
     }else{
         for(int i=0; i<ee_names.size(); i++){
             if(m_slaveEEWrenchesIn[ee_names[i]]->isNew()){
                 m_slaveEEWrenchesIn[ee_names[i]]->read();
                 geometry_msgs::WrenchStamped tmp;
+                tmp.header.stamp = tm_on_execute;
+                tmp.header.frame_id = "slave_"+ee_names[i]+"_aligned_to_world";
                 tmp.wrench.force.x  = m_slaveEEWrenches[ee_names[i]].data[0];
                 tmp.wrench.force.y  = m_slaveEEWrenches[ee_names[i]].data[1];
                 tmp.wrench.force.z  = m_slaveEEWrenches[ee_names[i]].data[2];
                 tmp.wrench.torque.x = m_slaveEEWrenches[ee_names[i]].data[3];
                 tmp.wrench.torque.y = m_slaveEEWrenches[ee_names[i]].data[4];
                 tmp.wrench.torque.z = m_slaveEEWrenches[ee_names[i]].data[5];
-                tmp.header.stamp = tm_on_execute;
-                tmp.header.frame_id = "slave_"+ee_names[i]+"_aligned_to_world";
                 slaveEEWrenches_pub[ee_names[i]].publish(tmp);
             }
         }
@@ -186,14 +218,14 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onExecute(RTC::UniqueId ec_id){
 //    }
 //    }
 
-
+    loop++;
     ros::spinOnce();
-  return RTC::RTC_OK;
+    return RTC::RTC_OK;
 }
 
 extern "C"{
-  void MasterSlaveROSBridgeInit(RTC::Manager* manager)  {
-    coil::Properties profile(masterslaverosbridge_spec);
-    manager->registerFactory(profile, RTC::Create<MasterSlaveROSBridge>, RTC::Delete<MasterSlaveROSBridge>);
-  }
+    void MasterSlaveROSBridgeInit(RTC::Manager* manager)  {
+        coil::Properties profile(masterslaverosbridge_spec);
+        manager->registerFactory(profile, RTC::Create<MasterSlaveROSBridge>, RTC::Delete<MasterSlaveROSBridge>);
+    }
 };
