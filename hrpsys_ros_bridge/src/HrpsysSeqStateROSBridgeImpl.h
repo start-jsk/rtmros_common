@@ -162,67 +162,6 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   TimedDoubleSeq m_mctorque;
   OutPort<TimedDoubleSeq> m_mctorqueOut;
 
-  //for human tracker
-  TimedPose3D m_htcom;
-  OutPort<TimedPose3D> m_htcomOut;
-  TimedPose3D m_htrf;
-  OutPort<TimedPose3D> m_htrfOut;
-  TimedPose3D m_htlf;
-  OutPort<TimedPose3D> m_htlfOut;
-  TimedPose3D m_htrh;
-  OutPort<TimedPose3D> m_htrhOut;
-  TimedPose3D m_htlh;
-  OutPort<TimedPose3D> m_htlhOut;
-  TimedPose3D m_hthead;
-  OutPort<TimedPose3D> m_htheadOut;
-  TimedPoint3D m_htzmp;
-  OutPort<TimedPoint3D> m_htzmpOut;
-  OpenHRP::TimedWrench m_htrfw;
-  OutPort<OpenHRP::TimedWrench> m_htrfwOut;
-  OpenHRP::TimedWrench m_htlfw;
-  OutPort<OpenHRP::TimedWrench> m_htlfwOut;
-
-  TimedPose3D m_htcom_dbg;
-  InPort<TimedPose3D> m_htcom_dbgIn;
-  TimedPose3D m_htrf_dbg;
-  InPort<TimedPose3D> m_htrf_dbgIn;
-  TimedPose3D m_htlf_dbg;
-  InPort<TimedPose3D> m_htlf_dbgIn;
-  TimedPose3D m_htrh_dbg;
-  InPort<TimedPose3D> m_htrh_dbgIn;
-  TimedPose3D m_htlh_dbg;
-  InPort<TimedPose3D> m_htlh_dbgIn;
-  TimedPose3D m_hthead_dbg;
-  InPort<TimedPose3D> m_hthead_dbgIn;
-  TimedPose3D m_rpcom_dbg;
-  InPort<TimedPose3D> m_rpcom_dbgIn;
-  TimedPose3D m_rprf_dbg;
-  InPort<TimedPose3D> m_rprf_dbgIn;
-  TimedPose3D m_rplf_dbg;
-  InPort<TimedPose3D> m_rplf_dbgIn;
-  TimedPose3D m_rprh_dbg;
-  InPort<TimedPose3D> m_rprh_dbgIn;
-  TimedPose3D m_rplh_dbg;
-  InPort<TimedPose3D> m_rplh_dbgIn;
-  TimedPose3D m_rphead_dbg;
-  InPort<TimedPose3D> m_rphead_dbgIn;
-  TimedPoint3D m_rpzmp_dbg;
-  InPort<TimedPoint3D> m_rpzmp_dbgIn;
-  TimedPoint3D m_rpdcp_dbg;
-  InPort<TimedPoint3D> m_rpdcp_dbgIn;
-  TimedPoint3D m_rpacp_dbg;
-  InPort<TimedPoint3D> m_rpacp_dbgIn;
-
-  TimedDoubleSeq m_invdyn_dbg;
-  InPort<TimedDoubleSeq> m_invdyn_dbgIn;
-  //teleop
-  RTC::TimedPose3D m_teleopOdom;
-  RTC::InPort<RTC::TimedPose3D> m_teleopOdomIn;
-  typedef boost::shared_ptr<RTC::OutPort<RTC::TimedDoubleSeq> > OTDS_Ptr;
-  std::vector<TimedDoubleSeq> m_fbwrench;
-  std::vector<OTDS_Ptr> m_fbwrenchOut;
-  std::vector<std::string> m_fbwrenchName;
-
   // </rtc-template>
 
   // CORBA Port declaration

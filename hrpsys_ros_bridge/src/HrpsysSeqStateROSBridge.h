@@ -33,8 +33,6 @@
 #include "diagnostic_msgs/DiagnosticArray.h"
 #include "sensor_msgs/Imu.h"
 #include "hrpsys_ros_bridge/SetSensorTransformation.h"
-//ishiguro
-#include <tf/transform_listener.h>
 
 extern const char* hrpsysseqstaterosbridgeimpl_spec[];
 
@@ -56,27 +54,14 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void onFollowJointTrajectoryActionGoal();
   void onFollowJointTrajectoryActionPreempt();
   void onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg);
-  //for human tracker
-  void onHumanTrackerCOMCommandCB(const geometry_msgs::PoseStampedConstPtr& msg);
-  void onHumanTrackerRFCommandCB(const geometry_msgs::PoseStampedConstPtr& msg);
-  void onHumanTrackerLFCommandCB(const geometry_msgs::PoseStampedConstPtr& msg);
-  void onHumanTrackerRHCommandCB(const geometry_msgs::PoseStampedConstPtr& msg);
-  void onHumanTrackerLHCommandCB(const geometry_msgs::PoseStampedConstPtr& msg);
-  void onHumanTrackerHEADCommandCB(const geometry_msgs::PoseStampedConstPtr& msg);
-  void onHumanTrackerZMPCommandCB(const geometry_msgs::PointStampedConstPtr& msg);
-  void onHumanTrackerRFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg);
-  void onHumanTrackerLFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg);
   bool sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
                 dynamic_reconfigure::Reconfigure::Response &res);
   bool setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
                                hrpsys_ros_bridge::SetSensorTransformation::Response& res);
-  void onFeedbackWrench(const ros::MessageEvent<geometry_msgs::WrenchStamped const>& event);
-
-      private:
+ private:
   ros::NodeHandle nh;
   ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, ref_cp_pub, act_cp_pub, odom_pub, imu_pub, em_mode_pub, ref_contact_states_pub, act_contact_states_pub;
   ros::Subscriber trajectory_command_sub;
-  std::vector<ros::Subscriber> fbwrench_subs;
   std::vector<ros::Publisher> fsensor_pub, cop_pub;
 #ifdef USE_PR2_CONTROLLERS_MSGS
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> joint_trajectory_server;
@@ -95,12 +80,6 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   std::string rootlink_name;
 
   ros::Subscriber clock_sub;
-  //ishiguro
-  ros::Subscriber htzmp_sub,htcom_sub,htrfw_sub,htlfw_sub,htrf_sub,htlf_sub,htrh_sub,htlh_sub,hthead_sub;
-  ros::Publisher htcom_dbg_pub,htrf_dbg_pub,htlf_dbg_pub,htrh_dbg_pub,htlh_dbg_pub,hthead_dbg_pub;
-  ros::Publisher rpcom_dbg_pub,rprf_dbg_pub,rplf_dbg_pub,rprh_dbg_pub,rplh_dbg_pub,rphead_dbg_pub,rpzmp_dbg_pub,rpdcp_dbg_pub,rpacp_dbg_pub;
-  ros::Publisher invdyn_dbg_pub;
-  tf::TransformListener ht_tf_listener;
 
   nav_msgs::Odometry prev_odom;
   bool prev_odom_acquired;
@@ -114,12 +93,9 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   ros::Timer periodic_update_timer;
   std::vector<geometry_msgs::TransformStamped> tf_transforms;
   void periodicTimerCallback(const ros::TimerEvent& event);
-
+  
   // odometry relatives
   void updateOdometry(const hrp::Vector3 &trans, const hrp::Matrix33 &R, const ros::Time &stamp);
-
-  // teleop relatives
-  void updateOdometryTF(const ros::Time &stamp);
 
   // imu relatives
   void updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp);
@@ -128,9 +104,6 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void updateSensorTransform(const ros::Time &stamp);
   std::map<std::string, geometry_msgs::Transform> sensor_transformations;
   boost::mutex sensor_transformation_mutex;
-
-  // whole body master slave relatives
-  void updateWBMS(const ros::Time &stamp);
 };
 
 

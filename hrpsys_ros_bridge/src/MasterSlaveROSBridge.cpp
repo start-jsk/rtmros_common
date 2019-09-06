@@ -40,63 +40,63 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onInitialize(){
     ros::param::get("~is_master_side", is_master_side);
 
     if(is_master_side){
-        RTCOUT("Set up ports for MASTER side connection (is_master_side = "<<is_master_side<<")");
+        RTC_INFO_STREAM("Set up ports for MASTER side connection (is_master_side = "<<is_master_side<<")");
         for ( int i=0; i<ee_names.size(); i++) { // to read ROS data from Network
             std::string n = "slave_"+ee_names[i]+"_wrench_in";
             slaveEEWrenches_sub[ee_names[i]] = nh.subscribe<geometry_msgs::WrenchStamped>(n, 1,
                 boost::bind(&MasterSlaveROSBridge::onSlaveEEWrenchCB, this, _1, ee_names[i]), ros::VoidConstPtr(),
                 ros::TransportHints().unreliable().reliable().tcpNoDelay());
-            RTCOUT("register ROS Subscriber " << n );
+            RTC_INFO_STREAM("register ROS Subscriber " << n );
         }
         for ( int i=0; i<ee_names.size(); i++) { // to write RTM data to HC
             std::string n = "slave_"+ee_names[i]+"_wrench_out";
             m_slaveEEWrenchesOut[ee_names[i]] = OTDS_Ptr(new RTC::OutPort<RTC::TimedDoubleSeq>(n.c_str(), m_slaveEEWrenches[ee_names[i]]));
             registerOutPort(n.c_str(), *m_slaveEEWrenchesOut[ee_names[i]]);
-            RTCOUT("register RTC OutPort " << n );
+            RTC_INFO_STREAM("register RTC OutPort " << n );
         }
         for ( int i=0; i<tgt_names.size(); i++) { // to read RTM data from HC
             std::string n = "master_"+tgt_names[i]+"_pose_in";
             m_masterTgtPosesIn[tgt_names[i]] = ITP3_Ptr(new RTC::InPort<RTC::TimedPose3D>(n.c_str(), m_masterTgtPoses[tgt_names[i]]));
             registerInPort(n.c_str(), *m_masterTgtPosesIn[tgt_names[i]]);
-            RTCOUT("register RTC InPort " << n );
+            RTC_INFO_STREAM("register RTC InPort " << n );
         }
         for ( int i=0; i<tgt_names.size(); i++) { // to write ROS data to Network
             std::string n = "master_"+tgt_names[i]+"_pose_out";
             masterTgtPoses_pub[tgt_names[i]] = nh.advertise<geometry_msgs::PoseStamped>(n, 1);
-            RTCOUT("register ROS Publisher " << n );
+            RTC_INFO_STREAM("register ROS Publisher " << n );
         }
         {// teleop Odom TF
             std::string n = "teleopOdom";
             m_teleopOdomIn = ITP3_Ptr(new RTC::InPort<RTC::TimedPose3D>(n.c_str(), m_teleopOdom));
             registerInPort(n.c_str(), *m_teleopOdomIn);
-            RTCOUT("register RTC InPort  " << n );
+            RTC_INFO_STREAM("register RTC InPort  " << n );
         }
 
     }else{
-        RTCOUT("Set up ports for SLAVE side connection (is_master_side = "<<is_master_side<<")");
+        RTC_INFO_STREAM("Set up ports for SLAVE side connection (is_master_side = "<<is_master_side<<")");
         for ( int i=0; i<tgt_names.size(); i++) { // to read ROS data from Network
             std::string n = "master_"+tgt_names[i]+"_pose_in";
             masterTgtPoses_sub[tgt_names[i]] = nh.subscribe<geometry_msgs::PoseStamped>(n, 1,
                 boost::bind(&MasterSlaveROSBridge::onMasterTgtPoseCB, this, _1, tgt_names[i]), ros::VoidConstPtr(),
                 ros::TransportHints().unreliable().reliable().tcpNoDelay());
-            RTCOUT("register ROS Subscriber " << n );
+            RTC_INFO_STREAM("register ROS Subscriber " << n );
         }
         for ( int i=0; i<tgt_names.size(); i++) { // to write RTM data to WBMS
             std::string n = "master_"+tgt_names[i]+"_pose_out";
             m_masterTgtPosesOut[tgt_names[i]] = OTP3_Ptr(new RTC::OutPort<RTC::TimedPose3D>(n.c_str(), m_masterTgtPoses[tgt_names[i]]));
             registerOutPort(n.c_str(), *m_masterTgtPosesOut[tgt_names[i]]);
-            RTCOUT("register RTC OutPort " << n );
+            RTC_INFO_STREAM("register RTC OutPort " << n );
         }
         for ( int i=0; i<ee_names.size(); i++) { // to read RTM data from WBMS
             std::string n = "slave_"+ee_names[i]+"_wrench_in";
             m_slaveEEWrenchesIn[ee_names[i]] = ITDS_Ptr(new RTC::InPort<RTC::TimedDoubleSeq>(n.c_str(), m_slaveEEWrenches[ee_names[i]]));
             registerInPort(n.c_str(), *m_slaveEEWrenchesIn[ee_names[i]]);
-            RTCOUT("register RTC InPort " << n );
+            RTC_INFO_STREAM("register RTC InPort " << n );
         }
         for ( int i=0; i<ee_names.size(); i++) { // to write ROS data to Network
             std::string n = "slave_"+ee_names[i]+"_wrench_out";
             slaveEEWrenches_pub[ee_names[i]] = nh.advertise<geometry_msgs::WrenchStamped>(n, 1);
-            RTCOUT("register ROS Publisher " << n );
+            RTC_INFO_STREAM("register ROS Publisher " << n );
         }
     }
 

@@ -65,33 +65,6 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
   odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
   imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1);
-  //ishiguro
-  htzmp_sub = nh.subscribe("human_tracker_zmp_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerZMPCommandCB, this);
-  htcom_sub = nh.subscribe("human_tracker_com_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerCOMCommandCB, this);
-  htrfw_sub = nh.subscribe("human_tracker_rfw_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRFWCommandCB, this);
-  htlfw_sub = nh.subscribe("human_tracker_lfw_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLFWCommandCB, this);
-  htrf_sub = nh.subscribe("human_tracker_rf_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRFCommandCB, this);
-  htlf_sub = nh.subscribe("human_tracker_lf_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLFCommandCB, this);
-  htrh_sub = nh.subscribe("human_tracker_rh_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerRHCommandCB, this);
-  htlh_sub = nh.subscribe("human_tracker_lh_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerLHCommandCB, this);
-  hthead_sub = nh.subscribe("human_tracker_head_ref", 1, &HrpsysSeqStateROSBridge::onHumanTrackerHEADCommandCB, this);
-
-  htcom_dbg_pub = nh.advertise<geometry_msgs::PoseStamped>("/wbms/feedback/h_com", 1);
-  htrf_dbg_pub = nh.advertise<geometry_msgs::PoseStamped>("/wbms/feedback/h_rf", 1);
-  htlf_dbg_pub = nh.advertise<geometry_msgs::PoseStamped>("/wbms/feedback/h_lf", 1);
-  htrh_dbg_pub = nh.advertise<geometry_msgs::PoseStamped>("/wbms/feedback/h_rh", 1);
-  htlh_dbg_pub = nh.advertise<geometry_msgs::PoseStamped>("/wbms/feedback/h_lh", 1);
-  hthead_dbg_pub = nh.advertise<geometry_msgs::PoseStamped>("/wbms/feedback/h_head", 1);
-  rpcom_dbg_pub = nh.advertise<geometry_msgs::PoseStamped>("/wbms/feedback/r_com", 1);
-  rprf_dbg_pub = nh.advertise<geometry_msgs::PoseStamped>("/wbms/feedback/r_rf", 1);
-  rplf_dbg_pub = nh.advertise<geometry_msgs::PoseStamped>("/wbms/feedback/r_lf", 1);
-  rprh_dbg_pub = nh.advertise<geometry_msgs::PoseStamped>("/wbms/feedback/r_rh", 1);
-  rplh_dbg_pub = nh.advertise<geometry_msgs::PoseStamped>("/wbms/feedback/r_lh", 1);
-  rphead_dbg_pub = nh.advertise<geometry_msgs::PoseStamped>("/wbms/feedback/r_head", 1);
-  rpzmp_dbg_pub = nh.advertise<geometry_msgs::PointStamped>("/wbms/feedback/r_zmp", 1);
-  rpdcp_dbg_pub = nh.advertise<geometry_msgs::PointStamped>("/wbms/feedback/r_dcp", 1);
-  rpacp_dbg_pub = nh.advertise<geometry_msgs::PointStamped>("/wbms/feedback/r_acp", 1);
-  invdyn_dbg_pub = nh.advertise<geometry_msgs::WrenchStamped>("/wbms/feedback/invdyn", 1);
 
   // is use_sim_time is set and no one publishes clock, publish clock time
   use_sim_time = ros::Time::isSimTime();
@@ -191,10 +164,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
     cop_pub[i] = nh.advertise<geometry_msgs::PointStamped>(tmpname+"_cop", 10);
   }
   em_mode_pub = nh.advertise<std_msgs::Int32>("emergency_mode", 10);
-  fbwrench_subs.resize(m_fbwrenchName.size());
-  for(int i=0;i<fbwrench_subs.size();i++){
-      fbwrench_subs[i] = nh.subscribe(m_fbwrenchName[i], 1, &HrpsysSeqStateROSBridge::onFeedbackWrench, this);
-  }
 
   return RTC::RTC_OK;
 }
@@ -279,58 +248,6 @@ void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt() {
 void HrpsysSeqStateROSBridge::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg) {
   onJointTrajectory(*msg);
 }
-//for human tracker
-void HrpsysSeqStateROSBridge::onHumanTrackerCOMCommandCB(const geometry_msgs::PoseStampedConstPtr& msg) {
-	m_htcom.data.position.x = msg->pose.position.x;	m_htcom.data.position.y = msg->pose.position.y;	m_htcom.data.position.z = msg->pose.position.z;
-  tf::Quaternion quat(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w);
-  if(quat.length() != 0.0){ tf::Matrix3x3(quat.normalized()).getRPY(m_htcom.data.orientation.r, m_htcom.data.orientation.p, m_htcom.data.orientation.y); }
-	m_htcomOut.write(m_htcom);
-}
-void HrpsysSeqStateROSBridge::onHumanTrackerRFCommandCB(const geometry_msgs::PoseStampedConstPtr& msg) {
-  m_htrf.data.position.x = msg->pose.position.x;  m_htrf.data.position.y = msg->pose.position.y;  m_htrf.data.position.z = msg->pose.position.z;
-  tf::Quaternion quat(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w);
-  if(quat.length() != 0.0){ tf::Matrix3x3(quat.normalized()).getRPY(m_htrf.data.orientation.r, m_htrf.data.orientation.p, m_htrf.data.orientation.y); }
-	m_htrfOut.write(m_htrf);
-}
-void HrpsysSeqStateROSBridge::onHumanTrackerLFCommandCB(const geometry_msgs::PoseStampedConstPtr& msg) {
-  m_htlf.data.position.x = msg->pose.position.x;  m_htlf.data.position.y = msg->pose.position.y;  m_htlf.data.position.z = msg->pose.position.z;
-  tf::Quaternion quat(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w);
-  if(quat.length() != 0.0){ tf::Matrix3x3(quat.normalized()).getRPY(m_htlf.data.orientation.r, m_htlf.data.orientation.p, m_htlf.data.orientation.y); }
-	m_htlfOut.write(m_htlf);
-}
-void HrpsysSeqStateROSBridge::onHumanTrackerRHCommandCB(const geometry_msgs::PoseStampedConstPtr& msg) {
-  m_htrh.data.position.x = msg->pose.position.x;  m_htrh.data.position.y = msg->pose.position.y;  m_htrh.data.position.z = msg->pose.position.z;
-  tf::Quaternion quat(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w);
-  if(quat.length() != 0.0){ tf::Matrix3x3(quat.normalized()).getRPY(m_htrh.data.orientation.r, m_htrh.data.orientation.p, m_htrh.data.orientation.y); }
-	m_htrhOut.write(m_htrh);
-}
-void HrpsysSeqStateROSBridge::onHumanTrackerLHCommandCB(const geometry_msgs::PoseStampedConstPtr& msg) {
-  m_htlh.data.position.x = msg->pose.position.x;  m_htlh.data.position.y = msg->pose.position.y;  m_htlh.data.position.z = msg->pose.position.z;
-  tf::Quaternion quat(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w);
-  if(quat.length() != 0.0){ tf::Matrix3x3(quat.normalized()).getRPY(m_htlh.data.orientation.r, m_htlh.data.orientation.p, m_htlh.data.orientation.y); }
-	m_htlhOut.write(m_htlh);
-}
-void HrpsysSeqStateROSBridge::onHumanTrackerHEADCommandCB(const geometry_msgs::PoseStampedConstPtr& msg) {
-  m_hthead.data.position.x = msg->pose.position.x;  m_hthead.data.position.y = msg->pose.position.y;  m_hthead.data.position.z = msg->pose.position.z;
-  tf::Quaternion quat(msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w);
-  if(quat.length() != 0.0){ tf::Matrix3x3(quat.normalized()).getRPY(m_hthead.data.orientation.r, m_hthead.data.orientation.p, m_hthead.data.orientation.y); }
-  m_htheadOut.write(m_hthead);
-}
-void HrpsysSeqStateROSBridge::onHumanTrackerZMPCommandCB(const geometry_msgs::PointStampedConstPtr& msg) {
-  m_htzmp.data.x = msg->point.x;  m_htzmp.data.y = msg->point.y;  m_htzmp.data.z = msg->point.z;
-  m_htzmpOut.write(m_htzmp);
-}
-void HrpsysSeqStateROSBridge::onHumanTrackerRFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg) {
-  m_htrfw.data.force.x  = msg->wrench.force.x;  m_htrfw.data.force.y    = msg->wrench.force.y;  m_htrfw.data.force.z    = msg->wrench.force.z;
-  m_htrfw.data.torque.x = msg->wrench.torque.x; m_htrfw.data.torque.y   = msg->wrench.torque.y; m_htrfw.data.torque.z   = msg->wrench.torque.z;
-  m_htrfwOut.write(m_htrfw);
-}
-void HrpsysSeqStateROSBridge::onHumanTrackerLFWCommandCB(const geometry_msgs::WrenchStampedConstPtr& msg) {
-  m_htlfw.data.force.x  = msg->wrench.force.x;  m_htlfw.data.force.y    = msg->wrench.force.y;  m_htlfw.data.force.z    = msg->wrench.force.z;
-  m_htlfw.data.torque.x = msg->wrench.torque.x; m_htlfw.data.torque.y   = msg->wrench.torque.y; m_htlfw.data.torque.z   = msg->wrench.torque.z;
-  m_htlfwOut.write(m_htlfw);
-}
-
 
 bool HrpsysSeqStateROSBridge::setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
                                                       hrpsys_ros_bridge::SetSensorTransformation::Response& res)
@@ -371,21 +288,6 @@ bool HrpsysSeqStateROSBridge::sendMsg (dynamic_reconfigure::Reconfigure::Request
     return false;
   }
   return true;
-}
-
-void HrpsysSeqStateROSBridge::onFeedbackWrench(const ros::MessageEvent<geometry_msgs::WrenchStamped const>& event){
-    const ros::M_string& header = event.getConnectionHeader();
-    std::string topic = header.at("topic");
-    const geometry_msgs::WrenchStampedConstPtr msg = event.getMessage();
-    for(int i=0; i<m_fbwrenchName.size();i++){
-        if(topic.find(m_fbwrenchName[i]) != std::string::npos){
-            RTC::TimedDoubleSeq d;
-            d.data.length(6);
-            d.data[0] = msg->wrench.force.x;     d.data[1] = msg->wrench.force.y;     d.data[2] = msg->wrench.force.z;
-            d.data[3] = msg->wrench.torque.x;    d.data[4] = msg->wrench.torque.y;    d.data[5] = msg->wrench.torque.z;
-            m_fbwrenchOut[i]->write(d);
-        }
-    }
 }
 
 RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
@@ -705,8 +607,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
 
   updateImu(base, is_base_valid, tm_on_execute);
 
-  updateOdometryTF(tm_on_execute);
-
   // publish forces sonsors
   for (unsigned int i=0; i<m_rsforceIn.size(); i++){
     if ( m_rsforceIn[i]->isNew() ) {
@@ -964,10 +864,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
   }
 
-  // wholw body master slave
-  updateWBMS(tm_on_execute);
-
-
   //
   return RTC::RTC_OK;
 }
@@ -1080,27 +976,6 @@ void HrpsysSeqStateROSBridge::updateOdometry(const hrp::Vector3 &trans, const hr
     prev_rpy = rpy;
     prev_odom_acquired = true;
   }
-}
-
-
-void HrpsysSeqStateROSBridge::updateOdometryTF(const ros::Time &stamp)
-{
-    if (m_teleopOdomIn.isNew()) {
-        m_teleopOdomIn.read();
-        geometry_msgs::TransformStamped tf_tmp;
-        tf_tmp.header.stamp = stamp;
-        tf_tmp.header.frame_id = "teleop_odom";
-        tf_tmp.child_frame_id = rootlink_name;
-        Eigen::Quaternion<double> quat(hrp::rotFromRpy(m_teleopOdom.data.orientation.r, m_teleopOdom.data.orientation.p, m_teleopOdom.data.orientation.y));
-        tf_tmp.transform.translation.x = m_teleopOdom.data.position.x;
-        tf_tmp.transform.translation.y = m_teleopOdom.data.position.y;
-        tf_tmp.transform.translation.z = m_teleopOdom.data.position.z;
-        tf_tmp.transform.rotation.x = quat.x();
-        tf_tmp.transform.rotation.y = quat.y();
-        tf_tmp.transform.rotation.z = quat.z();
-        tf_tmp.transform.rotation.w = quat.w();
-        tf_transforms.push_back(tf_tmp);
-    }
 }
 
 void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp)
@@ -1240,107 +1115,6 @@ void HrpsysSeqStateROSBridge::updateSensorTransform(const ros::Time &stamp)
   if (!sensor_tf_buffer.empty()) {
     boost::mutex::scoped_lock lock(tf_mutex);
     tf_transforms.insert(tf_transforms.end(), sensor_tf_buffer.begin(), sensor_tf_buffer.end());
-  }
-}
-
-
-
-void HrpsysSeqStateROSBridge::updateWBMS(const ros::Time &stamp){
-  geometry_msgs::PoseStamped tmp_pose;
-  geometry_msgs::PointStamped tmp_point;
-  typedef struct tmp_struct{
-    static void TimedPoint3DToPointStamped(const TimedPoint3D& in, const ros::Time& stamp, geometry_msgs::PointStamped& out){
-      out.header.stamp = stamp;
-      out.point.x = in.data.x;
-      out.point.y = in.data.y;
-      out.point.z = in.data.z;
-    }
-    static void TimedPose3DToPoseStamped(const TimedPose3D& in, const ros::Time& stamp, geometry_msgs::PoseStamped& out){
-      out.header.stamp = stamp;
-      out.pose.position.x = in.data.position.x;
-      out.pose.position.y = in.data.position.y;
-      out.pose.position.z = in.data.position.z;
-      tf::Matrix3x3 tmp_m;
-      tmp_m.setRPY(in.data.orientation.r,in.data.orientation.p,in.data.orientation.y);
-      tf::Quaternion tmp_q;
-      tmp_m.getRotation(tmp_q);
-      out.pose.orientation.x = tmp_q.getX();
-      out.pose.orientation.y = tmp_q.getY();
-      out.pose.orientation.z = tmp_q.getZ();
-      out.pose.orientation.w = tmp_q.getW();
-    }
-  }tmp_func;
-  if ( m_htcom_dbgIn.isNew() ) {
-    m_htcom_dbgIn.read();
-    tmp_func::TimedPose3DToPoseStamped(m_htcom_dbg,stamp,tmp_pose);
-    htcom_dbg_pub.publish(tmp_pose);
-  }
-  if ( m_htrf_dbgIn.isNew() ) {
-    m_htrf_dbgIn.read();
-    tmp_func::TimedPose3DToPoseStamped(m_htrf_dbg,stamp,tmp_pose);
-    htrf_dbg_pub.publish(tmp_pose);
-  }
-  if ( m_htlf_dbgIn.isNew() ) {
-    m_htlf_dbgIn.read();
-    tmp_func::TimedPose3DToPoseStamped(m_htlf_dbg,stamp,tmp_pose);
-    htlf_dbg_pub.publish(tmp_pose);
-  }
-  if ( m_htrh_dbgIn.isNew() ) {
-    m_htrh_dbgIn.read();
-    tmp_func::TimedPose3DToPoseStamped(m_htrh_dbg,stamp,tmp_pose);
-    htrh_dbg_pub.publish(tmp_pose);
-  }
-  if ( m_htlh_dbgIn.isNew() ) {
-    m_htlh_dbgIn.read();
-    tmp_func::TimedPose3DToPoseStamped(m_htlh_dbg,stamp,tmp_pose);
-    htlh_dbg_pub.publish(tmp_pose);
-  }
-  if ( m_hthead_dbgIn.isNew() ) {
-    m_hthead_dbgIn.read();
-    tmp_func::TimedPose3DToPoseStamped(m_hthead_dbg,stamp,tmp_pose);
-    hthead_dbg_pub.publish(tmp_pose);
-  }
-  if ( m_rpcom_dbgIn.isNew() ) {
-    m_rpcom_dbgIn.read();
-    tmp_func::TimedPose3DToPoseStamped(m_rpcom_dbg,stamp,tmp_pose);
-    rpcom_dbg_pub.publish(tmp_pose);
-  }
-  if ( m_rprf_dbgIn.isNew() ) {
-    m_rprf_dbgIn.read();
-    tmp_func::TimedPose3DToPoseStamped(m_rprf_dbg,stamp,tmp_pose);
-    rprf_dbg_pub.publish(tmp_pose);
-  }
-  if ( m_rplf_dbgIn.isNew() ) {
-    m_rplf_dbgIn.read();
-    tmp_func::TimedPose3DToPoseStamped(m_rplf_dbg,stamp,tmp_pose);
-    rplf_dbg_pub.publish(tmp_pose);
-  }
-  if ( m_rpdcp_dbgIn.isNew() ) {
-    m_rpdcp_dbgIn.read();
-    tmp_func::TimedPoint3DToPointStamped(m_rpdcp_dbg,stamp,tmp_point);
-    rpdcp_dbg_pub.publish(tmp_point);
-  }
-  if ( m_rpacp_dbgIn.isNew() ) {
-    m_rpacp_dbgIn.read();
-    tmp_func::TimedPoint3DToPointStamped(m_rpacp_dbg,stamp,tmp_point);
-    rpacp_dbg_pub.publish(tmp_point);
-  }
-  if ( m_rpzmp_dbgIn.isNew() ) {
-    m_rpzmp_dbgIn.read();
-    tmp_func::TimedPoint3DToPointStamped(m_rpzmp_dbg,stamp,tmp_point);
-    rpzmp_dbg_pub.publish(tmp_point);
-  }
-  if ( m_invdyn_dbgIn.isNew() ) {
-    m_invdyn_dbgIn.read();
-    geometry_msgs::WrenchStamped tmp_w;
-    tmp_w.header.stamp = stamp;
-    tmp_w.wrench.force.x = m_invdyn_dbg.data[0];
-    tmp_w.wrench.force.y = m_invdyn_dbg.data[1];
-    tmp_w.wrench.force.z = m_invdyn_dbg.data[2];
-    tmp_w.wrench.torque.x = m_invdyn_dbg.data[3];
-    tmp_w.wrench.torque.y = m_invdyn_dbg.data[4];
-    tmp_w.wrench.torque.z = m_invdyn_dbg.data[5];
-    invdyn_dbg_pub.publish(tmp_w);
   }
 }
 

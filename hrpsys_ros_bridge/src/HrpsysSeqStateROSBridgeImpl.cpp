@@ -45,36 +45,6 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_actContactStatesIn("actContactStates", m_actContactStates),
     m_controlSwingSupportTimeIn("controlSwingSupportTime", m_controlSwingSupportTime),
     m_mctorqueOut("mctorque", m_mctorque),
-    //for human tracker
-    m_htzmpOut("htzmp", m_htzmp),
-    m_htcomOut("htcom", m_htcom),
-    m_htrfwOut("htrfw", m_htrfw),
-    m_htlfwOut("htlfw", m_htlfw),
-    m_htrfOut("htrf", m_htrf),
-    m_htlfOut("htlf", m_htlf),
-    m_htrhOut("htrh", m_htrh),
-    m_htlhOut("htlh", m_htlh),
-    m_htheadOut("hthead", m_hthead),
-
-    m_htcom_dbgIn("htcom_dbgIn", m_htcom_dbg),
-    m_htrf_dbgIn("htrf_dbgIn", m_htrf_dbg),
-    m_htlf_dbgIn("htlf_dbgIn", m_htlf_dbg),
-    m_htrh_dbgIn("htrh_dbgIn", m_htrh_dbg),
-    m_htlh_dbgIn("htlh_dbgIn", m_htlh_dbg),
-    m_hthead_dbgIn("hthead_dbgIn", m_hthead_dbg),
-    m_rpcom_dbgIn("rpcom_dbgIn", m_rpcom_dbg),
-    m_rprf_dbgIn("rprf_dbgIn", m_rprf_dbg),
-    m_rplf_dbgIn("rplf_dbgIn", m_rplf_dbg),
-    m_rprh_dbgIn("rprh_dbgIn", m_rprh_dbg),
-    m_rplh_dbgIn("rplh_dbgIn", m_rplh_dbg),
-    m_rphead_dbgIn("rphead_dbgIn", m_rphead_dbg),
-    m_rpzmp_dbgIn("rpzmp_dbgIn", m_rpzmp_dbg),
-    m_rpdcp_dbgIn("rpdcp_dbgIn", m_rpdcp_dbg),
-    m_rpacp_dbgIn("rpacp_dbgIn", m_rpacp_dbg),
-
-    m_invdyn_dbgIn("invdyn_dbgIn", m_invdyn_dbg),
-
-    m_teleopOdomIn("teleopOdom", m_teleopOdom),
     m_SequencePlayerServicePort("SequencePlayerService")
 
     // </rtc-template>
@@ -106,37 +76,9 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("refContactStates", m_refContactStatesIn);
   addInPort("actContactStates", m_actContactStatesIn);
   addInPort("controlSwingSupportTime", m_controlSwingSupportTimeIn);
-  addInPort("teleopOdom", m_teleopOdomIn);
 
   // Set OutPort buffer
   addOutPort("mctorque", m_mctorqueOut);
-  //for human tracker
-  addOutPort("htzmp", m_htzmpOut);
-  addOutPort("htcom", m_htcomOut);
-  addOutPort("htrfw", m_htrfwOut);
-  addOutPort("htlfw", m_htlfwOut);
-  addOutPort("htrf", m_htrfOut);
-  addOutPort("htlf", m_htlfOut);
-  addOutPort("htrh", m_htrhOut);
-  addOutPort("htlh", m_htlhOut);
-  addOutPort("hthead", m_htheadOut);
-
-  addInPort("htcom_dbgIn", m_htcom_dbgIn);
-  addInPort("htrf_dbgIn", m_htrf_dbgIn);
-  addInPort("htlf_dbgIn", m_htlf_dbgIn);
-  addInPort("htrh_dbgIn", m_htrh_dbgIn);
-  addInPort("htlh_dbgIn", m_htlh_dbgIn);
-  addInPort("hthead_dbgIn", m_hthead_dbgIn);
-  addInPort("rpcom_dbgIn", m_rpcom_dbgIn);
-  addInPort("rprf_dbgIn", m_rprf_dbgIn);
-  addInPort("rplf_dbgIn", m_rplf_dbgIn);
-  addInPort("rprh_dbgIn", m_rprh_dbgIn);
-  addInPort("rplh_dbgIn", m_rplh_dbgIn);
-  addInPort("rphead_dbgIn", m_rphead_dbgIn);
-  addInPort("rpzmp_dbgIn", m_rpzmp_dbgIn);
-  addInPort("rpdcp_dbgIn", m_rpdcp_dbgIn);
-  addInPort("rpacp_dbgIn", m_rpacp_dbgIn);
-  addInPort("invdyn_dbgIn", m_invdyn_dbgIn);
 
   // Set service provider to Ports
 
@@ -199,8 +141,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   m_offforceIn.resize(nforce);
   m_mcforce.resize(nforce);
   m_mcforceIn.resize(nforce);
-  m_fbwrench.resize(npforce);
-  m_fbwrenchOut.resize(npforce);
   for (unsigned int i=0; i<npforce; i++){
     hrp::Sensor *s = body->sensor(hrp::Sensor::FORCE, i);
     // force and moment
@@ -218,11 +158,6 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
     m_mcforce[i].data.length(6);
     registerInPort(std::string("ref_" + s->name).c_str(), *m_mcforceIn[i]);
     m_mcforceName.push_back(std::string("ref_" + s->name));
-    // feedback force and moment
-    m_fbwrenchOut[i] = OTDS_Ptr(new OutPort<TimedDoubleSeq>(std::string("feedback_" + s->name).c_str(), m_fbwrench[i]));
-    m_fbwrench[i].data.length(6);
-    registerOutPort(std::string("feedback_" + s->name).c_str(), *m_fbwrenchOut[i]);
-    m_fbwrenchName.push_back(std::string("feedback_" + s->name));
     std::cerr << i << " physical force sensor : " << s->name << std::endl;
   }
 
@@ -240,7 +175,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
       si.transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
       hrp::Vector3 rpy;
       if ( hrp::Sensor::VISION == sensor->type )
-        // Rotate sensor->localR 180[deg] because OpenHRP3 cheadra -Z axis equals to ROS camera Z axis
+        // Rotate sensor->localR 180[deg] because OpenHRP3 camera -Z axis equals to ROS camera Z axis
         // http://www.openrtp.jp/openhrp3/jp/create_model.html
         rpy = hrp::rpyFromRot(sensor->localR * hrp::rodrigues(hrp::Vector3(1,0,0), M_PI));
       else if ( hrp::Sensor::RANGE == sensor->type )
@@ -386,9 +321,10 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
         if ( sensor ) {
           // real force sensor
           sensor_link_name = sensor->link->name;
-        } else if (sensor_info.find(sensor_name) !=  sensor_info.end()) {
+        } else if (sensor_info.find(tmpname) !=  sensor_info.end()) {
           // virtual force sensor
-          sensor_link_name =  sensor_info[sensor_name].link_name;
+          sensor_link_name = sensor_info[tmpname].link_name;
+          sensor_link_name = sensor_link_name.substr(0, sensor_link_name.size()-5); // such that LLEG_JOINT0_LINK -> LLEG_JOINT0
         } else {
           std::cerr << "[" << m_profile.instance_name << "]   unknown force param" << std::endl;
           continue;
