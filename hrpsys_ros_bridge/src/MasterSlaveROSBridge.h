@@ -10,6 +10,7 @@
 #include <rtm/DataOutPort.h>
 // ros
 #include "ros/ros.h"
+#include "std_msgs/Time.h"
 #include "geometry_msgs/PoseStamped.h"
 #include "geometry_msgs/WrenchStamped.h"
 //#include <tf/transform_listener.h>
@@ -27,6 +28,7 @@ class MasterSlaveROSBridge  : public RTC::DataFlowComponentBase
         void updateOdometryTF(const ros::Time &stamp);
         void onMasterTgtPoseCB(const geometry_msgs::PoseStamped::ConstPtr& msg, std::string& key);
         void onSlaveEEWrenchCB(const geometry_msgs::WrenchStamped::ConstPtr& msg, std::string& key);
+        void onCalcDelayCB(const std_msgs::Time::ConstPtr& msg);
 
     protected:
         // used in both case
@@ -58,7 +60,12 @@ class MasterSlaveROSBridge  : public RTC::DataFlowComponentBase
         std::map<std::string, ros::Publisher> slaveEEWrenches_pub;
 
 
-
+        // delay calc
+        ros::Subscriber calc_delay_sub;
+        ros::Publisher calc_delay_pub;
+        RTC::Time m_calcDelayInbound, m_calcDelayOutbound;
+        RTC::OutPort<RTC::Time> m_calcDelayInboundOut;
+        RTC::InPort<RTC::Time> m_calcDelayOutboundIn;
 
 
 
@@ -66,11 +73,6 @@ class MasterSlaveROSBridge  : public RTC::DataFlowComponentBase
         RTC::TimedStringSeq m_exDataIndex;
         RTC::OutPort<RTC::TimedDoubleSeq> m_exDataOut;
         RTC::OutPort<RTC::TimedStringSeq> m_exDataIndexOut;
-
-
-
-
-
 };
 
 

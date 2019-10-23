@@ -17,6 +17,8 @@ static const char* masterslaverosbridge_spec[] =
   };
 
 MasterSlaveROSBridge::MasterSlaveROSBridge(RTC::Manager* manager) : RTC::DataFlowComponentBase(manager),
+    m_calcDelayOutboundIn("calc_delay_outbound", m_calcDelayOutbound),
+    m_calcDelayInboundOut("calc_delay_inbound", m_calcDelayInbound),
     m_exDataOut("exData", m_exData),
     m_exDataIndexOut("exDataIndex", m_exDataIndex)
 {}
@@ -24,6 +26,8 @@ MasterSlaveROSBridge::MasterSlaveROSBridge(RTC::Manager* manager) : RTC::DataFlo
 MasterSlaveROSBridge::~MasterSlaveROSBridge(){}
 
 RTC::ReturnCode_t MasterSlaveROSBridge::onInitialize(){
+    addInPort("calc_delay_outbound", m_calcDelayOutboundIn);
+    addOutPort("calc_delay_inbound", m_calcDelayInboundOut);
     addOutPort("exData", m_exDataOut);
     addOutPort("exDataIndex", m_exDataIndexOut);
 
@@ -100,12 +104,21 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onInitialize(){
         }
     }
 
+    // both
+    calc_delay_sub = nh.subscribe("calc_delay_inbound", 1, &MasterSlaveROSBridge::onCalcDelayCB, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
+    calc_delay_pub = nh.advertise<std_msgs::Time>("calc_delay_outbound", 1);
 
     ROS_INFO_STREAM("[MasterSlaveROSBridge] @Initilize name : " << getInstanceName());
 
     loop = 0;
     tm.tick();
     return RTC::RTC_OK;
+}
+
+void MasterSlaveROSBridge::onCalcDelayCB(const std_msgs::Time::ConstPtr& msg){
+    m_calcDelayInbound.sec = msg->data.sec;
+    m_calcDelayInbound.nsec = msg->data.nsec;
+    m_calcDelayInboundOut.write();
 }
 
 void MasterSlaveROSBridge::onSlaveEEWrenchCB(const geometry_msgs::WrenchStamped::ConstPtr& msg, std::string& key){
@@ -135,7 +148,7 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onExecute(RTC::UniqueId ec_id){
     ros::Time tm_on_execute = ros::Time::now();
 
 
-    if(is_master_side){
+    if(is_master_side){ //master
         for(int i=0; i<tgt_names.size(); i++){
             if(m_masterTgtPosesIn[tgt_names[i]]->isNew()){
                 m_masterTgtPosesIn[tgt_names[i]]->read();
@@ -178,10 +191,7 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onExecute(RTC::UniqueId ec_id){
             }
         }
 
-
-
-
-    }else{
+    }else{ // slave
         for(int i=0; i<ee_names.size(); i++){
             if(m_slaveEEWrenchesIn[ee_names[i]]->isNew()){
                 m_slaveEEWrenchesIn[ee_names[i]]->read();
@@ -199,6 +209,15 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onExecute(RTC::UniqueId ec_id){
         }
     }
 
+
+    // both
+    if(m_calcDelayOutboundIn.isNew()){
+        m_calcDelayOutboundIn.read();
+        std_msgs::Time tmp;
+        tmp.data.sec = m_calcDelayOutbound.sec;
+        tmp.data.nsec = m_calcDelayOutbound.nsec;
+        calc_delay_pub.publish(tmp);
+    }
 
 
     static int count = 0;
