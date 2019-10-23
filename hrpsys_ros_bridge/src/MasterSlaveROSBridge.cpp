@@ -17,8 +17,8 @@ static const char* masterslaverosbridge_spec[] =
   };
 
 MasterSlaveROSBridge::MasterSlaveROSBridge(RTC::Manager* manager) : RTC::DataFlowComponentBase(manager),
-    m_calcDelayOutboundIn("calc_delay_outbound", m_calcDelayOutbound),
-    m_calcDelayInboundOut("calc_delay_inbound", m_calcDelayInbound),
+    m_delayCheckPacketOutboundIn("delay_check_packet_outbound", m_delayCheckPacketOutbound),
+    m_delayCheckPacketInboundOut("delay_check_packet_inbound", m_delayCheckPacketInbound),
     m_exDataOut("exData", m_exData),
     m_exDataIndexOut("exDataIndex", m_exDataIndex)
 {}
@@ -26,8 +26,8 @@ MasterSlaveROSBridge::MasterSlaveROSBridge(RTC::Manager* manager) : RTC::DataFlo
 MasterSlaveROSBridge::~MasterSlaveROSBridge(){}
 
 RTC::ReturnCode_t MasterSlaveROSBridge::onInitialize(){
-    addInPort("calc_delay_outbound", m_calcDelayOutboundIn);
-    addOutPort("calc_delay_inbound", m_calcDelayInboundOut);
+    addInPort("delay_check_packet_outbound", m_delayCheckPacketOutboundIn);
+    addOutPort("delay_check_packet_inbound", m_delayCheckPacketInboundOut);
     addOutPort("exData", m_exDataOut);
     addOutPort("exDataIndex", m_exDataIndexOut);
 
@@ -105,8 +105,8 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onInitialize(){
     }
 
     // both
-    calc_delay_sub = nh.subscribe("calc_delay_inbound", 1, &MasterSlaveROSBridge::onCalcDelayCB, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
-    calc_delay_pub = nh.advertise<std_msgs::Time>("calc_delay_outbound", 1);
+    delay_check_packet_sub = nh.subscribe("delay_check_packet_inbound", 1, &MasterSlaveROSBridge::ondelayCheckPacketCB, this, ros::TransportHints().unreliable().reliable().tcpNoDelay());
+    delay_check_packet_pub = nh.advertise<std_msgs::Time>("delay_check_packet_outbound", 1);
 
     ROS_INFO_STREAM("[MasterSlaveROSBridge] @Initilize name : " << getInstanceName());
 
@@ -115,10 +115,10 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onInitialize(){
     return RTC::RTC_OK;
 }
 
-void MasterSlaveROSBridge::onCalcDelayCB(const std_msgs::Time::ConstPtr& msg){
-    m_calcDelayInbound.sec = msg->data.sec;
-    m_calcDelayInbound.nsec = msg->data.nsec;
-    m_calcDelayInboundOut.write();
+void MasterSlaveROSBridge::ondelayCheckPacketCB(const std_msgs::Time::ConstPtr& msg){
+    m_delayCheckPacketInbound.sec = msg->data.sec;
+    m_delayCheckPacketInbound.nsec = msg->data.nsec;
+    m_delayCheckPacketInboundOut.write();
 }
 
 void MasterSlaveROSBridge::onSlaveEEWrenchCB(const geometry_msgs::WrenchStamped::ConstPtr& msg, std::string& key){
@@ -211,12 +211,12 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onExecute(RTC::UniqueId ec_id){
 
 
     // both
-    if(m_calcDelayOutboundIn.isNew()){
-        m_calcDelayOutboundIn.read();
+    if(m_delayCheckPacketOutboundIn.isNew()){
+        m_delayCheckPacketOutboundIn.read();
         std_msgs::Time tmp;
-        tmp.data.sec = m_calcDelayOutbound.sec;
-        tmp.data.nsec = m_calcDelayOutbound.nsec;
-        calc_delay_pub.publish(tmp);
+        tmp.data.sec = m_delayCheckPacketOutbound.sec;
+        tmp.data.nsec = m_delayCheckPacketOutbound.nsec;
+        delay_check_packet_pub.publish(tmp);
     }
 
 

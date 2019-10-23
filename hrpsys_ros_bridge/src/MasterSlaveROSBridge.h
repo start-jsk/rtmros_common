@@ -28,7 +28,7 @@ class MasterSlaveROSBridge  : public RTC::DataFlowComponentBase
         void updateOdometryTF(const ros::Time &stamp);
         void onMasterTgtPoseCB(const geometry_msgs::PoseStamped::ConstPtr& msg, std::string& key);
         void onSlaveEEWrenchCB(const geometry_msgs::WrenchStamped::ConstPtr& msg, std::string& key);
-        void onCalcDelayCB(const std_msgs::Time::ConstPtr& msg);
+        void ondelayCheckPacketCB(const std_msgs::Time::ConstPtr& msg);
 
     protected:
         // used in both case
@@ -61,11 +61,11 @@ class MasterSlaveROSBridge  : public RTC::DataFlowComponentBase
 
 
         // delay calc
-        ros::Subscriber calc_delay_sub;
-        ros::Publisher calc_delay_pub;
-        RTC::Time m_calcDelayInbound, m_calcDelayOutbound;
-        RTC::OutPort<RTC::Time> m_calcDelayInboundOut;
-        RTC::InPort<RTC::Time> m_calcDelayOutboundIn;
+        ros::Subscriber delay_check_packet_sub;
+        ros::Publisher delay_check_packet_pub;
+        RTC::Time m_delayCheckPacketInbound, m_delayCheckPacketOutbound;
+        RTC::OutPort<RTC::Time> m_delayCheckPacketInboundOut;
+        RTC::InPort<RTC::Time> m_delayCheckPacketOutboundIn;
 
 
 
