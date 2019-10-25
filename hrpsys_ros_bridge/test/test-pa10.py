@@ -153,6 +153,54 @@ class TestPA10Robot(unittest.TestCase):
         rospy.logwarn("difference from predicted velocity: %r"%(linalg.norm(array(real_vel)-array(pred_vel))))
         self.assertAlmostEqual(linalg.norm(array(real_vel)-array(pred_vel)), 0, delta=0.1)
 
+    # https://github.com/start-jsk/rtmros_common/pull/765#issuecomment-120208947
+    def test_jta_cancel_goal(self):
+        # for < kinetic
+        if os.environ['ROS_DISTRO'] >= 'kinetic' :
+            return True
+        from pr2_controllers_msgs.msg import JointTrajectoryAction, JointTrajectoryGoal
+        larm = actionlib.SimpleActionClient("/fullbody_controller/joint_trajectory_action", JointTrajectoryAction)
+        self.impl_test_jta_cancel_goal(larm, JointTrajectoryGoal())
+
+    def test_fjta_cancel_goal(self):
+        # for >= kinetic
+        if os.environ['ROS_DISTRO'] < 'kinetic' :
+            return True
+        from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
+        larm = actionlib.SimpleActionClient("/fullbody_controller/follow_joint_trajectory_action", FollowJointTrajectoryAction)
+        self.impl_test_jta_cancel_goal(larm, FollowJointTrajectoryGoal())
+
+    def impl_test_jta_cancel_goal(self, larm, goal):
+        larm.wait_for_server()
+
+        try:
+            self.listener.waitForTransform('/BASE_LINK', '/J7_LINK', rospy.Time(), rospy.Duration(120))
+        except tf.Exception:
+            self.assertTrue(None, "could not found tf from /BASE_LINK to /J7_LINK")
+        goal.trajectory.header.stamp = rospy.get_rostime()
+        goal.trajectory.joint_names.append("J1")
+        goal.trajectory.joint_names.append("J2")
+        goal.trajectory.joint_names.append("J3")
+        goal.trajectory.joint_names.append("J4")
+        goal.trajectory.joint_names.append("J5")
+        goal.trajectory.joint_names.append("J6")
+        goal.trajectory.joint_names.append("J7")
+
+        point = JointTrajectoryPoint()
+        point.positions = [ x * math.pi / 180.0 for x in [10,20,30,40,50,60,70] ]
+        point.time_from_start = rospy.Duration(5.0)
+        goal.trajectory.points.append(point)
+        larm.send_goal(goal)
+        rospy.sleep(2.5)
+        (trans1,rot1) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
+        rospy.logwarn("tf_echo /BASE_LINK /J7_LINK %r %r"%(trans1,rot1))
+        larm.cancel_goal()
+        rospy.sleep(2.5)
+        (trans2,rot2) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
+        rospy.logwarn("tf_echo /BASE_LINK /J7_LINK %r %r"%(trans2,rot2))
+        larm.wait_for_result()
+        rospy.logwarn("difference between two /J7_LINK %r %r"%(array(trans1)-array(trans2),linalg.norm(array(trans1)-array(trans2))))
+        self.assertAlmostEqual(linalg.norm(array(trans1)-array(trans2)), 0, delta=0.1)
 
 # unittest.main()
 if __name__ == '__main__':
