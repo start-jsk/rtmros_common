@@ -600,11 +600,11 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onFollowJointTraject
     else
     { // fullbody
       if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
-        ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAngles");
-        parent->m_service0->clearJointAngles();
-      } else {
         ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clear");
         parent->m_service0->clear();
+      } else {
+        ROS_INFO_STREAM("[" << parent->getInstanceName() << "] clearJointAngles");
+        parent->m_service0->clearJointAngles();
       }
     }
   }
