@@ -331,9 +331,13 @@
         (debug nil))
   (when (boundp param-class)
     (let* ((param-slots-list ;; get slots list for param-class
-            (remove-if #'(lambda (x) (or (string= "plist" x) (string= "connection-header" x)))
-                       (mapcar #'(lambda (x) (string-left-trim "::_" (string-left-trim "ros" (format nil "~A" x))))
-                               (concatenate cons (send (eval param-class) :slots)))))
+            ;; coerce to cons to avoid :count glitches on vectors
+            ;; https://github.com/euslisp/EusLisp/issues/295
+            (let ((slt (coerce (send (eval param-class) :slots) cons)))
+              (map nil #'(lambda (obj) (setq slt (remove obj slt :count 1)))
+                   (send ros::object :slots))
+              (mapcar #'(lambda (x) (string-left-trim "_" (symbol-name x)))
+                      slt)))
            (param-name
             ;; Extract param class, e.g., extract zz from hrpsys_ros_bridge::xx_yy_zz
             (car (last (read-from-string (substitute (elt " " 0) (elt ":" 0) (substitute (elt " " 0) (elt "_" 0) (format nil "(~A)" param-class)))))))
