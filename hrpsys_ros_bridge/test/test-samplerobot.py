@@ -4,6 +4,7 @@ PKG = 'hrpsys_ros_bridge'
 NAME = 'test_samplerobot'
 
 import argparse,unittest,rostest, time, sys, math, os
+from copy import deepcopy
 from numpy import *
 
 import rospy,rospkg, tf
@@ -22,6 +23,7 @@ class TestSampleRobot(unittest.TestCase):
     rfsensor = None
     odom = None
     joint_states = None
+    feedback = None
 
     def lfsensor_cb(self, sensor):
         self.lfsensor = sensor
@@ -90,6 +92,9 @@ class TestSampleRobot(unittest.TestCase):
             self.assertAlmostEqual(t2-t1, 11, delta=2)
             #self.assertNotAlmostEqual(trans[1],0,2)
 
+    def feedback_cb(self, msg):
+        self.feedback = msg
+
     def impl_test_joint_angles(self, larm, goal):
         larm.wait_for_server()
 
@@ -111,12 +116,31 @@ class TestSampleRobot(unittest.TestCase):
         point.positions = [ x * math.pi / 180.0 for x in [30,30,30,-90,-40,-30] ]
         point.time_from_start = rospy.Duration(5.0)
         goal.trajectory.points.append(point)
-        larm.send_goal(goal)
+        larm.send_goal(goal, feedback_cb = self.feedback_cb)
+        rospy.sleep(2.5)
+        mid_feedback = deepcopy(self.feedback)
         larm.wait_for_result()
         (trans2,rot2) = self.listener.lookupTransform('/WAIST_LINK0', '/LARM_LINK7', rospy.Time(0))
         rospy.logwarn("tf_echo /WAIST_LINK0 /LARM_LINK7 %r %r"%(trans2,rot2))
         rospy.logwarn("difference between two /LARM_LINK7 %r %r"%(array(trans1)-array(trans2),linalg.norm(array(trans1)-array(trans2))))
         self.assertNotAlmostEqual(linalg.norm(array(trans1)-array(trans2)), 0, delta=0.1)
+        # time_from_start in feedback should have a meaning
+        # https://github.com/jsk-ros-pkg/jsk_pr2eus/issues/233#issuecomment-403416846
+        # JointTrajectoryAction in pr2_controllers_msgs has empty feedback
+        if hasattr(mid_feedback, 'desired'):
+            rospy.logwarn("time_from_start of desired of midpoint feedback: %r"%mid_feedback.desired.time_from_start.to_sec())
+            self.assertAlmostEqual(mid_feedback.desired.time_from_start.to_sec(), 2.5, delta=1)
+            rospy.logwarn("time_from_start of actual of midpoint feedback: %r"%mid_feedback.actual.time_from_start.to_sec())
+            self.assertAlmostEqual(mid_feedback.actual.time_from_start.to_sec(), 2.5, delta=1)
+            rospy.logwarn("time_from_start of error of midpoint feedback: %r"%mid_feedback.error.time_from_start.to_sec())
+            self.assertAlmostEqual(mid_feedback.error.time_from_start.to_sec(), 2.5, delta=1)
+        # feedback shouldn't be published after motion finishes
+        # https://github.com/start-jsk/rtmros_common/pull/1049#issuecomment-403780615
+        fb_id1 = id(self.feedback)
+        rospy.sleep(0.5)
+        fb_id2 = id(self.feedback)
+        rospy.logwarn("object id of feedback after motion: %r, 0.5sec after: %r"%(fb_id1, fb_id2))
+        self.assertEqual(fb_id1, fb_id2)
 
         ## move less than 1.0 sec
         goal.trajectory.header.stamp = rospy.get_rostime()
