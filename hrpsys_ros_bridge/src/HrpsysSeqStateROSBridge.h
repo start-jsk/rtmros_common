@@ -84,6 +84,7 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
 
   coil::Mutex m_mutex;
   coil::TimeMeasure tm;
+  sensor_msgs::JointState prev_joint_state;
 
   std::string nameserver;
   std::string rootlink_name;
