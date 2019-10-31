@@ -102,11 +102,11 @@ rtmbuild_genbridge()
 # pr2_controller_msgs is not catkinized
 string(RANDOM _random_string)
 
-rtmbuild_add_executable(HrpsysSeqStateROSBridge src/HrpsysSeqStateROSBridgeImpl.cpp src/HrpsysSeqStateROSBridge.cpp src/HrpsysSeqStateROSBridgeComp.cpp)
+rtmbuild_add_executable(HrpsysSeqStateROSBridge src/HrpsysSeqStateROSBridgeImpl.cpp src/HrpsysSeqStateROSBridge.cpp src/HrpsysSeqStateROSBridgeComp.cpp src/HrpsysROSBridgeUtil.cpp)
 rtmbuild_add_executable(ImageSensorROSBridge src/ImageSensorROSBridge.cpp src/ImageSensorROSBridgeComp.cpp)
 rtmbuild_add_executable(RangeSensorROSBridge src/RangeSensorROSBridge.cpp src/RangeSensorROSBridgeComp.cpp)
 rtmbuild_add_executable(PointCloudROSBridge src/PointCloudROSBridge.cpp src/PointCloudROSBridgeComp.cpp)
-rtmbuild_add_executable(HrpsysJointTrajectoryBridge src/HrpsysJointTrajectoryBridge.cpp src/HrpsysJointTrajectoryBridgeComp.cpp)
+rtmbuild_add_executable(HrpsysJointTrajectoryBridge src/HrpsysJointTrajectoryBridge.cpp src/HrpsysJointTrajectoryBridgeComp.cpp src/HrpsysROSBridgeUtil.cpp)
 
 install(DIRECTORY launch euslisp srv idl scripts models test cmake
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
