@@ -38,7 +38,7 @@ def rtc_init () :
     while ms == None :
         time.sleep(1);
         ms = rtm.findRTCmanager(rtm.nshost)
-        rospy.loginfo("[collision_state.py] wait for RTCmanager : ",ms)
+        rospy.loginfo("[collision_state.py] wait for RTCmanager : %s",ms)
 
     co = None
     count = 0

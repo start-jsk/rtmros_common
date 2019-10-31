@@ -1,0 +1,17 @@
+- git:
+    uri: https://github.com/tork-a/openhrp3-release
+    version: release/kinetic/openhrp3
+    local-name: openhrp3
+- git:
+    uri: https://github.com/fkanehiro/hrpsys-base
+    version: master
+    local-name: hrpsys
+- git:
+    uri: https://github.com/tork-a/rtshell-release
+    local-name: rtshell
+- git:
+    uri: https://github.com/tork-a/rtsprofile-release
+    local-name: rtsprofile
+- git:
+    uri: https://github.com/tork-a/rtctree-release
+    local-name: rtctree

@@ -22,11 +22,21 @@ Here 3 things are happening:
   3. Specify rtconnect tag with connecting components info.
 '''
 
-cosnames = "omniNames"
-port_number = 15005
-
 from openrtm_tools import rtmstart, rtmlaunch
-import roslaunch
+from rosgraph import names
+import roslaunch, sys
+
+cosnames = "omniNames"
+
+port_number = 15005 # default
+
+arg_remap = names.load_mappings(sys.argv)
+
+if 'corbaport' in arg_remap:
+    port_number = int(arg_remap['corbaport'])
+    print "\033[34m[rtmlaunch] user defined corbaport:=", port_number, "will be used\033[0m"
+else:
+    print "\033[34m[rtmlaunch] default corbaport:=", port_number, "will be used\033[0m"
 
 p = rtmstart.start_cosname(cosnames, port_number)
 
