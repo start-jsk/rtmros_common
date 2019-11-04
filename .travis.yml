@@ -58,7 +58,7 @@ script:
   # https://github.com/start-jsk/rtmros_common/issues/1076
   # .deb can be got from https://pkgs.org (e.g., https://pkgs.org/download/libpcre3)
   # libpcre3-dev requires the same version of libpcrecpp0
-  - if [ "${ROS_DISTRO}" == "hydro" ] && [ "${USE_DEB}" != "true" ] ; then export BEFORE_SCRIPT="wget archive.ubuntu.com/ubuntu/pool/main/p/pcre3/libpcre3_8.31-2ubuntu2_amd64.deb; wget archive.ubuntu.com/ubuntu/pool/main/p/pcre3/libpcrecpp0_8.31-2ubuntu2_amd64.deb; wget archive.ubuntu.com/ubuntu/pool/main/p/pcre3/libpcre3-dev_8.31-2ubuntu2_amd64.deb; sudo dpkg -i libpcre3_8.31-2ubuntu2_amd64.deb; sudo dpkg -i libpcrecpp0_8.31-2ubuntu2_amd64.deb; sudo dpkg -i libpcre3-dev_8.31-2ubuntu2_amd64.deb; sudo apt-mark hold libpcre3 libpcrecpp0 libpcre3-dev"; fi
+  - if [ "${ROS_DISTRO}" == "hydro" ] && [ "${USE_DEB}" != "true" ] ; then add_scr="wget archive.ubuntu.com/ubuntu/pool/main/p/pcre3/libpcre3_8.31-2ubuntu2_amd64.deb; wget archive.ubuntu.com/ubuntu/pool/main/p/pcre3/libpcrecpp0_8.31-2ubuntu2_amd64.deb; wget archive.ubuntu.com/ubuntu/pool/main/p/pcre3/libpcre3-dev_8.31-2ubuntu2_amd64.deb; sudo dpkg -i libpcre3_8.31-2ubuntu2_amd64.deb; sudo dpkg -i libpcrecpp0_8.31-2ubuntu2_amd64.deb; sudo dpkg -i libpcre3-dev_8.31-2ubuntu2_amd64.deb; sudo apt-mark hold libpcre3 libpcrecpp0 libpcre3-dev"; fi; if [ "${BEFORE_SCRIPT}" == "" ] ; then export BEFORE_SCRIPT=${add_scr}; else export BEFORE_SCRIPT="${BEFORE_SCRIPT}; ${add_scr}"; fi
   - if [ "${TEST_TYPE}" == "" ] ; then source .travis/travis.sh; else source ./.travis_test.sh ; fi
   - ccache -s
 after_success:
