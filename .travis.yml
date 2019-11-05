@@ -51,14 +51,14 @@ before_script:
   - if [ "${TRAVIS_SECURE_ENV_VARS}" == "true" ]; then openssl aes-256-cbc -K $encrypted_b79fc5843df3_key -iv $encrypted_b79fc5843df3_iv -in .secrets.tar.enc -out .secrets.tar -d; tar -C ~/ -xvf .secrets.tar; export INSTALL_SRC="$INSTALL_SRC $INSTALL_SRC_SECURE"; export TEST_PKGS="$TEST_PKGS $TEST_PKGS_SECURE"; fi
   - export REPOSITORY_NAME=`basename $PWD`
   - if [ "${INSTALL_SRC}" != "" ] ;then export sudo apt-get install python-yaml; export BEFORE_SCRIPT="$(for src in $INSTALL_SRC; do name=`basename $src`; echo "python -c \"import yaml;print yaml.dump([{\\\"git\\\":{\\\"uri\\\":\\\"$src\\\",\\\"local-name\\\":\\\"$name\\\"}}], default_flow_style=False)\" >> .rosinstall;"; done)ls -al; cat .rosinstall; wstool update"; export USE_DEB=false; fi; # set USE_DEB false to enable .travis.rosinstall
-script:
-  - if [ "${IS_EUSLISP_TRAVIS_TEST}" != "true" ] ; then export ROS_PARALLEL_JOBS="-j2 -l2" ; fi
-  - if [ "${ROS_DISTRO}" == "hydro" ] ; then sudo apt-get install -y --force-yes gdebi && wget https://bintray.com/artifact/download/furushchev/ros-shadow-fixed/python-catkin-tools_0.3.1-1_all.deb && wget https://bintray.com/artifact/download/furushchev/ros-shadow-fixed/python-catkin-pkg_0.2.10-1_all.deb && sudo gdebi -n -q python-catkin-pkg_0.2.10-1_all.deb && sudo gdebi -n -q python-catkin-tools_0.3.1-1_all.deb && sudo apt-mark hold python-catkin-tools; fi
   # Forcely upgrade PCRE to avoid failure in building hrpsys with hydro.
   # https://github.com/start-jsk/rtmros_common/issues/1076
   # .deb can be got from https://pkgs.org (e.g., https://pkgs.org/download/libpcre3)
   # libpcre3-dev requires the same version of libpcrecpp0
   - if [ "${ROS_DISTRO}" == "hydro" ] && [ "${USE_DEB}" != "true" ] ; then add_scr="wget archive.ubuntu.com/ubuntu/pool/main/p/pcre3/libpcre3_8.31-2ubuntu2_amd64.deb; wget archive.ubuntu.com/ubuntu/pool/main/p/pcre3/libpcrecpp0_8.31-2ubuntu2_amd64.deb; wget archive.ubuntu.com/ubuntu/pool/main/p/pcre3/libpcre3-dev_8.31-2ubuntu2_amd64.deb; sudo dpkg -i libpcre3_8.31-2ubuntu2_amd64.deb; sudo dpkg -i libpcrecpp0_8.31-2ubuntu2_amd64.deb; sudo dpkg -i libpcre3-dev_8.31-2ubuntu2_amd64.deb; sudo apt-mark hold libpcre3 libpcrecpp0 libpcre3-dev"; fi; if [ "${BEFORE_SCRIPT}" == "" ] ; then export BEFORE_SCRIPT=${add_scr}; else export BEFORE_SCRIPT="${BEFORE_SCRIPT}; ${add_scr}"; fi
+script:
+  - if [ "${IS_EUSLISP_TRAVIS_TEST}" != "true" ] ; then export ROS_PARALLEL_JOBS="-j2 -l2" ; fi
+  - if [ "${ROS_DISTRO}" == "hydro" ] ; then sudo apt-get install -y --force-yes gdebi && wget https://bintray.com/artifact/download/furushchev/ros-shadow-fixed/python-catkin-tools_0.3.1-1_all.deb && wget https://bintray.com/artifact/download/furushchev/ros-shadow-fixed/python-catkin-pkg_0.2.10-1_all.deb && sudo gdebi -n -q python-catkin-pkg_0.2.10-1_all.deb && sudo gdebi -n -q python-catkin-tools_0.3.1-1_all.deb && sudo apt-mark hold python-catkin-tools; fi
   - if [ "${TEST_TYPE}" == "" ] ; then source .travis/travis.sh; else source ./.travis_test.sh ; fi
   - ccache -s
 after_success:
