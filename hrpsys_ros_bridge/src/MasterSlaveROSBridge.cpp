@@ -39,6 +39,8 @@ RTC::ReturnCode_t MasterSlaveROSBridge::onInitialize(){
     tgt_names = ee_names;
     tgt_names.push_back("com");
     tgt_names.push_back("head");
+    tgt_names.push_back("rhand");
+    tgt_names.push_back("lhand");
 
     ros::param::param<bool>("~is_master_side", is_master_side);
     ros::param::get("~is_master_side", is_master_side);
