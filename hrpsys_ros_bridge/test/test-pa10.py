@@ -44,7 +44,7 @@ class TestPA10Robot(unittest.TestCase):
 
     def test_tf_base_link_J7_LINK(self): # need to check if map/ is published?
         try:
-            self.listener.waitForTransform('/BASE_LINK', '/J7_LINK', rospy.Time(), rospy.Duration(120))
+            self.listener.waitForTransform('/BASE_LINK', '/J7_LINK', rospy.Time(), rospy.Duration(300))
         except tf.Exception:
             self.assertTrue(None, "could not found tf from /BASE_LINK to /J7_LINK")
         (trans,rot) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
@@ -72,7 +72,7 @@ class TestPA10Robot(unittest.TestCase):
         larm.wait_for_server()
 
         try:
-            self.listener.waitForTransform('/BASE_LINK', '/J7_LINK', rospy.Time(), rospy.Duration(120))
+            self.listener.waitForTransform('/BASE_LINK', '/J7_LINK', rospy.Time(), rospy.Duration(300))
         except tf.Exception:
             self.assertTrue(None, "could not found tf from /BASE_LINK to /J7_LINK")
         (trans1,rot1) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
@@ -99,7 +99,7 @@ class TestPA10Robot(unittest.TestCase):
 
     def test_joint_trajectory_command(self):
         try:
-            self.listener.waitForTransform('/BASE_LINK', '/J7_LINK', rospy.Time(), rospy.Duration(120))
+            self.listener.waitForTransform('/BASE_LINK', '/J7_LINK', rospy.Time(), rospy.Duration(300))
         except tf.Exception:
             self.assertTrue(None, "could not found tf from /BASE_LINK to /J7_LINK")
         (trans1,rot1) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
