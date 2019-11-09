@@ -71,9 +71,9 @@ if [ "${ROS_DISTRO}" == "hydro" ] ; then
     # https://github.com/ros/robot_model/pull/105, https://github.com/ros/robot_model/pull/106, https://github.com/ros/robot_model/pull/108
     cat <<EOF >> /tmp/rosinstall.$$
 - git:
-    uri: https://github.com/ros/robot_model.git
+    uri: https://github.com/pazeshun/robot_model.git
     local-name: robot_model
-    version: 6534424
+    version: for-hydro-with-new-pcre
 EOF
 fi
 
