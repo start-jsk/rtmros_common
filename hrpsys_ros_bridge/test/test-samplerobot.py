@@ -59,7 +59,7 @@ class TestSampleRobot(unittest.TestCase):
         # wait odom topic
         try:
             rospy.loginfo("waiting for /WAIST_LINK0 to /odom")
-            self.listener.waitForTransform('/WAIST_LINK0', '/odom', rospy.Time(), rospy.Duration(300))
+            self.listener.waitForTransform('/WAIST_LINK0', '/odom', rospy.Time(), rospy.Duration(120))
         except tf.Exception:
             self.assertTrue(None, "could not found tf from /WAIST_LINK0 to /odom")
         (trans1,rot1) = self.listener.lookupTransform('/WAIST_LINK0', '/odom', rospy.Time(0))
@@ -94,7 +94,7 @@ class TestSampleRobot(unittest.TestCase):
         larm.wait_for_server()
 
         try:
-            self.listener.waitForTransform('/WAIST_LINK0', '/LARM_LINK7', rospy.Time(), rospy.Duration(300))
+            self.listener.waitForTransform('/WAIST_LINK0', '/LARM_LINK7', rospy.Time(), rospy.Duration(120))
         except tf.Exception:
             self.assertTrue(None, "could not found tf from /WAIST_LINK0 to /LARM_LINK7")
         (trans1,rot1) = self.listener.lookupTransform('/WAIST_LINK0', '/LARM_LINK7', rospy.Time(0))

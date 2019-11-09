@@ -18,6 +18,6 @@
   <param name="hztest_tf/test_duration" value="5.0" />
   <test test-name="hztest_tf" pkg="rostest" type="hztest" name="hztest_tf" retry="4" />
 
-  <test test-name="pa10" pkg="hrpsys_ros_bridge" type="test-pa10.py" retry="4" time-limit="800" />
+  <test test-name="pa10" pkg="hrpsys_ros_bridge" type="test-pa10.py" retry="4" time-limit="400" />
 
 </launch>
