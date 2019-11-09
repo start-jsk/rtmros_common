@@ -64,6 +64,19 @@ cat <<EOF >> /tmp/rosinstall.$$
     local-name: hrpsys
 EOF
 
+if [ "${ROS_DISTRO}" == "hydro" ] ; then
+    # As .travis.yml forcely upgrade PCRE to avoid failure in building hrpsys with hydro, hrpsys_state_publisher dies:
+    # https://github.com/start-jsk/rtmros_common/pull/1077#issuecomment-552102475
+    # To avoid this, the following PRs are required:
+    # https://github.com/ros/robot_model/pull/105, https://github.com/ros/robot_model/pull/106, https://github.com/ros/robot_model/pull/108
+    cat <<EOF >> /tmp/rosinstall.$$
+- git:
+    uri: https://github.com/ros/robot_model.git
+    local-name: robot_model
+    version: 6534424
+EOF
+fi
+
 wstool merge /tmp/rosinstall.$$ -t $WORKSPACE/src
 wstool info -t $WORKSPACE/src
 wstool update --abort-changed-uris -t $WORKSPACE/src $PACKAGE
