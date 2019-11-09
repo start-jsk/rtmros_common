@@ -57,6 +57,12 @@ before_script:
   # .deb can be got from https://pkgs.org (e.g., https://pkgs.org/download/libpcre3)
   # libpcre3-dev requires the same version of libpcrecpp0
   - if [ "${ROS_DISTRO}" == "hydro" ] && [ "${USE_DEB}" != "true" ] ; then add_scr="wget archive.ubuntu.com/ubuntu/pool/main/p/pcre3/libpcre3_8.31-2ubuntu2_amd64.deb; wget archive.ubuntu.com/ubuntu/pool/main/p/pcre3/libpcrecpp0_8.31-2ubuntu2_amd64.deb; wget archive.ubuntu.com/ubuntu/pool/main/p/pcre3/libpcre3-dev_8.31-2ubuntu2_amd64.deb; sudo dpkg -i libpcre3_8.31-2ubuntu2_amd64.deb; sudo dpkg -i libpcrecpp0_8.31-2ubuntu2_amd64.deb; sudo dpkg -i libpcre3-dev_8.31-2ubuntu2_amd64.deb; sudo apt-mark hold libpcre3 libpcrecpp0 libpcre3-dev"; fi; if [ "${BEFORE_SCRIPT}" == "" ] ; then export BEFORE_SCRIPT=${add_scr}; else export BEFORE_SCRIPT="${BEFORE_SCRIPT}; ${add_scr}"; fi
+  # Forcely upgrading PCRE makes hrpsys_state_publisher dies:
+  # https://github.com/start-jsk/rtmros_common/pull/1077#issuecomment-552102475
+  # To avoid this, the following PRs are required:
+  # https://github.com/ros/robot_model/pull/105, https://github.com/ros/robot_model/pull/106, https://github.com/ros/robot_model/pull/108
+  # Also, see https://github.com/start-jsk/rtmros_common/pull/1077#issuecomment-552121026
+  - if [ "${ROS_DISTRO}" == "hydro" ] && [ "${USE_DEB}" != "true" ] ; then export BEFORE_SCRIPT="${BEFORE_SCRIPT}; wstool set -y robot_model --git https://github.com/pazeshun/robot_model.git -v for-hydro-with-new-pcre; wstool update"; fi
 script:
   - if [ "${IS_EUSLISP_TRAVIS_TEST}" != "true" ] ; then export ROS_PARALLEL_JOBS="-j2 -l2" ; fi
   - if [ "${ROS_DISTRO}" == "hydro" ] ; then sudo apt-get install -y --force-yes gdebi && wget https://bintray.com/artifact/download/furushchev/ros-shadow-fixed/python-catkin-tools_0.3.1-1_all.deb && wget https://bintray.com/artifact/download/furushchev/ros-shadow-fixed/python-catkin-pkg_0.2.10-1_all.deb && sudo gdebi -n -q python-catkin-pkg_0.2.10-1_all.deb && sudo gdebi -n -q python-catkin-tools_0.3.1-1_all.deb && sudo apt-mark hold python-catkin-tools; fi
