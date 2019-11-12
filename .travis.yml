@@ -52,7 +52,7 @@ before_script:
   - export REPOSITORY_NAME=`basename $PWD`
   - if [ "${INSTALL_SRC}" != "" ] ;then export sudo apt-get install python-yaml; export BEFORE_SCRIPT="$(for src in $INSTALL_SRC; do name=`basename $src`; echo "python -c \"import yaml;print yaml.dump([{\\\"git\\\":{\\\"uri\\\":\\\"$src\\\",\\\"local-name\\\":\\\"$name\\\"}}], default_flow_style=False)\" >> .rosinstall;"; done)ls -al; cat .rosinstall; wstool update"; export USE_DEB=false; fi; # set USE_DEB false to enable .travis.rosinstall
   # Forcely upgrade PCRE to avoid failure in building hrpsys with hydro.
-  # This has a side effect, and we need extra settings in setup_upstream.sh and .travis.rosinstall.hydro
+  # This has a side effect, and we need extra settings.
   # Issue detail: https://github.com/start-jsk/rtmros_common/issues/1076
   # .deb can be got from https://pkgs.org (e.g., https://pkgs.org/download/libpcre3)
   # libpcre3-dev requires the same version of libpcrecpp0
