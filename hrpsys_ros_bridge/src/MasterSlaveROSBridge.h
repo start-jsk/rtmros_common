@@ -26,8 +26,10 @@ class MasterSlaveROSBridge  : public RTC::DataFlowComponentBase
         virtual RTC::ReturnCode_t onInitialize();
         virtual RTC::ReturnCode_t onExecute(RTC::UniqueId ec_id);
         void updateOdometryTF(const ros::Time &stamp);
-        void onMasterTgtPoseCB(const geometry_msgs::PoseStamped::ConstPtr& msg, std::string& key);
-        void onSlaveEEWrenchCB(const geometry_msgs::WrenchStamped::ConstPtr& msg, std::string& key);
+        void onMasterTgtPoseCB  (const geometry_msgs::PoseStamped::ConstPtr& msg,   std::string& key);
+        void onSlaveTgtPoseCB   (const geometry_msgs::PoseStamped::ConstPtr& msg,   std::string& key);
+        void onMasterEEWrenchCB (const geometry_msgs::WrenchStamped::ConstPtr& msg, std::string& key);
+        void onSlaveEEWrenchCB  (const geometry_msgs::WrenchStamped::ConstPtr& msg, std::string& key);
         void ondelayCheckPacketCB(const std_msgs::Time::ConstPtr& msg);
 
     protected:
@@ -37,28 +39,39 @@ class MasterSlaveROSBridge  : public RTC::DataFlowComponentBase
         coil::TimeMeasure tm;
         unsigned long loop;
         std::vector<std::string> ee_names, tgt_names;
-        std::map<std::string, RTC::TimedPose3D> m_masterTgtPoses;
-        std::map<std::string, RTC::TimedDoubleSeq> m_slaveEEWrenches;
+        typedef boost::shared_ptr<RTC::InPort   <RTC::TimedPose3D>      > ITP3_Ptr;
+        typedef boost::shared_ptr<RTC::InPort   <RTC::TimedDoubleSeq>   > ITDS_Ptr;
+        typedef boost::shared_ptr<RTC::OutPort  <RTC::TimedPose3D>      > OTP3_Ptr;
+        typedef boost::shared_ptr<RTC::OutPort  <RTC::TimedDoubleSeq>   > OTDS_Ptr;
+        std::map<std::string, RTC::TimedPose3D>     m_masterTgtPoses;
+        std::map<std::string, RTC::TimedPose3D>     m_slaveTgtPoses;
+        std::map<std::string, RTC::TimedDoubleSeq>  m_masterEEWrenches;
+        std::map<std::string, RTC::TimedDoubleSeq>  m_slaveEEWrenches;
 
         // master side
-        typedef boost::shared_ptr<RTC::InPort   <RTC::TimedPose3D>      > ITP3_Ptr;
-        typedef boost::shared_ptr<RTC::OutPort  <RTC::TimedDoubleSeq>   > OTDS_Ptr;
-        std::map<std::string, ITP3_Ptr> m_masterTgtPosesIn;
-        std::map<std::string, OTDS_Ptr> m_slaveEEWrenchesOut;
-        std::map<std::string, ros::Subscriber> slaveEEWrenches_sub;
-        std::map<std::string, ros::Publisher> masterTgtPoses_pub;
+        std::map<std::string, ITP3_Ptr>         m_masterTgtPosesIn;
+        std::map<std::string, OTDS_Ptr>         m_slaveEEWrenchesOut;
+        std::map<std::string, ros::Publisher>   masterTgtPoses_pub;
+        std::map<std::string, ros::Subscriber>  slaveEEWrenches_sub;
+        // sub usage
+        std::map<std::string, ITDS_Ptr>         m_masterEEWrenchesIn;
+        std::map<std::string, OTP3_Ptr>         m_slaveTgtPosesOut;
+        std::map<std::string, ros::Publisher>   masterEEWrenches_pub;
+        std::map<std::string, ros::Subscriber>  slaveTgtPoses_sub;
         RTC::TimedPose3D m_teleopOdom;
         ITP3_Ptr m_teleopOdomIn;
         tf::TransformBroadcaster br;
 
         // slave side
-        typedef boost::shared_ptr<RTC::OutPort  <RTC::TimedPose3D>      > OTP3_Ptr;
-        typedef boost::shared_ptr<RTC::InPort   <RTC::TimedDoubleSeq>   > ITDS_Ptr;
-        std::map<std::string, ITDS_Ptr> m_slaveEEWrenchesIn;
-        std::map<std::string, OTP3_Ptr> m_masterTgtPosesOut;
-        std::map<std::string, ros::Subscriber> masterTgtPoses_sub;
-        std::map<std::string, ros::Publisher> slaveEEWrenches_pub;
-
+        std::map<std::string, ITDS_Ptr>         m_slaveEEWrenchesIn;
+        std::map<std::string, OTP3_Ptr>         m_masterTgtPosesOut;
+        std::map<std::string, ros::Publisher>   slaveEEWrenches_pub;
+        std::map<std::string, ros::Subscriber>  masterTgtPoses_sub;
+        // sub usage
+        std::map<std::string, ITP3_Ptr>         m_slaveTgtPosesIn;
+        std::map<std::string, OTDS_Ptr>         m_masterEEWrenchesOut;
+        std::map<std::string, ros::Publisher>   slaveTgtPoses_pub;
+        std::map<std::string, ros::Subscriber>  masterEEWrenches_sub;
 
         // delay calc
         ros::Subscriber delay_check_packet_sub;
@@ -66,8 +79,6 @@ class MasterSlaveROSBridge  : public RTC::DataFlowComponentBase
         RTC::Time m_delayCheckPacketInbound, m_delayCheckPacketOutbound;
         RTC::OutPort<RTC::Time> m_delayCheckPacketInboundOut;
         RTC::InPort<RTC::Time> m_delayCheckPacketOutboundIn;
-
-
 
         RTC::TimedDoubleSeq m_exData;
         RTC::TimedStringSeq m_exDataIndex;
