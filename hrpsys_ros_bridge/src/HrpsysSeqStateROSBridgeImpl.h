@@ -164,8 +164,6 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   // <rtc-template block="outport_declare">
   TimedDoubleSeq m_mctorque;
   OutPort<TimedDoubleSeq> m_mctorqueOut;
-  TimedDoubleSeq m_SegwaySensors;
-  OutPort<TimedDoubleSeq> m_SegwaySensorsOut;
 
   // </rtc-template>
 
