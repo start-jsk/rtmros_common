@@ -228,45 +228,96 @@ class TestPA10Robot(unittest.TestCase):
             self.assertTrue(None, "could not found tf from /BASE_LINK to /J7_LINK")
         (trans1,rot1) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
         rospy.logwarn("tf_echo /BASE_LINK /J7_LINK %r %r"%(trans1,rot1))
-        goal.trajectory.header.stamp = rospy.get_rostime()
-        goal.trajectory.joint_names.append("J1")
-        goal.trajectory.joint_names.append("J2")
-        goal.trajectory.joint_names.append("J3")
-        goal.trajectory.joint_names.append("J4")
-        goal.trajectory.joint_names.append("J5")
-        goal.trajectory.joint_names.append("J6")
-        goal.trajectory.joint_names.append("J7")
+        goal.trajectory.joint_names = ["J1","J2","J3","J4","J5","J6","J7"]
 
-        point = JointTrajectoryPoint()
-        point.positions = [ x * math.pi / 180.0 for x in [10,20,30,40,50,60,70] ]
-        point.time_from_start = rospy.Duration(5.0)
-        goal.trajectory.points.append(point)
+        point1 = JointTrajectoryPoint()
+        point2 = JointTrajectoryPoint()
+        point3 = JointTrajectoryPoint()
+        point4 = JointTrajectoryPoint()
+        # one point trajectory (:angle-vector) -> one point trajectory (:angle-vector)
+        rospy.logwarn("one point trajectory -> one point trajectory")
+        ## first point
+        point1.positions = [ x * math.pi / 180.0 for x in [10,20,30,40,50,60,70] ]
+        point1.time_from_start = rospy.Duration(5.0)
+        ## second point
+        point2.positions = [0,0,0,0,0,0,0]
+        point2.time_from_start = rospy.Duration(2.5)
+        ## execution
+        self.jta_overwrite_goal_template(larm, goal, trans1, [point1], [point2])
+
+        # one point trajectory (:angle-vector) -> two points trajectory (:angle-vector-sequence)
+        rospy.logwarn("one point trajectory -> two points trajectory")
+        ## first point
+        point1.positions = [ x * math.pi / 180.0 for x in [10,20,30,40,50,60,70] ]
+        point1.time_from_start = rospy.Duration(5.0)
+        ## second point
+        point2.positions = [ x * math.pi / 180.0 for x in [2.5,5,7.5,10,12.5,15,17.5] ]
+        point2.time_from_start = rospy.Duration(1.25)
+        ## third point
+        point3.positions = [0,0,0,0,0,0,0]
+        point3.time_from_start = rospy.Duration(2.5)
+        ## execution
+        self.jta_overwrite_goal_template(larm, goal, trans1, [point1], [point2, point3])
+
+        # two points trajectory (:angle-vector-sequence) -> one point trajectory (:angle-vector)
+        rospy.logwarn("two points trajectory -> one point trajectory")
+        ## first point
+        point1.positions = [ x * math.pi / 180.0 for x in [5,10,15,20,25,30,35] ]
+        point1.time_from_start = rospy.Duration(2.5)
+        ## second point
+        point2.positions = [ x * math.pi / 180.0 for x in [10,20,30,40,50,60,70] ]
+        point2.time_from_start = rospy.Duration(5.0)
+        ## third point
+        point3.positions = [0,0,0,0,0,0,0]
+        point3.time_from_start = rospy.Duration(2.5)
+        ## execution
+        self.jta_overwrite_goal_template(larm, goal, trans1, [point1, point2], [point3])
+
+        # two points trajectory (:angle-vector-sequence) -> two points trajectory (:angle-vector-sequence)
+        rospy.logwarn("two points trajectory -> two points trajectory")
+        ## first point
+        point1.positions = [ x * math.pi / 180.0 for x in [5,10,15,20,25,30,35] ]
+        point1.time_from_start = rospy.Duration(2.5)
+        ## second point
+        point2.positions = [ x * math.pi / 180.0 for x in [10,20,30,40,50,60,70] ]
+        point2.time_from_start = rospy.Duration(5.0)
+        ## third point
+        point3.positions = [ x * math.pi / 180.0 for x in [2.5,5,7.5,10,12.5,15,17.5] ]
+        point3.time_from_start = rospy.Duration(1.25)
+        ## fourth point
+        point4.positions = [0,0,0,0,0,0,0]
+        point4.time_from_start = rospy.Duration(2.5)
+        ## execution
+        self.jta_overwrite_goal_template(larm, goal, trans1, [point1, point2], [point3, point4])
+
+    def jta_overwrite_goal_template(self, larm, goal, trans1, points1, points2):
         # send first goal
+        goal.trajectory.header.stamp = rospy.get_rostime()
+        goal.trajectory.points = points1
         larm.send_goal(goal)
         rospy.sleep(2.5)
-        goal.trajectory.header.stamp = rospy.get_rostime()
-        point.positions = [0,0,0,0,0,0,0]
-        point.time_from_start = rospy.Duration(2.5)
-        del goal.trajectory.points[:]
-        goal.trajectory.points.append(point)
         # send second goal
+        goal.trajectory.header.stamp = rospy.get_rostime()
+        goal.trajectory.points = points2
         larm.send_goal(goal)
+        # check robot motion after it is overwritten
         jt_pos1 = rospy.wait_for_message('/joint_states', JointState)
         rospy.logwarn("joint position just after sending second goal: %r"%(array(jt_pos1.position)))
-        rospy.sleep(0.5)
+        rospy.sleep(0.2)
         jt_pos2 = rospy.wait_for_message('/joint_states', JointState)
-        rospy.logwarn("joint position 0.5 sec after sending second goal: %r"%(array(jt_pos2.position)))
-        rospy.sleep(2)
+        rospy.logwarn("joint position 0.2 sec after sending second goal: %r"%(array(jt_pos2.position)))
+        rospy.sleep(2.3)
         (trans2,rot2) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
         rospy.logwarn("tf_echo /BASE_LINK /J7_LINK %r %r"%(trans2,rot2))
         larm.wait_for_result()
         rospy.logwarn("difference between two joint positions %r"%(array(jt_pos2.position)-array(jt_pos1.position)))
-        # if robot suddenly stops when goal is overwritten, joint position immediately starts to decrease (heading for new goal (zero)).
-        # joint_states includes unchanged hand joints, so using assertGreaterEqual instead of assertGreater is necessary.
+        ## if robot suddenly stops when goal is overwritten, joint position immediately starts to decrease (heading for new goal).
+        ## joint_states includes unchanged hand joints, so using assertGreaterEqual instead of assertGreater is necessary.
         for x in array(jt_pos2.position)-array(jt_pos1.position):
             self.assertGreaterEqual(x, 0)
         rospy.logwarn("difference between two /J7_LINK %r %r"%(array(trans1)-array(trans2),linalg.norm(array(trans1)-array(trans2))))
         self.assertAlmostEqual(linalg.norm(array(trans1)-array(trans2)), 0, delta=0.1)
+
 
 # unittest.main()
 if __name__ == '__main__':
