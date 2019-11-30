@@ -326,16 +326,11 @@ class TestSampleRobot(unittest.TestCase):
 
         # initialize
         goal.trajectory.header.stamp = rospy.get_rostime()
-        goal.trajectory.joint_names.append("LARM_SHOULDER_P")
-        goal.trajectory.joint_names.append("LARM_SHOULDER_R")
-        goal.trajectory.joint_names.append("LARM_SHOULDER_Y")
-        goal.trajectory.joint_names.append("LARM_ELBOW")
-        goal.trajectory.joint_names.append("LARM_WRIST_Y")
-        goal.trajectory.joint_names.append("LARM_WRIST_P")
+        goal.trajectory.joint_names = ["LARM_SHOULDER_P","LARM_SHOULDER_R","LARM_SHOULDER_Y","LARM_ELBOW","LARM_WRIST_Y","LARM_WRIST_P"]
         point = JointTrajectoryPoint()
         point.positions = [0,0,0,0,0,0]
         point.time_from_start = rospy.Duration(5.0)
-        goal.trajectory.points.append(point)
+        goal.trajectory.points = [point]
         larm.send_goal(goal)
         larm.wait_for_result()
 
@@ -345,33 +340,91 @@ class TestSampleRobot(unittest.TestCase):
             self.assertTrue(None, "could not found tf from /WAIST_LINK0 to /LARM_LINK7")
         (trans1,rot1) = self.listener.lookupTransform('/WAIST_LINK0', '/LARM_LINK7', rospy.Time(0))
         rospy.logwarn("tf_echo /WAIST_LINK0 /LARM_LINK7 %r %r"%(trans1,rot1))
-        goal.trajectory.header.stamp = rospy.get_rostime()
-        point.positions = [ x * math.pi / 180.0 for x in [20,20,20,20,20,20] ]
-        point.time_from_start = rospy.Duration(5.0)
-        del goal.trajectory.points[:]
-        goal.trajectory.points.append(point)
+
+        point1 = JointTrajectoryPoint()
+        point2 = JointTrajectoryPoint()
+        point3 = JointTrajectoryPoint()
+        point4 = JointTrajectoryPoint()
+        # one point trajectory (:angle-vector) -> one point trajectory (:angle-vector)
+        rospy.logwarn("one point trajectory -> one point trajectory")
+        ## first point
+        point1.positions = [ x * math.pi / 180.0 for x in [20,20,20,20,20,20] ]
+        point1.time_from_start = rospy.Duration(5.0)
+        ## second point
+        point2.positions = [0,0,0,0,0,0]
+        point2.time_from_start = rospy.Duration(2.5)
+        ## execution
+        self.jta_overwrite_goal_template(larm, goal, trans1, [point1], [point2])
+
+        # hrpsys 315.16.0 (having https://github.com/fkanehiro/hrpsys-base/pull/1237) is needed for the following tests to pass
+        # # one point trajectory (:angle-vector) -> two points trajectory (:angle-vector-sequence)
+        # rospy.logwarn("one point trajectory -> two points trajectory")
+        # ## first point
+        # point1.positions = [ x * math.pi / 180.0 for x in [20,20,20,20,20,20] ]
+        # point1.time_from_start = rospy.Duration(5.0)
+        # ## second point
+        # point2.positions = [ x * math.pi / 180.0 for x in [5,5,5,5,5,5] ]
+        # point2.time_from_start = rospy.Duration(1.25)
+        # ## third point
+        # point3.positions = [0,0,0,0,0,0]
+        # point3.time_from_start = rospy.Duration(2.5)
+        # ## execution
+        # self.jta_overwrite_goal_template(larm, goal, trans1, [point1], [point2, point3])
+
+        # # two points trajectory (:angle-vector-sequence) -> one point trajectory (:angle-vector)
+        # rospy.logwarn("two points trajectory -> one point trajectory")
+        # ## first point
+        # point1.positions = [ x * math.pi / 180.0 for x in [10,10,10,10,10,10] ]
+        # point1.time_from_start = rospy.Duration(2.5)
+        # ## second point
+        # point2.positions = [ x * math.pi / 180.0 for x in [20,20,20,20,20,20] ]
+        # point2.time_from_start = rospy.Duration(5.0)
+        # ## third point
+        # point3.positions = [0,0,0,0,0,0]
+        # point3.time_from_start = rospy.Duration(2.5)
+        # ## execution
+        # self.jta_overwrite_goal_template(larm, goal, trans1, [point1, point2], [point3])
+
+        # # two points trajectory (:angle-vector-sequence) -> two points trajectory (:angle-vector-sequence)
+        # rospy.logwarn("two points trajectory -> two points trajectory")
+        # ## first point
+        # point1.positions = [ x * math.pi / 180.0 for x in [10,10,10,10,10,10] ]
+        # point1.time_from_start = rospy.Duration(2.5)
+        # ## second point
+        # point2.positions = [ x * math.pi / 180.0 for x in [20,20,20,20,20,20] ]
+        # point2.time_from_start = rospy.Duration(5.0)
+        # ## third point
+        # point3.positions = [ x * math.pi / 180.0 for x in [5,5,5,5,5,5] ]
+        # point3.time_from_start = rospy.Duration(1.25)
+        # ## fourth point
+        # point4.positions = [0,0,0,0,0,0]
+        # point4.time_from_start = rospy.Duration(2.5)
+        # ## execution
+        # self.jta_overwrite_goal_template(larm, goal, trans1, [point1, point2], [point3, point4])
+
+    def jta_overwrite_goal_template(self, larm, goal, trans1, points1, points2):
         # send first goal
+        goal.trajectory.header.stamp = rospy.get_rostime()
+        goal.trajectory.points = points1
         larm.send_goal(goal)
         rospy.sleep(2.5)
-        goal.trajectory.header.stamp = rospy.get_rostime()
-        point.positions = [0,0,0,0,0,0]
-        point.time_from_start = rospy.Duration(2.5)
-        del goal.trajectory.points[:]
-        goal.trajectory.points.append(point)
         # send second goal
+        goal.trajectory.header.stamp = rospy.get_rostime()
+        goal.trajectory.points = points2
         larm.send_goal(goal)
+        # check robot motion after it is overwritten
         jt_pos1 = rospy.wait_for_message('/joint_states', JointState)
         rospy.logwarn("joint position just after sending second goal: %r"%(array(jt_pos1.position)))
-        rospy.sleep(0.5)
+        rospy.sleep(0.2)
         jt_pos2 = rospy.wait_for_message('/joint_states', JointState)
-        rospy.logwarn("joint position 0.5 sec after sending second goal: %r"%(array(jt_pos2.position)))
-        rospy.sleep(2)
+        rospy.logwarn("joint position 0.2 sec after sending second goal: %r"%(array(jt_pos2.position)))
+        rospy.sleep(2.3)
         (trans2,rot2) = self.listener.lookupTransform('/WAIST_LINK0', '/LARM_LINK7', rospy.Time(0))
         rospy.logwarn("tf_echo /WAIST_LINK0 /LARM_LINK7 %r %r"%(trans2,rot2))
         larm.wait_for_result()
         rospy.logwarn("difference between two joint positions %r"%(array(jt_pos2.position)-array(jt_pos1.position)))
-        # if robot suddenly stops when goal is overwritten, joint position immediately starts to decrease (heading for new goal (zero)).
-        # joint_states includes unchanged hand joints, so using assertGreaterEqual instead of assertGreater is necessary.
+        ## if robot suddenly stops when goal is overwritten, joint position immediately starts to decrease (heading for new goal).
+        ## joint_states includes unchanged hand joints, so using assertGreaterEqual instead of assertGreater is necessary.
         for x in array(jt_pos2.position)-array(jt_pos1.position):
             self.assertGreaterEqual(x, 0)
         rospy.logwarn("difference between two /LARM_LINK7 %r %r"%(array(trans1)-array(trans2),linalg.norm(array(trans1)-array(trans2))))
