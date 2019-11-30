@@ -270,12 +270,7 @@ class TestSampleRobot(unittest.TestCase):
 
         # initialize
         goal.trajectory.header.stamp = rospy.get_rostime()
-        goal.trajectory.joint_names.append("LARM_SHOULDER_P")
-        goal.trajectory.joint_names.append("LARM_SHOULDER_R")
-        goal.trajectory.joint_names.append("LARM_SHOULDER_Y")
-        goal.trajectory.joint_names.append("LARM_ELBOW")
-        goal.trajectory.joint_names.append("LARM_WRIST_Y")
-        goal.trajectory.joint_names.append("LARM_WRIST_P")
+        goal.trajectory.joint_names = ["LARM_SHOULDER_P","LARM_SHOULDER_R","LARM_SHOULDER_Y","LARM_ELBOW","LARM_WRIST_Y","LARM_WRIST_P"]
         point = JointTrajectoryPoint()
         point.positions = [0,0,0,0,0,0]
         point.time_from_start = rospy.Duration(5.0)
@@ -287,11 +282,24 @@ class TestSampleRobot(unittest.TestCase):
             self.listener.waitForTransform('/WAIST_LINK0', '/LARM_LINK7', rospy.Time(), rospy.Duration(120))
         except tf.Exception:
             self.assertTrue(None, "could not found tf from /WAIST_LINK0 to /LARM_LINK7")
+
+        point1 = JointTrajectoryPoint()
+        point2 = JointTrajectoryPoint()
+        # cancel one point trajectory (:angle-vector)
+        point1.positions = [ x * math.pi / 180.0 for x in [20,20,20,20,20,20] ]
+        point1.time_from_start = rospy.Duration(5.0)
+        self.jta_cancel_goal_template(larm, goal, [point1])
+
+        # cancel two points trajectory (:angle-vector-sequence)
+        point1.positions = [ x * math.pi / 180.0 for x in [10,10,10,10,10,10] ]
+        point1.time_from_start = rospy.Duration(2.5)
+        point2.positions = [ x * math.pi / 180.0 for x in [20,20,20,20,20,20] ]
+        point2.time_from_start = rospy.Duration(5.0)
+        self.jta_cancel_goal_template(larm, goal, [point1, point2])
+
+    def jta_cancel_goal_template(self, larm, goal, points):
         goal.trajectory.header.stamp = rospy.get_rostime()
-        point.positions = [ x * math.pi / 180.0 for x in [20,20,20,20,20,20] ]
-        point.time_from_start = rospy.Duration(5.0)
-        del goal.trajectory.points[:]
-        goal.trajectory.points.append(point)
+        goal.trajectory.points = points
         larm.send_goal(goal)
         rospy.sleep(2.5)
         (trans1,rot1) = self.listener.lookupTransform('/WAIST_LINK0', '/LARM_LINK7', rospy.Time(0))

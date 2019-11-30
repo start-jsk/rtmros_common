@@ -177,19 +177,25 @@ class TestPA10Robot(unittest.TestCase):
             self.listener.waitForTransform('/BASE_LINK', '/J7_LINK', rospy.Time(), rospy.Duration(120))
         except tf.Exception:
             self.assertTrue(None, "could not found tf from /BASE_LINK to /J7_LINK")
-        goal.trajectory.header.stamp = rospy.get_rostime()
-        goal.trajectory.joint_names.append("J1")
-        goal.trajectory.joint_names.append("J2")
-        goal.trajectory.joint_names.append("J3")
-        goal.trajectory.joint_names.append("J4")
-        goal.trajectory.joint_names.append("J5")
-        goal.trajectory.joint_names.append("J6")
-        goal.trajectory.joint_names.append("J7")
+        goal.trajectory.joint_names = ["J1","J2","J3","J4","J5","J6","J7"]
 
-        point = JointTrajectoryPoint()
-        point.positions = [ x * math.pi / 180.0 for x in [10,20,30,40,50,60,70] ]
-        point.time_from_start = rospy.Duration(5.0)
-        goal.trajectory.points.append(point)
+        point1 = JointTrajectoryPoint()
+        point2 = JointTrajectoryPoint()
+        # cancel one point trajectory (:angle-vector)
+        point1.positions = [ x * math.pi / 180.0 for x in [10,20,30,40,50,60,70] ]
+        point1.time_from_start = rospy.Duration(5.0)
+        self.jta_cancel_goal_template(larm, goal, [point1])
+
+        # cancel two points trajectory (:angle-vector-sequence)
+        point1.positions = [ x * math.pi / 180.0 for x in [5,10,15,20,25,30,35] ]
+        point1.time_from_start = rospy.Duration(2.5)
+        point2.positions = [ x * math.pi / 180.0 for x in [10,20,30,40,50,60,70] ]
+        point2.time_from_start = rospy.Duration(5.0)
+        self.jta_cancel_goal_template(larm, goal, [point1, point2])
+
+    def jta_cancel_goal_template(self, larm, goal, points):
+        goal.trajectory.header.stamp = rospy.get_rostime()
+        goal.trajectory.points = points
         larm.send_goal(goal)
         rospy.sleep(2.5)
         (trans1,rot1) = self.listener.lookupTransform('/BASE_LINK', '/J7_LINK', rospy.Time(0))
