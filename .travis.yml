@@ -64,7 +64,6 @@ before_script:
   # Also, see https://github.com/start-jsk/rtmros_common/pull/1077#issuecomment-552121026
   - if [ "${ROS_DISTRO}" == "hydro" ] && [ "${USE_DEB}" != "true" ] ; then export BEFORE_SCRIPT="${BEFORE_SCRIPT}; wstool set -y robot_model --git https://github.com/pazeshun/robot_model.git -v for-hydro-with-new-pcre; wstool update"; export ROSDEP_ADDITIONAL_OPTIONS="-n -q -r --ignore-src --skip-keys=liburdfdom-dev --skip-keys=liburdfdom-headers-dev"; fi
 script:
-  - if [ "${IS_EUSLISP_TRAVIS_TEST}" == "true" ] ; then add_scr="export IS_EUSLISP_TRAVIS_TEST=true"; if [ "${BEFORE_SCRIPT}" == "" ] ; then export BEFORE_SCRIPT=${add_scr}; else export BEFORE_SCRIPT="${BEFORE_SCRIPT}; ${add_scr}"; fi; fi
   - if [ "${IS_EUSLISP_TRAVIS_TEST}" != "true" ] ; then export ROS_PARALLEL_JOBS="-j2 -l2" ; fi
   - if [ "${ROS_DISTRO}" == "hydro" ] ; then sudo apt-get install -y --force-yes gdebi && wget https://bintray.com/artifact/download/furushchev/ros-shadow-fixed/python-catkin-tools_0.3.1-1_all.deb && wget https://bintray.com/artifact/download/furushchev/ros-shadow-fixed/python-catkin-pkg_0.2.10-1_all.deb && sudo gdebi -n -q python-catkin-pkg_0.2.10-1_all.deb && sudo gdebi -n -q python-catkin-tools_0.3.1-1_all.deb && sudo apt-mark hold python-catkin-tools; fi
   - if [ "${TEST_TYPE}" == "" ] ; then source .travis/travis.sh; else source ./.travis_test.sh ; fi
