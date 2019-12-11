@@ -100,7 +100,7 @@
                   (dif-root-pos (distance (get-float-vector-from-log "/tmp/test-samplerobot-seq-full.sh_basePosOut") ref-root-pos))
                   (dif-root-rpy (distance (get-float-vector-from-log "/tmp/test-samplerobot-seq-full.sh_baseRpyOut") ref-root-rpy))
                   (dif-zmp (distance (get-float-vector-from-log "/tmp/test-samplerobot-seq-full.sh_zmpOut") ref-zmp))
-                  (dif-wrench (distance (apply #'concatenate float-vector (mapcar #'(lambda (x) (get-float-vector-from-log (format nil "/tmp/test-samplerobot-seq-full.sh_~AOut" x))) (send-all (send *sr* :force-sensors) :name)))
+                  (dif-wrench (distance (apply #'concatenate float-vector (mapcar #'(lambda (x) (get-float-vector-from-log (format nil "/tmp/test-samplerobot-seq-full.sh_~AOut" x))) (reverse (send-all (send *sr* :force-sensors) :name)))) ;;(reverse) Because :force-sensors and end-effectors of hrpsys are in reverse order.
                                         ref-wrench)))
               (warn ";; Diff angle-vector = ~A, root-pos = ~A, root-rpy = ~A, zmp = ~A, wrench = ~A~%"
                     dif-angle-vector dif-root-pos dif-root-rpy dif-zmp dif-wrench)
