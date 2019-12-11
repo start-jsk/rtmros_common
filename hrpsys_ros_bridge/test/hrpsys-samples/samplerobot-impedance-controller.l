@@ -36,6 +36,12 @@
   (send *ri* :wait-interpolation-seq)
   (send *ri* :set-ref-moment (float-vector 0 0 0) 2000 :rarm)
   (send *ri* :wait-interpolation-seq)
+  (send *ri* :set-ref-force-moment
+        (float-vector 10 10 -10) (float-vector 0.2 0.2 -0.5) 2000 :rarm)
+  (send *ri* :wait-interpolation-seq)
+  (send *ri* :set-ref-force-moment
+        (float-vector 0 0 0) (float-vector 0 0 0) 2000 :rarm)
+  (send *ri* :wait-interpolation-seq)
   t)
 
 (defun samplerobot-impedance-controller-demo3 ()
