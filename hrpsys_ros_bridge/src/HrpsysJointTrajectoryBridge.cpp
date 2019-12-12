@@ -330,6 +330,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::proc()
 
   // FIXME: need to set actual informatoin, currently we set dummy information
   trajectory_msgs::JointTrajectoryPoint commanded_joint_trajectory_point, error_joint_trajectory_point;
+  commanded_joint_trajectory_point.time_from_start = tm_on_execute - traj_start_tm;
   commanded_joint_trajectory_point.positions.resize(joint_list.size());
   commanded_joint_trajectory_point.velocities.resize(joint_list.size());
   commanded_joint_trajectory_point.accelerations.resize(joint_list.size());
@@ -341,6 +342,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::proc()
       commanded_joint_trajectory_point.accelerations[j] = parent->body->link(joint_list[j])->ddq;
       commanded_joint_trajectory_point.effort[j]        = parent->body->link(joint_list[j])->u;
     }
+  error_joint_trajectory_point.time_from_start = tm_on_execute - traj_start_tm;
   error_joint_trajectory_point.positions.resize(joint_list.size());
   error_joint_trajectory_point.velocities.resize(joint_list.size());
   error_joint_trajectory_point.accelerations.resize(joint_list.size());
@@ -502,6 +504,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
       parent->m_service0->playPattern(angles, rpy, zmp, duration);
     }
   }
+  traj_start_tm = ros::Time::now();
 
   interpolationp = true;
 }
