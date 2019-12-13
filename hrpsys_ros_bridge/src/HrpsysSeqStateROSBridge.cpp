@@ -168,6 +168,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
     cop_pub[i] = nh.advertise<geometry_msgs::PointStamped>(tmpname+"_cop", 10);
   }
   em_mode_pub = nh.advertise<std_msgs::Int32>("emergency_mode", 10);
+  is_stuck_pub = nh.advertise<std_msgs::Int32>("is_stuck", 10);
 
   return RTC::RTC_OK;
 }
@@ -972,6 +973,19 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       std_msgs::Int32 em_mode;
       em_mode.data = m_emergencyMode.data;
       em_mode_pub.publish(em_mode);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+  if ( m_isStuckIn.isNew() ) {
+    try {
+      m_isStuckIn.read();
+      std_msgs::Int32 is_stuck;
+      is_stuck.data = m_isStuck.data;
+      is_stuck_pub.publish(is_stuck);
     }
     catch(const std::runtime_error &e)
       {

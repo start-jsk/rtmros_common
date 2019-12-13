@@ -32,6 +32,8 @@
                      #'send self :rtmros-imu-callback :groupname groupname)
      (ros::subscribe "/emergency_mode" std_msgs::Int32
                      #'send self :rtmros-emergency-mode-callback :groupname groupname)
+     (ros::subscribe "/is_stuck" std_msgs::Int32
+                     #'send self :rtmros-is-stuck-callback :groupname groupname)
      (mapcar #'(lambda (x)
                  (ros::subscribe (format nil "/~A_capture_point" x) geometry_msgs::PointStamped
                                  #'send self :rtmros-capture-point-callback (read-from-string (format nil ":~A-capture-point" x)) :groupname groupname))
@@ -68,6 +70,11 @@
    (msg)
    (let ((m (send msg :data)))
      (send self :set-robot-state1 :emergency-mode m))
+   )
+  (:rtmros-is-stuck-callback
+   (msg)
+   (let ((m (send msg :data)))
+     (send self :set-robot-state1 :is-stuck m))
    )
   (:rtmros-capture-point-callback
    (ref-act msg)
