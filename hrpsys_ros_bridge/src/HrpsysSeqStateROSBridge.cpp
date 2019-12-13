@@ -169,6 +169,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   }
   em_mode_pub = nh.advertise<std_msgs::Int32>("emergency_mode", 10);
   is_stuck_pub = nh.advertise<std_msgs::Int32>("is_stuck", 10);
+  estimated_fxy_pub = nh.advertise<geometry_msgs::PointStamped>("estimated_fxy", 10);
 
   return RTC::RTC_OK;
 }
@@ -992,6 +993,28 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
   }
+
+  if ( m_estimatedFxyIn.isNew() ) {
+    try {
+      m_estimatedFxyIn.read();
+      geometry_msgs::PointStamped fxyv;
+      if ( use_hrpsys_time ) {
+        fxyv.header.stamp = ros::Time(m_estimatedFxy.tm.sec, m_estimatedFxy.tm.nsec);
+      }else{
+        fxyv.header.stamp = tm_on_execute;
+      }
+      fxyv.header.frame_id = rootlink_name;
+      fxyv.point.x = m_estimatedFxy.data.x;
+      fxyv.point.y = m_estimatedFxy.data.y;
+      fxyv.point.z = m_estimatedFxy.data.z;
+      estimated_fxy_pub.publish(fxyv);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
 
   //
   return RTC::RTC_OK;
