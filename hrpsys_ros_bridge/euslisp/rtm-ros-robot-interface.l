@@ -504,6 +504,26 @@
    (if update-robot-state (send self :state))
    (send self :set-ref-forces-moments (send self :reference-force-vector) moment-list tm)
    )
+  (:set-ref-force-moment
+   (force moment tm &optional (limb :arms) &key (update-robot-state t))
+   "Set reference force [N] and moment [Nm]. tm is interpolation time [ms].
+    limb should be limb symbol name such as :rarm, :larm, :rleg, :lleg, :arms, or :legs."
+   (if update-robot-state (send self :state))
+   (let ((limbs (case limb
+		  (:arms (list :rarm :larm))
+		  (:legs (list :rleg :lleg))
+		  (t (list limb)))))
+     (send self :set-ref-forces-moments
+           (mapcar #'(lambda (fs rfv)
+                       (if (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors)))) limbs)
+                           force rfv))
+                   (send robot :force-sensors) (send self :reference-force-vector))
+	   (mapcar #'(lambda (fs rfv)
+                       (if (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors)))) limbs)
+                           moment rfv))
+                   (send robot :force-sensors) (send self :reference-moment-vector))
+           tm)
+     ))
   (:set-ref-force
    (force tm &optional (limb :arms) &key (update-robot-state t))
    "Set reference force [N]. tm is interpolation time [ms].
