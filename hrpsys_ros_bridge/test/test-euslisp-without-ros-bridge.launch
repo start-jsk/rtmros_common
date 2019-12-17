@@ -1,0 +1,9 @@
+<!-- This test is named *.launch to be excluded from catkin_install_run_tests -->
+<!-- See https://github.com/start-jsk/rtmros_common/pull/1083#issuecomment-565054164 -->
+<!-- See https://github.com/start-jsk/rtmros_common/commit/6a881595b6aae3f40d572201bad6bf1a4b5950af -->
+<launch>
+  <test test-name="test_euslisp_without_ros_bridge" pkg="roseus" type="roseus"
+        args="$(find hrpsys_ros_bridge)/test/test-without-ros-bridge.l"
+        time-limit="300"
+        retry="1" />
+</launch>
