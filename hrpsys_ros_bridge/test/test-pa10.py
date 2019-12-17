@@ -19,6 +19,7 @@ from hrpsys_ros_bridge.srv import OpenHRP_SequencePlayerService_loadPattern, Ope
 
 import actionlib
 
+from sensor_msgs.msg import JointState
 from trajectory_msgs.msg import JointTrajectoryPoint, JointTrajectory
 
 class TestPA10Robot(unittest.TestCase):
@@ -27,7 +28,7 @@ class TestPA10Robot(unittest.TestCase):
     rfsensor = None
     feedback = None
 
-    def send_joint_angles(self,angles):
+    def send_joint_angles(self,angles,wait=True):
         pub = rospy.Publisher("/fullbody_controller/command", JointTrajectory)
         point = JointTrajectoryPoint()
         point.positions = [ x * math.pi / 180.0 for x in angles ]
@@ -37,7 +38,8 @@ class TestPA10Robot(unittest.TestCase):
         msg.joint_names = ["J1","J2","J3","J4","J5","J6","J7"]
         msg.points = [point]
         pub.publish(msg)
-        rospy.sleep(rospy.Duration(6.0))
+        if wait:
+            rospy.sleep(rospy.Duration(6.0))
 
     def setUp(self):
         rospy.init_node('TestPA10Robot')
@@ -135,6 +137,22 @@ class TestPA10Robot(unittest.TestCase):
         rospy.logwarn("tf_echo /BASE_LINK /J7_LINK %r %r"%(trans2,rot2))
         rospy.logwarn("difference between two /J7_LINK %r %r"%(array(trans1)-array(trans2),linalg.norm(array(trans1)-array(trans2))))
         self.assertNotAlmostEqual(linalg.norm(array(trans1)-array(trans2)), 0, delta=0.1)
+
+    def test_joint_states_velocity(self):
+        cmd_angles = [20,20,20,20,20,20,20]
+        self.send_joint_angles(cmd_angles, wait=False)
+        rospy.sleep(rospy.Duration(2.5))
+        jt_st = rospy.wait_for_message('/joint_states', JointState)
+        rospy.sleep(rospy.Duration(2.5))
+        # When acceleration and deceleration are constant and take the same time,
+        # (max velocity) = 2 * (target joint angle) / (whole execution time)
+        pred_vel = [2 * (x * math.pi / 180.0) / 5.0 for x in cmd_angles]
+        # get velocity of joints except hand
+        real_vel = [v for i, v in enumerate(jt_st.velocity) if 'HAND' not in jt_st.name[i]]
+        rospy.logwarn("real velocity: %r"%(array(real_vel)))
+        rospy.logwarn("difference from predicted velocity: %r"%(linalg.norm(array(real_vel)-array(pred_vel))))
+        self.assertAlmostEqual(linalg.norm(array(real_vel)-array(pred_vel)), 0, delta=0.1)
+
 
 # unittest.main()
 if __name__ == '__main__':
