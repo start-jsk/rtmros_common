@@ -36,6 +36,9 @@
 
 // </rtc-template>
 
+// version
+#include "HrpsysROSBridgeUtil.h"
+
 #include "tf/transform_broadcaster.h"
 using namespace RTC;
 
@@ -63,7 +66,7 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
 
   // The activated action (Active state entry action)
   // former rtc_active_entry()
-  // virtual RTC::ReturnCode_t onActivated(RTC::UniqueId ec_id);
+  virtual RTC::ReturnCode_t onActivated(RTC::UniqueId ec_id);
 
   // The deactivated action (Active state exit action)
   // former rtc_active_exit()
@@ -198,6 +201,8 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   std::map<std::string, COPLinkInfo> cop_link_info;
 
   double dt;
+
+  std::string hrpsys_version;
 
  private:
 };
