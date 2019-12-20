@@ -21,7 +21,6 @@ env:
     - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=true
     - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=false   NOT_TEST_INSTALL=true
     - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=source  NOT_TEST_INSTALL=true EXTRA_DEB="ros-hydro-roseus ros-hydro-euscollada ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" IS_EUSLISP_TRAVIS_TEST="true"
-    - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=true    NOT_TEST_INSTALL=true INSTALL_SRC="http://github.com/start-jsk/rtmros_tutorials" TEST_PKGS="hrpsys_ros_bridge_tutorials" INSTALL_SRC_SECURE="git@github.com:start-jsk/rtmros_hrp2" TEST_PKGS_SECURE="jsk_hrp2_ros_bridge"
     - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=source  NOT_TEST_INSTALL=true
     - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=true    EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
     - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=false   EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
@@ -57,9 +56,7 @@ notifications:
     on_failure: always #[always|never|change] # default: always
 before_script:
   - set -x
-  - if [ "${TRAVIS_SECURE_ENV_VARS}" == "true" ]; then openssl aes-256-cbc -K $encrypted_b79fc5843df3_key -iv $encrypted_b79fc5843df3_iv -in .secrets.tar.enc -out .secrets.tar -d; tar -C ~/ -xvf .secrets.tar; export INSTALL_SRC="$INSTALL_SRC $INSTALL_SRC_SECURE"; export TEST_PKGS="$TEST_PKGS $TEST_PKGS_SECURE"; fi
-  - export REPOSITORY_NAME=`basename $PWD`
-  - if [ "${INSTALL_SRC}" != "" ] ;then export sudo apt-get install python-yaml; export BEFORE_SCRIPT="$(for src in $INSTALL_SRC; do name=`basename $src`; echo "python -c \"import yaml;print yaml.dump([{\\\"git\\\":{\\\"uri\\\":\\\"$src\\\",\\\"local-name\\\":\\\"$name\\\"}}], default_flow_style=False)\" >> .rosinstall;"; done)ls -al; cat .rosinstall; wstool update"; export USE_DEB=false; fi; # set USE_DEB false to enable .travis.rosinstall
+  - if [ "${TRAVIS_SECURE_ENV_VARS}" == "true" ]; then openssl aes-256-cbc -K $encrypted_b79fc5843df3_key -iv $encrypted_b79fc5843df3_iv -in .secrets.tar.enc -out .secrets.tar -d; tar -C ~/ -xvf .secrets.tar; fi
   # Forcely upgrade PCRE to avoid failure in building hrpsys with hydro.
   # This has a side effect, and we need extra settings.
   # Issue detail: https://github.com/start-jsk/rtmros_common/issues/1076
