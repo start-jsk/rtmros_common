@@ -74,7 +74,7 @@ script:
   - if [ "${TEST_TYPE}" == "" ] ; then source .travis/travis.sh; else source ./.travis_test.sh ; fi
   - ccache -s
 after_success:
-  - if [ "${TRAVIS_SECURE_ENV_VARS}" == "true" ]; then cd ${CI_SOURCE_PATH}; openssl aes-256-cbc -K $encrypted_b79fc5843df3_key -iv $encrypted_b79fc5843df3_iv -in .secrets.tar.enc -out .secrets.tar -d; tar -C ~/ -xvf .secrets.tar; fi
+  - if [ "${TRAVIS_SECURE_ENV_VARS}" == "true" ]; then cd ${TRAVIS_BUILD_DIR}; openssl aes-256-cbc -K $encrypted_b79fc5843df3_key -iv $encrypted_b79fc5843df3_iv -in .secrets.tar.enc -out .secrets.tar -d; tar -C ~/ -xvf .secrets.tar; fi
   # upload-docs.sh in after_success works only when jenkins is not used, because it assumes ~/ros/ws_rtmros_common/build exists on travis:
   # https://github.com/jsk-ros-pkg/jsk_travis/blob/0.5.7/upload-docs.sh#L11
-  - if [ "${TRAVIS_BRANCH}" == "master" -a "${TRAVIS_SECURE_ENV_VARS}" == "true" -a "${USE_TRAVIS}" == "true" -a "${IS_EUSLISP_TRAVIS_TEST}" == "false" ]; then cd ${CI_SOURCE_PATH}; .travis/upload-docs.sh; fi
+  - if [ "${TRAVIS_BRANCH}" == "master" -a "${TRAVIS_SECURE_ENV_VARS}" == "true" -a "${USE_TRAVIS}" == "true" -a "${IS_EUSLISP_TRAVIS_TEST}" == "false" ]; then cd ${TRAVIS_BUILD_DIR}; .travis/upload-docs.sh; fi
