@@ -169,6 +169,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   }
   em_mode_pub = nh.advertise<std_msgs::Int32>("emergency_mode", 10);
   is_stuck_pub = nh.advertise<std_msgs::Int32>("is_stuck", 10);
+  use_flywheel_pub = nh.advertise<std_msgs::Int32>("use_flywheel", 10);
   estimated_fxy_pub = nh.advertise<geometry_msgs::PointStamped>("estimated_fxy", 10);
 
   return RTC::RTC_OK;
@@ -987,6 +988,19 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       std_msgs::Int32 is_stuck;
       is_stuck.data = m_isStuck.data;
       is_stuck_pub.publish(is_stuck);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+  if ( m_useFlywheelIn.isNew() ) {
+    try {
+      m_useFlywheelIn.read();
+      std_msgs::Int32 use_flywheel;
+      use_flywheel.data = m_useFlywheel.data;
+      use_flywheel_pub.publish(use_flywheel);
     }
     catch(const std::runtime_error &e)
       {

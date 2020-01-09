@@ -155,6 +155,8 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   InPort<TimedLong> m_emergencyModeIn;
   TimedBoolean m_isStuck;
   InPort<TimedBoolean> m_isStuckIn;
+  TimedBoolean m_useFlywheel;
+  InPort<TimedBoolean> m_useFlywheelIn;
   TimedPoint3D m_estimatedFxy;
   InPort<TimedPoint3D> m_estimatedFxyIn;
   TimedBooleanSeq m_refContactStates, m_actContactStates;

@@ -34,6 +34,8 @@
                      #'send self :rtmros-emergency-mode-callback :groupname groupname)
      (ros::subscribe "/is_stuck" std_msgs::Int32
                      #'send self :rtmros-is-stuck-callback :groupname groupname)
+     (ros::subscribe "/use_flywheel" std_msgs::Int32
+                     #'send self :rtmros-use-flywheel-callback :groupname groupname)
      (ros::subscribe "/estimated_fxy" geometry_msgs::PointStamped
                      #'send self :rtmros-estimated-fxy-callback :groupname groupname)
      (mapcar #'(lambda (x)
@@ -77,6 +79,11 @@
    (msg)
    (let ((m (send msg :data)))
      (send self :set-robot-state1 :is-stuck m))
+   )
+  (:rtmros-use-flywheel-callback
+   (msg)
+   (let ((m (send msg :data)))
+     (send self :set-robot-state1 :use-flywheel m))
    )
   (:rtmros-estimated-fxy-callback
    (msg)

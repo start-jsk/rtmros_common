@@ -42,6 +42,7 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_rsCOPInfoIn("rsCOPInfo", m_rsCOPInfo),
     m_emergencyModeIn("emergencyMode", m_emergencyMode),
     m_isStuckIn("isStuck", m_isStuck),
+    m_useFlywheelIn("useFlywheel", m_useFlywheel),
     m_estimatedFxyIn("estimatedFxy", m_estimatedFxy),
     m_refContactStatesIn("refContactStates", m_refContactStates),
     m_actContactStatesIn("actContactStates", m_actContactStates),
@@ -80,6 +81,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("rsCOPInfo", m_rsCOPInfoIn);
   addInPort("emergencyMode", m_emergencyModeIn);
   addInPort("isStuck", m_isStuckIn);
+  addInPort("useFlywheel", m_useFlywheelIn);
   addInPort("estimatedFxy", m_estimatedFxyIn);
   addInPort("refContactStates", m_refContactStatesIn);
   addInPort("actContactStates", m_actContactStatesIn);
