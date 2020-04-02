@@ -15,9 +15,9 @@ This document explains how to use and how to contribute to rtm-ros-robotics soft
 
  rtm-ros-robotics software is distributed as ros-debian packages, if you already uses ROS system, install the software as follows:
  - `sudo apt-get install ros-${ROS_DISTRO}-rtmros-common`
- 
+
  **NOTE** Currently, those packages are not released to `melodic` distribution. Please compile all rtm-ros-robotics source code by following the section below ("2. Compile from source code").
- 
+
  If you did not installed ROS sysem, please follow [this instruction](http://wiki.ros.org/ROS/Installation).
  - ``sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -a` main" > /etc/apt/sources.list.d/ros-latest.list'``
  - `wget http://packages.ros.org/ros.key -O - | sudo apt-key add -`
@@ -35,11 +35,11 @@ This document explains how to use and how to contribute to rtm-ros-robotics soft
  - `cd ~/catkin_ws/src`
  - `wstool init .`
  - `wstool set rtmros_common https://github.com/start-jsk/rtmros_common --git -y`
- 
+
  If compile all source code
  - `wstool merge https://raw.githubusercontent.com/start-jsk/rtmros_common/master/.travis.rosinstall -y`
  - `wstool merge https://raw.githubusercontent.com/start-jsk/rtmros_common/master/.travis.rosinstall.${ROS_DISTRO} -y`
- 
+
  Both methods needs following procedures.
  - `wstool update`
  - `cd ..`
