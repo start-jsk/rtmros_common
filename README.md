@@ -14,38 +14,39 @@ This document explains how to use and how to contribute to rtm-ros-robotics soft
 1. Install software
 
  rtm-ros-robotics software is distributed as ros-debian packages, if you already uses ROS system, install the software as follows:
- - `sudo apt-get install ros-$ROS_DISTRO-rtmros-common`
+ - `sudo apt-get install ros-${ROS_DISTRO}-rtmros-common`
  
- If you did not installed ROS sysem, please follow [this instruction](http://wiki.ros.org/hydro/Installation/Ubuntu).
+ **NOTE** Currently, those packages are not released to `melodic` distribution. Please compile all rtm-ros-robotics source code by following the section below ("2. Compile from source code").
+ 
+ If you did not installed ROS sysem, please follow [this instruction](http://wiki.ros.org/ROS/Installation).
  - ``sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -a` main" > /etc/apt/sources.list.d/ros-latest.list'``
  - `wget http://packages.ros.org/ros.key -O - | sudo apt-key add -`
  - `sudo apt-get update`
- - `sudo apt-get update ros-hydro-base` # you may use ros-groovy-base if you want
+ - `sudo apt-get update ros-${ROS_DISTRO}-base`
  - `sudo rosdep init`
  - `rosdep update`
- - `source /opt/ros/hydro/setup.bash` # it is better to source ROS environment everytime terminal starts (`echo "source /opt/ros/hydro/setup.bash" >> ~/.bashrc`)
+ - `source /opt/ros/${ROS_DISTRO}/setup.bash` # it is better to source ROS environment everytime terminal starts (`echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc`)
 
 2. Compile from source code
 
- You may have two choice, one is to compile all rtm-ros-robotics source code, other is to compile target repository.
- First, create catkin workspace
+ You may have two choices, one is to compile target repository (rtmros_common) only, the other is to compile all rtm-ros-robotics source code.
+ First, create catkin workspace and add rtmros_common
  - `mkdir -p ~/catkin_ws/src`
  - `cd ~/catkin_ws/src`
- - `catkin_init_workspace`
  - `wstool init .`
+ - `wstool set rtmros_common https://github.com/start-jsk/rtmros_common --git -y`
  
  If compile all source code
- - `wstool merge https://raw.github.com/start-jsk/rtmros_common/master/.rosinstall -y`
- 
- Else if compile only targe repository
- - `wstool set rtm-ros-robotics/rtmros_common https://github.com/start-jsk/rtmros_common --git -y`
+ - `wstool merge https://raw.githubusercontent.com/start-jsk/rtmros_common/master/.travis.rosinstall -y`
+ - `wstool merge https://raw.githubusercontent.com/start-jsk/rtmros_common/master/.travis.rosinstall.${ROS_DISTRO} -y`
  
  Both methods needs following procedures.
- - `wstool update `
+ - `wstool update`
  - `cd ..`
- - `source /opt/ros/hydro/setup.bash`
- - `rosdep install -v -r --from-paths src --ignore-src --rosdistro hydro -y`
- - `catkin_make`
+ - `source /opt/ros/${ROS_DISTRO}/setup.bash`
+ - `rosdep install -r --from-paths src --ignore-src -y`
+ - `sudo apt-get install python-catkin-tools`
+ - `catkin build`
 
 3. Contributes to rtm-ros-robotics projects.
 
