@@ -15,6 +15,7 @@ import os
 import rtm
 
 from hrpsys import hrpsys_config
+from hrpsys import ModelLoader_idl
 import OpenHRP
 
 import socket
@@ -63,7 +64,7 @@ def rtc_init () :
     if modelfile:
         import CosNaming
         obj = rtm.rootnc.resolve([CosNaming.NameComponent('ModelLoader', '')])
-        mdlldr = obj._narrow(OpenHRP.ModelLoader_idl._0_OpenHRP__POA.ModelLoader)
+        mdlldr = obj._narrow(ModelLoader_idl._0_OpenHRP__POA.ModelLoader)
         rospy.loginfo("  bodyinfo URL = file://"+modelfile)
         body_info = mdlldr.getBodyInfo("file://"+modelfile)
         root_link_name = body_info._get_links()[0].segments[0].name
