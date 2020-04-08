@@ -33,6 +33,7 @@ env:
     - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true EXTRA_DEB="ros-indigo-pr2eus" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST=false  # For updating euslisp-docs (Must be USE_TRAVIS=true and IS_EUSLISP_TRAVIS_TEST=false. See after_success)
     - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=true
     - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=false NOT_TEST_INSTALL=true
+    - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=false EXTRA_DEB="libopenni2-dev libpcl-dev" NOT_TEST_INSTALL=true  # To catch https://github.com/start-jsk/rtmros_common/pull/1090#issuecomment-610860446
     - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=true EXTRA_DEB="ros-kinetic-hrpsys-ros-bridge ros-kinetic-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
     - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=false EXTRA_DEB="ros-kinetic-hrpsys-ros-bridge ros-kinetic-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
     - USE_JENKINS=true ROS_DISTRO=melodic USE_DEB=true
