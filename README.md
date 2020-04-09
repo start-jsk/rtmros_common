@@ -33,6 +33,8 @@ This document explains how to use and how to contribute to rtm-ros-robotics soft
 
  If you want to compile all source code:
  - (If the target repository is not `rtmros_common`) `wstool set rtmros_common https://github.com/start-jsk/rtmros_common --git -y`
+ - (On `kinetic` distribution) `sudo apt-get install libopencv-dev`
+   - Skipping this may cause [runtime error](https://github.com/start-jsk/rtmros_common/pull/1091#issuecomment-611457804)
  - `wstool merge https://raw.githubusercontent.com/start-jsk/rtmros_common/master/.travis.rosinstall -y`
  - `wstool merge https://raw.githubusercontent.com/start-jsk/rtmros_common/master/.travis.rosinstall.${ROS_DISTRO} -y`
    - Please ignore `Unable to download URL` error on `indigo` distribution

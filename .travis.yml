@@ -57,6 +57,11 @@ notifications:
     on_failure: always #[always|never|change] # default: always
 before_script:
   - set -x
+  # Install libopencv-dev manually to compile hrpsys-simulator in hrpsys-base on kinetic
+  # Details: https://github.com/start-jsk/rtmros_common/pull/1091#issuecomment-611457804
+  #          https://github.com/start-jsk/rtmros_common/pull/1091#issuecomment-611476618
+  # Waiting for .travis.rosinstall.kinetic to use hrpsys-release
+  - if [ "${ROS_DISTRO}" == "kinetic" ] && [ "${USE_DEB}" != "true" ] ; then if [ "${EXTRA_DEB}" == "" ] ; then export EXTRA_DEB="libopencv-dev"; else export EXTRA_DEB="${EXTRA_DEB} libopencv-dev"; fi; fi
   # Forcely upgrade PCRE to avoid failure in building hrpsys with hydro.
   # This has a side effect, and we need extra settings.
   # Issue detail: https://github.com/start-jsk/rtmros_common/issues/1076
