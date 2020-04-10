@@ -4,7 +4,7 @@ A package suite that provides all the capabilities for the ROS users to connect 
 
 ## Install
 
-This document explains how to use and how to contribute to rtm-ros-robotics software ([openrtm_aist_core](https://github.com/start-jsk/openrtm_aist_core), [openhrp3](https://github.com/start-jsk/openhrp3), [hrpsys](https://github.com/start-jsk/hrpsys), [rtshell_core](https://github.com/start-jsk/rtshell_core), [rtmros_common](https://github.com/start-jsk/rtmros_common), [rtmros_hironx](https://github.com/start-jsk/rtmros_hironx), [rtmros_tutorial](https://github.com/start-jsk/rtmros_turorial), [rtmros_gazebo](https://github.com/start-jsk/rtmros_gazebo)). The instruction uses `rtmros_common` repository as an example, but also works for other rtm-ros-robotics repositories.
+This document explains how to use and how to contribute to rtm-ros-robotics software ([openrtm_aist](https://github.com/tork-a/openrtm_aist-release), [openhrp3](https://github.com/fkanehiro/openhrp3), [hrpsys](https://github.com/fkanehiro/hrpsys-base), [rtshell](https://github.com/tork-a/rtshell-release), [rtctree](https://github.com/tork-a/rtctree-release), [rtsprofile](https://github.com/tork-a/rtsprofile-release), [rtmros_common](https://github.com/start-jsk/rtmros_common), [rtmros_hironx](https://github.com/start-jsk/rtmros_hironx), [rtmros_tutorials](https://github.com/start-jsk/rtmros_tutorials), [rtmros_gazebo](https://github.com/start-jsk/rtmros_gazebo)). The instruction uses `rtmros_common` repository as an example, but also works for other rtm-ros-robotics repositories.
 
 1. Install software
 
