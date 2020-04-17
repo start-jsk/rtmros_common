@@ -67,8 +67,8 @@ AutoBalancer is hrpsys-base RTC to generate walking pattern and control Center O
 1. Launch hrpsys-simulator
 
     ```
-    export BUSH_CUSTOMIZER_CONFIG_PATH=`rospack find openhrp3`/../OpenHRP-3.1/customizer/sample1_bush_customizer_param.conf
-    rtmlaunch hrpsys_ros_bridge samplerobot.launch hrpsys_precreate_rtc:=PDcontroller USE_UNSTABLE_RTC:=true PROJECT_FILE:=`rospack find hrpsys`/share/hrpsys/samples/SampleRobot/SampleRobot.500.torque.xml
+    export BUSH_CUSTOMIZER_CONFIG_PATH=$(catkin locate --devel)/share/OpenHRP-3.1/customizer/sample1_bush_customizer_param.conf
+    rtmlaunch hrpsys_ros_bridge samplerobot.launch hrpsys_precreate_rtc:=PDcontroller USE_UNSTABLE_RTC:=true PROJECT_FILE:=$(catkin locate --devel)/share/hrpsys/samples/SampleRobot/SampleRobot.500.torque.xml
     ```
 2. Euslisp example
 
@@ -91,8 +91,8 @@ This example includes following three demos.
 1. Launch hrpsys-simulator
 
     ```
-    export BUSH_CUSTOMIZER_CONFIG_PATH=`rospack find openhrp3`/../OpenHRP-3.1/customizer/sample1_bush_customizer_param.conf
-    rtmlaunch hrpsys_ros_bridge samplerobot.launch hrpsys_precreate_rtc:=PDcontroller USE_UNSTABLE_RTC:=true PROJECT_FILE:=`rospack find hrpsys`/share/hrpsys/samples/SampleRobot/SampleRobot.carryobject.xml USE_OBJECTCONTACTTURNAROUNDDETECTOR:=true
+    export BUSH_CUSTOMIZER_CONFIG_PATH=$(catkin locate --devel)/share/OpenHRP-3.1/customizer/sample1_bush_customizer_param.conf
+    rtmlaunch hrpsys_ros_bridge samplerobot.launch hrpsys_precreate_rtc:=PDcontroller USE_UNSTABLE_RTC:=true PROJECT_FILE:=$(catkin locate --devel)/share/hrpsys/samples/SampleRobot/SampleRobot.carryobject.xml USE_OBJECTCONTACTTURNAROUNDDETECTOR:=true
     ```
 2. Euslisp example
 
@@ -113,7 +113,7 @@ This is terrain walk examples to use AutoBalancer. In this section, slope walkin
 ## Example for slope walking
 1. Launch hrpsys-simulator
     ```
-    rtmlaunch hrpsys_ros_bridge samplerobot.launch PROJECT_FILE:=`rospack find hrpsys`/share/hrpsys/samples/SampleRobot/SampleRobot.TerrainFloor.SlopeUpDown.xml
+    rtmlaunch hrpsys_ros_bridge samplerobot.launch USE_UNSTABLE_RTC:=true PROJECT_FILE:=$(catkin locate --devel)/share/hrpsys/samples/SampleRobot/SampleRobot.TerrainFloor.SlopeUpDown.xml
     ```
 2. Euslisp example
     ```
@@ -125,7 +125,7 @@ This is terrain walk examples to use AutoBalancer. In this section, slope walkin
 ## Example for stair climbing-up
 1. Launch hrpsys-simulator
     ```
-    rtmlaunch hrpsys_ros_bridge samplerobot.launch PROJECT_FILE:=`rospack find hrpsys`/share/hrpsys/samples/SampleRobot/SampleRobot.TerrainFloor.StairUp.xml
+    rtmlaunch hrpsys_ros_bridge samplerobot.launch USE_UNSTABLE_RTC:=true PROJECT_FILE:=$(catkin locate --devel)/share/hrpsys/samples/SampleRobot/SampleRobot.TerrainFloor.StairUp.xml
     ```
 2. Euslisp example
     ```
@@ -137,7 +137,7 @@ This is terrain walk examples to use AutoBalancer. In this section, slope walkin
 ## Example for stair climbing-down
 1. Launch hrpsys-simulator
     ```
-    rtmlaunch hrpsys_ros_bridge samplerobot.launch PROJECT_FILE:=`rospack find hrpsys`/share/hrpsys/samples/SampleRobot/SampleRobot.TerrainFloor.StairDown.xml
+    rtmlaunch hrpsys_ros_bridge samplerobot.launch USE_UNSTABLE_RTC:=true PROJECT_FILE:=$(catkin locate --devel)/share/hrpsys/samples/SampleRobot/SampleRobot.TerrainFloor.StairDown.xml
     ```
 2. Euslisp example
     ```
@@ -150,6 +150,6 @@ This is terrain walk examples to use AutoBalancer. In this section, slope walkin
 # Starting for DRC Testbed Model Simulation
 1. Launch hrpsys-simulator
     ```
-    rtmlaunch hrpsys_ros_bridge samplerobot.launch PROJECT_FILE:=`rospack find hrpsys`/share/hrpsys/samples/SampleRobot/SampleRobot.DRCTestbed.xml
+    rtmlaunch hrpsys_ros_bridge samplerobot.launch PROJECT_FILE:=$(catkin locate --devel)/share/hrpsys/samples/SampleRobot/SampleRobot.DRCTestbed.xml
     ```
     <div align="center"><p><img src="https://raw.githubusercontent.com/fkanehiro/hrpsys-base/master/sample/SampleRobot/img/DRCTestbed.png" alt="DRC Testbed" title="DRC Testbed" height=300/></p></div>  
