@@ -2,8 +2,8 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.3 (2020-04-20)
+------------------
 
 * check hrpsys/rtmros from sources (`#1068 <https://github.com/start-jsk/rtmros_common/issues/1068>`_)
 

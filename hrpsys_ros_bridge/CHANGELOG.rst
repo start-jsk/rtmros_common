@@ -2,8 +2,8 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.3 (2020-04-20)
+------------------
 * Adapt README for melodic & fix style of README & fix to run on melodic (`#1090 <https://github.com/start-jsk/rtmros_common/issues/1090>`_)
 
   * [hrpsys_ros_bridge] Prevent collision_state.py from dying on melodic

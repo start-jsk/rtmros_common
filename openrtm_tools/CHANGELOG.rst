@@ -2,8 +2,8 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.3 (2020-04-20)
+------------------
 * Try to run multiple hrpsys simulation environments (`#1054 <https://github.com/start-jsk/rtmros_common/issues/1054>`_)
 
   * delete unused print
