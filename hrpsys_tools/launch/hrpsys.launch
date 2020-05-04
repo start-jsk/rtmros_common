@@ -26,6 +26,12 @@
   <arg name="openrtm_args" default='-o "corba.master_manager:$(arg nameserver):$(arg managerport)" -o "corba.nameservers:$(arg nameserver):$(arg corbaport)" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
   <!-- END:openrtm setting -->
 
+  <!-- BEGIN:openrtm setting -->
+  <node pkg="hrpsys_tools" type="check_name_server.py"
+        name="check_name_server" args="$(arg omniorb_args)"
+        required="true" />
+  <!-- END:openrtm setting -->
+
   <!-- BEGIN:setting for hrpsys-simulator or rtcd -->
   <arg name="USE_RTCD" default="false" />
   <arg name="USE_CHOREONOID" default="false" />
