@@ -1774,7 +1774,7 @@
 (def-set-get-param-method
   'hrpsys_ros_bridge::Openhrp_StabilizerService_stParam
   :raw-set-st-param :get-st-param :get-st-param-arguments
-  :stabilizerservice_setparameter :stabilizerservice_getparameter)
+  :autobalancerservice_setstabilizerparam :autobalancerservice_getstabilizerparam)
 
 (defmethod rtm-ros-robot-interface
   (:set-st-param
@@ -1850,7 +1850,7 @@
    "Set Stabilzier parameter by default parameters."
    (unless (send self :get :default-st-param)
      (send self :put :default-st-param (send self :get-st-param)))
-   (send self :stabilizerservice_setparameter :i_param (send self :get :default-st-param))
+   (send self :autobalancerservice_setparameter :i_param (send self :get :default-st-param))
    )
   (:set-st-param-by-ratio
    (state-feedback-gain-ratio
@@ -1896,12 +1896,12 @@
   (:start-st
    ()
    "Start Stabilizer Mode."
-   (send self :stabilizerservice_startstabilizer)
+   (send self :autobalancerservice_startstabilizer)
    )
   (:stop-st
    ()
    "Stop Stabilizer Mode."
-   (send self :stabilizerservice_stopstabilizer)
+   (send self :autobalancerservice_stopstabilizer)
    )
   )
 
@@ -2224,9 +2224,9 @@
        (print-ros-msg (send self :get-gait-generator-param))
        (format t ";; :get-auto-balancer-param~%")
        (print-ros-msg (send self :get-auto-balancer-param)))
-     (when (find "/StabilizerServiceROSBridge" rosbridge-nodes :test #'string=)
-       (format t ";; :get-st-param~%")
-       (print-ros-msg (send self :get-st-param)))
+     ;; (when (find "/StabilizerServiceROSBridge" rosbridge-nodes :test #'string=)
+     ;;   (format t ";; :get-st-param~%")
+     ;;   (print-ros-msg (send self :get-st-param)))
      (when (find "/ObjectContactTurnaroundDetectorServiceROSBridge" rosbridge-nodes :test #'string=)
        (format t ";; :get-object-turnaround-detector-param~%")
        (print-ros-msg (send self :get-object-turnaround-detector-param)))
