@@ -47,7 +47,6 @@ matrix:
   - env: USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=false   EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
   # Running euslisp test on travis often takes more than 50 min
   - env: USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true   EXTRA_DEB="ros-indigo-hrpsys-ros-bridge ros-indigo-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
-  - env: USE_JENKINS=true ROS_DISTRO=melodic USE_DEB=true
 notifications:
   email:
     recipients:
