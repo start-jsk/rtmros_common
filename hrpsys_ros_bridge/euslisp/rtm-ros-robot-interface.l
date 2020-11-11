@@ -1772,7 +1772,7 @@
 
 ;; StabilizerService
 (def-set-get-param-method
-  'hrpsys_ros_bridge::Openhrp_StabilizerService_stParam
+  'hrpsys_ros_bridge::Openhrp_AutoBalancerService_StabilizerParam
   :raw-set-st-param :get-st-param :get-st-param-arguments
   :autobalancerservice_setstabilizerparam :autobalancerservice_getstabilizerparam)
 
