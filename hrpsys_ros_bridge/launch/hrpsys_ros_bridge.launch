@@ -143,6 +143,10 @@
           output="screen" args ="$(arg openrtm_args)" />
     <rtconnect from="RobotHardwareServiceROSBridge.rtc:RobotHardwareService" to="$(arg SIMULATOR_NAME).rtc:RobotHardwareService"  subscription_type="new"/>
     <rtconnect from="$(arg SIMULATOR_NAME).rtc:servoState" to="HrpsysSeqStateROSBridge0.rtc:servoState" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)" unless="$(arg USE_SOFTERRORLIMIT)"/>
+    <rtconnect from="$(arg SIMULATOR_NAME).rtc:pgain" to="HrpsysSeqStateROSBridge0.rtc:pgain" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
+    <rtconnect from="$(arg SIMULATOR_NAME).rtc:dgain" to="HrpsysSeqStateROSBridge0.rtc:dgain" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
+    <rtconnect from="$(arg SIMULATOR_NAME).rtc:torquePgain" to="HrpsysSeqStateROSBridge0.rtc:torquePgain" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
+    <rtconnect from="$(arg SIMULATOR_NAME).rtc:torqueDgain" to="HrpsysSeqStateROSBridge0.rtc:torqueDgain" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
     <rtactivate component="RobotHardwareServiceROSBridge.rtc" />
   </group>
 
