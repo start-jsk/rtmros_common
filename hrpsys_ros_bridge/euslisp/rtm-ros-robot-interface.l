@@ -1647,7 +1647,7 @@
    (send self :go-velocity
 	 (* vel-x-ratio (send (send msg :linear) :x))
          (* vel-y-ratio (send (send msg :linear) :y))
-         (* vel-th-ratio (send (send msg :angular) :z)))
+         (* vel-th-ratio (rad2deg (send (send msg :angular) :z))))
    )
   (:cmd-vel-mode
    ()
