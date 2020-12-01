@@ -1673,8 +1673,8 @@
    ()
    "Walk with subscribing /cmd_vel topic."
    (send self :start-cmd-vel-mode)
+   (send self :go-velocity 0 0 0)
    (do-until-key
-    (send self :go-velocity 0 0 0)
     (ros::spin-once)
     (ros::sleep)
     )
