@@ -1461,7 +1461,7 @@
      ))
   (:go-velocity
    (vx vy vth)
-   "Call goVelocity."
+   "Call goVelocity. vx[m/s], vy[m/s], and vth[deg/s]"
    (send self :autobalancerservice_goVelocity :vx vx :vy vy :vth vth))
   (:go-stop
    ()
