@@ -40,6 +40,8 @@
                  (ros::subscribe (format nil "/~A_contact_states" x) hrpsys_ros_bridge::ContactStatesStamped
                                  #'send self :rtmros-contact-states-callback (read-from-string (format nil ":~A-contact-states" x)) :groupname groupname))
              '(ref act))
+     (ros::subscribe "/odom" nav_msgs::Odometry
+                     #'send self :rtmros-abc-odom-callback :groupname groupname)
      ))
   (:rtmros-motor-states-callback
    (msg)
@@ -77,6 +79,14 @@
    (ref-act msg)
    (let ((ss (send-all (send msg :states) :state :state)))
      (send self :set-robot-state1 ref-act ss)))
+  (:rtmros-abc-odom-callback
+   (msg)
+   (let ((parsed
+          (list
+           (cons :stamp (send msg :header :stamp))
+           (cons :pose (ros::tf-pose->coords (send msg :pose :pose)))
+           (cons :twist (ros::tf-twist->coords (send msg :twist :twist))))))
+     (send self :set-robot-state1 :abc-odom parsed)))
   (:tmp-force-moment-vector-for-limb
    (f/m fsensor-name &optional (topic-name-prefix nil)) ;; topic-name-prefix is "off" or "reference"
    (let ((key-name (if topic-name-prefix
@@ -2000,6 +2010,22 @@
    (send self :stop-auto-balancer)
    (dolist (limb ic-limbs)
      (send self :wait-impedance-controller-transition limb))
+   )
+  ;; Start AutoBalancer while keeping continuity of odometry
+  ;; Foot-mid-coords have to be horizontal.
+  (:start-auto-balancer-odom-safe
+   (&rest args)
+   (send* self :start-auto-balancer args))
+  ;; Stop AutoBalancer while keeping continuity of odometry
+  ;; You have to stop ImpedanceController and Stabilizer in advance
+  (:stop-auto-balancer-odom-safe
+   ()
+   (send self :angle-vector-sequence-full
+         (list (map float-vector #'rad2deg (send (send (send self :robothardwareservice_getStatus2) :rs) :command)))
+         (list 5000)
+         :root-coords (list (send self :state :abc-odom :pose)))
+   (send self :wait-interpolation-seq)
+   (send self :stop-auto-balancer)
    )
 )
 
