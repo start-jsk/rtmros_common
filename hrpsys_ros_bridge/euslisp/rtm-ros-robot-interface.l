@@ -2011,18 +2011,18 @@
    (dolist (limb ic-limbs)
      (send self :wait-impedance-controller-transition limb))
    )
-  ;; Start AutoBalancer while keeping continuity of odometry
-  ;; Foot-mid-coords have to be horizontal.
   (:start-auto-balancer-odom-safe
    (&rest args)
+   "Start AutoBalancer while keeping continuity of odometry
+    Foot-mid-coords have to be horizontal."
    (send* self :start-auto-balancer args))
-  ;; Stop AutoBalancer while keeping continuity of odometry
-  ;; You have to stop ImpedanceController and Stabilizer in advance
   (:stop-auto-balancer-odom-safe
    ()
+   "Stop AutoBalancer while keeping continuity of odometry
+    You have to stop ImpedanceController and Stabilizer in advance"
    (send self :angle-vector-sequence-full
          (list (map float-vector #'rad2deg (send (send (send self :robothardwareservice_getStatus2) :rs) :command)))
-         (list 5000)
+         (list 1) ;; This value have to be equal to or smaller than the control period of hrpsys
          :root-coords (list (send self :state :abc-odom :pose)))
    (send self :wait-interpolation-seq)
    (send self :stop-auto-balancer)
