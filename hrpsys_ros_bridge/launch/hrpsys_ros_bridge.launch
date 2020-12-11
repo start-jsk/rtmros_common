@@ -267,6 +267,7 @@
     <rtconnect from="abc.rtc:isStuck" to="HrpsysSeqStateROSBridge0.rtc:isStuck" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
     <rtconnect from="abc.rtc:useFlywheel" to="HrpsysSeqStateROSBridge0.rtc:useFlywheel" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
     <rtconnect from="abc.rtc:estimatedFxy" to="HrpsysSeqStateROSBridge0.rtc:estimatedFxy" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
+    <rtconnect from="abc.rtc:currentSteppableRegion" to="HrpsysSeqStateROSBridge0.rtc:currentSteppableRegion" subscription_type="$(arg subscription_type)" push_policy="$(arg push_policy)" push_rate="$(arg push_rate)" buffer_length="$(arg buffer_length)"/>
     <rtconnect from="EmergencyStopperServiceROSBridge.rtc:EmergencyStopperService" to="es.rtc:EmergencyStopperService"  subscription_type="new"/>
     <rtconnect from="HardEmergencyStopperServiceROSBridge.rtc:EmergencyStopperService" to="hes.rtc:EmergencyStopperService"  subscription_type="new"/>
     <rtactivate component="EmergencyStopperServiceROSBridge.rtc" />

@@ -167,6 +167,8 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   InPort<OpenHRP::TimedLandingPosition> m_rslandingTargetIn;
   OpenHRP::TimedCogState m_rsendCogState;
   InPort<OpenHRP::TimedCogState> m_rsendCogStateIn;
+  OpenHRP::TimedSteppableRegion m_currentSteppableRegion;
+  InPort<OpenHRP::TimedSteppableRegion> m_currentSteppableRegionIn;
 
   // </rtc-template>
 

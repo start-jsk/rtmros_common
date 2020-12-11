@@ -171,6 +171,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   is_stuck_pub = nh.advertise<std_msgs::Int32>("is_stuck", 10);
   use_flywheel_pub = nh.advertise<std_msgs::Int32>("use_flywheel", 10);
   estimated_fxy_pub = nh.advertise<geometry_msgs::PointStamped>("estimated_fxy", 10);
+  current_steppable_region_pub = nh.advertise<hrpsys_ros_bridge::SteppableRegion>("current_steppable_region", 10);
 
   return RTC::RTC_OK;
 }
@@ -1028,6 +1029,33 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
   }
+
+  if ( m_currentSteppableRegionIn.isNew() ) {
+    try {
+      m_currentSteppableRegionIn.read();
+      hrpsys_ros_bridge::SteppableRegion region;
+      bool is_valid = false;
+      size_t convex_num(m_currentSteppableRegion.data.region.length());
+      region.polygons.resize(convex_num);
+      for (size_t i = 0; i < convex_num; i++) {
+        size_t vs_num(m_currentSteppableRegion.data.region[i].length()/2);
+        if (vs_num > 3) is_valid = true;
+        region.polygons[i].polygon.points.resize(vs_num);
+        for (size_t j = 0; j < vs_num; j++) {
+          region.polygons[i].polygon.points[j].x = m_currentSteppableRegion.data.region[i][2*j];
+          region.polygons[i].polygon.points[j].y = m_currentSteppableRegion.data.region[i][2*j+1];
+          region.polygons[i].polygon.points[j].z = 0.0;
+        }
+      }
+      region.l_r = m_currentSteppableRegion.data.l_r;
+      if (is_valid) current_steppable_region_pub.publish(region);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
 
 
   //
