@@ -88,7 +88,7 @@
   (:tmp-force-moment-vector
    (f/m &optional (limb) (topic-name-prefix nil)) ;; topic-name-prefix is "off" or "reference"
    (if limb
-       (send self :tmp-force-moment-vector-for-limb f/m (send (car (send robot limb :force-sensors)) :name) topic-name-prefix)
+       (send self :tmp-force-moment-vector-for-limb f/m (send (car (send robot :limb limb :force-sensors)) :name) topic-name-prefix)
      (mapcar #'(lambda (x)
                  (send self :tmp-force-moment-vector-for-limb f/m x topic-name-prefix))
              (send-all (send robot :force-sensors) :name))))
@@ -132,7 +132,7 @@
     This value corresponds to RemoveForceSensorLinkOffset RTC.
     If a limb argument is specified, returns a vector for the limb."
    (if limb
-       (send (car (send robot limb :force-sensors)) :rotate-vector (send self :off-force-vector limb))
+       (send (car (send robot :limb limb :force-sensors)) :rotate-vector (send self :off-force-vector limb))
      (mapcar #'(lambda (fs force)
                  (send fs :rotate-vector force))
              (send robot :force-sensors) (send self :off-force-vector))))
@@ -142,7 +142,7 @@
     This value corresponds to RemoveForceSensorLinkOffset RTC.
     If a limb argument is specified, returns a vector for the limb."
    (if limb
-       (send (car (send robot limb :force-sensors)) :rotate-vector (send self :off-moment-vector limb))
+       (send (car (send robot :limb limb :force-sensors)) :rotate-vector (send self :off-moment-vector limb))
      (mapcar #'(lambda (fs moment)
                  (send fs :rotate-vector moment))
              (send robot :force-sensors) (send self :off-moment-vector))))
@@ -314,7 +314,7 @@
                       (cons :controller-action ,(format nil "~A_controller/follow_joint_trajectory_action" (string-downcase limb)))
                       (cons :controller-state ,(format nil "~A_controller/state" (string-downcase limb)))
                       (cons :action-type control_msgs::FollowJointTrajectoryAction)
-                      (cons :joint-names (list ,@(send-all (send robot limb :joint-list) :name))))
+                      (cons :joint-names (list ,@(send-all (send robot :limb limb :joint-list) :name))))
                      )))))
       (if debugp
           (pprint (macroexpand sexp)))
@@ -517,11 +517,11 @@
 		  (t (list limb)))))
      (send self :set-ref-forces-moments
            (mapcar #'(lambda (fs rfv)
-                       (if (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors)))) limbs)
+                       (if (find-if #'(lambda (l) (equal fs (car (send robot :limb l :force-sensors)))) limbs)
                            force rfv))
                    (send robot :force-sensors) (send self :reference-force-vector))
 	   (mapcar #'(lambda (fs rfv)
-                       (if (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors)))) limbs)
+                       (if (find-if #'(lambda (l) (equal fs (car (send robot :limb l :force-sensors)))) limbs)
                            moment rfv))
                    (send robot :force-sensors) (send self :reference-moment-vector))
            tm)
@@ -537,7 +537,7 @@
                       (t (list limb)))))
      (send self :set-ref-forces
            (mapcar #'(lambda (fs rfv)
-                       (if (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors)))) limbs)
+                       (if (find-if #'(lambda (l) (equal fs (car (send robot :limb l :force-sensors)))) limbs)
                            force rfv))
                    (send robot :force-sensors) (send self :reference-force-vector))
            tm)
@@ -553,7 +553,7 @@
                       (t (list limb)))))
      (send self :set-ref-moments
            (mapcar #'(lambda (fs rfv)
-                       (if (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors)))) limbs)
+                       (if (find-if #'(lambda (l) (equal fs (car (send robot :limb l :force-sensors)))) limbs)
                            moment rfv))
                    (send robot :force-sensors) (send self :reference-moment-vector))
            tm)
@@ -841,7 +841,7 @@
    (cond
     ((eq limb :legs) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rleg :lleg)))
     ((eq limb :arms) (mapcar #'(lambda (l) (send* self method-name l args)) '(:rarm :larm)))
-    ((and (find-method robot limb) (car (send robot limb :force-sensors)))
+    ((and (find-method robot limb) (car (send robot :limb limb :force-sensors)))
      (apply method-func limb args))
     (t (error ";; No such limb or force sensor is defined for ~A~%." limb))
     ))
@@ -913,7 +913,7 @@
    (format t ";; Start object turnaround detection~%")
    (send self :set-object-turnaround-detector-param :axis axis :detector-total-wrench detector-total-wrench)
    (send self :state)
-   (let* ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+   (let* ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot :limb x :force-sensors)) (send robot :force-sensors)))))
           (org-ref-forces (mapcar #'(lambda (limb) (send self :reference-force-vector limb)) all-limbs))
           (diff-force (scale (/ max-ref-force (length limbs)) axis)))
      ;; Step.1 Set ref force and start detection
@@ -1001,7 +1001,7 @@
     If :all, returns the results of :get-otd-object-forces-moments itself. If :forces, returns forces results.
     If set-ref-force-linear-p t, set linear interpolation first and set hoffarbib interpolation in return."
    (format t ";; Start object turnaround detection~%")
-   (let ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+   (let ((all-limbs (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot :limb x :force-sensors)) (send robot :force-sensors)))))
          (fs-list (funcall func max-ref-moment)))
      (send self :set-object-turnaround-detector-param
            :axis axis :moment-center (scale 1e-3 moment-center) :detector-total-wrench detector-total-wrench)
@@ -1157,7 +1157,7 @@
       t if set successfully, nil otherwise"
    (send self :removeforcesensorlinkoffsetservice_removeforcesensoroffset
          :names
-         (mapcar #'(lambda (limb) (send (car (send robot limb :force-sensors)) :name)) limbs)
+         (mapcar #'(lambda (limb) (send (car (send robot :limb limb :force-sensors)) :name)) limbs)
          :tm tm))
   (:remove-force-sensor-offset-rmfo-arms
    (&key ((:time tm) 8.0))
@@ -2214,15 +2214,15 @@
        (format t ";; :get-kalman-filter-param~%")
        (print-ros-msg (send self :get-kalman-filter-param)))
      (when (find "/ReferenceForceUpdaterServiceROSBridge" rosbridge-nodes :test #'string=)
-       (dolist (limb (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+       (dolist (limb (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot :limb x :force-sensors)) (send robot :force-sensors)))))
          (format t ";; :get-reference-force-updater-param ~A~%" limb)
          (print-ros-msg (send self :get-reference-force-updater-param limb))))
      (when (find "/ImpedanceControllerServiceROSBridge" rosbridge-nodes :test #'string=)
-       (dolist (limb (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+       (dolist (limb (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot :limb x :force-sensors)) (send robot :force-sensors)))))
          (format t ";; :get-impedance-controller-param ~A~%" limb)
          (print-ros-msg (send self :get-impedance-controller-param limb))))
      (when (find "/RemoveForceSensorLinkOffsetServiceROSBridge" rosbridge-nodes :test #'string=)
-       (dolist (limb (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot x :force-sensors)) (send robot :force-sensors)))))
+       (dolist (limb (sort '(:rleg :lleg :rarm :larm) #'< #'(lambda (x) (position (car (send robot :limb x :force-sensors)) (send robot :force-sensors)))))
          (format t ";; :get-forcemoment-offset-param ~A~%" limb)
          (print-ros-msg (send self :get-forcemoment-offset-param limb))))
      (when (find "/TorqueControllerServiceROSBridge" rosbridge-nodes :test #'string=)
@@ -2330,12 +2330,12 @@
   (rs-list robot
   &key (all-limbs
         (mapcar #'(lambda (fs)
-                    (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors)))) '(:rleg :lleg :rarm :larm)))
+                    (find-if #'(lambda (l) (equal fs (car (send robot :limb l :force-sensors)))) '(:rleg :lleg :rarm :larm)))
                 (send robot :force-sensors)))
        (limbs
         (remove nil
                 (mapcar #'(lambda (fs)
-                    (find-if #'(lambda (l) (equal fs (car (send robot l :force-sensors))))
+                    (find-if #'(lambda (l) (equal fs (car (send robot :limb l :force-sensors))))
                              (case (length (cadr (memq :contact-state (car rs-list))))
                                    (2 '(:rleg :lleg))
                                    (4 '(:rleg :lleg :rarm :larm)))))
