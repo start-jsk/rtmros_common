@@ -314,7 +314,7 @@
                       (cons :controller-action ,(format nil "~A_controller/follow_joint_trajectory_action" (string-downcase limb)))
                       (cons :controller-state ,(format nil "~A_controller/state" (string-downcase limb)))
                       (cons :action-type control_msgs::FollowJointTrajectoryAction)
-                      (cons :joint-names (list ,@(send-all (send robot limb :joint-list) :name))))
+                      (cons :joint-names (send-all (send robot ,limb :joint-list) :name)))
                      )))))
       (if debugp
           (pprint (macroexpand sexp)))
