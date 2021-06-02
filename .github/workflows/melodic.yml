@@ -16,10 +16,35 @@ jobs:
             USE_DEB: true
             NOT_TEST_INSTALL: false
             CATKIN_TOOLS_BUILD_OPTIONS: '-iv --summarize --no-status'
+            TEST_PKGS: 'hrpsys_tools openrtm_tools rosnode_rtc rtmbuild hrpsys_ros_bridge openrtm_ros_bridge'
+            EXTRA_DEB: ''
+            ADDITIONAL_ENV_TO_DOCKER: ''
+            IS_EUSLISP_TRAVIS_TEST: false
           - name: melodic-src
             USE_DEB: false
             NOT_TEST_INSTALL: true
             CATKIN_TOOLS_BUILD_OPTIONS: '-iv --summarize --no-status --make-args -Wno-deprecated --' # otherwise hrpsys and openhrp3 output too many warnings.
+            TEST_PKGS: 'hrpsys_tools openrtm_tools rosnode_rtc rtmbuild hrpsys_ros_bridge openrtm_ros_bridge'
+            EXTRA_DEB: ''
+            ADDITIONAL_ENV_TO_DOCKER: ''
+            IS_EUSLISP_TRAVIS_TEST: false
+          - name: melodic-eustest
+            USE_DEB: true
+            NOT_TEST_INSTALL: false
+            CATKIN_TOOLS_BUILD_OPTIONS: '-iv --summarize --no-status'
+            TEST_PKGS: 'hrpsys_ros_bridge'
+            EXTRA_DEB: 'ros-melodic-hrpsys-ros-bridge ros-melodic-pr2eus'
+            ADDITIONAL_ENV_TO_DOCKER: 'IS_EUSLISP_TRAVIS_TEST'
+            IS_EUSLISP_TRAVIS_TEST: true
+          - name: melodic-src-eustest
+            USE_DEB: false
+            NOT_TEST_INSTALL: true
+            CATKIN_TOOLS_BUILD_OPTIONS: '-iv --summarize --no-status --make-args -Wno-deprecated --' # otherwise hrpsys and openhrp3 output too many warnings.
+            TEST_PKGS: 'hrpsys_ros_bridge'
+            EXTRA_DEB: 'ros-melodic-hrpsys-ros-bridge ros-melodic-pr2eus'
+            ADDITIONAL_ENV_TO_DOCKER: 'IS_EUSLISP_TRAVIS_TEST'
+            IS_EUSLISP_TRAVIS_TEST: true
+
 
     steps:
       - name: Install latest git ( use sudo for ros-ubuntu, remove sudo for ubuntu container), checkout@v2 uses REST API for git<2.18, which removes .git folder and does not checkout .travis submodules
@@ -39,3 +64,7 @@ jobs:
           USE_DEB: ${{ matrix.USE_DEB }}
           NOT_TEST_INSTALL: ${{ matrix.NOT_TEST_INSTALL }}
           CATKIN_TOOLS_BUILD_OPTIONS: ${{ matrix.CATKIN_TOOLS_BUILD_OPTIONS }}
+          TEST_PKGS: ${{ matrix.TEST_PKGS }}
+          EXTRA_DEB: ${{ matrix.EXTRA_DEB }}
+          ADDITIONAL_ENV_TO_DOCKER: ${{ matrix.ADDITIONAL_ENV_TO_DOCKER }}
+          IS_EUSLISP_TRAVIS_TEST: ${{ matrix.IS_EUSLISP_TRAVIS_TEST }}
