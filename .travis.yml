@@ -3,11 +3,15 @@
 #   Works with all MoveIt! repositories/branches
 #   Author: Dave Coleman, Jonathan Bohren
 sudo: required
-dist: trusty
+dist: bionic
 language: c++
 cache:
-  - ccache
-  - apt
+  apt: true
+  pip: true
+  directories:
+    - $HOME/.ccache
+    - $HOME/.cache/pip
+    - $HOME/apt-cacher-ng
 env:
   global:
     - ROSWS=wstool
