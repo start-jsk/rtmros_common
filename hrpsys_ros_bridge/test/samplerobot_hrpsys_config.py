@@ -30,25 +30,27 @@ class SampleRobotHrpsysConfigurator(HrpsysConfigurator):
         tlp.debug_print_freq = int(10 / 0.002)
         tlp.alarmRatio = 1.0
         self.tl_svc.setParameter(tlp)
+        abcp=self.abc_svc.getAutoBalancerParam()[1]
+        abcp.ik_mode = OpenHRP.AutoBalancerService.FULLBODY
         # ST parameters
-        stp=self.st_svc.getParameter()
-        stp.st_algorithm=OpenHRP.StabilizerService.EEFMQP
+        stp=self.abc_svc.getStabilizerParam()
+        stp.st_algorithm=OpenHRP.AutoBalancerService.EEFMQP
         #   eefm st params
         tmp_leg_inside_margin=71.12*1e-3
         tmp_leg_outside_margin=71.12*1e-3
         tmp_leg_front_margin=182.0*1e-3
         tmp_leg_rear_margin=72.0*1e-3
-        rleg_vertices = [OpenHRP.StabilizerService.TwoDimensionVertex(pos=[tmp_leg_front_margin, tmp_leg_inside_margin]),
-                         OpenHRP.StabilizerService.TwoDimensionVertex(pos=[tmp_leg_front_margin, -1*tmp_leg_outside_margin]),
-                         OpenHRP.StabilizerService.TwoDimensionVertex(pos=[-1*tmp_leg_rear_margin, -1*tmp_leg_outside_margin]),
-                         OpenHRP.StabilizerService.TwoDimensionVertex(pos=[-1*tmp_leg_rear_margin, tmp_leg_inside_margin])]
-        lleg_vertices = [OpenHRP.StabilizerService.TwoDimensionVertex(pos=[tmp_leg_front_margin, tmp_leg_outside_margin]),
-                         OpenHRP.StabilizerService.TwoDimensionVertex(pos=[tmp_leg_front_margin, -1*tmp_leg_inside_margin]),
-                         OpenHRP.StabilizerService.TwoDimensionVertex(pos=[-1*tmp_leg_rear_margin, -1*tmp_leg_inside_margin]),
-                         OpenHRP.StabilizerService.TwoDimensionVertex(pos=[-1*tmp_leg_rear_margin, tmp_leg_outside_margin])]
+        rleg_vertices = [OpenHRP.AutoBalancerService.TwoDimensionVertex(pos=[tmp_leg_front_margin, tmp_leg_inside_margin]),
+                         OpenHRP.AutoBalancerService.TwoDimensionVertex(pos=[tmp_leg_front_margin, -1*tmp_leg_outside_margin]),
+                         OpenHRP.AutoBalancerService.TwoDimensionVertex(pos=[-1*tmp_leg_rear_margin, -1*tmp_leg_outside_margin]),
+                         OpenHRP.AutoBalancerService.TwoDimensionVertex(pos=[-1*tmp_leg_rear_margin, tmp_leg_inside_margin])]
+        lleg_vertices = [OpenHRP.AutoBalancerService.TwoDimensionVertex(pos=[tmp_leg_front_margin, tmp_leg_outside_margin]),
+                         OpenHRP.AutoBalancerService.TwoDimensionVertex(pos=[tmp_leg_front_margin, -1*tmp_leg_inside_margin]),
+                         OpenHRP.AutoBalancerService.TwoDimensionVertex(pos=[-1*tmp_leg_rear_margin, -1*tmp_leg_inside_margin]),
+                         OpenHRP.AutoBalancerService.TwoDimensionVertex(pos=[-1*tmp_leg_rear_margin, tmp_leg_outside_margin])]
         rarm_vertices = rleg_vertices
         larm_vertices = lleg_vertices
-        stp.eefm_support_polygon_vertices_sequence = map (lambda x : OpenHRP.StabilizerService.SupportPolygonVertices(vertices=x), [lleg_vertices, rleg_vertices, larm_vertices, rarm_vertices])
+        stp.eefm_support_polygon_vertices_sequence = map (lambda x : OpenHRP.AutoBalancerService.SupportPolygonVertices(vertices=x), [lleg_vertices, rleg_vertices, larm_vertices, rarm_vertices])
         stp.eefm_leg_inside_margin=tmp_leg_inside_margin
         stp.eefm_leg_outside_margin=tmp_leg_outside_margin
         stp.eefm_leg_front_margin=tmp_leg_front_margin
@@ -63,7 +65,30 @@ class SampleRobotHrpsysConfigurator(HrpsysConfigurator):
         stp.k_tpcc_x=[4.0, 4.0]
         stp.k_brot_p=[0.0, 0.0]
         stp.k_brot_tc=[0.1, 0.1]
-        self.st_svc.setParameter(stp)
+        self.abc_svc.setStabilizerParam(stp)
+        gg=self.abc_svc.getGaitGeneratorParam()[1]
+        gg.default_step_time=1.0
+        gg.default_step_height=0.05
+        gg.default_double_support_ratio=0.15
+        gg.swing_trajectory_delay_time_offset=0.15
+        gg.stair_trajectory_way_point_offset=[0.03, 0.0, 0.0]
+        gg.swing_trajectory_final_distance_weight=3.0
+        gg.leg_margin=[0.18, 0.07, 0.07, 0.07]
+        gg.safe_leg_margin=[0.15, 0.05, 0.05, 0.05]
+        gg.stride_limitation_for_circle_type=[0.15, 0.3, 15, 0.1, 0.13]
+        gg.overwritable_stride_limitation=[0.35, 0.4, 0, 0.35, 0.12]
+        gg.margin_time_ratio=0.3
+        gg.use_act_states=False
+        gg.stride_limitation_type = OpenHRP.AutoBalancerService.CIRCLE
+        gg.default_orbit_type = OpenHRP.AutoBalancerService.RECTANGLE
+        gg.toe_pos_offset_x = 1e-3*117.338;
+        gg.heel_pos_offset_x = 1e-3*-116.342;
+        gg.toe_zmp_offset_x = 1e-3*117.338;
+        gg.heel_zmp_offset_x = 1e-3*-116.342;
+        gg.optional_go_pos_finalize_footstep_num=1
+        gg.overwritable_footstep_index_offset=1
+        self.abc_svc.setGaitGeneratorParam(gg)
+
 
     def __init__(self, robotname=""):
         HrpsysConfigurator.__init__(self)
