@@ -1289,6 +1289,10 @@
    "Call goPos with wait."
    (send self :go-pos-no-wait xx yy th)
    (send self :wait-foot-steps))
+  (:go-wheel
+   (xx tm)
+   "Call goWheel without wait."
+   (send self :autobalancerservice_goWheel :x xx :tm tm))
   (:raw-get-foot-step-param
    ()
    (send (send self :autobalancerservice_getfootstepparam) :i_param))
