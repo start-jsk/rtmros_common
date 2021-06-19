@@ -16,41 +16,43 @@ env:
   global:
     - ROSWS=wstool
     - BUILDER=catkin
+    - USE_DOCKER=true
+    - USE_TRAVIS=true
     - CATKIN_PARALLEL_JOBS='-p2'
     - CATKIN_PARALLEL_TEST_JOBS='-p1'
     - ROS_PARALLEL_TEST_JOBS='-j1'
     - ADDITIONAL_ENV_TO_DOCKER='IS_EUSLISP_TRAVIS_TEST'
     - secure: "QxLoOR83QHxGdMJ3BJ0TwRJdezWZaiWfoe4O88XMSG8LFMZLRbqNmOsrLn9b/VgMQpz44CP7tXXQvNz0FDRSTpgSdyNT+p1UA7iEhFYI4G3OEsYf0r6/4rjvtM7FCoIsBiPYBwofVAUP+U9d8Scjn+2+xjjKwOpEbaE/yc+zwrc="
   matrix:
-    - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=true
-    - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=false   NOT_TEST_INSTALL=true
-    - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=source  NOT_TEST_INSTALL=true EXTRA_DEB="ros-hydro-roseus ros-hydro-euscollada ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" IS_EUSLISP_TRAVIS_TEST="true"
-    - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=source  NOT_TEST_INSTALL=true
-    - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=true    EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
-    - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=false   EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
-    - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true
-    - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=false  NOT_TEST_INSTALL=true
-    - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true   EXTRA_DEB="ros-indigo-hrpsys-ros-bridge ros-indigo-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
-    - USE_JENKINS=true ROS_DISTRO=indigo USE_DEB=false EXTRA_DEB="ros-indigo-hrpsys-ros-bridge ros-indigo-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
-    - USE_TRAVIS=true TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=indigo EXTRA_DEB="ros-indigo-roslint"
-    - USE_TRAVIS=true TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=indigo EXTRA_DEB="ros-indigo-roslint"
-    - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true EXTRA_DEB="ros-indigo-pr2eus" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST=false  # For updating euslisp-docs (Must be USE_TRAVIS=true and IS_EUSLISP_TRAVIS_TEST=false. See after_success)
-    - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=true
-    - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=false NOT_TEST_INSTALL=true
-    - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=false EXTRA_DEB="libopenni2-dev libpcl-dev" NOT_TEST_INSTALL=true  # To catch https://github.com/start-jsk/rtmros_common/pull/1090#issuecomment-610860446
-    - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=true EXTRA_DEB="ros-kinetic-hrpsys-ros-bridge ros-kinetic-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
-    - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=false EXTRA_DEB="ros-kinetic-hrpsys-ros-bridge ros-kinetic-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
-    - USE_JENKINS=true ROS_DISTRO=melodic USE_DEB=true
-    - USE_JENKINS=true ROS_DISTRO=melodic USE_DEB=false NOT_TEST_INSTALL=true BEFORE_SCRIPT="pwd; sed -i \"35iadd_definitions(-Wno-deprecated)\" hrpsys/CMakeLists.txt openhrp3/CMakeLists.txt; (cd hrpsys; git diff)"
+    - ROS_DISTRO=hydro  USE_DEB=true
+    - ROS_DISTRO=hydro  USE_DEB=false   NOT_TEST_INSTALL=true
+    - ROS_DISTRO=hydro  USE_DEB=source  NOT_TEST_INSTALL=true EXTRA_DEB="ros-hydro-roseus ros-hydro-euscollada ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" IS_EUSLISP_TRAVIS_TEST="true"
+    - ROS_DISTRO=hydro  USE_DEB=source  NOT_TEST_INSTALL=true
+    - ROS_DISTRO=hydro  USE_DEB=true    EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
+    - ROS_DISTRO=hydro  USE_DEB=false   EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
+    - ROS_DISTRO=indigo USE_DEB=true
+    - ROS_DISTRO=indigo USE_DEB=false  NOT_TEST_INSTALL=true
+    - ROS_DISTRO=indigo USE_DEB=true   EXTRA_DEB="ros-indigo-hrpsys-ros-bridge ros-indigo-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
+    - ROS_DISTRO=indigo USE_DEB=false EXTRA_DEB="ros-indigo-hrpsys-ros-bridge ros-indigo-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
+    - TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=indigo EXTRA_DEB="ros-indigo-roslint"
+    - TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=indigo EXTRA_DEB="ros-indigo-roslint"
+    - ROS_DISTRO=indigo USE_DEB=true EXTRA_DEB="ros-indigo-pr2eus" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST=false  # For updating euslisp-docs (Must be USE_TRAVIS=true and IS_EUSLISP_TRAVIS_TEST=false. See after_success)
+    - ROS_DISTRO=kinetic USE_DEB=true
+    - ROS_DISTRO=kinetic USE_DEB=false NOT_TEST_INSTALL=true
+    - ROS_DISTRO=kinetic USE_DEB=false EXTRA_DEB="libopenni2-dev libpcl-dev" NOT_TEST_INSTALL=true  # To catch https://github.com/start-jsk/rtmros_common/pull/1090#issuecomment-610860446
+    - ROS_DISTRO=kinetic USE_DEB=true EXTRA_DEB="ros-kinetic-hrpsys-ros-bridge ros-kinetic-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
+    - ROS_DISTRO=kinetic USE_DEB=false EXTRA_DEB="ros-kinetic-hrpsys-ros-bridge ros-kinetic-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
+    - ROS_DISTRO=melodic USE_DEB=true
+    - ROS_DISTRO=melodic USE_DEB=false NOT_TEST_INSTALL=true BEFORE_SCRIPT="pwd; sed -i \"35iadd_definitions(-Wno-deprecated)\" hrpsys/CMakeLists.txt openhrp3/CMakeLists.txt; (cd hrpsys; git diff)"
 matrix:
   fast_finish: true
   allow_failures:
   # hydro + euslisp test
-  - env: USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=source  NOT_TEST_INSTALL=true EXTRA_DEB="ros-hydro-roseus ros-hydro-euscollada ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" IS_EUSLISP_TRAVIS_TEST="true"
-  - env: USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=true    EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
-  - env: USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=false   EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
+  - env: ROS_DISTRO=hydro  USE_DEB=source  NOT_TEST_INSTALL=true EXTRA_DEB="ros-hydro-roseus ros-hydro-euscollada ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" IS_EUSLISP_TRAVIS_TEST="true"
+  - env: ROS_DISTRO=hydro  USE_DEB=true    EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
+  - env: ROS_DISTRO=hydro  USE_DEB=false   EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
   # Running euslisp test on travis often takes more than 50 min
-  - env: USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true   EXTRA_DEB="ros-indigo-hrpsys-ros-bridge ros-indigo-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
+  - env: ROS_DISTRO=indigo USE_DEB=true   EXTRA_DEB="ros-indigo-hrpsys-ros-bridge ros-indigo-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
 notifications:
   email:
     recipients:
