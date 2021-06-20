@@ -10,7 +10,8 @@
 ###
 - git:
     uri: https://github.com/Naoki-Hiraoka/openhrp3
-    local-name: for-travis
+    local-name: openhrp3
+    version: for-travis
 - git:
     uri: https://github.com/fkanehiro/hrpsys-base
     local-name: hrpsys

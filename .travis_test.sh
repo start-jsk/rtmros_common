@@ -55,14 +55,14 @@ if [ "$TEST_TYPE" == "work_with_downstream" ]; then
     wstool set openhrp3 http://github.com/Naoki-Hiraoka/openhrp3 --git -y -v for-travis
     wstool update
     cd ..
+    sudo apt-get install -qq -y doxygen
 
     sudo dpkg -r --force-depends ros-$ROS_DISTRO-hrpsys-ros-bridge
     sudo dpkg -r --force-depends ros-$ROS_DISTRO-hrpsys-tools
     sudo dpkg -r --force-depends ros-$ROS_DISTRO-rtmbuild
     # https://github.com/start-jsk/rtmros_hironx/issues/287
     sudo sed -i s@test_tf_and_controller@_test_tf_and_controller@ /opt/ros/$ROS_DISTRO/share/hironx_ros_bridge/test/test_hironx_ros_bridge.py
-    catkin_make $ROS_PARALLEL_JOBS
-    catkin_make install $ROS_PARALLEL_JOBS
+    catkin_make_isolated --install $ROS_PARALLEL_JOBS
 else
     echo "
             #
@@ -78,6 +78,7 @@ else
     wstool set rtmros_nextage http://github.com/tork-a/rtmros_nextage --git -y
     wstool update
     cd ..
+    sudo apt-get install -qq -y doxygen
     # do not install rtmros_common because we want to use them
     find src
     for _pkg in hrpsys_ros_bridge hrpsys_tools rtmbuild; do
@@ -89,8 +90,7 @@ else
             sed -i "s@install(@dummy_install(@g" src/rtmros_common/${_pkg}/catkin.cmake
         fi
     done
-    catkin_make $ROS_PARALLEL_JOBS --only-pkg-with-deps `echo $pkg | sed s/-/_/g`
-    catkin_make install $ROS_PARALLEL_JOBS
+    catkin_make_isolated --install $ROS_PARALLEL_JOBS --only-pkg-with-deps `echo $pkg | sed s/-/_/g`
     # make sure to kill test
     for _pkg in hrpsys_ros_bridge hrpsys_tools rtmbuild; do
 	rm -fr install/lib/${_pkg}
