@@ -49,6 +49,13 @@ if [ "$TEST_TYPE" == "work_with_downstream" ]; then
             # check newer version of hrpsys works on current rtmros_common deb package
             # [rtmros_common:new] <-> [rtmros_<robot>:old]
             "
+    cd src
+    wstool init
+    wstool set hrpsys http://github.com/fkanehiro/hrpsys-base --git -y
+    wstool set openhrp3 http://github.com/Naoki-Hiraoka/openhrp3 --git -y -v for-travis
+    wstool update
+    cd ..
+
     sudo dpkg -r --force-depends ros-$ROS_DISTRO-hrpsys-ros-bridge
     sudo dpkg -r --force-depends ros-$ROS_DISTRO-hrpsys-tools
     sudo dpkg -r --force-depends ros-$ROS_DISTRO-rtmbuild
@@ -65,6 +72,8 @@ else
             # set up sorce code of downstream package
     cd src
     wstool init
+    wstool set hrpsys http://github.com/fkanehiro/hrpsys-base --git -y
+    wstool set openhrp3 http://github.com/Naoki-Hiraoka/openhrp3 --git -y -v for-travis
     wstool set rtmros_hironx http://github.com/start-jsk/rtmros_hironx --git -y
     wstool set rtmros_nextage http://github.com/tork-a/rtmros_nextage --git -y
     wstool update

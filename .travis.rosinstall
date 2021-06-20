@@ -9,10 +9,10 @@
 ### latest source is checked with use_deb==source, so we're ok with released source in here
 ###
 - git:
-    uri: https://github.com/tork-a/openhrp3-release
-    local-name: openhrp3
+    uri: https://github.com/Naoki-Hiraoka/openhrp3
+    local-name: for-travis
 - git:
-    uri: https://github.com/tork-a/hrpsys-release
+    uri: https://github.com/fkanehiro/hrpsys-base
     local-name: hrpsys
 # - git:
 #     uri: https://github.com/tork-a/rtshell-release
