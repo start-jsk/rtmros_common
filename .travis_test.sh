@@ -55,7 +55,18 @@ if [ "$TEST_TYPE" == "work_with_downstream" ]; then
     wstool set openhrp3 http://github.com/Naoki-Hiraoka/openhrp3 --git -y -v for-travis
     wstool update
     cd ..
-    sudo apt-get install -qq -y doxygen
+    # for build hrpsys
+    sudo apt-get install -qq -y freeglut3-dev python-tk jython doxygen libboost-all-dev libsdl1.2-dev libglew1.6-dev libqhull-dev libirrlicht-dev libxmu-dev libopencv-contrib-dev
+    if [[ "$ROS_DISTRO" ==  "hydro" || "$ROS_DISTRO" ==  "indigo" || "$ROS_DISTRO" ==  "kinetic" ]]; then
+        sudo apt-get install -qq -y libcv-dev libhighgui-dev
+    else
+        sudo apt-get install -qq -y libopencv-dev
+    fi
+    sudo apt-get install -qq -y python-wstool ros-${ROS_DISTRO}-catkin ros-${ROS_DISTRO}-mk ros-${ROS_DISTRO}-rostest ros-${ROS_DISTRO}-rtmbuild ros-${ROS_DISTRO}-roslint
+    sudo apt-get install -qq -y ros-${ROS_DISTRO}-pcl-ros ros-${ROS_DISTRO}-moveit-commander ros-${ROS_DISTRO}-rqt-robot-dashboard
+    sudo apt-get install -qq -y ros-${ROS_DISTRO}-hrpsys ros-${ROS_DISTRO}-hrpsys-ros-bridge ros-${ROS_DISTRO}-hrpsys-tools ros-${ROS_DISTRO}-hironx-ros-bridge
+    sudo apt-get install -qq -y ros-${ROS_DISTRO}-urdf
+    source /opt/ros/${ROS_DISTRO}/setup.bash
 
     sudo dpkg -r --force-depends ros-$ROS_DISTRO-hrpsys-ros-bridge
     sudo dpkg -r --force-depends ros-$ROS_DISTRO-hrpsys-tools
@@ -78,7 +89,19 @@ else
     wstool set rtmros_nextage http://github.com/tork-a/rtmros_nextage --git -y
     wstool update
     cd ..
-    sudo apt-get install -qq -y doxygen
+    # for build hrpsys
+    sudo apt-get install -qq -y freeglut3-dev python-tk jython doxygen libboost-all-dev libsdl1.2-dev libglew1.6-dev libqhull-dev libirrlicht-dev libxmu-dev libopencv-contrib-dev
+    if [[ "$ROS_DISTRO" ==  "hydro" || "$ROS_DISTRO" ==  "indigo" || "$ROS_DISTRO" ==  "kinetic" ]]; then
+        sudo apt-get install -qq -y libcv-dev libhighgui-dev
+    else
+        sudo apt-get install -qq -y libopencv-dev
+    fi
+    sudo apt-get install -qq -y python-wstool ros-${ROS_DISTRO}-catkin ros-${ROS_DISTRO}-mk ros-${ROS_DISTRO}-rostest ros-${ROS_DISTRO}-rtmbuild ros-${ROS_DISTRO}-roslint
+    sudo apt-get install -qq -y ros-${ROS_DISTRO}-pcl-ros ros-${ROS_DISTRO}-moveit-commander ros-${ROS_DISTRO}-rqt-robot-dashboard
+    sudo apt-get install -qq -y ros-${ROS_DISTRO}-hrpsys ros-${ROS_DISTRO}-hrpsys-ros-bridge ros-${ROS_DISTRO}-hrpsys-tools ros-${ROS_DISTRO}-hironx-ros-bridge
+    sudo apt-get install -qq -y ros-${ROS_DISTRO}-urdf
+    source /opt/ros/${ROS_DISTRO}/setup.bash
+
     # do not install rtmros_common because we want to use them
     find src
     for _pkg in hrpsys_ros_bridge hrpsys_tools rtmbuild; do
