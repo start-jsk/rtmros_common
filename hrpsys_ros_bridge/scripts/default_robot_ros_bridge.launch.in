@@ -17,6 +17,7 @@
   <!-- available in Kinetic -->
   <!-- <arg name="managerport" default="$(eval arg('corbaport') + 1)"/> -->
   <arg name="nameserver" default="localhost" />
+  <arg name="periodic_rate" default="500" />
   <include file="$(find hrpsys_ros_bridge)/launch/hrpsys_ros_bridge.launch">
     <arg name="SIMULATOR_NAME" value="$(arg SIMULATOR_NAME)" />
     <arg name="MODEL_FILE" value="@MODEL_FILE@" />
@@ -25,6 +26,7 @@
     <arg name="corbaport" default="$(arg corbaport)" />
     <arg name="managerport" default="$(arg managerport)" />
     <arg name="nameserver" default="$(arg nameserver)" />
+    <arg name="periodic_rate" default="$(arg periodic_rate)" />
     <!-- BEGIN: unstable : maintained-->
     <arg name="USE_WALKING" default="true" if="$(arg USE_UNSTABLE_RTC)"/>
     <arg name="USE_IMPEDANCECONTROLLER" default="true" if="$(arg USE_UNSTABLE_RTC)" />
