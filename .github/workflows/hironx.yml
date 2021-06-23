@@ -1,0 +1,51 @@
+on: [push, pull_request]
+
+jobs:
+  indigo:
+    runs-on: ubuntu-latest
+    name: ${{ matrix.name }}
+
+    container: ${{ matrix.container }}
+
+    strategy:
+      matrix:
+        include:
+          - name: indigo-work_with_downstream
+            ROS_DISTRO: indigo
+            container: jskrobotics/ros-ubuntu:14.04
+            EXTRA_DEB: 'ros-indigo-roslint'
+            TEST_TYPE: work_with_downstream
+          - name: indigo-work_with_315_1_10
+            ROS_DISTRO: indigo
+            container: jskrobotics/ros-ubuntu:14.04
+            EXTRA_DEB: 'ros-indigo-roslint'
+            TEST_TYPE: work_with_315_1_10
+          - name: melodic-work_with_downstream
+            ROS_DISTRO: melodic
+            container: jskrobotics/ros-ubuntu:18.04
+            EXTRA_DEB: 'ros-melodic-roslint'
+            TEST_TYPE: work_with_downstream
+          - name: melodic-work_with_315_1_10
+            ROS_DISTRO: melodic
+            container: jskrobotics/ros-ubuntu:18.04
+            EXTRA_DEB: 'ros-melodic-roslint'
+            TEST_TYPE: work_with_315_1_10
+
+    steps:
+      - name: Install latest git ( use sudo for ros-ubuntu, remove sudo for ubuntu container), checkout@v2 uses REST API for git<2.18, which removes .git folder and does not checkout .travis submodules
+        run: sudo apt-get update && sudo apt-get install -y software-properties-common && sudo apt-get update && sudo add-apt-repository -y ppa:git-core/ppa && sudo apt-get update && sudo apt-get install -y git
+      - name: Before Checkout # need for actions/checkout with ros-ubuntu container
+        run: sudo chown -R user:jenkins $RUNNER_WORKSPACE $HOME
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run jsk_travis
+        run: source ./.travis_test.sh
+        shell: bash
+        env:
+          ROS_DISTRO : ${{ matrix.ROS_DISTRO }}
+          CATKIN_PARALLEL_JOBS: '-p2'
+          CATKIN_PARALLEL_TEST_JOBS: '-p1'
+          ROS_PARALLEL_TEST_JOBS: '-j1'
+          TEST_PACKAGE: 'hironx-ros-bridge'
+          EXTRA_DEB: ${{ matrix.EXTRA_DEB }}
+          TEST_TYPE : ${{ matrix.TEST_TYPE }}
