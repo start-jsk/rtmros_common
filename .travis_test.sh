@@ -54,6 +54,7 @@ if [ "$TEST_TYPE" == "work_with_downstream" ]; then
     sudo dpkg -r --force-depends ros-$ROS_DISTRO-rtmbuild
     # https://github.com/start-jsk/rtmros_hironx/issues/287
     sudo sed -i s@test_tf_and_controller@_test_tf_and_controller@ /opt/ros/$ROS_DISTRO/share/hironx_ros_bridge/test/test_hironx_ros_bridge.py
+    sudo sed -i "41i <arg name=\"periodic_rate\" default=\"200\" />" /opt/ros/$ROS_DISTRO/share/hironx_ros_bridge/launch/hironx_ros_bridge.launch
     catkin_make $ROS_PARALLEL_JOBS
     catkin_make install $ROS_PARALLEL_JOBS
 else
@@ -65,7 +66,7 @@ else
             # set up sorce code of downstream package
     cd src
     wstool init
-    wstool set rtmros_hironx http://github.com/start-jsk/rtmros_hironx --git -y
+    wstool set rtmros_hironx http://github.com/Naoki-Hiraoka/rtmros_hironx --git -y -v update-travis
     wstool set rtmros_nextage http://github.com/tork-a/rtmros_nextage --git -y
     wstool update
     cd ..
