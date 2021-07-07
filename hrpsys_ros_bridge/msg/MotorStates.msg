@@ -38,5 +38,9 @@ bool[] power_state
 int32[] servo_alarm
 int16[] driver_temp
 float64[] temperature
+float64[] pgain
+float64[] dgain
+float64[] torque_pgain
+float64[] torque_dgain
 std_msgs/Float64MultiArray extra_data
 

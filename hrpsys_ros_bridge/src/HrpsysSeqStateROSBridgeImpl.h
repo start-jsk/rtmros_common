@@ -143,6 +143,14 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   InPort<TimedDoubleSeq> m_rstorqueIn;
   OpenHRP::TimedLongSeqSeq m_servoState;
   InPort<OpenHRP::TimedLongSeqSeq> m_servoStateIn;
+  TimedDoubleSeq m_pgain;
+  InPort<TimedDoubleSeq> m_pgainIn;
+  TimedDoubleSeq m_dgain;
+  InPort<TimedDoubleSeq> m_dgainIn;
+  TimedDoubleSeq m_torquePgain;
+  InPort<TimedDoubleSeq> m_torquePgainIn;
+  TimedDoubleSeq m_torqueDgain;
+  InPort<TimedDoubleSeq> m_torqueDgainIn;
   TimedPoint3D m_rszmp;
   InPort<TimedPoint3D> m_rszmpIn;
   TimedPoint3D m_rsrefCP;
