@@ -33,6 +33,7 @@ env:
     - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true EXTRA_DEB="ros-indigo-pr2eus" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST=false  # For updating euslisp-docs (Must be USE_TRAVIS=true and IS_EUSLISP_TRAVIS_TEST=false. See after_success)
     - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=true
     - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=false NOT_TEST_INSTALL=true
+    - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=false EXTRA_DEB="libopenni2-dev libpcl-dev" NOT_TEST_INSTALL=true  # To catch https://github.com/start-jsk/rtmros_common/pull/1090#issuecomment-610860446
     - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=true EXTRA_DEB="ros-kinetic-hrpsys-ros-bridge ros-kinetic-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
     - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=false EXTRA_DEB="ros-kinetic-hrpsys-ros-bridge ros-kinetic-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
     - USE_JENKINS=true ROS_DISTRO=melodic USE_DEB=true
@@ -46,7 +47,6 @@ matrix:
   - env: USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=false   EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
   # Running euslisp test on travis often takes more than 50 min
   - env: USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true   EXTRA_DEB="ros-indigo-hrpsys-ros-bridge ros-indigo-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
-  - env: USE_JENKINS=true ROS_DISTRO=melodic USE_DEB=true
 notifications:
   email:
     recipients:
@@ -56,6 +56,11 @@ notifications:
     on_failure: always #[always|never|change] # default: always
 before_script:
   - set -x
+  # Install libopencv-dev manually to compile hrpsys-simulator in hrpsys-base on kinetic
+  # Details: https://github.com/start-jsk/rtmros_common/pull/1091#issuecomment-611457804
+  #          https://github.com/start-jsk/rtmros_common/pull/1091#issuecomment-611476618
+  # Waiting for .travis.rosinstall.kinetic to use hrpsys-release
+  - if [ "${ROS_DISTRO}" == "kinetic" ] && [ "${USE_DEB}" != "true" ] ; then if [ "${EXTRA_DEB}" == "" ] ; then export EXTRA_DEB="libopencv-dev"; else export EXTRA_DEB="${EXTRA_DEB} libopencv-dev"; fi; fi
   # Forcely upgrade PCRE to avoid failure in building hrpsys with hydro.
   # This has a side effect, and we need extra settings.
   # Issue detail: https://github.com/start-jsk/rtmros_common/issues/1076

@@ -2,6 +2,16 @@
 Changelog for package openrtm_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.3 (2020-04-20)
+------------------
+* Try to run multiple hrpsys simulation environments (`#1054 <https://github.com/start-jsk/rtmros_common/issues/1054>`_)
+
+  * delete unused print
+  * fix bug in key existence confirmation
+  * allow any port number for nameserver
+
+* Contributors: Yasuhiro Ishiguro
+
 1.4.2 (2017-12-22)
 ------------------
 

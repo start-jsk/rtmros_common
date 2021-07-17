@@ -2,6 +2,24 @@
 Changelog for package hrpsys_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.3 (2020-04-20)
+------------------
+
+* check hrpsys/rtmros from sources (`#1068 <https://github.com/start-jsk/rtmros_common/issues/1068>`_)
+
+  * increse retry of test-pa10.test to 10
+  * (hrpsys_tools/test/test-pa10.test) run hrpsys_tools_config.py within unittest.TestCase
+  * because we have too much https://github.com/fkanehiro/hrpsys-base/issues/905#issue-121912200 like error on meldoic/source
+
+* Try to run multiple hrpsys simulation environments (`#1054 <https://github.com/start-jsk/rtmros_common/issues/1054>`_)
+
+  * re-add omniorb_args for backward compatibility
+  * change to use omniorb_args -> openrtm_args
+  * support any RTCManager port num
+  * allow any port number for nameserver
+
+* Contributors: Kei Okada, Yasuhiro Ishiguro
+
 1.4.2 (2017-12-22)
 ------------------
 

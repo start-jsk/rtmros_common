@@ -2,6 +2,97 @@
 Changelog for package hrpsys_ros_bridge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.3 (2020-04-20)
+------------------
+* Adapt README for melodic & fix style of README & fix to run on melodic (`#1090 <https://github.com/start-jsk/rtmros_common/issues/1090>`_)
+
+  * [hrpsys_ros_bridge] Prevent collision_state.py from dying on melodic
+    ModelLoader_idl should be accessed from hrpsys module as with https://github.com/fkanehiro/hrpsys-base/blob/315.15.0/python/hrpsys_config.py#L8 and https://github.com/fkanehiro/hrpsys-base/blob/315.15.0/python/hrpsys_config.py#L809.
+    See https://github.com/fkanehiro/hrpsys-base/commit/2dca76137c20856fcee634f5571059bebf7d3094 and https://github.com/fkanehiro/hrpsys-base/commit/a60a34483c5b6cdd02961257b6b7c7410443fc17.
+    Related to https://github.com/fkanehiro/hrpsys-base/issues/145?
+
+* use setJointAnglesOfGroup() and playPattern(), use clearJointAngles() with test (`#1071 <https://github.com/start-jsk/rtmros_common/issues/1071>`_)
+
+  * Fix swapping of clear and clearJointAngles
+  * Add comments to clarify when stopping motion is executed
+  * Tell getting new goal from cancel
+  * setJointANglesSequenceOfGroup has bugs as of 315.15.0, use old API intead
+    see https://github.com/fkanehiro/hrpsys-base/pull/1237
+  * add more debug info for `#765 <https://github.com/start-jsk/rtmros_common/issues/765>`_
+  * use setJointAnglesOfGroup() and playPattern(), use clearJointAngles()
+  * add code to get hrpsys rtc version, thakns to @n-ando
+  * Add two points trajectory to test of joint trajectory action cancel
+  * Add comment on two points trajectory to samplerobot test of joint trajectory action goal overwrite
+  * Add two points trajectory to PA10 test of joint trajectory action goal overwrite
+  * Add test for joint trajectory action cancel overwrite with samplerobot
+  * Add test for joint trajectory action goal overwrite with PA10
+  * Add test for joint trajectory action cancel with PA10
+
+* [HrpsysSeqStateROSBridge] output joint_state/velocity (`#1069 <https://github.com/start-jsk/rtmros_common/issues/1069>`_)
+
+  * [hrpsys_ros_bridge.launch] add comment to USE_VELOCITY_OUTPUT
+  * [hrpsys_ros_bridge] Add test of joint_states/velocity
+
+* [rtm-ros-robot-interface.l] fix bug of :motor-extra-data (`#1066 <https://github.com/start-jsk/rtmros_common/issues/1066>`_)
+
+  * [hrpsys_ros_bridge] Add test of :motor-extra-data without ros bridge
+  * [hrpsys_ros_bridge] Rename :motor-extra-data test as *.launch to be excluded from catkin_install_run_tests
+    See https://github.com/start-jsk/rtmros_common/pull/1083#issuecomment-565054164 and https://github.com/start-jsk/rtmros_common/commit/6a881595b6aae3f40d572201bad6bf1a4b5950a
+
+* [rtm-ros-robot-interface.l] add method :set-ref-force-moment to rtm-ros-robot-interface class (`#1045 <https://github.com/start-jsk/rtmros_common/issues/1045>`_)
+
+  * add method :set-ref-force-moment to rtm-ros-robot-interface class
+  * [hrpsys_ros_bridge] Add test of :set-ref-force-moment
+
+* Remove all ros::object slots in def-set-get-param-method (`#1060 <https://github.com/start-jsk/rtmros_common/issues/1060>`_)
+* Set time_from_start to feedback of joint trajectory action with tests (`#1073 <https://github.com/start-jsk/rtmros_common/issues/1073>`_)
+
+  * prev_traj_tm -> traj_start_tm
+  * Stop feedback when trajectory is completed
+  * Set time_from_start to feedback of joint trajectory action
+  * Add test of feedback from joint trajectory action with samplerobot
+  * Add test of feedback from joint trajectory action with PA10
+
+* Re-enable & fix euslisp test on travis (`#1085 <https://github.com/start-jsk/rtmros_common/issues/1085>`_)
+
+  * [hrpsys_ros_bridge] fix bug in samplerobot-sequence-player.l
+  * To speed up travis jobs having euslisp tests, stop other tests
+
+* Try to run multiple hrpsys simulation environments (`#1054 <https://github.com/start-jsk/rtmros_common/issues/1054>`_)
+
+  * add manager port arg in default launch templates
+  * re-add omniorb_args for backward compatibility
+  * change to use omniorb_args -> openrtm_args
+  * support any RTCManager port num
+  * update ros bridge launch files
+
+* [collision_state.py] fix argument of rospy.loginfo ( `#1055 <https://github.com/start-jsk/rtmros_common/issues/1055>`_)
+* fix def-set-get-param-method in rtm-ros-robot-interface.l (`#1053 <https://github.com/start-jsk/rtmros_common/issues/1053>`_)
+
+  * fix def-set-get-param-method in rtm-ros-robot-interface.l
+  * add forgotten argument of string= in the last commit
+
+* [hrpsys_ros_brdge] fix time-limit for test (`#1057 <https://github.com/start-jsk/rtmros_common/issues/1057>`_)
+
+* Fix less than one sec (`#1042 <https://github.com/start-jsk/rtmros_common/issues/1042>`_)
+
+  * [hrpsys_ros_bridge] change abs to std::abs for trajectory_action  when it received trajectory less than 1.0 sec
+  * [hrpsys_ros_bridge] add test for trajectory_action when it received trajectory less than 1.0 sec
+
+* fix typo in stop-rfu-no-wait (`#1044 <https://github.com/start-jsk/rtmros_common/issues/1044>`_)
+* use 2899/2898 for corbaport, since omniorb-nameserver forcestarted nameserver as default port 2809 when they're first installed (`#1043 <https://github.com/start-jsk/rtmros_common/issues/1043>`_)
+
+
+* Update GaitGenerator/ReferenceForceUpdater methods (`#1040 <https://github.com/start-jsk/rtmros_common/issues/1040>`_)
+
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add method to configure toe heel phase ration automatically in GaitGeneratorParam.
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Update method for new ReferenceForceUpdater functionalities (https://github.com/fkanehiro/hrpsys-base/pull/1239).
+  * [hrpsys_ros_bridge/euslisp/rtm-ros-robot-interface.l] Add method to print RTCs' parameters in more readable style using *print-object*.
+
+* Add method to print RTCs' parameters in more readable style using *print-object*. (`#1039 <https://github.com/start-jsk/rtmros_common/issues/1039>`_)
+
+* Contributors: Guilherme Affonso, Kei Okada, Naoki Hiraoka, Shintaro Komatsu, Shun Hasegawa, Shunichi Nozawa, Yohei Kakiuchi, Yasuhiro Ishiguro
+
 1.4.2 (2017-12-22)
 ------------------
 * add test to check `#1036 <https://github.com/start-jsk/rtmros_common/issues/1036>`_ situation (`#1038 <https://github.com/start-jsk/rtmros_common/issues/1038>`_)

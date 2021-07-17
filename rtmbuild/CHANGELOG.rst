@@ -2,6 +2,17 @@
 Changelog for package rtmbuild
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.3 (2020-04-20)
+------------------
+
+* check hrpsys/rtmros from sources (`#1068 <https://github.com/start-jsk/rtmros_common/issues/1068>`_)
+
+  * add -Wno-deprecated to compress log data size for travis
+  * on 18.04 (omniidl-python >= 4.2), import _omniidl requires python3
+  * since catkin > 0.7.0, the CPATH is no longer being set by catkin, so rtmbuild manually add them
+
+* Contributors: Kei Okada, Shun Hasegawa
+
 1.4.2 (2017-12-22)
 ------------------
 
