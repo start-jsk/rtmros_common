@@ -1040,7 +1040,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       region.polygons.resize(convex_num);
       for (size_t i = 0; i < convex_num; i++) {
         size_t vs_num(m_currentSteppableRegion.data.region[i].length()/3);
-        if (vs_num > 3) is_valid = true;
+        if (vs_num >= 3) is_valid = true;
         region.polygons[i].polygon.points.resize(vs_num);
         for (size_t j = 0; j < vs_num; j++) {
           region.polygons[i].polygon.points[j].x = m_currentSteppableRegion.data.region[i][3*j];
