@@ -21,21 +21,14 @@ chatter_inport.launch
 
 .. code-block:: bash
 
-  roslaunch rosnode_rtc chatter_inport.launch
-
-chatter_inport_1.1.0.launch
----------------------------
-
-.. code-block:: bash
-
-  roslaunch rosnode_rtc chatter_inport_1.1.0.launch
+  rtmlaunch rosnode_rtc chatter_inport.launch
 
 chatter_outport.launch
 ----------------------
 
 .. code-block:: bash
 
-  roslaunch rosnode_rtc chatter_outport.launch
+  rtmlaunch rosnode_rtc chatter_outport.launch
 
 stage_sample.launch
 -------------------
