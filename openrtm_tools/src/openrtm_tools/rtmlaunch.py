@@ -179,8 +179,12 @@ def rtactivate(nameserver, tags, tree):
         except Exception, e:
             print >>sys.stderr, '\033[31m[rtmlaunch] Could not Activate (', cmd_path, ') : ', e,'\033[0m'
             return 1
+        if tag.attributes.get("ec_index") != None:
+            ec_index = int(tag.attributes.get("ec_index").value);
+        else:
+            ec_index = 0
         try:
-            options = optparse.Values({"ec_index": 0, 'verbose': False})
+            options = optparse.Values({"ec_index": ec_index, 'verbose': False})
             try :
                 state_control_base.alter_component_state(activate_action, cmd_path, full_path, options, tree=tree)
             except Exception, e: # openrtm 1.1.0
