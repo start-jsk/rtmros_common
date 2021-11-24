@@ -299,10 +299,11 @@ void HrpsysSeqStateROSBridge::onSteppableRegionCB(const hrpsys_ros_bridge::Stepp
   m_rssteppableRegion.data.region.length(convex_num);
   for (size_t i = 0; i < convex_num; i++) {
     size_t vs_num(msg->polygons[i].polygon.points.size());
-    m_rssteppableRegion.data.region[i].length(2 * vs_num); // x,y components
+    m_rssteppableRegion.data.region[i].length(3 * vs_num); // x,y,z components
     for (size_t j = 0; j < vs_num; j++) {
-      m_rssteppableRegion.data.region[i][2*j] = msg->polygons[i].polygon.points[j].x;
-      m_rssteppableRegion.data.region[i][2*j+1] = msg->polygons[i].polygon.points[j].y;
+      m_rssteppableRegion.data.region[i][3*j] = msg->polygons[i].polygon.points[j].x;
+      m_rssteppableRegion.data.region[i][3*j+1] = msg->polygons[i].polygon.points[j].y;
+      m_rssteppableRegion.data.region[i][3*j+2] = msg->polygons[i].polygon.points[j].z;
     }
   }
   m_rssteppableRegion.data.l_r = msg->l_r;
@@ -1038,13 +1039,13 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       size_t convex_num(m_currentSteppableRegion.data.region.length());
       region.polygons.resize(convex_num);
       for (size_t i = 0; i < convex_num; i++) {
-        size_t vs_num(m_currentSteppableRegion.data.region[i].length()/2);
-        if (vs_num > 3) is_valid = true;
+        size_t vs_num(m_currentSteppableRegion.data.region[i].length()/3);
+        if (vs_num >= 3) is_valid = true;
         region.polygons[i].polygon.points.resize(vs_num);
         for (size_t j = 0; j < vs_num; j++) {
-          region.polygons[i].polygon.points[j].x = m_currentSteppableRegion.data.region[i][2*j];
-          region.polygons[i].polygon.points[j].y = m_currentSteppableRegion.data.region[i][2*j+1];
-          region.polygons[i].polygon.points[j].z = 0.0;
+          region.polygons[i].polygon.points[j].x = m_currentSteppableRegion.data.region[i][3*j];
+          region.polygons[i].polygon.points[j].y = m_currentSteppableRegion.data.region[i][3*j+1];
+          region.polygons[i].polygon.points[j].z = m_currentSteppableRegion.data.region[i][3*j+2];
         }
       }
       region.l_r = m_currentSteppableRegion.data.l_r;
