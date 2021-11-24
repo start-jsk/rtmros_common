@@ -207,7 +207,9 @@
            (send (send self :parser-list (format nil "rmfo_off_~A" (send f :name))) :read-state))
      (send self :set-robot-state1
            (read-from-string (format nil ":reference-~A" (string-downcase (send f :name))))
-           (send (send self :parser-list (format nil "sh_~AOut" (send f :name))) :read-state))
+           (if (send self :parser-list (format nil "rfu_ref_~AOut" (send f :name)))
+               (send (send self :parser-list (format nil "rfu_ref_~AOut" (send f :name))) :read-state)
+             (send (send self :parser-list (format nil "sh_~AOut" (send f :name))) :read-state)))
      )
    ;; (dolist (i (send robot :imu-sensors))
    ;;   (send self :set-robot-state1
