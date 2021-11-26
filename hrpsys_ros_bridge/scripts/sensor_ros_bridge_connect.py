@@ -28,12 +28,12 @@ def connecSensorRosBridgePort(url, rh, bridge, vs, rmfo, sh, es, rfu, subscripti
                     print program_name, "connect ", sen.name, rmfo.port("off_" + sen.name).get_port_profile().name, bridge.port("off_" + sen.name).get_port_profile().name
                     connectPorts(rmfo.port("off_" + sen.name), bridge.port("off_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy) # for abs forces
                 if sen.type == 'Force' and bridge.port("ref_" + sen.name): # for reference forces
-                    if rfu != None and rfu.port("ref_"+sen.name+"Out"):
-                        print program_name, "connect ", sen.name, rfu.port("ref_"+sen.name+"Out").get_port_profile().name, bridge.port("ref_" + sen.name).get_port_profile().name
-                        connectPorts(rfu.port("ref_"+sen.name+"Out"), bridge.port("ref_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy)
-                    elif es != None and es.port(sen.name+"Out"):
+                    if es != None and es.port(sen.name+"Out"):
                         print program_name, "connect ", sen.name, es.port(sen.name+"Out").get_port_profile().name, bridge.port("ref_" + sen.name).get_port_profile().name
                         connectPorts(es.port(sen.name+"Out"), bridge.port("ref_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy)
+                    elif rfu != None and rfu.port("ref_"+sen.name+"Out"):
+                        print program_name, "connect ", sen.name, rfu.port("ref_"+sen.name+"Out").get_port_profile().name, bridge.port("ref_" + sen.name).get_port_profile().name
+                        connectPorts(rfu.port("ref_"+sen.name+"Out"), bridge.port("ref_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy)
                     elif sh.port(sen.name+"Out"):
                         print program_name, "connect ", sen.name, sh.port(sen.name+"Out").get_port_profile().name, bridge.port("ref_" + sen.name).get_port_profile().name
                         connectPorts(sh.port(sen.name+"Out"), bridge.port("ref_" + sen.name), subscription_type, rate=push_rate, pushpolicy=push_policy)
@@ -78,4 +78,3 @@ if __name__ == '__main__':
         initSensorRosBridgeConnection(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7])
     else :
         print program_name, " requires url, simulator_name, rosbridge_name"
-
