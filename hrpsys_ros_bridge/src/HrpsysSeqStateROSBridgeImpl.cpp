@@ -172,12 +172,14 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
         continue;
       }
       SensorInfo si;
+      // localPos is parent. https://github.com/start-jsk/rtmros_common/pull/925 https://github.com/start-jsk/rtmros_common/pull/1114
       hrp::Vector3 localp = sensor->link->Rs.inverse() * sensor->localPos;
       si.transform.setOrigin( tf::Vector3(localp(0), localp(1), localp(2)) );
       hrp::Vector3 rpy;
       if ( hrp::Sensor::VISION == sensor->type )
         // Rotate sensor->localR 180[deg] because OpenHRP3 camera -Z axis equals to ROS camera Z axis
         // http://www.openrtp.jp/openhrp3/jp/create_model.html
+        // localR is parent. https://github.com/start-jsk/rtmros_common/pull/925 https://github.com/start-jsk/rtmros_common/pull/1114
         rpy = hrp::rpyFromRot(sensor->link->Rs.inverse() * sensor->localR * hrp::rodrigues(hrp::Vector3(1,0,0), M_PI));
       else if ( hrp::Sensor::RANGE == sensor->type )
         {
@@ -186,11 +188,12 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
           // http://www.openrtp.jp/openhrp3/jp/create_model.html
           hrp::Matrix33 m;
           m << 0, -1, 0, 0, 0, 1, -1, 0, 0;
+          // localR is parent. https://github.com/start-jsk/rtmros_common/pull/925 https://github.com/start-jsk/rtmros_common/pull/1114
           rpy = hrp::rpyFromRot(sensor->link->Rs.inverse() * sensor->localR * m);
         }
       else
       {
-        // localR is parent. https://github.com/start-jsk/rtmros_common/pull/925
+        // localR is parent. https://github.com/start-jsk/rtmros_common/pull/925 https://github.com/start-jsk/rtmros_common/pull/1114
         rpy = hrp::rpyFromRot(sensor->link->Rs.inverse() * sensor->localR);
       }
       si.transform.setRotation( tf::createQuaternionFromRPY(rpy(0), rpy(1), rpy(2)) );
