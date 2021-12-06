@@ -172,7 +172,8 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
         continue;
       }
       SensorInfo si;
-      si.transform.setOrigin( tf::Vector3(sensor->localPos(0), sensor->localPos(1), sensor->localPos(2)) );
+      hrp::Vector3 localp = sensor->link->Rs.inverse() * sensor->localPos;
+      si.transform.setOrigin( tf::Vector3(localp(0), localp(1), localp(2)) );
       hrp::Vector3 rpy;
       if ( hrp::Sensor::VISION == sensor->type )
         // Rotate sensor->localR 180[deg] because OpenHRP3 camera -Z axis equals to ROS camera Z axis
