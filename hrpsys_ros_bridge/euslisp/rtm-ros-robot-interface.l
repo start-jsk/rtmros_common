@@ -1389,6 +1389,48 @@
     For arguments, please see :set-foot-steps-with-param-no-wait documentation."
    (send self :set-foot-steps-with-param-no-wait foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list :overwrite-footstep-index overwrite-footstep-index)
    (send self :wait-foot-steps))
+  (:set-foot-steps-with-wheel-no-wait
+    (foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list goal-pos-list rv-max-list ra-max-list &key (overwrite-footstep-index 0))
+    (unless (listp (car foot-step-list))
+     (setq foot-step-list (mapcar #'(lambda (fs) (list fs)) foot-step-list)
+           step-height-list (mapcar #'(lambda (sh) (list sh)) step-height-list)
+           step-time-list (mapcar #'(lambda (st) (list st)) step-time-list)
+           toe-angle-list (mapcar #'(lambda (ta) (list ta)) toe-angle-list)
+           heel-angle-list (mapcar #'(lambda (ha) (list ha)) heel-angle-list)
+           goal-pos-list (mapcar #'(lambda (gp) (list gp)) goal-pos-list)
+           rv-max-list (mapcar #'(lambda (rv) (list rv)) rv-max-list)
+           ra-max-list (mapcar #'(lambda (ra) (list ra)) ra-max-list)))
+    (send self :autobalancerservice_setfootstepswithwheel
+          :fss
+          (mapcar #'(lambda (fs)
+                      (instance hrpsys_ros_bridge::openhrp_autobalancerservice_footsteps :init
+                                :fs
+                                (mapcar #'(lambda (f)
+                                            (send self :eus-footstep->abc-footstep f))
+                                        fs)))
+                  foot-step-list)
+          :spss
+          (mapcar #'(lambda (shs sts tas has)
+                      (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparams :init
+                                :sps
+                                (mapcar #'(lambda (sh st ta ha)
+                                            (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparam :init :step_height (* sh 1e-3) :step_time st :toe_angle ta :heel_angle ha))
+                                        shs sts tas has)))
+                  step-height-list step-time-list toe-angle-list heel-angle-list)
+          :wpss
+          (mapcar #'(lambda (gps rvs ras)
+                      (instance hrpsys_ros_bridge::openhrp_autobalancerservice_wheelparams :init
+                                :wps
+                                (mapcar #'(lambda (gp rv ra)
+                                            (instance hrpsys_ros_bridge::openhrp_autobalancerservice_wheelparam :init :goal_pos (* gp 1e-3) :rv_max rv :ra_max ra))
+                                        gps rvs ras)))
+                  goal-pos-list rv-max-list ra-max-list)
+          :overwrite_fs_idx overwrite-footstep-index
+          ))
+  (:set-foot-steps-with-wheel
+    (foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list goal-pos-list rv-max-list ra-max-list &key (overwrite-footstep-index 0))
+    (send self :set-foot-steps-with-wheel-no-wait foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list goal-pos-list rv-max-list ra-max-list :overwrite-footstep-index overwrite-footstep-index)
+    (send self :wait-foot-steps))
   (:set-foot-steps-roll-pitch
    (angle &key (axis :x))
    "Set foot steps with roll or pitch orientation.
