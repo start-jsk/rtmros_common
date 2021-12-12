@@ -2,12 +2,18 @@
 #   Generic MoveIt Travis Continuous Integration Configuration File
 #   Works with all MoveIt! repositories/branches
 #   Author: Dave Coleman, Jonathan Bohren
-sudo: required
-dist: trusty
+sudo: true
+dist: bionic
 language: c++
+services:
+  - docker
 cache:
-  - ccache
-  - apt
+  apt: true
+  pip: true
+  directories:
+    - $HOME/.ccache
+    - $HOME/.cache/pip
+    - $HOME/apt-cacher-ng
 env:
   global:
     - ROSWS=wstool
