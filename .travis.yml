@@ -59,6 +59,7 @@ notifications:
     on_failure: always #[always|never|change] # default: always
 before_script:
   - set -x
+  - if [ "${USE_TRAVIS}" == "true" ]; then export USE_DOCKER=true; fi
   # Install libopencv-dev manually to compile hrpsys-simulator in hrpsys-base on kinetic
   # Details: https://github.com/start-jsk/rtmros_common/pull/1091#issuecomment-611457804
   #          https://github.com/start-jsk/rtmros_common/pull/1091#issuecomment-611476618
