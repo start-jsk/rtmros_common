@@ -11,6 +11,10 @@ function error {
 
 trap error ERR
 
+# install fundamental packages
+sudo -E apt-get -y -qq update
+sudo -E apt-get -y -qq install apt-utils build-essential curl git lsb-release wget
+
 # MongoDB hack
 dpkg -s mongodb || echo "ok"; export HAVE_MONGO_DB=$?
 if [ $HAVE_MONGO_DB == 0 ]; then sudo apt-get remove --purge -qq -y mongodb mongodb-10gen || echo "ok"; fi
