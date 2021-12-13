@@ -9,16 +9,21 @@ function error {
     exit 1
 }
 
+function apt-get-install {
+    sudo -E apt-get -y -qq install $@ | pv -i 60 | grep -v -e '\(Preparing to unpack\|Unpacking\|Selecting previously unselected package\)'
+    [[ ${PIPESTATUS[0]} == 0 ]] || error
+}
 trap error ERR
 
 # install fundamental packages
 sudo -E apt-get -y -qq update
-sudo -E apt-get -y -qq install apt-utils build-essential curl git lsb-release wget
+sudo -E apt-get -y -qq install pv
+apt-get-install apt-utils build-essential curl git lsb-release wget
 
 # MongoDB hack
 dpkg -s mongodb || echo "ok"; export HAVE_MONGO_DB=$?
 if [ $HAVE_MONGO_DB == 0 ]; then sudo apt-get remove --purge -qq -y mongodb mongodb-10gen || echo "ok"; fi
-if [ $HAVE_MONGO_DB == 0 ]; then sudo apt-get install -qq -y mongodb-clients mongodb-server -o Dpkg::Options::="--force-confdef" || echo "ok"; fi # default actions
+if [ $HAVE_MONGO_DB == 0 ]; then apt-get-install mongodb-clients mongodb-server -o Dpkg::Options::="--force-confdef" || echo "ok"; fi # default actions
 
 ### before_install: # Use this to prepare the system to install prerequisites or dependencies
 # Define some config vars
@@ -30,14 +35,14 @@ sudo sh -c 'echo "deb http://packages.ros.org/ros-shadow-fixed/ubuntu `lsb_relea
 wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
 sudo apt-get update -qq
 sudo apt-get install -y --force-yes -q -qq dpkg # https://github.com/travis-ci/travis-ci/issues/9361#issuecomment-408431262 dpkg-deb: error: archive has premature member 'control.tar.xz' before 'control.tar.gz' #9361
-sudo apt-get install -qq -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin ros-$ROS_DISTRO-rosbash
+apt-get-install python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin ros-$ROS_DISTRO-rosbash
 
-if [ "$EXTRA_DEB" ]; then sudo apt-get install -qq -y $EXTRA_DEB;  fi
+if [ "$EXTRA_DEB" ]; then apt-get-install $EXTRA_DEB;  fi
 ###
 pkg=$TEST_PACKAGE
-sudo apt-get install -y -qq ros-$ROS_DISTRO-$pkg
+apt-get-install ros-$ROS_DISTRO-$pkg
 
-sudo apt-get install -y -qq ros-$ROS_DISTRO-rqt-robot-dashboard
+apt-get-install ros-$ROS_DISTRO-rqt-robot-dashboard
 
 #
 source /opt/ros/$ROS_DISTRO/setup.bash
