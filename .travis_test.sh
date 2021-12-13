@@ -35,7 +35,7 @@ sudo apt-get install -qq -y python-catkin-pkg python-rosdep python-wstool ros-$R
 if [ "$EXTRA_DEB" ]; then sudo apt-get install -qq -y $EXTRA_DEB;  fi
 ###
 pkg=$TEST_PACKAGE
-sudo apt-get install -y ros-$ROS_DISTRO-$pkg
+sudo apt-get install -y -qq ros-$ROS_DISTRO-$pkg
 
 sudo apt-get install -y -qq ros-$ROS_DISTRO-rqt-robot-dashboard
 
