@@ -1,8 +1,9 @@
 <launch>
   <!-- BEGIN:openrtm setting -->
   <arg name="nameserver" default="localhost" />
-  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
-  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+  <arg name="corba_port" default="2809" />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver):$(arg corba_port)" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):$(arg corba_port)" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
   <!-- END:openrtm setting -->
 
   <!-- Sample Service Bridge component -->

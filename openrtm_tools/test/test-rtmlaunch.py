@@ -9,6 +9,7 @@ try:
 except:
     import roslib; roslib.load_manifest(PKG)
 
+import argparse
 import unittest, os, sys, time
 import subprocess
 from subprocess import call, check_output, Popen, PIPE, STDOUT
@@ -17,14 +18,20 @@ import rtctree.tree
 
 class TestRtmLaunch(unittest.TestCase):
 
+    def setUp(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--corba_port', type=int, default=2809, help='corba port')
+        args, unknown = parser.parse_known_args()
+        self.corba_port = args.corba_port
+
     # check if MyServiceProviderComp and MyServiceConsumerComp is activated and connected
     def test_provider_activated(self):
         provider = None
         count = 0
         while count < 20 :
             try:
-                tree = rtctree.tree.RTCTree(servers='localhost:2809')
-                provider = tree.get_node(['/', 'localhost:2809','MyServiceProvider0.rtc'])
+                tree = rtctree.tree.RTCTree(servers='localhost:{}'.format(self.corba_port))
+                provider = tree.get_node(['/', 'localhost:{}'.format(self.corba_port),'MyServiceProvider0.rtc'])
                 print >>sys.stderr, "Provier : ", provider, provider.get_state_string()
                 if provider.state==rtctree.component.Component.ACTIVE:
                     break
@@ -38,8 +45,8 @@ class TestRtmLaunch(unittest.TestCase):
         count = 0
         while count < 20 :
             try:
-                tree = rtctree.tree.RTCTree(servers='localhost:2809')
-                consumer = tree.get_node(['/', 'localhost:2809','MyServiceConsumer0.rtc'])
+                tree = rtctree.tree.RTCTree(servers='localhost:{}'.format(self.corba_port))
+                consumer = tree.get_node(['/', 'localhost:{}'.format(self.corba_port),'MyServiceConsumer0.rtc'])
                 print >>sys.stderr, "Consumer : ", consumer, consumer.get_state_string()
                 if consumer.state==rtctree.component.Component.ACTIVE:
                     break
@@ -53,9 +60,9 @@ class TestRtmLaunch(unittest.TestCase):
         count = 0
         while count < 20 :
             try:
-                tree = rtctree.tree.RTCTree(servers='localhost:2809')
-                provider = tree.get_node(['/', 'localhost:2809','MyServiceProvider0.rtc'])
-                consumer = tree.get_node(['/', 'localhost:2809','MyServiceConsumer0.rtc'])
+                tree = rtctree.tree.RTCTree(servers='localhost:{}'.format(self.corba_port))
+                provider = tree.get_node(['/', 'localhost:{}'.format(self.corba_port),'MyServiceProvider0.rtc'])
+                consumer = tree.get_node(['/', 'localhost:{}'.format(self.corba_port),'MyServiceConsumer0.rtc'])
                 provider_port = provider.get_port_by_name("MyService")
                 consumer_port = consumer.get_port_by_name("MyService")
                 connection = provider_port.get_connection_by_dest(consumer_port)
@@ -73,8 +80,8 @@ class TestRtmLaunch(unittest.TestCase):
         count = 0
         while count < 20 :
             try:
-                tree = rtctree.tree.RTCTree(servers='localhost:2809')
-                seqin = tree.get_node(['/', 'localhost:2809','SequenceInComponent0.rtc'])
+                tree = rtctree.tree.RTCTree(servers='localhost:{}'.format(self.corba_port))
+                seqin = tree.get_node(['/', 'localhost:{}'.format(self.corba_port),'SequenceInComponent0.rtc'])
                 print >>sys.stderr, "SeqIn  : ", seqin, seqin.get_state_string()
                 if seqin.state==rtctree.component.Component.ACTIVE:
                     break
@@ -88,8 +95,8 @@ class TestRtmLaunch(unittest.TestCase):
         count = 0
         while count < 20 :
             try:
-                tree = rtctree.tree.RTCTree(servers='localhost:2809')
-                seqout = tree.get_node(['/', 'localhost:2809','SequenceOutComponent0.rtc'])
+                tree = rtctree.tree.RTCTree(servers='localhost:{}'.format(self.corba_port))
+                seqout = tree.get_node(['/', 'localhost:{}'.format(self.corba_port),'SequenceOutComponent0.rtc'])
                 print >>sys.stderr, "SeqOut : ", seqout, seqout.get_state_string()
                 if seqout.state==rtctree.component.Component.ACTIVE:
                     break
@@ -103,9 +110,9 @@ class TestRtmLaunch(unittest.TestCase):
         count = 0
         while count < 20 :
             try:
-                tree = rtctree.tree.RTCTree(servers='localhost:2809')
-                seqin  = tree.get_node(['/', 'localhost:2809','SequenceInComponent0.rtc'])
-                seqout = tree.get_node(['/', 'localhost:2809','SequenceInComponent0.rtc'])
+                tree = rtctree.tree.RTCTree(servers='localhost:{}'.format(self.corba_port))
+                seqin  = tree.get_node(['/', 'localhost:{}'.format(self.corba_port),'SequenceInComponent0.rtc'])
+                seqout = tree.get_node(['/', 'localhost:{}'.format(self.corba_port),'SequenceInComponent0.rtc'])
                 seqin_port1  = seqin.get_port_by_name("Float")
                 seqin_port2  = seqin.get_port_by_name("FloatSeq")
                 seqout_port1 = seqout.get_port_by_name("Float")

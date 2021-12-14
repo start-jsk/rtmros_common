@@ -4,9 +4,10 @@
   <arg     if="$(arg HAVE_DISPLAY)"  name="launch_prefix" value="xterm -fn 10x20 -geometry 60x20 -e" />
   <arg unless="$(arg HAVE_DISPLAY)"  name="launch_prefix" value=""/>
   <!-- BEGIN:openrtm setting -->
+  <arg name="corba_port" default="2809" />
   <arg name="nameserver" default="localhost" />
-  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
-  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver):$(arg corba_port)" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):$(arg corba_port)" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
   <!-- END:openrtm setting -->
 
   <node name="rtsysedit" pkg="openhrp3" type="rtsysedit.sh" if="$(arg HAVE_DISPLAY)"/>

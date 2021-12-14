@@ -1,9 +1,10 @@
 <launch>
-  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2809" />
+  <arg name="corba_port" default="5809" />
+  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="$(arg corba_port)" />
 
   <arg name="nameserver" default="localhost" />
-  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
-  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver):$(arg corba_port)" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):$(arg corba_port)" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
 
   <!-- RTC Service Provider sample -->
   <node name="provider" pkg="openrtm_tools" type="MyServiceProviderComp"	args='$(arg openrtm_args)' />
@@ -28,5 +29,5 @@
   <rtconnect from="SequenceInComponent0.rtc:FloatSeq"  to="SequenceOutComponent0.rtc:FloatSeq" subscription_type="flush"/>
   <!-- END:openrtm connection -->
 
-  <test test-name="rtmlaunch" pkg="openrtm_tools" type="test-rtmlaunch.py" retry="4" />
+  <test test-name="rtmlaunch" pkg="openrtm_tools" type="test-rtmlaunch.py" retry="4" args="--corba_port=$(arg corba_port)" />
 </launch>

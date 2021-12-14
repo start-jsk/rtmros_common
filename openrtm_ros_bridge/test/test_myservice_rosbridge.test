@@ -1,11 +1,15 @@
 <launch>
 
-  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="2809" />
+  <arg name="corba_port" default="3809" />
+  <node name="start_omninames" pkg="rtmbuild" type="start_omninames.sh" args="$(arg corba_port)" />
 
   <include file="$(find openrtm_ros_bridge)/samples/myservice_example.launch" >
     <arg name="HAVE_DISPLAY" value="false" />
+    <arg name="corba_port" value="$(arg corba_port)" />
   </include>
-  <include file="$(find openrtm_ros_bridge)/samples/myservice_rosbridge.launch" />
+  <include file="$(find openrtm_ros_bridge)/samples/myservice_rosbridge.launch" >
+    <arg name="corba_port" value="$(arg corba_port)" />
+  </include>
 
   <test type="test_myservice_rosbridge.py" pkg="openrtm_ros_bridge"
 	time-limit="300" test-name="test_myservice_rosbridge"
