@@ -7,13 +7,13 @@
   <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):$(arg corba_port)" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log" ' />
 
   <!-- RTC Service Provider sample -->
-  <node name="provider" pkg="openrtm_tools" type="MyServiceProviderComp"	args='$(arg openrtm_args)' />
+  <node name="provider" pkg="openrtm_tools" type="MyServiceProviderComp"	args='$(arg openrtm_args)' output="screen" />
   <!-- RTC Service Consumet sample -->
-  <node name="consumer" pkg="openrtm_tools" type="MyServiceConsumerComp"	args='$(arg openrtm_args)' />
+  <node name="consumer" pkg="openrtm_tools" type="MyServiceConsumerComp"	args='$(arg openrtm_args)' output="screen" />
 
   <!-- RTC SeqIn/SeqOut sample -->
-  <node name="seqin"  pkg="openrtm_tools" type="SeqInComp"	args='$(arg openrtm_args)' />
-  <node name="seqout" pkg="openrtm_tools" type="SeqOutComp"	args='$(arg openrtm_args)' />
+  <node name="seqin"  pkg="openrtm_tools" type="SeqInComp"	args='$(arg openrtm_args)' output="screen" />
+  <node name="seqout" pkg="openrtm_tools" type="SeqOutComp"	args='$(arg openrtm_args) output="screen"' />
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_py" pkg="openrtm_tools" type="rtmlaunch.py"
