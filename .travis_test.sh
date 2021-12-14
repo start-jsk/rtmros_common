@@ -63,8 +63,8 @@ if [ "$TEST_TYPE" == "work_with_downstream" ]; then
     sudo dpkg -r --force-depends ros-$ROS_DISTRO-rtmbuild
     # https://github.com/start-jsk/rtmros_hironx/issues/287
     sudo sed -i s@test_tf_and_controller@_test_tf_and_controller@ /opt/ros/$ROS_DISTRO/share/hironx_ros_bridge/test/test_hironx_ros_bridge.py
-    catkin_make $ROS_PARALLEL_JOBS | grep -v '^-- \(Up-to-date\|Installing\):' | grep -v 'Generating \(Python\|C++\) code from' | grep -v '^Compiling .*.py ...$' | grep -v 'Built target' | uniq
-    catkin_make install $ROS_PARALLEL_JOBS | grep -v '^-- \(Up-to-date\|Installing\):' | grep -v 'Generating \(Python\|C++\) code from' | grep -v '^Compiling .*.py ...$' | grep -v 'Built target' | uniq
+    catkin_make $ROS_PARALLEL_JOBS | grep -v '^-- \(Up-to-date\|Installing\):' | grep -v 'Generating ' | grep -v '^Compiling .*.py ...$' | grep -v 'Built target' | uniq
+    catkin_make install $ROS_PARALLEL_JOBS | grep -v '^-- \(Up-to-date\|Installing\):' | grep -v 'Generating ' | grep -v '^Compiling .*.py ...$' | grep -v 'Built target' | uniq
 else
     echo "
             #
@@ -89,8 +89,8 @@ else
             sed -i "s@install(@dummy_install(@g" src/rtmros_common/${_pkg}/catkin.cmake
         fi
     done
-    catkin_make $ROS_PARALLEL_JOBS --only-pkg-with-deps `echo $pkg | sed s/-/_/g` | grep -v '^-- \(Up-to-date\|Installing\):' | grep -v 'Generating \(Python\|C++\) code from' | grep -v '^Compiling .*.py ...$' | grep -v 'Built target' | uniq
-    catkin_make install $ROS_PARALLEL_JOBS | grep -v '^-- \(Up-to-date\|Installing\):' | grep -v 'Generating \(Python\|C++\) code from' | grep -v '^Compiling .*.py ...$' | grep -v 'Built target' | uniq
+    catkin_make $ROS_PARALLEL_JOBS --only-pkg-with-deps `echo $pkg | sed s/-/_/g` | grep -v '^-- \(Up-to-date\|Installing\):' | grep -v 'Generating ' | grep -v '^Compiling .*.py ...$' | grep -v 'Built target' | uniq
+    catkin_make install $ROS_PARALLEL_JOBS | grep -v '^-- \(Up-to-date\|Installing\):' | grep -v 'Generating ' | grep -v '^Compiling .*.py ...$' | grep -v 'Built target' | uniq
     # make sure to kill test
     for _pkg in hrpsys_ros_bridge hrpsys_tools rtmbuild; do
 	rm -fr install/lib/${_pkg}
