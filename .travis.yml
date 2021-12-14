@@ -28,9 +28,10 @@ env:
     # - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=false   NOT_TEST_INSTALL=true
     # - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=true    EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
     # - USE_JENKINS=true ROS_DISTRO=hydro  USE_DEB=false   EXTRA_DEB="ros-hydro-hrpsys-ros-bridge ros-hydro-pr2eus" ROS_PARALLEL_JOBS="-j1 -l1" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST="true"
-    - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true TEST_PKGS="openrtm_ros_bridge"
-    - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true TEST_PKGS="hrpsys_ros_bridge"
+    - USE_TRAVIS=true ROS_DISTRO=kinetic USE_DEB=true TEST_PKGS="openrtm_ros_bridge"
+    - USE_TRAVIS=true ROS_DISTRO=kinetic USE_DEB=true TEST_PKGS="hrpsys_ros_bridge"
     - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true TEST_PKGS="rtmbuild openrtm_tools"
+    - USE_TRAVIS=true ROS_DISTRO=kinetic USE_DEB=true TEST_PKGS="rtmbuild openrtm_tools"
     # - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true TEST_PKGS="rtmbuild"
     # - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true TEST_PKGS="hrpsys_tools"
     # - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true TEST_PKGS="rosnode_rtc"
@@ -38,7 +39,8 @@ env:
     # - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true   EXTRA_DEB="ros-indigo-hrpsys-ros-bridge ros-indigo-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
     # - USE_JENKINS=true ROS_DISTRO=indigo USE_DEB=false EXTRA_DEB="ros-indigo-hrpsys-ros-bridge ros-indigo-pr2eus" NOT_TEST_INSTALL=true TEST_PKGS="hrpsys_ros_bridge" IS_EUSLISP_TRAVIS_TEST=true
     # - USE_TRAVIS=true TEST_TYPE=work_with_downstream  TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=indigo EXTRA_DEB="ros-indigo-roslint" DOCKER_IMAGE=ubuntu:trusty
-    - USE_TRAVIS=true TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=indigo EXTRA_DEB="ros-indigo-roslint" DOCKER_IMAGE=ubuntu:trusty
+    #- USE_TRAVIS=true TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=indigo EXTRA_DEB="ros-indigo-roslint" DOCKER_IMAGE=ubuntu:trusty
+    - USE_TRAVIS=true TEST_TYPE=work_with_315_1_10    TEST_PACKAGE=hironx-ros-bridge ROS_DISTRO=kinetic EXTRA_DEB="ros-kinetic-roslint" DOCKER_IMAGE=ubuntu:xenial
     # - USE_TRAVIS=true ROS_DISTRO=indigo USE_DEB=true EXTRA_DEB="ros-indigo-pr2eus" NOT_TEST_INSTALL=true IS_EUSLISP_TRAVIS_TEST=false  # For updating euslisp-docs (Must be USE_TRAVIS=true and IS_EUSLISP_TRAVIS_TEST=false. See after_success)
     # - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=true
     # - USE_JENKINS=true ROS_DISTRO=kinetic USE_DEB=false NOT_TEST_INSTALL=true
