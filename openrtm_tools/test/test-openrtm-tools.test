@@ -20,5 +20,5 @@
   <rtconnect from="SequenceInComponent0.rtc:FloatSeq"  to="SequenceOutComponent0.rtc:FloatSeq" subscription_type="flush"/>
   <!-- END:openrtm connection -->
 
-  <test test-name="rtshell_setup" pkg="openrtm_tools" type="test-rtshell-setup.py" args="--corba_port=$(arg corba_port)" />
+  <test test-name="rtshell_setup" pkg="openrtm_tools" type="test-rtshell-setup.py" args="--corba_port=$(arg corba_port)" time-limit="360" />
 </launch>
