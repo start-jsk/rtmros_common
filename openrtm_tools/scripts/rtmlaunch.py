@@ -9,6 +9,10 @@ def signal_handler(signum, frame):
     sys.exit(0)
 
 if __name__ == '__main__':
+    if '--verbose' in sys.argv:
+        print >>sys.stderr, "[rtmlaunch.py] {} starting... ".format(__file__)
+        print >>sys.stderr, "[rtmlaunch.py] loading {}... ".format(rtmlaunch)
+
     signal.signal(signal.SIGINT, signal_handler)
     rtmlaunch.main()
 

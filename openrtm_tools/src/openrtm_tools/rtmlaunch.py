@@ -6,6 +6,7 @@ roslib.load_manifest('openrtm_tools')
 import sys
 import os
 import time
+import argparse
 import optparse
 import socket
 
@@ -191,11 +192,11 @@ def rtactivate(nameserver, tags, tree):
     return 0
 
 def main():
-    usage = '''Usage: %prog [launchfile]'''
-    if len(sys.argv) <= 1:
-        print >>sys.stderr, usage
-        return 1
-    fullpathname = sys.argv[1]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('fullpathname')
+    parser.add_argument('--verbose', action='store_true', help='show more debug message')
+    args, unknown = parser.parse_known_args()
+    fullpathname = args.fullpathname
     print >>sys.stderr, "[rtmlaunch] starting... ",fullpathname
     try:
         parser = parse(fullpathname)

@@ -13,7 +13,7 @@
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_py" pkg="openrtm_tools" type="rtmlaunch.py"
-        args="$(find openrtm_tools)/test/test-openrtm-tools.test" output="screen" />
+        args="--verbose $(find openrtm_tools)/test/test-openrtm-tools.test" output="screen"/>
   <rtactivate component="SequenceInComponent0.rtc" />
   <rtactivate component="SequenceOutComponent0.rtc" />
   <rtconnect from="SequenceInComponent0.rtc:Float"     to="SequenceOutComponent0.rtc:Float"    subscription_type="new"/>
