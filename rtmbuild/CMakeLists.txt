@@ -20,5 +20,5 @@ install(DIRECTORY cmake scripts test
   USE_SOURCE_PERMISSIONS
   )
 
-add_rostest(test/test-compile-idl.test)
+#add_rostest(test/test-compile-idl.test)
 
