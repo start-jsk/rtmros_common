@@ -98,8 +98,8 @@ class TestRtmLaunch(unittest.TestCase):
                 tree = rtctree.tree.RTCTree(servers='localhost:{}'.format(self.corba_port))
                 seqout = tree.get_node(['/', 'localhost:{}'.format(self.corba_port),'SequenceOutComponent0.rtc'])
                 print >>sys.stderr, "SeqOut : ", seqout, seqout.get_state_string()
-                if seqout.state==rtctree.component.Component.ACTIVE:
-                    break
+                # if seqout.state==rtctree.component.Component.ACTIVE:
+                #     break
             except:
                 pass
             time.sleep(1)
@@ -121,7 +121,7 @@ class TestRtmLaunch(unittest.TestCase):
                 connection2 = seqin_port2.get_connection_by_dest(seqout_port2)
                 print >>sys.stderr, "Connection : ", connection1.properties
                 print >>sys.stderr, "Connection : ", connection2.properties
-                break
+                #break
             except:
                 pass
             time.sleep(1)
