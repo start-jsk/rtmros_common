@@ -18,8 +18,6 @@
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_py" pkg="openrtm_tools" type="rtmlaunch.py"
         args="--verbose $(find openrtm_tools)/test/test-rtmlaunch.test" output="screen" />
-  <node name="rtmlaunch_py2" pkg="openrtm_tools" type="rtmlaunch2.py"
-        args="--verbose $(find openrtm_tools)/test/test-rtmlaunch.test" output="screen" />
   <rtactivate component="MyServiceProvider0.rtc" />
   <rtactivate component="MyServiceConsumer0.rtc" />
   <rtconnect from="MyServiceProvider0.rtc:MyService"
