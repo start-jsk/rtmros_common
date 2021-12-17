@@ -1289,6 +1289,15 @@
    "Call goPos with wait."
    (send self :go-pos-no-wait xx yy th)
    (send self :wait-foot-steps))
+  (:jump-to-no-wait
+   (xx yy zz ts tf)
+   "Call jumpTo without wait."
+   (send self :autobalancerservice_jumpTo :x xx :y yy :z zz :ts ts :tf tf))
+  (:jump-to
+   (xx yy zz ts tf)
+   "Call jumpTo with wait."
+   (send self :jump-to-no-wait xx yy zz ts tf)
+   (send self :wait-foot-steps))
   (:raw-get-foot-step-param
    ()
    (send (send self :autobalancerservice_getfootstepparam) :i_param))
