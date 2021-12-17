@@ -22,7 +22,7 @@ Here 3 things are happening:
   3. Specify rtconnect tag with connecting components info.
 '''
 
-from openrtm_tools import rtmstart, rtmlaunch
+from openrtm_tools import rtmstart, rtmlaunchlib
 from rosgraph import names
 import roslaunch, sys
 

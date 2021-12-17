@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from openrtm_tools import rtmlaunch
+from openrtm_tools import rtmlaunchlib
 
 import signal, sys
 def signal_handler(signum, frame):
@@ -11,10 +11,10 @@ def signal_handler(signum, frame):
 if __name__ == '__main__':
     if '--verbose' in sys.argv:
         print >>sys.stderr, "[rtmlaunch.py] {} starting... ".format(__file__)
-        print >>sys.stderr, "[rtmlaunch.py] loading {}... ".format(rtmlaunch)
+        print >>sys.stderr, "[rtmlaunch.py] loading {}... ".format(rtmlaunchlib)
 
     signal.signal(signal.SIGINT, signal_handler)
-    rtmlaunch.main()
+    rtmlaunchlib.main()
 
 
 
