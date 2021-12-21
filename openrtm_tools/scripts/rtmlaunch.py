@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from openrtm_tools import rtmlaunch
+from openrtm_tools import rtmlaunchlib
 
 import signal, sys
 def signal_handler(signum, frame):
@@ -10,7 +10,7 @@ def signal_handler(signum, frame):
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
-    rtmlaunch.main()
+    rtmlaunchlib.main()
 
 
 
