@@ -188,7 +188,8 @@ void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory
 
     trajectory_msgs::JointTrajectoryPoint point = trajectory.points[i];
     for (unsigned int j=0; j < trajectory.joint_names.size(); j++ ) {
-      body->link(joint_names[j])->q = point.positions[j];
+      hrp::Link* l = body->link(joint_names[j]);
+      if(l) l->q = point.positions[j];
     }
 
     body->calcForwardKinematics();
