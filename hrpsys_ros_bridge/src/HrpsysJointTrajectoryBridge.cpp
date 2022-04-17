@@ -457,7 +457,9 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
     trajectory_msgs::JointTrajectoryPoint point = trajectory.points[i];
     for (unsigned int j = 0; j < joint_names.size(); j++)
     {
-      parent->body->link(joint_names[j])->q = point.positions[j];
+      hrp::Link* l = parent->body->link(joint_names[j]);
+      if(l) l->q = point.positions[j];
+      else ROS_WARN_STREAM_ONCE("[" << parent->getInstanceName() << "] @onJointTrajectoryAction (" << this->groupname << ") : joint named " << joint_names[j] << " is not found. Skipping ...");
     }
 
     parent->body->calcForwardKinematics();
