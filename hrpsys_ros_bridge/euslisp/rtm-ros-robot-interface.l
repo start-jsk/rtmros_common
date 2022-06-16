@@ -1303,10 +1303,14 @@
    "Call goPosWheel without wait."
    (send self :autobalancerservice_goPosWheel :x xx :y yy :th th :w_x w-xx :rv_max rv-max :ra_max ra-max :tm_off tm-off)
    (send self :wait-foot-steps))
-  (:go-wheel
+  (:go-wheel-no-wait
    (xx rv-max ra-max)
    "Call goWheel without wait."
-   (send self :autobalancerservice_goWheel :x xx :rv_max rv-max :ra_max ra-max)
+   (send self :autobalancerservice_goWheel :x xx :rv_max rv-max :ra_max ra-max))
+  (:go-wheel
+   (xx rv-max ra-max)
+   "Call goWheel with wait."
+   (send self :go-wheel-no-wait xx rv-max ra-max)
    (send self :wait-foot-steps))
   (:raw-get-foot-step-param
    ()
