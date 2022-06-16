@@ -49,6 +49,10 @@
                             limbs)
                     (let ((av1 (send *sr* :angle-vector))
                           (ctype (read-from-string (format nil "~A-controller" limb))))
+                      ;; fix for https://github.com/fkanehiro/hrpsys-base/pull/1297
+                      ;; need to send reset-pose to default sequence controller
+                      (send *ri* :angle-vector av0 500)
+                      (send *ri* :wait-interpolation)
                       ;; Send pose just for specific limb controller
                       (send *ri* :angle-vector (send *sr* :angle-vector) 200 ctype)
                       (send *ri* :wait-interpolation ctype)

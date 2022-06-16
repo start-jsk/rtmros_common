@@ -1461,7 +1461,7 @@
      ))
   (:go-velocity
    (vx vy vth)
-   "Call goVelocity."
+   "Call goVelocity. vx[m/s], vy[m/s], and vth[deg/s]"
    (send self :autobalancerservice_goVelocity :vx vx :vy vy :vth vth))
   (:go-stop
    ()
@@ -1647,14 +1647,14 @@
    (send self :go-velocity
 	 (* vel-x-ratio (send (send msg :linear) :x))
          (* vel-y-ratio (send (send msg :linear) :y))
-         (* vel-th-ratio (send (send msg :angular) :z)))
+         (* vel-th-ratio (rad2deg (send (send msg :angular) :z))))
    )
   (:cmd-vel-mode
    ()
    "Walk with subscribing /cmd_vel topic."
    (send self :start-cmd-vel-mode)
+   (send self :go-velocity 0 0 0)
    (do-until-key
-    (send self :go-velocity 0 0 0)
     (ros::spin-once)
     (ros::sleep)
     )
