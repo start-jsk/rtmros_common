@@ -191,6 +191,13 @@ void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory
 
   std::vector<std::string> joint_names = trajectory.joint_names;
 
+  // set body to current reference angle
+  if ( m_mcangle.data.length() == body->joints().size() ) {
+    for (unsigned int i = 0; i < body->joints().size(); i++){
+      body->joint(i)->q = m_mcangle.data[i];
+    }
+  }
+
   for (unsigned int i=0; i < trajectory.points.size(); i++) {
     angles[i].length(body->joints().size());
 
