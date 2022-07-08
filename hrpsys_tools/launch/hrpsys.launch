@@ -41,14 +41,14 @@
   <!-- see http://code.google.com/p/hrpsys-base/issues/detail?id=14 for  exec_cxt.periodic.rate:100000 -->
   <arg unless="$(arg USE_RTCD)" name="hrpsys_precreate_rtc" default="HGcontroller"/>
   <arg unless="$(arg USE_RTCD)" name="hrpsys_preload_rtc" default="$(arg hrpsys_precreate_rtc).so"/>
-  <arg unless="$(arg USE_RTCD)" name="hrpsys_periodic_type" value="SynchExtTriggerEC" />
+  <arg unless="$(arg USE_RTCD)" name="hrpsys_periodic_type" default="SynchExtTriggerEC" />
   <arg unless="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless " />
   <arg unless="$(arg GUI)" name="hrpsys_gui_args" value="-nodisplay" />
   <!--   for rtcd -->
   <arg     if="$(arg USE_RTCD)" name="hrpsys_periodic_rate" default="200"/>
   <arg     if="$(arg USE_RTCD)" name="hrpsys_preload_rtc" default="RobotHardware.so,hrpEC.so"/>
   <arg     if="$(arg USE_RTCD)" name="hrpsys_precreate_rtc" default="RobotHardware"/>
-  <arg     if="$(arg USE_RTCD)" name="hrpsys_periodic_type" value="hrpExecutionContext" />
+  <arg     if="$(arg USE_RTCD)" name="hrpsys_periodic_type" default="hrpExecutionContext" />
   <arg     if="$(arg REALTIME)" name="hrpsys_opt_args" value="-endless -realtime" />
   <arg     if="$(arg GUI)" name="hrpsys_gui_args" value="" />
   <!--   for both -->
