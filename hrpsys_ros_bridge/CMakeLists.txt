@@ -248,14 +248,16 @@ file(WRITE models/SampleRobot_controller_config.yaml
       - LLEG_ANKLE_R
 ")
 
-# stop other tests when euslisp test is commanded, because euslisp test takes much time
-if (NOT ("true" STREQUAL "$ENV{IS_EUSLISP_TRAVIS_TEST}"))
-  add_rostest(test/test-samplerobot.test)
-  if (NOT $ENV{ROS_DISTRO} STREQUAL "hydro")
-    add_rostest(test/test-samplerobot-hcf.launch) # hydro-deb does not work with --unstable-rtc
+if(CATKIN_ENABLE_TESTING)
+  # stop other tests when euslisp test is commanded, because euslisp test takes much time
+  if (NOT ("true" STREQUAL "$ENV{IS_EUSLISP_TRAVIS_TEST}"))
+   add_rostest(test/test-samplerobot.test)
+    if (NOT $ENV{ROS_DISTRO} STREQUAL "hydro")
+      add_rostest(test/test-samplerobot-hcf.launch) # hydro-deb does not work with --unstable-rtc
+    endif()
+    add_rostest(test/test-pa10.test)
+    add_rostest(test/test-import-python.test)
   endif()
-  add_rostest(test/test-pa10.test)
-  add_rostest(test/test-import-python.test)
 endif()
 
 # call catkin depends
