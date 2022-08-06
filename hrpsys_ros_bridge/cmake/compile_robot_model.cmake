@@ -318,7 +318,15 @@ endmacro()
 # get path to collada_to_urdf
 macro(get_collada_to_urdf _collada_to_urdf_exe)
   find_package(collada_urdf_jsk_patch QUIET)
-  find_package(collada_urdf REQUIRED)
+
+  # noetic collada_urdf could not find_packag-ed due to https://github.com/ros/collada_urdf/issues/43
+  if("$ENV{ROS_DISTRO}" STREQUAL "noetic")
+    set(collada_urdf_PREFIX "/opt/ros/noetic")
+    set(collada_urdf_FOUND TRUE)
+  else()
+    find_package(collada_urdf REQUIRED)
+  endif("$ENV{ROS_DISTRO}" STREQUAL "noetic")
+  
   if (collada_urdf_jsk_patch_FOUND)
     set(${_collada_to_urdf_exe} ${collada_urdf_jsk_patch_PREFIX}/lib/collada_urdf_jsk_patch/collada_to_urdf)
   elseif (collada_urdf_FOUND)
