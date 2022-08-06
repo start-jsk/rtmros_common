@@ -20,5 +20,7 @@ install(DIRECTORY cmake scripts test
   USE_SOURCE_PERMISSIONS
   )
 
-add_rostest(test/test-compile-idl.test)
+if(CATKIN_ENABLE_TESTING)
+  add_rostest(test/test-compile-idl.test)
+endif()
 

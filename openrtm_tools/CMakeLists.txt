@@ -139,7 +139,8 @@ install(PROGRAMS scripts/rtmlaunch scripts/rtmtest DESTINATION ${CATKIN_GLOBAL_B
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-
-add_rostest(test/test-openrtm-tools.test)
-add_rostest(test/test-rtmlaunch.test)
+if(CATKIN_ENABLE_TESTING)
+  add_rostest(test/test-openrtm-tools.test)
+  add_rostest(test/test-rtmlaunch.test)
+endif()
 
