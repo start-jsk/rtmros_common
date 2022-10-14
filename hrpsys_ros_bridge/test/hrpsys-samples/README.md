@@ -21,8 +21,8 @@ DataLogger is hrpsys-base RTC for data logging of hrpsys-base RTCs
     ```
 
 # samplerobot-remove-force-offset.l
-RemoveForceSensorLinkOffset is hrpsys-base RTC to remove hands or feet from force sensor values. <br>
-Check /lhsensor and off_lhsensor if you want to see how it works. (e.g.rostopic echo /lhsensor) (by konishi 2022/4/8)
+RemoveForceSensorLinkOffset is hrpsys-base RTC to remove hands or feet from force sensor values.  
+Check /lhsensor and /off_lhsensor if you want to see how it works. (e.g., rostopic echo /lhsensor)  
 1. Launch hrpsys-simulator
 
     ```
