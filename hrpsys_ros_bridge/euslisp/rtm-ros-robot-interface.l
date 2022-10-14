@@ -117,13 +117,13 @@
   (:reference-force-vector
    (&optional (limb))
    "Returns reference force-vector [N] list for all limbs obtained by :state.
-    This value corresponds to StateHolder and SequencePlayer RTC.
+    This value corresponds to ReferenceForceUpdater, EmergencyStopper, StateHolder and SequencePlayer RTC prioritized in this order.
     If a limb argument is specified, returns a vector for the limb."
    (send self :tmp-force-moment-vector :force limb "reference"))
   (:reference-moment-vector
    (&optional (limb))
    "Returns reference moment-vector [Nm] list for all limbs obtained by :state.
-    This value corresponds to StateHolder and SequencePlayer RTC.
+    This value corresponds to ReferenceForceUpdater, EmergencyStopper, StateHolder and SequencePlayer RTC prioritized in this order.
     If a limb argument is specified, returns a vector for the limb."
    (send self :tmp-force-moment-vector :moment limb "reference"))
   (:absolute-force-vector
