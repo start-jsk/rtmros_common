@@ -436,6 +436,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
   {
     ROS_ERROR_STREAM(
         "[" << parent->getInstanceName() << "] @onJointTrajectoryAction / Error : " << "required joint_names.size() = " << joint_names.size() << " < joint_list.size() = " << joint_list.size());
+    parent->m_mutex.unlock();
     return;
   }
   for (unsigned int i = 0; i < joint_list.size(); i++)
@@ -444,6 +445,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
     {
       ROS_ERROR_STREAM(
           "[" << parent->getInstanceName() << "] @onJointTrajectoryAction / Error : " << "joint : " << joint_list[i] << " did not exist in the required trajectory.");
+      parent->m_mutex.unlock();
       return;
     }
   }
