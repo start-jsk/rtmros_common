@@ -35,11 +35,11 @@ if __name__ == '__main__':
     print >> of, 'controller_configuration:'
 
     for limb in lst.keys():
-        if limb is 'sensors':
+        if limb == 'sensors':
             continue
         if limb.endswith('-coords') or limb.endswith('-vector'):
             continue
-        if limb is 'links' or limb is 'replace_xmls':
+        if limb == 'links' or limb == 'replace_xmls':
             continue
         jlst = [j.keys()[0] for j in lst[limb] if isinstance(j, dict) and isinstance(j.values()[0], str)]
         if len(jlst) > 0:
