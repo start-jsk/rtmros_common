@@ -30,6 +30,9 @@
 #include "dynamic_reconfigure/Reconfigure.h"
 #include "hrpsys_ros_bridge/MotorStates.h"
 #include "hrpsys_ros_bridge/ContactStatesStamped.h"
+#include "hrpsys_ros_bridge/LandingPosition.h"
+#include "hrpsys_ros_bridge/CogState.h"
+#include "hrpsys_ros_bridge/SteppableRegion.h"
 #include "diagnostic_msgs/DiagnosticArray.h"
 #include "sensor_msgs/Imu.h"
 #include "hrpsys_ros_bridge/SetSensorTransformation.h"
@@ -54,14 +57,16 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void onFollowJointTrajectoryActionGoal();
   void onFollowJointTrajectoryActionPreempt();
   void onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg);
+  void onLandingHeightCB(const hrpsys_ros_bridge::LandingPosition::ConstPtr& msg);
+  void onSteppableRegionCB(const hrpsys_ros_bridge::SteppableRegion::ConstPtr& msg);
   bool sendMsg (dynamic_reconfigure::Reconfigure::Request &req,
                 dynamic_reconfigure::Reconfigure::Response &res);
   bool setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
                                hrpsys_ros_bridge::SetSensorTransformation::Response& res);
  private:
   ros::NodeHandle nh;
-  ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, ref_cp_pub, act_cp_pub, odom_pub, imu_pub, em_mode_pub, ref_contact_states_pub, act_contact_states_pub;
-  ros::Subscriber trajectory_command_sub;
+  ros::Publisher joint_state_pub, joint_controller_state_pub, mot_states_pub, diagnostics_pub, clock_pub, zmp_pub, ref_cp_pub, act_cp_pub, odom_pub, imu_pub, em_mode_pub, ref_contact_states_pub, act_contact_states_pub, landing_target_pub, end_cog_state_pub, is_stuck_pub, use_flywheel_pub, estimated_fxy_pub, current_steppable_region_pub;
+  ros::Subscriber trajectory_command_sub, landing_height_sub, steppable_region_sub;
   std::vector<ros::Publisher> fsensor_pub, cop_pub;
 #ifdef USE_PR2_CONTROLLERS_MSGS
   actionlib::SimpleActionServer<pr2_controllers_msgs::JointTrajectoryAction> joint_trajectory_server;

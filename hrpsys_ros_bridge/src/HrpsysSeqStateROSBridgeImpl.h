@@ -153,10 +153,22 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   InPort<TimedDoubleSeq> m_rsCOPInfoIn;
   TimedLong m_emergencyMode;
   InPort<TimedLong> m_emergencyModeIn;
+  TimedBoolean m_isStuck;
+  InPort<TimedBoolean> m_isStuckIn;
+  TimedBoolean m_useFlywheel;
+  InPort<TimedBoolean> m_useFlywheelIn;
+  TimedPoint3D m_estimatedFxy;
+  InPort<TimedPoint3D> m_estimatedFxyIn;
   TimedBooleanSeq m_refContactStates, m_actContactStates;
   InPort<TimedBooleanSeq> m_refContactStatesIn, m_actContactStatesIn;
   TimedDoubleSeq m_controlSwingSupportTime;
   InPort<TimedDoubleSeq> m_controlSwingSupportTimeIn;
+  OpenHRP::TimedLandingPosition m_rslandingTarget;
+  InPort<OpenHRP::TimedLandingPosition> m_rslandingTargetIn;
+  OpenHRP::TimedCogState m_rsendCogState;
+  InPort<OpenHRP::TimedCogState> m_rsendCogStateIn;
+  OpenHRP::TimedSteppableRegion m_currentSteppableRegion;
+  InPort<OpenHRP::TimedSteppableRegion> m_currentSteppableRegionIn;
 
   // </rtc-template>
 
@@ -164,6 +176,10 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   // <rtc-template block="outport_declare">
   TimedDoubleSeq m_mctorque;
   OutPort<TimedDoubleSeq> m_mctorqueOut;
+  OpenHRP::TimedLandingPosition m_rslandingHeight;
+  OutPort<OpenHRP::TimedLandingPosition> m_rslandingHeightOut;
+  OpenHRP::TimedSteppableRegion m_rssteppableRegion;
+  OutPort<OpenHRP::TimedSteppableRegion> m_rssteppableRegionOut;
 
   // </rtc-template>
 

@@ -41,10 +41,18 @@ HrpsysSeqStateROSBridgeImpl::HrpsysSeqStateROSBridgeImpl(RTC::Manager* manager)
     m_rsactCPIn("rsactCapturePoint", m_rsactCP),
     m_rsCOPInfoIn("rsCOPInfo", m_rsCOPInfo),
     m_emergencyModeIn("emergencyMode", m_emergencyMode),
+    m_isStuckIn("isStuck", m_isStuck),
+    m_useFlywheelIn("useFlywheel", m_useFlywheel),
+    m_estimatedFxyIn("estimatedFxy", m_estimatedFxy),
     m_refContactStatesIn("refContactStates", m_refContactStates),
     m_actContactStatesIn("actContactStates", m_actContactStates),
     m_controlSwingSupportTimeIn("controlSwingSupportTime", m_controlSwingSupportTime),
     m_mctorqueOut("mctorque", m_mctorque),
+    m_rslandingTargetIn("rslandingTarget", m_rslandingTarget),
+    m_rsendCogStateIn("rsendCogState", m_rsendCogState),
+    m_rslandingHeightOut("rslandingHeight", m_rslandingHeight),
+    m_rssteppableRegionOut("rssteppableRegion", m_rssteppableRegion),
+    m_currentSteppableRegionIn("currentSteppableRegion", m_currentSteppableRegion),
     m_SequencePlayerServicePort("SequencePlayerService")
 
     // </rtc-template>
@@ -73,12 +81,20 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridgeImpl::onInitialize()
   addInPort("servoState", m_servoStateIn);
   addInPort("rsCOPInfo", m_rsCOPInfoIn);
   addInPort("emergencyMode", m_emergencyModeIn);
+  addInPort("isStuck", m_isStuckIn);
+  addInPort("useFlywheel", m_useFlywheelIn);
+  addInPort("estimatedFxy", m_estimatedFxyIn);
   addInPort("refContactStates", m_refContactStatesIn);
   addInPort("actContactStates", m_actContactStatesIn);
   addInPort("controlSwingSupportTime", m_controlSwingSupportTimeIn);
+  addInPort("rslandingTarget", m_rslandingTargetIn);
+  addInPort("rsendCogState", m_rsendCogStateIn);
+  addInPort("currentSteppableRegion", m_currentSteppableRegionIn);
 
   // Set OutPort buffer
   addOutPort("mctorque", m_mctorqueOut);
+  addOutPort("rslandingHeight", m_rslandingHeightOut);
+  addOutPort("rssteppableRegion", m_rssteppableRegionOut);
 
   // Set service provider to Ports
 
