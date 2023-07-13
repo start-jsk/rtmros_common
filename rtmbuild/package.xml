@@ -21,6 +21,7 @@
   <build_depend>rostest</build_depend>
   <build_depend>openrtm_aist</build_depend>
   <build_depend>openrtm_aist_python</build_depend>
+  <build_depend>openhrp3</build_depend>
 
   <run_depend>libblas-dev</run_depend>
   <run_depend>liblapack-dev</run_depend>
@@ -33,6 +34,7 @@
   <run_depend>rostest</run_depend>
   <run_depend>openrtm_aist</run_depend>
   <run_depend>openrtm_aist_python</run_depend>
+  <run_depend>openhrp3</run_depend>
 
   <export/>
 </package>
