@@ -425,10 +425,12 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
   ROS_INFO_STREAM("[" << parent->getInstanceName() << "] @onJointTrajectoryAction (" << this->groupname << ")");
   // TODO: check size and joint names
 
-  OpenHRP::dSequenceSequence angles;
+  OpenHRP::dSequenceSequence angles, velocities, torques;
   OpenHRP::dSequence duration;
 
   angles.length(trajectory.points.size());
+  velocities.length(trajectory.points.size());
+  torques.length(trajectory.points.size());
   duration.length(trajectory.points.size());
 
   std::vector<std::string> joint_names = trajectory.joint_names;
@@ -454,23 +456,44 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
       "[" << parent->getInstanceName() << "] @onJointTrajectoryAction (" << this->groupname << ") : trajectory.points.size() " << trajectory.points.size());
   for (unsigned int i = 0; i < trajectory.points.size(); i++)
   {
-    angles[i].length(joint_names.size());
+    if(angles.length() == trajectory.points.size()) angles[i].length(joint_names.size());
+    if(velocities.length() == trajectory.points.size()) velocities[i].length(joint_names.size());
+    if(torques.length() == trajectory.points.size()) torques[i].length(joint_names.size());
 
     trajectory_msgs::JointTrajectoryPoint point = trajectory.points[i];
+    if(point.positions.size() != joint_names.size()) angles.length(0);
+    if(point.velocities.size() != joint_names.size()) velocities.length(0);
+    if(point.effort.size() != joint_names.size()) torques.length(0);
     for (unsigned int j = 0; j < joint_names.size(); j++)
     {
       hrp::Link* l = parent->body->link(joint_names[j]);
-      if(l) l->q = point.positions[j];
-      else ROS_WARN_STREAM_ONCE("[" << parent->getInstanceName() << "] @onJointTrajectoryAction (" << this->groupname << ") : joint named " << joint_names[j] << " is not found. Skipping ...");
+      if(l) {
+        if(point.positions.size() == joint_names.size()) l->q = point.positions[j];
+        if(point.velocities.size() == joint_names.size()) l->dq = point.velocities[j];
+        if(point.effort.size() == joint_names.size()) l->u = point.effort[j];
+      } else {
+        ROS_WARN_STREAM_ONCE("[" << parent->getInstanceName() << "] @onJointTrajectoryAction (" << this->groupname << ") : joint named " << joint_names[j] << " is not found. Skipping ...");
+      }
     }
 
     parent->body->calcForwardKinematics();
 
-    std::stringstream ss;
+    std::stringstream ss_angles, ss_velocities, ss_torques;
     for (unsigned int j = 0; j < joint_list.size(); j++)
     {
-      angles[i][j] = parent->body->link(joint_list[j])->q;
-      ss << " " << point.positions[j];
+      hrp::Link* l = parent->body->link(joint_list[j]);
+      if(angles.length() == trajectory.points.size()) {
+        angles[i][j] = l->q;
+        ss_angles << " " << angles[i][j];
+      }
+      if(velocities.length() == trajectory.points.size()) {
+        velocities[i][j] = l->dq;
+        ss_velocities << " " << velocities[i][j];
+      }
+      if(torques.length() == trajectory.points.size()) {
+        torques[i][j] = l->u;
+        ss_torques << " " << torques[i][j];
+      }
     }
     ROS_INFO_STREAM(
         "[" << parent->getInstanceName() << "] i:" << i << " : time_from_start " << trajectory.points[i].time_from_start.toSec());
@@ -484,7 +507,7 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
       duration[i] = trajectory.points[i].time_from_start.toSec();
       if ( std::abs(duration[i]) < 0.001 ) duration[i] = 0.001; // set magic delta ... https://github.com/start-jsk/rtmros_common/issues/1036
     }
-    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] [" << ss.str() << "] " << duration[i]);
+    ROS_INFO_STREAM("[" << parent->getInstanceName() << "] [" << ss_angles.str() << "] [" << ss_velocities.str() << "] [" << ss_torques.str() << "] " << duration[i]);
   }
 
   parent->m_mutex.unlock();
@@ -493,12 +516,16 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
     if (groupname.length() > 0)
     { // group
       ROS_INFO_STREAM("[" << parent->getInstanceName() << "] setJointAnglesOfGroup: " << groupname);
-      parent->m_service0->setJointAnglesOfGroup(groupname.c_str(), angles[0], duration[0]);
+      if(angles.length() > 0) parent->m_service0->setJointAnglesOfGroup(groupname.c_str(), angles[0], duration[0]);
+      if(velocities.length() > 0) parent->m_service0->setJointVelocitiesOfGroup(groupname.c_str(), velocities[0], duration[0]);
+      if(torques.length() > 0) parent->m_service0->setJointTorquesOfGroup(groupname.c_str(), torques[0], duration[0]);
     }
     else
     { // fullbody
       ROS_INFO_STREAM("[" << parent->getInstanceName() << "] setJointAngles");
-      parent->m_service0->setJointAngles(angles[0], duration[0]);
+      if(angles.length() > 0) parent->m_service0->setJointAngles(angles[0], duration[0]);
+      if(velocities.length() > 0) parent->m_service0->setJointVelocities(velocities[0], duration[0]);
+      if(torques.length() > 0) parent->m_service0->setJointTorques(torques[0], duration[0]);
     }
   }
   else
@@ -509,10 +536,12 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
       // hrpsys < 315.16.0 have bugs in setJointAnglesSequenceOfGroup https://github.com/fkanehiro/hrpsys-base/pull/1237
       if (LessThanVersion(parent->hrpsys_version, std::string("315.16.0"))) {
         ROS_INFO_STREAM("[" << parent->getInstanceName() << "] playPatternOfGroup: " << groupname);
-        parent->m_service0->playPatternOfGroup(groupname.c_str(), angles, duration);
+        if(angles.length() > 0) parent->m_service0->playPatternOfGroup(groupname.c_str(), angles, duration);
       } else {
         ROS_INFO_STREAM("[" << parent->getInstanceName() << "] setJointAnglesSequenceOfGroup: " << groupname);
-        parent->m_service0->setJointAnglesSequenceOfGroup(groupname.c_str(), angles, duration);
+        if(angles.length() > 0) parent->m_service0->setJointAnglesSequenceOfGroup(groupname.c_str(), angles, duration);
+        if(velocities.length() > 0) parent->m_service0->setJointVelocitiesSequenceOfGroup(groupname.c_str(), velocities, duration);
+        if(torques.length() > 0) parent->m_service0->setJointTorquesSequenceOfGroup(groupname.c_str(), torques, duration);
       }
     }
     else
@@ -521,10 +550,12 @@ void HrpsysJointTrajectoryBridge::jointTrajectoryActionObj::onJointTrajectory(
       if (LessThanVersion(parent->hrpsys_version, std::string("315.5.0"))) {
         ROS_INFO_STREAM("[" << parent->getInstanceName() << "] playPattern");
         OpenHRP::dSequenceSequence rpy, zmp;
-        parent->m_service0->playPattern(angles, rpy, zmp, duration);
+        if(angles.length() > 0) parent->m_service0->playPattern(angles, rpy, zmp, duration);
       } else {
         ROS_INFO_STREAM("[" << parent->getInstanceName() << "] setJointAnglesSequence");
-        parent->m_service0->setJointAnglesSequence(angles, duration);
+        if(angles.length() > 0) parent->m_service0->setJointAnglesSequence(angles, duration);
+        if(velocities.length() > 0) parent->m_service0->setJointVelocitiesSequence(velocities, duration);
+        if(torques.length() > 0) parent->m_service0->setJointTorquesSequence(torques, duration);
       }
     }
   }
