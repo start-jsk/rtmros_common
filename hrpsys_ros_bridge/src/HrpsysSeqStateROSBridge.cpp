@@ -175,10 +175,12 @@ void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory
   ROS_INFO_STREAM("[" << getInstanceName() << "] @onJointTrajectoryAction ");
   //std::cerr << goal->trajectory.joint_names.size() << std::endl;
 
-  OpenHRP::dSequenceSequence angles;
+  OpenHRP::dSequenceSequence angles, velocities, torques;
   OpenHRP::dSequence duration;
 
   angles.length(trajectory.points.size()) ;
+  velocities.length(trajectory.points.size()) ;
+  torques.length(trajectory.points.size()) ;
   duration.length(trajectory.points.size()) ;
 
   std::vector<std::string> joint_names = trajectory.joint_names;
@@ -187,17 +189,29 @@ void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory
   if ( m_mcangle.data.length() == body->joints().size() ) {
     for (unsigned int i = 0; i < body->joints().size(); i++){
       body->joint(i)->q = m_mcangle.data[i];
+      body->joint(i)->dq = 0.0;
+      body->joint(i)->u = 0.0;
     }
   }
 
   for (unsigned int i=0; i < trajectory.points.size(); i++) {
-    angles[i].length(body->joints().size());
+    if(angles.length() == trajectory.points.size()) angles[i].length(body->joints().size());
+    if(velocities.length() == trajectory.points.size()) velocities[i].length(body->joints().size());
+    if(torques.length() == trajectory.points.size()) torques[i].length(body->joints().size());
 
     trajectory_msgs::JointTrajectoryPoint point = trajectory.points[i];
+    if(point.positions.size() != trajectory.joint_names.size()) angles.length(0);
+    if(point.velocities.size() != trajectory.joint_names.size()) velocities.length(0);
+    if(point.effort.size() != trajectory.joint_names.size()) torques.length(0);
     for (unsigned int j=0; j < trajectory.joint_names.size(); j++ ) {
       hrp::Link* l = body->link(joint_names[j]);
-      if(l) l->q = point.positions[j];
-      else ROS_WARN_STREAM_ONCE("[" << getInstanceName() << "] @onJointTrajectoryAction : joint named " << joint_names[j] << " is not found. Skipping ...");
+      if(l) {
+        if(point.positions.size() == trajectory.joint_names.size()) l->q = point.positions[j];
+        if(point.velocities.size() == trajectory.joint_names.size()) l->dq = point.velocities[j];
+        if(point.effort.size() == trajectory.joint_names.size()) l->u = point.effort[j];
+      } else {
+        ROS_WARN_STREAM_ONCE("[" << getInstanceName() << "] @onJointTrajectoryAction : joint named " << joint_names[j] << " is not found. Skipping ...");
+      }
     }
 
     body->calcForwardKinematics();
@@ -206,7 +220,9 @@ void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory
     std::vector<hrp::Link*>::const_iterator it = body->joints().begin();
     while ( it != body->joints().end() ) {
       hrp::Link* l = ((hrp::Link*)*it);
-      angles[i][j] = l->q;
+      if(angles.length() == trajectory.points.size()) angles[i][j] = l->q;
+      if(velocities.length() == trajectory.points.size()) velocities[i][j] = l->dq;
+      if(torques.length() == trajectory.points.size()) torques[i][j] = l->u;
       ++it;++j;
     }
 
@@ -222,14 +238,18 @@ void HrpsysSeqStateROSBridge::onJointTrajectory(trajectory_msgs::JointTrajectory
   m_mutex.unlock();
 
   if ( duration.length() == 1 ) {
-    m_service0->setJointAngles(angles[0], duration[0]);
+    if(angles.length() > 0) m_service0->setJointAngles(angles[0], duration[0]);
+    if(velocities.length() > 0) m_service0->setJointVelocities(velocities[0], duration[0]);
+    if(torques.length() > 0) m_service0->setJointTorques(torques[0], duration[0]);
   } else {
     // hrpsys < 315.5.0 does not have clearJointAngles, so need to use old API
     if (LessThanVersion(hrpsys_version, std::string("315.5.0"))) {
       OpenHRP::dSequenceSequence rpy, zmp;
-      m_service0->playPattern(angles, rpy, zmp, duration);
+      if(angles.length() > 0) m_service0->playPattern(angles, rpy, zmp, duration);
     } else {
-      m_service0->setJointAnglesSequence(angles, duration);
+      if(angles.length() > 0) m_service0->setJointAnglesSequence(angles, duration);
+      if(velocities.length() > 0) m_service0->setJointVelocitiesSequence(velocities, duration);
+      if(torques.length() > 0) m_service0->setJointTorquesSequence(torques, duration);
     }
   }
   traj_start_tm = ros::Time::now();
