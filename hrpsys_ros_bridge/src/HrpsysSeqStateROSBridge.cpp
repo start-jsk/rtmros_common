@@ -391,6 +391,29 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
             mot_states.extra_data.data[i*extra_size+j] = ((float *)&(m_servoState.data[i][1]))[j];
         }
       }
+
+      // pgainIn dgainIn torquePgainIn torqueDgainIn
+      if ( m_pgainIn.isNew () ) m_pgainIn.read();
+      if ( m_pgain.data.length() == joint_size){
+        mot_states.pgain.resize(joint_size);
+        for ( unsigned int i = 0; i < joint_size ; i++ ) mot_states.pgain[i] = m_pgain.data[i];
+      }
+      if ( m_dgainIn.isNew () ) m_dgainIn.read();
+      if ( m_dgain.data.length() == joint_size){
+        mot_states.dgain.resize(joint_size);
+        for ( unsigned int i = 0; i < joint_size ; i++ ) mot_states.dgain[i] = m_dgain.data[i];
+      }
+      if ( m_torquePgainIn.isNew () ) m_torquePgainIn.read();
+      if ( m_torquePgain.data.length() == joint_size){
+        mot_states.torque_pgain.resize(joint_size);
+        for ( unsigned int i = 0; i < joint_size ; i++ ) mot_states.torque_pgain[i] = m_torquePgain.data[i];
+      }
+      if ( m_torqueDgainIn.isNew () ) m_torqueDgainIn.read();
+      if ( m_torqueDgain.data.length() == joint_size){
+        mot_states.torque_dgain.resize(joint_size);
+        for ( unsigned int i = 0; i < joint_size ; i++ ) mot_states.torque_dgain[i] = m_torqueDgain.data[i];
+      }
+
       mot_states_pub.publish(mot_states);
     }
     catch(const std::runtime_error &e)
