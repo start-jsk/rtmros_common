@@ -2,8 +2,8 @@
   <!-- PYTHONPATH must contains path for rtshell  -->
   <env name="PYTHONPATH" value="$(env PYTHONPATH)" />
   <arg name="nameserver" default="localhost" />
-  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver)" />
-  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):2809" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
+  <env name="RTCTREE_NAMESERVERS" value="$(arg nameserver):15005" />
+  <arg name="openrtm_args" value='-o "corba.nameservers:$(arg nameserver):15005" -o "naming.formats:%n.rtc" -o "logger.file_name:/tmp/rtc%p.log"' />
 
   <!-- ROS sample -->
   <node pkg="roscpp_tutorials" type="listener" name="listener"
@@ -17,12 +17,12 @@
 
   <!-- RTM sample -->
   <node pkg="rosnode_rtc" type="dataport_rtinject.sh" name="rtinject"
-	args="/localhost/RTMROSDataBridge0.rtc:chatter &quot;RTMROSDataBridge.std_msgs_String(data='hello')&quot;"
+	args="/localhost:15005/RTMROSDataBridge0.rtc:chatter &quot;RTMROSDataBridge.std_msgs_String(data='hello')&quot;"
 	launch-prefix="xterm -e"/>
 
   <!-- BEGIN:openrtm connection -->
   <node name="rtmlaunch_data_bridge" pkg="openrtm_tools" type="rtmlaunch.py"
-	args="$(find rosnode_rtc)/sample/chatter_inport_1.1.0.launch"/>
+	args="$(find rosnode_rtc)/sample/chatter_inport.launch"/>
   <rtactivate component="RTMROSDataBridge0.rtc" />
   <!-- END:openrtm connection -->
 
