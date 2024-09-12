@@ -32,6 +32,12 @@
                      #'send self :rtmros-imu-callback :groupname groupname)
      (ros::subscribe "/emergency_mode" std_msgs::Int32
                      #'send self :rtmros-emergency-mode-callback :groupname groupname)
+     (ros::subscribe "/is_stuck" std_msgs::Int32
+                     #'send self :rtmros-is-stuck-callback :groupname groupname)
+     (ros::subscribe "/use_flywheel" std_msgs::Int32
+                     #'send self :rtmros-use-flywheel-callback :groupname groupname)
+     (ros::subscribe "/estimated_fxy" geometry_msgs::PointStamped
+                     #'send self :rtmros-estimated-fxy-callback :groupname groupname)
      (mapcar #'(lambda (x)
                  (ros::subscribe (format nil "/~A_capture_point" x) geometry_msgs::PointStamped
                                  #'send self :rtmros-capture-point-callback (read-from-string (format nil ":~A-capture-point" x)) :groupname groupname))
@@ -69,6 +75,20 @@
    (let ((m (send msg :data)))
      (send self :set-robot-state1 :emergency-mode m))
    )
+  (:rtmros-is-stuck-callback
+   (msg)
+   (let ((m (send msg :data)))
+     (send self :set-robot-state1 :is-stuck m))
+   )
+  (:rtmros-use-flywheel-callback
+   (msg)
+   (let ((m (send msg :data)))
+     (send self :set-robot-state1 :use-flywheel m))
+   )
+  (:rtmros-estimated-fxy-callback
+   (msg)
+   (let ((p (send msg :point)))
+     (send self :set-robot-state1 :estimated-fxy (float-vector (send p :x) (send p :y) (send p :z)))))
   (:rtmros-capture-point-callback
    (ref-act msg)
    (let ((p (send msg :point)))
@@ -1269,6 +1289,29 @@
    "Call goPos with wait."
    (send self :go-pos-no-wait xx yy th)
    (send self :wait-foot-steps))
+  (:jump-to-no-wait
+   (xx yy zz ts tf)
+   "Call jumpTo without wait."
+   (send self :autobalancerservice_jumpTo :x xx :y yy :z zz :ts ts :tf tf))
+  (:jump-to
+   (xx yy zz ts tf)
+   "Call jumpTo with wait."
+   (send self :jump-to-no-wait xx yy zz ts tf)
+   (send self :wait-foot-steps))
+  (:go-pos-wheel
+   (xx yy th w-xx rv-max ra-max &optional (tm-off 0.0))
+   "Call goPosWheel without wait."
+   (send self :autobalancerservice_goPosWheel :x xx :y yy :th th :w_x w-xx :rv_max rv-max :ra_max ra-max :tm_off tm-off)
+   (send self :wait-foot-steps))
+  (:go-wheel-no-wait
+   (xx rv-max ra-max)
+   "Call goWheel without wait."
+   (send self :autobalancerservice_goWheel :x xx :rv_max rv-max :ra_max ra-max))
+  (:go-wheel
+   (xx rv-max ra-max)
+   "Call goWheel with wait."
+   (send self :go-wheel-no-wait xx rv-max ra-max)
+   (send self :wait-foot-steps))
   (:raw-get-foot-step-param
    ()
    (send (send self :autobalancerservice_getfootstepparam) :i_param))
@@ -1359,6 +1402,48 @@
     For arguments, please see :set-foot-steps-with-param-no-wait documentation."
    (send self :set-foot-steps-with-param-no-wait foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list :overwrite-footstep-index overwrite-footstep-index)
    (send self :wait-foot-steps))
+  (:set-foot-steps-with-wheel-no-wait
+    (foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list goal-pos-list rv-max-list ra-max-list &key (overwrite-footstep-index 0))
+    (unless (listp (car foot-step-list))
+     (setq foot-step-list (mapcar #'(lambda (fs) (list fs)) foot-step-list)
+           step-height-list (mapcar #'(lambda (sh) (list sh)) step-height-list)
+           step-time-list (mapcar #'(lambda (st) (list st)) step-time-list)
+           toe-angle-list (mapcar #'(lambda (ta) (list ta)) toe-angle-list)
+           heel-angle-list (mapcar #'(lambda (ha) (list ha)) heel-angle-list)
+           goal-pos-list (mapcar #'(lambda (gp) (list gp)) goal-pos-list)
+           rv-max-list (mapcar #'(lambda (rv) (list rv)) rv-max-list)
+           ra-max-list (mapcar #'(lambda (ra) (list ra)) ra-max-list)))
+    (send self :autobalancerservice_setfootstepswithwheel
+          :fss
+          (mapcar #'(lambda (fs)
+                      (instance hrpsys_ros_bridge::openhrp_autobalancerservice_footsteps :init
+                                :fs
+                                (mapcar #'(lambda (f)
+                                            (send self :eus-footstep->abc-footstep f))
+                                        fs)))
+                  foot-step-list)
+          :spss
+          (mapcar #'(lambda (shs sts tas has)
+                      (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparams :init
+                                :sps
+                                (mapcar #'(lambda (sh st ta ha)
+                                            (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepparam :init :step_height (* sh 1e-3) :step_time st :toe_angle ta :heel_angle ha))
+                                        shs sts tas has)))
+                  step-height-list step-time-list toe-angle-list heel-angle-list)
+          :wpss
+          (mapcar #'(lambda (gps rvs ras)
+                      (instance hrpsys_ros_bridge::openhrp_autobalancerservice_wheelparams :init
+                                :wps
+                                (mapcar #'(lambda (gp rv ra)
+                                            (instance hrpsys_ros_bridge::openhrp_autobalancerservice_wheelparam :init :goal_pos (* gp 1e-3) :rv_max rv :ra_max ra))
+                                        gps rvs ras)))
+                  goal-pos-list rv-max-list ra-max-list)
+          :overwrite_fs_idx overwrite-footstep-index
+          ))
+  (:set-foot-steps-with-wheel
+    (foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list goal-pos-list rv-max-list ra-max-list &key (overwrite-footstep-index 0))
+    (send self :set-foot-steps-with-wheel-no-wait foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list goal-pos-list rv-max-list ra-max-list :overwrite-footstep-index overwrite-footstep-index)
+    (send self :wait-foot-steps))
   (:set-foot-steps-roll-pitch
    (angle &key (axis :x))
    "Set foot steps with roll or pitch orientation.
@@ -1752,9 +1837,9 @@
 
 ;; StabilizerService
 (def-set-get-param-method
-  'hrpsys_ros_bridge::Openhrp_StabilizerService_stParam
+  'hrpsys_ros_bridge::Openhrp_AutoBalancerService_StabilizerParam
   :raw-set-st-param :get-st-param :get-st-param-arguments
-  :stabilizerservice_setparameter :stabilizerservice_getparameter)
+  :autobalancerservice_setstabilizerparam :autobalancerservice_getstabilizerparam)
 
 (defmethod rtm-ros-robot-interface
   (:set-st-param
@@ -1830,7 +1915,7 @@
    "Set Stabilzier parameter by default parameters."
    (unless (send self :get :default-st-param)
      (send self :put :default-st-param (send self :get-st-param)))
-   (send self :stabilizerservice_setparameter :i_param (send self :get :default-st-param))
+   (send self :autobalancerservice_setparameter :i_param (send self :get :default-st-param))
    )
   (:set-st-param-by-ratio
    (state-feedback-gain-ratio
@@ -1876,12 +1961,12 @@
   (:start-st
    ()
    "Start Stabilizer Mode."
-   (send self :stabilizerservice_startstabilizer)
+   (send self :autobalancerservice_startstabilizer)
    )
   (:stop-st
    ()
    "Stop Stabilizer Mode."
-   (send self :stabilizerservice_stopstabilizer)
+   (send self :autobalancerservice_stopstabilizer)
    )
   )
 
@@ -2204,9 +2289,9 @@
        (print-ros-msg (send self :get-gait-generator-param))
        (format t ";; :get-auto-balancer-param~%")
        (print-ros-msg (send self :get-auto-balancer-param)))
-     (when (find "/StabilizerServiceROSBridge" rosbridge-nodes :test #'string=)
-       (format t ";; :get-st-param~%")
-       (print-ros-msg (send self :get-st-param)))
+     ;; (when (find "/StabilizerServiceROSBridge" rosbridge-nodes :test #'string=)
+     ;;   (format t ";; :get-st-param~%")
+     ;;   (print-ros-msg (send self :get-st-param)))
      (when (find "/ObjectContactTurnaroundDetectorServiceROSBridge" rosbridge-nodes :test #'string=)
        (format t ";; :get-object-turnaround-detector-param~%")
        (print-ros-msg (send self :get-object-turnaround-detector-param)))

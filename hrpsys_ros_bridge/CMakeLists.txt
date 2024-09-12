@@ -76,7 +76,7 @@ if(CCACHE_FOUND AND "$ENV{CI}" STREQUAL "true" )
 endif(CCACHE_FOUND AND "$ENV{CI}" STREQUAL "true" )
 
 # define add_message_files before rtmbuild_init
-add_message_files(FILES MotorStates.msg ContactState.msg ContactStateStamped.msg ContactStatesStamped.msg)
+add_message_files(FILES MotorStates.msg LandingPosition.msg SteppableRegion.msg CogState.msg ContactState.msg ContactStateStamped.msg ContactStatesStamped.msg)
 add_service_files(FILES SetSensorTransformation.srv)
 # initialize rtmbuild
 rtmbuild_init(geometry_msgs)

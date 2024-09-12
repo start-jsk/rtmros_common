@@ -62,6 +62,8 @@ HrpsysSeqStateROSBridge::HrpsysSeqStateROSBridge(RTC::Manager* manager) :
   joint_controller_state_pub = nh.advertise<control_msgs::JointTrajectoryControllerState>("/fullbody_controller/state", 1);
 #endif
   trajectory_command_sub = nh.subscribe("/fullbody_controller/command", 1, &HrpsysSeqStateROSBridge::onTrajectoryCommandCB, this);
+  landing_height_sub = nh.subscribe("/landing_height", 1, &HrpsysSeqStateROSBridge::onLandingHeightCB, this);
+  steppable_region_sub = nh.subscribe("/steppable_region", 1, &HrpsysSeqStateROSBridge::onSteppableRegionCB, this);
   mot_states_pub = nh.advertise<hrpsys_ros_bridge::MotorStates>("/motor_states", 1);
   odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 1);
   imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1);
@@ -158,12 +160,18 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   ref_contact_states_pub = nh.advertise<hrpsys_ros_bridge::ContactStatesStamped>("/ref_contact_states", 10);
   act_contact_states_pub = nh.advertise<hrpsys_ros_bridge::ContactStatesStamped>("/act_contact_states", 10);
   cop_pub.resize(m_mcforceName.size());
+  landing_target_pub = nh.advertise<hrpsys_ros_bridge::LandingPosition>("/landing_target", 10);
+  end_cog_state_pub = nh.advertise<hrpsys_ros_bridge::CogState>("/end_cog_state", 10);
   for (unsigned int i=0; i<m_mcforceName.size(); i++){
     std::string tmpname(m_mcforceName[i]); // "ref_xx"
     tmpname.erase(0,4); // Remove "ref_"
     cop_pub[i] = nh.advertise<geometry_msgs::PointStamped>(tmpname+"_cop", 10);
   }
   em_mode_pub = nh.advertise<std_msgs::Int32>("emergency_mode", 10);
+  is_stuck_pub = nh.advertise<std_msgs::Int32>("is_stuck", 10);
+  use_flywheel_pub = nh.advertise<std_msgs::Int32>("use_flywheel", 10);
+  estimated_fxy_pub = nh.advertise<geometry_msgs::PointStamped>("estimated_fxy", 10);
+  current_steppable_region_pub = nh.advertise<hrpsys_ros_bridge::SteppableRegion>("current_steppable_region", 10);
 
   return RTC::RTC_OK;
 }
@@ -282,6 +290,33 @@ void HrpsysSeqStateROSBridge::onFollowJointTrajectoryActionPreempt() {
 
 void HrpsysSeqStateROSBridge::onTrajectoryCommandCB(const trajectory_msgs::JointTrajectoryConstPtr& msg) {
   onJointTrajectory(*msg);
+}
+
+void HrpsysSeqStateROSBridge::onLandingHeightCB(const hrpsys_ros_bridge::LandingPosition::ConstPtr& msg) {
+  m_rslandingHeight.data.x = msg->x;
+  m_rslandingHeight.data.y = msg->y;
+  m_rslandingHeight.data.z = msg->z;
+  m_rslandingHeight.data.nx = msg->nx;
+  m_rslandingHeight.data.ny = msg->ny;
+  m_rslandingHeight.data.nz = msg->nz;
+  m_rslandingHeight.data.l_r = msg->l_r;
+  m_rslandingHeightOut.write();
+}
+
+void HrpsysSeqStateROSBridge::onSteppableRegionCB(const hrpsys_ros_bridge::SteppableRegion::ConstPtr& msg) {
+  size_t convex_num(msg->polygons.size());
+  m_rssteppableRegion.data.region.length(convex_num);
+  for (size_t i = 0; i < convex_num; i++) {
+    size_t vs_num(msg->polygons[i].polygon.points.size());
+    m_rssteppableRegion.data.region[i].length(3 * vs_num); // x,y,z components
+    for (size_t j = 0; j < vs_num; j++) {
+      m_rssteppableRegion.data.region[i][3*j] = msg->polygons[i].polygon.points[j].x;
+      m_rssteppableRegion.data.region[i][3*j+1] = msg->polygons[i].polygon.points[j].y;
+      m_rssteppableRegion.data.region[i][3*j+2] = msg->polygons[i].polygon.points[j].z;
+    }
+  }
+  m_rssteppableRegion.data.l_r = msg->l_r;
+  m_rssteppableRegionOut.write();
 }
 
 bool HrpsysSeqStateROSBridge::setSensorTransformation(hrpsys_ros_bridge::SetSensorTransformation::Request& req,
@@ -806,6 +841,53 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       }
   }
 
+  if ( m_rslandingTargetIn.isNew() ) {
+    try {
+      m_rslandingTargetIn.read();
+      hrpsys_ros_bridge::LandingPosition landingTargetv;
+      if ( use_hrpsys_time ) {
+        landingTargetv.header.stamp = ros::Time(m_rslandingTarget.tm.sec, m_rslandingTarget.tm.nsec);
+      }else{
+        landingTargetv.header.stamp = tm_on_execute;
+      }
+      landingTargetv.header.frame_id = rootlink_name;
+      landingTargetv.x = m_rslandingTarget.data.x;
+      landingTargetv.y = m_rslandingTarget.data.y;
+      landingTargetv.z = m_rslandingTarget.data.z;
+      landingTargetv.l_r = m_rslandingTarget.data.l_r;
+      landing_target_pub.publish(landingTargetv);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+  if ( m_rsendCogStateIn.isNew() ) {
+    try {
+      m_rsendCogStateIn.read();
+      hrpsys_ros_bridge::CogState endCogStatev;
+      if ( use_hrpsys_time ) {
+        endCogStatev.header.stamp = ros::Time(m_rsendCogState.tm.sec, m_rsendCogState.tm.nsec);
+      }else{
+        endCogStatev.header.stamp = tm_on_execute;
+      }
+      endCogStatev.header.frame_id = rootlink_name;
+      endCogStatev.x = m_rsendCogState.data.x;
+      endCogStatev.y = m_rsendCogState.data.y;
+      endCogStatev.z = m_rsendCogState.data.z;
+      endCogStatev.vx = m_rsendCogState.data.vx;
+      endCogStatev.vy = m_rsendCogState.data.vy;
+      endCogStatev.vz = m_rsendCogState.data.vz;
+      endCogStatev.l_r = m_rsendCogState.data.l_r;
+      end_cog_state_pub.publish(endCogStatev);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
   if ( m_refContactStatesIn.isNew() && m_controlSwingSupportTimeIn.isNew() ) {
     try {
       m_refContactStatesIn.read();
@@ -910,6 +992,81 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
         ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
       }
   }
+
+  if ( m_isStuckIn.isNew() ) {
+    try {
+      m_isStuckIn.read();
+      std_msgs::Int32 is_stuck;
+      is_stuck.data = m_isStuck.data;
+      is_stuck_pub.publish(is_stuck);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+  if ( m_useFlywheelIn.isNew() ) {
+    try {
+      m_useFlywheelIn.read();
+      std_msgs::Int32 use_flywheel;
+      use_flywheel.data = m_useFlywheel.data;
+      use_flywheel_pub.publish(use_flywheel);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+  if ( m_estimatedFxyIn.isNew() ) {
+    try {
+      m_estimatedFxyIn.read();
+      geometry_msgs::PointStamped fxyv;
+      if ( use_hrpsys_time ) {
+        fxyv.header.stamp = ros::Time(m_estimatedFxy.tm.sec, m_estimatedFxy.tm.nsec);
+      }else{
+        fxyv.header.stamp = tm_on_execute;
+      }
+      fxyv.header.frame_id = rootlink_name;
+      fxyv.point.x = m_estimatedFxy.data.x;
+      fxyv.point.y = m_estimatedFxy.data.y;
+      fxyv.point.z = m_estimatedFxy.data.z;
+      estimated_fxy_pub.publish(fxyv);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+  if ( m_currentSteppableRegionIn.isNew() ) {
+    try {
+      m_currentSteppableRegionIn.read();
+      hrpsys_ros_bridge::SteppableRegion region;
+      bool is_valid = false;
+      size_t convex_num(m_currentSteppableRegion.data.region.length());
+      region.polygons.resize(convex_num);
+      for (size_t i = 0; i < convex_num; i++) {
+        size_t vs_num(m_currentSteppableRegion.data.region[i].length()/3);
+        if (vs_num >= 3) is_valid = true;
+        region.polygons[i].polygon.points.resize(vs_num);
+        for (size_t j = 0; j < vs_num; j++) {
+          region.polygons[i].polygon.points[j].x = m_currentSteppableRegion.data.region[i][3*j];
+          region.polygons[i].polygon.points[j].y = m_currentSteppableRegion.data.region[i][3*j+1];
+          region.polygons[i].polygon.points[j].z = m_currentSteppableRegion.data.region[i][3*j+2];
+        }
+      }
+      region.l_r = m_currentSteppableRegion.data.l_r;
+      if (is_valid) current_steppable_region_pub.publish(region);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+
 
   //
   return RTC::RTC_OK;
