@@ -124,6 +124,9 @@ public:
   };
 
 protected:
+  RTC::TimedDoubleSeq m_rsangle;
+  RTC::InPort<RTC::TimedDoubleSeq> m_rsangleIn;
+
   RTC::CorbaPort m_SequencePlayerServicePort;
   RTC::CorbaConsumer<OpenHRP::SequencePlayerService> m_service0;
 
