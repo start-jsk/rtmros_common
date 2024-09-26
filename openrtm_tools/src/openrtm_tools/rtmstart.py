@@ -3,6 +3,7 @@
 import os,psutil,subprocess,socket,sys
 from omniORB import CORBA
 import CosNaming
+from time import sleep
 
 def start_cosname(cosnames, port_number):
     p = None
@@ -51,6 +52,18 @@ def start_cosname(cosnames, port_number):
             pass
 
         p = subprocess.Popen([cosnames,"-start", str(port_number), "-always", "-logdir", logdir])
+
+        while start_naming:
+            try:
+                orb = CORBA.ORB_init(sys.argv + ['-ORBInitRef', 'NameService=corbaloc:iiop:localhost:'+str(port_number)+'/NameService'], CORBA.ORB_ID)
+                nameserver = orb.resolve_initial_references("NameService")
+                rootnc = nameserver._narrow(CosNaming.NamingContext)
+                start_naming = False
+            except Exception as e:
+                print(e)
+                print "\033[33m[rtmlaunch] name server is unreachable so wait for a seconds...\033[0m"
+                sleep(1)
+        print "\033[32m[rtmlaunch] name server is ready\033[0m"
 
         return p
 
