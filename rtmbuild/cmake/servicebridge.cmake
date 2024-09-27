@@ -50,6 +50,23 @@ macro(_rtmbuild_genbridge_init)
 
       string(REPLACE "\n" ";" ${PROJECT_NAME}_autogen_files  ${${PROJECT_NAME}_autogen_files})
       ##
+      ## if one of the autogen files are already installed, skip this.
+      set(_interface_name "")
+      foreach(_autogen_file ${${PROJECT_NAME}_autogen_files})
+        get_filename_component(_ext ${_autogen_file} EXT)
+        if(NOT _ext)
+          set(_interface_name ${_autogen_file})
+        endif()
+      endforeach()
+      if(DEBUG_RTMBUILD_CMAKE)
+        message("[_rtmbuild_genbridge_init] Convert ${_idl_file} as ${_interface_name} interface")
+      endif()
+      list(FIND ${PROJECT_NAME}_autogen_interfaces ${_interface_name} _found_interface_name)
+      if(${_found_interface_name} GREATER -1)
+        message(WARNING "Duplicate interface name ${_interface_name} (${_idl_name}), as of 2018, we do not find the solution to fix this without breaking API (https://github.com/start-jsk/rtmros_common/pull/1046)")
+        break() # skip to next loop
+      endif()
+      ##
       ## set _autogen_msg_files, _autogen_srv_files
       if(DEBUG_RTMBUILD_CMAKE)
         message("[_rtmbuild_genbridge_init] ${PROJECT_NAME}_autogen_files : ${${PROJECT_NAME}_autogen_files}")
