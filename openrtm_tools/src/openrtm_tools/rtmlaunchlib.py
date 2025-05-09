@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import roslib
 roslib.load_manifest('openrtm_tools')
@@ -32,7 +33,7 @@ def wait_component(cmd_path, tree):
     node = alive_component(path, tree)
     if not node:
         while count < 30:
-            print >>sys.stderr, "\033[33m[rtmlaunch] Wait for ",cmd_path," ",count,"/30\033[0m"
+            print("\033[33m[rtmlaunch] Wait for ",cmd_path," ",count,"/30\033[0m", file=sys.stderr)
             node = alive_component(path, tree)
             if node:
                 return node
@@ -92,7 +93,7 @@ def rtconnect(nameserver, tags, tree):
             sub_type = tag.attributes.get("subscription_type").value
             sub_type = replace_arg_tag_by_env(sub_type);
             if not sub_type in ['flush','new','periodic']:
-                print >>sys.stderr, sub_type+' is not a subscription type'
+                print(sub_type+' is not a subscription type', file=sys.stderr)
                 continue
         else:
             sub_type = 'flush' # this is default value
@@ -104,8 +105,8 @@ def rtconnect(nameserver, tags, tree):
             wait_component(dest_full_path, tree)
             if check_connect(source_full_path,dest_full_path, tree):
                 continue
-        except Exception, e:
-            print >>sys.stderr, '\033[31m[rtmlaunch] [ERROR] Could not Connect (', source_full_path, ',', dest_full_path, '): ', e,'\033[0m'
+        except Exception as e:
+            print('\033[31m[rtmlaunch] [ERROR] Could not Connect (', source_full_path, ',', dest_full_path, '): ', e,'\033[0m', file=sys.stderr)
             return 1
         #print source_path, source_full_path, dest_path, dest_full_path;
         try:
@@ -126,26 +127,26 @@ def rtconnect(nameserver, tags, tree):
             if tag.attributes.get("buffer_length") != None:
                 props['dataport.buffer.length'] = replace_arg_tag_by_env(str(tag.attributes.get("buffer_length").value))
             options = optparse.Values({'verbose': False, 'id': '', 'name': None, 'properties': props})
-            print >>sys.stderr, "[rtmlaunch] Connected from",source_path
-            print >>sys.stderr, "[rtmlaunch]             to",dest_path
-            print >>sys.stderr, "[rtmlaunch]           with",options
+            print("[rtmlaunch] Connected from",source_path, file=sys.stderr)
+            print("[rtmlaunch]             to",dest_path, file=sys.stderr)
+            print("[rtmlaunch]           with",options, file=sys.stderr)
             try :
                 rtcon.connect_ports(source_path, source_full_path, dest_path, dest_full_path, options, tree=tree)
-            except Exception, e_1_1_0: # openrtm 1.1.0
+            except Exception as e_1_1_0: # openrtm 1.1.0
                 try:
                     rtcon.connect_ports([(source_path,source_full_path), (dest_path, dest_full_path)], options, tree=tree)
-                except Exception, e_1_0_0: # openrtm 1.0.0
-                    print >>sys.stderr, '\033[31m[rtmlaunch] {0} did not work on both OpenRTM 1.0.0 and 1.1.0'.format(os.path.basename(sys.argv[1])),'\033[0m'
-                    print >>sys.stderr, '\033[31m[rtmlaunch]    OpenRTM 1.0.0 {0}'.format(e_1_0_0),'\033[0m'
-                    print >>sys.stderr, '\033[31m[rtmlaunch]    OpenRTM 1.1.0 {0}'.format(e_1_1_0),'\033[0m'
-                    print >>sys.stderr, '\033[31m[rtmlaunch]  This is very weird situation, Please check your network\033[0m'
-                    print >>sys.stderr, '\033[31m[rtmlaunch] configuration with `ifconfig` on both robot and client side. \033[0m'
-                    print >>sys.stderr, '\033[31m[rtmlaunch]  Having multiple network interface sometimes causes problem, \033[0m'
-                    print >>sys.stderr, '\033[31m[rtmlaunch] please see FAQ site http://www.openrtm.org/OpenRTM-aist/html/FAQ2FE38388E383A9E38396E383ABE382B7E383A5E383BCE38386E382A3E383B3E382B0.html#f2bc375d\033[0m'
-                    print >>sys.stderr, '\033[31m[rtmlaunch]            Issue related to this https://github.com/start-jsk/rtmros_hironx/issues/33\033[0m'
-                    print >>sys.stderr, '\033[31m[rtmlaunch]            ~/.ros/log may contains usefully informations\033[0m'
-        except Exception, e:
-            print >>sys.stderr, '\033[31m[rtmlaunch] {0}: {1}'.format(os.path.basename(sys.argv[1]), e),'\033[0m'
+                except Exception as e_1_0_0: # openrtm 1.0.0
+                    print('\033[31m[rtmlaunch] {0} did not work on both OpenRTM 1.0.0 and 1.1.0'.format(os.path.basename(sys.argv[1])),'\033[0m', file=sys.stderr)
+                    print('\033[31m[rtmlaunch]    OpenRTM 1.0.0 {0}'.format(e_1_0_0),'\033[0m', file=sys.stderr)
+                    print('\033[31m[rtmlaunch]    OpenRTM 1.1.0 {0}'.format(e_1_1_0),'\033[0m', file=sys.stderr)
+                    print('\033[31m[rtmlaunch]  This is very weird situation, Please check your network\033[0m', file=sys.stderr)
+                    print('\033[31m[rtmlaunch] configuration with `ifconfig` on both robot and client side. \033[0m', file=sys.stderr)
+                    print('\033[31m[rtmlaunch]  Having multiple network interface sometimes causes problem, \033[0m', file=sys.stderr)
+                    print('\033[31m[rtmlaunch] please see FAQ site http://www.openrtm.org/OpenRTM-aist/html/FAQ2FE38388E383A9E38396E383ABE382B7E383A5E383BCE38386E382A3E383B3E382B0.html#f2bc375d\033[0m', file=sys.stderr)
+                    print('\033[31m[rtmlaunch]            Issue related to this https://github.com/start-jsk/rtmros_hironx/issues/33\033[0m', file=sys.stderr)
+                    print('\033[31m[rtmlaunch]            ~/.ros/log may contains usefully informations\033[0m', file=sys.stderr)
+        except Exception as e:
+            print('\033[31m[rtmlaunch] {0}: {1}'.format(os.path.basename(sys.argv[1]), e),'\033[0m', file=sys.stderr)
     return 0
 
 def rtactivate(nameserver, tags, tree):
@@ -175,28 +176,28 @@ def rtactivate(nameserver, tags, tree):
             if state == 'Active':
                 continue
             else:
-                print >>sys.stderr, "[rtmlaunch] Activate <-",state,full_path
-        except Exception, e:
-            print >>sys.stderr, '\033[31m[rtmlaunch] Could not Activate (', cmd_path, ') : ', e,'\033[0m'
+                print("[rtmlaunch] Activate <-",state,full_path, file=sys.stderr)
+        except Exception as e:
+            print('\033[31m[rtmlaunch] Could not Activate (', cmd_path, ') : ', e,'\033[0m', file=sys.stderr)
             return 1
         try:
             options = optparse.Values({"ec_index": 0, 'verbose': False})
             try :
                 state_control_base.alter_component_state(activate_action, cmd_path, full_path, options, tree=tree)
-            except Exception, e: # openrtm 1.1.0
+            except Exception as e: # openrtm 1.1.0
                 state_control_base.alter_component_states(activate_action, [(cmd_path, full_path)], options, tree=tree)
-        except Exception, e:
-            print >>sys.stderr, '[rtmlaunch] {0}: {1}'.format(os.path.basename(sys.argv[0]), e)
+        except Exception as e:
+            print('[rtmlaunch] {0}: {1}'.format(os.path.basename(sys.argv[0]), e), file=sys.stderr)
             return 1
     return 0
 
 def main():
     usage = '''Usage: %prog [launchfile]'''
     if len(sys.argv) <= 1:
-        print >>sys.stderr, usage
+        print(usage, file=sys.stderr)
         return 1
     fullpathname = sys.argv[1]
-    print >>sys.stderr, "[rtmlaunch] starting... ",fullpathname
+    print("[rtmlaunch] starting... ",fullpathname, file=sys.stderr)
     try:
         parser = parse(fullpathname)
         nodes = parser.getElementsByTagName("launch")[0].childNodes
@@ -216,46 +217,46 @@ def main():
                 
         for remove_node in remove_nodes:
             nodes.remove(remove_node)
-    except Exception,e:
-        print e
+    except Exception as e:
+        print(e)
         return 1
 
     if os.getenv("RTCTREE_NAMESERVERS") == None:
-        print >>sys.stderr, "[rtmlaunch] RTCTREE_NAMESERVERS is not set, use localhost:15005"
+        print("[rtmlaunch] RTCTREE_NAMESERVERS is not set, use localhost:15005", file=sys.stderr)
         nameserver = "localhost:15005"
         os.environ["RTCTREE_NAMESERVERS"] = nameserver
     else:
         nameserver = os.getenv("RTCTREE_NAMESERVERS")
 
-    print >>sys.stderr, "\033[32m[rtmlaunch] RTCTREE_NAMESERVERS", nameserver,  os.getenv("RTCTREE_NAMESERVERS"), "\033[0m"
-    print >>sys.stderr, "\033[32m[rtmlaunch] SIMULATOR_NAME", os.getenv("SIMULATOR_NAME","Simulator"), "\033[0m"
+    print("\033[32m[rtmlaunch] RTCTREE_NAMESERVERS", nameserver,  os.getenv("RTCTREE_NAMESERVERS"), "\033[0m", file=sys.stderr)
+    print("\033[32m[rtmlaunch] SIMULATOR_NAME", os.getenv("SIMULATOR_NAME","Simulator"), "\033[0m", file=sys.stderr)
 
     try:
         tree = rtctree.tree.RTCTree()
-    except Exception, e:
-        print >>sys.stderr, "\033[31m[rtmlaunch] Could not start rtmlaunch.py, Caught exception (", e, ")\033[0m"
+    except Exception as e:
+        print("\033[31m[rtmlaunch] Could not start rtmlaunch.py, Caught exception (", e, ")\033[0m", file=sys.stderr)
         # check if host is connected
         try:
             hostname = nameserver.split(':')[0]
             ip_address = socket.gethostbyname(hostname)
-        except Exception, e:
-            print >>sys.stderr, "\033[31m[rtmlaunch] .. Could not find IP address of ", hostname, ", Caught exception (", e, ")\033[0m"
-            print >>sys.stderr, "\033[31m[rtmlaunch] .. Please check /etc/hosts or DNS setup\033[0m"
+        except Exception as e:
+            print("\033[31m[rtmlaunch] .. Could not find IP address of ", hostname, ", Caught exception (", e, ")\033[0m", file=sys.stderr)
+            print("\033[31m[rtmlaunch] .. Please check /etc/hosts or DNS setup\033[0m", file=sys.stderr)
             return 1
         # in this case, it is likely you forget to run name serveer
-        print >>sys.stderr, "\033[31m[rtmlaunch] .. Could not connect to NameServer at ", nameserver, ", Caught exception (", e, ")\033[0m"
-        print >>sys.stderr, "\033[31m[rtmlaunch] .. Please make sure that you have NameServer running at %s/`\033[0m"%(nameserver)
-        print >>sys.stderr, "\033[31m[rtmlaunch] .. You can check with `rtls %s/`\033[0m"%(nameserver)
+        print("\033[31m[rtmlaunch] .. Could not connect to NameServer at ", nameserver, ", Caught exception (", e, ")\033[0m", file=sys.stderr)
+        print("\033[31m[rtmlaunch] .. Please make sure that you have NameServer running at %s/`\033[0m"%(nameserver), file=sys.stderr)
+        print("\033[31m[rtmlaunch] .. You can check with `rtls %s/`\033[0m"%(nameserver), file=sys.stderr)
         return 1
     while 1:
-        print >>sys.stderr, "[rtmlaunch] check connection/activation"
+        print("[rtmlaunch] check connection/activation", file=sys.stderr)
         rtconnect(nameserver, parser.getElementsByTagName("rtconnect"), tree)
         rtactivate(nameserver, parser.getElementsByTagName("rtactivate"), tree)
         time.sleep(10)
         tree.add_name_server(nameserver, [])
         if os.getenv("RTC_CONNECTION_CHECK_ONCE") and os.getenv("RTC_CONNECTION_CHECK_ONCE").lower() == "true":
-            print >>sys.stderr, "[rtmlaunch] break from rtmlaunch main loop."
-            print >>sys.stderr, "[rtmlaunch] If you check the rtc connection in the while loop, real-time loop becomes slow."
+            print("[rtmlaunch] break from rtmlaunch main loop.", file=sys.stderr)
+            print("[rtmlaunch] If you check the rtc connection in the while loop, real-time loop becomes slow.", file=sys.stderr)
             break
 def get_flag_from_argv(arg):
     for a in sys.argv:

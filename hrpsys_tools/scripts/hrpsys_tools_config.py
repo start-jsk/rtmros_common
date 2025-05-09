@@ -38,9 +38,9 @@ if __name__ == '__main__':
             hcf.waitForRTCManagerAndRoboHardware(robotname=sys.argv[1])
             sys.argv = [sys.argv[0]] + sys.argv[2:]
         hcf.findComps()
-        print >> sys.stderr, "[hrpsys.py] #\n[hrpsys.py] # use `hcf` as robot interface, for example hcf.getJointAngles()\n[hrpsys.py] #"
+        print("[hrpsys.py] #\n[hrpsys.py] # use `hcf` as robot interface, for example hcf.getJointAngles()\n[hrpsys.py] #", file=sys.stderr)
         while args.c != None:
-            print >> sys.stderr, ">>", args.c[0]
+            print(">>", args.c[0], file=sys.stderr)
             exec(args.c[0])
             args.c.pop(0)
         if not (args.i and '__IPYTHON__' in vars(__builtins__)):

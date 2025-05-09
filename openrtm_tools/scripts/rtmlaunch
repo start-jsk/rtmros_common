@@ -34,9 +34,9 @@ arg_remap = names.load_mappings(sys.argv)
 
 if 'corbaport' in arg_remap:
     port_number = int(arg_remap['corbaport'])
-    print "\033[34m[rtmlaunch] user defined corbaport:=", port_number, "will be used\033[0m"
+    print(("\033[34m[rtmlaunch] user defined corbaport:=", port_number, "will be used\033[0m"))
 else:
-    print "\033[34m[rtmlaunch] default corbaport:=", port_number, "will be used\033[0m"
+    print(("\033[34m[rtmlaunch] default corbaport:=", port_number, "will be used\033[0m"))
 
 p = rtmstart.start_cosname(cosnames, port_number)
 
@@ -45,6 +45,6 @@ try:
 finally:
     # if omniName is invoked from this script, stop this
     if p :
-        print "\033[34m[rtmlaunch] terminate", cosnames, "at port", port_number, "\033[0m"
+        print(("\033[34m[rtmlaunch] terminate", cosnames, "at port", port_number, "\033[0m"))
         p.terminate()
 

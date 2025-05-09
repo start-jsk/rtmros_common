@@ -92,7 +92,9 @@ macro(compile_openhrp_model wrlfile)
   # use controller_config_converter
   get_controller_config_converter(_controller_config_converter)
   # get path to collada_to_urdf
-  get_collada_to_urdf(_collada_to_urdf_exe)
+  if(NOT $ENV{ROS_DISTRO} STREQUAL "noetic")
+    get_collada_to_urdf(_collada_to_urdf_exe) # not working on Noetic : https://github.com/ros/collada_urdf/issues/43
+  endif()
 
   # ready to go
   message(STATUS " wrl file ${_wrlfile}")
@@ -123,9 +125,15 @@ macro(compile_openhrp_model wrlfile)
   # output urdf files (collada -> urdf)
   set(_mesh_dir "${_workdir}/${_name}_meshes")
   set(_mesh_prefix "package://${PROJECT_NAME}/models/${_name}_meshes")
-  add_custom_command(OUTPUT ${_urdffile} ${_mesh_dir}
-    COMMAND ${_collada_to_urdf_exe} ${_daefile} --output_file ${_urdffile} -G -A --mesh_output_dir ${_mesh_dir} --mesh_prefix ${_mesh_prefix}
-    DEPENDS ${_sname}_${PROJECT_NAME}_compile_dae)
+  if($ENV{ROS_DISTRO} STREQUAL "noetic")
+    add_custom_command(OUTPUT ${_urdffile} ${_mesh_dir}
+      COMMAND rosrun collada_urdf collada_to_urdf ${_daefile} --output_file ${_urdffile} -G -A --mesh_output_dir ${_mesh_dir} --mesh_prefix ${_mesh_prefix}
+      DEPENDS ${_sname}_${PROJECT_NAME}_compile_dae)
+  else()
+    add_custom_command(OUTPUT ${_urdffile} ${_mesh_dir}
+      COMMAND ${_collada_to_urdf_exe} ${_daefile} --output_file ${_urdffile} -G -A --mesh_output_dir ${_mesh_dir} --mesh_prefix ${_mesh_prefix}
+      DEPENDS ${_sname}_${PROJECT_NAME}_compile_dae)
+  endif()
   add_custom_target(${_sname}_${PROJECT_NAME}_compile_urdf DEPENDS ${_urdffile} ${_mesh_dir})
   list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_urdf)
 
@@ -140,8 +148,13 @@ macro(compile_openhrp_model wrlfile)
 
   if(_controller_config)
     # output controller config (yaml -> config) if yaml is not found write dummy files
+    find_package(PythonInterp QUIET)
+    if(NOT PYTHONINTERP_FOUND)
+      find_package(Python REQUIRED)
+      set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
+    endif()  # enable to execute with correct python version (cf. https://github.com/tork-a/openrtm_aist_python-release/pull/5)
     add_custom_command(OUTPUT ${_controller_config}
-      COMMAND ${_controller_config_converter} ${_yamlfile} ${_controller_config}
+      COMMAND ${PYTHON_EXECUTABLE} ${_controller_config_converter} ${_yamlfile} ${_controller_config}
       DEPENDS ${_yamlfile})
     add_custom_target(${_sname}_${PROJECT_NAME}_compile_conf DEPENDS ${_controller_config})
     list(APPEND ${_sname}_${PROJECT_NAME}_compile_all_target ${_sname}_${PROJECT_NAME}_compile_conf)

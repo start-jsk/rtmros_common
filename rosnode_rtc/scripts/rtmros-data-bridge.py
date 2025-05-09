@@ -89,7 +89,7 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
             port = topic.lstrip('/').replace('/','_')
             topic_type = idlman.topicinfo.get(topic, None)
             _data = idlman.get_rtmobj(topic_type)
-            if topic in self.inports.keys() or not topic_type or not _data:
+            if topic in list(self.inports.keys()) or not topic_type or not _data:
                 rospy.loginfo('Failed to add InPort "%s"', port)
                 continue
             rospy.loginfo('Add InPort "%s"[%s]', port, topic_type)
@@ -102,7 +102,7 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
             port = topic.lstrip('/').replace('/','_')
             topic_type = idlman.topicinfo.get(topic, None)
             _data = idlman.get_rtmobj(topic_type)
-            if (topic in self.outports.keys()) or not topic_type or not _data:
+            if (topic in list(self.outports.keys())) or not topic_type or not _data:
                 rospy.loginfo('Failed to add OutPort "%s"', port)
                 continue
             rospy.loginfo('Add OutPort "%s"[%s]', port, topic_type)
@@ -115,7 +115,7 @@ class RtmRosDataBridge(OpenRTM_aist.DataFlowComponentBase):
 
     # InPort -> Publisher
     def onExecute(self, ec_id):
-        for topic in self.inports.keys():
+        for topic in list(self.inports.keys()):
             _inport, _ = self.inports[topic]
             if _inport.isNew():
                 _data = _inport.read()
@@ -206,7 +206,7 @@ class RtmRosDataIdl:
 
     def rtm2ros(self, data, output=None):
         datatype = str(data).split('(')[0].split('.')[1]
-        for msgtype in self.msg2obj.keys():
+        for msgtype in list(self.msg2obj.keys()):
             if datatype == msgtype.replace('/','_'):
                 output = self.msg2obj[msgtype][0]()
                 break
@@ -260,7 +260,7 @@ class RtmRosDataIdl:
             return self.msg2obj[data._type][1](*args)
 
     def get_rtmobj(self, msg):
-        if not msg in self.msg2obj.keys():
+        if not msg in list(self.msg2obj.keys()):
             return None
         return self.ros2rtm(self.msg2obj[msg][0]())
 
@@ -280,7 +280,7 @@ class RtmRosDataIdl:
         return text
 
     def gen_struct_text(self, msg):
-        if msg in (self.generated + self.basictab.keys()):
+        if msg in (self.generated + list(self.basictab.keys())):
             return True
 
         defmsg = self.get_message_definition(msg)
@@ -305,7 +305,7 @@ class RtmRosDataIdl:
         defmsg = defmsg.replace('/','_')
 
         # for embedded types, sequence/array types
-        for key in self.basictab.keys():
+        for key in list(self.basictab.keys()):
             p = re.compile( '(^|\n)'+key+'((\[[\d]*\])?[ ]+[\w]+)')
             defmsg = p.sub( r'\1'+self.basictab[key]+r'\2', defmsg)
         p = re.compile( '(^|\n)([ \w]+)\[([\d]+)\][ ]([\w]+)')

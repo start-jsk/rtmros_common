@@ -13,7 +13,7 @@ def start_cosname(cosnames, port_number):
         try:
             # find process using port_number
             if filter(lambda c: c.local_address[1] == port_number, p.get_connections()):
-                print "\033[31m[rtmlaunch]", p.name, "is already started with port", port_number,"\033[0m"
+                print("\033[31m[rtmlaunch]", p.name, "is already started with port", port_number,"\033[0m")
 
                 try:
                     orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)
@@ -26,22 +26,22 @@ def start_cosname(cosnames, port_number):
                     cxt = findObject(socket.gethostname(), "host_cxt")
                     obj = findObject("manager", "mgr", cxt)
                     start_naming = False
-                except CosNaming.NamingContext.NotFound, ex:
+                except CosNaming.NamingContext.NotFound as ex:
                     # this is ok since host_cxt, manager is not bind
                     start_naming = False
                     pass
                 except:
-                    print "\033[31m[rtmlaunch] name server is unreachable so kill process\033[0m"
-                    print "\033[31m[rtmlaunch] kill ", cosnames, " of pid", p.pid,"\033[0m"
+                    print("\033[31m[rtmlaunch] name server is unreachable so kill process\033[0m")
+                    print("\033[31m[rtmlaunch] kill ", cosnames, " of pid", p.pid,"\033[0m")
                     p.terminate()
         except:
             pass
 
     if not start_naming :
-        print "\033[31m[rtmlaunch] do not start", cosnames, ", exiting...\033[0m"
+        print("\033[31m[rtmlaunch] do not start", cosnames, ", exiting...\033[0m")
         exit(0)
     else:
-        print "\033[34m[rtmlaunch] Start", cosnames, "at port", port_number, "\033[0m"
+        print("\033[34m[rtmlaunch] Start", cosnames, "at port", port_number, "\033[0m")
         logdir = "/tmp"
         hostname = socket.gethostname()
         try :

@@ -73,7 +73,7 @@
 
   <group if="$(arg INSTALL_ROBOT_DESCRIPTION)" >
     <param name="robot_description" textfile="$(arg COLLADA_FILE)" />
-    <node pkg="robot_state_publisher" type="state_publisher" name="hrpsys_state_publisher" />
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="hrpsys_state_publisher" />
   </group>
 
   <!-- diagnostics -->

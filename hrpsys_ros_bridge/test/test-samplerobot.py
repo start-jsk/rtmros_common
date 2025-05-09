@@ -191,7 +191,7 @@ class TestSampleRobot(unittest.TestCase):
 
         ## wait for joint_states updates
         rospy.sleep(1)
-        current_positions = dict(zip(self.joint_states.name, self.joint_states.position))
+        current_positions = dict(list(zip(self.joint_states.name, self.joint_states.position)))
 
         # goal
         goal.trajectory.header.stamp = rospy.get_rostime()
@@ -221,7 +221,7 @@ class TestSampleRobot(unittest.TestCase):
 
         ## wait for joint_states updates
         rospy.sleep(1)
-        current_positions = dict(zip(self.joint_states.name, self.joint_states.position))
+        current_positions = dict(list(zip(self.joint_states.name, self.joint_states.position)))
 
         goal.trajectory.points = []
         ## add current position
@@ -242,7 +242,7 @@ class TestSampleRobot(unittest.TestCase):
 
         ## wait for update joint_states
         rospy.sleep(1)
-        current_positions = dict(zip(self.joint_states.name, self.joint_states.position))
+        current_positions = dict(list(zip(self.joint_states.name, self.joint_states.position)))
         goal_angles = [ 180.0 / math.pi * current_positions[x] for x in goal.trajectory.joint_names]
         rospy.logwarn(goal_angles)
         rospy.logwarn("difference between two angles %r %r"%(array([30,30,30,-90,-40,-30])-array(goal_angles),linalg.norm(array([30,30,30,-90,-40,-30])-array(goal_angles))))

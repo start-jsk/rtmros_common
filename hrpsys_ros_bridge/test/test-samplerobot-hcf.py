@@ -48,7 +48,7 @@ class TestSampleRobotHcf(unittest.TestCase):
                 hcf.init("SampleRobot(Robot)0", model_url)
                 assert(True)
             except AttributeError as e:
-                print >> sys.stderr, "[test-samplerobot-hcf.py] catch exception", e
+                print("[test-samplerobot-hcf.py] catch exception", e, file=sys.stderr)
                 assert(False)
 
 #unittest.main()

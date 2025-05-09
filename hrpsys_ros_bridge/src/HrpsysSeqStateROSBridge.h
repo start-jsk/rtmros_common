@@ -100,9 +100,11 @@ class HrpsysSeqStateROSBridge  : public HrpsysSeqStateROSBridgeImpl
   void updateOdometry(const hrp::Vector3 &trans, const hrp::Matrix33 &R, const ros::Time &stamp);
 
   // imu relatives
+  ros::Time last_updated_imu_tf_stamp;
   void updateImu(tf::Transform &base, bool is_base_valid, const ros::Time &stamp);
   
   // sensor relatives
+  ros::Time last_updated_sensor_tf_stamp;
   void updateSensorTransform(const ros::Time &stamp);
   std::map<std::string, geometry_msgs::Transform> sensor_transformations;
   boost::mutex sensor_transformation_mutex;

@@ -22,7 +22,7 @@ def joystick_callback(msg) :
             servo(OpenHRP_RobotHardwareService_servoRequest("all",1));
             time.sleep(1)
             power(OpenHRP_RobotHardwareService_powerRequest("all",1))
-        except rospy.ServiceException, e:
+        except rospy.ServiceException as e:
             rospy.logerr("Failed to put the hrpsys in serv off mode: service call failed with error: %s"%(e))
 
 if __name__ == '__main__':

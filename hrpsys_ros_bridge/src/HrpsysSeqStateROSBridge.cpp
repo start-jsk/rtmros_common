@@ -1114,12 +1114,13 @@ void HrpsysSeqStateROSBridge::updateImu(tf::Transform &base, bool is_base_valid,
       if (not_nan) {
         std::map<std::string, SensorInfo>::const_iterator its = sensor_info.begin();
         while ( its != sensor_info.end() ) {
-          if ( (*its).second.type_name == "RateGyro" ) {
+          if ( (*its).second.type_name == "RateGyro" && base_time > last_updated_imu_tf_stamp ) {
             boost::mutex::scoped_lock lock(tf_mutex);
             tf::StampedTransform imu_floor_stamped_transform(inv, base_time, (*its).first, "imu_floor");
             geometry_msgs::TransformStamped imu_floor_tf;
             tf::transformStampedTFToMsg(imu_floor_stamped_transform, imu_floor_tf);
             tf_transforms.push_back(imu_floor_tf);
+            last_updated_imu_tf_stamp = base_time;
             break;
           }
           ++its;
@@ -1159,9 +1160,10 @@ void HrpsysSeqStateROSBridge::updateSensorTransform(const ros::Time &stamp)
       ++its;
     }
   }
-  if (!sensor_tf_buffer.empty()) {
+  if (!sensor_tf_buffer.empty() && stamp > last_updated_sensor_tf_stamp) {
     boost::mutex::scoped_lock lock(tf_mutex);
     tf_transforms.insert(tf_transforms.end(), sensor_tf_buffer.begin(), sensor_tf_buffer.end());
+    last_updated_sensor_tf_stamp = stamp;
   }
 }
 

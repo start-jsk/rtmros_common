@@ -15,7 +15,8 @@ class TestOpenrtmTools(unittest.TestCase):
         self.assertTrue(os.path.exists(script))
         try:
             check_output("bash -c 'source %s; RTCTREE_NAMESERVERS=localhost:2809 %s'"%(script, command), shell=True, stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError, (e):
+        except subprocess.CalledProcessError as xxx_todo_changeme:
+            (e) = xxx_todo_changeme
             self.assertTrue(False, 'subprocess.CalledProcessError: cmd:%s returncode:%s output:%s' % (e.cmd, e.returncode, e.output))
         self.assertTrue(True) # ok rtls works
 

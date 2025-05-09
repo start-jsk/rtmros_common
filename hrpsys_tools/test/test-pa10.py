@@ -12,7 +12,7 @@ class TestInteractive(unittest.TestCase):
         execfile(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../scripts", "hrpsys_tools_config.py"), globals(), local_dict)
         hcf = local_dict['hcf']
         hcf.setJointAngles([10,10,10,10,10,10,10,10,10], 1)
-        print hcf.getJointAngles()
+        print(hcf.getJointAngles())
         self.assertTrue("OK")
 
 if __name__ == '__main__':

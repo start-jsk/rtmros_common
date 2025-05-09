@@ -28,7 +28,7 @@ def rtc_init () :
     while ms == None :
         time.sleep(1);
         ms = rtm.findRTCmanager(rtm.nshost)
-        print "[hrpsys_profile.py] wait for RTCmanager : ",ms
+        print("[hrpsys_profile.py] wait for RTCmanager : ",ms)
 
 def hrpsys_profile() :
     global ms, rh, eps
@@ -92,10 +92,10 @@ if __name__ == '__main__':
         while not rospy.is_shutdown():
             try :
                 hrpsys_profile()
-            except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE), e :
-                print "[hrpsys_profile.py] catch exception", e
+            except (omniORB.CORBA.TRANSIENT, omniORB.CORBA.BAD_PARAM, omniORB.CORBA.COMM_FAILURE) as e :
+                print("[hrpsys_profile.py] catch exception", e)
                 rtc_init()
-            except Exception, e:
+            except Exception as e:
                 pass
 
             r.sleep()

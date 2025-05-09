@@ -24,21 +24,21 @@ nsport = 9999
 
 def initCORBA() :
     global rootnc, orb
-    print "configuration ORB with ", nshost, ":", nsport
+    print("configuration ORB with ", nshost, ":", nsport)
     os.environ['ORBInitRef'] = 'NameService=corbaloc:iiop:{0}:{1}/NameService'.format(nshost,nsport)
 
     try:
         orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)
         nameserver = orb.resolve_initial_references("NameService");
         rootnc = nameserver._narrow(CosNaming.NamingContext)
-    except omniORB.CORBA.ORB.InvalidName, e:
+    except omniORB.CORBA.ORB.InvalidName as e:
         sys.exit('[ERROR] Invalide Name (hostname={0}).\n'.format(nshost) +
                  'Make sure the hostname is correct.\n' + str(e))
-    except omniORB.CORBA.TRANSIENT, e:
+    except omniORB.CORBA.TRANSIENT as e:
         sys.exit('[ERROR] Connection Failed with the Nameserver (hostname={0} port={1}).\n'.format(nshost, nsport) +
                  'Make sure the hostname is correct and the Nameserver is running.\n' + str(e))
     except Exception as e:
-        print str(e)
+        print(str(e))
 
     return None
 
@@ -49,11 +49,11 @@ def findObject(name) :
         try:
             nc = rootnc.resolve([CosNaming.NameComponent(name, "rtc")])
         except:
-            print >>sys.stderr, "Waiting for %s ..."%name
+            print("Waiting for %s ..."%name, file=sys.stderr)
             time.sleep(1)
             continue
         time.sleep(1)
-    print >>sys.stderr, "Found for %s (%r)"%(name,nc)
+    print("Found for %s (%r)"%(name,nc), file=sys.stderr)
     return nc
 
 class TestCompileIDL(unittest.TestCase):
@@ -62,22 +62,22 @@ class TestCompileIDL(unittest.TestCase):
         global orb
 
         # run opnrtm
-        print >>sys.stderr, "initCORBA"
+        print("initCORBA", file=sys.stderr)
         initCORBA()
 
         # wait for MyServiceROSBridge
-        print >>sys.stderr, "wait for MyServiceROSBridge"
+        print("wait for MyServiceROSBridge", file=sys.stderr)
         bridge   = findObject("MyServiceROSBridge")._narrow(RTC.RTObject)
-        print >>sys.stderr, "wait for MyServiceProvider"
+        print("wait for MyServiceProvider", file=sys.stderr)
         provider = findObject("MyServiceProvider0")._narrow(RTC.RTObject)
         # connect
-        print >>sys.stderr, "connect components"
+        print("connect components", file=sys.stderr)
         inP = provider.get_ports()[0]
         outP = bridge.get_ports()[0]
         con_prof = RTC.ConnectorProfile("connector0", "", [outP, inP], [])
         inP.connect(con_prof)
         # activate
-        print >>sys.stderr, "activate components"
+        print("activate components", file=sys.stderr)
         bridge.get_owned_contexts()[0].activate_component(bridge)
         provider.get_owned_contexts()[0].activate_component(provider)
 
@@ -89,7 +89,7 @@ class TestCompileIDL(unittest.TestCase):
 
     def testEcho(self):
         sys.path.append("/tmp/test_compile_idl/devel/lib/python2.7/dist-packages")
-        print sys.path
+        print(sys.path)
         import rtmbuild_test.srv
         rospy.logwarn("wait for service")
         rospy.wait_for_service("/MyServiceROSBridge/echo")

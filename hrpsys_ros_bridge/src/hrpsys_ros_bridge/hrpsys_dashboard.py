@@ -70,15 +70,15 @@ class HrpsysLogMenu(MenuDashWidget):
     try:
       hrpsys_save = rospy.ServiceProxy("/DataLoggerServiceROSBridge/save", OpenHRP_DataLoggerService_save )
       name = "/tmp/rtclog-" + time.strftime("%Y%m%d%H%M%S")
-      print "Writing log data to ",name
+      print("Writing log data to ",name)
       hrpsys_save(OpenHRP_DataLoggerService_saveRequest(name))
-      print "Done writing",name
-    except rospy.ServiceException, e:
+      print("Done writing",name)
+    except rospy.ServiceException as e:
       mb = QMessageBox(QMessageBox.NoIcon, "Error",
                        "Failed to save rtcd log: service call failed with error: %s"%(e),
                        QMessageBox.Ok, self.parent())
       mb.exec_()
-    except Exception, e:
+    except Exception as e:
       mb = QMessageBox(QMessageBox.NoIcon, "Error", str(e), QMessageBox.Ok, self.parent())
       mb.exec_()
 
@@ -147,7 +147,7 @@ class HrpsysPowerMenu(MenuDashWidget):
     try:
       power = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/power", OpenHRP_RobotHardwareService_power )
       power(OpenHRP_RobotHardwareService_powerRequest("all",0))
-    except Exception, e:
+    except Exception as e:
       mb = QMessageBox(QMessageBox.NoIcon, "Error",
                        "Failed to power on: %s"%(e),
                        QMessageBox.Ok, self.parent())
@@ -156,7 +156,7 @@ class HrpsysPowerMenu(MenuDashWidget):
     try:
       power = rospy.ServiceProxy("/RobotHardwareServiceROSBridge/power", OpenHRP_RobotHardwareService_power )
       power(OpenHRP_RobotHardwareService_powerRequest("all",1))
-    except Exception, e:
+    except Exception as e:
       mb = QMessageBox(QMessageBox.NoIcon, "Error",
                        "Failed to power off: %s"%(e),
                        QMessageBox.Ok, self.parent())
@@ -195,7 +195,7 @@ class HrpsysServoMenu(MenuDashWidget):
         actual(OpenHRP_StateHolderService_goActualRequest())
         time.sleep(2)
         servo(OpenHRP_RobotHardwareService_servoRequest("all",0))
-    except Exception, e:
+    except Exception as e:
       mb = QMessageBox(QMessageBox.NoIcon, "Error",
                        "Failed to servo on: %s"%(e),
                        QMessageBox.Ok, self.parent())
@@ -212,7 +212,7 @@ class HrpsysServoMenu(MenuDashWidget):
         servo(OpenHRP_RobotHardwareService_servoRequest("all", 1))
         time.sleep(1)
         power(OpenHRP_RobotHardwareService_powerRequest("all",1))
-    except Exception, e:
+    except Exception as e:
       mb = QMessageBox(QMessageBox.NoIcon, "Error",
                        "Failed to servo off: %s"%(e),
                        QMessageBox.Ok, self.parent())
@@ -335,7 +335,7 @@ def execHrpsysConfiguratorCommand(command_str):
     try:
         exec command_str
     except:
-        print >>sys.stderr, "Button execution for ", command_str, "failed, perhaps because of CORBA connection. Retry it once after resetting HrpsysConfigurator."
+        print("Button execution for ", command_str, "failed, perhaps because of CORBA connection. Retry it once after resetting HrpsysConfigurator.", file=sys.stderr)
         hcf=setupHrpsysConfigurator()
         exec command_str
 

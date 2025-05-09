@@ -10,7 +10,7 @@ class Sample4LegRobotHrpsysConfigurator(HrpsysConfigurator):
         return self.getRTCListUnstable()
     def init (self, robotname="Sample4LegRobot", url=""):
         HrpsysConfigurator.init(self, robotname, url)
-        print "initialize rtc parameters"
+        print("initialize rtc parameters")
         self.setStAbcParameters()
 
     def defJointGroups (self):
@@ -54,7 +54,7 @@ class Sample4LegRobotHrpsysConfigurator(HrpsysConfigurator):
                          OpenHRP.StabilizerService.TwoDimensionVertex(pos=[-1*stp_org.eefm_leg_rear_margin, stp_org.eefm_leg_outside_margin])]
         rarm_vertices = rleg_vertices
         larm_vertices = lleg_vertices
-        stp_org.eefm_support_polygon_vertices_sequence = map (lambda x : OpenHRP.StabilizerService.SupportPolygonVertices(vertices=x), [lleg_vertices, rleg_vertices, larm_vertices, rarm_vertices])
+        stp_org.eefm_support_polygon_vertices_sequence = [OpenHRP.StabilizerService.SupportPolygonVertices(vertices=x) for x in [lleg_vertices, rleg_vertices, larm_vertices, rarm_vertices]]
         stp_org.eefm_k1=[-1.39899,-1.39899]
         stp_org.eefm_k2=[-0.386111,-0.386111]
         stp_org.eefm_k3=[-0.175068,-0.175068]

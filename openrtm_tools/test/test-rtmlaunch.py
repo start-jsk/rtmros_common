@@ -25,7 +25,7 @@ class TestRtmLaunch(unittest.TestCase):
             try:
                 tree = rtctree.tree.RTCTree(servers='localhost:2809')
                 provider = tree.get_node(['/', 'localhost:2809','MyServiceProvider0.rtc'])
-                print >>sys.stderr, "Provier : ", provider, provider.get_state_string()
+                print("Provier : ", provider, provider.get_state_string(), file=sys.stderr)
                 if provider.state==rtctree.component.Component.ACTIVE:
                     break
             except:
@@ -40,7 +40,7 @@ class TestRtmLaunch(unittest.TestCase):
             try:
                 tree = rtctree.tree.RTCTree(servers='localhost:2809')
                 consumer = tree.get_node(['/', 'localhost:2809','MyServiceConsumer0.rtc'])
-                print >>sys.stderr, "Consumer : ", consumer, consumer.get_state_string()
+                print("Consumer : ", consumer, consumer.get_state_string(), file=sys.stderr)
                 if consumer.state==rtctree.component.Component.ACTIVE:
                     break
             except:
@@ -59,7 +59,7 @@ class TestRtmLaunch(unittest.TestCase):
                 provider_port = provider.get_port_by_name("MyService")
                 consumer_port = consumer.get_port_by_name("MyService")
                 connection = provider_port.get_connection_by_dest(consumer_port)
-                print >>sys.stderr, "Connection : ", connection.properties
+                print("Connection : ", connection.properties, file=sys.stderr)
                 break
             except:
                 pass
@@ -75,7 +75,7 @@ class TestRtmLaunch(unittest.TestCase):
             try:
                 tree = rtctree.tree.RTCTree(servers='localhost:2809')
                 seqin = tree.get_node(['/', 'localhost:2809','SequenceInComponent0.rtc'])
-                print >>sys.stderr, "SeqIn  : ", seqin, seqin.get_state_string()
+                print("SeqIn  : ", seqin, seqin.get_state_string(), file=sys.stderr)
                 if seqin.state==rtctree.component.Component.ACTIVE:
                     break
             except:
@@ -90,7 +90,7 @@ class TestRtmLaunch(unittest.TestCase):
             try:
                 tree = rtctree.tree.RTCTree(servers='localhost:2809')
                 seqout = tree.get_node(['/', 'localhost:2809','SequenceOutComponent0.rtc'])
-                print >>sys.stderr, "SeqOut : ", seqout, seqout.get_state_string()
+                print("SeqOut : ", seqout, seqout.get_state_string(), file=sys.stderr)
                 if seqout.state==rtctree.component.Component.ACTIVE:
                     break
             except:
@@ -112,8 +112,8 @@ class TestRtmLaunch(unittest.TestCase):
                 seqout_port2 = seqout.get_port_by_name("FloatSeq")
                 connection1 = seqin_port1.get_connection_by_dest(seqout_port1)
                 connection2 = seqin_port2.get_connection_by_dest(seqout_port2)
-                print >>sys.stderr, "Connection : ", connection1.properties
-                print >>sys.stderr, "Connection : ", connection2.properties
+                print("Connection : ", connection1.properties, file=sys.stderr)
+                print("Connection : ", connection2.properties, file=sys.stderr)
                 break
             except:
                 pass

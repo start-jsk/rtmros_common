@@ -34,6 +34,6 @@ conn = [['RobotHardware0', 'q',
 time.sleep(10)
 
 for node1, port1, node2, port2 in conn:
-    print [node1,port1,node2,port2]
+    print([node1,port1,node2,port2])
     connectPorts(findRTC(node1,rootnc).port(port1),
                  findRTC(node2,rootnc).port(port2), subscription='new')
